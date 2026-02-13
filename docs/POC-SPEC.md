@@ -214,15 +214,73 @@ poc/
 
 ---
 
-## Open Design Questions
+## Image Sources (Found!)
 
-1. **Do we have high-res photos from past events?** Action shots of competitors, venue photos, crowd shots. The current site has ZERO imagery — we need photos to make this pop. Check Instagram @themarianasopen and GSPN coverage.
+We have PLENTY of imagery to work with:
 
-2. **Logo files?** We only have the favicon PNG. Need vector/high-res version of the shield logo.
+### 1. marianasopen.com Photo Galleries
+Their own site has photo galleries for every event:
+- `marianasopen.com/past-events/marianas-open-2025/`
+- `marianasopen.com/past-events/marianas-open-2024/`
+- `marianasopen.com/past-events/marianas-pro-tokyo-2025/`
+- `marianasopen.com/past-events/marianas-pro-manila-2025/`
+- `marianasopen.com/past-events/marianas-pro-korea-2024-gallery/`
+- (and many more dating back to 2022)
 
-3. **Event poster designs?** Steve likely has promotional flyers/posters for past events that could inform the visual language.
+### 2. Instagram: @themarianasopen
+- **16K followers**, 2,189 posts
+- Rich content: competitor action shots, podium photos, event posters, behind-the-scenes
+- Great source for event poster designs and promotional visual language
 
-4. **Video clips for the Watch page mock?** The YouTube fight videos could work as placeholder content.
+### 3. News Media Photos
+- **GSPN (Guam Sports Network)** — Professional event photography (photo credit: Tanya Gillins)
+  - "Six mats simultaneously packed with action" — wide venue shots
+  - Individual match action shots with competitor/academy captions
+- **Post Guam** — Professional photos by Frank San Nicolas
+  - Match action: "Figo Bonsai's Marlon Godoy competes against Rodrigo Caporal of Atos Hong Kong"
+  - Black belt finals, podium ceremonies
+- **Guam PDN** — Sports section coverage with photos
+
+### 4. YouTube Video Thumbnails
+- Individual fight videos have clear thumbnails showing competitors
+- Can be used as placeholder content for the Watch/VOD mock page
+
+### 5. Logo
+- Shield/crest logo available as PNG from `marianasopen.com/wp-content/uploads/2023/09/favicon.png`
+- **Need from Steve:** Vector/high-res version for the POC
+- For POC: can upscale the PNG or recreate a simplified version
+
+### Design Guide Compliance
+
+Following the **Shimizu Frontend Design Guide** (`FRONTEND_DESIGN_GUIDE.md`) and **Shimizu Frontend Design Skill** (`FRONTEND_DESIGN_SKILL.md`):
+
+**Fonts (NOT using Inter/Roboto):**
+- Headings: **Clash Display** or **Cabinet Grotesk** (bold, distinctive, from Fontshare — free)
+- Body: **DM Sans** or **Outfit** (clean, good CJK fallback support)
+- Stats/numbers: Condensed weight for impact
+
+**No blacklisted patterns:**
+- No purple-to-blue gradients
+- No default `blue-500`
+- No `rounded-lg` on everything
+- No Hero → 3-col → testimonials → CTA layout
+- No emojis in UI — lucide-react SVG icons only
+
+**What we WILL do:**
+- Dark mode primary (combat sports aesthetic)
+- Custom brand palette (navy `#004581` + gold `#D4A843`)
+- Bento grid / asymmetric layouts for event showcase
+- Framer Motion scroll reveals and page transitions
+- Parallax on hero imagery
+- Intentional spacing and breathing room
+- One "wow" moment per page
+- `prefers-reduced-motion` respected
+
+## Open Questions
+
+1. **Logo vector file** — Ask Steve for high-res/vector version of the shield logo
+2. **Photo permissions** — Can we use photos from their Instagram/website galleries in the POC?
+3. **Event poster files** — Steve likely has promotional poster designs that inform the visual language
 
 ---
 
