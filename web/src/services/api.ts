@@ -164,6 +164,47 @@ export interface SponsorFormData {
   sort_order: number;
 }
 
+export interface Competitor {
+  id: number;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  nickname: string | null;
+  country_code: string | null;
+  belt_rank: string | null;
+  weight_class: string | null;
+  academy: string | null;
+  bio: string | null;
+  instagram_url: string | null;
+  youtube_url: string | null;
+  wins: number;
+  losses: number;
+  draws: number;
+  gold_medals: number;
+  silver_medals: number;
+  bronze_medals: number;
+  photo_url: string | null;
+}
+
+export interface CompetitorFormData {
+  first_name: string;
+  last_name: string;
+  nickname: string;
+  country_code: string;
+  belt_rank: string;
+  weight_class: string;
+  academy: string;
+  bio: string;
+  instagram_url: string;
+  youtube_url: string;
+  wins: number;
+  losses: number;
+  draws: number;
+  gold_medals: number;
+  silver_medals: number;
+  bronze_medals: number;
+}
+
 export interface SiteContentEntry {
   id: number;
   key: string;
@@ -240,6 +281,11 @@ export const api = {
   getEvents: () => fetchApi<Event[]>('/api/v1/events'),
   getEvent: (slug: string) => fetchApi<Event>(`/api/v1/events/${slug}`),
   getSponsors: () => fetchApi<Sponsor[]>('/api/v1/sponsors'),
+  getCompetitors: (params?: Record<string, string>) => {
+    const query = params ? '?' + new URLSearchParams(params).toString() : '';
+    return fetchApi<Competitor[]>(`/api/v1/competitors${query}`);
+  },
+  getCompetitor: (id: number) => fetchApi<Competitor>(`/api/v1/competitors/${id}`),
   getVideos: (params?: Record<string, string>) => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
     return fetchApi<Video[]>(`/api/v1/videos${query}`);

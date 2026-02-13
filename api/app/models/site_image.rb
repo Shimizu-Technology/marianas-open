@@ -1,4 +1,6 @@
 class SiteImage < ApplicationRecord
+  include HasImageUrl
+
   has_one_attached :image
 
   validates :placement, presence: true, inclusion: { in: %w[hero gallery about event_default sponsor_default] }
@@ -6,12 +8,7 @@ class SiteImage < ApplicationRecord
   scope :active, -> { where(active: true) }
   scope :by_placement, ->(p) { where(placement: p).order(:sort_order) }
 
-  def image_url
-    return nil unless image.attached?
-    Rails.application.routes.url_helpers.url_for(image)
-  rescue StandardError
-    nil
-  end
+  image_url_for :image
 
   def as_json(options = {})
     super(options.merge(

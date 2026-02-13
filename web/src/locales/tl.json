@@ -5,7 +5,17 @@
     "calendar": "Pro Series",
     "watch": "Panoorin",
     "about": "Tungkol",
-    "rankings": "Rankings"
+    "rankings": "Rankings",
+    "pastEvents": "Nakaraang Events"
+  },
+  "pastEvents": {
+    "badge": "Event Archive",
+    "title": "Nakaraang Events",
+    "subtitle": "Tuklasin ang kasaysayan ng Marianas Open at Pro Series sa buong Asia at Pacific.",
+    "noEvents": "Walang nakaraang events.",
+    "event": "event",
+    "events": "events",
+    "viewDetails": "Tingnan ang Detalye"
   },
   "hero": {
     "subtitle": "Pangunahing International ng Guam",

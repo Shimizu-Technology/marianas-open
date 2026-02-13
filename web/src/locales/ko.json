@@ -5,7 +5,17 @@
     "calendar": "프로 시리즈",
     "watch": "시청",
     "about": "소개",
-    "rankings": "랭킹"
+    "rankings": "랭킹",
+    "pastEvents": "지난 이벤트"
+  },
+  "pastEvents": {
+    "badge": "이벤트 아카이브",
+    "title": "지난 이벤트",
+    "subtitle": "마리아나스 오픈과 프로 시리즈의 역사를 살펴보세요.",
+    "noEvents": "지난 이벤트가 없습니다.",
+    "event": "이벤트",
+    "events": "이벤트",
+    "viewDetails": "자세히 보기"
   },
   "hero": {
     "subtitle": "괌 최고의 국제",

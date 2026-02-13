@@ -5,7 +5,17 @@
     "calendar": "プロシリーズ",
     "watch": "観戦",
     "about": "大会について",
-    "rankings": "ランキング"
+    "rankings": "ランキング",
+    "pastEvents": "過去のイベント"
+  },
+  "pastEvents": {
+    "badge": "イベントアーカイブ",
+    "title": "過去のイベント",
+    "subtitle": "マリアナスオープンとプロシリーズの歴史をご覧ください。",
+    "noEvents": "過去のイベントはありません。",
+    "event": "イベント",
+    "events": "イベント",
+    "viewDetails": "詳細を見る"
   },
   "hero": {
     "subtitle": "グアム発 国際",

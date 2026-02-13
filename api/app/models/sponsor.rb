@@ -1,11 +1,10 @@
 class Sponsor < ApplicationRecord
+  include HasImageUrl
+
   belongs_to :organization
   has_one_attached :logo
 
-  def logo_url
-    return nil unless logo.attached?
-    Rails.application.routes.url_helpers.url_for(logo) rescue nil
-  end
+  image_url_for :logo
 
   def as_json(options = {})
     super(options.merge(

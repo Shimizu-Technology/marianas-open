@@ -265,6 +265,28 @@ User.find_or_create_by!(email: "jerry.shimizutechnology@gmail.com") do |u|
 end
 puts "Created admin user"
 
+# Competitors
+Competitor.destroy_all
+competitors_data = [
+  { first_name: "Takeshi", last_name: "Yamamoto", nickname: "The Samurai", country_code: "JP", belt_rank: "black", weight_class: "Medium Heavy", academy: "Carpe Diem Tokyo", bio: "Multiple-time All Japan champion and ASJJF veteran.", instagram_url: "https://instagram.com/takeshi_bjj", wins: 45, losses: 8, draws: 2, gold_medals: 12, silver_medals: 5, bronze_medals: 3 },
+  { first_name: "Minjae", last_name: "Kim", country_code: "KR", belt_rank: "black", weight_class: "Light", academy: "Team MAD Seoul", bio: "South Korean national champion. Known for his spider guard.", wins: 38, losses: 12, draws: 1, gold_medals: 9, silver_medals: 4, bronze_medals: 2 },
+  { first_name: "Rafael", last_name: "Santos", nickname: "Rafa", country_code: "BR", belt_rank: "black", weight_class: "Heavy", academy: "Alliance Rio", bio: "World-class competitor from Rio de Janeiro with multiple international titles.", instagram_url: "https://instagram.com/rafasantos_bjj", youtube_url: "https://youtube.com/@rafasantosbjj", wins: 62, losses: 5, draws: 0, gold_medals: 18, silver_medals: 3, bronze_medals: 1 },
+  { first_name: "Marcus", last_name: "Rivera", country_code: "US", belt_rank: "brown", weight_class: "Middle", academy: "Atos San Diego", bio: "Rising star from the California competition circuit.", instagram_url: "https://instagram.com/marcusrivera_bjj", wins: 28, losses: 6, draws: 3, gold_medals: 7, silver_medals: 4, bronze_medals: 2 },
+  { first_name: "Maria", last_name: "Reyes", country_code: "PH", belt_rank: "purple", weight_class: "Light Feather", academy: "Deftac Manila", bio: "Philippines national champion and Southeast Asian Games medalist.", instagram_url: "https://instagram.com/mariareyes_bjj", wins: 22, losses: 4, draws: 1, gold_medals: 6, silver_medals: 3, bronze_medals: 1 },
+  { first_name: "Yuki", last_name: "Tanaka", country_code: "JP", belt_rank: "brown", weight_class: "Feather", academy: "Tri-Force Tokyo", bio: "Technical competitor known for precise submissions.", wins: 30, losses: 9, draws: 2, gold_medals: 8, silver_medals: 5, bronze_medals: 3 },
+  { first_name: "Jinho", last_name: "Park", nickname: "The Bull", country_code: "KR", belt_rank: "black", weight_class: "Ultra Heavy", academy: "Team Korea BJJ", bio: "Korean powerhouse and multiple-time Marianas Open champion.", wins: 35, losses: 7, draws: 0, gold_medals: 10, silver_medals: 2, bronze_medals: 4 },
+  { first_name: "Carlos", last_name: "Mendoza", country_code: "BR", belt_rank: "purple", weight_class: "Middle", academy: "GF Team", bio: "Young talent from Sao Paulo making waves in the Asian circuit.", wins: 18, losses: 5, draws: 1, gold_medals: 5, silver_medals: 2, bronze_medals: 3 },
+  { first_name: "Jake", last_name: "Thompson", country_code: "US", belt_rank: "blue", weight_class: "Heavy", academy: "Guam Jiu-Jitsu Academy", bio: "Local Guam competitor representing the island.", wins: 12, losses: 3, draws: 2, gold_medals: 3, silver_medals: 2, bronze_medals: 1 },
+  { first_name: "Ayaka", last_name: "Sato", country_code: "JP", belt_rank: "black", weight_class: "Light Feather", academy: "Paraestra Tokyo", bio: "Dominant force in women's BJJ across Asia.", instagram_url: "https://instagram.com/ayaka_sato_bjj", wins: 40, losses: 6, draws: 0, gold_medals: 14, silver_medals: 3, bronze_medals: 2 },
+  { first_name: "Diego", last_name: "Cruz", country_code: "PH", belt_rank: "brown", weight_class: "Light", academy: "ATOS Philippines", bio: "Filipino-American competitor bridging the gap between US and Asian circuits.", wins: 25, losses: 8, draws: 1, gold_medals: 6, silver_medals: 4, bronze_medals: 3 },
+  { first_name: "Soo-Yeon", last_name: "Lee", country_code: "KR", belt_rank: "purple", weight_class: "Feather", academy: "Korea Jiu-Jitsu Academy", bio: "Rising star in Korean women's BJJ.", wins: 15, losses: 3, draws: 0, gold_medals: 4, silver_medals: 2, bronze_medals: 1 },
+]
+
+competitors_data.each do |data|
+  Competitor.create!(data)
+end
+puts "Created #{Competitor.count} competitors"
+
 load Rails.root.join('db/seeds/site_contents.rb')
 
 puts "Seeding complete!"
