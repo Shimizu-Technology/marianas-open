@@ -4,7 +4,7 @@ class Sponsor < ApplicationRecord
 
   def logo_url
     return nil unless logo.attached?
-    Rails.application.routes.url_helpers.url_for(logo)
+    Rails.application.routes.url_helpers.url_for(logo) rescue nil
   end
 
   def as_json(options = {})

@@ -6,7 +6,7 @@ class Event < ApplicationRecord
 
   def hero_image_url
     return nil unless hero_image.attached?
-    Rails.application.routes.url_helpers.url_for(hero_image)
+    Rails.application.routes.url_helpers.url_for(hero_image) rescue nil
   end
 
   def as_json(options = {})
