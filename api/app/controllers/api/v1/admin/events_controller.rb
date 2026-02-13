@@ -43,10 +43,11 @@ module Api
           head :no_content
         end
 
-        # GET /admin/events/:id/import_results_preview
+        # GET /api/v1/admin/events/:id/import_results_preview
+        # Scrapes ASJJF and returns a summary without importing
         def import_results_preview
           ids = resolve_asjjf_ids
-          return render json: { error: "No ASJJF event IDs configured for this event." }, status: :unprocessable_entity if ids.empty?
+          return render json: { error: "No ASJJF event IDs configured. Set asjjf_event_ids on this event first." }, status: :unprocessable_entity if ids.empty?
 
           result = AsjjfScraper.preview(asjjf_event_ids: ids)
           render json: {
@@ -59,13 +60,18 @@ module Api
           render json: { error: e.message }, status: :unprocessable_entity
         end
 
-        # POST /admin/events/:id/import_results
+        # POST /api/v1/admin/events/:id/import_results
+        # Scrapes ASJJF and imports results (replaces existing)
         def import_results
           ids = resolve_asjjf_ids
-          return render json: { error: "No ASJJF event IDs configured for this event." }, status: :unprocessable_entity if ids.empty?
+          return render json: { error: "No ASJJF event IDs configured. Set asjjf_event_ids on this event first." }, status: :unprocessable_entity if ids.empty?
 
           result = AsjjfScraper.import!(event: @event, asjjf_event_ids: ids)
-          render json: { message: "Imported #{result[:imported]} results", imported: result[:imported], summary: result[:summary] }
+          render json: {
+            message: "Successfully imported #{result[:imported]} results",
+            imported: result[:imported],
+            summary: result[:summary]
+          }
         rescue AsjjfScraper::ScraperError => e
           render json: { error: e.message }, status: :unprocessable_entity
         end
@@ -100,6 +106,7 @@ module Api
         end
 
         def resolve_asjjf_ids
+          # Allow passing IDs in request body or use event's stored IDs
           ids = params[:asjjf_event_ids] || @event.asjjf_event_ids
           Array(ids).map(&:to_i).reject(&:zero?)
         end

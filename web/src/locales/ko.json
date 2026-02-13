@@ -342,5 +342,15 @@
     "silver": "은",
     "bronze": "동",
     "beltRank": "벨트"
+  },
+  "journey": {
+    "badge": "프로 시리즈 서킷",
+    "title": "여정을 따라가세요",
+    "subtitle": "아시아 태평양을 순회하며 랭킹 포인트를 획득하세요. 괌 그랜드 챔피언십 출전 자격을 얻으세요.",
+    "grandChampionship": "그랜드 챔피언십",
+    "completed": "완료",
+    "next": "다음",
+    "upcoming": "예정",
+    "viewEvent": "이벤트 보기"
   }
 }

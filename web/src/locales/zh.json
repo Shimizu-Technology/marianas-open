@@ -342,5 +342,15 @@
     "silver": "银牌",
     "bronze": "铜牌",
     "beltRank": "段位"
+  },
+  "journey": {
+    "badge": "职业系列巡回赛",
+    "title": "追踪旅程",
+    "subtitle": "征战亚太地区，赢取积分，获得关岛总决赛的参赛资格。",
+    "grandChampionship": "总决赛",
+    "completed": "已完成",
+    "next": "下一站",
+    "upcoming": "即将到来",
+    "viewEvent": "查看赛事"
   }
 }

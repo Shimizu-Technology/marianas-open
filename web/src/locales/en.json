@@ -342,5 +342,15 @@
     "silver": "Silver",
     "bronze": "Bronze",
     "beltRank": "Belt"
+  },
+  "journey": {
+    "badge": "Pro Series Circuit",
+    "title": "Follow the Journey",
+    "subtitle": "Compete across Asia-Pacific. Earn ranking points. Qualify for the Grand Championship in Guam.",
+    "grandChampionship": "Grand Championship",
+    "completed": "Completed",
+    "next": "Next",
+    "upcoming": "Upcoming",
+    "viewEvent": "View Event"
   }
 }

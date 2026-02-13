@@ -342,5 +342,15 @@
     "silver": "銀",
     "bronze": "銅",
     "beltRank": "帯"
+  },
+  "journey": {
+    "badge": "プロシリーズサーキット",
+    "title": "旅を辿る",
+    "subtitle": "アジア太平洋を巡り、ランキングポイントを獲得。グアムのグランドチャンピオンシップへの出場権を勝ち取ろう。",
+    "grandChampionship": "グランドチャンピオンシップ",
+    "completed": "終了",
+    "next": "次回",
+    "upcoming": "今後",
+    "viewEvent": "イベント詳細"
   }
 }

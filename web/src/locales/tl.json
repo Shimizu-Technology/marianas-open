@@ -342,5 +342,15 @@
     "silver": "Pilak",
     "bronze": "Tanso",
     "beltRank": "Belt"
+  },
+  "journey": {
+    "badge": "Pro Series Circuit",
+    "title": "Sundan ang Paglalakbay",
+    "subtitle": "Lumaban sa buong Asia-Pacific. Kumita ng ranking points. Mag-qualify para sa Grand Championship sa Guam.",
+    "grandChampionship": "Grand Championship",
+    "completed": "Natapos",
+    "next": "Susunod",
+    "upcoming": "Paparating",
+    "viewEvent": "Tingnan ang Event"
   }
 }
