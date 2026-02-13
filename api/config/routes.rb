@@ -11,6 +11,20 @@ Rails.application.routes.draw do
       # Admin
       namespace :admin do
         resources :users
+        resources :events do
+          member do
+            post :upload_image
+          end
+        end
+        resources :sponsors do
+          member do
+            post :upload_logo
+          end
+        end
+        resource :organization, only: [:show, :update] do
+          post :upload_logo, on: :collection
+          post :upload_banner, on: :collection
+        end
       end
     end
   end
