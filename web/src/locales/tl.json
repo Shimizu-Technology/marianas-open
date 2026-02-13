@@ -113,7 +113,11 @@
     "details": "Detalye",
     "stars": "bituin",
     "legendProSeries": "Pro Series",
-    "legendGrandChampionship": "Grand Championship"
+    "legendGrandChampionship": "Grand Championship",
+    "upcoming": "Paparating",
+    "pastResults": "Nakaraang Resulta",
+    "noPastEvents": "Wala pang nakaraang mga event.",
+    "completed": "Tapos na"
   },
   "watch": {
     "title": "Panoorin",
@@ -152,7 +156,11 @@
     "featureNotify": "Push Notifications",
     "featureNotifyDesc": "Maabisuhan kapag ang iyong paboritong kalahok ay umakyat sa mat. Huwag palampasin ang anumang laban.",
     "liveEventInfo": "Marianas Open 2026 — UOG Calvo Fieldhouse",
-    "liveBadge": "LIVE"
+    "liveBadge": "LIVE",
+    "featured": "Tampok",
+    "filterCategory": "Kategorya",
+    "noVideosYet": "Wala pang mga video",
+    "noVideosYetDesc": "Bumalik sa lalong madaling panahon para sa mga video ng laban at mga highlight."
   },
   "share": {
     "defaultText": "Tingnan ang Marianas Open — International BJJ Championship!",

@@ -21,6 +21,7 @@ const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const EventsAdmin = lazy(() => import('./pages/admin/EventsAdmin'));
 const SponsorsAdmin = lazy(() => import('./pages/admin/SponsorsAdmin'));
+const VideosAdmin = lazy(() => import('./pages/admin/VideosAdmin'));
 const UsersAdmin = lazy(() => import('./pages/admin/UsersAdmin'));
 const SettingsAdmin = lazy(() => import('./pages/admin/SettingsAdmin'));
 
@@ -80,6 +81,7 @@ export default function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="events" element={<EventsAdmin />} />
           <Route path="sponsors" element={<SponsorsAdmin />} />
+          <Route path="videos" element={<VideosAdmin />} />
           <Route path="users" element={<UsersAdmin />} />
           <Route path="settings" element={<SettingsAdmin />} />
         </Route>

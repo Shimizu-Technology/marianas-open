@@ -113,7 +113,11 @@
     "details": "Details",
     "stars": "stars",
     "legendProSeries": "Pro Series",
-    "legendGrandChampionship": "Grand Championship"
+    "legendGrandChampionship": "Grand Championship",
+    "upcoming": "Upcoming",
+    "pastResults": "Past Results",
+    "noPastEvents": "No past events yet.",
+    "completed": "Completed"
   },
   "watch": {
     "title": "Watch",
@@ -152,7 +156,11 @@
     "featureNotify": "Push Notifications",
     "featureNotifyDesc": "Get notified when your favorite competitors step on the mat. Never miss a match.",
     "liveEventInfo": "Marianas Open 2026 — UOG Calvo Fieldhouse",
-    "liveBadge": "LIVE"
+    "liveBadge": "LIVE",
+    "featured": "Featured",
+    "filterCategory": "Category",
+    "noVideosYet": "No videos yet",
+    "noVideosYetDesc": "Check back soon for match videos and highlights."
   },
   "share": {
     "defaultText": "Check out the Marianas Open — International BJJ Championship!",

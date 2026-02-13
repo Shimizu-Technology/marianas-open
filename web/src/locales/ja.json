@@ -113,7 +113,11 @@
     "details": "詳細",
     "stars": "つ星",
     "legendProSeries": "プロシリーズ",
-    "legendGrandChampionship": "グランドチャンピオンシップ"
+    "legendGrandChampionship": "グランドチャンピオンシップ",
+    "upcoming": "今後のイベント",
+    "pastResults": "過去の結果",
+    "noPastEvents": "過去のイベントはまだありません。",
+    "completed": "終了"
   },
   "watch": {
     "title": "観戦",
@@ -152,7 +156,11 @@
     "featureNotify": "プッシュ通知",
     "featureNotifyDesc": "お気に入りの選手がマットに上がった時に通知を受け取り。試合を見逃さない。",
     "liveEventInfo": "マリアナスオープン 2026 — UOGカルボ・フィールドハウス",
-    "liveBadge": "LIVE"
+    "liveBadge": "LIVE",
+    "featured": "注目",
+    "filterCategory": "カテゴリー",
+    "noVideosYet": "動画はまだありません",
+    "noVideosYetDesc": "試合動画とハイライトは近日公開予定です。"
   },
   "share": {
     "defaultText": "マリアナスオープン — 国際柔術選手権をチェック！",

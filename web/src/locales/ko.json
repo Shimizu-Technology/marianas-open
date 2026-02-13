@@ -113,7 +113,11 @@
     "details": "상세정보",
     "stars": "성급",
     "legendProSeries": "프로 시리즈",
-    "legendGrandChampionship": "그랜드 챔피언십"
+    "legendGrandChampionship": "그랜드 챔피언십",
+    "upcoming": "예정된 이벤트",
+    "pastResults": "지난 결과",
+    "noPastEvents": "아직 지난 이벤트가 없습니다.",
+    "completed": "완료"
   },
   "watch": {
     "title": "시청",
@@ -152,7 +156,11 @@
     "featureNotify": "푸시 알림",
     "featureNotifyDesc": "좋아하는 선수가 매트에 올라갈 때 알림을 받으세요. 경기를 놓치지 마세요.",
     "liveEventInfo": "마리아나스 오픈 2026 — UOG 칼보 필드하우스",
-    "liveBadge": "LIVE"
+    "liveBadge": "LIVE",
+    "featured": "추천",
+    "filterCategory": "카테고리",
+    "noVideosYet": "아직 영상이 없습니다",
+    "noVideosYetDesc": "경기 영상과 하이라이트를 곧 확인하세요."
   },
   "share": {
     "defaultText": "마리아나스 오픈 — 국제 주짓수 챔피언십을 확인하세요!",
