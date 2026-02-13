@@ -16,6 +16,7 @@ This repo contains all planning, research, documentation, and eventually the POC
 |----------|-------------|
 | [PRD.md](./docs/PRD.md) | Product Requirements Document — research, opportunities, POC plan |
 | [RESEARCH.md](./docs/RESEARCH.md) | Deep research on the Marianas Open, competitive landscape, tech analysis |
+| [POC-SPEC.md](./docs/POC-SPEC.md) | POC specification — pages, design direction, tech stack, build plan |
 | [COMPETITIVE-ANALYSIS.md](./docs/COMPETITIVE-ANALYSIS.md) | Deep dive into FloGrappling, Smoothcomp, UFC Fight Pass, and others |
 | [QUESTIONS.md](./docs/QUESTIONS.md) | Open questions for the meeting with Steve |
 
