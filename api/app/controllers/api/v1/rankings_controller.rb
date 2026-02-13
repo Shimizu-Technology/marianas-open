@@ -41,10 +41,10 @@ module Api
           .joins(:event)
           .select(
             "event_results.*, events.asjjf_stars as event_stars, " \
-            "events.name as event_name, events.slug as event_slug, events.start_date as event_date"
+            "events.name as event_name, events.slug as event_slug, events.date as event_date"
           )
           .where("LOWER(TRIM(event_results.competitor_name)) = ?", name.downcase)
-          .order("events.start_date DESC")
+          .order("events.date DESC")
 
         return render json: { error: "Competitor not found" }, status: :not_found if results.empty?
 
