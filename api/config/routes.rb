@@ -5,6 +5,8 @@ Rails.application.routes.draw do
       resources :events, only: [:index, :show], param: :slug
       resources :sponsors, only: [:index]
       resources :videos, only: [:index, :show]
+      resources :site_contents, only: [:index], path: 'site-contents'
+      resources :site_images, only: [:index], path: 'site-images'
 
       # Auth
       get :me, to: "users#me"
@@ -21,6 +23,12 @@ Rails.application.routes.draw do
         resources :sponsors do
           member do
             post :upload_logo
+          end
+        end
+        resources :site_contents, path: 'site-contents'
+        resources :site_images, path: 'site-images' do
+          member do
+            post :upload
           end
         end
         resource :organization, only: [:show, :update] do

@@ -6,6 +6,9 @@ import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useEvents, useSponsors } from '../hooks/useApi';
+import { useSiteContent } from '../hooks/useSiteContent';
+
+import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -27,12 +30,21 @@ export default function HomePage() {
   const shouldReduceMotion = useReducedMotion();
   const { events, loading: eventsLoading } = useEvents();
   const { sponsors, loading: sponsorsLoading } = useSponsors();
+  const { images: siteImages } = useSiteImages();
+  const { t: sc } = useSiteContent();
+
+  const heroImage = getImageUrl(siteImages, 'hero', '/images/action-match-1.webp');
+  const galleryImages = [
+    getImageUrl(siteImages, 'gallery', '/images/action-match-2.webp', 0),
+    getImageUrl(siteImages, 'gallery', '/images/venue-crowd.webp', 1),
+    getImageUrl(siteImages, 'gallery', '/images/podium-1.webp', 2),
+  ];
 
   const stats = [
-    { value: t('stats.competitors'), label: t('stats.competitorsLabel'), icon: Users },
-    { value: t('stats.countries'), label: t('stats.countriesLabel'), icon: Globe },
-    { value: t('stats.prizePpool'), label: t('stats.prizePoolLabel'), icon: Trophy },
-    { value: t('stats.since'), label: t('stats.sinceLabel'), icon: Calendar },
+    { value: sc('stat_competitors', t('stats.competitors')), label: sc('stat_competitors_label', t('stats.competitorsLabel')), icon: Users },
+    { value: sc('stat_countries', t('stats.countries')), label: sc('stat_countries_label', t('stats.countriesLabel')), icon: Globe },
+    { value: sc('stat_prize_pool', t('stats.prizePpool')), label: sc('stat_prize_pool_label', t('stats.prizePoolLabel')), icon: Trophy },
+    { value: sc('stat_established', t('stats.since')), label: sc('stat_established_label', t('stats.sinceLabel')), icon: Calendar },
   ];
 
   return (
@@ -42,7 +54,7 @@ export default function HomePage() {
         {/* Background image */}
         <div className="absolute inset-0">
           <ImageWithShimmer
-            src="/images/action-match-1.webp"
+            src={heroImage}
             alt=""
             className="w-full h-full object-cover"
           />
@@ -68,7 +80,7 @@ export default function HomePage() {
             <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-gold-500/30 rounded-full bg-gold-500/5">
               <Star size={14} className="text-gold-500 fill-gold-500" />
               <span className="text-sm text-gold-400 font-medium tracking-wide">
-                {t('hero.asjjfBadge')}
+                {sc('hero_badge', t('hero.asjjfBadge'))}
               </span>
             </div>
           </motion.div>
@@ -79,7 +91,7 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
           >
-            {t('hero.subtitle')}
+            {sc('hero_subtitle', t('hero.subtitle'))}
           </motion.p>
 
           <motion.h1
@@ -88,10 +100,10 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <span className="text-text-primary">{t('hero.title').split(' ').slice(0, -1).join(' ')}</span>
+            <span className="text-text-primary">{sc('hero_title_line1', t('hero.title').split(' ').slice(0, -1).join(' '))}</span>
             <br />
             <span className="bg-gradient-to-r from-gold-500 to-gold-300 bg-clip-text text-transparent">
-              {t('hero.title').split(' ').slice(-1)}
+              {sc('hero_title_line2', t('hero.title').split(' ').slice(-1)[0])}
             </span>
           </motion.h1>
 
@@ -158,13 +170,13 @@ export default function HomePage() {
             <ScrollReveal className="lg:col-span-5">
               <div className="space-y-6">
                 <div className="inline-block px-3 py-1 border border-gold-500/30 text-gold-500 text-xs font-heading uppercase tracking-widest">
-                  {t('home.since2007')}
+                  {sc('featured_badge', t('home.since2007'))}
                 </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black uppercase leading-tight">
-                  {t('home.featuredTitle')}
+                  {sc('featured_title', t('home.featuredTitle'))}
                 </h2>
                 <p className="text-text-secondary text-lg leading-relaxed">
-                  {t('home.featuredDesc')}
+                  {sc('featured_desc', t('home.featuredDesc'))}
                 </p>
                 <div className="flex gap-4 pt-4">
                   <Link
@@ -182,33 +194,33 @@ export default function HomePage() {
             <ScrollReveal className="lg:col-span-7" delay={0.2}>
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
-                  <ImageWithShimmer src="/images/action-match-2.webp" alt="BJJ competition match" className="w-full h-full object-cover" />
+                  <ImageWithShimmer src={galleryImages[0]} alt="BJJ competition match" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
-                    <div className="text-3xl font-heading font-black text-gold-500">{t('home.economicImpactValue')}</div>
-                    <div className="text-xs text-text-muted uppercase tracking-wider">{t('home.economicImpact')}</div>
+                    <div className="text-3xl font-heading font-black text-gold-500">{sc('economic_impact_value', t('home.economicImpactValue'))}</div>
+                    <div className="text-xs text-text-muted uppercase tracking-wider">{sc('economic_impact_label', t('home.economicImpact'))}</div>
                   </div>
                 </div>
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
-                  <ImageWithShimmer src="/images/venue-crowd.webp" alt="Marianas Open venue" className="w-full h-full object-cover" />
+                  <ImageWithShimmer src={galleryImages[1]} alt="Marianas Open venue" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
-                    <div className="text-3xl font-heading font-black text-text-primary">{t('home.spectatorsValue')}</div>
-                    <div className="text-xs text-text-muted uppercase tracking-wider">{t('home.spectators')}</div>
+                    <div className="text-3xl font-heading font-black text-text-primary">{sc('spectators_value', t('home.spectatorsValue'))}</div>
+                    <div className="text-xs text-text-muted uppercase tracking-wider">{sc('spectators_label', t('home.spectators'))}</div>
                   </div>
                 </div>
                 <div className="relative col-span-2 overflow-hidden border border-white/5">
-                  <ImageWithShimmer src="/images/podium-1.webp" alt="Podium ceremony" className="w-full h-48 object-cover" />
+                  <ImageWithShimmer src={galleryImages[2]} alt="Podium ceremony" className="w-full h-48 object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-r from-navy-900/95 via-navy-900/70 to-transparent" />
                   <div className="absolute inset-0 p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-2">
                       <Globe size={18} className="text-gold-500" />
                       <span className="text-sm text-gold-400 font-heading uppercase tracking-wider font-semibold">
-                        {t('home.internationalReach')}
+                        {sc('international_reach_title', t('home.internationalReach'))}
                       </span>
                     </div>
                     <p className="text-text-secondary text-sm leading-relaxed max-w-md">
-                      {t('home.internationalReachDesc')}
+                      {sc('international_reach_desc', t('home.internationalReachDesc'))}
                     </p>
                   </div>
                 </div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_13_075950) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_13_090524) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -100,6 +100,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_13_075950) do
     t.integer "sort_order"
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_prize_categories_on_event_id"
+  end
+
+  create_table "site_contents", force: :cascade do |t|
+    t.string "content_type", default: "text"
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.string "label"
+    t.string "section"
+    t.integer "sort_order", default: 0
+    t.datetime "updated_at", null: false
+    t.text "value_en"
+    t.text "value_ja"
+    t.text "value_ko"
+    t.text "value_tl"
+    t.text "value_zh"
+    t.index ["key"], name: "index_site_contents_on_key", unique: true
+    t.index ["section"], name: "index_site_contents_on_section"
+  end
+
+  create_table "site_images", force: :cascade do |t|
+    t.boolean "active", default: true
+    t.string "alt_text"
+    t.string "caption"
+    t.datetime "created_at", null: false
+    t.string "placement", null: false
+    t.integer "sort_order", default: 0
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["placement", "sort_order"], name: "index_site_images_on_placement_and_sort_order"
+    t.index ["placement"], name: "index_site_images_on_placement"
   end
 
   create_table "sponsors", force: :cascade do |t|
