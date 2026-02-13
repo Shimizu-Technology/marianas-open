@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       resources :videos, only: [:index, :show]
       resources :site_contents, only: [:index], path: 'site-contents'
       resources :site_images, only: [:index], path: 'site-images'
+      resources :rankings, only: [:index]
 
       # Auth
       get :me, to: "users#me"
