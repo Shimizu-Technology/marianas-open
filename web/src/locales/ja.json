@@ -325,5 +325,22 @@
     "purple": "紫",
     "brown": "茶",
     "black": "黒"
+  },
+  "competitorProfile": {
+    "title": "選手プロフィール",
+    "totalPoints": "合計ポイント",
+    "eventsCompeted": "大会",
+    "medals": "メダル",
+    "results": "結果",
+    "event": "大会",
+    "division": "部門",
+    "placement": "順位",
+    "pointsEarned": "獲得ポイント",
+    "backToRankings": "ランキングに戻る",
+    "noResults": "この選手の結果が見つかりません。",
+    "gold": "金",
+    "silver": "銀",
+    "bronze": "銅",
+    "beltRank": "帯"
   }
 }

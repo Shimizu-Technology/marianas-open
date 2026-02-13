@@ -1,5 +1,27 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+export interface CompetitorProfileResult {
+  event_name: string;
+  event_slug: string;
+  event_date: string;
+  division: string;
+  placement: number;
+  belt_rank: string;
+  points_earned: number;
+}
+
+export interface CompetitorProfile {
+  competitor_name: string;
+  academy: string;
+  country_code: string;
+  total_points: number;
+  gold: number;
+  silver: number;
+  bronze: number;
+  events_competed: number;
+  results: CompetitorProfileResult[];
+}
+
 export interface RankingEntry {
   competitor_name?: string;
   academy?: string;
@@ -522,4 +544,6 @@ export const api = {
     const qs = searchParams.toString();
     return fetchApi<RankingsResponse>(`/api/v1/rankings${qs ? `?${qs}` : ''}`);
   },
+  getCompetitorProfile: (name: string) =>
+    fetchApi<CompetitorProfile>(`/api/v1/rankings/competitor?name=${encodeURIComponent(name)}`),
 };

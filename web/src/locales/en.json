@@ -325,5 +325,22 @@
     "purple": "Purple",
     "brown": "Brown",
     "black": "Black"
+  },
+  "competitorProfile": {
+    "title": "Competitor Profile",
+    "totalPoints": "Total Points",
+    "eventsCompeted": "events",
+    "medals": "Medals",
+    "results": "Results",
+    "event": "Event",
+    "division": "Division",
+    "placement": "Placement",
+    "pointsEarned": "Points Earned",
+    "backToRankings": "Back to Rankings",
+    "noResults": "No results found for this competitor.",
+    "gold": "Gold",
+    "silver": "Silver",
+    "bronze": "Bronze",
+    "beltRank": "Belt"
   }
 }

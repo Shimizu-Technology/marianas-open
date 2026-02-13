@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { motion, MotionConfig } from 'framer-motion';
 import { Trophy, Users, Globe, Star, Medal, ChevronDown, Filter } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
@@ -245,8 +246,14 @@ export default function RankingsPage() {
                             <td className="p-3">
                               <div>
                                 <span className={`font-medium ${i < 3 ? 'text-white' : 'text-text-secondary'}`}>
-                                  {tab === 'individual' ? entry.competitor_name :
-                                   tab === 'team' ? entry.academy :
+                                  {tab === 'individual' ? (
+                                    <Link
+                                      to={`/competitors/profile?name=${encodeURIComponent(entry.competitor_name || '')}`}
+                                      className="hover:text-gold-400 transition-colors"
+                                    >
+                                      {entry.competitor_name}
+                                    </Link>
+                                  ) : tab === 'team' ? entry.academy :
                                    COUNTRY_NAMES[entry.country_code || ''] || entry.country_code}
                                 </span>
                                 {tab === 'individual' && entry.country_code && (

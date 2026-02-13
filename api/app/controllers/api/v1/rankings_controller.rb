@@ -33,5 +33,50 @@ module Api
         }
       end
     end
+
+      # GET /api/v1/rankings/competitor?name=Cruz+Anthony
+      def competitor
+        name = params[:name].to_s.strip
+        return render json: { error: "name parameter is required" }, status: :bad_request if name.blank?
+
+        results = EventResult
+          .joins(:event)
+          .select(
+            "event_results.*, events.asjjf_stars as event_stars, " \
+            "events.name as event_name, events.slug as event_slug, events.start_date as event_date"
+          )
+          .where("LOWER(TRIM(event_results.competitor_name)) = ?", name.downcase)
+          .order("events.start_date DESC")
+
+        return render json: { error: "Competitor not found" }, status: :not_found if results.empty?
+
+        total_points = results.sum { |r| RankingCalculator.points_for(r.placement, r.event_stars) }
+        golds   = results.count { |r| r.placement == 1 }
+        silvers = results.count { |r| r.placement == 2 }
+        bronzes = results.count { |r| r.placement == 3 }
+
+        render json: {
+          competitor_name: results.first.competitor_name,
+          academy: RankingCalculator.send(:most_common, results.map(&:academy)),
+          country_code: RankingCalculator.send(:most_common, results.map(&:country_code)),
+          total_points: total_points,
+          gold: golds,
+          silver: silvers,
+          bronze: bronzes,
+          events_competed: results.map(&:event_id).uniq.count,
+          results: results.map { |r|
+            {
+              event_name: r.event_name,
+              event_slug: r.event_slug,
+              event_date: r.event_date,
+              division: r.division,
+              placement: r.placement,
+              belt_rank: r.belt_rank,
+              points_earned: RankingCalculator.points_for(r.placement, r.event_stars)
+            }
+          }
+        }
+      end
+    end
   end
 end
