@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
-import { events } from '../data/events';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { useEvents, useSponsors } from '../hooks/useApi';
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -24,6 +25,8 @@ function getDateLocale(lang: string) {
 export default function HomePage() {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
+  const { events, loading: eventsLoading } = useEvents();
+  const { sponsors, loading: sponsorsLoading } = useSponsors();
 
   const stats = [
     { value: t('stats.competitors'), label: t('stats.competitorsLabel'), icon: Users },
@@ -229,58 +232,62 @@ export default function HomePage() {
             </div>
           </ScrollReveal>
 
-          <div className="space-y-3">
-            {events.map((event, i) => (
-              <ScrollReveal key={event.id} delay={i * 0.08}>
-                <Link
-                  to={event.isMainEvent ? '/event' : '/calendar'}
-                  className={`group flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 p-6 border transition-all duration-300 hover:border-gold-500/30 ${
-                    event.isMainEvent
-                      ? 'bg-gradient-to-r from-gold-500/10 to-transparent border-gold-500/20'
-                      : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
-                  }`}
-                >
-                  {/* Date */}
-                  <div className="shrink-0 w-28">
-                    <div className="text-xs text-text-muted uppercase tracking-wider font-heading">
-                      {new Date(event.date).toLocaleDateString(getDateLocale(i18n.language), { month: 'short' })}
+          {eventsLoading ? (
+            <LoadingSpinner />
+          ) : (
+            <div className="space-y-3">
+              {events.map((event, i) => (
+                <ScrollReveal key={event.id} delay={i * 0.08}>
+                  <Link
+                    to={event.is_main_event ? '/event' : '/calendar'}
+                    className={`group flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 p-6 border transition-all duration-300 hover:border-gold-500/30 ${
+                      event.is_main_event
+                        ? 'bg-gradient-to-r from-gold-500/10 to-transparent border-gold-500/20'
+                        : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
+                    }`}
+                  >
+                    {/* Date */}
+                    <div className="shrink-0 w-28">
+                      <div className="text-xs text-text-muted uppercase tracking-wider font-heading">
+                        {new Date(event.date).toLocaleDateString(getDateLocale(i18n.language), { month: 'short' })}
+                      </div>
+                      <div className="text-2xl font-heading font-black">
+                        {new Date(event.date).toLocaleDateString(getDateLocale(i18n.language), { day: 'numeric' })}
+                      </div>
                     </div>
-                    <div className="text-2xl font-heading font-black">
-                      {new Date(event.date).toLocaleDateString(getDateLocale(i18n.language), { day: 'numeric' })}
-                    </div>
-                  </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className={`font-heading font-bold text-lg truncate ${
-                        event.isMainEvent ? 'text-gold-500' : 'text-text-primary'
-                      }`}>
-                        {event.name}
-                      </h3>
-                      {event.isMainEvent && (
-                        <span className="shrink-0 text-xs px-2 py-0.5 bg-gold-500 text-navy-900 font-bold uppercase tracking-wider">
-                          {t('home.mainEvent')}
-                        </span>
-                      )}
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className={`font-heading font-bold text-lg truncate ${
+                          event.is_main_event ? 'text-gold-500' : 'text-text-primary'
+                        }`}>
+                          {event.name}
+                        </h3>
+                        {event.is_main_event && (
+                          <span className="shrink-0 text-xs px-2 py-0.5 bg-gold-500 text-navy-900 font-bold uppercase tracking-wider">
+                            {t('home.mainEvent')}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-text-secondary">
+                        {event.venue_name} · {event.city}, {event.country}
+                      </p>
                     </div>
-                    <p className="text-sm text-text-secondary">
-                      {event.venue} · {event.location}
-                    </p>
-                  </div>
 
-                  {/* Stars + Arrow */}
-                  <div className="flex items-center gap-4 shrink-0">
-                    <StarRating count={event.asjjfStars} />
-                    <ArrowRight
-                      size={16}
-                      className="text-text-muted group-hover:text-gold-500 group-hover:translate-x-1 transition-all"
-                    />
-                  </div>
-                </Link>
-              </ScrollReveal>
-            ))}
-          </div>
+                    {/* Stars + Arrow */}
+                    <div className="flex items-center gap-4 shrink-0">
+                      <StarRating count={event.asjjf_stars} />
+                      <ArrowRight
+                        size={16}
+                        className="text-text-muted group-hover:text-gold-500 group-hover:translate-x-1 transition-all"
+                      />
+                    </div>
+                  </Link>
+                </ScrollReveal>
+              ))}
+            </div>
+          )}
 
           <ScrollReveal className="text-center mt-12">
             <Link
@@ -307,14 +314,40 @@ export default function HomePage() {
 
           <ScrollReveal delay={0.2}>
             <div className="flex flex-wrap items-center justify-center gap-12 opacity-40">
-              {['ASJJF', 'GVB', 'United Airlines', 'Hyatt Regency', 'Dusit Thani'].map((name) => (
-                <div
-                  key={name}
-                  className="text-lg font-heading font-bold uppercase tracking-wider text-text-secondary"
-                >
-                  {name}
-                </div>
-              ))}
+              {sponsorsLoading ? (
+                <div className="text-text-muted text-sm">...</div>
+              ) : sponsors.length > 0 ? (
+                sponsors.map((sponsor) => (
+                  <div key={sponsor.id}>
+                    {sponsor.logo_url ? (
+                      <a
+                        href={sponsor.website_url || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={sponsor.logo_url}
+                          alt={sponsor.name}
+                          className="h-10 object-contain"
+                        />
+                      </a>
+                    ) : (
+                      <div className="text-lg font-heading font-bold uppercase tracking-wider text-text-secondary">
+                        {sponsor.name}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                ['ASJJF', 'GVB', 'United Airlines', 'Hyatt Regency', 'Dusit Thani'].map((name) => (
+                  <div
+                    key={name}
+                    className="text-lg font-heading font-bold uppercase tracking-wider text-text-secondary"
+                  >
+                    {name}
+                  </div>
+                ))
+              )}
             </div>
           </ScrollReveal>
         </div>

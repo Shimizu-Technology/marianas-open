@@ -6,14 +6,16 @@ import { Star, MapPin, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
 import QRShare from '../components/QRShare';
-import { events } from '../data/events';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { useEvents } from '../hooks/useApi';
+import type { Event } from '../services/api';
 
 function getDateLocale(lang: string) {
   const map: Record<string, string> = { ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', tl: 'fil-PH' };
   return map[lang] || 'en-US';
 }
 
-function EventMapDot({ event, index }: { event: typeof events[0]; index: number }) {
+function EventMapDot({ event, index }: { event: Event; index: number }) {
   const { i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const [showTooltip, setShowTooltip] = useState(false);
@@ -28,14 +30,13 @@ function EventMapDot({ event, index }: { event: typeof events[0]; index: number 
     HK: { x: 52, y: 44 },
   };
 
-  const pos = positions[event.countryCode] || { x: 50, y: 50 };
+  const pos = positions[event.country_code] || { x: 50, y: 50 };
 
   const formattedDate = new Date(event.date).toLocaleDateString(
     getDateLocale(i18n.language),
     { month: 'short', day: 'numeric', year: 'numeric' }
   );
 
-  // Dismiss tooltip on outside click/tap (mobile)
   useEffect(() => {
     if (!showTooltip) return;
     const handler = (e: TouchEvent | MouseEvent) => {
@@ -67,19 +68,16 @@ function EventMapDot({ event, index }: { event: typeof events[0]; index: number 
         setShowTooltip((prev) => !prev);
       }}
     >
-      {/* Ping animation for main event */}
-      {event.isMainEvent && (
+      {event.is_main_event && (
         <div className="absolute -inset-3 bg-gold-500/20 rounded-full animate-ping" />
       )}
 
-      {/* Dot */}
       <div
         className={`relative w-4 h-4 rounded-full cursor-pointer transition-transform hover:scale-150 ${
-          event.isMainEvent ? 'bg-gold-500' : 'bg-navy-700'
+          event.is_main_event ? 'bg-gold-500' : 'bg-navy-700'
         }`}
       />
 
-      {/* Tooltip with Framer Motion */}
       <AnimatePresence>
         {showTooltip && (
           <motion.div
@@ -92,7 +90,6 @@ function EventMapDot({ event, index }: { event: typeof events[0]; index: number 
             <div className="bg-surface border border-gold-500/30 p-3 whitespace-nowrap shadow-xl relative">
               <div className="font-heading font-bold text-sm text-text-primary">{event.name}</div>
               <div className="text-xs text-gold-400 mt-1">{formattedDate}</div>
-              {/* Arrow pointing down */}
               <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-gold-500/30" />
             </div>
           </motion.div>
@@ -105,8 +102,9 @@ function EventMapDot({ event, index }: { event: typeof events[0]; index: number 
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
+  const { events, loading } = useEvents();
 
-  const formatEventDate = useCallback((dateStr: string, dateEndStr?: string) => {
+  const formatEventDate = useCallback((dateStr: string, dateEndStr?: string | null) => {
     const locale = getDateLocale(i18n.language);
     const main = new Date(dateStr).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' });
     if (dateEndStr) {
@@ -115,6 +113,14 @@ export default function CalendarPage() {
     }
     return main;
   }, [i18n.language]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-20">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-20">
@@ -210,24 +216,24 @@ export default function CalendarPage() {
               <ScrollReveal key={event.id} delay={i * 0.08}>
                 <div
                   className={`group p-6 border transition-all duration-300 hover:border-gold-500/30 h-full flex flex-col ${
-                    event.isMainEvent
+                    event.is_main_event
                       ? 'bg-gradient-to-br from-gold-500/10 to-transparent border-gold-500/20 lg:col-span-1'
                       : 'bg-navy-900 border-white/5'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-heading font-bold uppercase tracking-widest text-text-muted bg-navy-800 px-2 py-1 border border-white/5">
-                      {event.countryCode}
+                      {event.country_code}
                     </span>
                     <div className="flex gap-0.5">
-                      {Array.from({ length: event.asjjfStars }).map((_, j) => (
+                      {Array.from({ length: event.asjjf_stars }).map((_, j) => (
                         <Star key={j} size={12} className="fill-gold-500 text-gold-500" />
                       ))}
                     </div>
                   </div>
 
                   <h3 className={`font-heading font-bold text-lg mb-2 ${
-                    event.isMainEvent ? 'text-gold-500' : 'text-text-primary'
+                    event.is_main_event ? 'text-gold-500' : 'text-text-primary'
                   }`}>
                     {event.name}
                   </h3>
@@ -235,21 +241,21 @@ export default function CalendarPage() {
                   <div className="space-y-2 text-sm text-text-secondary mb-6 flex-1">
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-text-muted shrink-0" />
-                      {formatEventDate(event.date, event.dateEnd)}
+                      {formatEventDate(event.date, event.end_date)}
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin size={14} className="text-text-muted shrink-0" />
-                      {event.venue}
+                      {event.venue_name}
                     </div>
                   </div>
 
                   <div className="flex gap-2">
                     <a
-                      href={event.registerUrl}
+                      href={event.registration_url || 'https://asjjf.org'}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
-                        event.isMainEvent
+                        event.is_main_event
                           ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
                           : 'bg-navy-700 text-text-primary hover:bg-navy-600'
                       }`}
@@ -257,7 +263,7 @@ export default function CalendarPage() {
                       {t('calendar.register')}
                       <ExternalLink size={12} />
                     </a>
-                    {event.isMainEvent && (
+                    {event.is_main_event && (
                       <Link
                         to="/event"
                         className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gold-500/30 text-gold-500 text-sm font-heading font-bold uppercase tracking-wider hover:bg-gold-500/10 transition-colors"

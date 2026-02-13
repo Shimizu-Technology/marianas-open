@@ -5,6 +5,8 @@ import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import QRShare from '../components/QRShare';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { useEvents } from '../hooks/useApi';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -27,8 +29,12 @@ function ShareButton({ platform, onClick }: { platform: string; onClick: () => v
 export default function EventDetailPage() {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
+  const { events, loading } = useEvents();
 
-  const scheduleItems = [
+  const mainEvent = events.find(e => e.is_main_event) || null;
+
+  // Fallback schedule items from i18n if API has none
+  const fallbackScheduleItems = [
     { time: '7:00 AM', event: t('event.schedule1') },
     { time: '8:00 AM', event: t('event.schedule2') },
     { time: '10:00 AM', event: t('event.schedule3') },
@@ -38,7 +44,14 @@ export default function EventDetailPage() {
     { time: '8:00 PM', event: t('event.schedule7') },
   ];
 
-  const prizeBreakdown = [
+  const scheduleItems = mainEvent && mainEvent.event_schedule_items.length > 0
+    ? mainEvent.event_schedule_items
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(item => ({ time: item.time, event: item.description }))
+    : fallbackScheduleItems;
+
+  // Fallback prize breakdown from i18n if API has none
+  const fallbackPrizeBreakdown = [
     { division: t('event.prizeBlackOpenM'), prize: '$10,000' },
     { division: t('event.prizeBlackOpenF'), prize: '$10,000' },
     { division: t('event.prizeBlackWeight'), prize: '$3,000' },
@@ -46,6 +59,16 @@ export default function EventDetailPage() {
     { division: t('event.prizeTeam'), prize: '$2,500' },
     { division: t('event.prizeKids'), prize: '$500' },
   ];
+
+  const prizeBreakdown = mainEvent && mainEvent.prize_categories.length > 0
+    ? mainEvent.prize_categories
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(cat => ({ division: cat.name, prize: cat.amount }))
+    : fallbackPrizeBreakdown;
+
+  const prizePoolDisplay = mainEvent?.prize_pool || '$50K';
+
+  const heroImageUrl = mainEvent?.hero_image_url;
 
   const shareUrl = 'https://marianasopen.com';
   const shareText = t('event.shareText');
@@ -60,16 +83,32 @@ export default function EventDetailPage() {
     window.open(urls[platform], '_blank', 'width=600,height=400');
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-20">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-20">
       {/* Hero with background image */}
       <section className="relative py-24 sm:py-32 overflow-hidden">
         <div className="absolute inset-0">
-          <ImageWithShimmer
-            src="/images/action-match-3.webp"
-            alt=""
-            className="w-full h-full object-cover"
-          />
+          {heroImageUrl ? (
+            <img
+              src={heroImageUrl}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <ImageWithShimmer
+              src="/images/action-match-3.webp"
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          )}
           <div className="absolute inset-0 bg-navy-900/75" />
           <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/50 to-transparent" />
         </div>
@@ -82,7 +121,7 @@ export default function EventDetailPage() {
             className="max-w-4xl"
           >
             <div className="flex items-center gap-2 mb-6">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: mainEvent?.asjjf_stars || 5 }).map((_, i) => (
                 <Star key={i} size={16} className="fill-gold-500 text-gold-500" />
               ))}
               <span className="text-gold-400 text-sm font-heading ml-2 uppercase tracking-wider">
@@ -109,11 +148,11 @@ export default function EventDetailPage() {
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-gold-500" />
-                {t('event.venue')}
+                {mainEvent ? `${mainEvent.venue_name}` : t('event.venue')}
               </div>
               <div className="flex items-center gap-2">
                 <Trophy size={16} className="text-gold-500" />
-                {t('event.prizePool')}
+                {mainEvent?.prize_pool || t('event.prizePool')}
               </div>
             </div>
           </motion.div>
@@ -154,7 +193,7 @@ export default function EventDetailPage() {
             <ScrollReveal delay={0.1}>
               <div className="bg-gradient-to-br from-gold-500/10 to-transparent border border-gold-500/20 p-8 h-full">
                 <Trophy size={24} className="text-gold-500 mb-4" />
-                <div className="text-5xl font-heading font-black text-gold-500 mb-2">$50K</div>
+                <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>
                 <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
                 <div className="space-y-3 text-sm">
                   {prizeBreakdown.map((item, i) => (
@@ -189,10 +228,12 @@ export default function EventDetailPage() {
                 <div className="flex items-center gap-3 mb-4">
                   <MapPin size={20} className="text-gold-500" />
                   <h3 className="font-heading font-bold text-xl uppercase tracking-wider">
-                    {t('event.venue')}
+                    {mainEvent ? mainEvent.venue_name : t('event.venue')}
                   </h3>
                 </div>
-                <p className="text-text-secondary text-sm mb-4">{t('event.location')}</p>
+                <p className="text-text-secondary text-sm mb-4">
+                  {mainEvent ? `${mainEvent.venue_address}, ${mainEvent.city}, ${mainEvent.country}` : t('event.location')}
+                </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div className="bg-navy-900 border border-white/5 p-4 text-center">
                     <Users size={20} className="text-gold-500 mx-auto mb-2" />
@@ -246,7 +287,7 @@ export default function EventDetailPage() {
                 </div>
                 <div className="mt-8">
                   <a
-                    href="https://asjjf.org"
+                    href={mainEvent?.registration_url || 'https://asjjf.org'}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
