@@ -1,20 +1,14 @@
 module Api
   module V1
     module Admin
-      class OrganizationController < ApplicationController
+      class OrganizationsController < ApplicationController
         include ClerkAuthenticatable
-
-        rescue_from StandardError do |e|
-          render json: { error: e.message, type: e.class.name, trace: e.backtrace&.first(5) }, status: :internal_server_error
-        end
 
         before_action :require_staff!
         before_action :set_organization
 
         def show
           render json: @organization.as_json
-        rescue => e
-          render json: { error: e.message, backtrace: e.backtrace&.first(5) }, status: :internal_server_error
         end
 
         def update
