@@ -1,0 +1,226 @@
+EVENT: 2023 Marianas Open Jiu-jitsu Championship
+SLUG: marianas-open-2023
+ASJJF_ID: 1363
+
+##### Male White Juvenile Middle
+1st|Lobaton Elton|Figo' / Bonsai Jiu Jitsu|GUM
+2nd|Asprer Zayden|Guma|GUM
+3rd|Paulino Ethan|Guma|GUM
+
+##### Male White Juvenile Open Weight
+1st|Lobaton Elton|Figo' / Bonsai Jiu Jitsu|GUM
+2nd|Cabe Ethan|Carlson Gracie Team|GUM
+3rd|Paulino Ethan|Guma|GUM
+
+##### Male White Adult Light Feather
+1st|Mesa Joaquin|Atos Jiu-jitsu Guam|GUM
+2nd|Eola Jasper|Atos Jiu-jitsu Guam|USA
+3rd|Guanlao Cean|Atos Jiu-jitsu Guam|GUM
+
+##### Male White Adult Feather
+1st|Cabales Corey|Figo' / Bonsai Jiu Jitsu|GUM
+2nd|Riley Sebastian|Atos Jiu-jitsu Guam|GUM
+3rd|Sanders Brendan|Guma|USA
+
+##### Male White Adult Light
+1st|Lacdoo Sean|Heights Academy Guam|GUM
+2nd|Contreras Bryant|Heights Academy Guam|GUM
+3rd|Cabe Ethan|Carlson Gracie Team|GUM
+
+##### Male White Adult Middle
+1st|Aguon Christopher|Atos Jiu-jitsu Guam|GUM
+2nd|Belakbir Youssef|Machado Guam|USA
+3rd|Cura Jun|Atos Jiu-jitsu Guam|JPN
+
+##### Male White Adult Medium Heavy
+1st|Atenta Joel|Atos Jiu-jitsu Guam|GUM
+2nd|Ymballa Joel|Guma|GUM
+
+##### Male White Adult Heavy
+1st|Ramiro Brian|Heights Academy Guam|GUM
+2nd|Berraho Zaki|Machado Guam|USA
+
+##### Male White Adult Ultra Heavy
+1st|Arcala Julian|Carlson Gracie Team|GUM
+
+##### Male White Adult Open Weight
+1st|Ramiro Brian|Heights Academy Guam|GUM
+2nd|Taitano Skyler|Atos Jiu-jitsu Guam|GUM
+3rd|Lacambra Eric|Carlson Gracie Team|GUM
+
+##### Male Blue Adult Light
+1st|Taitano Zander|Atos Jiu-jitsu Guam|GUM
+2nd|Haugen Alan|Machado Guam|USA
+3rd|Bustos Aaron|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Adult Middle
+1st|Cardenas Ezra|Machado Guam|USA
+2nd|Francisco Eric|Carlson Gracie Team|GUM
+3rd|Han Won Joon|Atos Jiu-jitsu Guam|KOR
+
+##### Male Blue Adult Medium Heavy
+1st|Detwiler Paul|Machado Guam|USA
+2nd|Wagthuth Eddie|Other|GUM
+3rd|Rosario Jordan|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Adult Super Heavy
+1st|Topasna Nathan|Other|GUM
+2nd|Yturralde Rob|Atos Jiu-jitsu Guam|GUM
+3rd|Vulovic Milo|Figo' / Bonsai Jiu Jitsu|USA
+
+##### Male Blue Adult Ultra Heavy
+1st|Doherty Jackson|Atos Jiu-jitsu Guam|USA
+
+##### Male Blue Adult Open Weight
+1st|Detwiler Paul|Machado Guam|USA
+2nd|Wagthuth Eddie|Other|GUM
+3rd|Cardenas Ezra|Machado Guam|USA
+
+##### Male Purple Adult Light
+1st|Silverio Joko Luis|Deftac Six Blades|PHL
+2nd|Lawver Samuel|Machado Guam|USA
+3rd|Batista Mark|Machado Guam|DOM
+
+##### Male Purple Adult Middle
+1st|Quintanilla Jr Gonzalo|Atos Jiu-jitsu Guam|GUM
+2nd|Charfauros Roque|Heights Academy Guam|GUM
+3rd|Taitingfong Justin|Atos Jiu-jitsu Guam|GUM
+
+##### Male Purple Adult Medium Heavy
+1st|Oka Akihiro|Pato Studio|JPN
+2nd|Shinohara Michael|Atos Jiu-jitsu Guam|GUM
+
+##### Male Purple Adult Super Heavy
+1st|Cruz Casey|Heights Academy Guam|GUM
+2nd|Zervoulakos Sean|Atos Jiu-jitsu Guam|GUM
+
+##### Male Purple Adult Open Weight
+1st|Oka Akihiro|Pato Studio|JPN
+2nd|Shinohara Michael|Atos Jiu-jitsu Guam|GUM
+3rd|Quintanilla Jr Gonzalo|Atos Jiu-jitsu Guam|GUM
+
+##### Male Brown Adult Light Feather
+1st|Ledesma Kenneth|Atos Jiu-jitsu Guam|GUM
+2nd|Barzaga Francisco|Checkmat Philippines|PHL
+
+##### Male Brown Adult Feather
+1st|Yano Akira Thomy|Igloo|JPN
+2nd|Saito Sho|Infight Japan|JPN
+3rd|Ledesma Oscar|Atos Jiu-jitsu Guam|GUM
+
+##### Male Brown Adult Light
+1st|Alegre Philip|Lucas Lepri Philippines|PHL
+2nd|Palomo Kyle|Carlson Gracie Team|GUM
+3rd|Mesa Jeffrey|Machado Guam|GUM
+
+##### Male Brown Adult Middle
+1st|Hirasawa Hiroshi|Pato Studio|JPN
+
+##### Male Brown Adult Super Heavy
+1st|Dias Raphael|Carlson Gracie Team|BRA
+2nd|Sugimoto Alexandre|Impacto Bjj|BRA
+
+##### Male Brown Adult Open Weight
+1st|Yano Akira Thomy|Igloo|JPN
+2nd|Saito Sho|Infight Japan|JPN
+3rd|Hirasawa Hiroshi|Pato Studio|JPN
+
+##### Male Black Adult Feather
+1st|Meneghin Erick|Igloo|BRA
+2nd|Sevilla Elouie Federico|Checkmat Philippines|PHL
+3rd|Enriquez Richard|Purebred Jiu Jitsu Guam|GUM
+
+##### Male Black Adult Light
+1st|Ohura Myke|Igloo|BRA
+
+##### Male Black Adult Medium Heavy
+1st|Ambrose Jj|Machado Guam|USA
+2nd|Meno John|Atos Jiu-jitsu Guam|GUM
+3rd|Camacho Frank|Purebred Jiu Jitsu Guam|GUM
+
+##### Male Black Adult Heavy
+1st|Bogdanove Grant|Life Jiu Jitsu Academy|USA
+2nd|Cruz Anthony|Heights Academy Guam|GUM
+3rd|Kim Bumjun|Over Limit Jiu Jitsu Association|KOR
+
+##### Male Black Adult Ultra Heavy
+1st|Jerome Joshua|Heights Academy Guam|USA
+
+##### Male Black Adult Open Weight
+1st|Bogdanove Grant|Life Jiu Jitsu Academy|USA
+2nd|Cruz Anthony|Heights Academy Guam|GUM
+3rd|Cristo Rogerio|Evox Bjj|BRA
+
+##### Male White Master 1 Feather
+1st|Camaya John|Atos Jiu-jitsu Guam|GUM
+2nd|Long Paul|Purebred Jiu Jitsu Guam|GUM
+3rd|Sarmiento Paul|Atos Jiu-jitsu Guam|GUM
+
+##### Male White Master 1 Light
+1st|Ngiratumerang Melvin|Purebred Jiu Jitsu Guam|GUM
+2nd|Manley Jeremiah|Atos Jiu-jitsu Guam|GUM
+3rd|Tiong Ryan|Atos Jiu-jitsu Guam|GUM
+
+##### Male White Master 1 Middle
+1st|Quinit Ben|Machado Guam|USA
+2nd|Basilio Paul-myer|Atos Jiu-jitsu Guam|GUM
+
+##### Male White Master 1 Medium Heavy
+1st|Spencer William|Carlson Gracie Team|USA
+
+##### Male White Master 1 Ultra Heavy
+1st|Andre Justin|Atos Jiu-jitsu Guam|GUM
+2nd|Schacher Gregory|The Pound Academy|GUM
+3rd|Cruz Fernando|Machado Guam|USA
+
+##### Male White Master 1 Open Weight
+1st|Schacher Gregory|The Pound Academy|GUM
+2nd|Camaya John|Atos Jiu-jitsu Guam|GUM
+3rd|Tiong Ryan|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Master 1 Light
+1st|Lyon Aaron|Machado Guam|USA
+2nd|Carbullido Joshua|Machado Guam|GUM
+3rd|Marquez Rollie|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Master 1 Medium Heavy
+1st|Blas Randy|Atos Jiu-jitsu Guam|GUM
+2nd|Cruz Shaun|Purebred Jiu Jitsu Guam|GUM
+3rd|Cruz Joey|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Master 1 Open Weight
+1st|Lyon Aaron|Machado Guam|USA
+2nd|Blas Randy|Atos Jiu-jitsu Guam|GUM
+3rd|Cruz Shaun|Purebred Jiu Jitsu Guam|GUM
+
+##### Male Purple Master 1 Ultra Heavy
+1st|Mendiola Casper|Other|MNP
+
+##### Male Brown Master 1 Heavy
+1st|Fausto Bernard|Carlson Gracie Team|GUM
+
+##### Male Brown Master 1 Open Weight
+1st|Sugimoto Alexandre|Impacto Bjj|BRA
+2nd|Fausto Bernard|Carlson Gracie Team|GUM
+
+##### Male Black Master 1 Open Weight
+1st|Ambrose Jj|Machado Guam|USA
+
+##### Male Blue Master 2 Middle
+1st|Hulsman Robin|Carlson Gracie Team|AUS
+2nd|Cabrera Alex|Purebred Jiu Jitsu Guam|GUM
+3rd|Lizama Randall|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Master 2 Open Weight
+1st|Cruz Joey|Atos Jiu-jitsu Guam|GUM
+2nd|Lizama Randall|Atos Jiu-jitsu Guam|GUM
+3rd|Cabrera Alex|Purebred Jiu Jitsu Guam|GUM
+
+##### Male Black Master 3 Light
+1st|Cristo Rogerio|Evox Bjj|BRA
+2nd|Park Min Uk|Over Limit Jiu Jitsu Association|KOR
+3rd|Salinas Wilfred|Purebred Jiu Jitsu Guam|USA
+
+##### Male Black Master 3 Medium Heavy
+1st|Suto Rogerio|Impacto Bjj|BRA
+2nd|Yusuke Tabata|Paraestra Moriya|JPN

@@ -5,6 +5,7 @@ class Event < ApplicationRecord
   has_many :event_schedule_items, dependent: :destroy
   has_many :prize_categories, dependent: :destroy
   has_many :videos, dependent: :nullify
+  has_many :event_results, dependent: :destroy
   has_one_attached :hero_image
 
   accepts_nested_attributes_for :event_schedule_items, allow_destroy: true
