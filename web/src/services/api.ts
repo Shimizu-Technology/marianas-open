@@ -103,8 +103,8 @@ export interface EventFormData {
   prize_pool: string;
   registration_url: string;
   status: string;
-  latitude: string;
-  longitude: string;
+  latitude: number | null;
+  longitude: number | null;
   event_schedule_items_attributes: EventScheduleItem[];
   prize_categories_attributes: PrizeCategory[];
 }

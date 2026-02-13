@@ -8,7 +8,9 @@ module Api
         before_action :set_event, only: [:show, :update, :destroy, :upload_image]
 
         def index
-          events = Organization.first&.events&.includes(:event_schedule_items, :prize_categories)&.order(date: :desc) || []
+          org = Organization.first
+          return render json: { error: "No organization configured" }, status: :unprocessable_entity unless org
+          events = org.events.includes(:event_schedule_items, :prize_categories).order(date: :desc)
           render json: { events: events.as_json }
         end
 
