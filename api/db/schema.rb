@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_13_090524) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_13_112800) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_13_090524) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "competitors", force: :cascade do |t|
+    t.string "academy"
+    t.string "belt_rank"
+    t.text "bio"
+    t.integer "bronze_medals", default: 0, null: false
+    t.string "country_code", limit: 2
+    t.datetime "created_at", null: false
+    t.integer "draws", default: 0, null: false
+    t.string "first_name", null: false
+    t.integer "gold_medals", default: 0, null: false
+    t.string "instagram_url"
+    t.string "last_name", null: false
+    t.integer "losses", default: 0, null: false
+    t.string "nickname"
+    t.integer "silver_medals", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.string "weight_class"
+    t.integer "wins", default: 0, null: false
+    t.string "youtube_url"
+    t.index ["belt_rank"], name: "index_competitors_on_belt_rank"
+    t.index ["country_code"], name: "index_competitors_on_country_code"
+    t.index ["weight_class"], name: "index_competitors_on_weight_class"
   end
 
   create_table "event_schedule_items", force: :cascade do |t|

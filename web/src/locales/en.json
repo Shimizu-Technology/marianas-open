@@ -242,6 +242,23 @@
     "minor": "If the competitor is a minor I, hereby certify that I am the parent and/or legal guardian of the named minor who has been given my express permission to compete in the event for which we are registering.",
     "organizerNotice": "Fury Promotions, LLC / Marianas Open / Marianas Pro. All rights reserved."
   },
+  "competitors": {
+    "badge": "Athletes",
+    "title": "Competitors",
+    "subtitle": "Meet the athletes competing in the Marianas Open Pro Series.",
+    "searchPlaceholder": "Search by name or academy...",
+    "allBelts": "All Belts",
+    "allWeights": "All Weight Classes",
+    "allCountries": "All Countries",
+    "results": "results",
+    "clearFilters": "Clear filters",
+    "noResults": "No competitors found matching your criteria.",
+    "record": "Record",
+    "gold": "Gold",
+    "silver": "Silver",
+    "bronze": "Bronze",
+    "weightClass": "Weight Class"
+  },
   "rankings": {
     "title": "Rankings",
     "subtitle": "ASJJF ranking points awarded at Marianas Open Pro Series events.",

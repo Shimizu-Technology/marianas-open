@@ -4,6 +4,7 @@ Rails.application.routes.draw do
       resource :organization, only: [:show]
       resources :events, only: [:index, :show], param: :slug
       resources :sponsors, only: [:index]
+      resources :competitors, only: [:index, :show]
       resources :videos, only: [:index, :show]
       resources :site_contents, only: [:index], path: 'site-contents'
       resources :site_images, only: [:index], path: 'site-images'
@@ -23,6 +24,11 @@ Rails.application.routes.draw do
         resources :sponsors do
           member do
             post :upload_logo
+          end
+        end
+        resources :competitors do
+          member do
+            post :upload_photo
           end
         end
         resources :site_contents, path: 'site-contents'

@@ -6,6 +6,7 @@
     "watch": "観戦",
     "about": "大会について",
     "rankings": "ランキング",
+    "competitors": "選手紹介",
     "pastEvents": "過去のイベント"
   },
   "pastEvents": {
@@ -240,6 +241,23 @@
     "dispute": "登録申請を行うことで、訴訟および陪審裁判の権利を放棄します。",
     "minor": "未成年の場合、私は親権者または法定後見人として参加を許可します。",
     "organizerNotice": "Fury Promotions, LLC / Marianas Open / Marianas Pro. All rights reserved."
+  },
+  "competitors": {
+    "badge": "アスリート",
+    "title": "選手紹介",
+    "subtitle": "マリアナスオープン・プロシリーズに参加する選手たちをご紹介します。",
+    "searchPlaceholder": "名前やアカデミーで検索...",
+    "allBelts": "全帯色",
+    "allWeights": "全階級",
+    "allCountries": "全国籍",
+    "results": "件",
+    "clearFilters": "フィルターをクリア",
+    "noResults": "条件に一致する選手が見つかりません。",
+    "record": "戦績",
+    "gold": "金メダル",
+    "silver": "銀メダル",
+    "bronze": "銅メダル",
+    "weightClass": "階級"
   },
   "rankings": {
     "title": "ランキング",
