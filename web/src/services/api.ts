@@ -1,5 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+// Auth token getter
+let getAuthToken: (() => Promise<string | null>) | null = null;
+
+export function setAuthTokenGetter(getter: () => Promise<string | null>) {
+  getAuthToken = getter;
+}
+
 export interface Organization {
   id: number;
   name: string;
@@ -64,15 +71,66 @@ export interface Sponsor {
   logo_url: string | null;
 }
 
-async function fetchApi<T>(endpoint: string): Promise<T> {
-  const response = await fetch(`${API_URL}${endpoint}`);
+export interface UserProfile {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  role: 'admin' | 'staff' | 'viewer';
+  is_admin: boolean;
+  is_staff: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (requireAuth && getAuthToken) {
+    const token = await getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
   if (!response.ok) throw new Error(`API error: ${response.status}`);
   return response.json();
 }
 
 export const api = {
+  // Public
   getOrganization: () => fetchApi<Organization>('/api/v1/organization'),
   getEvents: () => fetchApi<Event[]>('/api/v1/events'),
   getEvent: (slug: string) => fetchApi<Event>(`/api/v1/events/${slug}`),
   getSponsors: () => fetchApi<Sponsor[]>('/api/v1/sponsors'),
+
+  // Auth
+  getCurrentUser: (email?: string) => {
+    const params = email ? `?email=${encodeURIComponent(email)}` : '';
+    return fetchApi<{ user: UserProfile }>(`/api/v1/me${params}`, {}, true);
+  },
+
+  // Admin
+  getUsers: () => fetchApi<{ users: UserProfile[] }>('/api/v1/admin/users', {}, true),
+  createUser: (data: { email: string; role: string; first_name?: string; last_name?: string }) =>
+    fetchApi<{ user: UserProfile }>('/api/v1/admin/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true),
+  updateUser: (id: number, data: Partial<UserProfile>) =>
+    fetchApi<{ user: UserProfile }>(`/api/v1/admin/users/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }, true),
+  deleteUser: (id: number) =>
+    fetchApi<void>(`/api/v1/admin/users/${id}`, { method: 'DELETE' }, true),
 };

@@ -5,12 +5,21 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import MobileLanguageFAB from './components/MobileLanguageFAB';
 import LoadingSpinner from './components/LoadingSpinner';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const WatchPage = lazy(() => import('./pages/WatchPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+// Admin
+const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const EventsAdmin = lazy(() => import('./pages/admin/EventsAdmin'));
+const SponsorsAdmin = lazy(() => import('./pages/admin/SponsorsAdmin'));
+const UsersAdmin = lazy(() => import('./pages/admin/UsersAdmin'));
+const SettingsAdmin = lazy(() => import('./pages/admin/SettingsAdmin'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -50,14 +59,40 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <div className="min-h-screen bg-navy-900 text-text-primary">
-        <Header />
-        <main>
-          <AnimatedRoutes />
-        </main>
-        <Footer />
-        <MobileLanguageFAB />
-      </div>
+      <Routes>
+        {/* Admin routes — no Header/Footer */}
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute requiredRole="staff">
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminLayout />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="events" element={<EventsAdmin />} />
+          <Route path="sponsors" element={<SponsorsAdmin />} />
+          <Route path="users" element={<UsersAdmin />} />
+          <Route path="settings" element={<SettingsAdmin />} />
+        </Route>
+
+        {/* Public routes with Header/Footer */}
+        <Route
+          path="*"
+          element={
+            <div className="min-h-screen bg-navy-900 text-text-primary">
+              <Header />
+              <main>
+                <AnimatedRoutes />
+              </main>
+              <Footer />
+              <MobileLanguageFAB />
+            </div>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }

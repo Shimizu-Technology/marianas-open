@@ -94,4 +94,13 @@ puts "Created prize categories for main event"
   puts "Created sponsor: #{sponsor.name}"
 end
 
+# Admin user
+User.find_or_create_by!(email: "jerry.shimizutechnology@gmail.com") do |u|
+  u.clerk_id = "pending_admin_#{SecureRandom.uuid}"
+  u.first_name = "Jerry"
+  u.last_name = "Shimizu"
+  u.role = "admin"
+end
+puts "Created admin user"
+
 puts "Seeding complete!"
