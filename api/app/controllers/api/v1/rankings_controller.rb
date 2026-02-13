@@ -32,7 +32,6 @@ module Api
           }
         }
       end
-    end
 
       # GET /api/v1/rankings/competitor?name=Cruz+Anthony
       def competitor
