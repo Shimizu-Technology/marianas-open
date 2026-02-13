@@ -46,3 +46,25 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-navy-500);
   border-radius: 3px;
 }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-loading {
+  background: linear-gradient(
+    90deg,
+    var(--color-navy-800) 25%,
+    var(--color-navy-500) 50%,
+    var(--color-navy-800) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer-loading {
+    animation: none;
+  }
+}

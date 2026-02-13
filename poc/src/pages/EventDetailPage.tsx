@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
+import ImageWithShimmer from '../components/ImageWithShimmer';
 import QRShare from '../components/QRShare';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
@@ -47,7 +48,7 @@ export default function EventDetailPage() {
   ];
 
   const shareUrl = 'https://marianasopen.com';
-  const shareText = 'Marianas Open 2026 - International BJJ Championship in Guam!';
+  const shareText = t('event.shareText');
 
   const handleShare = (platform: string) => {
     const urls: Record<string, string> = {
@@ -64,7 +65,7 @@ export default function EventDetailPage() {
       {/* Hero with background image */}
       <section className="relative py-24 sm:py-32 overflow-hidden">
         <div className="absolute inset-0">
-          <img
+          <ImageWithShimmer
             src="/images/action-match-3.jpg"
             alt=""
             className="w-full h-full object-cover"
@@ -169,7 +170,7 @@ export default function EventDetailPage() {
             {/* Action photo */}
             <ScrollReveal delay={0.12}>
               <div className="relative overflow-hidden border border-white/5 h-full min-h-[250px]">
-                <img
+                <ImageWithShimmer
                   src="/images/action-match-4.jpg"
                   alt="Marianas Open competition"
                   className="w-full h-full object-cover"
@@ -271,8 +272,8 @@ export default function EventDetailPage() {
               { src: '/images/podium-2.jpg', alt: 'Podium ceremony' },
             ].map((img, i) => (
               <ScrollReveal key={i} delay={i * 0.08}>
-                <div className="relative overflow-hidden aspect-[3/2] border border-white/5">
-                  <img src={img.src} alt={img.alt} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                <div className="relative overflow-hidden aspect-[3/2] border border-white/5 group">
+                  <ImageWithShimmer src={img.src} alt={img.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
               </ScrollReveal>
             ))}

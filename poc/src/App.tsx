@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import MobileLanguageFAB from './components/MobileLanguageFAB';
 import HomePage from './pages/HomePage';
 import EventDetailPage from './pages/EventDetailPage';
 import CalendarPage from './pages/CalendarPage';
@@ -49,6 +50,7 @@ export default function App() {
           <AnimatedRoutes />
         </main>
         <Footer />
+        <MobileLanguageFAB />
       </div>
     </BrowserRouter>
   );

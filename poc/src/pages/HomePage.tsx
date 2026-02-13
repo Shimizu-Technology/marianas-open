@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Calendar, Trophy, Users, Globe } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import ImageWithShimmer from '../components/ImageWithShimmer';
 import { events } from '../data/events';
 
 function StarRating({ count }: { count: number }) {
@@ -32,7 +33,7 @@ export default function HomePage() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background image */}
         <div className="absolute inset-0">
-          <img
+          <ImageWithShimmer
             src="/images/action-match-1.jpg"
             alt=""
             className="w-full h-full object-cover"
@@ -59,7 +60,7 @@ export default function HomePage() {
             <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-gold-500/30 rounded-full bg-gold-500/5">
               <Star size={14} className="text-gold-500 fill-gold-500" />
               <span className="text-sm text-gold-400 font-medium tracking-wide">
-                ASJJF 5-Star Ranked Event
+                {t('hero.asjjfBadge')}
               </span>
             </div>
           </motion.div>
@@ -149,7 +150,7 @@ export default function HomePage() {
             <ScrollReveal className="lg:col-span-5">
               <div className="space-y-6">
                 <div className="inline-block px-3 py-1 border border-gold-500/30 text-gold-500 text-xs font-heading uppercase tracking-widest">
-                  Since 2007
+                  {t('home.since2007')}
                 </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black uppercase leading-tight">
                   {t('home.featuredTitle')}
@@ -173,34 +174,33 @@ export default function HomePage() {
             <ScrollReveal className="lg:col-span-7" delay={0.2}>
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
-                  <img src="/images/action-match-2.jpg" alt="BJJ competition match" className="w-full h-full object-cover" />
+                  <ImageWithShimmer src="/images/action-match-2.jpg" alt="BJJ competition match" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
-                    <div className="text-3xl font-heading font-black text-gold-500">$2M</div>
-                    <div className="text-xs text-text-muted uppercase tracking-wider">Economic Impact</div>
+                    <div className="text-3xl font-heading font-black text-gold-500">{t('home.economicImpactValue')}</div>
+                    <div className="text-xs text-text-muted uppercase tracking-wider">{t('home.economicImpact')}</div>
                   </div>
                 </div>
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
-                  <img src="/images/venue-crowd.jpg" alt="Marianas Open venue" className="w-full h-full object-cover" />
+                  <ImageWithShimmer src="/images/venue-crowd.jpg" alt="Marianas Open venue" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
-                    <div className="text-3xl font-heading font-black text-text-primary">5K+</div>
-                    <div className="text-xs text-text-muted uppercase tracking-wider">Spectators</div>
+                    <div className="text-3xl font-heading font-black text-text-primary">{t('home.spectatorsValue')}</div>
+                    <div className="text-xs text-text-muted uppercase tracking-wider">{t('home.spectators')}</div>
                   </div>
                 </div>
                 <div className="relative col-span-2 overflow-hidden border border-white/5">
-                  <img src="/images/podium-1.jpg" alt="Podium ceremony" className="w-full h-48 object-cover" />
+                  <ImageWithShimmer src="/images/podium-1.jpg" alt="Podium ceremony" className="w-full h-48 object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-r from-navy-900/95 via-navy-900/70 to-transparent" />
                   <div className="absolute inset-0 p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-2">
                       <Globe size={18} className="text-gold-500" />
                       <span className="text-sm text-gold-400 font-heading uppercase tracking-wider font-semibold">
-                        International Reach
+                        {t('home.internationalReach')}
                       </span>
                     </div>
                     <p className="text-text-secondary text-sm leading-relaxed max-w-md">
-                      Partners in Korea, Japan, Taiwan, Philippines, and Hong Kong. 
-                      Featured in 30,000+ printed magazines across Asia.
+                      {t('home.internationalReachDesc')}
                     </p>
                   </div>
                 </div>
@@ -255,7 +255,7 @@ export default function HomePage() {
                       </h3>
                       {event.isMainEvent && (
                         <span className="shrink-0 text-xs px-2 py-0.5 bg-gold-500 text-navy-900 font-bold uppercase tracking-wider">
-                          Main Event
+                          {t('home.mainEvent')}
                         </span>
                       )}
                     </div>

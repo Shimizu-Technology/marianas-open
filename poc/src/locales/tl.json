@@ -9,7 +9,8 @@
     "subtitle": "Pangunahing International ng Guam",
     "title": "Brazilian Jiu-Jitsu Championship",
     "cta": "Mag-register Na",
-    "learnMore": "Tingnan ang mga Event"
+    "learnMore": "Tingnan ang mga Event",
+    "asjjfBadge": "ASJJF 5-Star na Ranggo"
   },
   "stats": {
     "competitors": "1,300+",
@@ -28,7 +29,15 @@
     "featuredTitle": "Ang Pinakamalaking BJJ Tournament sa Marianas",
     "featuredDesc": "Nagsimula bilang isang lokal na torneo sa Guam noong 2007, lumago na ito sa isang internasyonal na pangyayari na sumasaklaw sa 6 na bansa na may mahigit 1,300 kalahok at $2M na economic impact.",
     "viewCalendar": "Tingnan ang Buong Calendar",
-    "registerNow": "Mag-register Na"
+    "registerNow": "Mag-register Na",
+    "since2007": "Simula 2007",
+    "economicImpact": "Economic Impact",
+    "economicImpactValue": "$2M",
+    "spectators": "Manonood",
+    "spectatorsValue": "5K+",
+    "internationalReach": "Pandaigdigang Abot",
+    "internationalReachDesc": "Mga partner sa Korea, Japan, Taiwan, Pilipinas, at Hong Kong. Nai-feature sa 30,000+ naka-print na magazine sa buong Asia.",
+    "mainEvent": "Pangunahing Event"
   },
   "event": {
     "title": "Marianas Open 2026",
@@ -55,7 +64,42 @@
     "step2Desc": "Hanapin ang 'Marianas Open 2026' sa listahan ng mga event at piliin ang iyong division.",
     "step3": "Kumpletuhin ang Bayad",
     "step3Desc": "Magbayad ng registration fee online. May early bird discounts.",
-    "shareTitle": "I-share ang Event na Ito"
+    "shareTitle": "I-share ang Event na Ito",
+    "shareText": "Marianas Open 2026 — International BJJ Championship sa Guam!",
+    "totalPrizePool": "Kabuuang Prize Pool",
+    "schedule1": "Pagbukas / Weigh-ins",
+    "schedule2": "Kids & Juvenile Divisions",
+    "schedule3": "Adult White & Blue Belt",
+    "schedule4": "Adult Purple & Brown Belt",
+    "schedule5": "Black Belt Divisions",
+    "schedule6": "Black Belt Finals / Open Class",
+    "schedule7": "Awards Ceremony",
+    "prizeBlackOpenM": "Black Belt Open Class (Lalaki)",
+    "prizeBlackOpenF": "Black Belt Open Class (Babae)",
+    "prizeBlackWeight": "Black Belt Weight Divisions",
+    "prizeBrownWeight": "Brown Belt Weight Divisions",
+    "prizeTeam": "Team Trophy",
+    "prizeKids": "Kids Grand Champion",
+    "pastEventLabel": "2025 Marianas Open",
+    "pastEventDesc": "1,000+ atleta mula sa 20+ bansa",
+    "competitionMats": "6 na Competition Mats",
+    "venueCapacity": "5,000+ na Kapasidad",
+    "venueUniversity": "University of Guam",
+    "venueAddress": "Mangilao, Guam 96913",
+    "flightTokyo": "Tokyo (NRT)",
+    "flightManila": "Manila (MNL)",
+    "flightSeoul": "Seoul (ICN)",
+    "flightHonolulu": "Honolulu (HNL)",
+    "hotelDusitDesc": "Opisyal na awards banquet venue",
+    "hotelHyattDesc": "Tumon Bay beachfront",
+    "visaEsta": "Visa Waiver (ESTA)",
+    "visaEstaDesc": "Japan, South Korea, Taiwan, at 30+ bansa",
+    "visaGuamCnmi": "Guam-CNMI Visa Waiver",
+    "visaGuamCnmiDesc": "Pilipinas, Hong Kong, piling bansa (45-araw na pananatili)",
+    "galleryMatch": "Laban sa kompetisyon",
+    "galleryCeremony": "Seremonya",
+    "galleryVenue": "Lugar ng kompetisyon",
+    "galleryPodium": "Seremonya ng podium"
   },
   "calendar": {
     "title": "2026 Pro Series",
@@ -64,7 +108,9 @@
     "mapSubtitle": "Mula sa lokal na qualifiers hanggang sa international stage — lumaban sa buong Asia at makuha ang iyong puwesto sa Marianas Open.",
     "register": "Mag-register",
     "details": "Detalye",
-    "stars": "bituin"
+    "stars": "bituin",
+    "legendProSeries": "Pro Series",
+    "legendGrandChampionship": "Grand Championship"
   },
   "watch": {
     "title": "Panoorin",
@@ -101,7 +147,9 @@
     "featureAI": "AI Match Highlights",
     "featureAIDesc": "Awtomatikong kinukuha ng AI ang mga pangunahing sandali — submissions, sweeps, at scoring.",
     "featureNotify": "Push Notifications",
-    "featureNotifyDesc": "Maabisuhan kapag ang iyong paboritong kalahok ay umakyat sa mat. Huwag palampasin ang anumang laban."
+    "featureNotifyDesc": "Maabisuhan kapag ang iyong paboritong kalahok ay umakyat sa mat. Huwag palampasin ang anumang laban.",
+    "liveEventInfo": "Marianas Open 2026 — UOG Calvo Fieldhouse",
+    "liveBadge": "LIVE"
   },
   "share": {
     "defaultText": "Tingnan ang Marianas Open — International BJJ Championship!",
@@ -123,5 +171,10 @@
     "taiwan": "Taiwan",
     "southKorea": "South Korea",
     "hongKong": "Hong Kong"
+  },
+  "shimizu": {
+    "title": "Gawa ng Shimizu Technology",
+    "description": "Custom na software para sa mga sports organization. Multi-language na platform, live streaming integration, tournament management.",
+    "cta": "Makipag-ugnayan"
   }
 }
