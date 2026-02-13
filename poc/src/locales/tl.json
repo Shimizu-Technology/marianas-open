@@ -1,0 +1,101 @@
+{
+  "nav": {
+    "home": "Home",
+    "events": "Mga Event",
+    "calendar": "Pro Series",
+    "watch": "Panoorin"
+  },
+  "hero": {
+    "subtitle": "Pangunahing International ng Guam",
+    "title": "Brazilian Jiu-Jitsu Championship",
+    "cta": "Mag-register Na",
+    "learnMore": "Tingnan ang mga Event"
+  },
+  "stats": {
+    "competitors": "1,300+",
+    "competitorsLabel": "Kalahok",
+    "countries": "6",
+    "countriesLabel": "Bansa",
+    "prizePpool": "$50K",
+    "prizePoolLabel": "Prize Pool",
+    "since": "2007",
+    "sinceLabel": "Itinatag"
+  },
+  "home": {
+    "upcomingTitle": "2026 Pro Series",
+    "upcomingSubtitle": "Lumaban sa buong Asia. Mag-qualify para sa Grand Championship.",
+    "sponsorsTitle": "Opisyal na Partners",
+    "featuredTitle": "Ang Pinakamalaking BJJ Tournament sa Marianas",
+    "featuredDesc": "Nagsimula bilang isang lokal na torneo sa Guam noong 2007, lumago na ito sa isang internasyonal na pangyayari na sumasaklaw sa 6 na bansa na may mahigit 1,300 kalahok at $2M na economic impact.",
+    "viewCalendar": "Tingnan ang Buong Calendar",
+    "registerNow": "Mag-register Na"
+  },
+  "event": {
+    "title": "Marianas Open 2026",
+    "tagline": "Ang Grand Championship",
+    "date": "Oktubre 18, 2026",
+    "venue": "UOG Calvo Fieldhouse",
+    "location": "University of Guam, Mangilao, Guam",
+    "asjjfRank": "ASJJF 5-Star na Ranggo",
+    "prizePool": "$50,000 Prize Pool",
+    "schedule": "Iskedyul ng Event",
+    "scheduleDesc": "Sabay-sabay na mga division sa 6 na mat. Black belt finals sa gabi.",
+    "travelTitle": "Impormasyon sa Biyahe",
+    "travelDesc": "Ang Guam ay visa-free na destinasyon para sa mga mamamayan ng Japan, Korea, at Taiwan. May mga direktang flight mula Tokyo, Osaka, Seoul, Manila, at Taipei.",
+    "flights": "Direktang Flights",
+    "flightsDesc": "Nag-aalok ang United Airlines at mga regional carrier ng direktang flights mula sa mga pangunahing Asian city. Oras ng flight: 3-4 na oras.",
+    "hotels": "Inirerekomendang Hotels",
+    "hotelsDesc": "Ang Hyatt Regency Guam, Dusit Thani Guam Resort, at Holiday Resort & Spa ay nag-aalok ng group rates para sa mga kalahok.",
+    "visa": "Impormasyon sa Visa",
+    "visaDesc": "Ang Guam Visa Waiver Program ay nag-a-apply sa mga mamamayan ng Japan, South Korea, Taiwan, at marami pang bansa para sa pananatili ng hanggang 45 araw.",
+    "howToRegister": "Paano Mag-register",
+    "step1": "Bumisita sa ASJJF.org",
+    "step1Desc": "Gumawa ng iyong competitor profile sa Asian Sport Jiu-Jitsu Federation website.",
+    "step2": "Pumili ng Event",
+    "step2Desc": "Hanapin ang 'Marianas Open 2026' sa listahan ng mga event at piliin ang iyong division.",
+    "step3": "Kumpletuhin ang Bayad",
+    "step3Desc": "Magbayad ng registration fee online. May early bird discounts.",
+    "shareTitle": "I-share ang Event na Ito"
+  },
+  "calendar": {
+    "title": "2026 Pro Series",
+    "subtitle": "7 event sa 6 na bansa. Isang grand championship.",
+    "mapTitle": "Sundan ang Paglalakbay",
+    "mapSubtitle": "Mula sa lokal na qualifiers hanggang sa international stage — lumaban sa buong Asia at makuha ang iyong puwesto sa Marianas Open.",
+    "register": "Mag-register",
+    "details": "Detalye",
+    "stars": "bituin"
+  },
+  "watch": {
+    "title": "Panoorin",
+    "subtitle": "Live streams, buong laban, at highlights mula sa bawat Marianas Open event.",
+    "liveNow": "Live Ngayon",
+    "liveDesc": "Walang event na kasalukuyang live. Bumalik sa mga araw ng event para sa live streaming.",
+    "upcomingStream": "Susunod na Live Stream",
+    "matchLibrary": "Library ng mga Laban",
+    "searchPlaceholder": "Maghanap ng kalahok, akademya...",
+    "filterWeight": "Weight Class",
+    "filterBelt": "Belt",
+    "filterAll": "Lahat",
+    "duration": "Tagal",
+    "viewMatch": "Panoorin",
+    "comingSoon": "Malapit Na",
+    "comingSoonDesc": "Full match streaming at VOD library na magsisimula sa 2026. Bawat laban. Bawat division. Bawat event.",
+    "noResults": "Walang nahanap na laban"
+  },
+  "footer": {
+    "tagline": "Pangunahing International Brazilian Jiu-Jitsu Championship ng Guam",
+    "followUs": "I-follow Kami",
+    "contact": "Makipag-ugnayan",
+    "rights": "Lahat ng karapatan ay nakalaan.",
+    "builtBy": "Gawa ng Shimizu Technology"
+  },
+  "common": {
+    "guam": "Guam",
+    "japan": "Japan",
+    "philippines": "Pilipinas",
+    "taiwan": "Taiwan",
+    "southKorea": "South Korea",
+    "hongKong": "Hong Kong"
+  }
+}

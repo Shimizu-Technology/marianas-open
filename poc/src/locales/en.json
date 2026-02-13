@@ -1,0 +1,101 @@
+{
+  "nav": {
+    "home": "Home",
+    "events": "Events",
+    "calendar": "Pro Series",
+    "watch": "Watch"
+  },
+  "hero": {
+    "subtitle": "Guam's Premier International",
+    "title": "Brazilian Jiu-Jitsu Championship",
+    "cta": "Register Now",
+    "learnMore": "Explore Events"
+  },
+  "stats": {
+    "competitors": "1,300+",
+    "competitorsLabel": "Competitors",
+    "countries": "6",
+    "countriesLabel": "Countries",
+    "prizePpool": "$50K",
+    "prizePoolLabel": "Prize Pool",
+    "since": "2007",
+    "sinceLabel": "Established"
+  },
+  "home": {
+    "upcomingTitle": "2026 Pro Series",
+    "upcomingSubtitle": "Compete across Asia. Qualify for the Grand Championship.",
+    "sponsorsTitle": "Official Partners",
+    "featuredTitle": "The Largest BJJ Tournament in the Marianas",
+    "featuredDesc": "What started as a local Guam tournament in 2007 has grown into an international phenomenon spanning 6 countries with over 1,300 competitors and $2M in economic impact.",
+    "viewCalendar": "View Full Calendar",
+    "registerNow": "Register Now"
+  },
+  "event": {
+    "title": "Marianas Open 2026",
+    "tagline": "The Grand Championship",
+    "date": "October 18, 2026",
+    "venue": "UOG Calvo Fieldhouse",
+    "location": "University of Guam, Mangilao, Guam",
+    "asjjfRank": "ASJJF 5-Star Ranked Event",
+    "prizePool": "$50,000 Prize Pool",
+    "schedule": "Event Schedule",
+    "scheduleDesc": "Divisions run simultaneously across 6 mats. Black belt finals in the evening.",
+    "travelTitle": "Travel Information",
+    "travelDesc": "Guam is a visa-free destination for Japanese, Korean, and Taiwanese nationals. Direct flights available from Tokyo, Osaka, Seoul, Manila, and Taipei.",
+    "flights": "Direct Flights",
+    "flightsDesc": "United Airlines and regional carriers offer direct flights from major Asian cities. Flight time: 3-4 hours from most hubs.",
+    "hotels": "Recommended Hotels",
+    "hotelsDesc": "Hyatt Regency Guam, Dusit Thani Guam Resort, and Holiday Resort & Spa offer competitor group rates.",
+    "visa": "Visa Information",
+    "visaDesc": "Guam Visa Waiver Program applies to citizens of Japan, South Korea, Taiwan, and many other countries for stays up to 45 days.",
+    "howToRegister": "How to Register",
+    "step1": "Visit ASJJF.org",
+    "step1Desc": "Create your competitor profile on the Asian Sport Jiu-Jitsu Federation website.",
+    "step2": "Select Event",
+    "step2Desc": "Find 'Marianas Open 2026' in the event listings and select your division.",
+    "step3": "Complete Payment",
+    "step3Desc": "Pay the registration fee online. Early bird discounts available.",
+    "shareTitle": "Share This Event"
+  },
+  "calendar": {
+    "title": "2026 Pro Series",
+    "subtitle": "7 events across 6 countries. One grand championship.",
+    "mapTitle": "Follow the Journey",
+    "mapSubtitle": "From local qualifiers to the international stage — compete across Asia and earn your spot at the Marianas Open.",
+    "register": "Register",
+    "details": "Details",
+    "stars": "stars"
+  },
+  "watch": {
+    "title": "Watch",
+    "subtitle": "Live streams, full matches, and highlights from every Marianas Open event.",
+    "liveNow": "Live Now",
+    "liveDesc": "No events are currently live. Check back during event days for live streaming.",
+    "upcomingStream": "Next Live Stream",
+    "matchLibrary": "Match Library",
+    "searchPlaceholder": "Search by competitor, academy...",
+    "filterWeight": "Weight Class",
+    "filterBelt": "Belt",
+    "filterAll": "All",
+    "duration": "Duration",
+    "viewMatch": "Watch",
+    "comingSoon": "Coming Soon",
+    "comingSoonDesc": "Full match streaming and VOD library launching in 2026. Every match. Every division. Every event.",
+    "noResults": "No matches found"
+  },
+  "footer": {
+    "tagline": "Guam's Premier International Brazilian Jiu-Jitsu Championship",
+    "followUs": "Follow Us",
+    "contact": "Contact",
+    "rights": "All rights reserved.",
+    "builtBy": "Built by Shimizu Technology"
+  },
+  "common": {
+    "guam": "Guam",
+    "japan": "Japan",
+    "philippines": "Philippines",
+    "taiwan": "Taiwan",
+    "southKorea": "South Korea",
+    "hongKong": "Hong Kong"
+  }
+}

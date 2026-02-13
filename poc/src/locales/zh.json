@@ -1,0 +1,101 @@
+{
+  "nav": {
+    "home": "首页",
+    "events": "赛事信息",
+    "calendar": "职业系列赛",
+    "watch": "观看"
+  },
+  "hero": {
+    "subtitle": "关岛顶级国际",
+    "title": "巴西柔术锦标赛",
+    "cta": "立即报名",
+    "learnMore": "浏览赛事"
+  },
+  "stats": {
+    "competitors": "1,300+",
+    "competitorsLabel": "参赛选手",
+    "countries": "6",
+    "countriesLabel": "参赛国家",
+    "prizePpool": "$50K",
+    "prizePoolLabel": "奖金池",
+    "since": "2007",
+    "sinceLabel": "创立"
+  },
+  "home": {
+    "upcomingTitle": "2026 职业系列赛",
+    "upcomingSubtitle": "征战亚洲各地，赢取总决赛资格。",
+    "sponsorsTitle": "官方合作伙伴",
+    "featuredTitle": "马里亚纳群岛最大的柔术锦标赛",
+    "featuredDesc": "2007年从关岛的一场本地比赛起步，如今已发展成为横跨6个国家、拥有1,300多名选手参赛、经济效益超200万美元的国际赛事。",
+    "viewCalendar": "查看完整日程",
+    "registerNow": "立即报名"
+  },
+  "event": {
+    "title": "马里亚纳公开赛 2026",
+    "tagline": "总决赛",
+    "date": "2026年10月18日",
+    "venue": "UOG卡尔沃体育馆",
+    "location": "关岛大学，曼吉劳，关岛",
+    "asjjfRank": "ASJJF 五星认证赛事",
+    "prizePool": "奖金总额 $50,000",
+    "schedule": "赛事日程",
+    "scheduleDesc": "6块比赛垫同时进行各级别比赛。黑带决赛在晚间举行。",
+    "travelTitle": "旅行信息",
+    "travelDesc": "关岛对日本、韩国和台湾公民免签。东京、大阪、首尔、马尼拉和台北均有直飞航班。",
+    "flights": "直飞航班",
+    "flightsDesc": "联合航空和区域航空公司从亚洲主要城市提供直飞航班。飞行时间：约3-4小时。",
+    "hotels": "推荐酒店",
+    "hotelsDesc": "关岛凯悦酒店、关岛都喜天丽度假酒店和假日度假水疗酒店提供选手团体优惠价。",
+    "visa": "签证信息",
+    "visaDesc": "关岛签证豁免计划适用于日本、韩国、台湾等国公民，可免签停留最多45天。",
+    "howToRegister": "如何报名",
+    "step1": "访问 ASJJF.org",
+    "step1Desc": "在亚洲运动柔术联合会网站上创建选手资料。",
+    "step2": "选择赛事",
+    "step2Desc": "在赛事列表中找到「Marianas Open 2026」并选择参赛级别。",
+    "step3": "完成付款",
+    "step3Desc": "在线支付报名费。早鸟优惠可用。",
+    "shareTitle": "分享此赛事"
+  },
+  "calendar": {
+    "title": "2026 职业系列赛",
+    "subtitle": "6个国家7场赛事。一个总决赛。",
+    "mapTitle": "追随征程",
+    "mapSubtitle": "从地方选拔到国际舞台——征战亚洲各地，赢取马里亚纳公开赛参赛资格。",
+    "register": "报名",
+    "details": "详情",
+    "stars": "星级"
+  },
+  "watch": {
+    "title": "观看",
+    "subtitle": "每场马里亚纳公开赛的直播、完整比赛和精彩集锦。",
+    "liveNow": "正在直播",
+    "liveDesc": "目前没有正在直播的赛事。请在比赛日回来查看直播。",
+    "upcomingStream": "下一场直播",
+    "matchLibrary": "比赛库",
+    "searchPlaceholder": "按选手、道馆搜索...",
+    "filterWeight": "体重级别",
+    "filterBelt": "段位",
+    "filterAll": "全部",
+    "duration": "时长",
+    "viewMatch": "观看",
+    "comingSoon": "即将推出",
+    "comingSoonDesc": "完整比赛直播和VOD库将于2026年推出。每场比赛。每个级别。每场赛事。",
+    "noResults": "未找到比赛"
+  },
+  "footer": {
+    "tagline": "关岛顶级国际巴西柔术锦标赛",
+    "followUs": "关注我们",
+    "contact": "联系方式",
+    "rights": "版权所有。",
+    "builtBy": "Shimizu Technology 出品"
+  },
+  "common": {
+    "guam": "关岛",
+    "japan": "日本",
+    "philippines": "菲律宾",
+    "taiwan": "台湾",
+    "southKorea": "韩国",
+    "hongKong": "香港"
+  }
+}

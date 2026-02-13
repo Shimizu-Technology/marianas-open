@@ -1,0 +1,101 @@
+{
+  "nav": {
+    "home": "ホーム",
+    "events": "大会情報",
+    "calendar": "プロシリーズ",
+    "watch": "観戦"
+  },
+  "hero": {
+    "subtitle": "グアム発 国際",
+    "title": "ブラジリアン柔術選手権",
+    "cta": "エントリーする",
+    "learnMore": "大会を見る"
+  },
+  "stats": {
+    "competitors": "1,300+",
+    "competitorsLabel": "選手数",
+    "countries": "6",
+    "countriesLabel": "参加国",
+    "prizePpool": "$50K",
+    "prizePoolLabel": "賞金総額",
+    "since": "2007",
+    "sinceLabel": "設立年"
+  },
+  "home": {
+    "upcomingTitle": "2026 プロシリーズ",
+    "upcomingSubtitle": "アジア各地で戦い、グランドチャンピオンシップへの切符を掴め。",
+    "sponsorsTitle": "公式パートナー",
+    "featuredTitle": "マリアナ諸島最大の柔術トーナメント",
+    "featuredDesc": "2007年にグアムのローカル大会として始まり、今や6カ国1,300人以上の選手が参加し、経済効果2億円以上の国際的イベントに成長しました。",
+    "viewCalendar": "大会カレンダーを見る",
+    "registerNow": "エントリーする"
+  },
+  "event": {
+    "title": "マリアナスオープン 2026",
+    "tagline": "グランドチャンピオンシップ",
+    "date": "2026年10月18日",
+    "venue": "UOGカルボ・フィールドハウス",
+    "location": "グアム大学、マンギラオ、グアム",
+    "asjjfRank": "ASJJF 5つ星認定大会",
+    "prizePool": "賞金総額 $50,000",
+    "schedule": "大会スケジュール",
+    "scheduleDesc": "6マットで各部門が同時進行。黒帯決勝は夕方に開催。",
+    "travelTitle": "渡航情報",
+    "travelDesc": "グアムは日本、韓国、台湾の国民はビザ不要。東京、大阪、ソウル、マニラ、台北から直行便あり。",
+    "flights": "直行便",
+    "flightsDesc": "ユナイテッド航空と地域航空会社が主要アジア都市から直行便を運航。飛行時間は約3〜4時間。",
+    "hotels": "推奨ホテル",
+    "hotelsDesc": "ハイアットリージェンシーグアム、デュシタニグアムリゾート、ホリデーリゾート＆スパが選手向け団体料金を提供。",
+    "visa": "ビザ情報",
+    "visaDesc": "グアムビザ免除プログラムにより、日本、韓国、台湾などの国民は最大45日間の滞在にビザ不要。",
+    "howToRegister": "エントリー方法",
+    "step1": "ASJJF.orgにアクセス",
+    "step1Desc": "アジアスポーツ柔術連盟のウェブサイトで選手プロフィールを作成。",
+    "step2": "大会を選択",
+    "step2Desc": "大会一覧から「Marianas Open 2026」を見つけ、出場部門を選択。",
+    "step3": "お支払い",
+    "step3Desc": "オンラインで参加費を支払い。早期割引あり。",
+    "shareTitle": "この大会をシェア"
+  },
+  "calendar": {
+    "title": "2026 プロシリーズ",
+    "subtitle": "6カ国7大会。一つのグランドチャンピオンシップ。",
+    "mapTitle": "旅路を追う",
+    "mapSubtitle": "地方予選から国際舞台へ — アジア各地で戦い、マリアナスオープンへの出場権を獲得せよ。",
+    "register": "エントリー",
+    "details": "詳細",
+    "stars": "つ星"
+  },
+  "watch": {
+    "title": "観戦",
+    "subtitle": "全マリアナスオープン大会のライブ配信、フルマッチ、ハイライト。",
+    "liveNow": "ライブ配信中",
+    "liveDesc": "現在ライブ配信中の大会はありません。大会日にライブ配信をご確認ください。",
+    "upcomingStream": "次のライブ配信",
+    "matchLibrary": "試合ライブラリ",
+    "searchPlaceholder": "選手名、道場名で検索...",
+    "filterWeight": "階級",
+    "filterBelt": "帯",
+    "filterAll": "すべて",
+    "duration": "試合時間",
+    "viewMatch": "観戦する",
+    "comingSoon": "近日公開",
+    "comingSoonDesc": "フルマッチ配信とVODライブラリは2026年に開始予定。全試合。全部門。全大会。",
+    "noResults": "試合が見つかりません"
+  },
+  "footer": {
+    "tagline": "グアム発 国際ブラジリアン柔術選手権",
+    "followUs": "フォローする",
+    "contact": "お問い合わせ",
+    "rights": "全著作権所有。",
+    "builtBy": "Shimizu Technology 制作"
+  },
+  "common": {
+    "guam": "グアム",
+    "japan": "日本",
+    "philippines": "フィリピン",
+    "taiwan": "台湾",
+    "southKorea": "韓国",
+    "hongKong": "香港"
+  }
+}
