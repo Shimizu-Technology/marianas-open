@@ -8,7 +8,6 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { api } from '../services/api';
 import type { Event } from '../services/api';
 
-/** Minimal inline SVG flags for event country codes */
 function CountryFlag({ code, className = 'w-5 h-4' }: { code: string; className?: string }) {
   switch (code?.toUpperCase()) {
     case 'GU':
@@ -64,15 +63,7 @@ function CountryFlag({ code, className = 'w-5 h-4' }: { code: string; className?
           <rect width="24" height="18" fill="#DE2110" rx="2" />
           <g transform="translate(12,9)">
             {[0, 72, 144, 216, 288].map((angle) => (
-              <ellipse
-                key={angle}
-                cx="0"
-                cy="-3"
-                rx="1.2"
-                ry="3"
-                fill="#fff"
-                transform={`rotate(${angle})`}
-              />
+              <ellipse key={angle} cx="0" cy="-3" rx="1.2" ry="3" fill="#fff" transform={`rotate(${angle})`} />
             ))}
           </g>
         </svg>
@@ -93,11 +84,7 @@ function StarRating({ stars }: { stars: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: 5 }, (_, i) => (
-        <Star
-          key={i}
-          size={12}
-          className={i < stars ? 'text-gold-500 fill-gold-500' : 'text-white/10'}
-        />
+        <Star key={i} size={12} className={i < stars ? 'text-gold-500 fill-gold-500' : 'text-white/10'} />
       ))}
     </div>
   );
@@ -106,11 +93,7 @@ function StarRating({ stars }: { stars: number }) {
 function formatEventDate(dateStr: string, locale: string): string {
   try {
     const date = new Date(dateStr + 'T00:00:00');
-    return date.toLocaleDateString(locale, {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return date.toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' });
   } catch {
     return dateStr;
   }
@@ -124,7 +107,7 @@ const cardVariants = {
     transition: {
       delay: i * 0.08,
       duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94],
+      ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
     },
   }),
 };
@@ -136,8 +119,7 @@ export default function PastEventsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api
-      .getEvents()
+    api.getEvents()
       .then((data) => {
         const completed = data.filter((e: Event) => e.status === 'completed');
         completed.sort((a: Event, b: Event) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -160,11 +142,7 @@ export default function PastEventsPage() {
   }, [events]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen pt-20">
-        <LoadingSpinner />
-      </div>
-    );
+    return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;
   }
 
   return (
@@ -202,9 +180,7 @@ export default function PastEventsPage() {
       <section className="py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {eventsByYear.length === 0 ? (
-            <div className="text-center py-16 text-text-muted">
-              {t('pastEvents.noEvents')}
-            </div>
+            <div className="text-center py-16 text-text-muted">{t('pastEvents.noEvents')}</div>
           ) : (
             <div className="space-y-16">
               {eventsByYear.map(({ year, events: yearEvents }) => (
@@ -226,7 +202,7 @@ export default function PastEventsPage() {
                       <motion.div
                         key={event.id}
                         custom={i}
-                        variants={shouldReduceMotion ? {} : cardVariants}
+                        variants={shouldReduceMotion ? undefined : cardVariants}
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, margin: '-30px' }}
@@ -235,7 +211,6 @@ export default function PastEventsPage() {
                           to={`/events/${event.slug}`}
                           className="group block bg-navy-900/50 border border-white/5 hover:border-gold-500/20 transition-all duration-300 overflow-hidden h-full"
                         >
-                          {/* Hero image or gradient placeholder */}
                           {event.hero_image_url ? (
                             <div className="relative aspect-[16/9] overflow-hidden">
                               <img
@@ -262,29 +237,24 @@ export default function PastEventsPage() {
                             </div>
                           )}
 
-                          {/* Card body */}
                           <div className="p-5 space-y-3">
                             <h3 className="font-heading font-bold text-lg text-text-primary group-hover:text-gold-500 transition-colors leading-tight">
                               {event.name}
                             </h3>
-
                             <div className="space-y-2">
                               <div className="flex items-center gap-2 text-sm text-text-secondary">
                                 <Calendar size={14} className="text-text-muted shrink-0" />
                                 <span>{formatEventDate(event.date, i18n.language)}</span>
                               </div>
-
                               <div className="flex items-center gap-2 text-sm text-text-secondary">
                                 <MapPin size={14} className="text-text-muted shrink-0" />
                                 <span className="truncate">{event.venue_name}</span>
                               </div>
-
                               <div className="flex items-center gap-2 text-sm text-text-secondary">
                                 <CountryFlag code={event.country_code} className="w-5 h-4 shrink-0" />
                                 <span>{event.city}, {event.country}</span>
                               </div>
                             </div>
-
                             <div className="flex items-center gap-1 text-xs text-gold-500/70 group-hover:text-gold-400 transition-colors pt-1">
                               <span className="font-heading uppercase tracking-wider">{t('pastEvents.viewDetails')}</span>
                               <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />

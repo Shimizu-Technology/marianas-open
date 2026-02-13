@@ -5,7 +5,18 @@
     "calendar": "职业系列赛",
     "watch": "观看",
     "about": "关于",
-    "rankings": "排名"
+    "rankings": "排名",
+    "competitors": "选手介绍",
+    "pastEvents": "往届赛事"
+  },
+  "pastEvents": {
+    "badge": "赛事档案",
+    "title": "往届赛事",
+    "subtitle": "探索马里亚纳公开赛和职业系列赛的历史。",
+    "noEvents": "暂无往届赛事。",
+    "event": "场赛事",
+    "events": "场赛事",
+    "viewDetails": "查看详情"
   },
   "hero": {
     "subtitle": "关岛顶级国际",
@@ -230,6 +241,23 @@
     "dispute": "提交报名申请即表示放弃诉讼权和陪审团审判权。",
     "minor": "如参赛者为未成年人，本人证明为其父母或法定监护人并允许其参赛。",
     "organizerNotice": "Fury Promotions, LLC / Marianas Open / Marianas Pro. All rights reserved."
+  },
+  "competitors": {
+    "badge": "运动员",
+    "title": "选手介绍",
+    "subtitle": "认识参加马里亚纳公开赛职业系列赛的选手们。",
+    "searchPlaceholder": "按姓名或道馆搜索...",
+    "allBelts": "所有腰带",
+    "allWeights": "所有级别",
+    "allCountries": "所有国家",
+    "results": "个结果",
+    "clearFilters": "清除筛选",
+    "noResults": "未找到符合条件的选手。",
+    "record": "战绩",
+    "gold": "金牌",
+    "silver": "银牌",
+    "bronze": "铜牌",
+    "weightClass": "级别"
   },
   "rankings": {
     "title": "排名",

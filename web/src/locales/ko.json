@@ -6,6 +6,7 @@
     "watch": "시청",
     "about": "소개",
     "rankings": "랭킹",
+    "competitors": "선수 소개",
     "pastEvents": "지난 이벤트"
   },
   "pastEvents": {
@@ -240,6 +241,23 @@
     "dispute": "등록 신청을 함으로써 소송 및 배심원 재판 권리를 포기합니다.",
     "minor": "미성년자의 경우, 친권자 또는 법적 후견인으로서 참가를 허가합니다.",
     "organizerNotice": "Fury Promotions, LLC / Marianas Open / Marianas Pro. All rights reserved."
+  },
+  "competitors": {
+    "badge": "선수",
+    "title": "선수 소개",
+    "subtitle": "마리아나스 오픈 프로 시리즈에 참가하는 선수들을 만나보세요.",
+    "searchPlaceholder": "이름 또는 체육관으로 검색...",
+    "allBelts": "모든 벨트",
+    "allWeights": "모든 체급",
+    "allCountries": "모든 국가",
+    "results": "결과",
+    "clearFilters": "필터 초기화",
+    "noResults": "조건에 맞는 선수를 찾을 수 없습니다.",
+    "record": "전적",
+    "gold": "금메달",
+    "silver": "은메달",
+    "bronze": "동메달",
+    "weightClass": "체급"
   },
   "rankings": {
     "title": "랭킹",

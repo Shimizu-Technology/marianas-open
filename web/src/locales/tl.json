@@ -6,6 +6,7 @@
     "watch": "Panoorin",
     "about": "Tungkol",
     "rankings": "Rankings",
+    "competitors": "Mga Kalaban",
     "pastEvents": "Nakaraang Events"
   },
   "pastEvents": {
@@ -240,6 +241,23 @@
     "dispute": "Sa pagsumite ng registration application, iwinawaksi mo ang karapatan sa pagsampa ng kaso at trial by jury.",
     "minor": "Kung ang kalahok ay isang menor de edad, pinapatunayan ko na ako ang magulang o legal na tagapag-alaga.",
     "organizerNotice": "Fury Promotions, LLC / Marianas Open / Marianas Pro. All rights reserved."
+  },
+  "competitors": {
+    "badge": "Mga Atleta",
+    "title": "Mga Kalaban",
+    "subtitle": "Kilalanin ang mga atletang lumalaban sa Marianas Open Pro Series.",
+    "searchPlaceholder": "Maghanap ayon sa pangalan o akademya...",
+    "allBelts": "Lahat ng Belt",
+    "allWeights": "Lahat ng Timbang",
+    "allCountries": "Lahat ng Bansa",
+    "results": "resulta",
+    "clearFilters": "I-clear ang mga filter",
+    "noResults": "Walang nahanap na kalaban na tumutugma sa iyong pamantayan.",
+    "record": "Rekord",
+    "gold": "Ginto",
+    "silver": "Pilak",
+    "bronze": "Tanso",
+    "weightClass": "Klase ng Timbang"
   },
   "rankings": {
     "title": "Rankings",

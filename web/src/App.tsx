@@ -13,6 +13,7 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const WatchPage = lazy(() => import('./pages/WatchPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const RankingsPage = lazy(() => import('./pages/RankingsPage'));
+const CompetitorsPage = lazy(() => import('./pages/CompetitorsPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PastEventsPage = lazy(() => import('./pages/PastEventsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
@@ -27,6 +28,7 @@ const UsersAdmin = lazy(() => import('./pages/admin/UsersAdmin'));
 const ImagesAdmin = lazy(() => import('./pages/admin/ImagesAdmin'));
 const SettingsAdmin = lazy(() => import('./pages/admin/SettingsAdmin'));
 const ContentAdmin = lazy(() => import('./pages/admin/ContentAdmin'));
+const CompetitorsAdmin = lazy(() => import('./pages/admin/CompetitorsAdmin'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -55,6 +57,7 @@ function AnimatedRoutes() {
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/rankings" element={<RankingsPage />} />
+            <Route path="/competitors" element={<CompetitorsPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/watch" element={<WatchPage />} />
             <Route path="/events/past" element={<PastEventsPage />} />
@@ -87,6 +90,7 @@ export default function App() {
           <Route path="events" element={<EventsAdmin />} />
           <Route path="sponsors" element={<SponsorsAdmin />} />
           <Route path="videos" element={<VideosAdmin />} />
+          <Route path="competitors" element={<CompetitorsAdmin />} />
           <Route path="images" element={<ImagesAdmin />} />
           <Route path="users" element={<UsersAdmin />} />
           <Route path="content" element={<ContentAdmin />} />
