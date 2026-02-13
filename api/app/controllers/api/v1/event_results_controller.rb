@@ -2,7 +2,7 @@ module Api
   module V1
     class EventResultsController < ApplicationController
       def index
-        event = Event.find(params[:event_id])
+        event = Event.find_by!(slug: params[:event_slug])
         results = event.event_results
 
         results = results.by_belt(params[:belt_rank]) if params[:belt_rank].present?
@@ -24,7 +24,7 @@ module Api
       end
 
       def summary
-        event = Event.find(params[:event_id])
+        event = Event.find_by!(slug: params[:event_slug])
         results = event.event_results
 
         render json: {
