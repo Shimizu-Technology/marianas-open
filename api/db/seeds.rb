@@ -238,4 +238,6 @@ User.find_or_create_by!(email: "jerry.shimizutechnology@gmail.com") do |u|
 end
 puts "Created admin user"
 
+load Rails.root.join('db/seeds/site_contents.rb')
+
 puts "Seeding complete!"
