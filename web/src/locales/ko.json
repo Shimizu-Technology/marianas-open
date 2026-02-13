@@ -325,5 +325,22 @@
     "purple": "퍼플",
     "brown": "브라운",
     "black": "블랙"
+  },
+  "competitorProfile": {
+    "title": "선수 프로필",
+    "totalPoints": "총 포인트",
+    "eventsCompeted": "대회",
+    "medals": "메달",
+    "results": "결과",
+    "event": "대회",
+    "division": "부문",
+    "placement": "순위",
+    "pointsEarned": "획득 포인트",
+    "backToRankings": "랭킹으로 돌아가기",
+    "noResults": "이 선수의 결과를 찾을 수 없습니다.",
+    "gold": "금",
+    "silver": "은",
+    "bronze": "동",
+    "beltRank": "벨트"
   }
 }

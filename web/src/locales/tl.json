@@ -325,5 +325,22 @@
     "purple": "Lila",
     "brown": "Kayumanggi",
     "black": "Itim"
+  },
+  "competitorProfile": {
+    "title": "Profile ng Kalaban",
+    "totalPoints": "Kabuuang Puntos",
+    "eventsCompeted": "mga event",
+    "medals": "Mga Medalya",
+    "results": "Mga Resulta",
+    "event": "Event",
+    "division": "Dibisyon",
+    "placement": "Pagkakalagay",
+    "pointsEarned": "Puntos na Nakuha",
+    "backToRankings": "Bumalik sa Rankings",
+    "noResults": "Walang resulta para sa kalaban na ito.",
+    "gold": "Ginto",
+    "silver": "Pilak",
+    "bronze": "Tanso",
+    "beltRank": "Belt"
   }
 }

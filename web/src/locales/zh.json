@@ -325,5 +325,22 @@
     "purple": "紫",
     "brown": "棕",
     "black": "黑"
+  },
+  "competitorProfile": {
+    "title": "选手简介",
+    "totalPoints": "总积分",
+    "eventsCompeted": "赛事",
+    "medals": "奖牌",
+    "results": "比赛结果",
+    "event": "赛事",
+    "division": "组别",
+    "placement": "名次",
+    "pointsEarned": "获得积分",
+    "backToRankings": "返回排名",
+    "noResults": "未找到该选手的比赛结果。",
+    "gold": "金牌",
+    "silver": "银牌",
+    "bronze": "铜牌",
+    "beltRank": "段位"
   }
 }
