@@ -41,7 +41,6 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
       }
 
       setAuthStatus('checking')
-      await new Promise(resolve => setTimeout(resolve, 100))
 
       try {
         const email = clerkUser?.primaryEmailAddress?.emailAddress

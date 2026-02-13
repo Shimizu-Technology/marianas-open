@@ -11,8 +11,9 @@ class ClerkAuth
         return handle_test_token(token)
       end
 
-      # Dev tokens for development
-      if Rails.env.development? && token.start_with?("dev_token_")
+      # Dev tokens for development only — explicitly blocked in production
+      if token.start_with?("dev_token_")
+        return nil unless Rails.env.development?
         return handle_dev_token(token)
       end
 

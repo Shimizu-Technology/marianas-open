@@ -41,6 +41,14 @@ module Api
 
         # DELETE /api/v1/admin/users/:id
         def destroy
+          if @user.id == current_user.id
+            return render json: { error: "Cannot delete yourself" }, status: :unprocessable_entity
+          end
+
+          if @user.admin? && User.where(role: "admin").count <= 1
+            return render json: { error: "Cannot delete the last admin user" }, status: :unprocessable_entity
+          end
+
           @user.destroy
           head :no_content
         end

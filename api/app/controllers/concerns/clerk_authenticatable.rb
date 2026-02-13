@@ -94,19 +94,8 @@ module ClerkAuthenticatable
       end
     end
 
-    # First user ever = auto-create as admin
-    if User.count.zero?
-      user_email = email.presence || "#{clerk_id}@placeholder.local"
-      return User.create(
-        clerk_id: clerk_id,
-        email: user_email,
-        first_name: first_name,
-        last_name: last_name,
-        role: "admin"
-      )
-    end
-
     # Not invited — deny access
+    # Note: First user must be manually seeded in db/seeds.rb
     nil
   end
 
