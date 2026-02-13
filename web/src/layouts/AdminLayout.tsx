@@ -8,6 +8,7 @@ const navItems = [
   { to: '/admin/sponsors', icon: Handshake, label: 'Sponsors' },
   { to: '/admin/videos', icon: Play, label: 'Videos' },
   { to: '/admin/images', icon: Image, label: 'Images' },
+  { to: '/admin/content', icon: FileText, label: 'Content' },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ]
