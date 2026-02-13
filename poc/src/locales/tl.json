@@ -176,5 +176,10 @@
     "title": "Gawa ng Shimizu Technology",
     "description": "Custom na software para sa mga sports organization. Multi-language na platform, live streaming integration, tournament management.",
     "cta": "Makipag-ugnayan"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Hindi natagpuan ang pahina",
+    "backHome": "Bumalik sa Home"
   }
 }

@@ -1,13 +1,16 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { lazy, Suspense, useEffect } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import MobileLanguageFAB from './components/MobileLanguageFAB';
-import HomePage from './pages/HomePage';
-import EventDetailPage from './pages/EventDetailPage';
-import CalendarPage from './pages/CalendarPage';
-import WatchPage from './pages/WatchPage';
-import { useEffect } from 'react';
+import LoadingSpinner from './components/LoadingSpinner';
+
+const HomePage = lazy(() => import('./pages/HomePage'));
+const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
+const CalendarPage = lazy(() => import('./pages/CalendarPage'));
+const WatchPage = lazy(() => import('./pages/WatchPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -29,12 +32,15 @@ function AnimatedRoutes() {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <Routes location={location}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/event" element={<EventDetailPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/watch" element={<WatchPage />} />
-        </Routes>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes location={location}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/event" element={<EventDetailPage />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/watch" element={<WatchPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
       </motion.div>
     </AnimatePresence>
   );
