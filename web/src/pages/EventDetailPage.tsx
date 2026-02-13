@@ -63,10 +63,10 @@ export default function EventDetailPage() {
   const prizeBreakdown = mainEvent && mainEvent.prize_categories.length > 0
     ? mainEvent.prize_categories
         .sort((a, b) => a.sort_order - b.sort_order)
-        .map(cat => ({ division: cat.name, prize: cat.amount }))
+        .map(cat => ({ division: cat.name, prize: `$${Number(cat.amount).toLocaleString()}` }))
     : fallbackPrizeBreakdown;
 
-  const prizePoolDisplay = mainEvent?.prize_pool || '$50K';
+  const prizePoolDisplay = mainEvent?.prize_pool ? `$${Number(mainEvent.prize_pool).toLocaleString()}` : '$50,000';
 
   const heroImageUrl = mainEvent?.hero_image_url;
 
@@ -152,7 +152,7 @@ export default function EventDetailPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Trophy size={16} className="text-gold-500" />
-                {mainEvent?.prize_pool || t('event.prizePool')}
+                {prizePoolDisplay}
               </div>
             </div>
           </motion.div>
