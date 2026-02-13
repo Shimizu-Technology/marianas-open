@@ -3,7 +3,9 @@
     "home": "Home",
     "events": "Events",
     "calendar": "Pro Series",
-    "watch": "Watch"
+    "watch": "Watch",
+    "about": "About",
+    "rankings": "Rankings"
   },
   "hero": {
     "subtitle": "Guam's Premier International",
@@ -99,7 +101,8 @@
     "galleryMatch": "Competition match",
     "galleryCeremony": "Ceremony",
     "galleryVenue": "Competition venue",
-    "galleryPodium": "Podium ceremony"
+    "galleryPodium": "Podium ceremony",
+    "registrationComingSoon": "Registration Coming Soon"
   },
   "calendar": {
     "title": "2026 Pro Series",
@@ -162,7 +165,8 @@
     "followUs": "Follow Us",
     "contact": "Contact",
     "rights": "All rights reserved.",
-    "builtBy": "Built by Shimizu Technology"
+    "builtBy": "Built by Shimizu Technology",
+    "terms": "Terms & Conditions"
   },
   "common": {
     "guam": "Guam",
@@ -181,5 +185,55 @@
     "title": "404",
     "message": "Page not found",
     "backHome": "Back to Home"
+  },
+  "about": {
+    "heroTitle": "About the Marianas Open",
+    "heroSubtitle": "Guam's premier martial arts tournament since 2007",
+    "storyTitle": "Our Story",
+    "p1": "Since its inception in 2007, the Marianas Open has grown into one of the premier martial arts tournaments in the Pacific region. Hosted annually in Guam, this event has emerged as a symbol of excellence, uniting athletes, families, and supporters from around the world.",
+    "p2": "The Marianas Open is more than just a competition—it's a celebration of community, culture, and the spirit of martial arts. Over the years, it has expanded into an international series, with tournaments held in Japan, the Philippines, Korea, and Guam, culminating in the grand finale on our home island. This event not only showcases the best in jiu-jitsu talent but also fosters a supportive environment for our youth and their families, promoting discipline, respect, and unity.",
+    "p3": "Every year, the Marianas Open attracts participants of all ages and skill levels, from novice competitors to seasoned champions. Our commitment to excellence is reflected in the quality of competition and the sense of camaraderie that defines the event. In addition to the tournament this year, we will host an awards ceremony to honor our athletes' achievements and recognize the invaluable support of our sponsors.",
+    "p4": "This event will be covered by international media and live-streamed by KUAM News, allowing people from around the world to tune in. With extensive coverage from international press, the Marianas Open connects with a global audience, giving attendees a chance to be part of an event that resonates deeply with our community values.",
+    "p5": "Join us as we continue to build on this legacy, making each year's Marianas Open better than the last. Together, we can support the next generation of martial artists and strengthen the bonds that unite us.",
+    "timelineTitle": "Our Journey",
+    "timeline2007": "The Marianas Open is founded in Guam as a local jiu-jitsu tournament.",
+    "timeline2015": "The tournament expands with international competitors from Japan and the Philippines.",
+    "timeline2019": "Pro Series launches with events across Asia—Japan, Philippines, Korea.",
+    "timeline2023": "Over 1,000 competitors. ASJJF 5-Star ranking achieved.",
+    "timeline2025": "1,300+ competitors from 6 countries. $2M economic impact to Guam.",
+    "timeline2026": "International Pro Series spans 7 events across 6 countries.",
+    "contactTitle": "Get in Touch",
+    "contactDesc": "Questions about the Marianas Open? Reach out to our team."
+  },
+  "terms": {
+    "title": "Terms & Conditions",
+    "lastUpdated": "Last updated: 2026",
+    "refund": "The registration fee is non-refundable.",
+    "liability": "I hereby assume full responsibility and liability for all damages, injuries, and losses that I may sustain or incur while participating in or watching the tournament.",
+    "injury": "I realize that serious injury is common place in martial arts tournaments such as the one I am hereby entering, and that death is a possibility. I also realize that if I am injured, I might be disfigured, disabled and/or rendered unable to work again. By entering into this competition, I agree to and fully accept and assume liability for any and all injuries that I may incur. I expressly waive any and all claims that I or anyone acting on my behalf or through me might have against Fury Promotions, the Marianas Open, Copa de Marianas, event promoters, operators, sponsors, officials, participants, non-participants, or volunteers for any injury regardless of its nature, effect or affect on me as a result of my participation and/or presence at the tournament.",
+    "medical": "I authorize, and agree to hold harmless, any medical personnel that may be present at the event to take any action necessary, should I become injured.",
+    "media": "I understand that tickets will be sold to spectators to watch the tournament; that news media and others might cover the tournament and that it may also be recorded or otherwise shown to audiences around the world. I hereby expressly and irrevocably forever consent to have my likeness shown, publicized, commented and/or reported on; and I do not expect to, and in fact waive any compensation I might otherwise be entitled to as a result thereof.",
+    "health": "I represent that I am in good health; that I am not presently, nor will I participate while under the influence of any drug or medication; that no one affiliated with this tournament has encouraged me to enter or made any representations regarding my fitness or ability to participate; that I have read and understood every provision of this release; and that I am legally competent to and freely enter into this waiver, release and assumption of risk agreement.",
+    "organizer": "Organizer: Fury promotions, LLC/Marianas Open/Marianas Pro (hereinafter 'organizer') expressly reserves the right, in its sole and absolute discretion, with or without cause, to change, modify or otherwise edit information contained upon the registration form, including but not limited to: the competitor's academy name and affiliation and/or the competitor's name and/or nickname.",
+    "changes": "Changes to a competitor's registration (including but not limited to: academy affiliation) will be permitted when announced at an announced date. There will be no changes permitted after that time.",
+    "headCoach": "The head coach of an academy's competition team shall be granted the right to change a competitor's registration information. I further understand that I am responsible for checking and must check my registration information for weight, belt, academy, age division, and name information at an announced date.",
+    "verification": "I understand that if I don't verify my information and send a notification for the correction by the specific time, no changes will be permitted after that time and any mistakes in the brackets, whether or not caused by me, may lead to my immediate disqualification.",
+    "denial": "Organizer hereby expressly reserves the right, in its sole and absolute discretion, with or without cause to deny a potential competitor's registration for permission to compete in the event. The terms athlete and/or competitor may be used interchangeably.",
+    "dispute": "If any dispute arises out of, or is any way related to your participation in this event, by entering your registration application, you are hereby expressly waiving and giving up your right to the filing of a lawsuit in the city, state/country or federal court and a trial by jury.",
+    "minor": "If the competitor is a minor I, hereby certify that I am the parent and/or legal guardian of the named minor who has been given my express permission to compete in the event for which we are registering.",
+    "organizerNotice": "Fury Promotions, LLC / Marianas Open / Marianas Pro. All rights reserved."
+  },
+  "rankings": {
+    "title": "Rankings",
+    "subtitle": "ASJJF ranking points awarded at Marianas Open Pro Series events.",
+    "fighterPoints": "Fighter Ranking Points",
+    "teamPoints": "Team Ranking Points (4-Star)",
+    "eventRatings": "Event Star Ratings",
+    "rating": "Rating",
+    "gold": "Gold",
+    "silver": "Silver",
+    "bronze": "Bronze",
+    "alone": "Alone",
+    "note": "Points are awarded based on the star rating of each event. 'Alone' points are awarded when a competitor wins a division with no opponents. Team points follow the 4-Star scale for all events."
   }
 }

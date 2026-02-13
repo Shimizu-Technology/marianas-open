@@ -11,8 +11,9 @@ export default function Header() {
 
   const links = [
     { to: '/', label: t('nav.home') },
-    { to: '/event', label: t('nav.events') },
-    { to: '/calendar', label: t('nav.calendar') },
+    { to: '/calendar', label: t('nav.events') },
+    { to: '/about', label: t('nav.about') },
+    { to: '/rankings', label: t('nav.rankings') },
     { to: '/watch', label: t('nav.watch') },
   ];
 

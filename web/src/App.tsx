@@ -11,6 +11,9 @@ const HomePage = lazy(() => import('./pages/HomePage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const WatchPage = lazy(() => import('./pages/WatchPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const RankingsPage = lazy(() => import('./pages/RankingsPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Admin
@@ -46,6 +49,9 @@ function AnimatedRoutes() {
             <Route path="/" element={<HomePage />} />
             <Route path="/event" element={<EventDetailPage />} />
             <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/rankings" element={<RankingsPage />} />
+            <Route path="/terms" element={<TermsPage />} />
             <Route path="/watch" element={<WatchPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

@@ -269,7 +269,7 @@ export default function EventsAdmin() {
               />
               <Field label="ASJJF Stars" type="number" value={form.asjjf_stars.toString()} onChange={v => updateForm('asjjf_stars', parseInt(v) || 0)} />
               <Field label="Prize Pool" value={form.prize_pool} onChange={v => updateForm('prize_pool', v)} placeholder="$10,000" />
-              <Field label="Registration URL" value={form.registration_url} onChange={v => updateForm('registration_url', v)} />
+              <Field label="ASJJF Registration URL" value={form.registration_url} onChange={v => updateForm('registration_url', v)} placeholder="https://asjjf.org/events/..." />
               <Field label="Latitude" value={form.latitude} onChange={v => updateForm('latitude', v)} />
               <Field label="Longitude" value={form.longitude} onChange={v => updateForm('longitude', v)} />
             </div>
