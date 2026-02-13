@@ -114,7 +114,7 @@ class RankingCalculator
       .joins(:event)
       .select("event_results.*, events.asjjf_stars as event_stars, events.id as event_id")
 
-    scope = scope.where(belt_rank: options[:belt]) if options[:belt].present?
+    scope = scope.where("LOWER(event_results.belt_rank) = ?", options[:belt].downcase) if options[:belt].present?
     scope = scope.where(gender: options[:gender]) if options[:gender].present?
     scope = scope.where(event_id: options[:event_id]) if options[:event_id].present?
 
