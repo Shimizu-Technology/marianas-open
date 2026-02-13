@@ -85,13 +85,19 @@ Features to discuss and potentially scope after the meeting.
 - **Consideration:** Could integrate with Smoothcomp if they use it, or build custom
 
 #### 3.6 Streaming Integration
-- **What:** Embed live streams with multi-language commentary options
-- **Features:**
+- **What:** Solve the fragmented video problem with a unified streaming/VOD experience
+- **Current state:** Individual fight videos uploaded to YouTube weeks after events (Japanese/English titles). Only select fights — finals, notable matchups. No live streaming. FloGrappling covered them in 2017-2018 but that appears to have stopped.
+- **Architecture:** They stream to YouTube Live (or similar) → we embed on our site with metadata
+- **Phase 1 (Simple):**
+  - YouTube Live embed on event page during tournament
+  - After event: indexed VOD library where you search by competitor name, weight class, round
+  - Timestamped clips from the long YouTube recordings
+- **Phase 2 (Advanced):**
   - Multi-mat streaming (multiple matches simultaneously)
   - Language-specific commentary tracks
-  - VOD replay library
-  - Clip sharing
-- **Consideration:** Major undertaking. Could start with YouTube Live embed + custom UI.
+  - Push notifications: "Your teammate's match starts in 5 minutes on Mat 3"
+  - Clip sharing with social cards
+- **Key question for Steve:** How many mats are filmed currently? All mats or just the main mat? What camera setup do they use?
 
 #### 3.7 Competitor Profiles & Rankings
 - **What:** Database of all competitors across 20 years of events

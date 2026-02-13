@@ -91,27 +91,40 @@ Steve Shimizu: *"Our partners are predicting Guam will be the next biggest jiu j
 ## Current Tech Stack & Pain Points
 
 ### Website: marianasopen.com
+- **WordPress** site behind Cloudflare CDN
+- Reportedly built by an outsourced team (possibly India-based)
 - Very basic — event listings with links to ASJJF for registration
+- Each event gets a simple page with "Click here to register" links to ASJJF
 - No multi-language support
 - No streaming integration
 - No results/rankings database
+- No real interactivity — just static event pages
 - Legacy Google Sites page still exists: `sites.google.com/site/671marianasopen`
+- WP JSON API exposed: `marianasopen.com/wp-json/`
 
 ### Registration: Fully on ASJJF.org
 - All competitor registration goes through the **ASJJF platform** (asjjf.org)
 - Marianas Open does NOT own the registration experience
 - Cannot customize the flow, branding, or language
 - Limited control over data and competitor relationships
+- Contact email for changes: `2022copagu@gmail.com` (Gmail-based, not branded)
 
-### Streaming: None
-- No current streaming platform
-- Competitors' families in Japan, Korea, Philippines, etc. cannot watch remotely
-- FloGrappling is the dominant BJJ streaming platform but very expensive
+### Streaming & Video: Fragmented
+- **FloGrappling** streamed the Marianas Open in the past (2017-2018 era) — but FloGrappling is expensive/exclusive
+- **Current approach:** Individual fight videos uploaded to YouTube AFTER the event
+  - Videos titled in Japanese/English format: `【FULL FIGHT】Name vs Name / MARIANAS OPEN 2024 【ブラジリアン柔術】`
+  - Posted weeks/months after the event (not live)
+  - Only select fights (finals, notable matchups) — NOT all matches
+  - No official Marianas Open YouTube channel found — videos seem posted by ASJJF or affiliated accounts
+- **The problem:** If you're a competitor's family in Japan and want to watch them fight LIVE, there's no way to do it
+- **The other problem:** After the event, you'd have to scrub through long videos or hope your specific fight was clipped and uploaded
+- **Opportunity:** Massive. 5,000+ spectators on-site but potentially 10x that audience remotely across 6 countries
 
-### Results & Rankings: None
-- No unified system to track results across 20 years of tournaments
-- No competitor profiles or historical records
-- No academy/team leaderboards
+### Results & Rankings: Partial (via ASJJF)
+- ASJJF maintains rankings: `Asia Jiu Jitsu Ranking`, `Japan Jiu Jitsu Ranking`, `Marianas Pro Ranking`, etc.
+- But these are federation-wide, not Marianas Open specific
+- No unified Marianas Open results database across 20 years
+- No competitor profiles or historical records on marianasopen.com
 
 ---
 
