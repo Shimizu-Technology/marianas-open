@@ -61,7 +61,7 @@ export default function CalendarPage() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen pt-20">
       {/* Hero */}
       <section className="relative py-20 sm:py-28 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-navy-800 to-navy-900" />

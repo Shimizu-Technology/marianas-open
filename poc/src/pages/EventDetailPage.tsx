@@ -18,7 +18,7 @@ export default function EventDetailPage() {
   ];
 
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen pt-20">
       {/* Hero */}
       <section className="relative py-24 sm:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-navy-800 via-navy-900 to-navy-900" />
