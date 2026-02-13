@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, useReducedMotion, MotionConfig } from 'framer-motion';
+import { motion, MotionConfig } from 'framer-motion';
 import { Trophy, Users, Globe, Star, Medal, ChevronDown, Filter } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
-import { api, RankingEntry } from '../services/api';
+import { api } from '../services/api';
+import type { RankingEntry } from '../services/api';
 
 type RankingTab = 'individual' | 'team' | 'country';
 
@@ -71,7 +72,6 @@ function RankBadge({ rank }: { rank: number }) {
 
 export default function RankingsPage() {
   const { t } = useTranslation();
-  const shouldReduceMotion = useReducedMotion();
   const [tab, setTab] = useState<RankingTab>('individual');
   const [belt, setBelt] = useState('All');
   const [giNogi, setGiNogi] = useState('Combined');
