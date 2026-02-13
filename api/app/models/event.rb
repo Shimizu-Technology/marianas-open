@@ -2,6 +2,9 @@ class Event < ApplicationRecord
   belongs_to :organization
   has_many :event_schedule_items, dependent: :destroy
   has_many :prize_categories, dependent: :destroy
+
+  accepts_nested_attributes_for :event_schedule_items, allow_destroy: true
+  accepts_nested_attributes_for :prize_categories, allow_destroy: true
   has_one_attached :hero_image
 
   def hero_image_url

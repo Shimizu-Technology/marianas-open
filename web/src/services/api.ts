@@ -25,17 +25,19 @@ export interface Organization {
 }
 
 export interface EventScheduleItem {
-  id: number;
+  id?: number;
   time: string;
   description: string;
   sort_order: number;
+  _destroy?: boolean;
 }
 
 export interface PrizeCategory {
-  id: number;
+  id?: number;
   name: string;
   amount: string;
   sort_order: number;
+  _destroy?: boolean;
 }
 
 export interface Event {
@@ -73,6 +75,7 @@ export interface Sponsor {
 
 export interface UserProfile {
   id: number;
+  clerk_id?: string;
   email: string;
   first_name: string;
   last_name: string;
@@ -82,6 +85,35 @@ export interface UserProfile {
   is_staff: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface EventFormData {
+  name: string;
+  slug: string;
+  description: string;
+  date: string;
+  end_date: string;
+  venue_name: string;
+  venue_address: string;
+  city: string;
+  country: string;
+  country_code: string;
+  asjjf_stars: number;
+  is_main_event: boolean;
+  prize_pool: string;
+  registration_url: string;
+  status: string;
+  latitude: number | null;
+  longitude: number | null;
+  event_schedule_items_attributes: EventScheduleItem[];
+  prize_categories_attributes: PrizeCategory[];
+}
+
+export interface SponsorFormData {
+  name: string;
+  tier: string;
+  website_url: string;
+  sort_order: number;
 }
 
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
@@ -102,7 +134,37 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireA
     headers,
   });
 
-  if (!response.ok) throw new Error(`API error: ${response.status}`);
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    const message = (body as Record<string, unknown>).error || (body as Record<string, unknown>).errors || `API error: ${response.status}`;
+    throw new Error(typeof message === 'string' ? message : JSON.stringify(message));
+  }
+
+  if (response.status === 204) return undefined as T;
+  return response.json();
+}
+
+async function fetchApiUpload<T>(endpoint: string, formData: FormData): Promise<T> {
+  const headers: Record<string, string> = {};
+
+  if (getAuthToken) {
+    const token = await getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error((body as Record<string, unknown>).error as string || `Upload error: ${response.status}`);
+  }
+
   return response.json();
 }
 
@@ -119,7 +181,7 @@ export const api = {
     return fetchApi<{ user: UserProfile }>(`/api/v1/me${params}`, {}, true);
   },
 
-  // Admin
+  // Admin - Users
   getUsers: () => fetchApi<{ users: UserProfile[] }>('/api/v1/admin/users', {}, true),
   createUser: (data: { email: string; role: string; first_name?: string; last_name?: string }) =>
     fetchApi<{ user: UserProfile }>('/api/v1/admin/users', {
@@ -133,4 +195,65 @@ export const api = {
     }, true),
   deleteUser: (id: number) =>
     fetchApi<void>(`/api/v1/admin/users/${id}`, { method: 'DELETE' }, true),
+
+  // Admin - Events
+  admin: {
+    getEvents: () => fetchApi<{ events: Event[] }>('/api/v1/admin/events', {}, true),
+    getEvent: (id: number) => fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}`, {}, true),
+    createEvent: (data: Partial<EventFormData>) =>
+      fetchApi<{ event: Event }>('/api/v1/admin/events', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    updateEvent: (id: number, data: Partial<EventFormData>) =>
+      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    deleteEvent: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/events/${id}`, { method: 'DELETE' }, true),
+    uploadEventImage: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return fetchApiUpload<{ event: Event }>(`/api/v1/admin/events/${id}/upload_image`, formData);
+    },
+
+    // Sponsors
+    getSponsors: () => fetchApi<{ sponsors: Sponsor[] }>('/api/v1/admin/sponsors', {}, true),
+    createSponsor: (data: SponsorFormData) =>
+      fetchApi<{ sponsor: Sponsor }>('/api/v1/admin/sponsors', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    updateSponsor: (id: number, data: Partial<SponsorFormData>) =>
+      fetchApi<{ sponsor: Sponsor }>(`/api/v1/admin/sponsors/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    deleteSponsor: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/sponsors/${id}`, { method: 'DELETE' }, true),
+    uploadSponsorLogo: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('logo', file);
+      return fetchApiUpload<{ sponsor: Sponsor }>(`/api/v1/admin/sponsors/${id}/upload_logo`, formData);
+    },
+
+    // Organization
+    getOrganization: () => fetchApi<Organization>('/api/v1/admin/organization', {}, true),
+    updateOrganization: (data: Partial<Organization>) =>
+      fetchApi<Organization>('/api/v1/admin/organization', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    uploadOrgLogo: (file: File) => {
+      const formData = new FormData();
+      formData.append('logo', file);
+      return fetchApiUpload<Organization>('/api/v1/admin/organization/upload_logo', formData);
+    },
+    uploadOrgBanner: (file: File) => {
+      const formData = new FormData();
+      formData.append('banner', file);
+      return fetchApiUpload<Organization>('/api/v1/admin/organization/upload_banner', formData);
+    },
+  },
 };
