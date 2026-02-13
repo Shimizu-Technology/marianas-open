@@ -2,7 +2,6 @@ module Api
   module V1
     class RankingsController < ApplicationController
       # GET /api/v1/rankings
-      # Params: type (individual|team|country), belt, gi_nogi, gender, limit
       def index
         options = {
           belt: params[:belt],
@@ -56,8 +55,8 @@ module Api
 
         render json: {
           competitor_name: results.first.competitor_name,
-          academy: RankingCalculator.send(:most_common, results.map(&:academy)),
-          country_code: RankingCalculator.send(:most_common, results.map(&:country_code)),
+          academy: most_common_value(results.map(&:academy)),
+          country_code: most_common_value(results.map(&:country_code)),
           total_points: total_points,
           gold: golds,
           silver: silvers,
@@ -75,6 +74,18 @@ module Api
             }
           }
         }
+      rescue => e
+        Rails.logger.error("Competitor lookup failed: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
+        render json: { error: e.message }, status: :internal_server_error
+      end
+
+      private
+
+      def most_common_value(arr)
+        arr.compact.reject(&:blank?)
+           .tally
+           .max_by { |_, count| count }
+           &.first
       end
     end
   end
