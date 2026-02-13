@@ -139,11 +139,23 @@ export default function EventDetailPage() {
             </div>
 
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] mb-6">
-              <span className="text-text-primary">Marianas</span>
-              <br />
-              <span className="bg-gradient-to-r from-gold-500 to-gold-300 bg-clip-text text-transparent">
-                Open 2026
-              </span>
+              {mainEvent ? (
+                <>
+                  <span className="text-text-primary">{mainEvent.name.split(' ').slice(0, -1).join(' ')}</span>
+                  <br />
+                  <span className="bg-gradient-to-r from-gold-500 to-gold-300 bg-clip-text text-transparent">
+                    {mainEvent.name.split(' ').slice(-1)[0]}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-text-primary">Marianas</span>
+                  <br />
+                  <span className="bg-gradient-to-r from-gold-500 to-gold-300 bg-clip-text text-transparent">
+                    Open
+                  </span>
+                </>
+              )}
             </h1>
 
             <p className="text-xl text-text-secondary font-heading uppercase tracking-wider mb-8">
