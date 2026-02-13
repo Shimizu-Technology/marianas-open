@@ -7,6 +7,7 @@ import ImageWithShimmer from '../components/ImageWithShimmer';
 import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useEvents } from '../hooks/useApi';
+import { getEventHeroImage } from '../utils/images';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -68,7 +69,7 @@ export default function EventDetailPage() {
 
   const prizePoolDisplay = mainEvent?.prize_pool ? `$${Number(mainEvent.prize_pool).toLocaleString()}` : '$50,000';
 
-  const heroImageUrl = mainEvent?.hero_image_url;
+  const heroImageUrl = getEventHeroImage(mainEvent?.slug || 'marianas-open-2026', mainEvent?.hero_image_url ?? null);
 
   const shareUrl = 'https://marianasopen.com';
   const shareText = t('event.shareText');
