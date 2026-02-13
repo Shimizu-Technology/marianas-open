@@ -5,6 +5,7 @@ import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink } from '
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import LoadingSpinner from '../components/LoadingSpinner';
+import JourneySection from '../components/JourneySection';
 import { useEvents, useSponsors } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
 
@@ -229,6 +230,11 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Journey Section */}
+      {!eventsLoading && events.length > 0 && (
+        <JourneySection events={events} />
+      )}
 
       {/* 2026 Pro Series Timeline */}
       <section className="py-24 sm:py-32 bg-surface">
