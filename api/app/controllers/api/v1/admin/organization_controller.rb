@@ -9,6 +9,8 @@ module Api
 
         def show
           render json: @organization.as_json
+        rescue => e
+          render json: { error: e.message, backtrace: e.backtrace&.first(5) }, status: :internal_server_error
         end
 
         def update
