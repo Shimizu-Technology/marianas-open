@@ -1,3 +1,4 @@
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2 } from 'lucide-react';
@@ -6,6 +7,7 @@ import SocialShare from '../components/SocialShare';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
+import EventResultsSection from '../components/EventResultsSection';
 import { useEvents } from '../hooks/useApi';
 import { getEventHeroImage } from '../utils/images';
 
@@ -29,10 +31,16 @@ function ShareButton({ platform, onClick }: { platform: string; onClick: () => v
 
 export default function EventDetailPage() {
   const { t } = useTranslation();
+  const { slug } = useParams<{ slug: string }>();
   const shouldReduceMotion = useReducedMotion();
   const { events, loading } = useEvents();
 
-  const mainEvent = events.find(e => e.is_main_event) || null;
+  // If slug provided, show that event; otherwise show main event
+  const mainEvent = slug
+    ? events.find(e => e.slug === slug) || null
+    : events.find(e => e.is_main_event) || null;
+
+  const isCompleted = mainEvent?.status === 'completed';
 
   // Fallback schedule items from i18n if API has none
   const fallbackScheduleItems = [
@@ -402,6 +410,11 @@ export default function EventDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* Results Section — only for completed events */}
+      {isCompleted && mainEvent && (
+        <EventResultsSection eventSlug={mainEvent.slug} />
+      )}
 
       {/* Share */}
       <section className="py-16">

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Calendar, MapPin, Star, Trophy, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, Star, Trophy, ArrowRight, Medal } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { api } from '../services/api';
@@ -255,9 +255,17 @@ export default function PastEventsPage() {
                                 <span>{event.city}, {event.country}</span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-1 text-xs text-gold-500/70 group-hover:text-gold-400 transition-colors pt-1">
-                              <span className="font-heading uppercase tracking-wider">{t('pastEvents.viewDetails')}</span>
-                              <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                            <div className="flex items-center gap-3 pt-1">
+                              <div className="flex items-center gap-1 text-xs text-gold-500/70 group-hover:text-gold-400 transition-colors">
+                                <span className="font-heading uppercase tracking-wider">{t('pastEvents.viewDetails')}</span>
+                                <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                              </div>
+                              {event.status === 'completed' && (
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-gold-500/10 border border-gold-500/20 text-gold-400 text-xs font-heading uppercase tracking-wider">
+                                  <Medal size={10} />
+                                  <span>{t('results.viewResults')}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </Link>

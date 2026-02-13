@@ -288,5 +288,6 @@ end
 puts "Created #{Competitor.count} competitors"
 
 load Rails.root.join('db/seeds/site_contents.rb')
+load Rails.root.join('db/seeds/event_results.rb')
 
 puts "Seeding complete!"

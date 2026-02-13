@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_13_112800) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_13_123000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -64,6 +64,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_13_112800) do
     t.index ["belt_rank"], name: "index_competitors_on_belt_rank"
     t.index ["country_code"], name: "index_competitors_on_country_code"
     t.index ["weight_class"], name: "index_competitors_on_weight_class"
+  end
+
+  create_table "event_results", force: :cascade do |t|
+    t.string "academy"
+    t.string "age_category"
+    t.string "belt_rank"
+    t.bigint "competitor_id"
+    t.string "competitor_name", null: false
+    t.string "country_code"
+    t.datetime "created_at", null: false
+    t.string "division", null: false
+    t.bigint "event_id", null: false
+    t.string "gender"
+    t.text "notes"
+    t.integer "placement", null: false
+    t.string "submission_method"
+    t.datetime "updated_at", null: false
+    t.string "weight_class"
+    t.index ["competitor_id"], name: "index_event_results_on_competitor_id"
+    t.index ["competitor_name"], name: "index_event_results_on_competitor_name"
+    t.index ["event_id", "belt_rank"], name: "index_event_results_on_event_id_and_belt_rank"
+    t.index ["event_id", "division"], name: "index_event_results_on_event_id_and_division"
+    t.index ["event_id"], name: "index_event_results_on_event_id"
   end
 
   create_table "event_schedule_items", force: :cascade do |t|
@@ -204,6 +227,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_13_112800) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "event_results", "competitors"
+  add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"
   add_foreign_key "events", "organizations"
   add_foreign_key "prize_categories", "events"

@@ -2,7 +2,10 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resource :organization, only: [:show]
-      resources :events, only: [:index, :show], param: :slug
+      resources :events, only: [:index, :show], param: :slug do
+        resources :event_results, only: [:index], path: 'results'
+        get 'results/summary', to: 'event_results#summary'
+      end
       resources :sponsors, only: [:index]
       resources :competitors, only: [:index, :show]
       resources :videos, only: [:index, :show]
@@ -18,6 +21,12 @@ Rails.application.routes.draw do
         resources :events do
           member do
             post :upload_image
+          end
+          resources :event_results, only: [:create, :update, :destroy], path: 'results' do
+            collection do
+              post :bulk_create
+              delete :destroy_all
+            end
           end
         end
         resources :videos

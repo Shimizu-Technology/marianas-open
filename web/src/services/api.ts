@@ -222,6 +222,34 @@ export interface SiteContentEntry {
 export type SiteContentMap = Record<string, { en: string | null; ja: string | null; ko: string | null; tl: string | null; zh: string | null }>;
 export type SiteContentGrouped = Record<string, SiteContentEntry[]>;
 
+export interface EventResult {
+  id: number;
+  division: string;
+  gender: string;
+  belt_rank: string;
+  age_category: string;
+  weight_class: string;
+  placement: number;
+  competitor_name: string;
+  academy: string;
+  country_code: string;
+}
+
+export interface EventResultDivision {
+  division: string;
+  results: EventResult[];
+}
+
+export interface EventResultsSummary {
+  total_results: number;
+  gold_medals: number;
+  divisions: number;
+  countries: number;
+  academies: number;
+  belt_breakdown: Record<string, number>;
+  top_academies: { name: string; gold: number; silver: number; bronze: number; total: number }[];
+}
+
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -280,6 +308,12 @@ export const api = {
   getOrganization: () => fetchApi<Organization>('/api/v1/organization'),
   getEvents: () => fetchApi<Event[]>('/api/v1/events'),
   getEvent: (slug: string) => fetchApi<Event>(`/api/v1/events/${slug}`),
+  getEventResults: (slug: string, params?: Record<string, string>) => {
+    const query = params ? '?' + new URLSearchParams(params).toString() : '';
+    return fetchApi<EventResultDivision[]>(`/api/v1/events/${slug}/results${query}`);
+  },
+  getEventResultsSummary: (slug: string) =>
+    fetchApi<EventResultsSummary>(`/api/v1/events/${slug}/results/summary`),
   getSponsors: () => fetchApi<Sponsor[]>('/api/v1/sponsors'),
   getCompetitors: (params?: Record<string, string>) => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
