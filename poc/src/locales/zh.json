@@ -176,5 +176,10 @@
     "title": "Shimizu Technology 出品",
     "description": "面向体育组织的定制软件。多语言平台、直播集成、赛事管理系统。",
     "cta": "联系我们"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "页面未找到",
+    "backHome": "返回首页"
   }
 }

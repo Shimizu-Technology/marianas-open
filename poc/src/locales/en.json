@@ -176,5 +176,10 @@
     "title": "Built by Shimizu Technology",
     "description": "Custom software for sports organizations. Multi-language platforms, live streaming integration, tournament management.",
     "cta": "Get in Touch"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Page not found",
+    "backHome": "Back to Home"
   }
 }

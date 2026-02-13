@@ -176,5 +176,10 @@
     "title": "Shimizu Technology 制作",
     "description": "スポーツ団体向けカスタムソフトウェア。多言語プラットフォーム、ライブ配信連携、大会運営システム。",
     "cta": "お問い合わせ"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "ページが見つかりません",
+    "backHome": "ホームに戻る"
   }
 }
