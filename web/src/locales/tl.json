@@ -3,7 +3,9 @@
     "home": "Home",
     "events": "Mga Event",
     "calendar": "Pro Series",
-    "watch": "Panoorin"
+    "watch": "Panoorin",
+    "about": "Tungkol",
+    "rankings": "Rankings"
   },
   "hero": {
     "subtitle": "Pangunahing International ng Guam",
@@ -99,7 +101,8 @@
     "galleryMatch": "Laban sa kompetisyon",
     "galleryCeremony": "Seremonya",
     "galleryVenue": "Lugar ng kompetisyon",
-    "galleryPodium": "Seremonya ng podium"
+    "galleryPodium": "Seremonya ng podium",
+    "registrationComingSoon": "Magbubukas ang Pagpaparehistro"
   },
   "calendar": {
     "title": "2026 Pro Series",
@@ -162,7 +165,8 @@
     "followUs": "I-follow Kami",
     "contact": "Makipag-ugnayan",
     "rights": "Lahat ng karapatan ay nakalaan.",
-    "builtBy": "Gawa ng Shimizu Technology"
+    "builtBy": "Gawa ng Shimizu Technology",
+    "terms": "Mga Tuntunin at Kundisyon"
   },
   "common": {
     "guam": "Guam",
@@ -181,5 +185,55 @@
     "title": "404",
     "message": "Hindi natagpuan ang pahina",
     "backHome": "Bumalik sa Home"
+  },
+  "about": {
+    "heroTitle": "Tungkol sa Marianas Open",
+    "heroSubtitle": "Ang premier na torneo ng martial arts ng Guam mula 2007",
+    "storyTitle": "Ang Aming Kwento",
+    "p1": "Mula nang maitatag noong 2007, ang Marianas Open ay naging isa sa mga nangungunang torneo ng martial arts sa rehiyon ng Pasipiko. Ginaganap taun-taon sa Guam, ang kaganapang ito ay naging simbolo ng kahusayan, nagbubuklod ng mga atleta, pamilya, at tagasuporta mula sa buong mundo.",
+    "p2": "Ang Marianas Open ay higit pa sa isang kompetisyon—ito ay isang pagdiriwang ng komunidad, kultura, at espiritu ng martial arts. Sa mga nakaraang taon, lumawak ito sa isang internasyonal na serye, na may mga torneo sa Japan, Pilipinas, Korea, at Guam.",
+    "p3": "Bawat taon, ang Marianas Open ay nag-aanyaya ng mga kalahok sa lahat ng edad at antas ng kasanayan, mula sa mga baguhan hanggang sa mga champion.",
+    "p4": "Ang kaganapan ay sasakupin ng internasyonal na media at i-live-stream ng KUAM News, na nagpapahintulot sa mga tao sa buong mundo na manood.",
+    "p5": "Samahan kami habang patuloy naming binubuo ang legacy na ito. Sama-sama, masusuportahan natin ang susunod na henerasyon ng mga martial artist.",
+    "timelineTitle": "Ang Aming Paglalakbay",
+    "timeline2007": "Itinatag sa Guam bilang lokal na torneo ng jiu-jitsu.",
+    "timeline2015": "Lumawak na may mga internasyonal na kalahok mula Japan at Pilipinas.",
+    "timeline2019": "Inilunsad ang Pro Series sa buong Asya.",
+    "timeline2023": "Mahigit 1,000 kalahok. Nakamit ang ASJJF 5-Star ranking.",
+    "timeline2025": "1,300+ kalahok mula 6 na bansa. $2M epekto sa ekonomiya ng Guam.",
+    "timeline2026": "Internasyonal na Pro Series sa 7 kaganapan sa 6 na bansa.",
+    "contactTitle": "Makipag-ugnayan",
+    "contactDesc": "May tanong tungkol sa Marianas Open? Makipag-ugnayan sa aming koponan."
+  },
+  "terms": {
+    "title": "Mga Tuntunin at Kundisyon",
+    "lastUpdated": "Huling na-update: 2026",
+    "refund": "Ang bayad sa pagpaparehistro ay hindi maibabalik.",
+    "liability": "Inaako ko ang buong responsibilidad at pananagutan para sa lahat ng pinsala, sugat, at pagkalugi na maaari kong matamo habang lumalahok o nanonood sa torneo.",
+    "injury": "Nauunawaan ko na ang malubhang pinsala ay karaniwan sa mga torneo ng martial arts at posible ang kamatayan. Sa pagsali sa kompetisyon, tinatanggap ko ang lahat ng pananagutan at iwinawaksi ang lahat ng claim laban sa Fury Promotions, Marianas Open, at mga kaugnay na partido.",
+    "medical": "Pinapahintulutan ko ang anumang medical personnel na magsagawa ng kinakailangang aksyon kung masaktan ako.",
+    "media": "Nauunawaan ko na ang torneo ay maaaring i-broadcast sa buong mundo at pumapayag ako sa paggamit ng aking larawan nang walang bayad.",
+    "health": "Kinakatawan ko na ako ay malusog, hindi naimpluwensiyahan ng anumang droga, at nabasa at naunawaan ko ang lahat ng probisyon ng release na ito.",
+    "organizer": "Ang organizer ay may karapatang baguhin ang impormasyon sa registration form, kabilang ang pangalan ng akademya at pangalan ng kalahok.",
+    "changes": "Ang mga pagbabago sa pagpaparehistro ay pinapayagan lamang sa loob ng inihayag na panahon.",
+    "headCoach": "Ang head coach ng isang akademya ay may karapatang baguhin ang impormasyon ng pagpaparehistro ng kalahok.",
+    "verification": "Kung hindi ko ma-verify ang aking impormasyon bago ang itinakdang oras, walang pagbabago ang papayagan at maaari akong ma-disqualify.",
+    "denial": "Ang organizer ay may karapatang tanggihan ang pagpaparehistro ng isang kalahok.",
+    "dispute": "Sa pagsumite ng registration application, iwinawaksi mo ang karapatan sa pagsampa ng kaso at trial by jury.",
+    "minor": "Kung ang kalahok ay isang menor de edad, pinapatunayan ko na ako ang magulang o legal na tagapag-alaga.",
+    "organizerNotice": "Fury Promotions, LLC / Marianas Open / Marianas Pro. All rights reserved."
+  },
+  "rankings": {
+    "title": "Rankings",
+    "subtitle": "ASJJF ranking points na ibinibigay sa Marianas Open Pro Series events.",
+    "fighterPoints": "Fighter Ranking Points",
+    "teamPoints": "Team Ranking Points (4-Star)",
+    "eventRatings": "Event Star Ratings",
+    "rating": "Rating",
+    "gold": "Gold",
+    "silver": "Silver",
+    "bronze": "Bronze",
+    "alone": "Alone",
+    "note": "Ang points ay ibinibigay batay sa star rating ng bawat event. Ang 'Alone' points ay ibinibigay kapag nanalo nang walang kalaban. Ang team points ay sumusunod sa 4-Star scale."
   }
 }

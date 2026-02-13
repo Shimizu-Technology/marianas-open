@@ -3,7 +3,9 @@
     "home": "首页",
     "events": "赛事信息",
     "calendar": "职业系列赛",
-    "watch": "观看"
+    "watch": "观看",
+    "about": "关于",
+    "rankings": "排名"
   },
   "hero": {
     "subtitle": "关岛顶级国际",
@@ -99,7 +101,8 @@
     "galleryMatch": "比赛场景",
     "galleryCeremony": "仪式",
     "galleryVenue": "比赛场馆",
-    "galleryPodium": "颁奖仪式"
+    "galleryPodium": "颁奖仪式",
+    "registrationComingSoon": "报名即将开放"
   },
   "calendar": {
     "title": "2026 职业系列赛",
@@ -162,7 +165,8 @@
     "followUs": "关注我们",
     "contact": "联系方式",
     "rights": "版权所有。",
-    "builtBy": "Shimizu Technology 出品"
+    "builtBy": "Shimizu Technology 出品",
+    "terms": "条款与条件"
   },
   "common": {
     "guam": "关岛",
@@ -181,5 +185,55 @@
     "title": "404",
     "message": "页面未找到",
     "backHome": "返回首页"
+  },
+  "about": {
+    "heroTitle": "关于马里亚纳斯公开赛",
+    "heroSubtitle": "自2007年以来关岛首屈一指的武术赛事",
+    "storyTitle": "我们的故事",
+    "p1": "自2007年创办以来，马里亚纳斯公开赛已成长为太平洋地区最著名的武术赛事之一。每年在关岛举办，这项赛事已成为卓越的象征，将世界各地的运动员、家庭和支持者团结在一起。",
+    "p2": "马里亚纳斯公开赛不仅仅是一场比赛——它是社区、文化和武术精神的庆典。多年来，它已扩展为国际系列赛，在日本、菲律宾、韩国和关岛举办比赛。",
+    "p3": "每年，马里亚纳斯公开赛吸引从新手到冠军的各年龄、各水平的参赛者。",
+    "p4": "赛事将由国际媒体报道并由KUAM新闻进行直播，让全球观众观看。",
+    "p5": "加入我们，继续建设这一传统。让我们一起支持下一代武术家。",
+    "timelineTitle": "我们的历程",
+    "timeline2007": "在关岛创办为地方柔术赛事。",
+    "timeline2015": "日本、菲律宾国际选手参赛。",
+    "timeline2019": "亚洲各地Pro系列赛启动。",
+    "timeline2023": "超过1,000名选手。获得ASJJF 5星排名。",
+    "timeline2025": "来自6个国家1,300多名选手。为关岛带来200万美元经济效益。",
+    "timeline2026": "国际Pro系列赛，6个国家7场赛事。",
+    "contactTitle": "联系我们",
+    "contactDesc": "对马里亚纳斯公开赛有疑问？请联系我们的团队。"
+  },
+  "terms": {
+    "title": "条款与条件",
+    "lastUpdated": "最后更新: 2026年",
+    "refund": "报名费不可退还。",
+    "liability": "本人完全承担在参加或观看比赛过程中可能遭受的所有损害、伤害和损失的责任。",
+    "injury": "本人了解武术比赛中严重受伤是常见的，且有死亡的可能性。通过参加比赛，本人完全接受所有伤害责任，并放弃对Fury Promotions、马里亚纳斯公开赛及相关方的所有索赔。",
+    "medical": "本人授权在场医疗人员在本人受伤时采取必要措施。",
+    "media": "本人了解比赛可能向全球播出，同意使用本人肖像并放弃任何报酬。",
+    "health": "本人声明身体健康，未受药物影响，已阅读并理解本免责声明的所有条款。",
+    "organizer": "主办方保留修改报名表信息（包括选手姓名、道馆名称等）的权利。",
+    "changes": "报名信息的修改仅在公告的时间内允许。",
+    "headCoach": "道馆主教练有权修改选手的报名信息。",
+    "verification": "如果未在指定时间前验证信息，将不允许修改，可能导致取消资格。",
+    "denial": "主办方保留拒绝选手报名的权利。",
+    "dispute": "提交报名申请即表示放弃诉讼权和陪审团审判权。",
+    "minor": "如参赛者为未成年人，本人证明为其父母或法定监护人并允许其参赛。",
+    "organizerNotice": "Fury Promotions, LLC / Marianas Open / Marianas Pro. All rights reserved."
+  },
+  "rankings": {
+    "title": "排名",
+    "subtitle": "马里亚纳斯公开赛Pro系列赛事的ASJJF排名积分。",
+    "fighterPoints": "选手排名积分",
+    "teamPoints": "团队排名积分（4星）",
+    "eventRatings": "赛事星级评定",
+    "rating": "评级",
+    "gold": "金牌",
+    "silver": "银牌",
+    "bronze": "铜牌",
+    "alone": "单独",
+    "note": "积分根据每场赛事的星级评定发放。“单独”积分在没有对手时获胜时发放。团队积分遵循4星标准。"
   }
 }
