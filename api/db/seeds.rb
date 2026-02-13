@@ -1,6 +1,7 @@
 puts "Seeding Marianas Open data..."
 
 # Clear existing data
+SiteImage.destroy_all
 Video.destroy_all
 PrizeCategory.destroy_all
 EventScheduleItem.destroy_all
@@ -229,6 +230,32 @@ videos_data.each do |data|
   puts "Created video: #{video.title}"
 end
 
+# Site Images
+site_images_data = [
+  { title: "Venue Crowd - Hero Background", placement: "hero", alt_text: "Crowd at the Marianas Open venue", sort_order: 0, filename: "venue-crowd.webp" },
+  { title: "Action Match 1", placement: "gallery", alt_text: "BJJ competition match", sort_order: 0, filename: "action-match-1.webp" },
+  { title: "Action Match 2", placement: "gallery", alt_text: "BJJ competition match", sort_order: 1, filename: "action-match-2.webp" },
+  { title: "Action Match 3", placement: "gallery", alt_text: "BJJ competition match", sort_order: 2, filename: "action-match-3.webp" },
+  { title: "Action Match 4", placement: "gallery", alt_text: "BJJ competition match", sort_order: 3, filename: "action-match-4.webp" },
+  { title: "Podium Ceremony 1", placement: "gallery", alt_text: "Podium ceremony at the Marianas Open", sort_order: 4, filename: "podium-1.webp" },
+  { title: "Podium Ceremony 2", placement: "gallery", alt_text: "Podium ceremony at the Marianas Open", sort_order: 5, filename: "podium-2.webp" },
+  { title: "Ceremony 1", placement: "gallery", alt_text: "Award ceremony", sort_order: 6, filename: "ceremony-1.webp" },
+  { title: "Ceremony 2", placement: "gallery", alt_text: "Award ceremony", sort_order: 7, filename: "ceremony-2.webp" },
+  { title: "Venue Mats", placement: "about", alt_text: "Competition mats at the venue", sort_order: 0, filename: "venue-mats.webp" },
+]
+
+site_images_data.each do |data|
+  filename = data.delete(:filename)
+  file_path = images_path.join(filename)
+  if File.exist?(file_path)
+    si = SiteImage.create!(data)
+    si.image.attach(io: File.open(file_path), filename: filename, content_type: "image/webp")
+    puts "Created site image: #{si.title}"
+  else
+    puts "Skipped site image (file not found): #{filename}"
+  end
+end
+
 # Admin user
 User.find_or_create_by!(email: "jerry.shimizutechnology@gmail.com") do |u|
   u.clerk_id = "pending_admin_#{SecureRandom.uuid}"
@@ -237,5 +264,7 @@ User.find_or_create_by!(email: "jerry.shimizutechnology@gmail.com") do |u|
   u.role = "admin"
 end
 puts "Created admin user"
+
+load Rails.root.join('db/seeds/site_contents.rb')
 
 puts "Seeding complete!"
