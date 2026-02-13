@@ -63,5 +63,5 @@ Rails.application.configure do
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
   # Active Storage
-  config.active_storage.service = :amazon
+  config.active_storage.service = :local
 end
