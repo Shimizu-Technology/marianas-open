@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80" fill="none">
+  <!-- Shield -->
+  <path d="M32 2 L60 14 L60 44 Q60 64 32 78 Q4 64 4 44 L4 14 Z"
+        fill="#004581" stroke="#D4A843" stroke-width="3"/>
+  <!-- MO initials -->
+  <text x="32" y="50" text-anchor="middle"
+        font-family="'Arial Black', 'Helvetica Neue', sans-serif"
+        font-weight="900" font-size="28" fill="#D4A843" letter-spacing="1">
+    MO
+  </text>
+</svg>

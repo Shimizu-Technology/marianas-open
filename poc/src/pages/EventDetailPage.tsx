@@ -66,7 +66,7 @@ export default function EventDetailPage() {
       <section className="relative py-24 sm:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithShimmer
-            src="/images/action-match-3.jpg"
+            src="/images/action-match-3.webp"
             alt=""
             className="w-full h-full object-cover"
           />
@@ -171,7 +171,7 @@ export default function EventDetailPage() {
             <ScrollReveal delay={0.12}>
               <div className="relative overflow-hidden border border-white/5 h-full min-h-[250px]">
                 <ImageWithShimmer
-                  src="/images/action-match-4.jpg"
+                  src="/images/action-match-4.webp"
                   alt="Marianas Open competition"
                   className="w-full h-full object-cover"
                 />
@@ -266,10 +266,10 @@ export default function EventDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { src: '/images/action-match-1.jpg', alt: t('event.galleryMatch') },
-              { src: '/images/ceremony-1.jpg', alt: t('event.galleryCeremony') },
-              { src: '/images/venue-mats.jpg', alt: t('event.galleryVenue') },
-              { src: '/images/podium-2.jpg', alt: t('event.galleryPodium') },
+              { src: '/images/action-match-1.webp', alt: t('event.galleryMatch') },
+              { src: '/images/ceremony-1.webp', alt: t('event.galleryCeremony') },
+              { src: '/images/venue-mats.webp', alt: t('event.galleryVenue') },
+              { src: '/images/podium-2.webp', alt: t('event.galleryPodium') },
             ].map((img, i) => (
               <ScrollReveal key={i} delay={i * 0.08}>
                 <div className="relative overflow-hidden aspect-[3/2] border border-white/5 group">

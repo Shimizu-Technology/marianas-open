@@ -11,7 +11,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img src="/images/logo.png" alt="Marianas Open" className="h-12 w-12" />
+              <img src="/images/logo.svg" alt="Marianas Open" className="h-12 w-12" />
               <span className="font-heading font-bold text-lg uppercase tracking-wider">
                 Marianas Open
               </span>

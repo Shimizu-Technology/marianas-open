@@ -22,7 +22,7 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0">
-            <img src="/images/logo.png" alt="Marianas Open" className="h-10 w-10" />
+            <img src="/images/logo.svg" alt="Marianas Open" className="h-10 w-10" />
             <div className="hidden sm:block">
               <span className="text-sm font-bold tracking-wider text-text-primary font-heading uppercase">
                 Marianas Open

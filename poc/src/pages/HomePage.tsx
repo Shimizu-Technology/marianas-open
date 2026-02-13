@@ -39,7 +39,7 @@ export default function HomePage() {
         {/* Background image */}
         <div className="absolute inset-0">
           <ImageWithShimmer
-            src="/images/action-match-1.jpg"
+            src="/images/action-match-1.webp"
             alt=""
             className="w-full h-full object-cover"
           />
@@ -179,7 +179,7 @@ export default function HomePage() {
             <ScrollReveal className="lg:col-span-7" delay={0.2}>
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
-                  <ImageWithShimmer src="/images/action-match-2.jpg" alt="BJJ competition match" className="w-full h-full object-cover" />
+                  <ImageWithShimmer src="/images/action-match-2.webp" alt="BJJ competition match" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
                     <div className="text-3xl font-heading font-black text-gold-500">{t('home.economicImpactValue')}</div>
@@ -187,7 +187,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
-                  <ImageWithShimmer src="/images/venue-crowd.jpg" alt="Marianas Open venue" className="w-full h-full object-cover" />
+                  <ImageWithShimmer src="/images/venue-crowd.webp" alt="Marianas Open venue" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
                     <div className="text-3xl font-heading font-black text-text-primary">{t('home.spectatorsValue')}</div>
@@ -195,7 +195,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="relative col-span-2 overflow-hidden border border-white/5">
-                  <ImageWithShimmer src="/images/podium-1.jpg" alt="Podium ceremony" className="w-full h-48 object-cover" />
+                  <ImageWithShimmer src="/images/podium-1.webp" alt="Podium ceremony" className="w-full h-48 object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-r from-navy-900/95 via-navy-900/70 to-transparent" />
                   <div className="absolute inset-0 p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-2">
