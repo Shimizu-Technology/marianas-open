@@ -231,7 +231,43 @@ Show Steve a working demo that makes him go: *"This is exactly what we need."*
 
 ---
 
-## 8. Risks & Open Questions
+## 8. Lessons from Competitive Research
+
+Based on deep analysis of FloGrappling, Smoothcomp, UFC Fight Pass, and others (see [COMPETITIVE-ANALYSIS.md](./COMPETITIVE-ANALYSIS.md)).
+
+### Design Principles (What We Learned)
+
+| Principle | Learned From | Details |
+|-----------|-------------|---------|
+| **Match-level indexing is everything** | FloGrappling's failure | Flo streams events but you can't find specific matches. Smoothcomp TV auto-cuts matches and links to brackets/profiles. We MUST do this. |
+| **Zero-skill streaming setup** | Smoothcomp's QR code flow | Steve's team shouldn't need a tech degree. Scan QR → tap record → live. |
+| **YouTube is our streaming infrastructure** | Smoothcomp + BJJ Tour | Don't build streaming tech. Use YouTube Live, embed in our branded UI. |
+| **Transparent, flexible pricing** | FloGrappling's 800+ BBB complaints | Annual-only at $150 with no monthly option = community hatred. Offer monthly. Be honest. |
+| **Free live → premium VOD** | UFC Fight Pass model | Free live streams grow the international audience. Premium for VOD library, multi-angle, highlights. |
+| **Multi-language is the fan experience gap** | Nobody does this for BJJ | Smoothcomp has 18 UI languages but no platform localizes the fan/streaming experience. This is our edge. |
+| **Don't replace Smoothcomp for brackets** | Smoothcomp's 10-year head start | They own tournament operations. We own the fan/media/international experience. Complement, don't compete. |
+| **Post-event is where long-term value lives** | FloGrappling's archive mess | Families want to rewatch and share. Searchable, shareable VOD clips > unsearchable 10-hour recordings. |
+| **Camera quality matters** | FloGrappling's "240p cameras" complaints | Minimum 1080p. Ask Steve about current camera setup. |
+
+### Our Positioning
+
+We are NOT building:
+- A FloGrappling competitor (media empire)
+- A Smoothcomp competitor (tournament operations)
+- A UFC Fight Pass competitor (massive streaming platform)
+
+We ARE building:
+- **The international fan experience layer** for the Marianas Open
+- Multi-language everything (UI, registration, emails, social sharing, VOD)
+- Smart match discovery (search by competitor, weight class, round, academy)
+- Beautiful event hub that replaces the basic WordPress site
+- YouTube Live embedded with our branded, localized UI on top
+- Post-event VOD library with match-level indexing
+- Social sharing optimized for LINE (Japan), KakaoTalk (Korea), Facebook (Philippines)
+
+---
+
+## 9. Risks & Open Questions
 
 See [QUESTIONS.md](./QUESTIONS.md) for the full list of open questions.
 
@@ -239,14 +275,16 @@ See [QUESTIONS.md](./QUESTIONS.md) for the full list of open questions.
 | Risk | Mitigation |
 |------|-----------|
 | **ASJJF dependency** — Can they leave ASJJF's platform? | Ask Steve about the relationship; may need to integrate rather than replace |
-| **Translation quality** — AI translations may have BJJ terminology wrong | Have native-speaking practitioners review key terms |
-| **Scope creep** — Full platform is massive | Start with event hub + registration, add streaming/brackets later |
-| **Existing commitments** — Steve may have other tech plans | Come prepared to listen, not just pitch |
-| **Competition** — Smoothcomp is established | Our edge is i18n + custom branding + unified experience |
+| **Smoothcomp adoption** — Steve might already use or want Smoothcomp | Position as complementary — we handle the fan-facing/international layer, Smoothcomp handles brackets/scoring |
+| **Translation quality** — AI translations may have BJJ terminology wrong | Have native-speaking practitioners review; BJJ has specific Japanese/Portuguese terms that are universal |
+| **Scope creep** — Full platform is massive | Start with event hub + VOD, NOT registration or brackets |
+| **Camera/streaming capability** — Does Steve's team have the equipment? | Need to understand current video setup before promising streaming features |
+| **Existing commitments** — Steve may have other tech plans or contracts | Come prepared to listen, not just pitch |
+| **FloGrappling exclusivity** — Could Flo try to lock up Marianas Open? | Move fast; our multi-language angle isn't something Flo would offer |
 
 ---
 
-## 9. Timeline (Proposed)
+## 10. Timeline (Proposed)
 
 | Phase | Timeframe | Deliverable |
 |-------|-----------|-------------|

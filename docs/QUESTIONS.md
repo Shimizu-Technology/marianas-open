@@ -20,13 +20,21 @@
 
 8. **What do competitors complain about most?** Registration? Info access? Travel logistics?
 
-## About Streaming
+## About Streaming & Video
 
-9. **Have you explored streaming before?** Any previous attempts or conversations with platforms?
+9. **Have you explored streaming before?** Any previous attempts or conversations with platforms? We saw FloGrappling covered you in 2017-2018 — what happened there?
 
-10. **Who would watch?** Families? Other gyms? BJJ fans? Is there existing demand, or would you need to build it?
+10. **How many mats are filmed currently?** All mats or just the main mat? What camera setup do you use? (Phone, GoPro, professional cameras?)
 
-11. **Would you want free streaming (grow the audience) or paid (monetize)?** Or freemium — free for prelims, paid for finals?
+11. **Who films the matches?** Dedicated videographer? Volunteers? How many cameras per mat?
+
+12. **The YouTube fight videos** (e.g., "FULL FIGHT Samkang Kim vs Sho Saito") — who uploads those? How do they decide which fights to post?
+
+13. **Who would watch live streams?** Families? Other gyms? BJJ fans? Is there existing demand, or would you need to build it?
+
+14. **Would you want free streaming (grow the audience) or paid (monetize)?** Or freemium — free for prelims, paid for finals?
+
+15. **Have you looked at Smoothcomp?** They have a streaming feature with auto match-cutting and scoreboard overlay. Is that something you've considered?
 
 ## About Sponsors
 
