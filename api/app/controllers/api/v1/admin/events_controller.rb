@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_staff!
-        before_action :set_event, only: [:show, :update, :destroy, :upload_image]
+        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :import_results_preview, :import_results]
 
         def index
           org = Organization.first
@@ -43,6 +43,33 @@ module Api
           head :no_content
         end
 
+        # GET /admin/events/:id/import_results_preview
+        def import_results_preview
+          ids = resolve_asjjf_ids
+          return render json: { error: "No ASJJF event IDs configured for this event." }, status: :unprocessable_entity if ids.empty?
+
+          result = AsjjfScraper.preview(asjjf_event_ids: ids)
+          render json: {
+            event: { id: @event.id, name: @event.name, slug: @event.slug },
+            existing_results_count: @event.event_results.count,
+            preview: result[:summary],
+            sample: result[:results].first(10).map { |r| r.slice(:division, :placement, :competitor_name, :academy, :country_code) }
+          }
+        rescue AsjjfScraper::ScraperError => e
+          render json: { error: e.message }, status: :unprocessable_entity
+        end
+
+        # POST /admin/events/:id/import_results
+        def import_results
+          ids = resolve_asjjf_ids
+          return render json: { error: "No ASJJF event IDs configured for this event." }, status: :unprocessable_entity if ids.empty?
+
+          result = AsjjfScraper.import!(event: @event, asjjf_event_ids: ids)
+          render json: { message: "Imported #{result[:imported]} results", imported: result[:imported], summary: result[:summary] }
+        rescue AsjjfScraper::ScraperError => e
+          render json: { error: e.message }, status: :unprocessable_entity
+        end
+
         def upload_image
           unless params[:image].present?
             return render json: { error: "No image provided" }, status: :unprocessable_entity
@@ -66,9 +93,15 @@ module Api
             :venue_name, :venue_address, :city, :country, :country_code,
             :asjjf_stars, :is_main_event, :prize_pool, :registration_url,
             :status, :latitude, :longitude,
+            asjjf_event_ids: [],
             event_schedule_items_attributes: [:id, :time, :description, :sort_order, :_destroy],
             prize_categories_attributes: [:id, :name, :amount, :sort_order, :_destroy]
           )
+        end
+
+        def resolve_asjjf_ids
+          ids = params[:asjjf_event_ids] || @event.asjjf_event_ids
+          Array(ids).map(&:to_i).reject(&:zero?)
         end
       end
     end
