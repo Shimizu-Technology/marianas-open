@@ -26,7 +26,7 @@ Rails.application.routes.draw do
             get :import_results_preview
             post :import_results
           end
-          resources :event_results, only: [:create, :update, :destroy], path: 'results' do
+          resources :event_results, only: [:index, :create, :update, :destroy], path: 'results' do
             collection do
               post :bulk_create
               delete :destroy_all

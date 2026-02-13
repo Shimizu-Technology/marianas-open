@@ -225,3 +225,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_13_163947) do
     t.index ["featured"], name: "index_videos_on_featured"
     t.index ["youtube_video_id"], name: "index_videos_on_youtube_video_id"
   end
+
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "event_results", "competitors"
+  add_foreign_key "event_results", "events"
+  add_foreign_key "event_schedule_items", "events"
+  add_foreign_key "events", "organizations"
+  add_foreign_key "prize_categories", "events"
+  add_foreign_key "sponsors", "organizations"
+  add_foreign_key "videos", "events"
+end

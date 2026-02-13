@@ -7,6 +7,10 @@ module Api
         before_action :require_staff!
         before_action :set_sponsor, only: [:show, :update, :destroy, :upload_logo]
 
+        def show
+          render json: { sponsor: @sponsor.as_json }
+        end
+
         def index
           sponsors = Organization.first&.sponsors&.order(:tier, :sort_order) || []
           render json: { sponsors: sponsors.as_json }
