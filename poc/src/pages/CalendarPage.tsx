@@ -3,6 +3,8 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import SocialShare from '../components/SocialShare';
+import QRShare from '../components/QRShare';
 import { events } from '../data/events';
 
 function EventMapDot({ event, index }: { event: typeof events[0]; index: number }) {
@@ -74,9 +76,13 @@ export default function CalendarPage() {
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] mb-6">
               {t('calendar.title')}
             </h1>
-            <p className="text-text-secondary text-lg max-w-xl mx-auto">
+            <p className="text-text-secondary text-lg max-w-xl mx-auto mb-6">
               {t('calendar.subtitle')}
             </p>
+            <div className="flex items-center justify-center gap-3">
+              <SocialShare shareText={t('share.defaultText')} />
+              <QRShare />
+            </div>
           </motion.div>
         </div>
       </section>
@@ -163,13 +169,8 @@ export default function CalendarPage() {
                 >
                   {/* Country flag + Stars */}
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl">
-                      {event.countryCode === 'GU' && '🇬🇺'}
-                      {event.countryCode === 'JP' && '🇯🇵'}
-                      {event.countryCode === 'PH' && '🇵🇭'}
-                      {event.countryCode === 'TW' && '🇹🇼'}
-                      {event.countryCode === 'KR' && '🇰🇷'}
-                      {event.countryCode === 'HK' && '🇭🇰'}
+                    <span className="text-xs font-heading font-bold uppercase tracking-widest text-text-muted bg-navy-800 px-2 py-1 border border-white/5">
+                      {event.countryCode}
                     </span>
                     <div className="flex gap-0.5">
                       {Array.from({ length: event.asjjfStars }).map((_, j) => (

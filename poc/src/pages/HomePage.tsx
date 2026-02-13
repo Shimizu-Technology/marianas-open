@@ -30,10 +30,16 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-navy-800 via-navy-900 to-navy-900" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--color-navy-700)_0%,_transparent_50%)] opacity-30" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--color-gold-500)_0%,_transparent_40%)] opacity-[0.07]" />
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <img
+            src="/images/action-match-1.jpg"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-navy-900/80" />
+          <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/60 to-navy-900/40" />
+        </div>
 
         {/* Grid pattern overlay */}
         <div
@@ -166,25 +172,37 @@ export default function HomePage() {
             {/* Bento grid of stats/images */}
             <ScrollReveal className="lg:col-span-7" delay={0.2}>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-surface border border-white/5 p-8 space-y-2">
-                  <div className="text-5xl font-heading font-black text-gold-500">$2M</div>
-                  <div className="text-sm text-text-muted uppercase tracking-wider">Economic Impact</div>
-                </div>
-                <div className="bg-surface border border-white/5 p-8 space-y-2">
-                  <div className="text-5xl font-heading font-black text-text-primary">5K+</div>
-                  <div className="text-sm text-text-muted uppercase tracking-wider">Spectators</div>
-                </div>
-                <div className="col-span-2 bg-gradient-to-r from-navy-700 to-navy-800 p-8 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Globe size={18} className="text-gold-500" />
-                    <span className="text-sm text-gold-400 font-heading uppercase tracking-wider font-semibold">
-                      International Reach
-                    </span>
+                <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
+                  <img src="/images/action-match-2.jpg" alt="BJJ competition match" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
+                  <div className="absolute bottom-0 left-0 p-4 space-y-1">
+                    <div className="text-3xl font-heading font-black text-gold-500">$2M</div>
+                    <div className="text-xs text-text-muted uppercase tracking-wider">Economic Impact</div>
                   </div>
-                  <p className="text-text-secondary text-sm leading-relaxed">
-                    Partners in Korea, Japan, Taiwan, Philippines, and Hong Kong. 
-                    Featured in 30,000+ printed magazines across Asia.
-                  </p>
+                </div>
+                <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
+                  <img src="/images/venue-crowd.jpg" alt="Marianas Open venue" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
+                  <div className="absolute bottom-0 left-0 p-4 space-y-1">
+                    <div className="text-3xl font-heading font-black text-text-primary">5K+</div>
+                    <div className="text-xs text-text-muted uppercase tracking-wider">Spectators</div>
+                  </div>
+                </div>
+                <div className="relative col-span-2 overflow-hidden border border-white/5">
+                  <img src="/images/podium-1.jpg" alt="Podium ceremony" className="w-full h-48 object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-navy-900/95 via-navy-900/70 to-transparent" />
+                  <div className="absolute inset-0 p-8 flex flex-col justify-center">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Globe size={18} className="text-gold-500" />
+                      <span className="text-sm text-gold-400 font-heading uppercase tracking-wider font-semibold">
+                        International Reach
+                      </span>
+                    </div>
+                    <p className="text-text-secondary text-sm leading-relaxed max-w-md">
+                      Partners in Korea, Japan, Taiwan, Philippines, and Hong Kong. 
+                      Featured in 30,000+ printed magazines across Asia.
+                    </p>
+                  </div>
                 </div>
               </div>
             </ScrollReveal>
