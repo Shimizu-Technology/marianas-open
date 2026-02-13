@@ -1,14 +1,14 @@
-EVENT: 2023 Marianas Open Jiu-jitsu Championship
+EVENT: 2023 Marianas Open
 SLUG: marianas-open-2023
-ASJJF_ID: 1363
+ASJJF_IDS: 1363
 
 ##### Male White Juvenile Middle
-1st|Lobaton Elton|Figo' / Bonsai Jiu Jitsu|GUM
+1st|Lobaton Elton|Figo’ / Bonsai Jiu Jitsu|GUM
 2nd|Asprer Zayden|Guma|GUM
 3rd|Paulino Ethan|Guma|GUM
 
 ##### Male White Juvenile Open Weight
-1st|Lobaton Elton|Figo' / Bonsai Jiu Jitsu|GUM
+1st|Lobaton Elton|Figo’ / Bonsai Jiu Jitsu|GUM
 2nd|Cabe Ethan|Carlson Gracie Team|GUM
 3rd|Paulino Ethan|Guma|GUM
 
@@ -18,7 +18,7 @@ ASJJF_ID: 1363
 3rd|Guanlao Cean|Atos Jiu-jitsu Guam|GUM
 
 ##### Male White Adult Feather
-1st|Cabales Corey|Figo' / Bonsai Jiu Jitsu|GUM
+1st|Cabales Corey|Figo’ / Bonsai Jiu Jitsu|GUM
 2nd|Riley Sebastian|Atos Jiu-jitsu Guam|GUM
 3rd|Sanders Brendan|Guma|USA
 
@@ -66,7 +66,7 @@ ASJJF_ID: 1363
 ##### Male Blue Adult Super Heavy
 1st|Topasna Nathan|Other|GUM
 2nd|Yturralde Rob|Atos Jiu-jitsu Guam|GUM
-3rd|Vulovic Milo|Figo' / Bonsai Jiu Jitsu|USA
+3rd|Vulovic Milo|Figo’ / Bonsai Jiu Jitsu|USA
 
 ##### Male Blue Adult Ultra Heavy
 1st|Doherty Jackson|Atos Jiu-jitsu Guam|USA
@@ -82,7 +82,7 @@ ASJJF_ID: 1363
 3rd|Batista Mark|Machado Guam|DOM
 
 ##### Male Purple Adult Middle
-1st|Quintanilla Jr Gonzalo|Atos Jiu-jitsu Guam|GUM
+1st|Quintanilla Jr Gonz..|Atos Jiu-jitsu Guam|GUM
 2nd|Charfauros Roque|Heights Academy Guam|GUM
 3rd|Taitingfong Justin|Atos Jiu-jitsu Guam|GUM
 
@@ -97,11 +97,11 @@ ASJJF_ID: 1363
 ##### Male Purple Adult Open Weight
 1st|Oka Akihiro|Pato Studio|JPN
 2nd|Shinohara Michael|Atos Jiu-jitsu Guam|GUM
-3rd|Quintanilla Jr Gonzalo|Atos Jiu-jitsu Guam|GUM
+3rd|Quintanilla Jr Gonz..|Atos Jiu-jitsu Guam|GUM
 
 ##### Male Brown Adult Light Feather
 1st|Ledesma Kenneth|Atos Jiu-jitsu Guam|GUM
-2nd|Barzaga Francisco|Checkmat Philippines|PHL
+2nd|Barzaga Francisco L..|Checkmat Philippines|PHL
 
 ##### Male Brown Adult Feather
 1st|Yano Akira Thomy|Igloo|JPN
@@ -127,7 +127,7 @@ ASJJF_ID: 1363
 
 ##### Male Black Adult Feather
 1st|Meneghin Erick|Igloo|BRA
-2nd|Sevilla Elouie Federico|Checkmat Philippines|PHL
+2nd|Sevilla Elouie Fede..|Checkmat Philippines|PHL
 3rd|Enriquez Richard|Purebred Jiu Jitsu Guam|GUM
 
 ##### Male Black Adult Light
@@ -170,11 +170,11 @@ ASJJF_ID: 1363
 
 ##### Male White Master 1 Ultra Heavy
 1st|Andre Justin|Atos Jiu-jitsu Guam|GUM
-2nd|Schacher Gregory|The Pound Academy|GUM
+2nd|Schacher, I Gregory|The Pound Academy|GUM
 3rd|Cruz Fernando|Machado Guam|USA
 
 ##### Male White Master 1 Open Weight
-1st|Schacher Gregory|The Pound Academy|GUM
+1st|Schacher, I Gregory|The Pound Academy|GUM
 2nd|Camaya John|Atos Jiu-jitsu Guam|GUM
 3rd|Tiong Ryan|Atos Jiu-jitsu Guam|GUM
 

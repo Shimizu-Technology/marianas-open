@@ -1,0 +1,560 @@
+EVENT: 2024 Marianas Pro Korea
+SLUG: marianas-pro-korea-2024
+ASJJF_IDS: 1514, 1515
+
+##### [GI] Male White Juvenile Light
+1st|Kim Yeongmin|Over Limit Jiu Jitsu Korea|KOR
+2nd|Seungyoon Kwon|Over Limit Jiu Jitsu Korea|KOR
+3rd|Lee Jiwon|Wire Jiu Jitsu|KOR
+
+##### [GI] Male White Juvenile Heavy
+1st|Hyunbin Park|Wire Jiu Jitsu|KOR
+
+##### [GI] Male White Juvenile Super Heavy
+1st|Jeong Jaemin|Over Limit Jiu Jitsu Korea|KOR
+2nd|Lee Wonjong|Burning Jiujitsu|KOR
+3rd|Jin Byungwook|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male White Juvenile Open Weight
+1st|Kim Yeongmin|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Blue Juvenile Feather
+1st|Matsuo Christian|Carlos Toyota Bjj|BRA
+2nd|Lee Yoonchan|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Blue Juvenile Light
+1st|Kim Seongbin|Over Limit Jiu Jitsu Korea|KOR
+2nd|Baek Sooho|Other|KOR
+3rd|Ma Seungmin|Team Control Bjj|KOR
+3rd|Oshiro Mike|Carlos Toyota Bjj|BRA
+
+##### [GI] Male Blue Juvenile Middle
+1st|Kobayashi João|Carlos Toyota Bjj|BRA
+2nd|Noh Nohtaeeon|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Blue Juvenile Medium Heavy
+1st|Taek Lee|Team Control Bjj|KOR
+2nd|Ilano Edvilor Iii|Deftac Ribeiro|PHL
+
+##### [GI] Male Blue Juvenile Super Heavy
+1st|Kim Hongyeol|Carlos Toyota Bjj|KOR
+
+##### [GI] Male Blue Juvenile Open Weight
+1st|Oshiro Mike|Carlos Toyota Bjj|BRA
+2nd|Matsuo Christian|Carlos Toyota Bjj|BRA
+3rd|Ilano Edvilor Iii|Deftac Ribeiro|PHL
+3rd|Kobayashi João|Carlos Toyota Bjj|BRA
+
+##### [GI] Male White Adult Rooster
+1st|Kitami Masaki|Baret Submissions|MNP
+2nd|Kim Yungeon|Impacto Bjj Korea|KOR
+3rd|Changhyun Kim|Wire Jiu Jitsu|KOR
+
+##### [GI] Male White Adult Light Feather
+1st|Moon Taewon|Over Limit Jiu Jitsu Korea|KOR
+2nd|Okawa Javin|Baret Submissions|MNP
+3rd|Seo Hyeonseong|Over Limit Jiu Jitsu Korea|KOR
+3rd|Lee Jaebum|Other|KOR
+
+##### [GI] Male White Adult Feather
+1st|Lee Hojoon|Over Limit Jiu Jitsu Korea|KOR
+2nd|Chun Jungmin|Over Limit Jiu Jitsu Korea|KOR
+3rd|Lee Jae Seung|Over Limit Jiu Jitsu Korea|KOR
+3rd|Son Junhyuk|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male White Adult Light
+1st|Kim Kimdoheon|Wave Brazilian Jiu Jitsu|KOR
+2nd|Kim Janghyun|Over Limit Jiu Jitsu Korea|KOR
+3rd|Hwnag Sung Jun|Impacto Bjj Korea|KOR
+3rd|Kang Min Sik|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male White Adult Middle
+1st|Junghwan Kim|Wire Jiu Jitsu|KOR
+2nd|Hun Woo|Wave Brazilian Jiu Jitsu|KOR
+3rd|Lee Hyeon Woo|Over Limit Jiu Jitsu Korea|KOR
+3rd|Song Juho|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male White Adult Super Heavy
+1st|Klein Jacob|Atos Jiu-jitsu Guam|USA
+2nd|Kim Kangseop|Urban-jiujitsu|KOR
+3rd|Kim Deok-hwan|Over Limit Jiu Jitsu Korea|KOR
+3rd|Taekyoon Jung|Wire Jiu Jitsu|KOR
+
+##### [GI] Male White Adult Ultra Heavy
+1st|Park Wi Jun|Over Limit Jiu Jitsu Korea|KOR
+2nd|Cha Hoyeong|Seorae Jiujitsu|KOR
+
+##### [GI] Male White Adult Open Weight
+1st|Park Jeonghoon|Atos Korea|KOR
+2nd|Klein Jacob|Atos Jiu-jitsu Guam|USA
+3rd|Choi Sungwon|Atos Korea|KOR
+3rd|Park Wi Jun|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Blue Adult Rooster
+1st|Yooshin Sung|Essential Jiujitsu|KOR
+
+##### [GI] Male Blue Adult Light Feather
+1st|Iamazato Enzo|Carlos Toyota Bjj|BRA
+2nd|Kwak Minjae|Over Limit Jiu Jitsu Korea|KOR
+3rd|Narazaki Lukas|Checkmat Japan|BRA
+3rd|Kim Hyungbin|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Blue Adult Feather
+1st|Haul Chae|Team Control Bjj|KOR
+2nd|Seo Minhyeock Seo|Over Limit Jiu Jitsu Korea|KOR
+3rd|Jung Woojin|Team Mad Korea|KOR
+3rd|Son Young|Marc Jiu-jitsu|KOR
+
+##### [GI] Male Blue Adult Light
+1st|Lee Hyeonseo|Wave Brazilian Jiu Jitsu|KOR
+2nd|Park Ju Ho|Gracie Barra Jungwon|KOR
+3rd|You Jaehak|Over Limit Jiu Jitsu Korea|KOR
+3rd|Lim Hyeonggi|Wire Jiu Jitsu|KOR
+
+##### [GI] Male Blue Adult Middle
+1st|Byeong Min Jung|Wire Jiu Jitsu|KOR
+2nd|Seungmin Baek|Wire Jiu Jitsu|KOR
+3rd|Kim Kyumin|Over Limit Jiu Jitsu Korea|KOR
+3rd|Okjea Lee|Atos Korea|KOR
+
+##### [GI] Male Blue Adult Medium Heavy
+1st|Kim Jeongsu|Wire Jiu Jitsu|KOR
+2nd|Attao Jesus|Baret Submissions|MNP
+3rd|Hyunjin Baek|Over Limit Jiu Jitsu Korea|KOR
+3rd|Park Se Jin|Atos Korea|KOR
+
+##### [GI] Male Blue Adult Heavy
+1st|Eun Joong Kim|Over Limit Jiu Jitsu Korea|KOR
+2nd|Haganey Joseph|Machado Guam|USA
+3rd|Agda Kier|Purebred Jiu Jitsu Guam|PHL
+3rd|Jaehyung Kim|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Blue Adult Ultra Heavy
+1st|Cha Jihyun|Over Limit Jiu Jitsu Korea|KOR
+2nd|Jang Jeawon|Over Limit Jiu Jitsu Korea|KOR
+3rd|Hyun Kim|Atos Korea|KOR
+
+##### [GI] Male Blue Adult Open Weight
+1st|Eun Joong Kim|Over Limit Jiu Jitsu Korea|KOR
+2nd|Kim Wonwoo|Jiu Jitsu Land|KOR
+3rd|Iamazato Enzo|Carlos Toyota Bjj|BRA
+3rd|Lee Hyeonseo|Wave Brazilian Jiu Jitsu|KOR
+
+##### [GI] Male Purple Adult Light Feather
+1st|Park Ji Hun|Wire Jiu Jitsu|KOR
+2nd|Sik You|Wire Jiu Jitsu|KOR
+3rd|Oliveira Marco|Urban-jiujitsu|BRA
+
+##### [GI] Male Purple Adult Feather
+1st|Pereira Rafael|Bonsai Jiu-jitsu Japan|BRA
+2nd|Choi Heekyu|Queen Of Jiu Jitsu|KOR
+3rd|Euichan Noh|Over Limit Jiu Jitsu Korea|KOR
+3rd|Kim Taerin|Wire Jiu Jitsu|KOR
+
+##### [GI] Male Purple Adult Light
+1st|Park Jaewoon|Atos Jiu-jitsu|KOR
+2nd|Han Yongwon|Seorae Jiujitsu|KOR
+3rd|Park Park Young Kyu|Wire Jiu Jitsu|KOR
+3rd|Yoon Jaehoon|Wire Jiu Jitsu|KOR
+
+##### [GI] Male Purple Adult Middle
+1st|Hwang Jonghyun|Alliance|KOR
+2nd|Hong Jae Ho|Other|KOR
+
+##### [GI] Male Purple Adult Medium Heavy
+1st|Kim Bohun|Alliance|KOR
+2nd|Junghyun Kim|John Frankl Jiu-jitsu|KOR
+
+##### [GI] Male Purple Adult Heavy
+1st|Seung Ju Jeon|Wave Brazilian Jiu Jitsu|KOR
+
+##### [GI] Male Purple Adult Ultra Heavy
+1st|Che Junyong|Wave Brazilian Jiu Jitsu|KOR
+2nd|Lee Younghyuk|Impacto Bjj Korea|KOR
+
+##### [GI] Male Purple Adult Open Weight
+1st|Che Junyong|Wave Brazilian Jiu Jitsu|KOR
+2nd|Park Jaewoon|Atos Jiu-jitsu|KOR
+3rd|Pereira Rafael|Bonsai Jiu-jitsu Japan|BRA
+3rd|Kim Bohun|Alliance|KOR
+
+##### [GI] Male Brown Adult Light Feather
+1st|Watanabe Shuto|Strapple Shinyurigaoka|JPN
+2nd|Lee Gyeonghwan|Wave Brazilian Jiu Jitsu|KOR
+
+##### [GI] Male Brown Adult Feather
+1st|Jung Kawangmin|Alliance|KOR
+2nd|Jihwan Hyun|Over Limit Jiu Jitsu Korea|KOR
+3rd|Kim Jungwoo|Just Jiu-jitsu|KOR
+
+##### [GI] Male Brown Adult Light
+1st|Samkang Kim|Wave Brazilian Jiu Jitsu|KOR
+2nd|Kim Jin|Wire Jiu Jitsu|KOR
+3rd|Ho Yeon|Wire Jiu Jitsu|KOR
+
+##### [GI] Male Brown Adult Middle
+1st|Park Deahee|Atos Korea|KOR
+
+##### [GI] Male Brown Adult Heavy
+1st|Donghyun Kim|Over Limit Jiu Jitsu Korea|KOR
+2nd|Heo Harang|Jiu Jitsu Land|KOR
+3rd|Kim Yangrae|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Brown Adult Super Heavy
+1st|Kim Hee Dong|Seorae Jiujitsu|KOR
+2nd|Chae Min-gyu|Team Mad Korea|KOR
+3rd|Novotny Daniel|Kris Kim Bjj|USA
+3rd|Ada Chad|Purebred Jiu Jitsu Guam|GUM
+
+##### [GI] Male Brown Adult Open Weight
+1st|Kim Hee Dong|Seorae Jiujitsu|KOR
+2nd|Heo Harang|Jiu Jitsu Land|KOR
+3rd|Park Deahee|Atos Korea|KOR
+3rd|Jung Kawangmin|Alliance|KOR
+
+##### [GI] Male Black Adult Feather
+1st|Ha Yoonseo|Urban-jiujitsu|KOR
+2nd|Han Hyeonwoo|Team Roots Korea|KOR
+
+##### [GI] Male Black Adult Middle
+1st|Yoosuk Park|Alliance|KOR
+2nd|Park Geunpil|Wire Jiu Jitsu|KOR
+
+##### [GI] Male Black Adult Super Heavy
+1st|Yoon Minho|Wire Jiu Jitsu|PRK
+2nd|Kim Dave|John Frankl Jiu-jitsu|KOR
+
+##### [GI] Male Black Adult Ultra Heavy
+1st|Won Ho Song|Team Crown Jinhae|KOR
+
+##### [GI] Male Black Adult Open Weight
+1st|Yoon Minho|Wire Jiu Jitsu|PRK
+2nd|Kim Dave|John Frankl Jiu-jitsu|KOR
+3rd|Han Hyeonwoo|Team Roots Korea|KOR
+3rd|Ha Yoonseo|Urban-jiujitsu|KOR
+
+##### [GI] Male White Master 1 Feather
+1st|Beeson Jake|Fight Geek Bjj|GBR
+2nd|Jung Myungho|Impacto Bjj Korea|KOR
+
+##### [GI] Male White Master 1 Light
+1st|Kim Hunjae|Lucas Lepri Philippines|KOR
+2nd|Park Jongha|Atos Korea|KOR
+3rd|Woo Jimyeong|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male White Master 1 Middle
+1st|Jeon Seunghun|Over Limit Jiu Jitsu Korea|KOR
+2nd|Gu Junghyun|Impacto Bjj Korea|KOR
+
+##### [GI] Male White Master 1 Medium Heavy
+1st|Kim Dooho|Over Limit Jiu Jitsu Korea|KOR
+2nd|Jo Kyuhak|Team Superb|KOR
+
+##### [GI] Male White Master 1 Open Weight
+1st|Kim Dooho|Over Limit Jiu Jitsu Korea|KOR
+2nd|Jeon Seunghun|Over Limit Jiu Jitsu Korea|KOR
+3rd|Jo Kyuhak|Team Superb|KOR
+3rd|Gu Junghyun|Impacto Bjj Korea|KOR
+
+##### [GI] Male Blue Master 1 Light
+1st|Park Myeong Jun|Other|KOR
+2nd|Lyon Aaron|Machado Guam|USA
+3rd|Kim Yisak|Wire Jiu Jitsu|KOR
+
+##### [GI] Male Blue Master 1 Middle
+1st|Kim Hoon|Wire Jiu Jitsu|KOR
+2nd|Jang Jaesang|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Blue Master 1 Medium Heavy
+1st|Ham Hyeongju|Over Limit Jiu Jitsu Korea|KOR
+2nd|Kim Yonghwa|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Blue Master 1 Open Weight
+1st|Kim Hyungrae|Axis|KOR
+2nd|Choi Jongseung|Other|KOR
+3rd|Park Myeong Jun|Other|KOR
+3rd|Ham Hyeongju|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Purple Master 1 Light
+1st|Park Minhyeok|Jiujitsu Of Brothers|KOR
+2nd|Seo Minkyu|Paraestra Korea|KOR
+3rd|Leong Ben|Wire Jiu Jitsu|SGP
+3rd|Ki Beob Kim|Wire Jiu Jitsu|KOR
+
+##### [GI] Male Purple Master 1 Middle
+1st|Yu Donghui|Over Limit Jiu Jitsu Korea|KOR
+2nd|Ki Beom Kwon|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Purple Master 1 Heavy
+1st|Kim Keonil|Paraestra Korea|KOR
+2nd|Baek Seunggeun|Other|KOR
+
+##### [GI] Male Purple Master 1 Ultra Heavy
+1st|Yoon Jisung|Wire Jiu Jitsu|KOR
+
+##### [GI] Male Purple Master 1 Open Weight
+1st|Kim Keonil|Paraestra Korea|KOR
+2nd|Park Minhyeok|Jiujitsu Of Brothers|KOR
+3rd|Ki Beob Kim|Wire Jiu Jitsu|KOR
+3rd|Baek Seunggeun|Other|KOR
+
+##### [GI] Male Brown Master 1 Middle
+1st|Junbae Kim|Alliance|KOR
+2nd|Lawver Samuel|Machado Guam|USA
+
+##### [GI] Male Brown Master 1 Open Weight
+1st|Junbae Kim|Alliance|KOR
+2nd|Lawver Samuel|Machado Guam|USA
+
+##### [GI] Male Black Master 1 Light
+1st|Cho Daeyeon|Urban-jiujitsu|KOR
+2nd|Jung Yoon Ho|Alliance|KOR
+
+##### [GI] Male Black Master 1 Medium Heavy
+1st|Jung Heesung|Urban-jiujitsu|KOR
+2nd|Lee Dongyoung|Team Roots Korea|KOR
+3rd|Hyeungseok Lee|Over Limit Jiu Jitsu Korea|KOR
+3rd|Kyeongjun Lee|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Black Master 1 Heavy
+1st|Lee Jaesik|Alliance|KOR
+
+##### [GI] Male Black Master 1 Open Weight
+1st|Cho Daeyeon|Urban-jiujitsu|KOR
+2nd|Lee Dongyoung|Team Roots Korea|KOR
+3rd|Jung Heesung|Urban-jiujitsu|KOR
+3rd|Junyeup Kim|Essential Jiujitsu|KOR
+
+##### [GI] Male Blue Master 2 Feather
+1st|Nagahara Yoshimasa|Rita Jiu Jitsu|JPN
+
+##### [GI] Male Blue Master 2 Light
+1st|Juan Shaun|Kingdom Jiujitsu|GUM
+2nd|Yamazaki Ikuta|Rita Jiu Jitsu|JPN
+3rd|Hong Chang Su|Over Limit Jiu Jitsu Korea|KOR
+3rd|Kim Hyunwoong|Lucas Lepri Philippines|KOR
+
+##### [GI] Male Blue Master 2 Heavy
+1st|Johwa Hong|Wire Jiu Jitsu|KOR
+2nd|Bradford Michael|Other|USA
+3rd|Cruz Joey|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Blue Master 2 Open Weight
+1st|Johwa Hong|Wire Jiu Jitsu|KOR
+2nd|Kim Hyunwoong|Lucas Lepri Philippines|KOR
+3rd|Juan Shaun|Kingdom Jiujitsu|GUM
+
+##### [GI] Male Purple Master 2 Light
+1st|Song Hansong|Seorae Jiujitsu|KOR
+2nd|Lee Osang|Wire Jiu Jitsu|KOR
+3rd|Kim Taewon|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Purple Master 2 Middle
+1st|Choi Booil|Over Limit Jiu Jitsu Korea|KOR
+2nd|Kim Pyeong-dong|Over Limit Jiu Jitsu Korea|KOR
+3rd|Ahn Chihun|Team Superb|KOR
+
+##### [GI] Male Purple Master 2 Open Weight
+1st|Yu Donghui|Over Limit Jiu Jitsu Korea|KOR
+2nd|Ahn Chihun|Team Superb|KOR
+3rd|Kim Taewon|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Brown Master 2 Light Feather
+1st|Matsuo Roberto|Carlos Toyota Bjj|BRA
+2nd|Park Junseong|Impacto Bjj Korea|KOR
+
+##### [GI] Male Brown Master 2 Feather
+1st|Yoon Jongwook|Seorae Jiujitsu|KOR
+2nd|Jung Yunmin|Team Roots Korea|KOR
+3rd|Barron Jody|Urban-jiujitsu|CAN
+
+##### [GI] Male Brown Master 2 Middle
+1st|Jang Inseon|Atos Korea|KOR
+
+##### [GI] Male Brown Master 2 Medium Heavy
+1st|Lee Hak Kyung|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Brown Master 2 Super Heavy
+1st|Shinohara Raymond|Machado Guam|GUM
+
+##### [GI] Male Brown Master 2 Open Weight
+1st|Jang Inseon|Atos Korea|KOR
+2nd|Shinohara Raymond|Machado Guam|GUM
+3rd|Matsuo Roberto|Carlos Toyota Bjj|BRA
+3rd|Lee Hak Kyung|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Black Master 2 Medium Heavy
+1st|Castro Ademir|Fight Geek Bjj|BRA
+2nd|Kim Bumjun|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male White Master 3 Feather
+1st|Yun Jongseon|Over Limit Jiu Jitsu Korea|KOR
+2nd|Ishizaki Noriaki|Muse Jiu Jitsu Academy|JPN
+3rd|Park Junwoo|Wire Jiu Jitsu|KOR
+
+##### [GI] Male White Master 3 Medium Heavy
+1st|Jo Hwa Young|Team Superb|KOR
+2nd|Kim Kyongsun|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male White Master 3 Open Weight
+1st|Yun Jongseon|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Blue Master 3 Super Heavy
+1st|Kang Jungu|Wire Jiu Jitsu|KOR
+
+##### [GI] Male Brown Master 3 Middle
+1st|Stotts Brandon|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Im Namseon|Gracie Barra Jungwon|KOR
+
+##### [GI] Male Brown Master 3 Open Weight
+1st|Stotts Brandon|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Im Namseon|Gracie Barra Jungwon|KOR
+
+##### [GI] Male Black Master 3 Light
+1st|Yoo Daerip|Imperator|KOR
+
+##### [GI] Male Black Master 3 Heavy
+1st|Kwon Hyuk Il|Seoraejiujitsu|KOR
+
+##### [GI] Male Black Master 3 Super Heavy
+1st|Soocheol Park|Over Limit Jiu Jitsu Korea|KOR
+2nd|Jung Kyo Park|Marc Jiu-jitsu|KOR
+
+##### [GI] Male Black Master 3 Ultra Heavy
+1st|Lee Dae Woong|John Frankl Jiu-jitsu|KOR
+2nd|Yusuke Tabata|Paraestra Moriya|JPN
+
+##### [GI] Male Black Master 3 Open Weight
+1st|Lee Dae Woong|John Frankl Jiu-jitsu|KOR
+2nd|Yoo Daerip|Imperator|KOR
+3rd|Yusuke Tabata|Paraestra Moriya|JPN
+3rd|Kwon Hyuk Il|Seoraejiujitsu|KOR
+
+##### [GI] Male White Master 4 Medium Heavy
+1st|Park Chanseo|Yuhon Bjj Academy|KOR
+2nd|Choi Byeong In|Yuhon Bjj Academy|KOR
+
+##### [GI] Male Brown Master 4 Light
+1st|Jung Dong Kyun|Atos Korea|KOR
+2nd|Kim Do Hyoung|Over Limit Jiu Jitsu Korea|KOR
+
+##### [GI] Male Brown Master 4 Open Weight
+1st|Jung Dong Kyun|Atos Korea|KOR
+2nd|Kim Do Hyoung|Over Limit Jiu Jitsu Korea|KOR
+3rd|Lee Michael|Machado Guam|USA
+
+##### [NOGI] Male White Adult Feather
+1st|Yamagishi Jacob|Baret Submissions|MNP
+2nd|Kim Sungwon|Over Limit Jiu Jitsu Korea|KOR
+3rd|Song Ziqiang|Purebred Jiu Jitsu Guam|MNP
+3rd|Okawa Javin|Baret Submissions|MNP
+
+##### [NOGI] Male White Adult Middle
+1st|Kang Min Sik|Over Limit Jiu Jitsu Korea|KOR
+
+##### [NOGI] Male White Adult Heavy
+1st|Klein Jacob|Atos Jiu-jitsu Guam|USA
+2nd|Tankersley Adrian|Other|USA
+
+##### [NOGI] Male White Adult Open Weight
+1st|Klein Jacob|Atos Jiu-jitsu Guam|USA
+2nd|Yamagishi Jacob|Baret Submissions|MNP
+3rd|Okawa Javin|Baret Submissions|MNP
+3rd|Kim Sungwon|Over Limit Jiu Jitsu Korea|KOR
+
+##### [NOGI] Male Blue Adult Light Feather
+1st|Iamazato Enzo|Carlos Toyota Bjj|BRA
+
+##### [NOGI] Male Blue Adult Feather
+1st|Oshiro Mike|Carlos Toyota Bjj|BRA
+
+##### [NOGI] Male Blue Adult Light
+1st|Lyon Aaron|Machado Guam|USA
+2nd|Jang Jae Min|Over Limit Jiu Jitsu Korea|KOR
+3rd|Taitingfong Giovonni|Purebred Jiu Jitsu Guam|MNP
+
+##### [NOGI] Male Blue Adult Middle
+1st|Tan-torres Joshua|Cobra Kai Martial Arts|USA
+2nd|Knoth Robert|Over Limit Jiu Jitsu Korea|USA
+
+##### [NOGI] Male Blue Adult Heavy
+1st|Haganey Joseph|Machado Guam|USA
+2nd|Agda Kier|Purebred Jiu Jitsu Guam|PHL
+3rd|Attao Jesus|Baret Submissions|MNP
+
+##### [NOGI] Male Blue Adult Open Weight
+1st|Tan-torres Joshua|Cobra Kai Martial Arts|USA
+2nd|Knoth Robert|Over Limit Jiu Jitsu Korea|USA
+3rd|Lyon Aaron|Machado Guam|USA
+3rd|Haganey Joseph|Machado Guam|USA
+
+##### [NOGI] Male Purple Adult Light
+1st|Hirokawa Yoshiki|Other|JPN
+2nd|Marsella Larry|Machado Guam|USA
+3rd|Leong Ben|Wire Jiu Jitsu|SGP
+
+##### [NOGI] Male Purple Adult Middle
+1st|Hong Jae Ho|Other|KOR
+2nd|Yejun Park|Over Limit Jiu Jitsu Korea|KOR
+
+##### [NOGI] Male Purple Adult Open Weight
+1st|Schulte William|Other|USA
+2nd|Hirokawa Yoshiki|Other|JPN
+3rd|Yejun Park|Over Limit Jiu Jitsu Korea|KOR
+
+##### [NOGI] Male Brown Adult Middle
+1st|Lee Dongyeob|Mybjj Team Japan|USA
+2nd|Park Deahee|Atos Korea|KOR
+
+##### [NOGI] Male Brown Adult Medium Heavy
+1st|Donghyun Kim|Over Limit Jiu Jitsu Korea|KOR
+
+##### [NOGI] Male Brown Adult Heavy
+1st|Kim Yangrae|Over Limit Jiu Jitsu Korea|KOR
+
+##### [NOGI] Male Brown Adult Open Weight
+1st|Lee Dongyeob|Mybjj Team Japan|USA
+2nd|Donghyun Kim|Over Limit Jiu Jitsu Korea|KOR
+3rd|Kim Yangrae|Over Limit Jiu Jitsu Korea|KOR
+3rd|Park Deahee|Atos Korea|KOR
+
+##### [NOGI] Male Black Adult Light
+1st|Dos Santos Silva Ju..|Showfight Dream Team|BRA
+
+##### [NOGI] Male Black Adult Ultra Heavy
+1st|Won Ho Song|Team Crown Jinhae|KOR
+2nd|Palagi Asa|Other|USA
+
+##### [NOGI] Male Black Adult Open Weight
+1st|Won Ho Song|Team Crown Jinhae|KOR
+2nd|Palagi Asa|Other|USA
+3rd|Dos Santos Silva Ju..|Showfight Dream Team|BRA
+
+##### [NOGI] Male Brown Master 1 Feather
+1st|Watanabe Shuto|Strapple Shinyurigaoka|JPN
+2nd|Hur Jaehyuck|Over Limit Jiu Jitsu Korea|KOR
+
+##### [NOGI] Male Brown Master 1 Open Weight
+1st|Hur Jaehyuck|Over Limit Jiu Jitsu Korea|KOR
+
+##### [NOGI] Male Brown Master 2 Feather
+1st|Park Junseong|Impacto Bjj Korea|KOR
+
+##### [NOGI] Male Brown Master 2 Heavy
+1st|Hu Mu|Over Limit Jiu Jitsu China|CHN
+
+##### [NOGI] Male Brown Master 2 Super Heavy
+1st|Shinohara Raymond|Machado Guam|GUM
+
+##### [NOGI] Male Brown Master 2 Open Weight
+1st|Shinohara Raymond|Machado Guam|GUM
+2nd|Park Junseong|Impacto Bjj Korea|KOR
+
+##### [NOGI] Male Black Master 2 Medium Heavy
+1st|Ambrose Jj|Machado Guam|USA
+2nd|Kim Bumjun|Over Limit Jiu Jitsu Korea|KOR
+
+##### [NOGI] Male Black Master 2 Open Weight
+1st|Ambrose Jj|Machado Guam|USA
+2nd|Kim Bumjun|Over Limit Jiu Jitsu Korea|KOR
+3rd|Soocheol Park|Over Limit Jiu Jitsu Korea|KOR

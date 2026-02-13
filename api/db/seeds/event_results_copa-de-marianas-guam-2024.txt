@@ -1,0 +1,164 @@
+EVENT: 2024 Copa De Marianas
+SLUG: copa-de-marianas-guam-2024
+ASJJF_IDS: 1428
+
+##### Male White Juvenile Feather
+1st|Williams Gil|Heights Academy Guam|GUM
+2nd|Cruz Jesse|Carlson Gracie Team|GUM
+
+##### Male Blue Juvenile Middle
+1st|Lobaton Elton|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Taijeron Isaiah|Heights Academy Guam|GUM
+
+##### Male White Adult Rooster
+1st|Eola Jasper|Atos Jiu-jitsu Guam|USA
+2nd|Cruz Jaren|Guma|GUM
+3rd|Rempis Rafael|Fsm Brazilian Jiu Jitsu|PHL
+
+##### Male White Adult Feather
+1st|Taitingfong Landon|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Fontenot Deondra|Carlson Gracie Team|USA
+3rd|Sablan Isaiah|Purebred Jiu Jitsu Guam|MNP
+
+##### Male White Adult Light
+1st|Macpherson Sean|Atos Jiu-jitsu Guam|USA
+2nd|Contreras Bryant|Heights Academy Guam|GUM
+3rd|Yamagishi Jacob|Baret Submissions|MNP
+
+##### Male White Adult Middle
+1st|Sullivan Jackson|Atos Jiu-jitsu Guam|USA
+2nd|Ymballa Joel|Guma|GUM
+
+##### Male White Adult Heavy
+1st|Williams Josiah|Carlson Gracie Team|USA
+
+##### Male White Adult Ultra Heavy
+1st|Taijeron Ethan|Heights Academy Guam|GUM
+2nd|Miagoux Mauiti|Machado Guam|PYF
+3rd|Keller Zachary|Fsm Brazilian Jiu Jitsu|FSM
+
+##### Male White Adult Open Weight
+1st|Contreras Bryant|Heights Academy Guam|GUM
+2nd|Yamagishi Jacob|Baret Submissions|MNP
+3rd|Sullivan Jackson|Atos Jiu-jitsu Guam|USA
+
+##### Male Blue Adult Rooster
+1st|Topasna Scottie|Heights Academy Guam|GUM
+2nd|Pelep Deitrick|Fsm Brazilian Jiu Jitsu|FSM
+
+##### Male Blue Adult Feather
+1st|Taitano Zander|Atos Jiu-jitsu Guam|GUM
+2nd|Mesa Joaquin|Atos Jiu-jitsu Guam|GUM
+3rd|Cabales Corey|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### Male Blue Adult Light
+1st|Lacdoo Sean|Heights Academy Guam|GUM
+2nd|Gogo Austin|Atos Jiu-jitsu Guam|GUM
+3rd|Lyon Aaron|Machado Guam|USA
+
+##### Male Blue Adult Middle
+1st|Ada Colin|Atos Jiu-jitsu Guam|GUM
+2nd|Gubanov Ivan|Carlson Gracie Team|RUS
+3rd|Francisco Eric|Carlson Gracie Team|GUM
+
+##### Male Blue Adult Heavy
+1st|Yturralde Rob|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Adult Ultra Heavy
+1st|Guerrero James|Heights Academy Guam|GUM
+2nd|Agda Kier|Purebred Jiu Jitsu Guam|PHL
+3rd|Rosario Jordan|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Adult Open Weight
+1st|Taitano Zander|Atos Jiu-jitsu Guam|GUM
+2nd|Mesa Joaquin|Atos Jiu-jitsu Guam|GUM
+3rd|Guerrero James|Heights Academy Guam|GUM
+
+##### Male Purple Adult Middle
+1st|Quintanilla Jr Gonz..|Atos Jiu-jitsu Guam|GUM
+2nd|Taitingfong Justin|Atos Jiu-jitsu Guam|GUM
+
+##### Male Purple Adult Medium Heavy
+1st|Shinohara Michael|Atos Jiu-jitsu Guam|GUM
+2nd|Rivera Anthony|Heights Academy Guam|GUM
+3rd|Cepeda Christian|Atos Jiu-jitsu Guam|GUM
+
+##### Male Purple Adult Ultra Heavy
+1st|Mendiola Casper|Other|MNP
+
+##### Male Purple Adult Open Weight
+1st|Shinohara Michael|Atos Jiu-jitsu Guam|GUM
+2nd|Quintanilla Jr Gonz..|Atos Jiu-jitsu Guam|GUM
+3rd|Mendiola Casper|Other|MNP
+
+##### Male Brown Adult Heavy
+1st|Brown Nicolas|Purebred Jiu Jitsu Guam|GUM
+2nd|Shinohara Raymond|Machado Guam|GUM
+
+##### Male Brown Adult Open Weight
+1st|Brown Nicolas|Purebred Jiu Jitsu Guam|GUM
+2nd|Shinohara Raymond|Machado Guam|GUM
+
+##### Male Black Adult Medium Heavy
+1st|Cruz Anthony|Carlson Gracie Team|GUM
+2nd|Cruz Oliver|Purebred Jiu Jitsu Guam|GUM
+
+##### Male Black Adult Heavy
+1st|Meno John|Atos Jiu-jitsu Guam|GUM
+
+##### Male Black Adult Open Weight
+1st|Cruz Anthony|Carlson Gracie Team|GUM
+2nd|Meno John|Atos Jiu-jitsu Guam|GUM
+3rd|Cruz Oliver|Purebred Jiu Jitsu Guam|GUM
+
+##### Male White Master 1 Light
+1st|Ngiratumerang Melvin|Purebred Jiu Jitsu Guam|GUM
+
+##### Male White Master 1 Medium Heavy
+1st|Acosta Riki|Atos Jiu-jitsu Guam|DOM
+
+##### Male White Master 1 Ultra Heavy
+1st|Celestine Da&#39;aud|Machado Guam|TTO
+
+##### Male White Master 1 Open Weight
+1st|Quinit Ben|Machado Guam|USA
+2nd|Acosta Riki|Atos Jiu-jitsu Guam|DOM
+3rd|Ngiratumerang Melvin|Purebred Jiu Jitsu Guam|GUM
+
+##### Male Blue Master 1 Heavy
+1st|Blas Randy|Atos Jiu-jitsu Guam|GUM
+2nd|Bennett Lorenzo|Atos Jiu-jitsu Guam|USA
+
+##### Male Blue Master 1 Open Weight
+1st|Blas Randy|Atos Jiu-jitsu Guam|GUM
+2nd|Bennett Lorenzo|Atos Jiu-jitsu Guam|USA
+3rd|Lyon Aaron|Machado Guam|USA
+
+##### Male White Master 2 Feather
+1st|Sarmiento Paul|Atos Jiu-jitsu Guam|GUM
+2nd|Matsumoto Shovey|Guma|GUM
+3rd|Lizama Edward|Machado Guam|GUM
+
+##### Male White Master 2 Middle
+1st|Rendina Christopher|Purebred Jiu Jitsu Guam|USA
+
+##### Male White Master 2 Medium Heavy
+1st|Howard Brian|Carlson Gracie Team|GUM
+2nd|Ngiratregd Kyle|Figo’ / Bonsai Jiu Jitsu|PLW
+
+##### Male White Master 2 Ultra Heavy
+1st|Brown Adam|Carlson Gracie Team|USA
+
+##### Male White Master 2 Open Weight
+1st|Howard Brian|Carlson Gracie Team|GUM
+2nd|Sarmiento Paul|Atos Jiu-jitsu Guam|GUM
+3rd|Matsumoto Shovey|Guma|GUM
+
+##### Male Blue Master 2 Light
+1st|Cabrera Alex|Purebred Jiu Jitsu Guam|GUM
+2nd|Manley Jeremiah|Atos Jiu-jitsu Guam|GUM
+3rd|Williams Grant|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### Male Blue Master 2 Open Weight
+1st|Cabrera Alex|Purebred Jiu Jitsu Guam|GUM
+2nd|Manley Jeremiah|Atos Jiu-jitsu Guam|GUM

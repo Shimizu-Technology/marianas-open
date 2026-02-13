@@ -1,0 +1,453 @@
+EVENT: 2024 Marianas Pro Manila
+SLUG: marianas-pro-manila-2024
+ASJJF_IDS: 1511
+
+##### Male White Juvenile Light Feather
+1st|Jimenez Joseph|Cobrinha Manila|PHL
+2nd|Umandal Kurt|Calma Jiu Jitsu|PHL
+3rd|De Mesa Jed|Project Lifestyle Manila|PHL
+3rd|Ledda Luc|Deftac Six Blades|PHL
+
+##### Male White Juvenile Feather
+1st|Agcaoili Alessandro|Cobrinha Manila|PHL
+2nd|Arias Saviour|Carpe Diem|PHL
+3rd|Alitao Andreas|Deftac Six Blades|PHL
+
+##### Male White Juvenile Light
+1st|Cardines Bryan|Cebu Jiu-jitsu|PHL
+2nd|Lee Geon Hui|Deftac Six Blades|KOR
+
+##### Male White Juvenile Medium Heavy
+1st|Lee Jun|Deftac Six Blades|KOR
+2nd|Saniel Andreas|Deftac Six Blades|PHL
+3rd|Go Casey|Deftac Six Blades|PHL
+
+##### Male White Juvenile Super Heavy
+1st|Co Yeuri|Deftac Six Blades|PHL
+
+##### Male White Juvenile Open Weight
+1st|Co Yeuri|Deftac Six Blades|PHL
+2nd|Go Casey|Deftac Six Blades|PHL
+3rd|Umandal Kurt|Calma Jiu Jitsu|PHL
+3rd|Ledda Luc|Deftac Six Blades|PHL
+
+##### Male Blue Juvenile Light Feather
+1st|Santos Julian|Deftac Six Blades|PHL
+2nd|Aguila Lukas|Carpe Diem|PHL
+3rd|Benavides Rafael|Cebu Jiu-jitsu|PHL
+
+##### Male Blue Juvenile Middle
+1st|Hyeonseo Na|Deftac Six Blades|KOR
+2nd|Esteban Wiane|Carpe Diem|PHL
+3rd|Bulayungan Regius|Bullyville Fight Team|PHL
+
+##### Male White Adult Rooster
+1st|Aguilar Yanni|Project Lifestyle Manila|PHL
+2nd|Cruz Alexandrous|Project Lifestyle Manila|PHL
+3rd|Veranda Dennis|Deftac Six Blades|PHL
+3rd|Subido Ashton|Kamphuis Fabricio|PHL
+
+##### Male White Adult Light Feather
+1st|Alipio Denzel Leal|Deftac Six Blades|PHL
+2nd|Anastacio Gabriel|Carpe Diem|PHL
+3rd|Rances Kurt|Project Lifestyle Manila|PHL
+3rd|Escandor Ray Alex|Deftac Six Blades|PHL
+
+##### Male White Adult Feather
+1st|Yaun Sherwin|Project Lifestyle Manila|PHL
+2nd|Aguirre Jerome|Carpe Diem|PHL
+3rd|Arcayos Zyv Wesley|Kamphuis Fabricio|PHL
+3rd|Serrano Joaquin|Bullyville Fight Team|PHL
+
+##### Male White Adult Light
+1st|Burgos Richard|Deftac Six Blades|PHL
+2nd|Sia Joseph|Deftac Six Blades|PHL
+3rd|Hans Earl|Project Lifestyle Manila|PHL
+3rd|Ng Anton|Deftac Six Blades|PHL
+
+##### Male White Adult Middle
+1st|Latawan Sherwin|Project Lifestyle Manila|PHL
+2nd|Belakbir Youssef|Machado Guam|USA
+3rd|Allares Jose Jelome..|Deftac Six Blades|PHL
+3rd|Pascual Vincent|Project Lifestyle Manila|PHL
+
+##### Male White Adult Medium Heavy
+1st|Atenta Joel|Atos Jiu-jitsu Guam|GUM
+2nd|Morris Ryan|Project Lifestyle Manila|PHL
+3rd|Almanon Benjie|Deftac Six Blades|PHL
+3rd|Sarandona Yeshu|Project Lifestyle Manila|PHL
+
+##### Male White Adult Ultra Heavy
+1st|Roberts Callum|Deftac Six Blades|PHL
+2nd|Licup Chris|Project Lifestyle Manila|PHL
+3rd|Cullarin Edgar|Over Limit Jiu Jitsu - Tarlac|PHL
+3rd|Pedreno Carlos|Deftac Six Blades|PHL
+
+##### Male White Adult Open Weight
+1st|Alipio Denzel Leal|Deftac Six Blades|PHL
+2nd|Morris Ryan|Project Lifestyle Manila|PHL
+3rd|Belakbir Youssef|Machado Guam|USA
+3rd|Atenta Joel|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Adult Rooster
+1st|Del Rosario Lord|Deftac Ribeiro|PHL
+2nd|Aguilar Luchoo|Deftac Six Blades|PHL
+3rd|Itaas Mark|Bullyville Fight Team|PHL
+3rd|Carpio Thomas|Deftac Six Blades|PHL
+
+##### Male Blue Adult Light Feather
+1st|Lim Sebastian|Cobrinha Manila|PHL
+2nd|Tan Daniel|Project Lifestyle Manila|PHL
+3rd|Sudsudan John|Jiu Jitsu Manila|PHL
+3rd|Dioquino Andrew|Carpe Diem|PHL
+
+##### Male Blue Adult Feather
+1st|Lim Stephen|Cobrinha Manila|PHL
+2nd|Sanders Brendan|Guma|USA
+3rd|Danao Ross|Checkmat Philippines|PHL
+3rd|Garcia Kurt|Project Lifestyle Manila|PHL
+
+##### Male Blue Adult Light
+1st|Enriquez Simon|Leap Jiu Jitsu|PHL
+2nd|Cruz Jordan|Bullyville Fight Team|PHL
+3rd|Borja Edward|Checkmat Philippines|PHL
+
+##### Male Blue Adult Middle
+1st|Valdez Brandon|Machado Guam|USA
+2nd|Miranda David|Bullyville Fight Team|PHL
+3rd|Wong Lance|Checkmat Philippines|PHL
+3rd|Javier John|Project Lifestyle Manila|PHL
+
+##### Male Blue Adult Medium Heavy
+1st|Dy Joshua|Jiu Jitsu Manila|PHL
+2nd|Peralta Gonzo|Deftac Six Blades|PHL
+3rd|Gyuseong Kim|Deftac Six Blades|KOR
+
+##### Male Blue Adult Heavy
+1st|Cabo Donavan|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### Male Blue Adult Ultra Heavy
+1st|Dagatan Fidel|Carpe Diem|PHL
+2nd|Harris Darnell|Guma|GUM
+
+##### Male Blue Adult Open Weight
+1st|Dagatan Fidel|Carpe Diem|PHL
+2nd|Miranda David|Bullyville Fight Team|PHL
+3rd|Valdez Brandon|Machado Guam|USA
+3rd|Cabo Donavan|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### Male Purple Adult Rooster
+1st|Manio Ivan Mij|Deftac Six Blades|PHL
+2nd|Hilario Enrique|Project Lifestyle Manila|PHL
+3rd|Revilloza Jc|Checkmat Philippines|PHL
+3rd|Thapa Ashish|Kowloon Jiu-jitsu|NPL
+
+##### Male Purple Adult Light Feather
+1st|Marte Joaquin Anton..|Deftac Six Blades|PHL
+2nd|Cachuela Joaquin|Carpe Diem|PHL
+
+##### Male Purple Adult Feather
+1st|Caw-is Marshal|Checkmat Philippines|PHL
+2nd|Ochoa Marc|Atos Jiu-jitsu|PHL
+3rd|Balcita Dylan|Checkmat Philippines|PHL
+3rd|Caasi Kevin|Checkmat Philippines|PHL
+
+##### Male Purple Adult Middle
+1st|Peliño Dahn|Checkmat Philippines|PHL
+2nd|Ceriola Nicolas|Deftac Six Blades|PHL
+3rd|Sawal Edrick|Checkmat Philippines|PHL
+3rd|Pablo Kioni|Atos Jiu-jitsu Guam|GUM
+
+##### Male Purple Adult Heavy
+1st|Cruz Carlo Yani|Project Lifestyle Manila|PHL
+
+##### Male Purple Adult Open Weight
+1st|Cruz Carlo Yani|Project Lifestyle Manila|PHL
+2nd|Ortega Raymundo|Checkmat Philippines|PHL
+3rd|Balcita Dylan|Checkmat Philippines|PHL
+3rd|Sawal Edrick|Checkmat Philippines|PHL
+
+##### Male Brown Adult Light Feather
+1st|Morales Alphonso Ra..|Cobrinha Manila|PHL
+2nd|Matias Raphael|Atos Jiu-jitsu|PHL
+3rd|Rulloda Juan Rico|Deftac Six Blades|PHL
+
+##### Male Brown Adult Feather
+1st|Jayson Serg|Other|PHL
+
+##### Male Brown Adult Light
+1st|Yi Uidang|Deftac Six Blades|KOR
+
+##### Male Brown Adult Middle
+1st|Gaerlan Leo Paolo|Matrix Jiu Jitsu|PHL
+2nd|Borja Michael|Checkmat Philippines|PHL
+
+##### Male Brown Adult Medium Heavy
+1st|Hirasawa Hiroshi|Pato Studio|JPN
+
+##### Male Brown Adult Open Weight
+1st|Hirasawa Hiroshi|Pato Studio|JPN
+2nd|Gaerlan Leo Paolo|Matrix Jiu Jitsu|PHL
+3rd|Jayson Serg|Other|PHL
+3rd|Yi Uidang|Deftac Six Blades|KOR
+
+##### Male Black Adult Feather
+1st|Ortiz Nathanielle|Deftac Ribeiro|PHL
+2nd|Sevilla Elouie Fede..|Checkmat Philippines|PHL
+
+##### Male Black Adult Open Weight
+1st|Ortiz Nathanielle|Deftac Ribeiro|PHL
+
+##### Male White Master 1 Feather
+1st|Olanda Tyrone Roe|Deftac Six Blades|PHL
+2nd|Banasan Kenneth|Checkmat Philippines|PHL
+3rd|Chan Remington|Deftac Six Blades|PHL
+
+##### Male White Master 1 Light
+1st|Sunga Luis|Checkmat Philippines|PHL
+2nd|Clamor Omar|Deftac Six Blades|PHL
+3rd|Birung Herald|Deftac Six Blades|PHL
+3rd|Dangalan Raymart|Project Lifestyle Manila|PHL
+
+##### Male White Master 1 Middle
+1st|Victa Ira|Deftac Six Blades|PHL
+2nd|Mota Nelson|Deftac Six Blades|PHL
+3rd|Datu Zeperelle|Atos Jiu-jitsu|PHL
+
+##### Male White Master 1 Medium Heavy
+1st|Urgel Taishi|Checkmat Philippines|PHL
+2nd|Gonzales Rosh|Bullyville Fight Team|PHL
+3rd|Enriquez Ralph|Over Limit Jiu Jitsu Philippines|PHL
+3rd|Duque Restituto Jr.|Deftac Six Blades|PHL
+
+##### Male White Master 1 Heavy
+1st|Zablan Carlo|Checkmat Philippines|PHL
+2nd|Faburada Ernel|Project Lifestyle Manila|PHL
+
+##### Male White Master 1 Ultra Heavy
+1st|Guzman Martin Ian|Checkmat Philippines|PHL
+2nd|Juico John|Deftac Six Blades|PHL
+3rd|Manuel Jan Miguel|Deftac Six Blades|PHL
+
+##### Male White Master 1 Open Weight
+1st|Banasan Kenneth|Checkmat Philippines|PHL
+2nd|Urgel Taishi|Checkmat Philippines|PHL
+3rd|Zablan Carlo|Checkmat Philippines|PHL
+3rd|Guzman Martin Ian|Checkmat Philippines|PHL
+
+##### Male Blue Master 1 Light Feather
+1st|Moran Emmanuel|Deftac Six Blades|PHL
+2nd|Himoc Joselito Apol..|Checkmat Philippines|PHL
+3rd|Barnuevo Ray Justin|Project Lifestyle Manila|PHL
+
+##### Male Blue Master 1 Feather
+1st|Anson Miguel Antonio|Deftac Six Blades|PHL
+2nd|Maningat Kenneth|Checkmat Philippines|PHL
+3rd|Jang Yohan|Motion Jiu-jitsu|KOR
+3rd|Dadivas Oliver|Project Lifestyle Manila|PHL
+
+##### Male Blue Master 1 Light
+1st|Tubola Niño|Origins Bjj|PHL
+2nd|Lyon Aaron|Machado Guam|USA
+3rd|Gomez Philip Michael|Checkmat Philippines|PHL
+3rd|Tolidanes Guian Kar..|Checkmat Philippines|PHL
+
+##### Male Blue Master 1 Middle
+1st|Contreras Rico-dy|Calma Jiu Jitsu|PHL
+2nd|Maquiling Ayman|Jiu Jitsu Manila|PHL
+
+##### Male Blue Master 1 Medium Heavy
+1st|Aldeguer Damien|Bullyville Fight Team|PHL
+2nd|Aitchison Alan|Other|GBR
+3rd|Bordonada Glenn|Kamphuis Fabricio|PHL
+
+##### Male Blue Master 1 Heavy
+1st|Adajar John|Project Lifestyle Manila|PHL
+
+##### Male Blue Master 1 Super Heavy
+1st|Chang Charles|Project Lifestyle Manila|PHL
+2nd|Mangovo Victor|Lawrence Chan Jiu-jitsu|AGO
+
+##### Male Blue Master 1 Open Weight
+1st|Tubola Niño|Origins Bjj|PHL
+2nd|Chang Charles|Project Lifestyle Manila|PHL
+3rd|Anson Miguel Antonio|Deftac Six Blades|PHL
+3rd|Aldeguer Damien|Bullyville Fight Team|PHL
+
+##### Male Brown Master 1 Medium Heavy
+1st|Gi-yeob Lee|Atos Korea|KOR
+
+##### Male Brown Master 1 Super Heavy
+1st|Ladera Luigi|Jiu Jitsu Manila|PHL
+2nd|Shinohara Raymond|Machado Guam|GUM
+
+##### Male Brown Master 1 Open Weight
+1st|Ladera Luigi|Jiu Jitsu Manila|PHL
+2nd|Shinohara Raymond|Machado Guam|GUM
+3rd|Gi-yeob Lee|Atos Korea|KOR
+
+##### Male White Master 2 Feather
+1st|Lubon Ryan|Deftac Six Blades|PHL
+2nd|Paraso Juan|Atos Jiu-jitsu|PHL
+3rd|Lim Carlos|Deftac Six Blades|PHL
+3rd|Amar Ezerson|Project Lifestyle Manila|PHL
+
+##### Male White Master 2 Light
+1st|Aguila Miguel|Checkmat Philippines|PHL
+2nd|De La Peña Jumar|Deftac Six Blades|PHL
+3rd|Cruz Joni|Project Lifestyle Manila|PHL
+3rd|Abarico Eddierez|Over Limit Jiu Jitsu Philippines|PHL
+
+##### Male White Master 2 Heavy
+1st|Rongavilla Mark|Deftac Six Blades|PHL
+2nd|Iblasin John|Deftac Six Blades|PHL
+
+##### Male White Master 2 Super Heavy
+1st|Binaya Jerome|Project Lifestyle Manila|PHL
+
+##### Male White Master 2 Open Weight
+1st|Rongavilla Mark|Deftac Six Blades|PHL
+2nd|Victa Ira|Deftac Six Blades|PHL
+3rd|Binaya Jerome|Project Lifestyle Manila|PHL
+3rd|Aguila Miguel|Checkmat Philippines|PHL
+
+##### Male Blue Master 2 Feather
+1st|Malenab Mikhail Vin..|Deftac Six Blades|PHL
+2nd|Cruz Rainer|Checkmat Philippines|PHL
+3rd|Petty Michael|Gf Team|USA
+3rd|Credo Pedro|Bullyville Fight Team|PHL
+
+##### Male Blue Master 2 Light
+1st|Flor Carlo|Over Limit Jiu Jitsu Philippines|PHL
+2nd|Alcos John Ryan|Calma Jiu Jitsu|PHL
+3rd|Vitales Andrew|Deftac Six Blades|PHL
+3rd|De Leon Dexter|Checkmat Philippines|PHL
+
+##### Male Blue Master 2 Ultra Heavy
+1st|Uichanco Christopher|Bullyville Fight Team|PHL
+2nd|Don Craig|Hong Kong Jiu-jitsu (hkjj)|GBR
+
+##### Male Blue Master 2 Open Weight
+1st|Uichanco Christopher|Bullyville Fight Team|PHL
+2nd|Malenab Mikhail Vin..|Deftac Six Blades|PHL
+3rd|De Leon Dexter|Checkmat Philippines|PHL
+3rd|Don Craig|Hong Kong Jiu-jitsu (hkjj)|GBR
+
+##### Male Purple Master 2 Feather
+1st|Almeda Edward Micha..|Deftac Six Blades|PHL
+2nd|Castillo Orlando|Cobrinha Manila|PHL
+3rd|Atienza Ron Nyael|Over Limit Jiu Jitsu -  Angeles|PHL
+
+##### Male Purple Master 2 Light
+1st|Escolar Ahmad|Over Limit Jiu Jitsu Philippines|PHL
+
+##### Male Purple Master 2 Middle
+1st|Kim Dae-woong|Atos Korea|KOR
+2nd|Ferriol Joseph Nath..|Checkmat Philippines|PHL
+3rd|Baluyot Guevarra Al..|Kamphuis Fabricio|PHL
+
+##### Male Purple Master 2 Open Weight
+1st|Baluyot Guevarra Al..|Kamphuis Fabricio|PHL
+2nd|Escolar Ahmad|Over Limit Jiu Jitsu Philippines|PHL
+3rd|Atienza Ron Nyael|Over Limit Jiu Jitsu -  Angeles|PHL
+
+##### Male Brown Master 2 Middle
+1st|Jang Inseon|Atos Korea|KOR
+2nd|Cunanan Mario|Jiu Jitsu Manila|PHL
+3rd|Cipriano Ernesto Ga..|Deftac Six Blades|PHL
+3rd|Larano Neil|Checkmat Philippines|PHL
+
+##### Male Brown Master 2 Open Weight
+1st|Jang Inseon|Atos Korea|KOR
+
+##### Male Black Master 2 Ultra Heavy
+1st|Bilko Jakub|Other|POL
+2nd|Varilla Raymond Yan..|Project Lifestyle Manila|PHL
+
+##### Male Black Master 2 Open Weight
+1st|Bilko Jakub|Other|POL
+2nd|Varilla Raymond Yan..|Project Lifestyle Manila|PHL
+
+##### Male White Master 3 Light Feather
+1st|Ledda Gino|Deftac Six Blades|PHL
+2nd|Osorio Dexter|Checkmat Philippines|PHL
+
+##### Male White Master 3 Light
+1st|Cordero Robert|Deftac Six Blades|PHL
+2nd|Garcia Sherwin|Project Lifestyle Manila|PHL
+3rd|Asuque Gilbert|Deftac Ribeiro|PHL
+
+##### Male White Master 3 Middle
+1st|Go Christian Go|Deftac Six Blades|PHL
+2nd|Bunda Ibhar|Deftac Six Blades|PHL
+3rd|Bautista Dino|Kamphuis Fabricio|PHL
+
+##### Male White Master 3 Heavy
+1st|Del Rosario Briann|Checkmat Philippines|PHL
+2nd|Chinilla Nilo|Checkmat Philippines|PHL
+3rd|Prichard David|Deftac Six Blades|NZL
+
+##### Male White Master 3 Open Weight
+1st|Chinilla Nilo|Checkmat Philippines|PHL
+2nd|Asuque Gilbert|Deftac Ribeiro|PHL
+3rd|Bunda Ibhar|Deftac Six Blades|PHL
+3rd|Prichard David|Deftac Six Blades|NZL
+
+##### Male Blue Master 3 Feather
+1st|Lainez Lee Ray|Cobrinha Manila|PHL
+2nd|Jumaquio Marc Antoni|Checkmat Philippines|PHL
+
+##### Male Blue Master 3 Light
+1st|Chang Johann|Deftac Six Blades|PHL
+
+##### Male Purple Master 3 Feather
+1st|Cue Teodoro Jr.|Cebu Jiu-jitsu|PHL
+2nd|Espinosa Ryan|Project Lifestyle Manila|PHL
+3rd|Aranas Dave|Checkmat Philippines|PHL
+3rd|Ang Ryane|Cobrinha Manila|PHL
+
+##### Male Purple Master 3 Open Weight
+1st|Aranas Dave|Checkmat Philippines|PHL
+2nd|Espinosa Ryan|Project Lifestyle Manila|PHL
+3rd|Cue Teodoro Jr.|Cebu Jiu-jitsu|PHL
+3rd|Ang Ryane|Cobrinha Manila|PHL
+
+##### Male Brown Master 3 Light
+1st|Ablan Micael|Jiu Jitsu Manila|PHL
+2nd|Go Cedenio Carlito|Jiu Jitsu Manila|PHL
+
+##### Male Brown Master 3 Middle
+1st|Stotts Brandon|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### Male Brown Master 3 Super Heavy
+1st|Dy Bryan|Atos Jiu-jitsu|PHL
+
+##### Male Brown Master 3 Open Weight
+1st|Dy Bryan|Atos Jiu-jitsu|PHL
+2nd|Stotts Brandon|Figo’ / Bonsai Jiu Jitsu|GUM
+3rd|Go Cedenio Carlito|Jiu Jitsu Manila|PHL
+
+##### Male Black Master 3 Middle
+1st|Ang Willie|Carpe Diem|PHL
+
+##### Male Black Master 3 Super Heavy
+1st|Jimenez Manuel|Checkmat Philippines|PHL
+2nd|Mascenon Enrico|Atos Jiu-jitsu|PHL
+
+##### Male Black Master 3 Open Weight
+1st|Jimenez Manuel|Checkmat Philippines|PHL
+2nd|Ang Willie|Carpe Diem|PHL
+3rd|Mascenon Enrico|Atos Jiu-jitsu|PHL
+
+##### Male White Master 4 Light
+1st|Rayanon Jr Melanio|Project Lifestyle Manila|PHL
+2nd|Manzano Kuya|Deftac Six Blades|PHL
+
+##### Male White Master 4 Open Weight
+1st|Rayanon Jr Melanio|Project Lifestyle Manila|PHL
+2nd|Del Rosario Briann|Checkmat Philippines|PHL
+3rd|Manzano Kuya|Deftac Six Blades|PHL
+
+##### Male Brown Master 4 Medium Heavy
+1st|Lee Michael|Machado Guam|USA
+2nd|Toledo Martin|Deftac Six Blades|PHL

@@ -1,8 +1,11 @@
+$stdout.sync = true
 puts "Seeding event results..."
 
 def parse_division(division_str)
-  # Parse "Male Black Adult Open Weight" into components
-  parts = division_str.strip.split(' ')
+  # Parse "Male Black Adult Open Weight" or "[GI] Male Black Adult Open Weight" into components
+  # Strip [GI] / [NOGI] prefix if present
+  clean = division_str.strip.sub(/^\[(GI|NOGI)\]\s*/, '')
+  parts = clean.split(' ')
 
   gender = parts[0]&.downcase  # Male/Female
   belt = parts[1]&.downcase    # White/Blue/Purple/Brown/Black
@@ -17,7 +20,14 @@ def parse_division(division_str)
                  end
 
   # Weight class is everything after age (and master number if present)
-  weight_start = age_raw == 'master' ? 4 : 3
+  # Handle "Juvenile 16-17" or "Adult 18" age qualifiers
+  weight_start = if age_raw == 'master'
+                   4
+                 elsif parts[3]&.match?(/^\d/)
+                   4 # skip age qualifier like "16-17" or "18"
+                 else
+                   3
+                 end
   weight_raw = parts[weight_start..].join(' ').downcase
   weight_class = weight_raw.gsub(' ', '_')
 
@@ -40,20 +50,18 @@ def seed_results_from_text(file_path)
   event.event_results.delete_all
 
   current_division = nil
-  results_count = 0
+  batch = []
 
   lines.each do |line|
     if line.start_with?('#####')
       current_division = line.gsub('#####', '').strip
     elsif line.match?(/^\d+(st|nd|rd)\|/) && current_division
       parts = line.split('|')
-      placement_str = parts[0].strip
-      placement = placement_str.gsub(/\D/, '').to_i
-
+      placement = parts[0].strip.gsub(/\D/, '').to_i
       parsed = parse_division(current_division)
 
-      EventResult.create!(
-        event: event,
+      batch << {
+        event_id: event.id,
         division: current_division,
         gender: parsed[:gender],
         belt_rank: parsed[:belt_rank],
@@ -62,13 +70,15 @@ def seed_results_from_text(file_path)
         placement: placement,
         competitor_name: parts[1]&.strip,
         academy: parts[2]&.strip,
-        country_code: parts[3]&.strip
-      )
-      results_count += 1
+        country_code: parts[3]&.strip,
+        created_at: Time.current,
+        updated_at: Time.current
+      }
     end
   end
 
-  puts "Seeded #{results_count} results for #{event.name}"
+  EventResult.insert_all(batch) if batch.any?
+  puts "Seeded #{batch.length} results for #{event.name}"
 end
 
 # Seed all result files

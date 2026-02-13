@@ -1,0 +1,618 @@
+EVENT: 2025 Marianas Pro Taiwan
+SLUG: marianas-pro-taiwan-2025
+ASJJF_IDS: 1693, 1694
+
+##### [GI] Male White Juvenile 16-17 Feather
+1st|Wang Ryan|Hsinchu B J J|TAI
+
+##### [GI] Male White Juvenile 16-17 Open Weight
+1st|Huang Chih-wei|Ufc Gym Taiwan|TAI
+
+##### [GI] Male Blue Juvenile 16-17 Feather
+1st|Chun-dao Wang|Taiwan B J J Linkou|TAI
+2nd|Cruz Don Pedro|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male Blue Juvenile 16-17 Light
+1st|Li Cheng You|Martial Armour Mma And Fitness|TAI
+
+##### [GI] Male Blue Juvenile 16-17 Open Weight
+1st|Li Cheng You|Martial Armour Mma And Fitness|TAI
+2nd|Chun-dao Wang|Taiwan B J J Linkou|TAI
+
+##### [GI] Male White Adult 18 Rooster
+1st|Lee Hong-jie|Genghis Khan Fitness Club|TAI
+2nd|Yen Sheng-lun|Martial Armour Mma And Fitness|TAI
+
+##### [GI] Male White Adult 18 Light Feather
+1st|Lin Wei - Han|Tornado Jiujitsu Academy|TAI
+2nd|Liu Chen-ning|Genghis Khan Fitness Club|TAI
+3rd|Li Ching Yu|Carlos Toyota Bjj|TAI
+3rd|Chiu Yu Cheng|Hsinchu B J J|TAI
+
+##### [GI] Male White Adult 18 Feather
+1st|Chang Jia-kai|The Bear&#39;s Den Bjj - Mma|TAI
+2nd|Kuo Po-yi|Lohas Bjj And Fitness|TAI
+3rd|Yang Ming-hsien|Taiwan B J J Linkou|TAI
+3rd|Jingxuan Wu|Hsinchu B J J|TAI
+
+##### [GI] Male White Adult 18 Light
+1st|Lai Jianlin|Genghis Khan Fitness Club|TAI
+2nd|Weng Hsu-kuan|Tornado Jiujitsu Academy|TAI
+3rd|Wang Zhongjun|Shuraba Mma|TAI
+3rd|Zhan Yien|Catch Jiu Jitsu|TAI
+
+##### [GI] Male White Adult 18 Middle
+1st|Tang Yu-ren|Lohas Bjj And Fitness|TAI
+2nd|Liao Yi-fei|Ninja Brothers Bjj - Mma|TAI
+3rd|Cai Mingrong|Pma Bjj|TAI
+
+##### [GI] Male White Adult 18 Medium Heavy
+1st|Chen Bo-dong|Genghis Khan Fitness Club|TAI
+2nd|Hung Tzu Hsuan|Straight Jiu Jitsu|TAI
+3rd|Chien Kaicheng|Genghis Khan Fitness Club|TAI
+3rd|Liao Yi-xian|Genghis Khan Fitness Club|TAI
+
+##### [GI] Male White Adult 18 Super Heavy
+1st|Yeo Soon Kee|Martial Armour Mma And Fitness|MYS
+2nd|Cho Li Hau|Kaohsiung Bjj - Mma|AUS
+3rd|Kuan-chieh Liu|Inglorious Grapplers|TAI
+
+##### [GI] Male White Adult 18 Ultra Heavy
+1st|Fang Jiakai|Inglorious Grapplers|TAI
+2nd|Ma Chienchung|Hsinchu B J J|TAI
+
+##### [GI] Male White Adult 18 Open Weight
+1st|Weng Chia-wei|Tornado Jiujitsu Academy|TAI
+2nd|Tang Yu-ren|Lohas Bjj And Fitness|TAI
+3rd|Chen Bo-dong|Genghis Khan Fitness Club|TAI
+3rd|Yeo Soon Kee|Martial Armour Mma And Fitness|MYS
+
+##### [GI] Male Blue Adult 18 Light Feather
+1st|Tao I Ju|Ufc Gym Taiwan|TAI
+2nd|Lin Yan-guang|Tornado Jiujitsu Academy|TAI
+
+##### [GI] Male Blue Adult 18 Feather
+1st|Huang Cheng Chi|Martial Armour Mma And Fitness|TAI
+2nd|Hsiao Kai|Tornado Jiujitsu Academy|TAI
+3rd|Tsai He-jin|Lok&#39;s Hapkido School|TAI
+3rd|Chi Tze-an|Taiwan Bjj Taichung|TAI
+
+##### [GI] Male Blue Adult 18 Light
+1st|Lee Kwanghae|Jiujitsu Of Brothers|KOR
+2nd|Chen Chao Hsien|Straight Jiu Jitsu|TAI
+3rd|Lin Che Nan|Tornado Jiujitsu Academy|TAI
+3rd|Lin Cheng|Martial Armour Mma And Fitness|TAI
+
+##### [GI] Male Blue Adult 18 Middle
+1st|Chen Ikai|Straight Jiu Jitsu|TAI
+2nd|Huang Bai Jun|Grand Union Taiwan|TAI
+3rd|Chen Luchi|Taiwan B J J|TAI
+3rd|Kang Lin-li|Pma Bjj|TAI
+
+##### [GI] Male Blue Adult 18 Medium Heavy
+1st|Hsu Chia Jun|Taiwan B J J|TAI
+2nd|Huang Shao Bin|Lohas Bjj And Fitness|TAI
+3rd|Chang Wei Kang|The Bear&#39;s Den Bjj - Mma|TAI
+3rd|Wang Ting-wei|Catch Jiu Jitsu|TAI
+
+##### [GI] Male Blue Adult 18 Heavy
+1st|Dewitt D’angelo|Kaohsiung Bjj - Mma|USA
+2nd|Lu Yuwun|Ufc Gym Bjj|TAI
+3rd|Lin Yu-kai|Inglorious Grapplers|TAI
+
+##### [GI] Male Blue Adult 18 Super Heavy
+1st|Ken Zheng Wong|Kaohsiung Bjj - Mma|TAI
+
+##### [GI] Male Blue Adult 18 Ultra Heavy
+1st|Hong Yichih|Inglorious Grapplers|TAI
+2nd|Tang Fan-i|Straight Jiu Jitsu|TAI
+
+##### [GI] Male Blue Adult 18 Open Weight
+1st|Hong Yichih|Inglorious Grapplers|TAI
+2nd|Dewitt D’angelo|Kaohsiung Bjj - Mma|USA
+3rd|Chen Pinwei|Ifighting Martial Fitness|TAI
+3rd|Chen Chao Hsien|Straight Jiu Jitsu|TAI
+
+##### [GI] Male Purple Adult 18 Light Feather
+1st|Antonio Aldrin|Carpe Diem|PHL
+2nd|Kyoung Kim|Urban Jiujitsu Seoul|KOR
+3rd|Jiahao Fan|Catch Jiu Jitsu|TAI
+3rd|Kim Eunsoo|Wire Jiujitsu|KOR
+
+##### [GI] Male Purple Adult 18 Feather
+1st|Chang Rong-chi|Hsinchu B J J|TAI
+2nd|Sheu Ming-shi|Taiwan B J J|TAI
+
+##### [GI] Male Purple Adult 18 Light
+1st|Lu Fangshuo|Taiwan Bjj Taichung|TAI
+2nd|Hwang Shengyang|Taiwan B J J|TAI
+3rd|Ng Kwok Wai|Rcjj - Caporal|HKG
+3rd|Pena Daniel|Hsinchu B J J|USA
+
+##### [GI] Male Purple Adult 18 Middle
+1st|Na Sangmin|Atos Korea|KOR
+2nd|Guo Youyi|Taiwan B J J|TAI
+3rd|Ping-hsun Feng|Taiwan B J J|TAI
+3rd|Lin Chun-fong|Gft Taiwan|TAI
+
+##### [GI] Male Purple Adult 18 Medium Heavy
+1st|Wei Chia Chen|Taiwan B J J|TAI
+
+##### [GI] Male Purple Adult 18 Heavy
+1st|Lok Nicholas|Taiwan B J J|CAN
+
+##### [GI] Male Purple Adult 18 Super Heavy
+1st|Huang Chiang-chen|Catch Jiu Jitsu|TAI
+2nd|Mounger Will|Imanari Jiu Jitsu|USA
+
+##### [GI] Male Purple Adult 18 Open Weight
+1st|Cherif Redouane|Taiwan B J J|FRA
+2nd|Chang Rong-chi|Hsinchu B J J|TAI
+3rd|Lu Fangshuo|Taiwan Bjj Taichung|TAI
+3rd|Li Haoyu|Catch Jiu Jitsu|TAI
+
+##### [GI] Male Brown Adult 18 Feather
+1st|Hong　 Seokkyun|Urban-jiujitsu|KOR
+2nd|Lin Po Yu|Taiwan B J J|TAI
+
+##### [GI] Male Brown Adult 18 Light
+1st|Huang Guo Cheng|Taiwan B J J|TAI
+2nd|Li Kwan Yeung|Reversal Tokyo Standout|JPN
+3rd|Sit Vincent|Gf Team|HKG
+3rd|Chen Mao Hong|Ninja Brothers Bjj - Mma|TAI
+
+##### [GI] Male Brown Adult 18 Medium Heavy
+1st|Chun-zhong Deng|Martial Armour Mma And Fitness|TAI
+
+##### [GI] Male Brown Adult 18 Super Heavy
+1st|Lin Nuo-nan|Inglorious Grapplers|TAI
+2nd|Chen-yuan Chiang|Taiwan B J J|TAI
+
+##### [GI] Male Brown Adult 18 Ultra Heavy
+1st|Tisdale Samuel|Taiwan B J J|USA
+2nd|Lin Chunan|Catch Jiu Jitsu|TAI
+
+##### [GI] Male Brown Adult 18 Open Weight
+1st|Tisdale Samuel|Taiwan B J J|USA
+2nd|Fang Kuan-chieh|Ufc Gym Taiwan|TAI
+3rd|Lin Nuo-nan|Inglorious Grapplers|TAI
+3rd|Chen-yuan Chiang|Taiwan B J J|TAI
+
+##### [GI] Male Black Adult 18 Middle
+1st|Cho Daeyeon|Urban-jiujitsu|KOR
+
+##### [GI] Male Black Adult 18 Medium Heavy
+1st|Miranda Rafael|Ufc Gym Taiwan|BRA
+2nd|Fernandes Thiago|Martial Armour Mma And Fitness|BRA
+3rd|Piotrowski Artur|The Bear&#39;s Den Bjj - Mma|POL
+
+##### [GI] Male Black Adult 18 Open Weight
+1st|Miranda Rafael|Ufc Gym Taiwan|BRA
+2nd|Fernandes Thiago|Martial Armour Mma And Fitness|BRA
+3rd|Cho Daeyeon|Urban-jiujitsu|KOR
+
+##### [GI] Male White Master 30 Light Feather
+1st|Li Zhe Wei|Taiwan B J J  Keelung|TAI
+2nd|Lin Pochun|Tornado Jiujitsu Academy|TAI
+
+##### [GI] Male White Master 30 Feather
+1st|Li Guan Lin|Taiwan B J J Linkou|TAI
+2nd|Kong Kei Cheung|Gf Team|HKG
+3rd|Huang Chi-yen|Taiwan B J J|TAI
+3rd|Shang-chien Ho|Taiwan B J J Linkou|TAI
+
+##### [GI] Male White Master 30 Light
+1st|Jin Zijun|Martial Armour Mma And Fitness|TAI
+2nd|Lin Kun Chin|Martial Armour Mma And Fitness|TAI
+3rd|Lin Yu Ting|Carlos Toyota Bjj|TAI
+3rd|Lee Kang|Tornado Jiujitsu Academy|TAI
+
+##### [GI] Male White Master 30 Middle
+1st|Hung-yi Tu|Taiwan B J J Linkou|TAI
+
+##### [GI] Male White Master 30 Heavy
+1st|Yen Shihchen|Shuraba Mma|TAI
+2nd|Kashtanov Artem|Martial Armour Mma And Fitness|RUS
+
+##### [GI] Male White Master 30 Open Weight
+1st|Yen Shihchen|Shuraba Mma|TAI
+2nd|Kong Kei Cheung|Gf Team|HKG
+3rd|Lin Kun Chin|Martial Armour Mma And Fitness|TAI
+
+##### [GI] Male Blue Master 30 Light Feather
+1st|Chen Chiao Chih|Ufc Gym Taiwan|TAI
+2nd|Chia Te Liao|Pma Bjj|TAI
+3rd|Wang Te Wei|Ufc Gym Taiwan|TAI
+3rd|Emeriau Benjamin|Hsinchu B J J|FRA
+
+##### [GI] Male Blue Master 30 Feather
+1st|Lee Heng|Pma Bjj|TAI
+2nd|Hirata Seiya|Buffalo Jiu-jitsu|JPN
+3rd|Leung Ryan|Gf Team|HKG
+
+##### [GI] Male Blue Master 30 Light
+1st|Lin Zhenheng|Taiwan B J J|TAI
+2nd|Chen Yi-fu|Ufc Gym Taiwan|TAI
+3rd|Huang Yan-ru|Shuraba Mma|TAI
+
+##### [GI] Male Blue Master 30 Middle
+1st|Chen Zongcheng|Kylin Bjj|CHN
+2nd|Lin Chun Yu|Taiwan B J J  Keelung|TAI
+3rd|Chen Charles|Ufc Gym Taiwan|BRA
+
+##### [GI] Male Blue Master 30 Medium Heavy
+1st|Chien Chia-hsin|The Bear&#39;s Den Bjj - Mma|TAI
+2nd|Li Hsin-hung|Taiwan B J J|TAI
+
+##### [GI] Male Blue Master 30 Open Weight
+1st|Lee Heng|Pma Bjj|TAI
+2nd|Chen Zongcheng|Kylin Bjj|CHN
+3rd|Lin Chun Yu|Taiwan B J J  Keelung|TAI
+3rd|Chien Chia-hsin|The Bear&#39;s Den Bjj - Mma|TAI
+
+##### [GI] Male Purple Master 30 Feather
+1st|Liu Tzu-chun|Pma Bjj|TAI
+2nd|Lo Chun Lung|Taiwan B J J|TAI
+3rd|Lee Juying|Ufc Gym Taiwan|TAI
+3rd|Huang Wei-hao|Taiwan Bjj Taichung|TAI
+
+##### [GI] Male Purple Master 30 Super Heavy
+1st|Vuillemin Anthony|Hsinchu B J J|FRA
+
+##### [GI] Male Purple Master 30 Ultra Heavy
+1st|Wu Zhizhan|Taiwan B J J|TAI
+
+##### [GI] Male Purple Master 30 Open Weight
+1st|Wu Zhizhan|Taiwan B J J|TAI
+2nd|Lo Chun Lung|Taiwan B J J|TAI
+
+##### [GI] Male White Master 36 Light Feather
+1st|Peng Shengmao|Hsinchu B J J|TAI
+2nd|Taisuke Iwasaki|Invert Jiujitsu|JPN
+3rd|Cheng-fu Wu|The Bear&#39;s Den Bjj - Mma|TAI
+
+##### [GI] Male White Master 36 Feather
+1st|Yang Chia Yu|Taiwan B J J  Keelung|TAI
+2nd|Liou Chang-you|Lohas Bjj And Fitness|TAI
+3rd|Lin Chih-hao|Taiwan B J J|TAI
+
+##### [GI] Male White Master 36 Middle
+1st|Wang Yu-jen|Taiwan B J J Linkou|TAI
+2nd|Zhan Xunjin|Tornado Jiujitsu Academy|TAI
+3rd|Chang Arthur|Tornado Jiujitsu Academy|USA
+3rd|Zhang Youquan|Shuraba Mma|TAI
+
+##### [GI] Male White Master 36 Heavy
+1st|Kuo Yen Cheng|Genghis Khan Fitness Club|TAI
+
+##### [GI] Male White Master 36 Ultra Heavy
+1st|Chu I Lung|Ufc Gym Taiwan|TAI
+2nd|Wang Kaiting|Tornado Jiujitsu Academy|TAI
+
+##### [GI] Male White Master 36 Open Weight
+1st|Chu I Lung|Ufc Gym Taiwan|TAI
+2nd|Kuo Yen Cheng|Genghis Khan Fitness Club|TAI
+3rd|Wang Kaiting|Tornado Jiujitsu Academy|TAI
+3rd|Chang Arthur|Tornado Jiujitsu Academy|USA
+
+##### [GI] Male Blue Master 36 Feather
+1st|Pan Tsai-hsing|Taiwan B J J|TAI
+2nd|Cha Hsiu Chi|Taiwan Bjj Zhonghe|TAI
+3rd|Sasaki Yosuke|Ueno Okachimachi Bjj|JPN
+
+##### [GI] Male Blue Master 36 Middle
+1st|Tamara Aleksei|Ufc Gym Taiwan|RUS
+2nd|Tsai Sung Tai|Tornado Jiujitsu Academy|TAI
+
+##### [GI] Male Blue Master 36 Ultra Heavy
+1st|Hsu Chunhao|Taiwan Bjj Taichung|TAI
+2nd|Chiang Min-yen|Borderless Jiu-jitsu|TAI
+
+##### [GI] Male Blue Master 36 Open Weight
+1st|Pan Tsai-hsing|Taiwan B J J|TAI
+2nd|Hsu Chunhao|Taiwan Bjj Taichung|TAI
+3rd|Tsai Sung Tai|Tornado Jiujitsu Academy|TAI
+3rd|Chiang Min-yen|Borderless Jiu-jitsu|TAI
+
+##### [GI] Male Purple Master 36 Middle
+1st|Smith Thomas|Leos Jiu Jitsu Academy|USA
+
+##### [GI] Male Purple Master 36 Super Heavy
+1st|Lin Guan|Pma Bjj|TAI
+
+##### [GI] Male Purple Master 36 Ultra Heavy
+1st|Pan Po-wei|Straight Jiu Jitsu|TAI
+
+##### [GI] Male Purple Master 36 Open Weight
+1st|Pan Po-wei|Straight Jiu Jitsu|TAI
+2nd|Lin Guan|Pma Bjj|TAI
+3rd|Smith Thomas|Leos Jiu Jitsu Academy|USA
+
+##### [GI] Male Brown Master 36 Medium Heavy
+1st|Kim Dae-woong|Atos Korea|KOR
+
+##### [GI] Male Brown Master 36 Open Weight
+1st|Kim Dae-woong|Atos Korea|KOR
+
+##### [GI] Male Black Master 36 Light
+1st|Kim Hanhee|Hon Jiu Jitsu|KOR
+2nd|Haw Soh Boon|Unity Jiu Jitsu Academy|MYS
+3rd|Hsien Ming Pai|Taiwan Bjj Zhongzheng|TAI
+3rd|Chang Cheng Jie|Martial Armour Mma And Fitness|TAI
+
+##### [GI] Male Black Master 36 Middle
+1st|Jang Inseon|Atos Korea|KOR
+
+##### [GI] Male Black Master 36 Medium Heavy
+1st|Telfair Demitri|The Bear&#39;s Den Bjj - Mma|CAN
+
+##### [GI] Male Black Master 36 Heavy
+1st|Reid Daniel David A..|Catch Jiu Jitsu|GBR
+
+##### [GI] Male Black Master 36 Ultra Heavy
+1st|Kim Keunwoo|Tani Team|KOR
+
+##### [GI] Male Black Master 36 Open Weight
+1st|Reid Daniel David A..|Catch Jiu Jitsu|GBR
+2nd|Jang Inseon|Atos Korea|KOR
+3rd|Kim Keunwoo|Tani Team|KOR
+3rd|Telfair Demitri|The Bear&#39;s Den Bjj - Mma|CAN
+
+##### [GI] Male Blue Master 41 Light
+1st|Hsien Yang Yao|Kaohsiung Bjj - Mma|TAI
+
+##### [GI] Male Blue Master 41 Middle
+1st|Wang Tzu Huai|Taiwan Bjj Zhonghe|TAI
+2nd|Lin Chi-wei|Taiwan B J J Linkou|TAI
+
+##### [GI] Male Blue Master 41 Open Weight
+1st|Hsien Yang Yao|Kaohsiung Bjj - Mma|TAI
+2nd|Wang Tzu Huai|Taiwan Bjj Zhonghe|TAI
+
+##### [GI] Male Black Master 41 Light Feather
+1st|Kim Changhun|Hon Jiu Jitsu|KOR
+2nd|Fujisawa Yoshihiro|Carpe Diem Bjj Jiyugaoka|JPN
+
+##### [GI] Male White Master 46 Feather
+1st|Wu Zhaoji|Other|TAI
+2nd|Lin Boxun|Taiwan B J J Linkou|TAI
+3rd|Wu Tsung-hua|Taiwan B J J|TAI
+3rd|Chang Chia-hsiung|The Bear&#39;s Den Bjj - Mma|TAI
+
+##### [GI] Male White Master 46 Light
+1st|Chan Sze-wang|Taiwan B J J Linkou|TAI
+2nd|Chiang Tung Yun|Taiwan B J J|TAI
+
+##### [GI] Male Blue Master 46 Heavy
+1st|Yang Seungwoo|Urban-jiujitsu|KOR
+2nd|Chu Steve|Tornado Jiujitsu Academy|USA
+
+##### [GI] Male Blue Master 46 Open Weight
+1st|Chu Steve|Tornado Jiujitsu Academy|USA
+
+##### [GI] Male Purple Master 46 Middle
+1st|Hsu Chien-wen|Ufc Gym Taiwan|TAI
+
+##### [GI] Male Purple Master 46 Open Weight
+1st|Hsu Chien-wen|Ufc Gym Taiwan|TAI
+
+##### [NOGI] Male White Juvenile 16-17 Open Weight
+1st|Huang Chih-wei|Ufc Gym Taiwan|TAI
+2nd|Orr Knut|Ifighting Martial Fitness|GBR
+
+##### [NOGI] Male Blue Juvenile 16-17 Light Feather
+1st|Cruz Don Pedro|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [NOGI] Male White Adult 18 Light Feather
+1st|Cheng Chen|Catch Jiu Jitsu|TAI
+2nd|Liu Chen-ning|Genghis Khan Fitness Club|TAI
+3rd|Chen Guan-zhong|Taiwan B J J|TAI
+3rd|Cohen Djuwyan|Imanari Jiu Jitsu|FRA
+
+##### [NOGI] Male White Adult 18 Feather
+1st|Nesbitt Christopher|The Bear&#39;s Den Bjj - Mma|USA
+2nd|Chang Jia-kai|The Bear&#39;s Den Bjj - Mma|TAI
+3rd|Hsu Chia Che|Martial Armour Mma And Fitness|TAI
+3rd|Hsu Kai Chen|Arizona Bjj|TAI
+
+##### [NOGI] Male White Adult 18 Light
+1st|Wu Haoren|Ifighting Martial Fitness|TAI
+2nd|Jin Zijun|Martial Armour Mma And Fitness|TAI
+3rd|Ken Lo|Kowloon Jiu-jitsu|HKG
+3rd|Weng Hsu-kuan|Tornado Jiujitsu Academy|TAI
+
+##### [NOGI] Male White Adult 18 Middle
+1st|Zhuang Lin-jun-yi|Ifighting Martial Fitness|TAI
+2nd|Miao Ping-hsiu|Hsinchu B J J|TAI
+3rd|Orr Knut|Ifighting Martial Fitness|GBR
+3rd|Rutter Simon|Other|USA
+
+##### [NOGI] Male White Adult 18 Medium Heavy
+1st|Hsieh Yu-chun|Ifighting Martial Fitness|TAI
+2nd|Hung Tzu Hsuan|Straight Jiu Jitsu|TAI
+
+##### [NOGI] Male White Adult 18 Heavy
+1st|Glenn Lequan|Other|USA
+
+##### [NOGI] Male White Adult 18 Super Heavy
+1st|Chuang Yu Sheng|Taiwan Bjj Taichung|TAI
+
+##### [NOGI] Male White Adult 18 Ultra Heavy
+1st|Cho Li Hau|Kaohsiung Bjj - Mma|AUS
+
+##### [NOGI] Male White Adult 18 Open Weight
+1st|Cho Li Hau|Kaohsiung Bjj - Mma|AUS
+2nd|Chang Jia-kai|The Bear&#39;s Den Bjj - Mma|TAI
+3rd|Hsieh Yu-chun|Ifighting Martial Fitness|TAI
+3rd|Perry Jack|Fares Academy For Fighting Arts|GBR
+
+##### [NOGI] Male Blue Adult 18 Rooster
+1st|Chang Shihhan|Pma Bjj|TAI
+2nd|Zhong Ming Han|Taiwan B J J|TAI
+
+##### [NOGI] Male Blue Adult 18 Feather
+1st|Lee Heng|Pma Bjj|TAI
+2nd|Huang Cheng Chi|Martial Armour Mma And Fitness|TAI
+3rd|Chang Wei Hsiang|Kaohsiung Bjj - Mma|TAI
+3rd|Mccaffrey Padraig|The Bear&#39;s Den Bjj - Mma|IRL
+
+##### [NOGI] Male Blue Adult 18 Light
+1st|Chen Zhe An|The Bear&#39;s Den Bjj - Mma|TAI
+2nd|Lin Zhenheng|Taiwan B J J|TAI
+3rd|Kawamura Riku|Kaohsiung Bjj - Mma|JPN
+3rd|Ye Kai|Kaohsiung Bjj - Mma|TAI
+
+##### [NOGI] Male Blue Adult 18 Medium Heavy
+1st|Wang Ting-wei|Catch Jiu Jitsu|TAI
+
+##### [NOGI] Male Blue Adult 18 Heavy
+1st|Dewitt D’angelo|Kaohsiung Bjj - Mma|USA
+2nd|Ken Zheng Wong|Kaohsiung Bjj - Mma|TAI
+
+##### [NOGI] Male Blue Adult 18 Super Heavy
+1st|Rommelt Marvin|Catch Jiu Jitsu|DEU
+
+##### [NOGI] Male Blue Adult 18 Open Weight
+1st|Dewitt D’angelo|Kaohsiung Bjj - Mma|USA
+2nd|Ken Zheng Wong|Kaohsiung Bjj - Mma|TAI
+3rd|Ye Kai|Kaohsiung Bjj - Mma|TAI
+3rd|Rommelt Marvin|Catch Jiu Jitsu|DEU
+
+##### [NOGI] Male Purple Adult 18 Light Feather
+1st|Jiahao Fan|Catch Jiu Jitsu|TAI
+2nd|Demferlee O. Tatel ..|Taiwan B J J|PHL
+
+##### [NOGI] Male Purple Adult 18 Feather
+1st|Sheu Ming-shi|Taiwan B J J|TAI
+
+##### [NOGI] Male Purple Adult 18 Light
+1st|Hwang Shengyang|Taiwan B J J|TAI
+
+##### [NOGI] Male Purple Adult 18 Middle
+1st|Li Haoyu|Catch Jiu Jitsu|TAI
+2nd|Lin Chun-fong|Gft Taiwan|TAI
+
+##### [NOGI] Male Purple Adult 18 Open Weight
+1st|Cherif Redouane|Taiwan B J J|FRA
+2nd|Sheu Ming-shi|Taiwan B J J|TAI
+3rd|Lin Chun-fong|Gft Taiwan|TAI
+3rd|Hwang Shengyang|Taiwan B J J|TAI
+
+##### [NOGI] Male Brown Adult 18 Light
+1st|Stamper Marshall|10th Planet Jiu-jitsu|USA
+
+##### [NOGI] Male Brown Adult 18 Medium Heavy
+1st|Chun-zhong Deng|Martial Armour Mma And Fitness|TAI
+
+##### [NOGI] Male Brown Adult 18 Ultra Heavy
+1st|Lin Chunan|Catch Jiu Jitsu|TAI
+
+##### [NOGI] Male Brown Adult 18 Open Weight
+1st|Stamper Marshall|10th Planet Jiu-jitsu|USA
+2nd|Chun-zhong Deng|Martial Armour Mma And Fitness|TAI
+3rd|Chen-yuan Chiang|Taiwan B J J|TAI
+3rd|Lin Chunan|Catch Jiu Jitsu|TAI
+
+##### [NOGI] Male White Master 30 Feather
+1st|Li Guan Lin|Taiwan B J J Linkou|TAI
+2nd|Shang-chien Ho|Taiwan B J J Linkou|TAI
+3rd|Fangmin Lin|Yaykids|TAI
+3rd|Cheng-fu Wu|The Bear&#39;s Den Bjj - Mma|TAI
+
+##### [NOGI] Male White Master 30 Medium Heavy
+1st|Chang Tzung Hao|Taiwan Bjj Zhonghe|TAI
+
+##### [NOGI] Male White Master 30 Super Heavy
+1st|Peotto Joseph|Taiwan B J J|CAN
+2nd|Yeo Soon Kee|Martial Armour Mma And Fitness|MYS
+
+##### [NOGI] Male White Master 30 Open Weight
+1st|Peotto Joseph|Taiwan B J J|CAN
+2nd|Yeo Soon Kee|Martial Armour Mma And Fitness|MYS
+3rd|Cheng-fu Wu|The Bear&#39;s Den Bjj - Mma|TAI
+
+##### [NOGI] Male Blue Master 30 Medium Heavy
+1st|Chien Chia-hsin|The Bear&#39;s Den Bjj - Mma|TAI
+2nd|Ko Han-chieh|Taiwan B J J|TAI
+
+##### [NOGI] Male Blue Master 30 Open Weight
+1st|Chien Chia-hsin|The Bear&#39;s Den Bjj - Mma|TAI
+2nd|Ko Han-chieh|Taiwan B J J|TAI
+
+##### [NOGI] Male Purple Master 30 Medium Heavy
+1st|Huang Wen Chi|Taiwan Bjj Taichung|TAI
+2nd|Mitchell Robert|Taiwan B J J|USA
+3rd|Belzer Kyle　David|10th Planet Jiu-jitsu|USA
+3rd|Wong Hoi Tang|Ufc Gym Taiwan|HKG
+
+##### [NOGI] Male Purple Master 30 Ultra Heavy
+1st|Wu Zhizhan|Taiwan B J J|TAI
+
+##### [NOGI] Male Purple Master 30 Open Weight
+1st|Wu Zhizhan|Taiwan B J J|TAI
+2nd|Huang Wen Chi|Taiwan Bjj Taichung|TAI
+3rd|Wong Hoi Tang|Ufc Gym Taiwan|HKG
+3rd|Belzer Kyle　David|10th Planet Jiu-jitsu|USA
+
+##### [NOGI] Male White Master 36 Feather
+1st|Chang Chia-hsiung|The Bear&#39;s Den Bjj - Mma|TAI
+2nd|Lee Sheng-yuan|Taiwan B J J|TAI
+
+##### [NOGI] Male White Master 36 Light
+1st|Yin Hui|Dragon Fight Art Mma Center|TAI
+2nd|Liu Shangchih|Invert Jiujitsu|TAI
+
+##### [NOGI] Male White Master 36 Middle
+1st|Zhan Xunjin|Tornado Jiujitsu Academy|TAI
+2nd|Wen Huai-lung|Taiwan Bjj Zhonghe|TAI
+3rd|Hung-yi Tu|Taiwan B J J Linkou|TAI
+
+##### [NOGI] Male White Master 36 Medium Heavy
+1st|Lein Dawei|Ifighting Martial Fitness|TAI
+2nd|Li Fu-yuan|Catch Jiu Jitsu|TAI
+3rd|Liu Yeunong|Ufc Gym Taiwan|TAI
+
+##### [NOGI] Male White Master 36 Open Weight
+1st|Li Fu-yuan|Catch Jiu Jitsu|TAI
+2nd|Lein Dawei|Ifighting Martial Fitness|TAI
+
+##### [NOGI] Male Blue Master 36 Feather
+1st|Hirata Seiya|Buffalo Jiu-jitsu|JPN
+2nd|Cha Hsiu Chi|Taiwan Bjj Zhonghe|TAI
+
+##### [NOGI] Male Blue Master 36 Light
+1st|Hsien Yang Yao|Kaohsiung Bjj - Mma|TAI
+2nd|Ma Ho Cheng|Catch Jiu Jitsu|TAI
+
+##### [NOGI] Male Blue Master 36 Middle
+1st|Tamara Aleksei|Ufc Gym Taiwan|RUS
+2nd|Wang Tzu Huai|Taiwan Bjj Zhonghe|TAI
+
+##### [NOGI] Male Blue Master 36 Heavy
+1st|Chu Steve|Tornado Jiujitsu Academy|USA
+
+##### [NOGI] Male Blue Master 36 Open Weight
+1st|Tamara Aleksei|Ufc Gym Taiwan|RUS
+2nd|Hsien Yang Yao|Kaohsiung Bjj - Mma|TAI
+3rd|Chu Steve|Tornado Jiujitsu Academy|USA
+
+##### [NOGI] Male Purple Master 36 Middle
+1st|Smith Thomas|Leos Jiu Jitsu Academy|USA
+
+##### [NOGI] Male Purple Master 36 Open Weight
+1st|Smith Thomas|Leos Jiu Jitsu Academy|USA
+
+##### [NOGI] Male Black Master 36 Light Feather
+1st|Kim Changhun|Hon Jiu Jitsu|KOR
+
+##### [NOGI] Male Black Master 36 Light
+1st|Kim Hanhee|Hon Jiu Jitsu|KOR
+2nd|You Joshua|Kaohsiung Bjj - Mma|USA
+
+##### [NOGI] Male Black Master 36 Super Heavy
+1st|Pereira Marinho Mar..|Ufc Gym Taiwan|BRA
+
+##### [NOGI] Male Black Master 36 Open Weight
+1st|Pereira Marinho Mar..|Ufc Gym Taiwan|BRA
+2nd|Piotrowski Artur|The Bear&#39;s Den Bjj - Mma|POL
+3rd|You Joshua|Kaohsiung Bjj - Mma|USA

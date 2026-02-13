@@ -1,0 +1,429 @@
+EVENT: 2023 Marianas Pro Japan
+SLUG: marianas-pro-japan-2023
+ASJJF_IDS: 1251
+
+##### Male White Juvenile Feather
+1st|Pique Ichiro|Infight Japan|PER
+2nd|Lee Jaewon|De La Riva Japan|KOR
+3rd|Okamura Ryoya|Impacto Bjj Japan|JPN
+
+##### Male White Juvenile Light
+1st|Mondigo Ethan Jhay|Over Limit Jiu Jitsu Philippines|PHL
+2nd|Nakano Fernando|Infight Japan|BRA
+
+##### Male White Juvenile Heavy
+1st|Koga Bruno|Infight Japan|BRA
+2nd|Aoki Arda|Impacto Bjj Japan|JPN
+
+##### Male White Juvenile Open Weight
+1st|Koga Bruno|Infight Japan|BRA
+2nd|Aoki Arda|Impacto Bjj Japan|JPN
+
+##### Male Blue Juvenile Feather
+1st|Narazaki Lukas|Checkmat Japan|BRA
+2nd|Acosta Isaiah|R1ng Bjj|USA
+3rd|Takazawa Kota|Igloo|JPN
+
+##### Male Blue Juvenile Light
+1st|Sano Kaila|Axis|JPN
+2nd|Taitano Zander|Atos Jiu-jitsu Guam|GUM
+3rd|Duenas Tavion|Purebred Jiu Jitsu Guam|GUM
+
+##### Male Blue Juvenile Medium Heavy
+1st|Nakahara Gustavo|Carlos Toyota Bjj|BRA
+2nd|Nam Jooyoung|Over Limit Jiu Jitsu Korea|KOR
+3rd|Valdes Aaron|Impacto Bjj Japan|JPN
+
+##### Male Blue Juvenile Open Weight
+1st|Sano Kaila|Axis|JPN
+2nd|Taitano Zander|Atos Jiu-jitsu Guam|GUM
+3rd|Duenas Tavion|Purebred Jiu Jitsu Guam|GUM
+
+##### Male White Adult Light Feather
+1st|Furuya Yuha|Cave|JPN
+2nd|Hayato Teshigawara|Infight Japan|JPN
+3rd|Cepeda Eithen|Atos Jiu-jitsu Guam|GUM
+
+##### Male White Adult Feather
+1st|Mesa Joaquin|Atos Jiu-jitsu Guam|GUM
+2nd|Borja Valiant|Atos Jiu-jitsu Guam|GUM
+3rd|Urata Masaya|Alma Fight Gym Warp|JPN
+
+##### Male White Adult Light
+1st|Gogo Austin|Atos Jiu-jitsu Guam|GUM
+2nd|Hojoon Lee|Over Limit Jiu Jitsu Korea|KOR
+
+##### Male White Adult Middle
+1st|Valdez Brandon|Machado Guam|USA
+2nd|Cornell Andrew|Purebred Jiu Jitsu Guam|USA
+
+##### Male White Adult Medium Heavy
+1st|Huang Xingyong|Hsinchu B J J|TAI
+
+##### Male White Adult Open Weight
+1st|Cornell Andrew|Purebred Jiu Jitsu Guam|USA
+2nd|Urata Masaya|Alma Fight Gym Warp|JPN
+3rd|Valdez Brandon|Machado Guam|USA
+
+##### Male Blue Adult Rooster
+1st|Nagai Sho|Igloo|JPN
+2nd|Miyasato Ricardo|Infight Japan|BRA
+
+##### Male Blue Adult Light Feather
+1st|Ohno Tomoki|Carpe Diem|JPN
+2nd|Shibuya Daisuke|Carpe Diem Bjj Jiyugaoka|JPN
+3rd|Aoki Yuya|Life Jiu Jitsu Academy|JPN
+
+##### Male Blue Adult Feather
+1st|Lim Byeonghun|De La Riva Japan|KOR
+2nd|Adachi Ryota|Carpe Diem Bjj Jiyugaoka|JPN
+3rd|Chang Rong-chi|Hsinchu B J J|TAI
+
+##### Male Blue Adult Light
+1st|Lee Young|Wire Jiu Jitsu|KOR
+2nd|Diogo Tokunaga|Sekitani Jiu Jitsu Academy|BRA
+3rd|Romero Ricahrd|Project Lifestyle Manila|PHL
+
+##### Male Blue Adult Middle
+1st|Ogasawara Hiroki|Alma Fight Gym Warp|JPN
+2nd|Yun Yeojun|De La Riva Japan|KOR
+3rd|Tsukayama Mitsuo|Sekitani Jiu Jitsu Academy|PER
+
+##### Male Blue Adult Medium Heavy
+1st|Clements Brendon|Oni Bjj|USA
+2nd|Tamura Yuuma|Sora Bjj|JPN
+3rd|Topasna Nathan|Other|GUM
+
+##### Male Blue Adult Ultra Heavy
+1st|Akil Kenyon|Carpe Diem Bjj Jiyugaoka|USA
+2nd|Jesus Ryan|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Adult Open Weight
+1st|Ogasawara Hiroki|Alma Fight Gym Warp|JPN
+2nd|Saito Eduardo|Rrt|BRA
+3rd|Shibuya Daisuke|Carpe Diem Bjj Jiyugaoka|JPN
+
+##### Male Purple Adult Light Feather
+1st|Park Ji Hun|Wire Jiu Jitsu|KOR
+2nd|Tada Diogo|Infight Japan|BRA
+
+##### Male Purple Adult Feather
+1st|Hagiwara Daiki|Relaxin&#39;bjj|JPN
+2nd|Yoshida Akihiro|Takamoto Dojo|JPN
+3rd|Park Inseong|Wire Jiu Jitsu|KOR
+
+##### Male Purple Adult Light
+1st|Kumada Kenshin|Sendai Jiu-jitsu Academy|JPN
+2nd|Gonzalez Cesar|Infight Japan|USA
+3rd|Quintanilla Jr Gonz..|Atos Jiu-jitsu Guam|GUM
+
+##### Male Purple Adult Middle
+1st|Rodrigues Victor|Rrt|BRA
+2nd|Shirasaka So|Carpe Diem|JPN
+
+##### Male Purple Adult Medium Heavy
+1st|Pegoraro Saio Willi..|Hishojuku|BRA
+2nd|Huang Zhengkai|Baret Submissions|TAI
+3rd|Oka Akihiro|Pato Studio|JPN
+
+##### Male Purple Adult Super Heavy
+1st|Massato Leonardo|Rrt|JPN
+2nd|Cruz Casey|Heights Academy Guam|GUM
+
+##### Male Purple Adult Open Weight
+1st|Oka Akihiro|Pato Studio|JPN
+2nd|Shirasaka So|Carpe Diem|JPN
+3rd|Fuse Tomoaki|Carpe Diem Kimitsu|JPN
+
+##### Male Brown Adult Light Feather
+1st|Saito Sho|Infight Japan|JPN
+2nd|Meneghin Erick|Igloo|BRA
+3rd|Takasugi Kai|Alma Fight Gym Homies|JPN
+
+##### Male Brown Adult Light
+1st|Yano Akira Thomy|Igloo|JPN
+2nd|Kihun Youm|Asm Bigfoot Jiu Jitsu|KOR
+3rd|Kim Youngjun|Over Limit Jiu Jitsu Korea|KOR
+
+##### Male Brown Adult Middle
+1st|Ohura Myke|Igloo|BRA
+2nd|Kim Dong Hyun|Over Limit Jiu Jitsu Japan|KOR
+3rd|Fujita Hiroshi|The Black Beltmerge|JPN
+
+##### Male Brown Adult Medium Heavy
+1st|Omoto Kengo|Bonsai Jiu-jitsu Japan|JPN
+2nd|Brown Nicolas|Purebred Jiu Jitsu Guam|GUM
+
+##### Male Brown Adult Open Weight
+1st|Meneghin Erick|Igloo|BRA
+2nd|Ohura Myke|Igloo|BRA
+3rd|Fujita Hiroshi|The Black Beltmerge|JPN
+
+##### Male Black Adult Feather
+1st|Oyanagi Keito|Carpe Diem|JPN
+2nd|Yamanaka Kenya|Igloo|JPN
+3rd|Lin Yu|Atos Jiu-jitsu|TAI
+
+##### Male Black Adult Light
+1st|Go Utsugi|Cave|JPN
+2nd|Cruz Oliver|Purebred Jiu Jitsu Guam|GUM
+3rd|Zhong Qingya|Over Limit Jiu Jitsu China|CHN
+
+##### Male Black Adult Middle
+1st|Bogdanove Grant|Life Jiu Jitsu Academy|USA
+2nd|Urata Igor|Impacto Bjj Japan|BRA
+
+##### Male Black Adult Super Heavy
+1st|Cruz Anthony|Carlson Gracie Team|GUM
+2nd|Harris David|Purebred Jiu Jitsu Guam|GUM
+3rd|Jeong Hyeonseok|Over Limit Jiu Jitsu Korea|KOR
+
+##### Male Black Adult Open Weight
+1st|Bogdanove Grant|Life Jiu Jitsu Academy|USA
+2nd|Mietz Thomas|Carpe Diem|FRA
+3rd|Go Utsugi|Cave|JPN
+
+##### Male White Master 1 Feather
+1st|Imamura Kenta|Zeek Gym|JPN
+2nd|Flor Carlo|Over Limit Jiu Jitsu Philippines|PHL
+3rd|Hau Kingsley|Kowloon Bjj|GBR
+
+##### Male White Master 1 Light
+1st|Lee Heunbok|De La Riva Japan|KOR
+2nd|Lyon Aaron|Machado Guam|USA
+3rd|Gamboa Aldo|Muse Jiu Jitsu Academy|MEX
+
+##### Male White Master 1 Heavy
+1st|Blas Randy|Atos Jiu-jitsu Guam|GUM
+2nd|Vieira Aldber|Carlos Toyota Bjj|JPN
+
+##### Male White Master 1 Open Weight
+1st|Blas Randy|Atos Jiu-jitsu Guam|GUM
+2nd|Lyon Aaron|Machado Guam|USA
+3rd|Vieira Aldber|Carlos Toyota Bjj|JPN
+
+##### Male Blue Master 1 Feather
+1st|Uchino Jun|Swells Jiu Jitsu Gym|JPN
+2nd|Horiuchi Takamasa|Ueno Okachimachi Bjj|JPN
+3rd|Oizumi Renan|Evox Bjj|BRA
+
+##### Male Blue Master 1 Light
+1st|Borja Mychal|Atos Jiu-jitsu Guam|GUM
+2nd|Broden Ryan|Carpe Diem Bjj Jiyugaoka|USA
+3rd|Kim Hyundo|Asm Bigfoot Jiu Jitsu|KOR
+
+##### Male Blue Master 1 Middle
+1st|Gotou Dai|Infight Japan|JPN
+2nd|Blyden Jabulani|Strapple Kameari|VIR
+3rd|Jung Changhyeon|Asm Bigfoot Jiu Jitsu|KOR
+
+##### Male Blue Master 1 Open Weight
+1st|Borja Mychal|Atos Jiu-jitsu Guam|GUM
+2nd|Blyden Jabulani|Strapple Kameari|VIR
+3rd|Gotou Dai|Infight Japan|JPN
+
+##### Male Purple Master 1 Light Feather
+1st|Matsuo Roberto|Carlos Toyota Bjj|BRA
+2nd|Cabaluna Lourence J..|Over Limit Jiu Jitsu Philippines|PHL
+3rd|Jindai Momoki|Braves Jiu-jitsu|JPN
+
+##### Male Purple Master 1 Light
+1st|Paixao Widison|Impacto Bjj Japan|BRA
+2nd|Narikiyo Takehiro|Bjj Academy Nobushi|JPN
+3rd|Cepeda Christian|Atos Jiu-jitsu Guam|GUM
+
+##### Male Purple Master 1 Middle
+1st|Kim Hyung Jin|Over Limit Jiu Jitsu Korea|KOR
+2nd|Charfauros Roque|Heights Academy Guam|GUM
+
+##### Male Purple Master 1 Medium Heavy
+1st|Rodrigues Jean|Evox Bjj|BRA
+
+##### Male Purple Master 1 Ultra Heavy
+1st|Sigaoat Gabriel|Uprising Jiu Jitsu|GUM
+2nd|Travagini Wellington|Impacto Bjj Japan|JPN
+3rd|Aoki Ryosuke|Paraestra Tokyo|JPN
+
+##### Male Purple Master 1 Open Weight
+1st|Narikiyo Takehiro|Bjj Academy Nobushi|JPN
+2nd|Beyer Peter|Uprising Jiu Jitsu|USA
+3rd|Paixao Widison|Impacto Bjj Japan|BRA
+
+##### Male Black Master 1 Feather
+1st|Yamaki Yu|X-treme Ebina|JPN
+2nd|Cavazos Daniel|R1ng Bjj|USA
+
+##### Male Black Master 1 Middle
+1st|Takamoto Hirokazu|Takamoto Dojo|JPN
+2nd|Park Gyeongdeok|Over Limit Jiu Jitsu Korea|KOR
+
+##### Male Black Master 1 Ultra Heavy
+1st|Yu Seonghun|Asm Bigfoot Jiu Jitsu|KOR
+
+##### Male Black Master 1 Open Weight
+1st|Cristo Rogerio|Evox Bjj|BRA
+2nd|Zhong Qingya|Over Limit Jiu Jitsu China|CHN
+3rd|Takamoto Hirokazu|Takamoto Dojo|JPN
+
+##### Male Blue Master 2 Middle
+1st|Asakura Hayato|Right Thing Academy|JPN
+2nd|Ahn Chihun|Over Limit Jiu Jitsu Korea|KOR
+3rd|Lizama Randall|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Master 2 Medium Heavy
+1st|Cruz Joey|Atos Jiu-jitsu Guam|GUM
+2nd|Soonguk Kwon|Over Limit Jiu Jitsu Korea|KOR
+3rd|Hinkle Jerry|Atos Jiu-jitsu Guam|GUM
+
+##### Male Blue Master 2 Open Weight
+1st|Hinkle Jerry|Atos Jiu-jitsu Guam|GUM
+2nd|Cruz Joey|Atos Jiu-jitsu Guam|GUM
+3rd|Asakura Hayato|Right Thing Academy|JPN
+
+##### Male Purple Master 2 Feather
+1st|Intencion Jett|Project Lifestyle Manila|PHL
+2nd|Tada Vagner|Infight Japan|BRA
+
+##### Male Purple Master 2 Middle
+1st|Choi Booil|Over Limit Jiu Jitsu Korea|KOR
+2nd|Respicio Rico|Atos Jiu-jitsu Guam|GUM
+
+##### Male Purple Master 2 Open Weight
+1st|Travagini Wellington|Impacto Bjj Japan|JPN
+2nd|Tada Vagner|Infight Japan|BRA
+3rd|Matsuo Roberto|Carlos Toyota Bjj|BRA
+
+##### Male Brown Master 2 Light Feather
+1st|Basmayor William|Over Limit Jiu Jitsu Philippines|PHL
+
+##### Male Brown Master 2 Light
+1st|Murakami Tiago|Infight Japan|BRA
+2nd|Chae Youngha|Over Limit Jiu Jitsu Korea|KOR
+3rd|Hao Jan Vincent|Project Lifestyle Manila|PHL
+
+##### Male Brown Master 2 Ultra Heavy
+1st|Lee Yong|Over Limit Jiu Jitsu Korea|KOR
+2nd|Kyeongjun Lee|Over Limit Jiu Jitsu Korea|KOR
+3rd|Oohashi Akira|Tateyama Top Team|JPN
+
+##### Male Brown Master 2 Open Weight
+1st|Kim Bumjun|Over Limit Jiu Jitsu Korea|KOR
+2nd|Kyeongjun Lee|Over Limit Jiu Jitsu Korea|KOR
+3rd|Oohashi Akira|Tateyama Top Team|JPN
+
+##### Male White Master 3 Light Feather
+1st|Silva Saito|Infight Japan|JPN
+2nd|Hamanaka Takashi|Visca|JPN
+
+##### Male White Master 3 Feather
+1st|Noguchi Naoki|Atos Jiu-jitsu Guam|JPN
+2nd|Tokeiji Michitaka|Carpediem Mita|JPN
+3rd|Manley Jeremiah|Atos Jiu-jitsu Guam|GUM
+
+##### Male White Master 3 Open Weight
+1st|Carrillo Tony|Nafa Jiujitsu Club|USA
+2nd|Sygaco Jonard|Nafa Jiujitsu Club|USA
+3rd|Beener Shane|Oni Bjj|USA
+
+##### Male Blue Master 3 Feather
+1st|Ninomiya Kazuyoshi|Paraestra Tokyo|JPN
+2nd|Koga Wilson Tatsuya|Infight Japan|BRA
+3rd|Matsumura Yuji|Right Thing Academy|JPN
+
+##### Male Blue Master 3 Ultra Heavy
+1st|Yamashitafuji Wagner|Impacto Bjj Japan|BRA
+2nd|Caldera Arthur|Leos Jiu Jitsu Academy|USA
+
+##### Male Blue Master 3 Open Weight
+1st|Yamashitafuji Wagner|Impacto Bjj Japan|BRA
+2nd|Caldera Arthur|Leos Jiu Jitsu Academy|USA
+
+##### Male Purple Master 3 Light Feather
+1st|Sato Takeshi|Wajyutsu Keishukai Otemachi Dojo|JPN
+2nd|Baisa Dannie|Atos Jiu-jitsu Guam|GUM
+
+##### Male Purple Master 3 Middle
+1st|Tamashiro Takayuki|The Black Belt Japan Okinawa|JPN
+2nd|Nelson Justin|Uprising Jiu Jitsu|USA
+
+##### Male Purple Master 3 Open Weight
+1st|Aromin Ray|Heights Academy Guam|GUM
+2nd|Rodrigues Jean|Evox Bjj|BRA
+3rd|Nelson Justin|Uprising Jiu Jitsu|USA
+
+##### Male Brown Master 3 Middle
+1st|Dur Gael|Rrt|FRA
+2nd|Naganuma Masato|Newaza World Koedo|JPN
+
+##### Male Brown Master 3 Open Weight
+1st|Akiyama Yasuhiro|Paraestra Koiwa|JPN
+2nd|Dur Gael|Rrt|FRA
+
+##### Male Black Master 3 Light
+1st|Aramaki Makoto|Master Japan Fukuoka|JPN
+2nd|Park Min Uk|Over Limit Jiu Jitsu Korea|KOR
+3rd|Matsumura Eduardo|Infight Japan|BRA
+
+##### Male Black Master 3 Middle
+1st|Aflague Terence|Heights Academy Guam|GUM
+2nd|Yusuke Tabata|The Black Beltmerge|JPN
+
+##### Male Black Master 3 Heavy
+1st|Suto Rogerio|Impacto Bjj Japan|BRA
+2nd|Kuwano Hidenori|Team Legnum|JPN
+3rd|Matanane Wayne|Heights Academy Guam|GUM
+
+##### Male Black Master 3 Ultra Heavy
+1st|Kim Keunwoo|Tani Team|KOR
+2nd|Flores Erik|Heights Academy Guam|USA
+
+##### Male Black Master 3 Open Weight
+1st|Suto Rogerio|Impacto Bjj Japan|BRA
+2nd|Flores Erik|Heights Academy Guam|USA
+3rd|Aflague Terence|Heights Academy Guam|GUM
+
+##### Male White Master 4 Light
+1st|Minoshima Yuji|X-treme Ebina|JPN
+2nd|Suzuki Motonori|Paraestra Kichijoji|JPN
+
+##### Male Blue Master 4 Medium Heavy
+1st|Kobe Kenji|Evox Bjj|JPN
+2nd|Imura Kosuke|Visca|JPN
+
+##### Male Blue Master 4 Open Weight
+1st|Kobe Kenji|Evox Bjj|JPN
+2nd|Robertson Benjamin|Oni Bjj|USA
+3rd|Terozeni Magno|Over Limit Jiu Jitsu Japan|BRA
+
+##### Male Brown Master 4 Feather
+1st|Okubo Matia|Visca|JPN
+2nd|Sano Kouki|X-treme Ebina|JPN
+
+##### Male Brown Master 4 Open Weight
+1st|Sano Kouki|X-treme Ebina|JPN
+2nd|Meno Francis|Heights Academy Guam|GUM
+
+##### Male Black Master 4 Feather
+1st|Hiramura Taishi|Igloo|JPN
+2nd|Inano Gaku|Cute|JPN
+3rd|Mondigo Jason|Over Limit Jiu Jitsu Philippines|PHL
+
+##### Male Black Master 4 Light
+1st|Asada Toshio|Bjj Core Japan|BRA
+2nd|Wada Junichiro|Impacto Bjj Japan|JPN
+3rd|Gutierrez Rob|Purebred Jiu Jitsu Guam|GUM
+
+##### Male Black Master 4 Middle
+1st|Cristo Rogerio|Evox Bjj|BRA
+2nd|Cho Sungmin|Over Limit Jiu Jitsu Korea|KOR
+3rd|Kamakura Yoshiyuki|Impacto Bjj Japan|BRA
+
+##### Male Black Master 4 Medium Heavy
+1st|Kobayashi Marcio Mi..|Impacto Bjj Japan|JPN
+2nd|Shibata Kazunobu|Imanari Jiu-jitsu Wizard|JPN
+3rd|Lopez Angel|Tinguinha Bjj Academy|USA
+
+##### Male Black Master 4 Open Weight
+1st|Kobayashi Marcio Mi..|Impacto Bjj Japan|JPN
+2nd|Cho Sungmin|Over Limit Jiu Jitsu Korea|KOR
+3rd|Shibata Kazunobu|Imanari Jiu-jitsu Wizard|JPN

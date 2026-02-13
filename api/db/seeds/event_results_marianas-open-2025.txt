@@ -1,0 +1,640 @@
+EVENT: 2025 Marianas Open
+SLUG: marianas-open-2025
+ASJJF_IDS: 1732, 1759
+
+##### [GI] Male White Juvenile 16-17 Light Feather
+1st|Palacios Leighton|Baret Submissions|USA
+
+##### [GI] Male White Juvenile 16-17 Middle
+1st|Merfalen Eziah|Atos Jiu-jitsu Guam|GUM
+2nd|Candaso Jaiden|Gracie Barra Marianas|GUM
+
+##### [GI] Male White Juvenile 16-17 Medium Heavy
+1st|Ignacio Dravan|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male White Juvenile 16-17 Open Weight
+1st|Ignacio Dravan|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Merfalen Eziah|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Blue Juvenile 16-17 Feather
+1st|Alferos Caiden|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Lujan Robert|Purebred Jiu Jitsu Guam|GUM
+3rd|Quitugua Alexander|Atos Jiu-jitsu Guam|GUM
+3rd|Cruz Jesse|Carlson Gracie Team|GUM
+
+##### [GI] Male Blue Juvenile 16-17 Light
+1st|Iamazato Enzo|Carlos Toyota Bjj|BRA
+2nd|Camacho Matthias|Carlson Gracie Team|GUM
+3rd|Camacho Jose|Figo’ / Bonsai Jiu Jitsu|GUM
+3rd|Schacher Il Gregory|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Blue Juvenile 16-17 Middle
+1st|Higa Vinicios|Carlos Toyota Bjj|BRA
+2nd|Kobayashi João|Carlos Toyota Bjj|BRA
+3rd|Tenorio John|Carlson Gracie Team|GUM
+3rd|Asprer Zayden|Guma|GUM
+
+##### [GI] Male Blue Juvenile 16-17 Open Weight
+1st|Kobayashi João|Carlos Toyota Bjj|BRA
+2nd|Iamazato Enzo|Carlos Toyota Bjj|BRA
+3rd|Higa Vinicios|Carlos Toyota Bjj|BRA
+3rd|Pereira Lance|Machado Guam|GUM
+
+##### [GI] Male White Adult 18 Light Feather
+1st|Diaz Jared Ken|Atos Jiu-jitsu Guam|GUM
+2nd|Cruz Jahaziah|Carlson Gracie Team|GUM
+3rd|Fejeran Joshua|Carlson Gracie Team|GUM
+3rd|Camacho Jason-felix|Spike 22|GUM
+
+##### [GI] Male White Adult 18 Feather
+1st|Lim Gavin|Spike 22|GUM
+2nd|Ursua Ansen|Känsept Academy|USA
+3rd|Carey Kyle|Guma|USA
+3rd|Mariano Alexander|Guma|GUM
+
+##### [GI] Male White Adult 18 Light
+1st|Swann Aoi|Purebred Jiu Jitsu Guam|JPN
+2nd|Dirige Troy|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male White Adult 18 Middle
+1st|Finn Stephen|Purebred Jiu Jitsu Guam|USA
+2nd|Van Der Maas Evert|Purebred Jiu Jitsu Guam|NLD
+3rd|King Jason|Machado Guam|USA
+3rd|Santos Ezekiel|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male White Adult 18 Heavy
+1st|Poulson Joshua|Atos Jiu-jitsu Guam|USA
+2nd|Hayden Ian|Ryze|USA
+3rd|Tamow Emjay|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male White Adult 18 Super Heavy
+1st|Johnson Kyuande|Ryze|USA
+2nd|Demissie Manasseh|Purebred Jiu Jitsu Guam|USA
+
+##### [GI] Male White Adult 18 Ultra Heavy
+1st|Robinson James|Machado Guam|USA
+2nd|Gonzalez Bienvenido|Deftac Six Blades|PHL
+3rd|Soriano Jonavin|Carlson Gracie Team|GUM
+3rd|Quinata Jr. Brian|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male White Adult 18 Open Weight
+1st|Finn Stephen|Purebred Jiu Jitsu Guam|USA
+2nd|Swann Aoi|Purebred Jiu Jitsu Guam|JPN
+3rd|Demissie Manasseh|Purebred Jiu Jitsu Guam|USA
+3rd|Van Der Maas Evert|Purebred Jiu Jitsu Guam|NLD
+
+##### [GI] Male Blue Adult 18 Rooster
+1st|Cruz Jaren|Guma|GUM
+2nd|Borja Jerome|Guma|GUM
+
+##### [GI] Male Blue Adult 18 Feather
+1st|Matsuo Christian|Carlos Toyota Bjj|BRA
+2nd|Sanders Brendan|Guma|USA
+3rd|Rosario Logan|Spike 22|GUM
+3rd|Cabales Corey|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male Blue Adult 18 Light
+1st|Hong Junmin|Kingdom Jiujitsu|KOR
+2nd|Yamagishi Jacob|Baret Submissions|MNP
+3rd|Egashira Pietro|Carlos Toyota Bjj|BRA
+3rd|Babauta Trey|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male Blue Adult 18 Middle
+1st|Nakahara Gustavo|Carlos Toyota Bjj|BRA
+2nd|Baek Seungjin|Bonsai Korea|KOR
+3rd|Paulino Gabriel|Guma|GUM
+3rd|Garcia Sage|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male Blue Adult 18 Medium Heavy
+1st|Crisostomo Jaycen|Känsept Academy|GUM
+2nd|Naholowaa Kainoa|Guma|GUM
+3rd|Saligao Julian|Checkmat Philippines|PHL
+3rd|Attao Jesus|Baret Submissions|MNP
+
+##### [GI] Male Blue Adult 18 Heavy
+1st|Cabo Donavan|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Kabeya Ryosuke|Evox Bjj|JPN
+3rd|Han Won Joon|Atos Jiu-jitsu Guam|KOR
+3rd|Atenta Joel|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Blue Adult 18 Ultra Heavy
+1st|Roberts Callum|Deftac Six Blades|PHL
+2nd|Blas Aidan|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male Blue Adult 18 Open Weight
+1st|Roberts Callum|Deftac Six Blades|PHL
+2nd|Matsuo Christian|Carlos Toyota Bjj|BRA
+3rd|Kabeya Ryosuke|Evox Bjj|JPN
+3rd|Hong Junmin|Kingdom Jiujitsu|KOR
+
+##### [GI] Male Purple Adult 18 Feather
+1st|Nagase Yuji|Evox Bjj|BRA
+2nd|Kajiwara Shinnosuke|Carpe Diem Bjj Jiyugaoka|JPN
+3rd|Cachuela Joaquin Sa..|Carpe Diem|PHL
+3rd|Lee Seungju|Gracie Allegiance Korea|KOR
+
+##### [GI] Male Purple Adult 18 Middle
+1st|Wagthuth Eddie|Spike 22|GUM
+2nd|Shin Jinhyeok|Atos Jiu-jitsu Guam|GUM
+3rd|Valdez Brandon|Machado Guam|USA
+3rd|Conlu Kristopher|Purebred Jiu Jitsu Guam|GUM
+
+##### [GI] Male Purple Adult 18 Medium Heavy
+1st|Miagoux Mauiti|Atos Jiu-jitsu Guam|PYF
+
+##### [GI] Male Purple Adult 18 Ultra Heavy
+1st|Mendonça Luiz Miguel|Infight Japan|BRA
+2nd|Mcdaniel Ken|Other|GUM
+
+##### [GI] Male Purple Adult 18 Open Weight
+1st|Mendonça Luiz Miguel|Infight Japan|BRA
+2nd|Cherif Redouane|Taiwan Bjj|FRA
+3rd|Miagoux Mauiti|Atos Jiu-jitsu Guam|PYF
+3rd|Wagthuth Eddie|Spike 22|GUM
+
+##### [GI] Male Brown Adult 18 Feather
+1st|Nagao Rei|Carpe Diem Bjj Sendai|JPN
+2nd|Gatan Vince|Checkmat Philippines|PHL
+3rd|Masga Vicente|Purebred Jiu Jitsu Guam|MNP
+
+##### [GI] Male Brown Adult 18 Light
+1st|Shin Jinwoo|Over Limit Jiu Jitsu Association|KOR
+2nd|Jimenez Matias|Other|ECU
+3rd|Quitugua Cory|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male Brown Adult 18 Middle
+1st|Song Wonjae|Kris Kim Bjj|KOR
+2nd|Harada Fabio|Infight Japan|JPN
+3rd|Palomo Kyle|Figo’ / Bonsai Jiu Jitsu|GUM
+3rd|Quintanilla Jr Gonz..|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Brown Adult 18 Medium Heavy
+1st|Pacheco Dennis|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Brown Adult 18 Ultra Heavy
+1st|Che Junyong|Wave Brazilian Jiu Jitsu|KOR
+2nd|Shinohara Michael|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Brown Adult 18 Open Weight
+1st|Che Junyong|Wave Brazilian Jiu Jitsu|KOR
+2nd|Song Wonjae|Kris Kim Bjj|KOR
+3rd|Nagao Rei|Carpe Diem Bjj Sendai|JPN
+3rd|Shin Jinwoo|Over Limit Jiu Jitsu Association|KOR
+
+##### [GI] Male Black Adult 18 Medium Heavy
+1st|Roxas Dean|Other|PHL
+2nd|Cruz Anthony|Carlson Gracie Team|GUM
+3rd|Dejesus Timothy|Atos Jiu-jitsu Guam|GUM
+3rd|Carbullido Jonah|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Black Adult 18 Heavy
+1st|Jackson Dealonzio|Alliance Training Center Academy|USA
+
+##### [GI] Male Black Adult 18 Super Heavy
+1st|Silva Xavier|Evox Bjj|USA
+
+##### [GI] Male Black Adult 18 Ultra Heavy
+1st|Harris David|Purebred Jiu Jitsu Guam|GUM
+2nd|Jeong Hyeonseok|Over Limit Jiu Jitsu Association|KOR
+
+##### [GI] Male Black Adult 18 Open Weight
+1st|Jackson Dealonzio|Alliance Training Center Academy|USA
+2nd|Cruz Anthony|Carlson Gracie Team|GUM
+3rd|Silva Xavier|Evox Bjj|USA
+
+##### [GI] Male White Master 30 Feather
+1st|Sagun Derek|Ryze|GUM
+2nd|Peng Shengmao|Hsinchu B J J|TAI
+
+##### [GI] Male White Master 30 Light
+1st|Rios Franklin|Heights Academy Guam|GUM
+2nd|Salinas Jordan|Atos Jiu-jitsu Guam|GUM
+3rd|Villagomez John|Baret Submissions|MNP
+
+##### [GI] Male White Master 30 Middle
+1st|Peter Jay|Spike 22|GUM
+2nd|Davis Adrian|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male White Master 30 Medium Heavy
+1st|Taitano Shaun|Ryze|GUM
+2nd|Santos Mike|Heights Academy Guam|GUM
+3rd|Amani N’dri|Purebred Jiu Jitsu Guam|GUM
+
+##### [GI] Male White Master 30 Super Heavy
+1st|Juanillo Robert|Purebred Jiu Jitsu Guam|GUM
+2nd|Mendiola Quinton|Machado Guam|GUM
+
+##### [GI] Male White Master 30 Open Weight
+1st|Peter Jay|Spike 22|GUM
+2nd|Juanillo Robert|Purebred Jiu Jitsu Guam|GUM
+3rd|Quinata Jr. Brian|Atos Jiu-jitsu Guam|GUM
+3rd|Crenshaw Joshua|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Blue Master 30 Feather
+1st|Camaya John|Atos Jiu-jitsu Guam|GUM
+2nd|Kawakami Shunsuke|Infight Japan|JPN
+3rd|Marquez Rollie Boy|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Blue Master 30 Light
+1st|Ngiratumerang Melvin|Purebred Jiu Jitsu Guam|PLW
+2nd|Tiong Ryan|Atos Jiu-jitsu Guam|GUM
+3rd|Gonzalvo Marvin Jay|Figo’ / Bonsai Jiu Jitsu|GUM
+3rd|Sosa Gian|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Blue Master 30 Heavy
+1st|Klein Jacob|Atos Jiu-jitsu Guam|USA
+2nd|Basilio Paul-myer|Atos Jiu-jitsu Guam|GUM
+3rd|San Nicolas Jonathan|Spike 22|GUM
+
+##### [GI] Male Blue Master 30 Super Heavy
+1st|Reederbarton Arron|Carlson Gracie Team|USA
+2nd|Thomas Tyler|Kuro Hata Bjj Okinawa|USA
+
+##### [GI] Male Blue Master 30 Ultra Heavy
+1st|Scott Greg|Catch Jiu Jitsu|GBR
+2nd|Perez Nathan|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Blue Master 30 Open Weight
+1st|Perez Nathan|Atos Jiu-jitsu Guam|GUM
+2nd|Klein Jacob|Atos Jiu-jitsu Guam|USA
+3rd|Atenta Joel|Atos Jiu-jitsu Guam|GUM
+3rd|Thomas Tyler|Kuro Hata Bjj Okinawa|USA
+
+##### [GI] Male Purple Master 30 Light
+1st|Nicolescu Cristian|Carpe Diem|PLW
+2nd|Bustos Aaron|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Purple Master 30 Middle
+1st|Guo Youyi|Taiwan Bjj|TAI
+2nd|Delgado Mark|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male Purple Master 30 Medium Heavy
+1st|Blas Jade|Atos Jiu-jitsu Guam|USA
+2nd|Guthertz Jerome|Carlson Gracie Team|GUM
+3rd|Francisco Eric|Carlson Gracie Team|GUM
+3rd|Sablan Norberto|Baret Submissions|MNP
+
+##### [GI] Male Purple Master 30 Open Weight
+1st|Nicolescu Cristian|Carpe Diem|PLW
+2nd|Mafnas Jr Jose|Purebred Jiu Jitsu Guam|MNP
+3rd|Blas Jade|Atos Jiu-jitsu Guam|USA
+3rd|Guo Youyi|Taiwan Bjj|TAI
+
+##### [GI] Male Brown Master 30 Medium Heavy
+1st|Lujan Vincent|Carlson Gracie Team|GUM
+
+##### [GI] Male Brown Master 30 Ultra Heavy
+1st|Lin Nuo-nan|Inglorious Grapplers|TAI
+2nd|Templanza Bart|Machado Guam|GUM
+
+##### [GI] Male Brown Master 30 Open Weight
+1st|Lin Nuo-nan|Inglorious Grapplers|TAI
+2nd|Pacheco Dennis|Atos Jiu-jitsu Guam|GUM
+3rd|Lin Po Yu|Taiwan Bjj|TAI
+3rd|Tisdale Samuel|Taiwan Bjj|USA
+
+##### [GI] Male Black Master 30 Feather
+1st|Mangubat Myron|Carpe Diem Bjj Manila|PHL
+2nd|Deleon Guerrero Bry..|Baret Submissions|MNP
+3rd|Ledesma Oscar|Atos Jiu-jitsu Guam|GUM
+3rd|Enriquez Richard|Purebred Jiu Jitsu Guam|GUM
+
+##### [GI] Male Black Master 30 Middle
+1st|San Nicolas Jeremiah|Känsept Academy|GUM
+2nd|Mesa Jeffrey|Heights Academy Guam|GUM
+3rd|Nielsen Trevor|Other|GUM
+3rd|Cruz Oliver|Purebred Jiu Jitsu Guam|GUM
+
+##### [GI] Male Black Master 30 Heavy
+1st|Caporal Rodrigo|Atos Jiu-jitsu|BRA
+2nd|Miranda Rafael|Ufc Gym Taiwan|BRA
+3rd|Mietz Thomas|Carpe Diem|FRA
+
+##### [GI] Male Black Master 30 Super Heavy
+1st|Godoy Marlon|Bonsai Jiu-jitsu Japan|BRA
+2nd|Moser John-eddie|Conde Koma Brazilian Jiu-jitsu|GUM
+
+##### [GI] Male Black Master 30 Ultra Heavy
+1st|Novotny Daniel|Heights Academy Guam|USA
+
+##### [GI] Male Black Master 30 Open Weight
+1st|Caporal Rodrigo|Atos Jiu-jitsu|BRA
+2nd|Miranda Rafael|Ufc Gym Taiwan|BRA
+3rd|Mietz Thomas|Carpe Diem|FRA
+3rd|San Nicolas Jeremiah|Känsept Academy|GUM
+
+##### [GI] Male White Master 36 Heavy
+1st|Garcia Benjamin|Atos Jiu-jitsu Guam|GUM
+2nd|Valdez Ryan|Ryze|USA
+3rd|Taitano Jovano|Baret Submissions|MNP
+3rd|Frisbie Jeff|Carlson Gracie Team|USA
+
+##### [GI] Male White Master 36 Ultra Heavy
+1st|Sablan Victor|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Santos Joseph|Figo’ / Bonsai Jiu Jitsu|GUM
+3rd|Mendiola Eric|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male White Master 36 Open Weight
+1st|Mendiola Eric|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Blue Master 36 Light
+1st|Borja Mychal|Atos Jiu-jitsu Guam|GUM
+2nd|Sarmiento Paul|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Blue Master 36 Ultra Heavy
+1st|Schacher, I Gregory|Atos Jiu-jitsu Guam|GUM
+2nd|Camacho Richard|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male Blue Master 36 Open Weight
+1st|Schacher, I Gregory|Atos Jiu-jitsu Guam|GUM
+2nd|Borja Mychal|Atos Jiu-jitsu Guam|GUM
+3rd|Sarmiento Paul|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male Purple Master 36 Light
+1st|Cabrera Alex|Purebred Jiu Jitsu Guam|GUM
+2nd|Bumagat Ralph|Carlson Gracie Team|GUM
+
+##### [GI] Male Purple Master 36 Middle
+1st|Duenas Raymond|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Gutierrez Howard|Atos Jiu-jitsu Guam|GUM
+3rd|Respicio Rico|Atos Jiu-jitsu Guam|GUM
+3rd|Untalan Augustin|Heights Academy Guam|USA
+
+##### [GI] Male Purple Master 36 Open Weight
+1st|Cruz Justin|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Gutierrez Howard|Atos Jiu-jitsu Guam|GUM
+3rd|Cabrera Alex|Purebred Jiu Jitsu Guam|GUM
+
+##### [GI] Male Black Master 36 Medium Heavy
+1st|Hirasawa Hiroshi|Pato Studio|JPN
+2nd|Mackenzie Jacob|Gf Team|CAN
+3rd|Suzuki Takuru|Evox Bjj|JPN
+3rd|Ambrose Jj|Machado Guam|USA
+
+##### [GI] Male Black Master 36 Open Weight
+1st|Hirasawa Hiroshi|Pato Studio|JPN
+3rd|Dejesus Timothy|Atos Jiu-jitsu Guam|GUM
+
+##### [GI] Male White Master 41 Light
+1st|Aguon Leonard|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Salinas Steve|Ryze|USA
+
+##### [GI] Male Blue Master 41 Light Feather
+1st|Lubon Ryan|Deftac Six Blades|PHL
+2nd|Williams Grant|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male Blue Master 41 Middle
+1st|Howard Brian|Carlson Gracie Team|GUM
+2nd|Serrano Juanito|Atos Jiu-jitsu Guam|GUM
+3rd|Chu Tinghao|Inglorious Grapplers|TAI
+
+##### [GI] Male Blue Master 41 Open Weight
+1st|Howard Brian|Carlson Gracie Team|GUM
+2nd|Serrano Juanito|Atos Jiu-jitsu Guam|GUM
+3rd|Chu Tinghao|Inglorious Grapplers|TAI
+
+##### [GI] Male Purple Master 41 Feather
+1st|Manley Jeremiah|Atos Jiu-jitsu Guam|GUM
+2nd|Cruz Greg|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [GI] Male Brown Master 41 Light
+1st|Eusebio Christian|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Lin Po Yu|Taiwan Bjj|TAI
+
+##### [GI] Male Brown Master 41 Middle
+1st|Huang Guo Cheng|Taiwan Bjj|TAI
+
+##### [GI] Male Black Master 41 Light
+1st|Yusuke Tabata|Paraestra Moriya|JPN
+2nd|Cubacub Lloyd|Atos Jiu-jitsu Guam|USA
+
+##### [GI] Male Black Master 41 Heavy
+1st|Shiraki Daisuke|Carpe Diem Hope|JPN
+2nd|Atalig Hayato|Carlson Gracie Team|GUM
+3rd|Juarez Paul|Jiu Jitsu Manila|PHL
+
+##### [GI] Male Black Master 41 Open Weight
+1st|Shiraki Daisuke|Carpe Diem Hope|JPN
+2nd|Atalig Hayato|Carlson Gracie Team|GUM
+3rd|Cubacub Lloyd|Atos Jiu-jitsu Guam|USA
+3rd|Jerome Joshua|Heights Academy Guam|USA
+
+##### [GI] Male Blue Master 46 Light
+1st|Muna Donald|Figo’ / Bonsai Jiu Jitsu|GUM
+2nd|Charfauros Jr George|Atos Jiu-jitsu Guam|USA
+
+##### [GI] Male Purple Master 46 Light
+1st|Lizama Edward|Machado Guam|GUM
+
+##### [GI] Male Purple Master 46 Open Weight
+1st|Manley Jeremiah|Atos Jiu-jitsu Guam|GUM
+2nd|Cruz Joey|Atos Jiu-jitsu Guam|GUM
+3rd|Lizama Edward|Machado Guam|GUM
+
+##### [GI] Male Black Master 46 Middle
+1st|Kamakura Yoshiyuki|Impacto Bjj|BRA
+
+##### [GI] Male Black Master 46 Ultra Heavy
+1st|Flores Erik|Heights Academy Guam|GUM
+
+##### [GI] Male Black Master 46 Open Weight
+1st|Flores Erik|Heights Academy Guam|GUM
+2nd|Alvarez Justis|Purebred Jiu Jitsu Guam|MNP
+3rd|Kamakura Yoshiyuki|Impacto Bjj|BRA
+
+##### [NOGI] Male Blue Juvenile 16-17 Light
+1st|Iamazato Enzo|Carlos Toyota Bjj|BRA
+2nd|Quitugua Alexander|Atos Jiu-jitsu Guam|GUM
+3rd|Schacher Il Gregory|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male Blue Juvenile 16-17 Middle
+1st|Seungin Lee|Alliance Korea|KOR
+2nd|Kobayashi João|Carlos Toyota Bjj|BRA
+3rd|Asprer Zayden|Guma|GUM
+
+##### [NOGI] Male Blue Juvenile 16-17 Open Weight
+1st|Kobayashi João|Carlos Toyota Bjj|BRA
+2nd|Iamazato Enzo|Carlos Toyota Bjj|BRA
+3rd|Schacher Il Gregory|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male White Adult 18 Light Feather
+1st|Naval Kaiden|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male White Adult 18 Feather
+1st|Lim Gavin|Spike 22|GUM
+2nd|Ursua Ansen|Känsept Academy|USA
+3rd|Peredo Rai-ramon|Spike 22|GUM
+3rd|Carey Kyle|Guma|USA
+
+##### [NOGI] Male White Adult 18 Middle
+1st|Van Der Maas Evert|Purebred Jiu Jitsu Guam|NLD
+2nd|Santos Ezekiel|Figo’ / Bonsai Jiu Jitsu|GUM
+3rd|King Jason|Machado Guam|USA
+3rd|Merfalen Eziah|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male White Adult 18 Medium Heavy
+1st|Botkin Cameron|Ryze|USA
+2nd|Ok Alvin|Other|GUM
+
+##### [NOGI] Male White Adult 18 Ultra Heavy
+1st|Manibusan Ryan|Atos Jiu-jitsu Guam|GUM
+2nd|Quinata Jr. Brian|Atos Jiu-jitsu Guam|GUM
+3rd|Tamow Emjay|Atos Jiu-jitsu Guam|GUM
+3rd|Mendiola Eric|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male White Adult 18 Open Weight
+1st|Carey Kyle|Guma|USA
+2nd|Stanley Noah|Figo’ / Bonsai Jiu Jitsu|GUM
+3rd|Camacho Jason-felix|Spike 22|GUM
+3rd|Peredo Rai-ramon|Spike 22|GUM
+
+##### [NOGI] Male Blue Adult 18 Light
+1st|Matsuo Christian|Carlos Toyota Bjj|BRA
+2nd|Mesa Joaquin|Atos Jiu-jitsu Guam|GUM
+3rd|Sanders Brendan|Guma|USA
+3rd|Babauta Trey|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [NOGI] Male Blue Adult 18 Middle
+1st|Paulino Gabriel|Guma|GUM
+2nd|Mendiola Sean|Spike 22|GUM
+3rd|Hippert Riley|Guma|USA
+3rd|Santos Troy|Baret Submissions|MNP
+
+##### [NOGI] Male Blue Adult 18 Medium Heavy
+1st|Nakahara Gustavo|Carlos Toyota Bjj|BRA
+2nd|Crisostomo Jaycen|Känsept Academy|GUM
+3rd|Vargas Orvin|Atos Jiu-jitsu Guam|PRI
+3rd|Naholowaa Kainoa|Guma|GUM
+
+##### [NOGI] Male Blue Adult 18 Ultra Heavy
+1st|Roberts Callum|Deftac Six Blades|PHL
+2nd|Schacher, I Gregory|Atos Jiu-jitsu Guam|GUM
+3rd|Blas Aidan|Figo’ / Bonsai Jiu Jitsu|GUM
+
+##### [NOGI] Male Blue Adult 18 Open Weight
+1st|Matsuo Christian|Carlos Toyota Bjj|BRA
+2nd|Roberts Callum|Deftac Six Blades|PHL
+3rd|Crisostomo Jaycen|Känsept Academy|GUM
+3rd|Nakahara Gustavo|Carlos Toyota Bjj|BRA
+
+##### [NOGI] Male Purple Adult 18 Middle
+1st|Shin Jinhyeok|Atos Jiu-jitsu Guam|GUM
+2nd|Valdez Brandon|Machado Guam|USA
+
+##### [NOGI] Male Purple Adult 18 Medium Heavy
+1st|Miagoux Mauiti|Atos Jiu-jitsu Guam|PYF
+2nd|Blas Jade|Atos Jiu-jitsu Guam|USA
+
+##### [NOGI] Male Purple Adult 18 Open Weight
+1st|Cherif Redouane|Taiwan Bjj|FRA
+2nd|Valdez Brandon|Machado Guam|USA
+3rd|Miagoux Mauiti|Atos Jiu-jitsu Guam|PYF
+3rd|Blas Jade|Atos Jiu-jitsu Guam|USA
+
+##### [NOGI] Male Brown Adult 18 Middle
+1st|Quintanilla Jr Gonz..|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male Brown Adult 18 Medium Heavy
+1st|Silverio Joko|Deftac Six Blades|PHL
+2nd|Rosales Nicholas|Purebred Jiu Jitsu Guam|USA
+3rd|Pacheco Dennis|Atos Jiu-jitsu Guam|GUM
+3rd|Lujan Vincent|Carlson Gracie Team|GUM
+
+##### [NOGI] Male Brown Adult 18 Open Weight
+1st|Tisdale Samuel|Taiwan Bjj|USA
+2nd|Silverio Joko|Deftac Six Blades|PHL
+3rd|Quintanilla Jr Gonz..|Atos Jiu-jitsu Guam|GUM
+3rd|Lujan Vincent|Carlson Gracie Team|GUM
+
+##### [NOGI] Male Black Adult 18 Light
+1st|Jones Trevin|Vida|USA
+
+##### [NOGI] Male Black Adult 18 Medium Heavy
+1st|Ambrose Jj|Machado Guam|USA
+2nd|Camacho Frank|Purebred Jiu Jitsu Guam|GUM
+
+##### [NOGI] Male Black Adult 18 Heavy
+1st|Jimenez Roberto|Other|ECU
+
+##### [NOGI] Male Black Adult 18 Open Weight
+1st|Grandy Alex|10th Planet Jiu-jitsu|USA
+2nd|Godoy Marlon|Bonsai Jiu-jitsu Japan|BRA
+3rd|Jones Trevin|Vida|USA
+3rd|Camacho Frank|Purebred Jiu Jitsu Guam|GUM
+
+##### [NOGI] Male White Master 30 Heavy
+1st|Crenshaw Joshua|Atos Jiu-jitsu Guam|GUM
+2nd|Sagun Derek|Ryze|GUM
+
+##### [NOGI] Male White Master 30 Open Weight
+1st|Crenshaw Joshua|Atos Jiu-jitsu Guam|GUM
+2nd|Quinata Jr. Brian|Atos Jiu-jitsu Guam|GUM
+3rd|Sagun Derek|Ryze|GUM
+
+##### [NOGI] Male Blue Master 30 Light
+1st|Ngiratumerang Melvin|Purebred Jiu Jitsu Guam|PLW
+2nd|Sosa Gian|Atos Jiu-jitsu Guam|GUM
+3rd|Kasala Steven|Figo’ / Bonsai Jiu Jitsu|GUM
+3rd|Tamashiro Theodore|Ryze|GUM
+
+##### [NOGI] Male Blue Master 30 Heavy
+1st|Kabeya Ryosuke|Evox Bjj|JPN
+2nd|Klein Jacob|Atos Jiu-jitsu Guam|USA
+3rd|Basilio Paul-myer|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male Blue Master 30 Ultra Heavy
+1st|Perez Nathan|Atos Jiu-jitsu Guam|GUM
+2nd|Scott Greg|Catch Jiu Jitsu|GBR
+3rd|Reederbarton Arron|Carlson Gracie Team|USA
+
+##### [NOGI] Male Blue Master 30 Open Weight
+1st|Kabeya Ryosuke|Evox Bjj|JPN
+2nd|Klein Jacob|Atos Jiu-jitsu Guam|USA
+3rd|Reederbarton Arron|Carlson Gracie Team|USA
+3rd|Scott Greg|Catch Jiu Jitsu|GBR
+
+##### [NOGI] Male Purple Master 30 Middle
+1st|Gutierrez Howard|Atos Jiu-jitsu Guam|GUM
+2nd|Manalon Shaun|Machado Guam|USA
+
+##### [NOGI] Male Purple Master 30 Open Weight
+1st|Gutierrez Howard|Atos Jiu-jitsu Guam|GUM
+2nd|Manalon Shaun|Machado Guam|USA
+
+##### [NOGI] Male Black Master 30 Light
+1st|Eclavea Scotty|Other|GUM
+2nd|Deleon Guerrero Bry..|Baret Submissions|MNP
+3rd|Ledesma Oscar|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male Black Master 30 Middle
+1st|Cruz Oliver|Purebred Jiu Jitsu Guam|GUM
+2nd|Mesa Jeffrey|Heights Academy Guam|GUM
+
+##### [NOGI] Male Black Master 30 Open Weight
+1st|Ambrose Jj|Machado Guam|USA
+2nd|Cruz Oliver|Purebred Jiu Jitsu Guam|GUM
+3rd|Deleon Guerrero Bry..|Baret Submissions|MNP
+3rd|Mesa Jeffrey|Heights Academy Guam|GUM
+
+##### [NOGI] Male White Master 36 Heavy
+1st|Valdez Ryan|Ryze|USA
+2nd|Davis Adrian|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male Blue Master 36 Light
+1st|Borja Mychal|Atos Jiu-jitsu Guam|GUM
+2nd|Castro Alexander|Other|GUM
+
+##### [NOGI] Male Blue Master 36 Open Weight
+1st|Schacher, I Gregory|Atos Jiu-jitsu Guam|GUM
+2nd|Borja Mychal|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male Brown Master 36 Open Weight
+1st|Rosales Nicholas|Purebred Jiu Jitsu Guam|USA
+2nd|Huang Guo Cheng|Taiwan Bjj|TAI
+3rd|Pacheco Dennis|Atos Jiu-jitsu Guam|GUM
+
+##### [NOGI] Male Black Master 41 Heavy
+1st|Juarez Paul|Jiu Jitsu Manila|PHL
+
+##### [NOGI] Male Black Master 41 Open Weight
+1st|Juarez Paul|Jiu Jitsu Manila|PHL
