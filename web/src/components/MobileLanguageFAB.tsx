@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Globe, X } from 'lucide-react';
+import { flagComponents } from './flags';
 
 const languages = [
-  { code: 'en', flag: '🇺🇸', label: 'English' },
-  { code: 'ja', flag: '🇯🇵', label: '日本語' },
-  { code: 'ko', flag: '🇰🇷', label: '한국어' },
-  { code: 'tl', flag: '🇵🇭', label: 'Filipino' },
-  { code: 'zh', flag: '🇨🇳', label: '中文' },
+  { code: 'en', label: 'English' },
+  { code: 'ja', label: '日本語' },
+  { code: 'ko', label: '한국어' },
+  { code: 'tl', label: 'Filipino' },
+  { code: 'zh', label: '中文' },
 ];
 
 export default function MobileLanguageFAB() {
@@ -17,6 +18,7 @@ export default function MobileLanguageFAB() {
   const shouldReduceMotion = useReducedMotion();
 
   const currentLang = languages.find((l) => l.code === i18n.language) || languages[0];
+  const CurrentFlag = flagComponents[currentLang.code];
 
   return (
     <div className="md:hidden fixed bottom-6 right-4 z-50">
@@ -40,28 +42,31 @@ export default function MobileLanguageFAB() {
               exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.2 }}
             >
-              {languages.map((lang, i) => (
-                <motion.button
-                  key={lang.code}
-                  onClick={() => {
-                    i18n.changeLanguage(lang.code);
-                    setOpen(false);
-                  }}
-                  initial={shouldReduceMotion ? {} : { opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-full border transition-all duration-200 ${
-                    i18n.language === lang.code
-                      ? 'bg-gold-500/20 border-gold-500/40 text-gold-400'
-                      : 'bg-navy-800/95 border-white/10 text-text-secondary hover:text-text-primary'
-                  }`}
-                >
-                  <span className="text-sm font-heading font-medium tracking-wide">
-                    {lang.label}
-                  </span>
-                  <span className="text-2xl leading-none">{lang.flag}</span>
-                </motion.button>
-              ))}
+              {languages.map((lang, i) => {
+                const Flag = flagComponents[lang.code];
+                return (
+                  <motion.button
+                    key={lang.code}
+                    onClick={() => {
+                      i18n.changeLanguage(lang.code);
+                      setOpen(false);
+                    }}
+                    initial={shouldReduceMotion ? {} : { opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-full border transition-all duration-200 ${
+                      i18n.language === lang.code
+                        ? 'bg-gold-500/20 border-gold-500/40 text-gold-400'
+                        : 'bg-navy-800/95 border-white/10 text-text-secondary hover:text-text-primary'
+                    }`}
+                  >
+                    <span className="text-sm font-heading font-medium tracking-wide">
+                      {lang.label}
+                    </span>
+                    {Flag && <Flag className="w-7 h-[21px]" />}
+                  </motion.button>
+                );
+              })}
             </motion.div>
           </>
         )}
@@ -104,9 +109,11 @@ export default function MobileLanguageFAB() {
               className="flex items-center justify-center"
             >
               <Globe size={22} strokeWidth={2.5} />
-              <span className="absolute -top-1 -right-1 text-xs w-5 h-5 rounded-full bg-navy-900 text-gold-500 font-bold flex items-center justify-center border border-gold-500/40">
-                {currentLang.flag}
-              </span>
+              {CurrentFlag && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-navy-900 flex items-center justify-center border border-gold-500/40 overflow-hidden">
+                  <CurrentFlag className="w-4 h-3" />
+                </span>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
