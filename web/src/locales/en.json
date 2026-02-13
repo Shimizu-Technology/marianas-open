@@ -5,7 +5,17 @@
     "calendar": "Pro Series",
     "watch": "Watch",
     "about": "About",
-    "rankings": "Rankings"
+    "rankings": "Rankings",
+    "pastEvents": "Past Events"
+  },
+  "pastEvents": {
+    "badge": "Event Archive",
+    "title": "Past Events",
+    "subtitle": "Explore the history of the Marianas Open and Pro Series across Asia and the Pacific.",
+    "noEvents": "No past events found.",
+    "event": "event",
+    "events": "events",
+    "viewDetails": "View Details"
   },
   "hero": {
     "subtitle": "Guam's Premier International",
