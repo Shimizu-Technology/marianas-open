@@ -5,7 +5,17 @@
     "calendar": "职业系列赛",
     "watch": "观看",
     "about": "关于",
-    "rankings": "排名"
+    "rankings": "排名",
+    "pastEvents": "往届赛事"
+  },
+  "pastEvents": {
+    "badge": "赛事档案",
+    "title": "往届赛事",
+    "subtitle": "探索马里亚纳公开赛和职业系列赛的历史。",
+    "noEvents": "暂无往届赛事。",
+    "event": "场赛事",
+    "events": "场赛事",
+    "viewDetails": "查看详情"
   },
   "hero": {
     "subtitle": "关岛顶级国际",
