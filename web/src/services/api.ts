@@ -87,6 +87,43 @@ export interface UserProfile {
   updated_at: string;
 }
 
+export interface Video {
+  id: number;
+  event_id: number | null;
+  title: string;
+  youtube_url: string;
+  youtube_video_id: string | null;
+  competitor_1_name: string | null;
+  competitor_2_name: string | null;
+  weight_class: string | null;
+  belt_rank: string | null;
+  round: string | null;
+  result: string | null;
+  duration_seconds: number | null;
+  category: string | null;
+  sort_order: number;
+  featured: boolean;
+  status: string;
+  event_name: string | null;
+}
+
+export interface VideoFormData {
+  title: string;
+  youtube_url: string;
+  competitor_1_name: string;
+  competitor_2_name: string;
+  weight_class: string;
+  belt_rank: string;
+  round: string;
+  result: string;
+  duration_seconds: number | null;
+  category: string;
+  sort_order: number;
+  featured: boolean;
+  status: string;
+  event_id: number | null;
+}
+
 export interface EventFormData {
   name: string;
   slug: string;
@@ -174,6 +211,11 @@ export const api = {
   getEvents: () => fetchApi<Event[]>('/api/v1/events'),
   getEvent: (slug: string) => fetchApi<Event>(`/api/v1/events/${slug}`),
   getSponsors: () => fetchApi<Sponsor[]>('/api/v1/sponsors'),
+  getVideos: (params?: Record<string, string>) => {
+    const query = params ? '?' + new URLSearchParams(params).toString() : '';
+    return fetchApi<Video[]>(`/api/v1/videos${query}`);
+  },
+  getVideo: (id: number) => fetchApi<Video>(`/api/v1/videos/${id}`),
 
   // Auth
   getCurrentUser: (email?: string) => {
@@ -237,6 +279,21 @@ export const api = {
       formData.append('logo', file);
       return fetchApiUpload<{ sponsor: Sponsor }>(`/api/v1/admin/sponsors/${id}/upload_logo`, formData);
     },
+
+    // Videos
+    getVideos: () => fetchApi<{ videos: Video[] }>('/api/v1/admin/videos', {}, true),
+    createVideo: (data: Partial<VideoFormData>) =>
+      fetchApi<{ video: Video }>('/api/v1/admin/videos', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    updateVideo: (id: number, data: Partial<VideoFormData>) =>
+      fetchApi<{ video: Video }>(`/api/v1/admin/videos/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    deleteVideo: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/videos/${id}`, { method: 'DELETE' }, true),
 
     // Organization
     getOrganization: () => fetchApi<Organization>('/api/v1/admin/organization', {}, true),

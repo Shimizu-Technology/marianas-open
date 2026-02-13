@@ -113,7 +113,11 @@
     "details": "详情",
     "stars": "星级",
     "legendProSeries": "职业系列赛",
-    "legendGrandChampionship": "总决赛"
+    "legendGrandChampionship": "总决赛",
+    "upcoming": "即将举办",
+    "pastResults": "过往赛果",
+    "noPastEvents": "暂无过往赛事。",
+    "completed": "已结束"
   },
   "watch": {
     "title": "观看",
@@ -152,7 +156,11 @@
     "featureNotify": "推送通知",
     "featureNotifyDesc": "当您喜爱的选手上场时收到通知。不错过任何比赛。",
     "liveEventInfo": "马里亚纳公开赛 2026 — UOG卡尔沃体育馆",
-    "liveBadge": "LIVE"
+    "liveBadge": "LIVE",
+    "featured": "精选",
+    "filterCategory": "类别",
+    "noVideosYet": "暂无视频",
+    "noVideosYetDesc": "请稍后查看比赛视频和精彩集锦。"
   },
   "share": {
     "defaultText": "查看马里亚纳公开赛——国际柔术锦标赛！",

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_13_065635) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_13_075950) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -125,10 +125,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_13_065635) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  create_table "videos", force: :cascade do |t|
+    t.string "belt_rank"
+    t.string "category"
+    t.string "competitor_1_name"
+    t.string "competitor_2_name"
+    t.datetime "created_at", null: false
+    t.integer "duration_seconds"
+    t.bigint "event_id"
+    t.boolean "featured", default: false
+    t.string "result"
+    t.string "round"
+    t.integer "sort_order", default: 0
+    t.string "status", default: "published"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.string "weight_class"
+    t.string "youtube_url", null: false
+    t.string "youtube_video_id"
+    t.index ["event_id"], name: "index_videos_on_event_id"
+    t.index ["featured"], name: "index_videos_on_featured"
+    t.index ["youtube_video_id"], name: "index_videos_on_youtube_video_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "event_schedule_items", "events"
   add_foreign_key "events", "organizations"
   add_foreign_key "prize_categories", "events"
   add_foreign_key "sponsors", "organizations"
+  add_foreign_key "videos", "events"
 end

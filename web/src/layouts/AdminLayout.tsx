@@ -1,11 +1,12 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { CalendarDays, Handshake, Settings, Users, LayoutDashboard, ArrowLeft } from 'lucide-react'
+import { CalendarDays, Handshake, Settings, Users, LayoutDashboard, ArrowLeft, Play } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/admin/events', icon: CalendarDays, label: 'Events' },
   { to: '/admin/sponsors', icon: Handshake, label: 'Sponsors' },
+  { to: '/admin/videos', icon: Play, label: 'Videos' },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ]
