@@ -29,22 +29,22 @@ export default function EventDetailPage() {
   const shouldReduceMotion = useReducedMotion();
 
   const scheduleItems = [
-    { time: '7:00 AM', event: 'Doors Open / Weigh-ins' },
-    { time: '8:00 AM', event: 'Kids & Juvenile Divisions' },
-    { time: '10:00 AM', event: 'Adult White & Blue Belt' },
-    { time: '1:00 PM', event: 'Adult Purple & Brown Belt' },
-    { time: '4:00 PM', event: 'Black Belt Divisions' },
-    { time: '6:00 PM', event: 'Black Belt Finals / Open Class' },
-    { time: '8:00 PM', event: 'Awards Ceremony' },
+    { time: '7:00 AM', event: t('event.schedule1') },
+    { time: '8:00 AM', event: t('event.schedule2') },
+    { time: '10:00 AM', event: t('event.schedule3') },
+    { time: '1:00 PM', event: t('event.schedule4') },
+    { time: '4:00 PM', event: t('event.schedule5') },
+    { time: '6:00 PM', event: t('event.schedule6') },
+    { time: '8:00 PM', event: t('event.schedule7') },
   ];
 
   const prizeBreakdown = [
-    { division: 'Black Belt Open Class (M)', prize: '$10,000' },
-    { division: 'Black Belt Open Class (F)', prize: '$10,000' },
-    { division: 'Black Belt Weight Divisions', prize: '$3,000' },
-    { division: 'Brown Belt Weight Divisions', prize: '$1,500' },
-    { division: 'Team Trophy', prize: '$2,500' },
-    { division: 'Kids Grand Champion', prize: '$500' },
+    { division: t('event.prizeBlackOpenM'), prize: '$10,000' },
+    { division: t('event.prizeBlackOpenF'), prize: '$10,000' },
+    { division: t('event.prizeBlackWeight'), prize: '$3,000' },
+    { division: t('event.prizeBrownWeight'), prize: '$1,500' },
+    { division: t('event.prizeTeam'), prize: '$2,500' },
+    { division: t('event.prizeKids'), prize: '$500' },
   ];
 
   const shareUrl = 'https://marianasopen.com';
@@ -155,7 +155,7 @@ export default function EventDetailPage() {
               <div className="bg-gradient-to-br from-gold-500/10 to-transparent border border-gold-500/20 p-8 h-full">
                 <Trophy size={24} className="text-gold-500 mb-4" />
                 <div className="text-5xl font-heading font-black text-gold-500 mb-2">$50K</div>
-                <div className="text-sm text-text-muted uppercase tracking-wider mb-6">Total Prize Pool</div>
+                <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
                 <div className="space-y-3 text-sm">
                   {prizeBreakdown.map((item, i) => (
                     <div key={i} className="flex justify-between text-text-secondary">
@@ -177,8 +177,8 @@ export default function EventDetailPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/80 to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <div className="text-xs text-gold-400 font-heading uppercase tracking-wider">2025 Marianas Open</div>
-                  <div className="text-sm text-text-secondary">1,000+ athletes from 20+ countries</div>
+                  <div className="text-xs text-gold-400 font-heading uppercase tracking-wider">{t('event.pastEventLabel')}</div>
+                  <div className="text-sm text-text-secondary">{t('event.pastEventDesc')}</div>
                 </div>
               </div>
             </ScrollReveal>
@@ -196,13 +196,13 @@ export default function EventDetailPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div className="bg-navy-900 border border-white/5 p-4 text-center">
                     <Users size={20} className="text-gold-500 mx-auto mb-2" />
-                    <div className="text-sm text-text-secondary">6 Competition Mats</div>
-                    <div className="text-sm text-text-secondary">5,000+ Capacity</div>
+                    <div className="text-sm text-text-secondary">{t('event.competitionMats')}</div>
+                    <div className="text-sm text-text-secondary">{t('event.venueCapacity')}</div>
                   </div>
                   <div className="bg-navy-900 border border-white/5 p-4 text-center">
                     <MapPin size={20} className="text-gold-500 mx-auto mb-2" />
-                    <div className="text-sm text-text-secondary">University of Guam</div>
-                    <div className="text-sm text-text-secondary">Mangilao, Guam 96913</div>
+                    <div className="text-sm text-text-secondary">{t('event.venueUniversity')}</div>
+                    <div className="text-sm text-text-secondary">{t('event.venueAddress')}</div>
                   </div>
                 </div>
                 {/* Embedded Map */}
@@ -266,10 +266,10 @@ export default function EventDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { src: '/images/action-match-1.jpg', alt: 'Competition match' },
-              { src: '/images/ceremony-1.jpg', alt: 'Ceremony' },
-              { src: '/images/venue-mats.jpg', alt: 'Competition venue' },
-              { src: '/images/podium-2.jpg', alt: 'Podium ceremony' },
+              { src: '/images/action-match-1.jpg', alt: t('event.galleryMatch') },
+              { src: '/images/ceremony-1.jpg', alt: t('event.galleryCeremony') },
+              { src: '/images/venue-mats.jpg', alt: t('event.galleryVenue') },
+              { src: '/images/podium-2.jpg', alt: t('event.galleryPodium') },
             ].map((img, i) => (
               <ScrollReveal key={i} delay={i * 0.08}>
                 <div className="relative overflow-hidden aspect-[3/2] border border-white/5 group">
@@ -303,19 +303,19 @@ export default function EventDetailPage() {
                 <p className="text-text-secondary text-sm leading-relaxed mb-4">{t('event.flightsDesc')}</p>
                 <div className="space-y-2 text-sm text-text-muted">
                   <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span>Tokyo (NRT)</span>
+                    <span>{t('event.flightTokyo')}</span>
                     <span className="text-text-secondary">3.5 hrs</span>
                   </div>
                   <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span>Manila (MNL)</span>
+                    <span>{t('event.flightManila')}</span>
                     <span className="text-text-secondary">3.5 hrs</span>
                   </div>
                   <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span>Seoul (ICN)</span>
+                    <span>{t('event.flightSeoul')}</span>
                     <span className="text-text-secondary">4 hrs</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Honolulu (HNL)</span>
+                    <span>{t('event.flightHonolulu')}</span>
                     <span className="text-text-secondary">7 hrs</span>
                   </div>
                 </div>
@@ -330,11 +330,11 @@ export default function EventDetailPage() {
                 <div className="space-y-3 text-sm">
                   <div className="bg-navy-800 p-3 border border-white/5">
                     <div className="font-heading font-semibold text-text-primary">Dusit Thani Guam</div>
-                    <div className="text-text-muted text-xs mt-1">Official awards banquet venue</div>
+                    <div className="text-text-muted text-xs mt-1">{t('event.hotelDusitDesc')}</div>
                   </div>
                   <div className="bg-navy-800 p-3 border border-white/5">
                     <div className="font-heading font-semibold text-text-primary">Hyatt Regency Guam</div>
-                    <div className="text-text-muted text-xs mt-1">Tumon Bay beachfront</div>
+                    <div className="text-text-muted text-xs mt-1">{t('event.hotelHyattDesc')}</div>
                   </div>
                 </div>
               </div>
@@ -347,12 +347,12 @@ export default function EventDetailPage() {
                 <p className="text-text-secondary text-sm leading-relaxed mb-4">{t('event.visaDesc')}</p>
                 <div className="space-y-2 text-sm text-text-muted">
                   <div className="bg-navy-800 p-3 border border-white/5">
-                    <div className="font-heading font-semibold text-gold-400 text-xs uppercase tracking-wider mb-1">Visa Waiver (ESTA)</div>
-                    <div className="text-text-secondary text-xs">Japan, South Korea, Taiwan, and 30+ countries</div>
+                    <div className="font-heading font-semibold text-gold-400 text-xs uppercase tracking-wider mb-1">{t('event.visaEsta')}</div>
+                    <div className="text-text-secondary text-xs">{t('event.visaEstaDesc')}</div>
                   </div>
                   <div className="bg-navy-800 p-3 border border-white/5">
-                    <div className="font-heading font-semibold text-gold-400 text-xs uppercase tracking-wider mb-1">Guam-CNMI Visa Waiver</div>
-                    <div className="text-text-secondary text-xs">Philippines, Hong Kong, select countries (45-day stay)</div>
+                    <div className="font-heading font-semibold text-gold-400 text-xs uppercase tracking-wider mb-1">{t('event.visaGuamCnmi')}</div>
+                    <div className="text-text-secondary text-xs">{t('event.visaGuamCnmiDesc')}</div>
                   </div>
                 </div>
               </div>

@@ -8,6 +8,11 @@ import SocialShare from '../components/SocialShare';
 import QRShare from '../components/QRShare';
 import { events } from '../data/events';
 
+function getDateLocale(lang: string) {
+  const map: Record<string, string> = { ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', tl: 'fil-PH' };
+  return map[lang] || 'en-US';
+}
+
 function EventMapDot({ event, index }: { event: typeof events[0]; index: number }) {
   const { i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
@@ -26,11 +31,11 @@ function EventMapDot({ event, index }: { event: typeof events[0]; index: number 
   const pos = positions[event.countryCode] || { x: 50, y: 50 };
 
   const formattedDate = new Date(event.date).toLocaleDateString(
-    i18n.language === 'ja' ? 'ja-JP' : i18n.language === 'ko' ? 'ko-KR' : i18n.language === 'zh' ? 'zh-CN' : i18n.language === 'tl' ? 'fil-PH' : 'en-US',
+    getDateLocale(i18n.language),
     { month: 'short', day: 'numeric', year: 'numeric' }
   );
 
-  // Dismiss tooltip on outside click (mobile)
+  // Dismiss tooltip on outside click/tap (mobile)
   useEffect(() => {
     if (!showTooltip) return;
     const handler = (e: TouchEvent | MouseEvent) => {
@@ -87,7 +92,7 @@ function EventMapDot({ event, index }: { event: typeof events[0]; index: number 
             <div className="bg-surface border border-gold-500/30 p-3 whitespace-nowrap shadow-xl relative">
               <div className="font-heading font-bold text-sm text-text-primary">{event.name}</div>
               <div className="text-xs text-gold-400 mt-1">{formattedDate}</div>
-              {/* Arrow */}
+              {/* Arrow pointing down */}
               <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-gold-500/30" />
             </div>
           </motion.div>
@@ -102,7 +107,7 @@ export default function CalendarPage() {
   const shouldReduceMotion = useReducedMotion();
 
   const formatEventDate = useCallback((dateStr: string, dateEndStr?: string) => {
-    const locale = i18n.language === 'ja' ? 'ja-JP' : i18n.language === 'ko' ? 'ko-KR' : i18n.language === 'zh' ? 'zh-CN' : i18n.language === 'tl' ? 'fil-PH' : 'en-US';
+    const locale = getDateLocale(i18n.language);
     const main = new Date(dateStr).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' });
     if (dateEndStr) {
       const end = new Date(dateEndStr).toLocaleDateString(locale, { day: 'numeric' });
@@ -150,10 +155,8 @@ export default function CalendarPage() {
             </div>
           </ScrollReveal>
 
-          {/* Map visualization */}
           <ScrollReveal>
             <div className="relative bg-surface border border-white/5 overflow-hidden" style={{ aspectRatio: '16/9' }}>
-              {/* Stylized map background */}
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--color-navy-800)_0%,_var(--color-surface)_70%)]" />
               <div
                 className="absolute inset-0 opacity-[0.06]"
@@ -163,7 +166,6 @@ export default function CalendarPage() {
                 }}
               />
 
-              {/* Connection lines */}
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -181,12 +183,10 @@ export default function CalendarPage() {
                 />
               </svg>
 
-              {/* Event dots */}
               {events.map((event, i) => (
                 <EventMapDot key={event.id} event={event} index={i} />
               ))}
 
-              {/* Legend */}
               <div className="absolute bottom-4 left-4 flex items-center gap-6 text-xs text-text-muted">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-navy-700" />

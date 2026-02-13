@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Calendar, Trophy, Users, Globe } from 'lucide-react';
+import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import { events } from '../data/events';
@@ -16,8 +16,13 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
+function getDateLocale(lang: string) {
+  const map: Record<string, string> = { ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', tl: 'fil-PH' };
+  return map[lang] || 'en-US';
+}
+
 export default function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
 
   const stats = [
@@ -238,10 +243,10 @@ export default function HomePage() {
                   {/* Date */}
                   <div className="shrink-0 w-28">
                     <div className="text-xs text-text-muted uppercase tracking-wider font-heading">
-                      {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
+                      {new Date(event.date).toLocaleDateString(getDateLocale(i18n.language), { month: 'short' })}
                     </div>
                     <div className="text-2xl font-heading font-black">
-                      {new Date(event.date).toLocaleDateString('en-US', { day: 'numeric' })}
+                      {new Date(event.date).toLocaleDateString(getDateLocale(i18n.language), { day: 'numeric' })}
                     </div>
                   </div>
 
@@ -310,6 +315,30 @@ export default function HomePage() {
                   {name}
                 </div>
               ))}
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Built by Shimizu Technology */}
+      <section className="py-16 border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <ScrollReveal>
+            <div className="max-w-2xl mx-auto text-center space-y-4">
+              <div className="w-12 h-px bg-gold-500/40 mx-auto" />
+              <p className="text-sm font-heading font-semibold uppercase tracking-[0.2em] text-text-muted">
+                {t('shimizu.title')}
+              </p>
+              <p className="text-text-secondary text-sm leading-relaxed max-w-lg mx-auto">
+                {t('shimizu.description')}
+              </p>
+              <a
+                href="mailto:leon@shimizu-technology.com"
+                className="inline-flex items-center gap-2 text-gold-500 text-sm font-heading font-semibold uppercase tracking-wider hover:text-gold-400 transition-colors"
+              >
+                {t('shimizu.cta')}
+                <ExternalLink size={14} />
+              </a>
             </div>
           </ScrollReveal>
         </div>
