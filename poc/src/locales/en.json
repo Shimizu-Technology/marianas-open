@@ -28,7 +28,15 @@
     "featuredTitle": "The Largest BJJ Tournament in the Marianas",
     "featuredDesc": "What started as a local Guam tournament in 2007 has grown into an international phenomenon spanning 6 countries with over 1,300 competitors and $2M in economic impact.",
     "viewCalendar": "View Full Calendar",
-    "registerNow": "Register Now"
+    "registerNow": "Register Now",
+    "since2007": "Since 2007",
+    "economicImpact": "Economic Impact",
+    "economicImpactValue": "$2M",
+    "spectators": "Spectators",
+    "spectatorsValue": "5K+",
+    "internationalReach": "International Reach",
+    "internationalReachDesc": "Partners in Korea, Japan, Taiwan, Philippines, and Hong Kong. Featured in 30,000+ printed magazines across Asia.",
+    "mainEvent": "Main Event"
   },
   "event": {
     "title": "Marianas Open 2026",
@@ -55,7 +63,41 @@
     "step2Desc": "Find 'Marianas Open 2026' in the event listings and select your division.",
     "step3": "Complete Payment",
     "step3Desc": "Pay the registration fee online. Early bird discounts available.",
-    "shareTitle": "Share This Event"
+    "shareTitle": "Share This Event",
+    "totalPrizePool": "Total Prize Pool",
+    "schedule1": "Doors Open / Weigh-ins",
+    "schedule2": "Kids & Juvenile Divisions",
+    "schedule3": "Adult White & Blue Belt",
+    "schedule4": "Adult Purple & Brown Belt",
+    "schedule5": "Black Belt Divisions",
+    "schedule6": "Black Belt Finals / Open Class",
+    "schedule7": "Awards Ceremony",
+    "prizeBlackOpenM": "Black Belt Open Class (M)",
+    "prizeBlackOpenF": "Black Belt Open Class (F)",
+    "prizeBlackWeight": "Black Belt Weight Divisions",
+    "prizeBrownWeight": "Brown Belt Weight Divisions",
+    "prizeTeam": "Team Trophy",
+    "prizeKids": "Kids Grand Champion",
+    "pastEventLabel": "2025 Marianas Open",
+    "pastEventDesc": "1,000+ athletes from 20+ countries",
+    "competitionMats": "6 Competition Mats",
+    "venueCapacity": "5,000+ Capacity",
+    "venueUniversity": "University of Guam",
+    "venueAddress": "Mangilao, Guam 96913",
+    "flightTokyo": "Tokyo (NRT)",
+    "flightManila": "Manila (MNL)",
+    "flightSeoul": "Seoul (ICN)",
+    "flightHonolulu": "Honolulu (HNL)",
+    "hotelDusitDesc": "Official awards banquet venue",
+    "hotelHyattDesc": "Tumon Bay beachfront",
+    "visaEsta": "Visa Waiver (ESTA)",
+    "visaEstaDesc": "Japan, South Korea, Taiwan, and 30+ countries",
+    "visaGuamCnmi": "Guam-CNMI Visa Waiver",
+    "visaGuamCnmiDesc": "Philippines, Hong Kong, select countries (45-day stay)",
+    "galleryMatch": "Competition match",
+    "galleryCeremony": "Ceremony",
+    "galleryVenue": "Competition venue",
+    "galleryPodium": "Podium ceremony"
   },
   "calendar": {
     "title": "2026 Pro Series",
@@ -64,7 +106,9 @@
     "mapSubtitle": "From local qualifiers to the international stage — compete across Asia and earn your spot at the Marianas Open.",
     "register": "Register",
     "details": "Details",
-    "stars": "stars"
+    "stars": "stars",
+    "legendProSeries": "Pro Series",
+    "legendGrandChampionship": "Grand Championship"
   },
   "watch": {
     "title": "Watch",
@@ -101,7 +145,9 @@
     "featureAI": "Match Highlights AI",
     "featureAIDesc": "AI-powered highlights automatically capture key moments — submissions, sweeps, and scoring.",
     "featureNotify": "Push Notifications",
-    "featureNotifyDesc": "Get notified when your favorite competitors step on the mat. Never miss a match."
+    "featureNotifyDesc": "Get notified when your favorite competitors step on the mat. Never miss a match.",
+    "liveEventInfo": "Marianas Open 2026 — UOG Calvo Fieldhouse",
+    "liveBadge": "LIVE"
   },
   "share": {
     "defaultText": "Check out the Marianas Open — International BJJ Championship!",
@@ -123,5 +169,10 @@
     "taiwan": "Taiwan",
     "southKorea": "South Korea",
     "hongKong": "Hong Kong"
+  },
+  "shimizu": {
+    "title": "Built by Shimizu Technology",
+    "description": "Custom software for sports organizations. Multi-language platforms, live streaming integration, tournament management.",
+    "cta": "Get in Touch"
   }
 }

@@ -28,7 +28,15 @@
     "featuredTitle": "マリアナ諸島最大の柔術トーナメント",
     "featuredDesc": "2007年にグアムのローカル大会として始まり、今や6カ国1,300人以上の選手が参加し、経済効果2億円以上の国際的イベントに成長しました。",
     "viewCalendar": "大会カレンダーを見る",
-    "registerNow": "エントリーする"
+    "registerNow": "エントリーする",
+    "since2007": "2007年創設",
+    "economicImpact": "経済効果",
+    "economicImpactValue": "2億円",
+    "spectators": "観客数",
+    "spectatorsValue": "5,000+",
+    "internationalReach": "国際展開",
+    "internationalReachDesc": "韓国、日本、台湾、フィリピン、香港にパートナー。アジア全域で30,000部以上の雑誌に掲載。",
+    "mainEvent": "メインイベント"
   },
   "event": {
     "title": "マリアナスオープン 2026",
@@ -55,7 +63,41 @@
     "step2Desc": "大会一覧から「Marianas Open 2026」を見つけ、出場部門を選択。",
     "step3": "お支払い",
     "step3Desc": "オンラインで参加費を支払い。早期割引あり。",
-    "shareTitle": "この大会をシェア"
+    "shareTitle": "この大会をシェア",
+    "totalPrizePool": "賞金総額",
+    "schedule1": "開場 / 計量",
+    "schedule2": "キッズ＆ジュニア部門",
+    "schedule3": "成人 白帯＆青帯",
+    "schedule4": "成人 紫帯＆茶帯",
+    "schedule5": "黒帯部門",
+    "schedule6": "黒帯決勝 / オープンクラス",
+    "schedule7": "表彰式",
+    "prizeBlackOpenM": "黒帯オープンクラス（男子）",
+    "prizeBlackOpenF": "黒帯オープンクラス（女子）",
+    "prizeBlackWeight": "黒帯階級別",
+    "prizeBrownWeight": "茶帯階級別",
+    "prizeTeam": "チームトロフィー",
+    "prizeKids": "キッズグランドチャンピオン",
+    "pastEventLabel": "2025 マリアナスオープン",
+    "pastEventDesc": "20カ国以上から1,000人以上の選手",
+    "competitionMats": "6面の試合マット",
+    "venueCapacity": "収容人数 5,000+",
+    "venueUniversity": "グアム大学",
+    "venueAddress": "マンギラオ, グアム 96913",
+    "flightTokyo": "東京 (NRT)",
+    "flightManila": "マニラ (MNL)",
+    "flightSeoul": "ソウル (ICN)",
+    "flightHonolulu": "ホノルル (HNL)",
+    "hotelDusitDesc": "公式表彰晩餐会場",
+    "hotelHyattDesc": "タモン湾ビーチフロント",
+    "visaEsta": "ビザ免除 (ESTA)",
+    "visaEstaDesc": "日本、韓国、台湾、その他30カ国以上",
+    "visaGuamCnmi": "グアム-CNMI ビザ免除",
+    "visaGuamCnmiDesc": "フィリピン、香港、一部の国（45日間滞在可）",
+    "galleryMatch": "試合の様子",
+    "galleryCeremony": "セレモニー",
+    "galleryVenue": "会場の様子",
+    "galleryPodium": "表彰式"
   },
   "calendar": {
     "title": "2026 プロシリーズ",
@@ -64,7 +106,9 @@
     "mapSubtitle": "地方予選から国際舞台へ — アジア各地で戦い、マリアナスオープンへの出場権を獲得せよ。",
     "register": "エントリー",
     "details": "詳細",
-    "stars": "つ星"
+    "stars": "つ星",
+    "legendProSeries": "プロシリーズ",
+    "legendGrandChampionship": "グランドチャンピオンシップ"
   },
   "watch": {
     "title": "観戦",
@@ -101,7 +145,9 @@
     "featureAI": "AIマッチハイライト",
     "featureAIDesc": "AI搭載のハイライトがサブミッション、スイープ、得点などの重要な瞬間を自動キャプチャ。",
     "featureNotify": "プッシュ通知",
-    "featureNotifyDesc": "お気に入りの選手がマットに上がった時に通知を受け取り。試合を見逃さない。"
+    "featureNotifyDesc": "お気に入りの選手がマットに上がった時に通知を受け取り。試合を見逃さない。",
+    "liveEventInfo": "マリアナスオープン 2026 — UOGカルボ・フィールドハウス",
+    "liveBadge": "LIVE"
   },
   "share": {
     "defaultText": "マリアナスオープン — 国際柔術選手権をチェック！",
@@ -123,5 +169,10 @@
     "taiwan": "台湾",
     "southKorea": "韓国",
     "hongKong": "香港"
+  },
+  "shimizu": {
+    "title": "Shimizu Technology 制作",
+    "description": "スポーツ団体向けカスタムソフトウェア。多言語プラットフォーム、ライブ配信連携、大会運営システム。",
+    "cta": "お問い合わせ"
   }
 }

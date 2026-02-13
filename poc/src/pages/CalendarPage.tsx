@@ -1,5 +1,6 @@
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
@@ -7,11 +8,17 @@ import SocialShare from '../components/SocialShare';
 import QRShare from '../components/QRShare';
 import { events } from '../data/events';
 
-function EventMapDot({ event, index }: { event: typeof events[0]; index: number }) {
-  const shouldReduceMotion = useReducedMotion();
+function getDateLocale(lang: string) {
+  const map: Record<string, string> = { ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', tl: 'fil-PH' };
+  return map[lang] || 'en-US';
+}
 
-  // Simple projection for the interactive map visual
-  // Normalized positions for the map area (percentage-based)
+function EventMapDot({ event, index }: { event: typeof events[0]; index: number }) {
+  const { i18n } = useTranslation();
+  const shouldReduceMotion = useReducedMotion();
+  const [showTooltip, setShowTooltip] = useState(false);
+  const dotRef = useRef<HTMLDivElement>(null);
+
   const positions: Record<string, { x: number; y: number }> = {
     GU: { x: 82, y: 62 },
     JP: { x: 68, y: 22 },
@@ -23,14 +30,42 @@ function EventMapDot({ event, index }: { event: typeof events[0]; index: number 
 
   const pos = positions[event.countryCode] || { x: 50, y: 50 };
 
+  const formattedDate = new Date(event.date).toLocaleDateString(
+    getDateLocale(i18n.language),
+    { month: 'short', day: 'numeric', year: 'numeric' }
+  );
+
+  // Dismiss tooltip on outside click/tap (mobile)
+  useEffect(() => {
+    if (!showTooltip) return;
+    const handler = (e: TouchEvent | MouseEvent) => {
+      if (dotRef.current && !dotRef.current.contains(e.target as Node)) {
+        setShowTooltip(false);
+      }
+    };
+    document.addEventListener('touchstart', handler);
+    document.addEventListener('mousedown', handler);
+    return () => {
+      document.removeEventListener('touchstart', handler);
+      document.removeEventListener('mousedown', handler);
+    };
+  }, [showTooltip]);
+
   return (
     <motion.div
-      className="absolute group"
+      ref={dotRef}
+      className="absolute"
       style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
       initial={shouldReduceMotion ? {} : { scale: 0, opacity: 0 }}
       whileInView={{ scale: 1, opacity: 1 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.15, duration: 0.5, type: 'spring' }}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      onTouchStart={(e) => {
+        e.stopPropagation();
+        setShowTooltip((prev) => !prev);
+      }}
     >
       {/* Ping animation for main event */}
       {event.isMainEvent && (
@@ -44,23 +79,42 @@ function EventMapDot({ event, index }: { event: typeof events[0]; index: number 
         }`}
       />
 
-      {/* Tooltip */}
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-20">
-        <div className="bg-navy-900 border border-white/10 p-3 whitespace-nowrap shadow-xl">
-          <div className="font-heading font-bold text-sm text-text-primary">{event.name}</div>
-          <div className="text-xs text-text-muted mt-1">{event.venue}</div>
-          <div className="text-xs text-gold-400 mt-1">
-            {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          </div>
-        </div>
-      </div>
+      {/* Tooltip with Framer Motion */}
+      <AnimatePresence>
+        {showTooltip && (
+          <motion.div
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 pointer-events-none z-20"
+            initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="bg-surface border border-gold-500/30 p-3 whitespace-nowrap shadow-xl relative">
+              <div className="font-heading font-bold text-sm text-text-primary">{event.name}</div>
+              <div className="text-xs text-gold-400 mt-1">{formattedDate}</div>
+              {/* Arrow pointing down */}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-gold-500/30" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
 export default function CalendarPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
+
+  const formatEventDate = useCallback((dateStr: string, dateEndStr?: string) => {
+    const locale = getDateLocale(i18n.language);
+    const main = new Date(dateStr).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' });
+    if (dateEndStr) {
+      const end = new Date(dateEndStr).toLocaleDateString(locale, { day: 'numeric' });
+      return `${main} – ${end}`;
+    }
+    return main;
+  }, [i18n.language]);
 
   return (
     <div className="min-h-screen pt-20">
@@ -101,10 +155,8 @@ export default function CalendarPage() {
             </div>
           </ScrollReveal>
 
-          {/* Map visualization */}
           <ScrollReveal>
             <div className="relative bg-surface border border-white/5 overflow-hidden" style={{ aspectRatio: '16/9' }}>
-              {/* Stylized map background — grid + gradient */}
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--color-navy-800)_0%,_var(--color-surface)_70%)]" />
               <div
                 className="absolute inset-0 opacity-[0.06]"
@@ -114,7 +166,6 @@ export default function CalendarPage() {
                 }}
               />
 
-              {/* Connection lines between events */}
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -123,7 +174,6 @@ export default function CalendarPage() {
                     <stop offset="100%" stopColor="var(--color-gold-500)" stopOpacity="0.1" />
                   </linearGradient>
                 </defs>
-                {/* GU -> JP -> PH -> TW -> KR -> HK -> GU */}
                 <polyline
                   points="82,62 68,22 55,58 60,38 62,20 52,44 82,62"
                   fill="none"
@@ -133,20 +183,18 @@ export default function CalendarPage() {
                 />
               </svg>
 
-              {/* Event dots */}
               {events.map((event, i) => (
                 <EventMapDot key={event.id} event={event} index={i} />
               ))}
 
-              {/* Legend */}
               <div className="absolute bottom-4 left-4 flex items-center gap-6 text-xs text-text-muted">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-navy-700" />
-                  <span>Pro Series</span>
+                  <span>{t('calendar.legendProSeries')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-gold-500" />
-                  <span>Grand Championship</span>
+                  <span>{t('calendar.legendGrandChampionship')}</span>
                 </div>
               </div>
             </div>
@@ -167,7 +215,6 @@ export default function CalendarPage() {
                       : 'bg-navy-900 border-white/5'
                   }`}
                 >
-                  {/* Country flag + Stars */}
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-heading font-bold uppercase tracking-widest text-text-muted bg-navy-800 px-2 py-1 border border-white/5">
                       {event.countryCode}
@@ -188,8 +235,7 @@ export default function CalendarPage() {
                   <div className="space-y-2 text-sm text-text-secondary mb-6 flex-1">
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-text-muted shrink-0" />
-                      {new Date(event.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                      {event.dateEnd && ` – ${new Date(event.dateEnd).toLocaleDateString('en-US', { day: 'numeric' })}`}
+                      {formatEventDate(event.date, event.dateEnd)}
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin size={14} className="text-text-muted shrink-0" />

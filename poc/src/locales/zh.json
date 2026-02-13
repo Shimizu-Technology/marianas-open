@@ -28,7 +28,15 @@
     "featuredTitle": "马里亚纳群岛最大的柔术锦标赛",
     "featuredDesc": "2007年从关岛的一场本地比赛起步，如今已发展成为横跨6个国家、拥有1,300多名选手参赛、经济效益超200万美元的国际赛事。",
     "viewCalendar": "查看完整日程",
-    "registerNow": "立即报名"
+    "registerNow": "立即报名",
+    "since2007": "创立于2007",
+    "economicImpact": "经济效益",
+    "economicImpactValue": "$2M",
+    "spectators": "观众",
+    "spectatorsValue": "5,000+",
+    "internationalReach": "国际影响力",
+    "internationalReachDesc": "在韩国、日本、台湾、菲律宾和香港拥有合作伙伴。在亚洲各地30,000多份印刷杂志上刊登。",
+    "mainEvent": "主赛事"
   },
   "event": {
     "title": "马里亚纳公开赛 2026",
@@ -55,7 +63,41 @@
     "step2Desc": "在赛事列表中找到「Marianas Open 2026」并选择参赛级别。",
     "step3": "完成付款",
     "step3Desc": "在线支付报名费。早鸟优惠可用。",
-    "shareTitle": "分享此赛事"
+    "shareTitle": "分享此赛事",
+    "totalPrizePool": "奖金总额",
+    "schedule1": "开场 / 称重",
+    "schedule2": "少儿 & 青少年组",
+    "schedule3": "成人 白带 & 蓝带",
+    "schedule4": "成人 紫带 & 棕带",
+    "schedule5": "黑带组",
+    "schedule6": "黑带决赛 / 公开级",
+    "schedule7": "颁奖典礼",
+    "prizeBlackOpenM": "黑带公开级（男子）",
+    "prizeBlackOpenF": "黑带公开级（女子）",
+    "prizeBlackWeight": "黑带分级别",
+    "prizeBrownWeight": "棕带分级别",
+    "prizeTeam": "团体奖杯",
+    "prizeKids": "少儿总冠军",
+    "pastEventLabel": "2025 马里亚纳公开赛",
+    "pastEventDesc": "来自20多个国家的1,000多名选手",
+    "competitionMats": "6块比赛垫",
+    "venueCapacity": "容纳5,000+人",
+    "venueUniversity": "关岛大学",
+    "venueAddress": "曼吉劳, 关岛 96913",
+    "flightTokyo": "东京 (NRT)",
+    "flightManila": "马尼拉 (MNL)",
+    "flightSeoul": "首尔 (ICN)",
+    "flightHonolulu": "檀香山 (HNL)",
+    "hotelDusitDesc": "官方颁奖晚宴场地",
+    "hotelHyattDesc": "杜梦湾海滨",
+    "visaEsta": "免签 (ESTA)",
+    "visaEstaDesc": "日本、韩国、台湾及30多个国家",
+    "visaGuamCnmi": "关岛-CNMI 免签",
+    "visaGuamCnmiDesc": "菲律宾、香港、部分国家（可停留45天）",
+    "galleryMatch": "比赛场景",
+    "galleryCeremony": "仪式",
+    "galleryVenue": "比赛场馆",
+    "galleryPodium": "颁奖仪式"
   },
   "calendar": {
     "title": "2026 职业系列赛",
@@ -64,7 +106,9 @@
     "mapSubtitle": "从地方选拔到国际舞台——征战亚洲各地，赢取马里亚纳公开赛参赛资格。",
     "register": "报名",
     "details": "详情",
-    "stars": "星级"
+    "stars": "星级",
+    "legendProSeries": "职业系列赛",
+    "legendGrandChampionship": "总决赛"
   },
   "watch": {
     "title": "观看",
@@ -101,7 +145,9 @@
     "featureAI": "AI比赛精彩集锦",
     "featureAIDesc": "AI自动捕捉关键时刻——降服、扫技和得分。",
     "featureNotify": "推送通知",
-    "featureNotifyDesc": "当您喜爱的选手上场时收到通知。不错过任何比赛。"
+    "featureNotifyDesc": "当您喜爱的选手上场时收到通知。不错过任何比赛。",
+    "liveEventInfo": "马里亚纳公开赛 2026 — UOG卡尔沃体育馆",
+    "liveBadge": "LIVE"
   },
   "share": {
     "defaultText": "查看马里亚纳公开赛——国际柔术锦标赛！",
@@ -123,5 +169,10 @@
     "taiwan": "台湾",
     "southKorea": "韩国",
     "hongKong": "香港"
+  },
+  "shimizu": {
+    "title": "Shimizu Technology 出品",
+    "description": "面向体育组织的定制软件。多语言平台、直播集成、赛事管理系统。",
+    "cta": "联系我们"
   }
 }

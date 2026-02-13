@@ -28,7 +28,15 @@
     "featuredTitle": "마리아나 제도 최대의 주짓수 대회",
     "featuredDesc": "2007년 괌의 로컬 대회로 시작하여, 현재 6개국 1,300명 이상의 선수가 참가하고 경제 효과 200만 달러 이상의 국제 이벤트로 성장했습니다.",
     "viewCalendar": "전체 일정 보기",
-    "registerNow": "지금 등록"
+    "registerNow": "지금 등록",
+    "since2007": "2007년 설립",
+    "economicImpact": "경제 효과",
+    "economicImpactValue": "$2M",
+    "spectators": "관중",
+    "spectatorsValue": "5,000+",
+    "internationalReach": "국제 네트워크",
+    "internationalReachDesc": "한국, 일본, 대만, 필리핀, 홍콩에 파트너. 아시아 전역 30,000부 이상의 잡지에 게재.",
+    "mainEvent": "메인 이벤트"
   },
   "event": {
     "title": "마리아나스 오픈 2026",
@@ -55,7 +63,41 @@
     "step2Desc": "대회 목록에서 'Marianas Open 2026'을 찾아 출전 부문 선택.",
     "step3": "결제 완료",
     "step3Desc": "온라인으로 참가비 결제. 조기 등록 할인 가능.",
-    "shareTitle": "이 대회 공유"
+    "shareTitle": "이 대회 공유",
+    "totalPrizePool": "총 상금",
+    "schedule1": "개장 / 계체",
+    "schedule2": "키즈 & 주니어 부문",
+    "schedule3": "성인 화이트 & 블루벨트",
+    "schedule4": "성인 퍼플 & 브라운벨트",
+    "schedule5": "블랙벨트 부문",
+    "schedule6": "블랙벨트 결승 / 오픈클래스",
+    "schedule7": "시상식",
+    "prizeBlackOpenM": "블랙벨트 오픈클래스 (남)",
+    "prizeBlackOpenF": "블랙벨트 오픈클래스 (여)",
+    "prizeBlackWeight": "블랙벨트 체급별",
+    "prizeBrownWeight": "브라운벨트 체급별",
+    "prizeTeam": "팀 트로피",
+    "prizeKids": "키즈 그랜드 챔피언",
+    "pastEventLabel": "2025 마리아나스 오픈",
+    "pastEventDesc": "20개국 이상에서 1,000명 이상의 선수",
+    "competitionMats": "6개 경기 매트",
+    "venueCapacity": "수용 인원 5,000+",
+    "venueUniversity": "괌 대학교",
+    "venueAddress": "망길라오, 괌 96913",
+    "flightTokyo": "도쿄 (NRT)",
+    "flightManila": "마닐라 (MNL)",
+    "flightSeoul": "서울 (ICN)",
+    "flightHonolulu": "호놀룰루 (HNL)",
+    "hotelDusitDesc": "공식 시상 만찬 장소",
+    "hotelHyattDesc": "투몬 베이 비치프론트",
+    "visaEsta": "비자 면제 (ESTA)",
+    "visaEstaDesc": "일본, 한국, 대만 및 30개국 이상",
+    "visaGuamCnmi": "괌-CNMI 비자 면제",
+    "visaGuamCnmiDesc": "필리핀, 홍콩, 일부 국가 (45일 체류)",
+    "galleryMatch": "경기 모습",
+    "galleryCeremony": "세레모니",
+    "galleryVenue": "경기장 모습",
+    "galleryPodium": "시상식"
   },
   "calendar": {
     "title": "2026 프로 시리즈",
@@ -64,7 +106,9 @@
     "mapSubtitle": "지역 예선에서 국제 무대로 — 아시아 전역에서 경쟁하고 마리아나스 오픈 출전권을 획득하세요.",
     "register": "등록",
     "details": "상세정보",
-    "stars": "성급"
+    "stars": "성급",
+    "legendProSeries": "프로 시리즈",
+    "legendGrandChampionship": "그랜드 챔피언십"
   },
   "watch": {
     "title": "시청",
@@ -101,7 +145,9 @@
     "featureAI": "AI 매치 하이라이트",
     "featureAIDesc": "AI가 서브미션, 스윕, 득점 등 핵심 순간을 자동으로 캡처.",
     "featureNotify": "푸시 알림",
-    "featureNotifyDesc": "좋아하는 선수가 매트에 올라갈 때 알림을 받으세요. 경기를 놓치지 마세요."
+    "featureNotifyDesc": "좋아하는 선수가 매트에 올라갈 때 알림을 받으세요. 경기를 놓치지 마세요.",
+    "liveEventInfo": "마리아나스 오픈 2026 — UOG 칼보 필드하우스",
+    "liveBadge": "LIVE"
   },
   "share": {
     "defaultText": "마리아나스 오픈 — 국제 주짓수 챔피언십을 확인하세요!",
@@ -123,5 +169,10 @@
     "taiwan": "대만",
     "southKorea": "한국",
     "hongKong": "홍콩"
+  },
+  "shimizu": {
+    "title": "Shimizu Technology 제작",
+    "description": "스포츠 단체를 위한 맞춤 소프트웨어. 다국어 플랫폼, 라이브 스트리밍 연동, 대회 관리 시스템.",
+    "cta": "문의하기"
   }
 }

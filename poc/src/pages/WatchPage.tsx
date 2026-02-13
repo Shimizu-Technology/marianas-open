@@ -120,7 +120,7 @@ export default function WatchPage() {
                     {t('watch.liveNow')}
                   </span>
                   <span className="text-text-muted text-xs hidden sm:inline">
-                    Marianas Open 2026 — UOG Calvo Fieldhouse
+                    {t('watch.liveEventInfo')}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export default function WatchPage() {
                 <div className="absolute top-4 left-4 flex items-center gap-2">
                   <div className="px-2.5 py-1 bg-red-600 text-white text-xs font-bold rounded-sm flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    LIVE
+                    {t('watch.liveBadge')}
                   </div>
                   <div className="px-2.5 py-1 bg-black/60 backdrop-blur-sm text-white text-xs rounded-sm">
                     {viewerCount.toLocaleString()} {t('watch.viewers')}
