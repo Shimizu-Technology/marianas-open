@@ -4,6 +4,14 @@ Rails.application.routes.draw do
       resource :organization, only: [:show]
       resources :events, only: [:index, :show], param: :slug
       resources :sponsors, only: [:index]
+
+      # Auth
+      get :me, to: "users#me"
+
+      # Admin
+      namespace :admin do
+        resources :users
+      end
     end
   end
 
