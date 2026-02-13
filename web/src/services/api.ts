@@ -1,5 +1,30 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+export interface RankingEntry {
+  competitor_name?: string;
+  academy?: string;
+  country_code?: string;
+  total_points: number;
+  gold: number;
+  silver: number;
+  bronze: number;
+  events_competed?: number;
+  results_count?: number;
+  athletes?: number;
+  academies?: number;
+}
+
+export interface RankingsResponse {
+  rankings: RankingEntry[];
+  meta: {
+    type: string;
+    formula: string;
+    note: string;
+    filters: Record<string, string>;
+    total: number;
+  };
+}
+
 // Auth token getter
 let getAuthToken: (() => Promise<string | null>) | null = null;
 
@@ -478,5 +503,23 @@ export const api = {
       formData.append('banner', file);
       return fetchApiUpload<Organization>('/api/v1/admin/organization/upload_banner', formData);
     },
+  },
+
+  // Rankings
+  getRankings: (params: {
+    type?: 'individual' | 'team' | 'country';
+    belt?: string;
+    gi_nogi?: string;
+    gender?: string;
+    limit?: number;
+  } = {}) => {
+    const searchParams = new URLSearchParams();
+    if (params.type) searchParams.set('type', params.type);
+    if (params.belt) searchParams.set('belt', params.belt);
+    if (params.gi_nogi) searchParams.set('gi_nogi', params.gi_nogi);
+    if (params.gender) searchParams.set('gender', params.gender);
+    if (params.limit) searchParams.set('limit', String(params.limit));
+    const qs = searchParams.toString();
+    return fetchApi<RankingsResponse>(`/api/v1/rankings${qs ? `?${qs}` : ''}`);
   },
 };
