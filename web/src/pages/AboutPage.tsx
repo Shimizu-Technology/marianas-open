@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Users, Globe, Trophy, Calendar, MapPin, Mail, Phone } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
+import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 
 const timeline = [
   { year: '2007', key: 'timeline2007' },
@@ -16,6 +17,10 @@ const timeline = [
 export default function AboutPage() {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
+  const { images: siteImages } = useSiteImages();
+
+  const heroImage = getImageUrl(siteImages, 'hero', '/images/venue-crowd.webp');
+  const galleryImage = getImageUrl(siteImages, 'gallery', '/images/action-match-2.webp');
 
   const stats = [
     { value: t('stats.competitors'), label: t('stats.competitorsLabel'), icon: Users },
@@ -30,7 +35,7 @@ export default function AboutPage() {
       <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithShimmer
-            src="/images/venue-crowd.webp"
+            src={heroImage}
             alt=""
             className="w-full h-full object-cover"
           />
@@ -109,7 +114,7 @@ export default function AboutPage() {
       {/* Image Break */}
       <section className="relative h-64 sm:h-80 overflow-hidden">
         <ImageWithShimmer
-          src="/images/action-match-2.webp"
+          src={galleryImage}
           alt=""
           className="w-full h-full object-cover"
         />

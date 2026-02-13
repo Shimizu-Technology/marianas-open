@@ -124,6 +124,17 @@ export interface VideoFormData {
   event_id: number | null;
 }
 
+export interface SiteImage {
+  id: number;
+  title: string | null;
+  alt_text: string | null;
+  placement: 'hero' | 'gallery' | 'about' | 'event_default' | 'sponsor_default';
+  sort_order: number;
+  active: boolean;
+  caption: string | null;
+  image_url: string | null;
+}
+
 export interface EventFormData {
   name: string;
   slug: string;
@@ -152,6 +163,23 @@ export interface SponsorFormData {
   website_url: string;
   sort_order: number;
 }
+
+export interface SiteContentEntry {
+  id: number;
+  key: string;
+  content_type: string;
+  value_en: string | null;
+  value_ja: string | null;
+  value_ko: string | null;
+  value_tl: string | null;
+  value_zh: string | null;
+  section: string;
+  label: string;
+  sort_order: number;
+}
+
+export type SiteContentMap = Record<string, { en: string | null; ja: string | null; ko: string | null; tl: string | null; zh: string | null }>;
+export type SiteContentGrouped = Record<string, SiteContentEntry[]>;
 
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
   const headers: Record<string, string> = {
@@ -207,6 +235,7 @@ async function fetchApiUpload<T>(endpoint: string, formData: FormData): Promise<
 
 export const api = {
   // Public
+  getSiteContents: () => fetchApi<SiteContentMap>('/api/v1/site-contents'),
   getOrganization: () => fetchApi<Organization>('/api/v1/organization'),
   getEvents: () => fetchApi<Event[]>('/api/v1/events'),
   getEvent: (slug: string) => fetchApi<Event>(`/api/v1/events/${slug}`),
@@ -216,6 +245,10 @@ export const api = {
     return fetchApi<Video[]>(`/api/v1/videos${query}`);
   },
   getVideo: (id: number) => fetchApi<Video>(`/api/v1/videos/${id}`),
+  getSiteImages: (placement?: string) => {
+    const query = placement ? `?placement=${encodeURIComponent(placement)}` : '';
+    return fetchApi<{ site_images: SiteImage[] }>(`/api/v1/site-images${query}`);
+  },
 
   // Auth
   getCurrentUser: (email?: string) => {
@@ -294,6 +327,39 @@ export const api = {
       }, true),
     deleteVideo: (id: number) =>
       fetchApi<void>(`/api/v1/admin/videos/${id}`, { method: 'DELETE' }, true),
+
+    // Site Images
+    getSiteImages: () =>
+      fetchApi<{ site_images: SiteImage[] }>('/api/v1/admin/site-images', {}, true),
+    createSiteImage: (data: FormData) =>
+      fetchApiUpload<{ site_image: SiteImage }>('/api/v1/admin/site-images', data),
+    updateSiteImage: (id: number, data: Partial<SiteImage>) =>
+      fetchApi<{ site_image: SiteImage }>(`/api/v1/admin/site-images/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    uploadSiteImage: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return fetchApiUpload<{ site_image: SiteImage }>(`/api/v1/admin/site-images/${id}/upload`, formData);
+    },
+    deleteSiteImage: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/site-images/${id}`, { method: 'DELETE' }, true),
+
+    // Site Contents
+    getSiteContents: () => fetchApi<{ site_contents: SiteContentGrouped }>('/api/v1/admin/site-contents', {}, true),
+    createSiteContent: (data: Partial<SiteContentEntry>) =>
+      fetchApi<{ site_content: SiteContentEntry }>('/api/v1/admin/site-contents', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    updateSiteContent: (id: number, data: Partial<SiteContentEntry>) =>
+      fetchApi<{ site_content: SiteContentEntry }>(`/api/v1/admin/site-contents/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }, true),
+    deleteSiteContent: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/site-contents/${id}`, { method: 'DELETE' }, true),
 
     // Organization
     getOrganization: () => fetchApi<Organization>('/api/v1/admin/organization', {}, true),

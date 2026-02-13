@@ -23,7 +23,9 @@ const EventsAdmin = lazy(() => import('./pages/admin/EventsAdmin'));
 const SponsorsAdmin = lazy(() => import('./pages/admin/SponsorsAdmin'));
 const VideosAdmin = lazy(() => import('./pages/admin/VideosAdmin'));
 const UsersAdmin = lazy(() => import('./pages/admin/UsersAdmin'));
+const ImagesAdmin = lazy(() => import('./pages/admin/ImagesAdmin'));
 const SettingsAdmin = lazy(() => import('./pages/admin/SettingsAdmin'));
+const ContentAdmin = lazy(() => import('./pages/admin/ContentAdmin'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -82,7 +84,9 @@ export default function App() {
           <Route path="events" element={<EventsAdmin />} />
           <Route path="sponsors" element={<SponsorsAdmin />} />
           <Route path="videos" element={<VideosAdmin />} />
+          <Route path="images" element={<ImagesAdmin />} />
           <Route path="users" element={<UsersAdmin />} />
+          <Route path="content" element={<ContentAdmin />} />
           <Route path="settings" element={<SettingsAdmin />} />
         </Route>
 
