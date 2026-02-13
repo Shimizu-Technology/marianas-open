@@ -23,6 +23,8 @@ Rails.application.routes.draw do
         resources :events do
           member do
             post :upload_image
+            get :import_results_preview
+            post :import_results
           end
           resources :event_results, only: [:create, :update, :destroy], path: 'results' do
             collection do
