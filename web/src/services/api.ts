@@ -359,6 +359,26 @@ export const api = {
       return fetchApiUpload<{ sponsor: Sponsor }>(`/api/v1/admin/sponsors/${id}/upload_logo`, formData);
     },
 
+    // Competitors
+    getCompetitors: () => fetchApi<{ competitors: Competitor[] }>('/api/v1/admin/competitors', {}, true),
+    createCompetitor: (data: Partial<CompetitorFormData>) =>
+      fetchApi<{ competitor: Competitor }>('/api/v1/admin/competitors', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    updateCompetitor: (id: number, data: Partial<CompetitorFormData>) =>
+      fetchApi<{ competitor: Competitor }>(`/api/v1/admin/competitors/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    deleteCompetitor: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/competitors/${id}`, { method: 'DELETE' }, true),
+    uploadCompetitorPhoto: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('photo', file);
+      return fetchApiUpload<{ competitor: Competitor }>(`/api/v1/admin/competitors/${id}/upload_photo`, formData);
+    },
+
     // Videos
     getVideos: () => fetchApi<{ videos: Video[] }>('/api/v1/admin/videos', {}, true),
     createVideo: (data: Partial<VideoFormData>) =>
