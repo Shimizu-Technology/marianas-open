@@ -16,6 +16,10 @@ class Event < ApplicationRecord
   def as_json(options = {})
     super(options.merge(
       methods: [:hero_image_url],
+      include: {
+        event_schedule_items: { except: [:created_at, :updated_at] },
+        prize_categories: { except: [:created_at, :updated_at] }
+      },
       except: [:created_at, :updated_at]
     ))
   end

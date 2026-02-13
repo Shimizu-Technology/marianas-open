@@ -53,7 +53,7 @@ export default function EventDetailPage() {
     { time: '8:00 PM', event: t('event.schedule7') },
   ];
 
-  const scheduleItems = mainEvent && mainEvent.event_schedule_items.length > 0
+  const scheduleItems = mainEvent && mainEvent.event_schedule_items?.length > 0
     ? mainEvent.event_schedule_items
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(item => ({ time: item.time, event: item.description }))
@@ -69,7 +69,7 @@ export default function EventDetailPage() {
     { division: t('event.prizeKids'), prize: '$500' },
   ];
 
-  const prizeBreakdown = mainEvent && mainEvent.prize_categories.length > 0
+  const prizeBreakdown = mainEvent && mainEvent.prize_categories?.length > 0
     ? mainEvent.prize_categories
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(cat => ({ division: cat.name, prize: `$${Number(cat.amount).toLocaleString()}` }))
