@@ -4,6 +4,10 @@ module Api
       class OrganizationController < ApplicationController
         include ClerkAuthenticatable
 
+        rescue_from StandardError do |e|
+          render json: { error: e.message, type: e.class.name, trace: e.backtrace&.first(5) }, status: :internal_server_error
+        end
+
         before_action :require_staff!
         before_action :set_organization
 
