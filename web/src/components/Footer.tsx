@@ -70,6 +70,10 @@ export default function Footer() {
               {t('footer.terms')}
             </Link>
             <span className="text-white/10">|</span>
+            <Link to="/admin" className="hover:text-text-secondary transition-colors">
+              Admin
+            </Link>
+            <span className="text-white/10">|</span>
             <p>{t('footer.builtBy')}</p>
           </div>
         </div>
