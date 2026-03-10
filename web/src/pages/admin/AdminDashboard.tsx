@@ -9,29 +9,40 @@ interface Stats {
   totalEvents: number
   upcomingEvents: number
   totalSponsors: number
-  totalUsers: number
+  totalUsers: number | null
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats>({ totalEvents: 0, upcomingEvents: 0, totalSponsors: 0, totalUsers: 0 })
+  const [stats, setStats] = useState<Stats>({ totalEvents: 0, upcomingEvents: 0, totalSponsors: 0, totalUsers: null })
   const [recentEvents, setRecentEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
-        const [eventsRes, sponsorsRes, usersRes] = await Promise.all([
+        const [eventsRes, sponsorsRes, meRes] = await Promise.all([
           api.admin.getEvents(),
           api.admin.getSponsors(),
-          api.getUsers(),
+          api.getCurrentUser(),
         ])
+
+        let totalUsers: number | null = null
+        if (meRes.user.is_admin) {
+          try {
+            const usersRes = await api.getUsers()
+            totalUsers = usersRes.users.length
+          } catch {
+            totalUsers = null
+          }
+        }
+
         const events = eventsRes.events
         const now = new Date().toISOString().split('T')[0]
         setStats({
           totalEvents: events.length,
           upcomingEvents: events.filter((e: Event) => e.date >= now).length,
           totalSponsors: sponsorsRes.sponsors.length,
-          totalUsers: usersRes.users.length,
+          totalUsers,
         })
         setRecentEvents(events.slice(0, 5))
       } catch (err) {
@@ -47,8 +58,10 @@ export default function AdminDashboard() {
     { label: 'Total Events', value: stats.totalEvents, icon: CalendarDays, to: '/admin/events' },
     { label: 'Upcoming', value: stats.upcomingEvents, icon: CalendarDays, to: '/admin/events' },
     { label: 'Sponsors', value: stats.totalSponsors, icon: Handshake, to: '/admin/sponsors' },
-    { label: 'Users', value: stats.totalUsers, icon: Users, to: '/admin/users' },
-  ]
+    ...(stats.totalUsers !== null
+      ? [{ label: 'Users', value: stats.totalUsers, icon: Users, to: '/admin/users' }]
+      : []),
+  ] as const
 
   if (loading) {
     return (
