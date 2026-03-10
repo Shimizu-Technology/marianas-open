@@ -33,16 +33,39 @@ module Api
           divisions: results.distinct.pluck(:division).count,
           countries: results.distinct.pluck(:country_code).compact.count,
           academies: results.distinct.pluck(:academy).compact.count,
-          belt_breakdown: EventResult::BELT_RANKS.map { |belt|
-            { belt: belt, count: results.where(belt_rank: belt).gold.count }
-          },
-          top_academies: results.gold
-            .group(:academy)
-            .count
-            .sort_by { |_, v| -v }
-            .first(10)
-            .map { |academy, count| { academy: academy, gold_count: count } }
+          belt_breakdown: EventResult::BELT_RANKS.each_with_object({}) do |belt, acc|
+            acc[belt] = results.where(belt_rank: belt).gold.count
+          end,
+          top_academies: top_academies_summary(results)
         }
+      end
+
+      private
+
+      def top_academies_summary(results)
+        rows = results
+          .where.not(academy: [nil, ""])
+          .group(:academy)
+          .pluck(
+            :academy,
+            Arel.sql("SUM(CASE WHEN placement = 1 THEN 1 ELSE 0 END)"),
+            Arel.sql("SUM(CASE WHEN placement = 2 THEN 1 ELSE 0 END)"),
+            Arel.sql("SUM(CASE WHEN placement = 3 THEN 1 ELSE 0 END)"),
+            Arel.sql("COUNT(*)")
+          )
+
+        rows
+          .map { |academy, gold, silver, bronze, total|
+            {
+              name: academy,
+              gold: gold,
+              silver: silver,
+              bronze: bronze,
+              total: total
+            }
+          }
+          .sort_by { |academy| [-academy[:gold], -academy[:silver], -academy[:bronze], -academy[:total], academy[:name]] }
+          .first(10)
       end
     end
   end

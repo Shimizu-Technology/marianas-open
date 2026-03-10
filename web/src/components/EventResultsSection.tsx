@@ -322,7 +322,10 @@ export default function EventResultsSection({ eventSlug }: { eventSlug: string }
       .map(div => ({
         ...div,
         results: div.results.filter(r => {
-          if (search && !r.competitor_name.toLowerCase().includes(searchLower) && !r.academy.toLowerCase().includes(searchLower)) return false;
+          if (search) {
+            const academy = (r.academy ?? '').toLowerCase();
+            if (!r.competitor_name.toLowerCase().includes(searchLower) && !academy.includes(searchLower)) return false;
+          }
           if (beltFilter && r.belt_rank !== beltFilter) return false;
           if (genderFilter && r.gender !== genderFilter) return false;
           if (weightFilter && r.weight_class !== weightFilter) return false;

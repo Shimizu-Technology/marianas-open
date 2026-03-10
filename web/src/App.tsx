@@ -94,7 +94,14 @@ export default function App() {
           <Route path="videos" element={<VideosAdmin />} />
           <Route path="competitors" element={<CompetitorsAdmin />} />
           <Route path="images" element={<ImagesAdmin />} />
-          <Route path="users" element={<UsersAdmin />} />
+          <Route
+            path="users"
+            element={(
+              <ProtectedRoute requiredRole="admin">
+                <UsersAdmin />
+              </ProtectedRoute>
+            )}
+          />
           <Route path="content" element={<ContentAdmin />} />
           <Route path="settings" element={<SettingsAdmin />} />
         </Route>

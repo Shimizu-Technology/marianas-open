@@ -278,7 +278,7 @@ export interface EventResult {
   weight_class: string;
   placement: number;
   competitor_name: string;
-  academy: string;
+  academy: string | null;
   country_code: string;
 }
 

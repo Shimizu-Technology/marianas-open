@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { CalendarDays, Handshake, Settings, Users, LayoutDashboard, ArrowLeft, Play, Image, FileText, Swords } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { api } from '../services/api'
 
 const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
@@ -15,6 +17,28 @@ const navItems = [
 ]
 
 export default function AdminLayout() {
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+
+    api.getCurrentUser()
+      .then(({ user }) => {
+        if (!cancelled) setIsAdmin(user.is_admin)
+      })
+      .catch(() => {
+        if (!cancelled) setIsAdmin(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const visibleNavItems = isAdmin
+    ? navItems
+    : navItems.filter(item => item.to !== '/admin/users')
+
   return (
     <div className="min-h-screen bg-navy-900 flex">
       {/* Sidebar */}
@@ -26,7 +50,7 @@ export default function AdminLayout() {
         </div>
 
         <nav className="flex-1 py-3 px-2 space-y-0.5">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

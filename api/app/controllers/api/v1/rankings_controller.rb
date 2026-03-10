@@ -76,7 +76,7 @@ module Api
         }
       rescue => e
         Rails.logger.error("Competitor lookup failed: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
-        render json: { error: e.message }, status: :internal_server_error
+        render json: { error: "Internal server error" }, status: :internal_server_error
       end
 
       private
