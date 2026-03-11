@@ -19,7 +19,7 @@
     "viewDetails": "View Details"
   },
   "hero": {
-    "subtitle": "Guam's Premier International",
+    "subtitle": "Guam's Premier Jiu-jitsu Event",
     "title": "Brazilian Jiu-Jitsu Championship",
     "cta": "Register Now",
     "learnMore": "Explore Events",
@@ -39,8 +39,8 @@
     "upcomingTitle": "2026 Pro Series",
     "upcomingSubtitle": "Compete across Asia. Qualify for the Grand Championship.",
     "sponsorsTitle": "Official Partners",
-    "featuredTitle": "The Largest BJJ Tournament in the Marianas",
-    "featuredDesc": "What started as a local Guam tournament in 2007 has grown into an international phenomenon spanning 6 countries with over 1,300 competitors and $2M in economic impact.",
+    "featuredTitle": "The Marianas Open",
+    "featuredDesc": "The Marianas Open is the biggest and longest established jiu-jitsu organization in the Marianas, with tournaments since 2007. Our goal is to provide a professional and well-organized tournament experience for all athletes, coaches, and spectators.",
     "viewCalendar": "View Full Calendar",
     "registerNow": "Register Now",
     "since2007": "Since 2007",
@@ -207,7 +207,7 @@
   },
   "about": {
     "heroTitle": "About the Marianas Open",
-    "heroSubtitle": "Guam's premier martial arts tournament since 2007",
+    "heroSubtitle": "Guam's premier martial arts tournament and international championship since 2007",
     "storyTitle": "Our Story",
     "p1": "Since its inception in 2007, the Marianas Open has grown into one of the premier martial arts tournaments in the Pacific region. Hosted annually in Guam, this event has emerged as a symbol of excellence, uniting athletes, families, and supporters from around the world.",
     "p2": "The Marianas Open is more than just a competition—it's a celebration of community, culture, and the spirit of martial arts. Over the years, it has expanded into an international series, with tournaments held in Japan, the Philippines, Korea, and Guam, culminating in the grand finale on our home island. This event not only showcases the best in jiu-jitsu talent but also fosters a supportive environment for our youth and their families, promoting discipline, respect, and unity.",
@@ -272,7 +272,7 @@
     "alone": "Alone",
     "note": "Points are awarded based on the star rating of each event. 'Alone' points are awarded when a competitor wins a division with no opponents. Team points follow the 4-Star scale for all events.",
     "dynamicSubtitle": "Live rankings calculated from official ASJJF event results across all Marianas Open tournaments.",
-    "formula": "Points: Gold = 15 × event stars, Silver = 7 × stars, Bronze = 3 × stars",
+    "formula": "Fighter (5-Star): Gold 75, Silver 35, Bronze 15. Team (4-Star): Gold 21, Silver 9, Bronze 3.",
     "athletes": "Athletes",
     "academies": "Academies",
     "countries": "Countries",
@@ -288,7 +288,7 @@
     "noResults": "No results found for these filters.",
     "pointsReference": "Points Reference",
     "eventStars": "Event Star Ratings",
-    "formulaNote": "Based on ASJJF star-based ranking system. Per-match bonus points (+3 submission, +1 decision) not included."
+    "formulaNote": "Official reference: Fighter ranking points use 5-Star values; team ranking points use 4-Star values. Alone brackets and same-team one brackets follow organizer policy on the official rankings page."
   },
   "results": {
     "title": "Event Results",
