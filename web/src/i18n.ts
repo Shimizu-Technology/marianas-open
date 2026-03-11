@@ -22,9 +22,11 @@ i18n
     },
     supportedLngs: ['en', 'ja', 'ko', 'tl', 'zh', 'pt'],
     fallbackLng: 'en',
+    lng: 'en',
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage'],
       caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng',
     },
     interpolation: { escapeValue: false },
   });
