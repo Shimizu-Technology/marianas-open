@@ -22,7 +22,6 @@ i18n
     },
     supportedLngs: ['en', 'ja', 'ko', 'tl', 'zh', 'pt'],
     fallbackLng: 'en',
-    lng: 'en',
     detection: {
       order: ['localStorage'],
       caches: ['localStorage'],
