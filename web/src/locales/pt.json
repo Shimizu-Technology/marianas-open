@@ -218,8 +218,8 @@
     "timeline2007": "O Marianas Open é fundado em Guam como um torneio local de jiu-jitsu.",
     "timeline2015": "O torneio se expande com competidores internacionais do Japão e das Filipinas.",
     "timeline2019": "A Pro Series é lançada com eventos em toda a Ásia – Japão, Filipinas, Coreia.",
-    "timeline2023": "Mais de 1.000 concorrentes. Classificação 5 estrelas da ASJJF alcançada.",
-    "timeline2025": "Mais de 1.300 concorrentes de 6 países. Impacto econômico de US$ 2 milhões para Guam.",
+    "timeline2023": "Mais de 1.000 competidores. Classificação 5 estrelas da ASJJF alcançada.",
+    "timeline2025": "Mais de 1.300 competidores de 6 países. Impacto econômico de US$ 2 milhões para Guam.",
     "timeline2026": "A International Pro Series abrange 7 eventos em 6 países.",
     "contactTitle": "Entre em contato",
     "contactDesc": "Dúvidas sobre o Marianas Open? Fale com nossa equipe."
@@ -327,7 +327,7 @@
     "black": "Preto"
   },
   "competitorProfile": {
-    "title": "Perfil do Concorrente",
+    "title": "Perfil do Competidor",
     "totalPoints": "Total de pontos",
     "eventsCompeted": "eventos",
     "medals": "Medalhas",
@@ -337,7 +337,7 @@
     "placement": "Colocação",
     "pointsEarned": "Pontos ganhos",
     "backToRankings": "Voltar às classificações",
-    "noResults": "Nenhum resultado encontrado para este concorrente.",
+    "noResults": "Nenhum resultado encontrado para este competidor.",
     "gold": "Ouro",
     "silver": "Prata",
     "bronze": "Bronze",
