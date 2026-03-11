@@ -33,6 +33,11 @@ namespace :marianas do
                        next
                      end
         status = row['status'].to_s.strip.presence || 'published'
+        unless %w[published draft archived].include?(status)
+          skipped += 1
+          puts "- skip row #{line_no}: unknown status=#{status.inspect} (allowed: published, draft, archived)"
+          next
+        end
 
         if title.blank? || youtube_url.blank?
           skipped += 1
