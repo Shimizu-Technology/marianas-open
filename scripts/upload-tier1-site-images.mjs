@@ -108,7 +108,21 @@ function inferMime(filePath) {
   );
 }
 
+function placementForSection(section, sourceUrl) {
+  const map = {
+    organization: 'sponsor_default',
+    events: 'gallery',
+    hero: 'hero',
+  };
+  const placement = map[String(section || '').trim()];
+  if (!placement) {
+    throw new Error(`unknown section ${JSON.stringify(section)} for row ${sourceUrl || '(unknown source)'}`);
+  }
+  return placement;
+}
+
 async function uploadOne(filePath, row) {
+  const placement = placementForSection(row.section, row.source_url);
   const create = await jsonFetch(`${base}/api/v1/admin/site-images`, {
     method: 'POST',
     headers: {
@@ -118,7 +132,7 @@ async function uploadOne(filePath, row) {
     body: JSON.stringify({
       title: path.basename(filePath),
       alt_text: row.target_field,
-      placement: row.section === 'organization' ? 'sponsor_default' : row.section === 'events' ? 'gallery' : 'hero',
+      placement,
       sort_order: 0,
       active: true,
       caption: `Imported from ${row.source_url}`,
@@ -175,9 +189,16 @@ async function uploadOne(filePath, row) {
 
   for (const row of rows) {
     if (row.status === 'applied' || row.status === 'uploaded') continue;
-    const filePath = path.join(assetsDir, row.local_file);
 
-    if (!fs.existsSync(filePath)) {
+    const localFile = String(row.local_file || '').trim();
+    if (!localFile) {
+      row.status = 'missing-local';
+      row.notes = 'local_file column is empty';
+      continue;
+    }
+
+    const filePath = path.join(assetsDir, localFile);
+    if (!fs.existsSync(filePath) || fs.lstatSync(filePath).isDirectory()) {
       row.status = 'missing-local';
       row.notes = 'local file missing';
       continue;
