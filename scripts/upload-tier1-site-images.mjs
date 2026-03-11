@@ -64,14 +64,14 @@ function splitCsvLine(line) {
 function parseCsv(text) {
   const lines = text.trim().split(/\r?\n/);
   if (!lines.length) return [];
-  const headers = splitCsvLine(lines[0]).map((x) => x.replace(/^"|"$/g, ''));
+  const headers = splitCsvLine(lines[0]);
   const rows = [];
   for (const line of lines.slice(1)) {
     if (!line.trim()) continue;
     const vals = splitCsvLine(line);
     const obj = {};
     headers.forEach((h, i) => {
-      obj[h] = (vals[i] || '').replace(/^"|"$/g, '');
+      obj[h] = vals[i] || '';
     });
     rows.push(obj);
   }
@@ -83,7 +83,7 @@ function toCsv(rows) {
   const extraHeaders = [...new Set(rows.flatMap((r) => Object.keys(r || {})))].filter((h) => !fixedHeaders.includes(h));
   const headers = [...fixedHeaders, ...extraHeaders];
   const esc = (v) => `"${String(v ?? '').replaceAll('"', '""')}"`;
-  return [headers.join(','), ...rows.map((r) => headers.map((h) => esc(r[h] ?? '')).join(','))].join('\n') + '\n';
+  return [headers.map(esc).join(','), ...rows.map((r) => headers.map((h) => esc(r[h] ?? '')).join(','))].join('\n') + '\n';
 }
 
 async function jsonFetch(url, opts = {}) {
