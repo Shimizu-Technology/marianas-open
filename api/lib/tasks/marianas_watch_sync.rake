@@ -19,7 +19,7 @@ namespace :marianas do
     tx_updated = 0
 
     runner = proc do
-      CSV.foreach(csv_path, headers: true).with_index(2) do |row, line_no|
+      CSV.foreach(csv_path, headers: true, encoding: 'UTF-8').with_index(2) do |row, line_no|
         title = row['title'].to_s.strip
         youtube_url = row['youtube_url'].to_s.strip
         if title.blank? || youtube_url.blank?
@@ -102,13 +102,14 @@ namespace :marianas do
         }
         attrs[:event_id] = event.id if event_slug.present? || event_name.present?
 
-        changed = video.new_record? || attrs.any? { |k, v| video.public_send(k) != v }
+        was_new_record = video.new_record?
+        changed = was_new_record || attrs.any? { |k, v| video.public_send(k) != v }
         if !changed
           skipped += 1
           next
         end
 
-        action = video.new_record? ? 'create' : 'update'
+        action = was_new_record ? 'create' : 'update'
         if dry_run
           puts "- [dry_run] #{action} #{youtube_url}"
           created += 1 if action == 'create'
@@ -118,7 +119,7 @@ namespace :marianas do
 
         video.assign_attributes(attrs)
         video.save!
-        if video.previous_changes.key?('id')
+        if action == 'create'
           tx_created += 1
           puts "- create #{youtube_url}"
         else
