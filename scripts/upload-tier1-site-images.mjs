@@ -17,7 +17,10 @@ import path from 'node:path';
 const args = process.argv.slice(2);
 const getArg = (name, def = '') => {
   const idx = args.indexOf(`--${name}`);
-  return idx >= 0 ? args[idx + 1] : def;
+  if (idx < 0) return def;
+  const val = args[idx + 1];
+  if (val === undefined || String(val).startsWith('--')) return def;
+  return val;
 };
 const dryRun = args.includes('--dry-run');
 const base = getArg('base', process.env.API_BASE_URL || 'http://127.0.0.1:3100');
@@ -104,6 +107,7 @@ function inferMime(filePath) {
       '.png': 'image/png',
       '.gif': 'image/gif',
       '.webp': 'image/webp',
+      '.svg': 'image/svg+xml',
     }[ext] || 'application/octet-stream'
   );
 }
