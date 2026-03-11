@@ -117,7 +117,7 @@ export default function RankingsPage() {
               {t('rankings.dynamicSubtitle', 'Live rankings calculated from official ASJJF event results across all Marianas Open tournaments.')}
             </p>
             <p className="text-xs text-text-muted">
-              {t('rankings.formula', 'Points: Gold = 15 × event stars, Silver = 7 × stars, Bronze = 3 × stars')}
+              {t('rankings.formula', 'Fighter (5-Star): Gold 75, Silver 35, Bronze 15. Team (4-Star): Gold 21, Silver 9, Bronze 3.')}
             </p>
           </motion.div>
 
@@ -298,7 +298,7 @@ export default function RankingsPage() {
                   <div className="p-4 border-b border-white/5 flex items-center gap-2">
                     <Medal size={16} className="text-gold-500" />
                     <h3 className="font-heading font-bold text-sm">
-                      {t('rankings.pointsReference', 'Points Reference')}
+                      {t('rankings.fighterPoints', 'Fighter Ranking Points')}
                     </h3>
                   </div>
                   <div className="p-4 space-y-3">
@@ -316,8 +316,21 @@ export default function RankingsPage() {
                     ))}
                   </div>
                   <div className="px-4 pb-4">
+                    <h4 className="text-xs text-text-muted mb-2 font-medium">{t('rankings.teamPoints', 'Team Ranking Points (4-Star)')}</h4>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-secondary">4★</span>
+                      <div className="flex gap-2 text-text-muted">
+                        <span className="text-gold-500">21</span>
+                        <span>/</span>
+                        <span className="text-gray-400">9</span>
+                        <span>/</span>
+                        <span className="text-amber-700">3</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4">
                     <p className="text-[10px] text-text-muted leading-relaxed border-t border-white/5 pt-3">
-                      {t('rankings.formulaNote', 'Based on ASJJF star-based ranking system. Per-match bonus points (+3 submission, +1 decision) not included.')}
+                      {t('rankings.formulaNote', 'Official reference: Fighter ranking points use 5-Star values; team ranking points use 4-Star values. Alone brackets and same-team one brackets follow organizer policy on the official rankings page.')}
                     </p>
                   </div>
 
