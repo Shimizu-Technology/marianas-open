@@ -10,6 +10,7 @@ import { useEvents, useSponsors } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
+import { getDateLocale } from '../utils/dateLocale';
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -19,11 +20,6 @@ function StarRating({ count }: { count: number }) {
       ))}
     </div>
   );
-}
-
-function getDateLocale(lang: string) {
-  const map: Record<string, string> = { ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', tl: 'fil-PH', pt: 'pt-BR' };
-  return map[lang] || 'en-US';
 }
 
 export default function HomePage() {

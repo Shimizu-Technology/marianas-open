@@ -139,7 +139,7 @@
     "matchLibrary": "Biblioteca de Lutas",
     "searchPlaceholder": "Buscar por competidor, academia...",
     "filterWeight": "Classe de peso",
-    "filterBelt": "Cinto",
+    "filterBelt": "Faixa",
     "filterEvent": "Evento",
     "filterAll": "Todos",
     "duration": "Duração",
@@ -192,7 +192,7 @@
     "japan": "Japão",
     "philippines": "Filipinas",
     "taiwan": "Taiwan",
-    "southKorea": "Coréia do Sul",
+    "southKorea": "Coreia do Sul",
     "hongKong": "Hong Kong"
   },
   "shimizu": {
@@ -217,7 +217,7 @@
     "timelineTitle": "Nossa jornada",
     "timeline2007": "O Marianas Open é fundado em Guam como um torneio local de jiu-jitsu.",
     "timeline2015": "O torneio se expande com competidores internacionais do Japão e das Filipinas.",
-    "timeline2019": "A Pro Series é lançada com eventos em toda a Ásia – Japão, Filipinas, Coréia.",
+    "timeline2019": "A Pro Series é lançada com eventos em toda a Ásia – Japão, Filipinas, Coreia.",
     "timeline2023": "Mais de 1.000 concorrentes. Classificação 5 estrelas da ASJJF alcançada.",
     "timeline2025": "Mais de 1.300 concorrentes de 6 países. Impacto econômico de US$ 2 milhões para Guam.",
     "timeline2026": "A International Pro Series abrange 7 eventos em 6 países.",
@@ -277,7 +277,7 @@
     "academies": "Academias",
     "countries": "Países",
     "filters": "Filtros",
-    "beltRank": "Classificação do cinto",
+    "beltRank": "Classificação da faixa",
     "athlete": "Atleta",
     "academy": "Academia",
     "country": "País",
@@ -305,7 +305,7 @@
     "placement2": "2º Lugar",
     "placement3": "3º Lugar",
     "searchPlaceholder": "Pesquise por nome ou academia...",
-    "allBelts": "Todos os cintos",
+    "allBelts": "Todas as faixas",
     "allWeights": "Todas as classes de peso",
     "allGenders": "Todos os gêneros",
     "male": "Masculino",
@@ -341,7 +341,7 @@
     "gold": "Ouro",
     "silver": "Prata",
     "bronze": "Bronze",
-    "beltRank": "Cinto"
+    "beltRank": "Faixa"
   },
   "journey": {
     "badge": "Circuito Série Pro",
