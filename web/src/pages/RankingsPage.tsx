@@ -117,7 +117,7 @@ export default function RankingsPage() {
               {t('rankings.dynamicSubtitle', 'Live rankings calculated from official ASJJF event results across all Marianas Open tournaments.')}
             </p>
             <p className="text-xs text-text-muted">
-              {t('rankings.formula', 'Points: Gold = 15 × event stars, Silver = 7 × stars, Bronze = 3 × stars')}
+              {t('rankings.formula', 'Fighter (5-Star): Gold 75, Silver 35, Bronze 15. Team (4-Star): Gold 21, Silver 9, Bronze 3.')}
             </p>
           </motion.div>
 
