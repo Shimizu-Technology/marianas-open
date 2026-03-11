@@ -15,14 +15,21 @@ class Video < ApplicationRecord
     end
   end
 
+  def self.parse_youtube_video_id(url)
+    return '' if url.blank?
+    if url.match?(/youtu\.be\//)
+      url.split('/').last.to_s.split('?').first.to_s
+    elsif url.match?(/[?&]v=/)
+      url.match(/[?&]v=([^&]+)/).to_a[1].to_s
+    else
+      ''
+    end
+  end
+
   private
 
   def extract_youtube_id
-    return if youtube_url.blank?
-    if youtube_url.match?(/youtu\.be\//)
-      self.youtube_video_id = youtube_url.split('/').last.split('?').first
-    elsif youtube_url.match?(/[?&]v=/)
-      self.youtube_video_id = youtube_url.match(/[?&]v=([^&]+)/)[1]
-    end
+    parsed = self.class.parse_youtube_video_id(youtube_url)
+    self.youtube_video_id = parsed if parsed.present?
   end
 end
