@@ -33,7 +33,8 @@ namespace :marianas do
           next
         end
 
-        featured = ActiveModel::Type::Boolean.new.cast(row['featured'])
+        featured_cast = ActiveModel::Type::Boolean.new.cast(row['featured'])
+        featured = featured_cast.nil? ? false : featured_cast
         sort_order_raw = row['sort_order'].to_s.strip
         sort_order = if sort_order_raw.blank?
                        0
