@@ -6,6 +6,10 @@ Automates Tier-1 asset upload (logos/banners/covers) through the Admin Site Imag
 
 `scripts/upload-tier1-site-images.mjs`
 
+## Prerequisites
+
+- Node.js **18 or newer** (script uses native `fetch` and `FormData`)
+
 ## Inputs
 
 - `--base` API base URL (default: `http://127.0.0.1:3100`; trailing slash is auto-trimmed)

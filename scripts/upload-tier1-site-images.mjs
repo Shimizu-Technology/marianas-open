@@ -8,11 +8,19 @@
  *     --token <CLERK_BEARER_TOKEN> \
  *     --csv /path/to/marianas-open-tier1-url-remap-sheet-2026-03-11.csv \
  *     --assets /path/to/core-download-2026-03-11 \
- *     [--dry-run]
+ *     [--dry-run] \
+ *     [--activate] \
+ *     [--timeout-ms 45000]
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
+
+const [major] = process.versions.node.split('.').map(Number);
+if ((major || 0) < 18) {
+  console.error(`Node.js 18+ is required (detected ${process.version}). Native fetch/FormData are used by this script.`);
+  process.exit(1);
+}
 
 const args = process.argv.slice(2);
 const getArg = (name, def = '') => {
