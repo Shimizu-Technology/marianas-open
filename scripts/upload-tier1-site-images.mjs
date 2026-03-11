@@ -273,9 +273,6 @@ async function uploadOne(filePath, row) {
     }
 
     try {
-      // validate section/placement in both dry-run and real-run
-      placementForSection(row.section, row.source_url);
-
       if (dryRun) {
         row.status = 'ready-upload';
         readyUpload++;
