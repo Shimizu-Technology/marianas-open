@@ -272,7 +272,7 @@
     "alone": "Sozinho",
     "note": "Os pontos são concedidos com base na classificação por estrelas de cada evento. Os pontos 'Sozinho' são concedidos quando um competidor vence uma divisão sem oponentes. Os pontos da equipe seguem a escala de 4 estrelas para todos os eventos.",
     "dynamicSubtitle": "Classificações ao vivo calculadas a partir dos resultados oficiais dos eventos da ASJJF em todos os torneios do Marianas Open.",
-    "formula": "Pontos: Ouro = 15 × estrelas do evento, Prata = 7 × estrelas, Bronze = 3 × estrelas",
+    "formula": "Lutador (5 estrelas): Ouro 75, Prata 35, Bronze 15. Equipe (4 estrelas): Ouro 21, Prata 9, Bronze 3.",
     "athletes": "Atletas",
     "academies": "Academias",
     "countries": "Países",
@@ -288,7 +288,7 @@
     "noResults": "Nenhum resultado encontrado para estes filtros.",
     "pointsReference": "Referência de pontos",
     "eventStars": "Classificações por estrelas do evento",
-    "formulaNote": "Baseado no sistema de classificação baseado em estrelas da ASJJF. Pontos de bônus por partida (+3 finalizações, +1 decisão) não incluídos."
+    "formulaNote": "Referência oficial: pontos de lutadores usam valores de 5 estrelas; pontos de equipe usam valores de 4 estrelas. Chaves sem oponente e chaves com apenas uma equipe seguem a política do organizador na página oficial de rankings."
   },
   "results": {
     "title": "Resultados do Evento",

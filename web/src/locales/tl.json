@@ -272,7 +272,7 @@
     "alone": "Mag-isa",
     "note": "Ang points ay ibinibigay batay sa star rating ng bawat event. Ang 'Alone' points ay ibinibigay kapag nanalo nang walang kalaban. Ang team points ay sumusunod sa 4-Star scale.",
     "dynamicSubtitle": "Live rankings mula sa opisyal na ASJJF event results sa lahat ng Marianas Open tournaments.",
-    "formula": "Mga Puntos: Ginto = 15 × bituin ng event, Pilak = 7 × bituin, Tanso = 3 × bituin",
+    "formula": "Manlalaban (5-star): Ginto 75, Pilak 35, Tanso 15. Koponan (4-star): Ginto 21, Pilak 9, Tanso 3.",
     "athletes": "Mga Atleta",
     "academies": "Mga Academy",
     "countries": "Mga Bansa",
@@ -288,7 +288,7 @@
     "noResults": "Walang resulta para sa mga filter na ito.",
     "pointsReference": "Sanggunian ng Puntos",
     "eventStars": "Mga Star Rating ng Event",
-    "formulaNote": "Batay sa ASJJF star-based ranking system. Hindi kasama ang per-match bonus points (+3 submission, +1 desisyon)."
+    "formulaNote": "Opisyal na batayan: ang puntos ng manlalaban ay gumagamit ng 5-star values; ang puntos ng koponan ay gumagamit ng 4-star values. Ang alone brackets at same-team one brackets ay sumusunod sa patakaran ng organizer sa opisyal na rankings page."
   },
   "results": {
     "title": "Mga Resulta ng Event",
