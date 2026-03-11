@@ -78,3 +78,6 @@ node scripts/upload-tier1-site-images.mjs \
 - Use dry-run first to validate local file coverage
 - Keep a backup copy of the CSV before real upload
 - After upload, apply `new_s3_url` values to content records and mark rows `applied`
+- Activation step (required for visibility):
+  - Option A: include `--activate` on initial real upload run
+  - Option B: run a separate activation pass/API update for uploaded rows after content mapping

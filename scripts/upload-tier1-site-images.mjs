@@ -90,7 +90,7 @@ function parseCsv(text) {
     const vals = splitCsvLine(line);
     const obj = {};
     headers.forEach((h, i) => {
-      obj[h] = vals[i] || '';
+      obj[h] = vals[i] ?? '';
     });
     rows.push(obj);
   }
