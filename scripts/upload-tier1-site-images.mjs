@@ -28,6 +28,7 @@ const base = String(baseRaw).replace(/\/+$/, '');
 const token = getArg('token', process.env.ADMIN_BEARER_TOKEN || '');
 const csvPath = getArg('csv', '');
 const assetsDir = getArg('assets', '');
+const timeoutMs = Number(getArg('timeout-ms', process.env.UPLOADER_TIMEOUT_MS || '45000')) || 45000;
 
 if (!csvPath || !assetsDir) {
   console.error('Missing --csv or --assets');
@@ -91,8 +92,18 @@ function toCsv(rows) {
   return [headers.map(esc).join(','), ...rows.map((r) => headers.map((h) => esc(r[h] ?? '')).join(','))].join('\n') + '\n';
 }
 
+async function fetchWithTimeout(url, opts = {}, ms = timeoutMs) {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { ...opts, signal: controller.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 async function jsonFetch(url, opts = {}) {
-  const res = await fetch(url, opts);
+  const res = await fetchWithTimeout(url, opts, timeoutMs);
   const txt = await res.text();
   let data = null;
   try {
@@ -157,11 +168,11 @@ async function uploadOne(filePath, row) {
   const mime = inferMime(filePath);
   form.append('image', new Blob([fs.readFileSync(filePath)], { type: mime }), path.basename(filePath));
 
-  const up = await fetch(`${base}/api/v1/admin/site-images/${id}/upload`, {
+  const up = await fetchWithTimeout(`${base}/api/v1/admin/site-images/${id}/upload`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body: form,
-  });
+  }, timeoutMs);
 
   const txt = await up.text();
   let data = null;
@@ -172,19 +183,19 @@ async function uploadOne(filePath, row) {
   }
 
   if (!up.ok) {
-    await fetch(`${base}/api/v1/admin/site-images/${id}`, {
+    await fetchWithTimeout(`${base}/api/v1/admin/site-images/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
-    }).catch(() => {});
+    }, timeoutMs).catch(() => {});
     throw new Error(`upload failed (${up.status}): ${JSON.stringify(data)}`);
   }
 
   const imageUrl = data?.site_image?.image_url;
   if (!imageUrl) {
-    await fetch(`${base}/api/v1/admin/site-images/${id}`, {
+    await fetchWithTimeout(`${base}/api/v1/admin/site-images/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
-    }).catch(() => {});
+    }, timeoutMs).catch(() => {});
     throw new Error(`upload succeeded but image_url missing in response: ${JSON.stringify(data)}`);
   }
 
@@ -192,17 +203,23 @@ async function uploadOne(filePath, row) {
 }
 
 (async () => {
-  const csvRaw = fs.readFileSync(csvPath, 'utf8');
+  const csvRaw = fs.readFileSync(csvPath, 'utf8').replace(/^\uFEFF/, '');
   const rows = parseCsv(csvRaw);
-  let done = 0;
+  let attempted = 0;
+  let uploaded = 0;
+  let readyUpload = 0;
+  let missingLocal = 0;
+  let uploadError = 0;
 
   for (const row of rows) {
     if (row.status === 'applied' || row.status === 'uploaded') continue;
+    attempted++;
 
     const localFile = String(row.local_file || '').trim();
     if (!localFile) {
       row.status = 'missing-local';
       row.notes = 'local_file column is empty';
+      missingLocal++;
       continue;
     }
 
@@ -210,12 +227,13 @@ async function uploadOne(filePath, row) {
     if (!fs.existsSync(filePath) || fs.lstatSync(filePath).isDirectory()) {
       row.status = 'missing-local';
       row.notes = 'local file missing';
+      missingLocal++;
       continue;
     }
 
     if (dryRun) {
       row.status = 'ready-upload';
-      done++;
+      readyUpload++;
       continue;
     }
 
@@ -224,15 +242,16 @@ async function uploadOne(filePath, row) {
       row.new_s3_url = url;
       row.status = 'uploaded';
       row.notes = 'uploaded via admin site-images API';
-      done++;
+      uploaded++;
       console.log(`uploaded: ${row.local_file}`);
     } catch (e) {
       row.status = 'upload-error';
       row.notes = String(e.message || e);
+      uploadError++;
       console.error(`failed: ${row.local_file} -> ${row.notes}`);
     }
   }
 
   fs.writeFileSync(csvPath, toCsv(rows));
-  console.log(`done: ${done} rows processed`);
+  console.log(`[summary] attempted=${attempted} uploaded=${uploaded} ready_upload=${readyUpload} missing_local=${missingLocal} upload_error=${uploadError}`);
 })();
