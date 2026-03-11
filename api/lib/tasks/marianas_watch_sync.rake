@@ -20,6 +20,12 @@ namespace :marianas do
       CSV.foreach(csv_path, headers: true).with_index(2) do |row, line_no|
         title = row['title'].to_s.strip
         youtube_url = row['youtube_url'].to_s.strip
+        if title.blank? || youtube_url.blank?
+          skipped += 1
+          puts "- skip row #{line_no}: missing title/youtube_url (title=#{title.inspect} url=#{youtube_url.inspect})"
+          next
+        end
+
         category = row['category'].to_s.strip.presence || 'gi'
         featured = row['featured'].to_s.strip.downcase == 'true'
         sort_order_raw = row['sort_order'].to_s.strip
@@ -36,12 +42,6 @@ namespace :marianas do
         unless %w[published draft archived].include?(status)
           skipped += 1
           puts "- skip row #{line_no}: unknown status=#{status.inspect} (allowed: published, draft, archived)"
-          next
-        end
-
-        if title.blank? || youtube_url.blank?
-          skipped += 1
-          puts "- skip row #{line_no}: missing title/youtube_url (title=#{title.inspect} url=#{youtube_url.inspect})"
           next
         end
 
