@@ -71,6 +71,7 @@ node scripts/upload-tier1-site-images.mjs \
 - Creates a `site_image` record (default `active=false`), uploads corresponding local file
 - Writes resulting hosted URL to `new_s3_url`
 - Updates row status (`uploaded`, `upload-error`, `missing-local`)
+- Persists CSV checkpoints incrementally after each processed row (resumable progress)
 - If upload fails after create, script attempts cleanup delete and logs cleanup failures explicitly
 
 ## Safety notes

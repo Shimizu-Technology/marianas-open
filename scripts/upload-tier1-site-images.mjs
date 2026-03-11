@@ -238,6 +238,10 @@ async function uploadOne(filePath, row) {
   let missingLocal = 0;
   let uploadError = 0;
 
+  const checkpoint = () => {
+    fs.writeFileSync(csvPath, toCsv(rows));
+  };
+
   for (const row of rows) {
     if (row.status === 'applied' || row.status === 'uploaded') continue;
     attempted++;
@@ -247,6 +251,7 @@ async function uploadOne(filePath, row) {
       row.status = 'missing-local';
       row.notes = 'local_file column is empty';
       missingLocal++;
+      checkpoint();
       continue;
     }
 
@@ -257,6 +262,7 @@ async function uploadOne(filePath, row) {
       row.status = 'missing-local';
       row.notes = 'local_file path escapes assets root';
       missingLocal++;
+      checkpoint();
       continue;
     }
 
@@ -264,6 +270,7 @@ async function uploadOne(filePath, row) {
       row.status = 'missing-local';
       row.notes = 'local file missing';
       missingLocal++;
+      checkpoint();
       continue;
     }
 
@@ -274,6 +281,7 @@ async function uploadOne(filePath, row) {
       row.status = 'upload-error';
       row.notes = String(e.message || e);
       uploadError++;
+      checkpoint();
       continue;
     }
 
@@ -281,6 +289,7 @@ async function uploadOne(filePath, row) {
       if (dryRun) {
         row.status = 'ready-upload';
         readyUpload++;
+        checkpoint();
         continue;
       }
 
@@ -290,6 +299,7 @@ async function uploadOne(filePath, row) {
       row.notes = 'uploaded via admin site-images API';
       uploaded++;
       console.log(`uploaded: ${row.local_file}`);
+      checkpoint();
     } catch (e) {
       row.status = 'upload-error';
       const errMsg = String(e.message || e);
@@ -299,6 +309,7 @@ async function uploadOne(filePath, row) {
         : errMsg;
       uploadError++;
       console.error(`failed: ${row.local_file} -> ${row.notes}`);
+      checkpoint();
     }
   }
 
