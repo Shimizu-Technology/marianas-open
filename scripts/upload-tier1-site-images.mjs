@@ -82,7 +82,6 @@ function splitCsvLine(line) {
 
 function parseCsv(text) {
   const lines = text.trim().split(/\r?\n/);
-  if (!lines.length) return [];
   const headers = splitCsvLine(lines[0]).map((h) => h.trim());
   const rows = [];
   for (const line of lines.slice(1)) {
@@ -190,6 +189,7 @@ async function uploadOne(filePath, row) {
   if (!create.ok || !create.data?.site_image?.id) {
     if (create.ok && !create.data?.site_image?.id) {
       console.error(`create returned success without site_image.id; possible orphan record may require manual cleanup: ${JSON.stringify(create.data)}`);
+      throw new Error(`create response missing site_image.id (status=${create.status}); possible orphan — manual cleanup may be required: ${JSON.stringify(create.data)}`);
     }
     throw new Error(`create failed (${create.status}): ${JSON.stringify(create.data)}`);
   }
@@ -232,6 +232,11 @@ async function uploadOne(filePath, row) {
 (async () => {
   const csvRaw = fs.readFileSync(csvPath, 'utf8').replace(/^\uFEFF/, '');
   const rows = parseCsv(csvRaw);
+  if (rows.length === 0) {
+    console.error(`No data rows found in CSV: ${csvPath}`);
+    process.exit(1);
+  }
+
   let attempted = 0;
   let uploaded = 0;
   let readyUpload = 0;
