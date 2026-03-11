@@ -52,6 +52,25 @@ namespace :marianas do
           next
         end
 
+        event_slug = row['event_slug'].to_s.strip
+        event_name = row['event_name'].to_s.strip
+        event = nil
+        if event_slug.present?
+          event = Event.find_by(slug: event_slug)
+          if event.nil?
+            skipped += 1
+            puts "- skip row #{line_no}: unknown event_slug=#{event_slug.inspect}"
+            next
+          end
+        elsif event_name.present?
+          event = Event.find_by(name: event_name)
+          if event.nil?
+            skipped += 1
+            puts "- skip row #{line_no}: unknown event_name=#{event_name.inspect}"
+            next
+          end
+        end
+
         youtube_video_id = Video.parse_youtube_video_id(youtube_url)
         if youtube_video_id.blank?
           skipped += 1
@@ -72,6 +91,7 @@ namespace :marianas do
           featured: featured,
           sort_order: sort_order,
           status: status,
+          event_id: event&.id,
         }
 
         changed = video.new_record? || attrs.any? { |k, v| video.public_send(k) != v }
