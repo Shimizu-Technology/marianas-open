@@ -17,17 +17,26 @@ namespace :marianas do
     skipped = 0
 
     runner = proc do
-      CSV.foreach(csv_path, headers: true) do |row|
+      CSV.foreach(csv_path, headers: true).with_index(2) do |row, line_no|
         title = row['title'].to_s.strip
         youtube_url = row['youtube_url'].to_s.strip
         category = row['category'].to_s.strip.presence || 'gi'
         featured = row['featured'].to_s.strip.downcase == 'true'
-        sort_order = row['sort_order'].to_s.strip.presence&.to_i || 0
+        sort_order_raw = row['sort_order'].to_s.strip
+        sort_order = if sort_order_raw.blank?
+                       0
+                     elsif sort_order_raw.match?(/\A\d+\z/)
+                       sort_order_raw.to_i
+                     else
+                       skipped += 1
+                       puts "- skip row #{line_no}: invalid sort_order=#{sort_order_raw.inspect} (must be numeric)"
+                       next
+                     end
         status = row['status'].to_s.strip.presence || 'published'
 
         if title.blank? || youtube_url.blank?
           skipped += 1
-          puts "- skip row: missing title/youtube_url"
+          puts "- skip row #{line_no}: missing title/youtube_url (title=#{title.inspect} url=#{youtube_url.inspect})"
           next
         end
 
