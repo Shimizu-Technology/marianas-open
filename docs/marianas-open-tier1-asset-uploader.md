@@ -13,6 +13,7 @@ Automates Tier-1 asset upload (logos/banners/covers) through the Admin Site Imag
 - `--csv` Remap sheet CSV path
 - `--assets` Local asset folder path (must exist; script exits fast if invalid)
 - `--dry-run` Marks rows as `ready-upload` without API writes
+- `--activate` Sets uploaded `site_image.active=true` immediately (default is `false`)
 
 ## CSV columns expected
 
@@ -59,9 +60,10 @@ node scripts/upload-tier1-site-images.mjs \
 ## Behavior
 
 - Skips rows already marked `uploaded` or `applied`
-- Creates a `site_image` record, uploads corresponding local file
+- Creates a `site_image` record (default `active=false`), uploads corresponding local file
 - Writes resulting hosted URL to `new_s3_url`
 - Updates row status (`uploaded`, `upload-error`, `missing-local`)
+- If upload fails after create, script attempts cleanup delete and logs cleanup failures explicitly
 
 ## Safety notes
 

@@ -29,6 +29,7 @@ const token = getArg('token', process.env.ADMIN_BEARER_TOKEN || '');
 const csvPath = getArg('csv', '');
 const assetsDir = getArg('assets', '');
 const timeoutMs = Number(getArg('timeout-ms', process.env.UPLOADER_TIMEOUT_MS || '45000')) || 45000;
+const activate = args.includes('--activate');
 
 if (!csvPath || !assetsDir) {
   console.error('Missing --csv or --assets');
@@ -141,6 +142,21 @@ function placementForSection(section, sourceUrl) {
   return placement;
 }
 
+async function cleanupCreatedSiteImage(id) {
+  try {
+    const res = await fetchWithTimeout(`${base}/api/v1/admin/site-images/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }, timeoutMs);
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error(`cleanup DELETE failed for id=${id}: status=${res.status} body=${txt.slice(0, 300)}`);
+    }
+  } catch (cleanupErr) {
+    console.error(`cleanup DELETE failed for id=${id}: ${cleanupErr?.message || cleanupErr}`);
+  }
+}
+
 async function uploadOne(filePath, row) {
   const placement = placementForSection(row.section, row.source_url);
   const create = await jsonFetch(`${base}/api/v1/admin/site-images`, {
@@ -154,7 +170,7 @@ async function uploadOne(filePath, row) {
       alt_text: row.target_field,
       placement,
       sort_order: 0,
-      active: true,
+      active: activate,
       caption: `Imported from ${row.source_url}`,
     }),
   });
@@ -183,19 +199,13 @@ async function uploadOne(filePath, row) {
   }
 
   if (!up.ok) {
-    await fetchWithTimeout(`${base}/api/v1/admin/site-images/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    }, timeoutMs).catch(() => {});
+    await cleanupCreatedSiteImage(id);
     throw new Error(`upload failed (${up.status}): ${JSON.stringify(data)}`);
   }
 
   const imageUrl = data?.site_image?.image_url;
   if (!imageUrl) {
-    await fetchWithTimeout(`${base}/api/v1/admin/site-images/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    }, timeoutMs).catch(() => {});
+    await cleanupCreatedSiteImage(id);
     throw new Error(`upload succeeded but image_url missing in response: ${JSON.stringify(data)}`);
   }
 
