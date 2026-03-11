@@ -91,8 +91,8 @@ namespace :marianas do
           featured: featured,
           sort_order: sort_order,
           status: status,
-          event_id: event&.id,
         }
+        attrs[:event_id] = event.id if event_slug.present? || event_name.present?
 
         changed = video.new_record? || attrs.any? { |k, v| video.public_send(k) != v }
         if !changed
