@@ -30,10 +30,10 @@
     "competitorsLabel": "선수",
     "countries": "6",
     "countriesLabel": "참가국",
-    "prizePpool": "$50K",
     "prizePoolLabel": "상금",
     "since": "2007",
-    "sinceLabel": "설립"
+    "sinceLabel": "설립",
+    "prizePool": "$50K"
   },
   "home": {
     "upcomingTitle": "2026 프로 시리즈",

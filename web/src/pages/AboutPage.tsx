@@ -25,7 +25,7 @@ export default function AboutPage() {
   const stats = [
     { value: t('stats.competitors'), label: t('stats.competitorsLabel'), icon: Users },
     { value: t('stats.countries'), label: t('stats.countriesLabel'), icon: Globe },
-    { value: t('stats.prizePpool'), label: t('stats.prizePoolLabel'), icon: Trophy },
+    { value: t('stats.prizePool'), label: t('stats.prizePoolLabel'), icon: Trophy },
     { value: t('stats.since'), label: t('stats.sinceLabel'), icon: Calendar },
   ];
 

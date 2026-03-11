@@ -14,16 +14,7 @@ import {
 } from 'lucide-react';
 import type { Event } from '../services/api';
 import ScrollReveal from './ScrollReveal';
-
-function getDateLocale(lang: string) {
-  const map: Record<string, string> = {
-    ja: 'ja-JP',
-    ko: 'ko-KR',
-    zh: 'zh-CN',
-    tl: 'fil-PH',
-  };
-  return map[lang] || 'en-US';
-}
+import { getDateLocale } from '../utils/dateLocale';
 
 type StopStatus = 'completed' | 'next' | 'upcoming';
 

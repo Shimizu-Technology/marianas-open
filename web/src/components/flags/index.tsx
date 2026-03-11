@@ -113,6 +113,17 @@ export function FlagCN({ className = 'w-6 h-[18px]' }: FlagProps) {
   );
 }
 
+export function FlagBR({ className = 'w-6 h-[18px]' }: FlagProps) {
+  return (
+    <svg viewBox="0 0 24 18" className={className} aria-hidden="true">
+      <rect width="24" height="18" fill="#009B3A" rx="2" />
+      <polygon points="12,2.2 20.2,9 12,15.8 3.8,9" fill="#FFDF00" />
+      <circle cx="12" cy="9" r="3.2" fill="#002776" />
+      <path d="M9.1 9.2c.9-.8 2-.9 3.1-.8 1 .1 2 .4 2.8 1" stroke="#fff" strokeWidth="0.45" fill="none" />
+    </svg>
+  );
+}
+
 /** Map language code to flag component */
 export const flagComponents: Record<string, React.ComponentType<FlagProps>> = {
   en: FlagUS,
@@ -120,4 +131,5 @@ export const flagComponents: Record<string, React.ComponentType<FlagProps>> = {
   ko: FlagKR,
   tl: FlagPH,
   zh: FlagCN,
+  pt: FlagBR,
 };

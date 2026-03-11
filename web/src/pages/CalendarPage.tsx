@@ -9,11 +9,7 @@ import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useEvents } from '../hooks/useApi';
 import type { Event } from '../services/api';
-
-function getDateLocale(lang: string) {
-  const map: Record<string, string> = { ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', tl: 'fil-PH' };
-  return map[lang] || 'en-US';
-}
+import { getDateLocale } from '../utils/dateLocale';
 
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
