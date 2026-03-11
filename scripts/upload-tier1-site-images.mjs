@@ -105,19 +105,25 @@ function toCsv(rows) {
   return [headers.map(esc).join(','), ...rows.map((r) => headers.map((h) => esc(r[h] ?? '')).join(','))].join('\n') + '\n';
 }
 
-async function fetchWithTimeout(url, opts = {}, ms = timeoutMs) {
+async function fetchTextWithTimeout(url, opts = {}, ms = timeoutMs) {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), ms);
   try {
-    return await fetch(url, { ...opts, signal: controller.signal });
+    const res = await fetch(url, { ...opts, signal: controller.signal });
+    const txt = await res.text();
+    return { res, txt };
   } finally {
     clearTimeout(t);
   }
 }
 
+async function fetchWithTimeout(url, opts = {}, ms = timeoutMs) {
+  const { res } = await fetchTextWithTimeout(url, opts, ms);
+  return res;
+}
+
 async function jsonFetch(url, opts = {}) {
-  const res = await fetchWithTimeout(url, opts, timeoutMs);
-  const txt = await res.text();
+  const { res, txt } = await fetchTextWithTimeout(url, opts, timeoutMs);
   let data = null;
   try {
     data = JSON.parse(txt);
@@ -197,13 +203,12 @@ async function uploadOne(filePath, row) {
     const mime = inferMime(filePath);
     form.append('image', new Blob([fs.readFileSync(filePath)], { type: mime }), path.basename(filePath));
 
-    const up = await fetchWithTimeout(`${base}/api/v1/admin/site-images/${id}/upload`, {
+    const { res: up, txt } = await fetchTextWithTimeout(`${base}/api/v1/admin/site-images/${id}/upload`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: form,
     }, timeoutMs);
 
-    const txt = await up.text();
     let data = null;
     try {
       data = JSON.parse(txt);
