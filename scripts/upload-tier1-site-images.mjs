@@ -192,36 +192,39 @@ async function uploadOne(filePath, row) {
   }
   const id = create.data.site_image.id;
 
-  const form = new FormData();
-  const mime = inferMime(filePath);
-  form.append('image', new Blob([fs.readFileSync(filePath)], { type: mime }), path.basename(filePath));
-
-  const up = await fetchWithTimeout(`${base}/api/v1/admin/site-images/${id}/upload`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body: form,
-  }, timeoutMs);
-
-  const txt = await up.text();
-  let data = null;
   try {
-    data = JSON.parse(txt);
-  } catch {
-    data = { raw: txt };
-  }
+    const form = new FormData();
+    const mime = inferMime(filePath);
+    form.append('image', new Blob([fs.readFileSync(filePath)], { type: mime }), path.basename(filePath));
 
-  if (!up.ok) {
+    const up = await fetchWithTimeout(`${base}/api/v1/admin/site-images/${id}/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    }, timeoutMs);
+
+    const txt = await up.text();
+    let data = null;
+    try {
+      data = JSON.parse(txt);
+    } catch {
+      data = { raw: txt };
+    }
+
+    if (!up.ok) {
+      throw new Error(`upload failed (${up.status}): ${JSON.stringify(data)}`);
+    }
+
+    const imageUrl = data?.site_image?.image_url;
+    if (!imageUrl) {
+      throw new Error(`upload succeeded but image_url missing in response: ${JSON.stringify(data)}`);
+    }
+
+    return imageUrl;
+  } catch (e) {
     await cleanupCreatedSiteImage(id);
-    throw new Error(`upload failed (${up.status}): ${JSON.stringify(data)}`);
+    throw e;
   }
-
-  const imageUrl = data?.site_image?.image_url;
-  if (!imageUrl) {
-    await cleanupCreatedSiteImage(id);
-    throw new Error(`upload succeeded but image_url missing in response: ${JSON.stringify(data)}`);
-  }
-
-  return imageUrl;
 }
 
 (async () => {
@@ -295,4 +298,8 @@ async function uploadOne(filePath, row) {
 
   fs.writeFileSync(csvPath, toCsv(rows));
   console.log(`[summary] attempted=${attempted} uploaded=${uploaded} ready_upload=${readyUpload} missing_local=${missingLocal} upload_error=${uploadError}`);
+
+  if (uploadError > 0 || (missingLocal > 0 && !dryRun)) {
+    process.exitCode = 1;
+  }
 })();
