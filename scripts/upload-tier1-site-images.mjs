@@ -23,13 +23,18 @@ const getArg = (name, def = '') => {
   return val;
 };
 const dryRun = args.includes('--dry-run');
-const base = getArg('base', process.env.API_BASE_URL || 'http://127.0.0.1:3100');
+const baseRaw = getArg('base', process.env.API_BASE_URL || 'http://127.0.0.1:3100');
+const base = String(baseRaw).replace(/\/+$/, '');
 const token = getArg('token', process.env.ADMIN_BEARER_TOKEN || '');
 const csvPath = getArg('csv', '');
 const assetsDir = getArg('assets', '');
 
 if (!csvPath || !assetsDir) {
   console.error('Missing --csv or --assets');
+  process.exit(1);
+}
+if (!fs.existsSync(assetsDir) || !fs.lstatSync(assetsDir).isDirectory()) {
+  console.error(`Assets directory not found or not a directory: ${assetsDir}`);
   process.exit(1);
 }
 if (!dryRun && !token) {
