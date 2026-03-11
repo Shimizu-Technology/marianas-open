@@ -1,0 +1,58 @@
+# Marianas Open Tier-1 Asset Uploader
+
+Automates Tier-1 asset upload (logos/banners/covers) through the Admin Site Images API and updates the remap CSV in-place.
+
+## Script
+
+`scripts/upload-tier1-site-images.mjs`
+
+## Inputs
+
+- `--base` API base URL (default: `http://127.0.0.1:3100`)
+- `--token` Admin bearer token (required for real upload)
+- `--csv` Remap sheet CSV path
+- `--assets` Local asset folder path
+- `--dry-run` Marks rows as `ready-upload` without API writes
+
+## CSV columns expected
+
+- `source_url`
+- `local_file`
+- `section`
+- `target_field`
+- `new_s3_url`
+- `status`
+- `notes`
+
+## Dry run
+
+```bash
+node scripts/upload-tier1-site-images.mjs \
+  --base http://127.0.0.1:3100 \
+  --csv /path/to/marianas-open-tier1-url-remap-sheet-2026-03-11.csv \
+  --assets /path/to/core-download-2026-03-11 \
+  --dry-run
+```
+
+## Real upload
+
+```bash
+node scripts/upload-tier1-site-images.mjs \
+  --base https://<your-api-host> \
+  --token <ADMIN_BEARER_TOKEN> \
+  --csv /path/to/marianas-open-tier1-url-remap-sheet-2026-03-11.csv \
+  --assets /path/to/core-download-2026-03-11
+```
+
+## Behavior
+
+- Skips rows already marked `uploaded` or `applied`
+- Creates a `site_image` record, uploads corresponding local file
+- Writes resulting hosted URL to `new_s3_url`
+- Updates row status (`uploaded`, `upload-error`, `missing-local`)
+
+## Safety notes
+
+- Use dry-run first to validate local file coverage
+- Keep a backup copy of the CSV before real upload
+- After upload, apply `new_s3_url` values to content records and mark rows `applied`
