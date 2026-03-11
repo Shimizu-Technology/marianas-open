@@ -29,6 +29,7 @@ class Video < ApplicationRecord
   private
 
   def extract_youtube_id
-    self.youtube_video_id = self.class.parse_youtube_video_id(youtube_url)
+    parsed = self.class.parse_youtube_video_id(youtube_url)
+    self.youtube_video_id = parsed if parsed.present?
   end
 end
