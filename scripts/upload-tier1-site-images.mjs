@@ -162,12 +162,11 @@ function placementForSection(section, sourceUrl) {
 
 async function cleanupCreatedSiteImage(id) {
   try {
-    const res = await fetchWithTimeout(`${base}/api/v1/admin/site-images/${id}`, {
+    const { res, txt } = await fetchTextWithTimeout(`${base}/api/v1/admin/site-images/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     }, timeoutMs);
     if (!res.ok) {
-      const txt = await res.text();
       console.error(`cleanup DELETE failed for id=${id}: status=${res.status} body=${txt.slice(0, 300)}`);
     }
   } catch (cleanupErr) {
