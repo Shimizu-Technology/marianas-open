@@ -117,11 +117,6 @@ async function fetchTextWithTimeout(url, opts = {}, ms = timeoutMs) {
   }
 }
 
-async function fetchWithTimeout(url, opts = {}, ms = timeoutMs) {
-  const { res } = await fetchTextWithTimeout(url, opts, ms);
-  return res;
-}
-
 async function jsonFetch(url, opts = {}) {
   const { res, txt } = await fetchTextWithTimeout(url, opts, timeoutMs);
   let data = null;
