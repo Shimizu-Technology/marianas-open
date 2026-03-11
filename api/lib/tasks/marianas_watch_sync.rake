@@ -16,46 +16,59 @@ namespace :marianas do
     updated = 0
     skipped = 0
 
-    CSV.foreach(csv_path, headers: true) do |row|
-      title = row['title'].to_s.strip
-      youtube_url = row['youtube_url'].to_s.strip
-      category = row['category'].to_s.strip.presence || 'gi'
-      featured = row['featured'].to_s.strip.downcase == 'true'
-      sort_order = row['sort_order'].to_s.strip.presence&.to_i || 0
-      status = row['status'].to_s.strip.presence || 'published'
+    runner = proc do
+      CSV.foreach(csv_path, headers: true) do |row|
+        title = row['title'].to_s.strip
+        youtube_url = row['youtube_url'].to_s.strip
+        category = row['category'].to_s.strip.presence || 'gi'
+        featured = row['featured'].to_s.strip.downcase == 'true'
+        sort_order = row['sort_order'].to_s.strip.presence&.to_i || 0
+        status = row['status'].to_s.strip.presence || 'published'
 
-      if title.blank? || youtube_url.blank?
-        skipped += 1
-        puts "- skip row: missing title/youtube_url"
-        next
+        if title.blank? || youtube_url.blank?
+          skipped += 1
+          puts "- skip row: missing title/youtube_url"
+          next
+        end
+
+        video = Video.find_or_initialize_by(youtube_url: youtube_url)
+        attrs = {
+          title: title,
+          category: category,
+          featured: featured,
+          sort_order: sort_order,
+          status: status,
+        }
+
+        changed = video.new_record? || attrs.any? { |k, v| video.public_send(k) != v }
+        if !changed
+          skipped += 1
+          next
+        end
+
+        action = video.new_record? ? 'create' : 'update'
+        if dry_run
+          puts "- [dry_run] #{action} #{youtube_url}"
+          created += 1 if action == 'create'
+          updated += 1 if action == 'update'
+          next
+        end
+
+        video.assign_attributes(attrs)
+        video.save!
+        if video.previous_changes.key?('id')
+          created += 1
+        else
+          updated += 1
+        end
       end
+    end
 
-      video = Video.find_or_initialize_by(youtube_url: youtube_url)
-      attrs = {
-        title: title,
-        category: category,
-        featured: featured,
-        sort_order: sort_order,
-        status: status,
-      }
-
-      changed = video.new_record? || attrs.any? { |k, v| video.public_send(k) != v }
-      if !changed
-        skipped += 1
-        next
-      end
-
-      if dry_run
-        puts "- #{video.new_record? ? 'create' : 'update'} #{youtube_url}"
-        next
-      end
-
-      video.assign_attributes(attrs)
-      video.save!
-      if video.previous_changes.key?('id')
-        created += 1
-      else
-        updated += 1
+    if dry_run
+      runner.call
+    else
+      ActiveRecord::Base.transaction do
+        runner.call
       end
     end
 
