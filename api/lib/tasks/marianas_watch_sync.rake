@@ -15,6 +15,8 @@ namespace :marianas do
     created = 0
     updated = 0
     skipped = 0
+    tx_created = 0
+    tx_updated = 0
 
     runner = proc do
       CSV.foreach(csv_path, headers: true).with_index(2) do |row, line_no|
@@ -117,10 +119,10 @@ namespace :marianas do
         video.assign_attributes(attrs)
         video.save!
         if video.previous_changes.key?('id')
-          created += 1
+          tx_created += 1
           puts "- create #{youtube_url}"
         else
-          updated += 1
+          tx_updated += 1
           puts "- update #{youtube_url}"
         end
       end
@@ -132,6 +134,8 @@ namespace :marianas do
       ActiveRecord::Base.transaction do
         runner.call
       end
+      created = tx_created
+      updated = tx_updated
     end
 
     puts "[marianas:sync_watch_videos] created=#{created} updated=#{updated} skipped=#{skipped}"
