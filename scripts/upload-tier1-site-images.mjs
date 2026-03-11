@@ -70,7 +70,7 @@ function splitCsvLine(line) {
 function parseCsv(text) {
   const lines = text.trim().split(/\r?\n/);
   if (!lines.length) return [];
-  const headers = splitCsvLine(lines[0]);
+  const headers = splitCsvLine(lines[0]).map((h) => h.trim());
   const rows = [];
   for (const line of lines.slice(1)) {
     if (!line.trim()) continue;
@@ -223,7 +223,16 @@ async function uploadOne(filePath, row) {
       continue;
     }
 
-    const filePath = path.join(assetsDir, localFile);
+    const assetsRoot = path.resolve(assetsDir);
+    const filePath = path.resolve(assetsRoot, localFile);
+    const safeRoot = assetsRoot.endsWith(path.sep) ? assetsRoot : `${assetsRoot}${path.sep}`;
+    if (!filePath.startsWith(safeRoot)) {
+      row.status = 'missing-local';
+      row.notes = 'local_file path escapes assets root';
+      missingLocal++;
+      continue;
+    }
+
     if (!fs.existsSync(filePath) || fs.lstatSync(filePath).isDirectory()) {
       row.status = 'missing-local';
       row.notes = 'local file missing';
