@@ -193,6 +193,9 @@ async function uploadOne(filePath, row) {
   });
 
   if (!create.ok || !create.data?.site_image?.id) {
+    if (create.ok && !create.data?.site_image?.id) {
+      console.error(`create returned success without site_image.id; possible orphan record may require manual cleanup: ${JSON.stringify(create.data)}`);
+    }
     throw new Error(`create failed (${create.status}): ${JSON.stringify(create.data)}`);
   }
   const id = create.data.site_image.id;
