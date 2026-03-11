@@ -266,7 +266,7 @@ export interface SiteContentEntry {
   sort_order: number;
 }
 
-export type SiteContentMap = Record<string, { en: string | null; ja: string | null; ko: string | null; tl: string | null; zh: string | null }>;
+export type SiteContentMap = Record<string, { en: string | null; ja: string | null; ko: string | null; tl: string | null; zh: string | null; pt?: string | null }>;
 export type SiteContentGrouped = Record<string, SiteContentEntry[]>;
 
 export interface EventResult {

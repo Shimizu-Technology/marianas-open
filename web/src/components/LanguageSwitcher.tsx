@@ -7,6 +7,7 @@ const languages = [
   { code: 'ko', label: '한국어' },
   { code: 'tl', label: 'Filipino' },
   { code: 'zh', label: '中文' },
+  { code: 'pt', label: 'Português' },
 ];
 
 export default function LanguageSwitcher() {

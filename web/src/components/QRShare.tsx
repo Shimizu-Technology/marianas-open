@@ -10,6 +10,7 @@ const languageNames: Record<string, string> = {
   ko: '한국어',
   tl: 'Tagalog',
   zh: '中文',
+  pt: 'Português',
 };
 
 export default function QRShare() {

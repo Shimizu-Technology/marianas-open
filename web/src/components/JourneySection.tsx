@@ -21,6 +21,7 @@ function getDateLocale(lang: string) {
     ko: 'ko-KR',
     zh: 'zh-CN',
     tl: 'fil-PH',
+    pt: 'pt-BR',
   };
   return map[lang] || 'en-US';
 }
