@@ -16,6 +16,17 @@ namespace :marianas do
     updated = 0
     skipped = 0
 
+    extract_youtube_video_id = lambda do |youtube_url|
+      next '' if youtube_url.blank?
+      if youtube_url.match?(/youtu\.be\//)
+        youtube_url.split('/').last.to_s.split('?').first.to_s
+      elsif youtube_url.match?(/[?&]v=/)
+        youtube_url.match(/[?&]v=([^&]+)/).to_a[1].to_s
+      else
+        ''
+      end
+    end
+
     runner = proc do
       CSV.foreach(csv_path, headers: true).with_index(2) do |row, line_no|
         title = row['title'].to_s.strip
@@ -45,9 +56,18 @@ namespace :marianas do
           next
         end
 
-        video = Video.find_or_initialize_by(youtube_url: youtube_url)
+        youtube_video_id = extract_youtube_video_id.call(youtube_url)
+        if youtube_video_id.blank?
+          skipped += 1
+          puts "- skip row #{line_no}: could not extract youtube_video_id from #{youtube_url.inspect}"
+          next
+        end
+
+        video = Video.find_by(youtube_video_id: youtube_video_id) || Video.find_or_initialize_by(youtube_url: youtube_url)
         attrs = {
           title: title,
+          youtube_url: youtube_url,
+          youtube_video_id: youtube_video_id,
           category: category,
           featured: featured,
           sort_order: sort_order,
@@ -72,8 +92,10 @@ namespace :marianas do
         video.save!
         if video.previous_changes.key?('id')
           created += 1
+          puts "- create #{youtube_url}"
         else
           updated += 1
+          puts "- update #{youtube_url}"
         end
       end
     end
