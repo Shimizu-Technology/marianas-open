@@ -13,11 +13,15 @@ Automates Tier-1 asset upload (logos/banners/covers) through the Admin Site Imag
 ## Inputs
 
 - `--base` API base URL (default: `http://127.0.0.1:3100`; trailing slash is auto-trimmed)
+  - env fallback: `API_BASE_URL`
 - `--token` Admin bearer token (required for real upload)
+  - env fallback: `ADMIN_BEARER_TOKEN`
 - `--csv` Remap sheet CSV path
 - `--assets` Local asset folder path (must exist; script exits fast if invalid)
 - `--dry-run` Marks rows as `ready-upload` without API writes
 - `--activate` Sets uploaded `site_image.active=true` immediately (default is `false`)
+- `--timeout-ms` Per-request timeout in milliseconds (default: `45000`)
+  - env fallback: `UPLOADER_TIMEOUT_MS`
 
 ## CSV columns expected
 

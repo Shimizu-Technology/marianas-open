@@ -262,13 +262,26 @@ async function uploadOne(filePath, row) {
       continue;
     }
 
-    if (dryRun) {
-      row.status = 'ready-upload';
-      readyUpload++;
+    // Validate section placement in both dry-run and real-run so dry-run is a true readiness gate.
+    try {
+      placementForSection(row.section, row.source_url);
+    } catch (e) {
+      row.status = 'upload-error';
+      row.notes = String(e.message || e);
+      uploadError++;
       continue;
     }
 
     try {
+      // validate section/placement in both dry-run and real-run
+      placementForSection(row.section, row.source_url);
+
+      if (dryRun) {
+        row.status = 'ready-upload';
+        readyUpload++;
+        continue;
+      }
+
       const url = await uploadOne(filePath, row);
       row.new_s3_url = url;
       row.status = 'uploaded';
