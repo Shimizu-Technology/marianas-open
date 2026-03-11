@@ -292,7 +292,11 @@ async function uploadOne(filePath, row) {
       console.log(`uploaded: ${row.local_file}`);
     } catch (e) {
       row.status = 'upload-error';
-      row.notes = String(e.message || e);
+      const errMsg = String(e.message || e);
+      const networkLike = /(aborted|timeout|timed out|fetch failed|network)/i.test(errMsg);
+      row.notes = networkLike
+        ? `${errMsg} (possible orphan: verify recent site_images records manually if create request may have reached server)`
+        : errMsg;
       uploadError++;
       console.error(`failed: ${row.local_file} -> ${row.notes}`);
     }
