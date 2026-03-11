@@ -33,7 +33,8 @@
     "prizePpool": "$50K",
     "prizePoolLabel": "Prize Pool",
     "since": "2007",
-    "sinceLabel": "Established"
+    "sinceLabel": "Established",
+    "prizePool": "$50K"
   },
   "home": {
     "upcomingTitle": "2026 Pro Series",

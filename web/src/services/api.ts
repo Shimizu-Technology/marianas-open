@@ -261,12 +261,13 @@ export interface SiteContentEntry {
   value_ko: string | null;
   value_tl: string | null;
   value_zh: string | null;
+  value_pt: string | null;
   section: string;
   label: string;
   sort_order: number;
 }
 
-export type SiteContentMap = Record<string, { en: string | null; ja: string | null; ko: string | null; tl: string | null; zh: string | null; pt?: string | null }>;
+export type SiteContentMap = Record<string, { en: string | null; ja: string | null; ko: string | null; tl: string | null; zh: string | null; pt: string | null }>;
 export type SiteContentGrouped = Record<string, SiteContentEntry[]>;
 
 export interface EventResult {

@@ -33,7 +33,8 @@
     "prizePpool": "$50K",
     "prizePoolLabel": "奖金池",
     "since": "2007",
-    "sinceLabel": "创立"
+    "sinceLabel": "创立",
+    "prizePool": "$50K"
   },
   "home": {
     "upcomingTitle": "2026 职业系列赛",

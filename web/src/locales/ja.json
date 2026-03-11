@@ -33,7 +33,8 @@
     "prizePpool": "$50K",
     "prizePoolLabel": "賞金総額",
     "since": "2007",
-    "sinceLabel": "設立年"
+    "sinceLabel": "設立年",
+    "prizePool": "$50K"
   },
   "home": {
     "upcomingTitle": "2026 プロシリーズ",

@@ -44,7 +44,7 @@ export default function HomePage() {
   const stats = [
     { value: sc('stat_competitors', t('stats.competitors')), label: sc('stat_competitors_label', t('stats.competitorsLabel')), icon: Users },
     { value: sc('stat_countries', t('stats.countries')), label: sc('stat_countries_label', t('stats.countriesLabel')), icon: Globe },
-    { value: sc('stat_prize_pool', t('stats.prizePpool')), label: sc('stat_prize_pool_label', t('stats.prizePoolLabel')), icon: Trophy },
+    { value: sc('stat_prize_pool', t('stats.prizePool')), label: sc('stat_prize_pool_label', t('stats.prizePoolLabel')), icon: Trophy },
     { value: sc('stat_established', t('stats.since')), label: sc('stat_established_label', t('stats.sinceLabel')), icon: Calendar },
   ];
 
