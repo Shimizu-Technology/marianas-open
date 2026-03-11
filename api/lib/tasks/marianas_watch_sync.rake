@@ -63,11 +63,17 @@ namespace :marianas do
             next
           end
         elsif event_name.present?
-          event = Event.find_by(name: event_name)
-          if event.nil?
+          matches = Event.where(name: event_name).limit(2).to_a
+          if matches.empty?
             skipped += 1
             puts "- skip row #{line_no}: unknown event_name=#{event_name.inspect}"
             next
+          elsif matches.length > 1
+            skipped += 1
+            puts "- skip row #{line_no}: ambiguous event_name=#{event_name.inspect}; use event_slug instead"
+            next
+          else
+            event = matches.first
           end
         end
 
