@@ -35,6 +35,10 @@ if (!csvPath || !assetsDir) {
   console.error('Missing --csv or --assets');
   process.exit(1);
 }
+if (!fs.existsSync(csvPath) || !fs.lstatSync(csvPath).isFile()) {
+  console.error(`CSV not found or not a file: ${csvPath}`);
+  process.exit(1);
+}
 if (!fs.existsSync(assetsDir) || !fs.lstatSync(assetsDir).isDirectory()) {
   console.error(`Assets directory not found or not a directory: ${assetsDir}`);
   process.exit(1);
