@@ -330,7 +330,7 @@ export default function RankingsPage() {
                   </div>
                   <div className="px-4 pb-4">
                     <p className="text-[10px] text-text-muted leading-relaxed border-t border-white/5 pt-3">
-                      {t('rankings.formulaNote', 'Based on ASJJF star-based ranking system. Per-match bonus points (+3 submission, +1 decision) not included.')}
+                      {t('rankings.formulaNote', 'Official reference: Fighter ranking points use 5-Star values; team ranking points use 4-Star values. Alone brackets and same-team one brackets follow organizer policy on the official rankings page.')}
                     </p>
                   </div>
 
