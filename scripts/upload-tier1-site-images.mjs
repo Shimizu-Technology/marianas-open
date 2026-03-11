@@ -162,9 +162,12 @@ async function cleanupCreatedSiteImage(id) {
     }, timeoutMs);
     if (!res.ok) {
       console.error(`cleanup DELETE failed for id=${id}: status=${res.status} body=${txt.slice(0, 300)}`);
+      return false;
     }
+    return true;
   } catch (cleanupErr) {
     console.error(`cleanup DELETE failed for id=${id}: ${cleanupErr?.message || cleanupErr}`);
+    return false;
   }
 }
 
@@ -224,8 +227,11 @@ async function uploadOne(filePath, row) {
 
     return imageUrl;
   } catch (e) {
-    await cleanupCreatedSiteImage(id);
-    throw e;
+    const cleaned = await cleanupCreatedSiteImage(id);
+    const suffix = cleaned
+      ? ' (cleanup delete succeeded - no orphan expected)'
+      : ' (cleanup delete FAILED - orphan may remain, verify recent site_images manually)';
+    throw new Error(`${e?.message || e}${suffix}`);
   }
 }
 
@@ -307,18 +313,14 @@ async function uploadOne(filePath, row) {
       checkpoint();
     } catch (e) {
       row.status = 'upload-error';
-      const errMsg = String(e.message || e);
-      const networkLike = /(aborted|timeout|timed out|fetch failed|network)/i.test(errMsg);
-      row.notes = networkLike
-        ? `${errMsg} (possible orphan: verify recent site_images records manually if create request may have reached server)`
-        : errMsg;
+      row.notes = String(e.message || e);
       uploadError++;
       console.error(`failed: ${row.local_file} -> ${row.notes}`);
       checkpoint();
     }
   }
 
-  fs.writeFileSync(csvPath, toCsv(rows));
+  if (attempted > 0) fs.writeFileSync(csvPath, toCsv(rows));
   console.log(`[summary] attempted=${attempted} uploaded=${uploaded} ready_upload=${readyUpload} missing_local=${missingLocal} upload_error=${uploadError}`);
 
   if (uploadError > 0 || missingLocal > 0) {
