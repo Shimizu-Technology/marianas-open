@@ -20,7 +20,7 @@
   },
   "hero": {
     "subtitle": "关岛顶级国际",
-    "title": "巴西柔术锦标赛",
+    "title": "Guam 巴西柔术锦标赛",
     "cta": "立即报名",
     "learnMore": "浏览赛事",
     "asjjfBadge": "ASJJF 五星级认证赛事"
@@ -36,7 +36,7 @@
     "prizePool": "$50K"
   },
   "home": {
-    "upcomingTitle": "2026 职业系列赛",
+    "upcomingTitle": "Guam 2026 职业系列赛",
     "upcomingSubtitle": "征战亚洲各地，赢取总决赛资格。",
     "sponsorsTitle": "官方合作伙伴",
     "featuredTitle": "马里亚纳群岛最大的柔术锦标赛",
@@ -53,7 +53,7 @@
     "mainEvent": "主赛事"
   },
   "event": {
-    "title": "马里亚纳公开赛 2026",
+    "title": "Guam 马里亚纳公开赛 2026",
     "tagline": "总决赛",
     "date": "2026年10月18日",
     "venue": "UOG卡尔沃体育馆",
@@ -93,7 +93,7 @@
     "prizeBrownWeight": "棕带分级别",
     "prizeTeam": "团体奖杯",
     "prizeKids": "少儿总冠军",
-    "pastEventLabel": "2025 马里亚纳公开赛",
+    "pastEventLabel": "Guam 2025 马里亚纳公开赛",
     "pastEventDesc": "来自20多个国家的1,000多名选手",
     "competitionMats": "6块比赛垫",
     "venueCapacity": "容纳5,000+人",
@@ -116,8 +116,8 @@
     "registrationComingSoon": "报名即将开放"
   },
   "calendar": {
-    "title": "2026 职业系列赛",
-    "subtitle": "6个国家7场赛事。一个总决赛。",
+    "title": "Guam 2026 职业系列赛",
+    "subtitle": "6个国家7场赛事。一个总决赛。 Guam",
     "mapTitle": "追随征程",
     "mapSubtitle": "从地方选拔到国际舞台——征战亚洲各地，赢取马里亚纳公开赛参赛资格。",
     "register": "报名",
@@ -166,7 +166,7 @@
     "featureAIDesc": "AI自动捕捉关键时刻——降服、扫技和得分。",
     "featureNotify": "推送通知",
     "featureNotifyDesc": "当您喜爱的选手上场时收到通知。不错过任何比赛。",
-    "liveEventInfo": "马里亚纳公开赛 2026 — UOG卡尔沃体育馆",
+    "liveEventInfo": "Guam 马里亚纳公开赛 2026 — UOG卡尔沃体育馆",
     "liveBadge": "LIVE",
     "featured": "精选",
     "filterCategory": "类别",
@@ -206,7 +206,7 @@
     "backHome": "返回首页"
   },
   "about": {
-    "heroTitle": "关于马里亚纳斯公开赛",
+    "heroTitle": "Guam 关于马里亚纳斯公开赛",
     "heroSubtitle": "自2007年以来关岛首屈一指的武术赛事",
     "storyTitle": "我们的故事",
     "p1": "自2007年创办以来，马里亚纳斯公开赛已成长为太平洋地区最著名的武术赛事之一。每年在关岛举办，这项赛事已成为卓越的象征，将世界各地的运动员、家庭和支持者团结在一起。",

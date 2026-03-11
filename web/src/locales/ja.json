@@ -20,7 +20,7 @@
   },
   "hero": {
     "subtitle": "グアム発 国際",
-    "title": "ブラジリアン柔術選手権",
+    "title": "Guam ブラジリアン柔術選手権",
     "cta": "エントリーする",
     "learnMore": "大会を見る",
     "asjjfBadge": "ASJJF 5つ星認定大会"
@@ -36,7 +36,7 @@
     "prizePool": "$50K"
   },
   "home": {
-    "upcomingTitle": "2026 プロシリーズ",
+    "upcomingTitle": "Guam 2026 プロシリーズ",
     "upcomingSubtitle": "アジア各地で戦い、グランドチャンピオンシップへの切符を掴め。",
     "sponsorsTitle": "公式パートナー",
     "featuredTitle": "マリアナ諸島最大の柔術トーナメント",
@@ -53,7 +53,7 @@
     "mainEvent": "メインイベント"
   },
   "event": {
-    "title": "マリアナスオープン 2026",
+    "title": "Guam マリアナスオープン 2026",
     "tagline": "グランドチャンピオンシップ",
     "date": "2026年10月18日",
     "venue": "UOGカルボ・フィールドハウス",
@@ -93,7 +93,7 @@
     "prizeBrownWeight": "茶帯階級別",
     "prizeTeam": "チームトロフィー",
     "prizeKids": "キッズグランドチャンピオン",
-    "pastEventLabel": "2025 マリアナスオープン",
+    "pastEventLabel": "Guam 2025 マリアナスオープン",
     "pastEventDesc": "20カ国以上から1,000人以上の選手",
     "competitionMats": "6面の試合マット",
     "venueCapacity": "収容人数 5,000+",
@@ -116,8 +116,8 @@
     "registrationComingSoon": "登録近日開始"
   },
   "calendar": {
-    "title": "2026 プロシリーズ",
-    "subtitle": "6カ国7大会。一つのグランドチャンピオンシップ。",
+    "title": "Guam 2026 プロシリーズ",
+    "subtitle": "6カ国7大会。一つのグランドチャンピオンシップ。 Guam",
     "mapTitle": "旅路を追う",
     "mapSubtitle": "地方予選から国際舞台へ — アジア各地で戦い、マリアナスオープンへの出場権を獲得せよ。",
     "register": "エントリー",
@@ -166,7 +166,7 @@
     "featureAIDesc": "AI搭載のハイライトがサブミッション、スイープ、得点などの重要な瞬間を自動キャプチャ。",
     "featureNotify": "プッシュ通知",
     "featureNotifyDesc": "お気に入りの選手がマットに上がった時に通知を受け取り。試合を見逃さない。",
-    "liveEventInfo": "マリアナスオープン 2026 — UOGカルボ・フィールドハウス",
+    "liveEventInfo": "Guam マリアナスオープン 2026 — UOGカルボ・フィールドハウス",
     "liveBadge": "LIVE",
     "featured": "注目",
     "filterCategory": "カテゴリー",
@@ -206,7 +206,7 @@
     "backHome": "ホームに戻る"
   },
   "about": {
-    "heroTitle": "マリアナスオープンについて",
+    "heroTitle": "Guam マリアナスオープンについて",
     "heroSubtitle": "2007年から続くグアムのプレミア格闘技大会",
     "storyTitle": "私たちの物語",
     "p1": "2007年の創設以来、マリアナスオープンは太平洋地域で最も権威ある格闘技大会のひとつに成長しました。グアムで毎年開催されるこのイベントは、世界中のアスリート、家族、サポーターを結びつける卓越の象徴となっています。",

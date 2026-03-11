@@ -20,7 +20,7 @@
   },
   "hero": {
     "subtitle": "O principal campeonato internacional de Guam",
-    "title": "Campeonato Internacional de Jiu-Jitsu Brasileiro",
+    "title": "Guam Campeonato Internacional de Jiu-Jitsu Brasileiro",
     "cta": "Inscreva-se agora",
     "learnMore": "Explorar eventos",
     "asjjfBadge": "Evento classificado 5 estrelas da ASJJF"
@@ -36,7 +36,7 @@
     "prizePool": "US$ 50 mil"
   },
   "home": {
-    "upcomingTitle": "Série Pro 2026",
+    "upcomingTitle": "Guam Série Pro 2026",
     "upcomingSubtitle": "Compita pela Ásia. Classifique-se para o Grande Campeonato.",
     "sponsorsTitle": "Parceiros Oficiais",
     "featuredTitle": "O Maior Torneio de Jiu-Jitsu das Marianas",
@@ -53,7 +53,7 @@
     "mainEvent": "Evento Principal"
   },
   "event": {
-    "title": "Aberto das Marianas 2026",
+    "title": "Guam Aberto das Marianas 2026",
     "tagline": "O Grande Campeonato",
     "date": "18 de outubro de 2026",
     "venue": "Casa de Campo UOG Calvo",
@@ -93,7 +93,7 @@
     "prizeBrownWeight": "Divisões de Peso da Faixa Marrom",
     "prizeTeam": "Troféu de Equipe",
     "prizeKids": "Grande Campeão Infantil",
-    "pastEventLabel": "Aberto das Marianas 2025",
+    "pastEventLabel": "Guam Aberto das Marianas 2025",
     "pastEventDesc": "Mais de 1.000 atletas de mais de 20 países",
     "competitionMats": "6 tatames de competição",
     "venueCapacity": "Mais de 5.000 capacidades",
@@ -116,8 +116,8 @@
     "registrationComingSoon": "Inscrições em breve"
   },
   "calendar": {
-    "title": "Série Pro 2026",
-    "subtitle": "7 eventos em 6 países. Um grande campeonato.",
+    "title": "Guam Série Pro 2026",
+    "subtitle": "7 eventos em 6 países. Um grande campeonato. Guam",
     "mapTitle": "Acompanhe a jornada",
     "mapSubtitle": "Das classificatórias locais ao palco internacional — compita pela Ásia e garanta sua vaga no Marianas Open.",
     "register": "Cadastre-se",
@@ -166,7 +166,7 @@
     "featureAIDesc": "Os destaques alimentados por IA capturam automaticamente os principais momentos – finalizações, raspagens e pontuação.",
     "featureNotify": "Notificações push",
     "featureNotifyDesc": "Seja notificado quando seus competidores favoritos entrarem no tatame. Nunca perca uma luta.",
-    "liveEventInfo": "Marianas Open 2026 — UOG Calvo Fieldhouse",
+    "liveEventInfo": "Guam Marianas Open 2026 — UOG Calvo Fieldhouse",
     "liveBadge": "AO VIVO",
     "featured": "Destaque",
     "filterCategory": "Categoria",
@@ -206,7 +206,7 @@
     "backHome": "Voltar para o início"
   },
   "about": {
-    "heroTitle": "Sobre o Marianas Open",
+    "heroTitle": "Guam Sobre o Marianas Open",
     "heroSubtitle": "O principal torneio de artes marciais de Guam desde 2007",
     "storyTitle": "Nossa história",
     "p1": "Desde a sua criação em 2007, o Marianas Open tornou-se um dos principais torneios de artes marciais da região do Pacífico. Realizado anualmente em Guam, este evento emergiu como um símbolo de excelência, unindo atletas, famílias e apoiadores de todo o mundo.",
