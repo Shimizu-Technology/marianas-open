@@ -34,28 +34,51 @@ if (!dryRun && !token) {
   process.exit(1);
 }
 
-function parseCsv(text) {
-  const [head, ...rows] = text.trim().split(/\r?\n/);
-  const headers = head.split(',');
-  return rows.map((line) => {
-    const vals = [];
-    let cur = '';
-    let q = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') q = !q;
-      else if (c === ',' && !q) { vals.push(cur); cur = ''; }
-      else cur += c;
+function splitCsvLine(line) {
+  const vals = [];
+  let cur = '';
+  let q = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (q && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        q = !q;
+      }
+    } else if (c === ',' && !q) {
+      vals.push(cur);
+      cur = '';
+    } else {
+      cur += c;
     }
-    vals.push(cur);
+  }
+  vals.push(cur);
+  return vals;
+}
+
+function parseCsv(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (!lines.length) return [];
+  const headers = splitCsvLine(lines[0]).map((x) => x.replace(/^"|"$/g, ''));
+  const rows = [];
+  for (const line of lines.slice(1)) {
+    if (!line.trim()) continue;
+    const vals = splitCsvLine(line);
     const obj = {};
-    headers.forEach((h, i) => (obj[h] = (vals[i] || '').replace(/^"|"$/g, '')));
-    return obj;
-  });
+    headers.forEach((h, i) => {
+      obj[h] = (vals[i] || '').replace(/^"|"$/g, '');
+    });
+    rows.push(obj);
+  }
+  return rows;
 }
 
 function toCsv(rows) {
-  const headers = ['source_url','local_file','section','target_field','new_s3_url','status','notes'];
+  const fixedHeaders = ['source_url', 'local_file', 'section', 'target_field', 'new_s3_url', 'status', 'notes'];
+  const extraHeaders = [...new Set(rows.flatMap((r) => Object.keys(r || {})))].filter((h) => !fixedHeaders.includes(h));
+  const headers = [...fixedHeaders, ...extraHeaders];
   const esc = (v) => `"${String(v ?? '').replaceAll('"', '""')}"`;
   return [headers.join(','), ...rows.map((r) => headers.map((h) => esc(r[h] ?? '')).join(','))].join('\n') + '\n';
 }
@@ -64,15 +87,32 @@ async function jsonFetch(url, opts = {}) {
   const res = await fetch(url, opts);
   const txt = await res.text();
   let data = null;
-  try { data = JSON.parse(txt); } catch { data = { raw: txt }; }
+  try {
+    data = JSON.parse(txt);
+  } catch {
+    data = { raw: txt };
+  }
   return { ok: res.ok, status: res.status, data };
+}
+
+function inferMime(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  return (
+    {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+    }[ext] || 'application/octet-stream'
+  );
 }
 
 async function uploadOne(filePath, row) {
   const create = await jsonFetch(`${base}/api/v1/admin/site-images`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -84,42 +124,71 @@ async function uploadOne(filePath, row) {
       caption: `Imported from ${row.source_url}`,
     }),
   });
+
   if (!create.ok || !create.data?.site_image?.id) {
     throw new Error(`create failed (${create.status}): ${JSON.stringify(create.data)}`);
   }
   const id = create.data.site_image.id;
 
   const form = new FormData();
-  form.append('image', new Blob([fs.readFileSync(filePath)]), path.basename(filePath));
+  const mime = inferMime(filePath);
+  form.append('image', new Blob([fs.readFileSync(filePath)], { type: mime }), path.basename(filePath));
+
   const up = await fetch(`${base}/api/v1/admin/site-images/${id}/upload`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}` },
     body: form,
   });
+
   const txt = await up.text();
   let data = null;
-  try { data = JSON.parse(txt); } catch { data = { raw: txt }; }
-  if (!up.ok) throw new Error(`upload failed (${up.status}): ${JSON.stringify(data)}`);
-  return data?.site_image?.image_url || '';
+  try {
+    data = JSON.parse(txt);
+  } catch {
+    data = { raw: txt };
+  }
+
+  if (!up.ok) {
+    await fetch(`${base}/api/v1/admin/site-images/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {});
+    throw new Error(`upload failed (${up.status}): ${JSON.stringify(data)}`);
+  }
+
+  const imageUrl = data?.site_image?.image_url;
+  if (!imageUrl) {
+    await fetch(`${base}/api/v1/admin/site-images/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {});
+    throw new Error(`upload succeeded but image_url missing in response: ${JSON.stringify(data)}`);
+  }
+
+  return imageUrl;
 }
 
 (async () => {
   const csvRaw = fs.readFileSync(csvPath, 'utf8');
   const rows = parseCsv(csvRaw);
   let done = 0;
+
   for (const row of rows) {
     if (row.status === 'applied' || row.status === 'uploaded') continue;
     const filePath = path.join(assetsDir, row.local_file);
+
     if (!fs.existsSync(filePath)) {
       row.status = 'missing-local';
       row.notes = 'local file missing';
       continue;
     }
+
     if (dryRun) {
       row.status = 'ready-upload';
       done++;
       continue;
     }
+
     try {
       const url = await uploadOne(filePath, row);
       row.new_s3_url = url;
