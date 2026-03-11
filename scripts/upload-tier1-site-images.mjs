@@ -299,7 +299,7 @@ async function uploadOne(filePath, row) {
   fs.writeFileSync(csvPath, toCsv(rows));
   console.log(`[summary] attempted=${attempted} uploaded=${uploaded} ready_upload=${readyUpload} missing_local=${missingLocal} upload_error=${uploadError}`);
 
-  if (uploadError > 0 || (missingLocal > 0 && !dryRun)) {
+  if (uploadError > 0 || missingLocal > 0) {
     process.exitCode = 1;
   }
 })();
