@@ -139,7 +139,7 @@
     "matchLibrary": "Library ng mga Laban",
     "searchPlaceholder": "Maghanap ng kalahok, akademya...",
     "filterWeight": "Klase ng Timbang",
-    "filterBelt": "sinturon",
+    "filterBelt": "Sinturon",
     "filterEvent": "Kaganapan",
     "filterAll": "Lahat",
     "duration": "Tagal",
@@ -268,7 +268,7 @@
     "rating": "Rating",
     "gold": "ginto",
     "silver": "pilak",
-    "bronze": "Tanso",
+    "bronze": "tanso",
     "alone": "Mag-isa",
     "note": "Ang points ay ibinibigay batay sa star rating ng bawat event. Ang 'Alone' points ay ibinibigay kapag nanalo nang walang kalaban. Ang team points ay sumusunod sa 4-Star scale.",
     "dynamicSubtitle": "Live rankings mula sa opisyal na ASJJF event results sa lahat ng Marianas Open tournaments.",
@@ -341,7 +341,7 @@
     "gold": "Ginto",
     "silver": "Pilak",
     "bronze": "Tanso",
-    "beltRank": "sinturon"
+    "beltRank": "Sinturon"
   },
   "journey": {
     "badge": "Pro Series Circuit",
