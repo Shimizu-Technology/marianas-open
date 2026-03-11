@@ -38,7 +38,7 @@ namespace :marianas do
         end
 
         category = row['category'].to_s.strip.presence || 'gi'
-        featured = row['featured'].to_s.strip.downcase == 'true'
+        featured = ActiveModel::Type::Boolean.new.cast(row['featured'])
         sort_order_raw = row['sort_order'].to_s.strip
         sort_order = if sort_order_raw.blank?
                        0
@@ -64,6 +64,10 @@ namespace :marianas do
         end
 
         video = Video.find_by(youtube_video_id: youtube_video_id) || Video.find_or_initialize_by(youtube_url: youtube_url)
+        if !video.new_record? && video.youtube_url.present? && video.youtube_url != youtube_url
+          puts "- warn row #{line_no}: youtube_url differs for #{youtube_video_id} (db=#{video.youtube_url.inspect} csv=#{youtube_url.inspect})"
+        end
+
         attrs = {
           title: title,
           youtube_url: youtube_url,
