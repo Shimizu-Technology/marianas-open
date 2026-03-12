@@ -11,6 +11,8 @@ import { useEvents } from '../hooks/useApi';
 import type { Event } from '../services/api';
 import { getDateLocale } from '../utils/dateLocale';
 
+// Event/venue names are treated as official proper nouns from organizer assets.
+// Dates remain locale-formatted via `formatEventDate`.
 const ROAD_TO_OPEN_POSTERS = [
   {
     src: '/images/poster-mp-nagoya.jpg',

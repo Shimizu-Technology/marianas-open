@@ -34,8 +34,7 @@ const ORG_PARTNER_LOGO_MAP: Record<string, { src: string; url?: string }> = {
   roadtotheopen: { src: '/images/logos/road-to-open-logo-white.png', url: 'https://marianasopen.com/calendar' },
 };
 
-const ORG_PARTNER_KEYS = ['asjjf', 'msjjf', 'copademarianas', 'roadtotheopen'] as const;
-const ORG_PARTNER_KEY_SET = new Set<string>(ORG_PARTNER_KEYS);
+const ORG_PARTNER_KEY_SET = new Set<string>(['asjjf', 'msjjf', 'copademarianas', 'roadtotheopen']);
 
 const ORG_PARTNERS = [
   { key: 'asjjf', name: 'ASJJF' },
