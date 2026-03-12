@@ -36,7 +36,7 @@
     "prizePool": "$50K"
   },
   "home": {
-    "upcomingTitle": "Guam 2026 プロシリーズ",
+    "upcomingTitle": "グアム プロシリーズ 2026",
     "upcomingSubtitle": "アジア各地で戦い、グランドチャンピオンシップへの切符を掴め。",
     "sponsorsTitle": "公式パートナー",
     "featuredTitle": "マリアナ諸島最大の柔術トーナメント",
@@ -53,7 +53,7 @@
     "mainEvent": "メインイベント"
   },
   "event": {
-    "title": "Guam マリアナスオープン 2026",
+    "title": "グアム・マリアナスオープン 2026",
     "tagline": "グランドチャンピオンシップ",
     "date": "2026年10月18日",
     "venue": "UOGカルボ・フィールドハウス",
@@ -93,7 +93,7 @@
     "prizeBrownWeight": "茶帯階級別",
     "prizeTeam": "チームトロフィー",
     "prizeKids": "キッズグランドチャンピオン",
-    "pastEventLabel": "Guam 2025 マリアナスオープン",
+    "pastEventLabel": "2025 グアム・マリアナスオープン",
     "pastEventDesc": "20カ国以上から1,000人以上の選手",
     "competitionMats": "6面の試合マット",
     "venueCapacity": "収容人数 5,000+",
@@ -116,7 +116,7 @@
     "registrationComingSoon": "登録近日開始"
   },
   "calendar": {
-    "title": "Guam 2026 プロシリーズ",
+    "title": "グアム プロシリーズ 2026",
     "subtitle": "6カ国7大会。グアムで開催される一つのグランドチャンピオンシップ。",
     "mapTitle": "旅路を追う",
     "mapSubtitle": "地方予選から国際舞台へ — アジア各地で戦い、マリアナスオープンへの出場権を獲得せよ。",
@@ -166,7 +166,7 @@
     "featureAIDesc": "AI搭載のハイライトがサブミッション、スイープ、得点などの重要な瞬間を自動キャプチャ。",
     "featureNotify": "プッシュ通知",
     "featureNotifyDesc": "お気に入りの選手がマットに上がった時に通知を受け取り。試合を見逃さない。",
-    "liveEventInfo": "Guam マリアナスオープン 2026 — UOGカルボ・フィールドハウス",
+    "liveEventInfo": "グアム・マリアナスオープン 2026 — UOG カルボ・フィールドハウス",
     "liveBadge": "LIVE",
     "featured": "注目",
     "filterCategory": "カテゴリー",
