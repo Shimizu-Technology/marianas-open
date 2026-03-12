@@ -53,7 +53,7 @@
     "mainEvent": "主赛事"
   },
   "event": {
-    "title": "Guam 马里亚纳公开赛 2026",
+    "title": "关岛马里亚纳公开赛 2026",
     "tagline": "总决赛",
     "date": "2026年10月18日",
     "venue": "UOG卡尔沃体育馆",
@@ -93,7 +93,7 @@
     "prizeBrownWeight": "棕带分级别",
     "prizeTeam": "团体奖杯",
     "prizeKids": "少儿总冠军",
-    "pastEventLabel": "Guam 2025 马里亚纳公开赛",
+    "pastEventLabel": "2025 关岛马里亚纳公开赛",
     "pastEventDesc": "来自20多个国家的1,000多名选手",
     "competitionMats": "6块比赛垫",
     "venueCapacity": "容纳5,000+人",
@@ -166,7 +166,7 @@
     "featureAIDesc": "AI自动捕捉关键时刻——降服、扫技和得分。",
     "featureNotify": "推送通知",
     "featureNotifyDesc": "当您喜爱的选手上场时收到通知。不错过任何比赛。",
-    "liveEventInfo": "Guam 马里亚纳公开赛 2026 — UOG卡尔沃体育馆",
+    "liveEventInfo": "关岛马里亚纳公开赛 2026 — UOG 卡尔沃体育馆",
     "liveBadge": "LIVE",
     "featured": "精选",
     "filterCategory": "类别",
