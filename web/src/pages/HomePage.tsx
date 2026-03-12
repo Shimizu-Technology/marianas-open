@@ -35,6 +35,7 @@ const SPONSOR_LOGO_MAP: Record<string, { src: string; url?: string }> = {
 };
 
 const ORG_PARTNER_KEYS = ['asjjf', 'msjjf', 'copademarianas', 'roadtotheopen'] as const;
+const ORG_PARTNER_KEY_SET = new Set<string>(ORG_PARTNER_KEYS);
 
 const ORG_PARTNERS = [
   { key: 'asjjf', name: 'ASJJF' },
@@ -382,7 +383,7 @@ export default function HomePage() {
                 <div className="text-text-muted text-sm">...</div>
               ) : sponsors.length > 0 ? (
                 sponsors
-                  .filter((sponsor) => !ORG_PARTNER_KEYS.includes(normalizeSponsorKey(sponsor.name) as typeof ORG_PARTNER_KEYS[number]))
+                  .filter((sponsor) => !ORG_PARTNER_KEY_SET.has(normalizeSponsorKey(sponsor.name)))
                   .map((sponsor) => {
                     const logoSrc = sponsor.logo_url || null;
                     const logoUrl = sponsor.website_url || null;
