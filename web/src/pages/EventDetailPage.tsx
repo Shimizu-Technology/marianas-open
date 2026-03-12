@@ -272,14 +272,14 @@ export default function EventDetailPage() {
                   {/* Fallback shown when map iframe cannot load */}
                   <div className="absolute inset-0 bg-navy-800 flex flex-col items-center justify-center gap-3 z-0">
                     <MapPin size={28} className="text-gold-500" />
-                    <p className="text-text-secondary text-sm">UOG Calvo Fieldhouse · Mangilao, Guam</p>
+                    <p className="text-text-secondary text-sm">{t('event.venue')} · {t('event.location')}</p>
                     <a
                       href="https://maps.google.com/?q=UOG+Calvo+Fieldhouse+Guam"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-gold-500 text-xs font-heading font-semibold uppercase tracking-wider hover:text-gold-400 transition-colors"
                     >
-                      View on Google Maps <ExternalLink size={12} />
+                      {t('event.viewOnGoogleMaps')} <ExternalLink size={12} />
                     </a>
                   </div>
                   <iframe
