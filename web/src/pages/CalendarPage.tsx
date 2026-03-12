@@ -57,9 +57,19 @@ export default function CalendarPage() {
 
   const formatEventDate = useCallback((dateStr: string, dateEndStr?: string | null) => {
     const locale = getDateLocale(i18n.language);
-    const main = new Date(dateStr).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' });
+
+    const parseDateLocalSafe = (value: string) => {
+      const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (match) {
+        const [, y, m, d] = match;
+        return new Date(Number(y), Number(m) - 1, Number(d));
+      }
+      return new Date(value);
+    };
+
+    const main = parseDateLocalSafe(dateStr).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' });
     if (dateEndStr) {
-      const end = new Date(dateEndStr).toLocaleDateString(locale, { day: 'numeric' });
+      const end = parseDateLocalSafe(dateEndStr).toLocaleDateString(locale, { day: 'numeric' });
       return `${main} – ${end}`;
     }
     return main;
