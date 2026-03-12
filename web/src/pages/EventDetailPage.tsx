@@ -267,12 +267,25 @@ export default function EventDetailPage() {
                     <div className="text-sm text-text-secondary">{t('event.venueAddress')}</div>
                   </div>
                 </div>
-                {/* Embedded Map */}
+                {/* Embedded Map with fallback */}
                 <div className="relative overflow-hidden border border-white/5 aspect-[16/7]">
+                  {/* Fallback shown when map iframe cannot load */}
+                  <div className="absolute inset-0 bg-navy-800 flex flex-col items-center justify-center gap-3 z-0">
+                    <MapPin size={28} className="text-gold-500" />
+                    <p className="text-text-secondary text-sm">UOG Calvo Fieldhouse · Mangilao, Guam</p>
+                    <a
+                      href="https://maps.google.com/?q=UOG+Calvo+Fieldhouse+Guam"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-gold-500 text-xs font-heading font-semibold uppercase tracking-wider hover:text-gold-400 transition-colors"
+                    >
+                      View on Google Maps <ExternalLink size={12} />
+                    </a>
+                  </div>
                   <iframe
                     title="UOG Calvo Fieldhouse Map"
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3869.8!2d144.7937!3d13.4443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x671f827d25a3a3a3%3A0x12345!2sUOG+Calvo+Fieldhouse!5e0!3m2!1sen!2sgu!4v1700000000000!5m2!1sen!2sgu"
-                    className="w-full h-full border-0"
+                    className="w-full h-full border-0 relative z-10"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     allowFullScreen
