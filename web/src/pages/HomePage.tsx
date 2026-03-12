@@ -43,10 +43,6 @@ const ORG_PARTNERS = [
   { key: 'roadtotheopen', name: 'Road to the Open' },
 ] as const;
 
-function getSponsorLogo(name: string) {
-  const key = normalizeSponsorKey(name);
-  return SPONSOR_LOGO_MAP[key] ?? null;
-}
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
@@ -388,9 +384,8 @@ export default function HomePage() {
                 sponsors
                   .filter((sponsor) => !ORG_PARTNER_KEYS.includes(normalizeSponsorKey(sponsor.name) as typeof ORG_PARTNER_KEYS[number]))
                   .map((sponsor) => {
-                    const staticLogo = getSponsorLogo(sponsor.name);
-                    const logoSrc = sponsor.logo_url || staticLogo?.src || null;
-                    const logoUrl = sponsor.website_url || staticLogo?.url || null;
+                    const logoSrc = sponsor.logo_url || null;
+                    const logoUrl = sponsor.website_url || null;
                     return (
                       <div key={sponsor.id}>
                         {logoSrc ? (
