@@ -27,7 +27,7 @@ function normalizeSponsorKey(name: string) {
 }
 
 // Static logo lookup for well-known sponsors when API doesn't supply logo_url
-const SPONSOR_LOGO_MAP: Record<string, { src: string; url?: string }> = {
+const ORG_PARTNER_LOGO_MAP: Record<string, { src: string; url?: string }> = {
   asjjf: { src: '/images/logos/asjjf-logo.png', url: 'https://asjjf.org' },
   msjjf: { src: '/images/logos/msjjf-logo-white.png', url: 'https://marianasopen.com' },
   copademarianas: { src: '/images/logos/copa-seal-logo.png', url: 'https://asjjf.org/main/eventInfo/1837' },
@@ -354,7 +354,7 @@ export default function HomePage() {
           <ScrollReveal delay={0.15}>
             <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16 mb-10">
               {ORG_PARTNERS.map((partner) => {
-                const logo = SPONSOR_LOGO_MAP[partner.key];
+                const logo = ORG_PARTNER_LOGO_MAP[partner.key];
                 if (!logo) return null;
 
                 return (
