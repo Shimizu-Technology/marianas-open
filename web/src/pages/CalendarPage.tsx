@@ -11,6 +11,30 @@ import { useEvents } from '../hooks/useApi';
 import type { Event } from '../services/api';
 import { getDateLocale } from '../utils/dateLocale';
 
+const ROAD_TO_OPEN_POSTERS = [
+  {
+    src: '/images/poster-mp-nagoya.jpg',
+    title: 'Marianas Pro Nagoya',
+    date: 'March 14, 2026',
+    location: 'Aichi Budokan, Japan',
+    href: 'https://asjjf.org/main/eventInfo/1863',
+  },
+  {
+    src: '/images/poster-mp-korea.jpg',
+    title: 'Marianas Pro Korea',
+    date: 'June 6, 2026',
+    location: 'SETEC, Seoul, Korea',
+    href: 'https://asjjf.org/main/eventInfo/1867',
+  },
+  {
+    src: '/images/poster-copa.jpg',
+    title: 'Copa de Marianas',
+    date: 'Jan. 31, 2026',
+    location: 'UOG Calvo Fieldhouse, Guam',
+    href: 'https://asjjf.org/main/eventInfo/1837',
+  },
+] as const;
+
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
@@ -212,28 +236,14 @@ export default function CalendarPage() {
           </ScrollReveal>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              {
-                src: '/images/poster-mp-nagoya.jpg',
-                title: 'Marianas Pro Nagoya',
-                date: 'March 14, 2026',
-                location: 'Aichi Budokan, Japan',
-              },
-              {
-                src: '/images/poster-mp-korea.jpg',
-                title: 'Marianas Pro Korea',
-                date: 'June 6, 2026',
-                location: 'SETEC, Seoul, Korea',
-              },
-              {
-                src: '/images/poster-copa.jpg',
-                title: 'Copa de Marianas',
-                date: 'Jan. 31, 2026',
-                location: 'UOG Calvo Fieldhouse, Guam',
-              },
-            ].map((poster, i) => (
+            {ROAD_TO_OPEN_POSTERS.map((poster, i) => (
               <ScrollReveal key={poster.title} delay={i * 0.1}>
-                <div className="group relative overflow-hidden border border-white/5 hover:border-gold-500/20 transition-colors duration-300">
+                <a
+                  href={poster.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative block overflow-hidden border border-white/5 hover:border-gold-500/20 transition-colors duration-300"
+                >
                   <div className="relative aspect-[3/4] overflow-hidden">
                     <img
                       src={poster.src}
@@ -255,7 +265,7 @@ export default function CalendarPage() {
                       {poster.location}
                     </p>
                   </div>
-                </div>
+                </a>
               </ScrollReveal>
             ))}
           </div>

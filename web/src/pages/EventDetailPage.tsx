@@ -37,11 +37,11 @@ const EVENT_POSTER_MAP: Record<string, { src: string; label: string }> = {
 };
 
 const EVENT_PARTNERS = [
-  { name: 'ASJJF', src: '/images/logos/asjjf-logo.png', href: 'https://asjjf.org' },
-  { name: 'MSJJF', src: '/images/logos/msjjf-logo-white.png', href: 'https://marianasopen.com' },
-  { name: 'Copa de Marianas', src: '/images/logos/copa-seal-logo.png', href: 'https://asjjf.org/main/eventInfo/1837' },
-  { name: 'Marianas Pro', src: '/images/logos/mp-seal-logo.png', href: 'https://marianasopen.com/calendar' },
-  { name: 'Road to the Open', src: '/images/logos/road-to-open-logo-white.png', href: 'https://marianasopen.com/calendar' },
+  { name: 'ASJJF', src: '/images/logos/asjjf-logo.png', href: 'https://asjjf.org', heightClass: 'h-12' },
+  { name: 'MSJJF', src: '/images/logos/msjjf-logo-white.png', href: 'https://marianasopen.com', heightClass: 'h-10' },
+  { name: 'Copa de Marianas', src: '/images/logos/copa-seal-logo.png', href: 'https://asjjf.org/main/eventInfo/1837', heightClass: 'h-12' },
+  { name: 'Marianas Pro', src: '/images/logos/mp-seal-logo.png', href: 'https://marianasopen.com/calendar', heightClass: 'h-12' },
+  { name: 'Road to the Open', src: '/images/logos/road-to-open-logo-white.png', href: 'https://marianasopen.com/calendar', heightClass: 'h-9' },
 ] as const;
 
 export default function EventDetailPage() {
@@ -409,7 +409,7 @@ export default function EventDetailPage() {
                   <img
                     src={partner.src}
                     alt={partner.name}
-                    className={`${partner.name === 'MSJJF' ? 'h-10' : partner.name === 'Road to the Open' ? 'h-9' : 'h-12'} object-contain`}
+                    className={`${partner.heightClass} object-contain`}
                   />
                 </a>
               ))}
