@@ -15,7 +15,6 @@ const ROAD_TO_OPEN_POSTERS = [
   {
     src: '/images/poster-mp-nagoya.jpg',
     title: 'Marianas Pro Nagoya',
-    date: 'March 14, 2026',
     isoDate: '2026-03-14',
     location: 'Aichi Budokan, Japan',
     href: 'https://asjjf.org/main/eventInfo/1863',
@@ -23,7 +22,6 @@ const ROAD_TO_OPEN_POSTERS = [
   {
     src: '/images/poster-mp-korea.jpg',
     title: 'Marianas Pro Korea',
-    date: 'June 6, 2026',
     isoDate: '2026-06-06',
     location: 'SETEC, Seoul, Korea',
     href: 'https://asjjf.org/main/eventInfo/1867',
@@ -31,7 +29,6 @@ const ROAD_TO_OPEN_POSTERS = [
   {
     src: '/images/poster-copa.jpg',
     title: 'Copa de Marianas',
-    date: 'Jan. 31, 2026',
     isoDate: '2026-01-31',
     location: 'UOG Calvo Fieldhouse, Guam',
     href: 'https://asjjf.org/main/eventInfo/1837',
@@ -277,7 +274,7 @@ export default function CalendarPage() {
                       </h3>
                       <p className="text-xs text-text-muted flex items-center gap-1.5">
                         <Calendar size={10} className="text-gold-500 shrink-0" />
-                        {poster.date}
+                        {formatEventDate(poster.isoDate)}
                       </p>
                       <p className="text-xs text-text-muted flex items-center gap-1.5 mt-0.5">
                         <MapPin size={10} className="text-gold-500 shrink-0" />
