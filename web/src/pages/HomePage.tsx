@@ -30,11 +30,11 @@ export default function HomePage() {
   const { images: siteImages } = useSiteImages();
   const { t: sc } = useSiteContent();
 
-  const heroImage = '/images/action-match-1.webp';
+  const heroImage = '/images/hero-podium.jpg';
   const galleryImages = [
-    getImageUrl(siteImages, 'gallery', '/images/action-match-2.webp', 0),
-    getImageUrl(siteImages, 'gallery', '/images/venue-crowd.webp', 1),
-    getImageUrl(siteImages, 'gallery', '/images/podium-1.webp', 2),
+    getImageUrl(siteImages, 'gallery', '/images/gallery/event-photo-4.jpg', 0),
+    getImageUrl(siteImages, 'gallery', '/images/gallery/event-photo-2.jpg', 1),
+    getImageUrl(siteImages, 'gallery', '/images/gallery/event-photo-3.jpg', 2),
   ];
 
   const stats = [
