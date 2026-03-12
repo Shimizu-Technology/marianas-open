@@ -73,6 +73,9 @@ export default function CalendarPage() {
     );
   }
 
+  const todayLocal = new Date();
+  todayLocal.setHours(0, 0, 0, 0);
+
   return (
     <div className="min-h-screen pt-20">
       {/* Hero */}
@@ -239,8 +242,6 @@ export default function CalendarPage() {
             {ROAD_TO_OPEN_POSTERS.map((poster, i) => {
               const [year, month, day] = poster.isoDate.split('-').map(Number);
               const posterDateLocal = new Date(year, month - 1, day);
-              const todayLocal = new Date();
-              todayLocal.setHours(0, 0, 0, 0);
               const isPastPoster = posterDateLocal < todayLocal;
 
               return (
