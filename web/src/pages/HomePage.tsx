@@ -32,7 +32,7 @@ export default function HomePage() {
 
   const heroImage = '/images/hero-podium.jpg';
   const galleryImages = [
-    getImageUrl(siteImages, 'gallery', '/images/gallery/event-photo-1.jpg', 0),
+    getImageUrl(siteImages, 'gallery', '/images/gallery/event-photo-4.jpg', 0),
     getImageUrl(siteImages, 'gallery', '/images/gallery/event-photo-2.jpg', 1),
     getImageUrl(siteImages, 'gallery', '/images/gallery/event-photo-3.jpg', 2),
   ];
