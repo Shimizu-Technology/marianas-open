@@ -79,6 +79,23 @@ export default function EventDetailPage() {
 
   const heroImageUrl = getEventHeroImage(mainEvent?.slug || 'marianas-open-2026', mainEvent?.hero_image_url ?? null);
 
+  const EVENT_POSTER_MAP: Record<string, { src: string; label: string }> = {
+    'copa-de-marianas-2026': {
+      src: '/images/poster-copa.jpg',
+      label: 'Copa de Marianas 2026',
+    },
+  };
+
+  const eventPoster = mainEvent?.slug ? EVENT_POSTER_MAP[mainEvent.slug] : undefined;
+
+  const EVENT_PARTNERS = [
+    { name: 'ASJJF', src: '/images/logos/asjjf-logo.png', href: 'https://asjjf.org' },
+    { name: 'MSJJF', src: '/images/logos/msjjf-logo-white.png', href: 'https://marianasopen.com' },
+    { name: 'Copa de Marianas', src: '/images/logos/copa-seal-logo.png', href: 'https://asjjf.org/main/eventInfo/1837' },
+    { name: 'Marianas Pro', src: '/images/logos/mp-seal-logo.png', href: 'https://marianasopen.com/calendar' },
+    { name: 'Road to the Open', src: '/images/logos/road-to-open-logo-white.png', href: 'https://marianasopen.com/calendar' },
+  ] as const;
+
   const shareUrl = 'https://marianasopen.com';
   const shareText = t('event.shareText');
 
@@ -230,17 +247,17 @@ export default function EventDetailPage() {
             {/* Event poster / action photo */}
             <ScrollReveal delay={0.12}>
               <div className="relative overflow-hidden border border-white/5 h-full min-h-[250px]">
-                {mainEvent?.is_main_event ? (
+                {eventPoster ? (
                   <>
                     <img
-                      src="/images/poster-copa.jpg"
-                      alt="Copa de Marianas 2026"
+                      src={eventPoster.src}
+                      alt={eventPoster.label}
                       className="w-full h-full object-cover object-top"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-navy-900/85 via-transparent to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4">
                       <div className="text-xs text-gold-400 font-heading uppercase tracking-wider">{t('event.officialPoster', 'Official Poster')}</div>
-                      <div className="text-sm text-text-secondary">Copa de Marianas 2026</div>
+                      <div className="text-sm text-text-secondary">{eventPoster.label}</div>
                     </div>
                   </>
                 ) : (
@@ -381,21 +398,21 @@ export default function EventDetailPage() {
               {t('home.sponsorsTitle')}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
-              <a href="https://asjjf.org" target="_blank" rel="noopener noreferrer" className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <img src="/images/logos/asjjf-logo.png" alt="ASJJF" className="h-12 object-contain" />
-              </a>
-              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <img src="/images/logos/msjjf-logo-white.png" alt="MSJJF" className="h-10 object-contain" />
-              </div>
-              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <img src="/images/logos/copa-seal-logo.png" alt="Copa de Marianas" className="h-12 object-contain" />
-              </div>
-              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <img src="/images/logos/mp-seal-logo.png" alt="Marianas Pro" className="h-12 object-contain" />
-              </div>
-              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <img src="/images/logos/road-to-open-logo-white.png" alt="Road to the Open" className="h-9 object-contain" />
-              </div>
+              {EVENT_PARTNERS.map((partner) => (
+                <a
+                  key={partner.name}
+                  href={partner.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="opacity-60 hover:opacity-100 transition-opacity duration-300"
+                >
+                  <img
+                    src={partner.src}
+                    alt={partner.name}
+                    className={`${partner.name === 'MSJJF' ? 'h-10' : partner.name === 'Road to the Open' ? 'h-9' : 'h-12'} object-contain`}
+                  />
+                </a>
+              ))}
             </div>
           </ScrollReveal>
         </div>

@@ -228,7 +228,7 @@ export default function CalendarPage() {
               {
                 src: '/images/poster-copa.jpg',
                 title: 'Copa de Marianas',
-                date: 'Jan. 31',
+                date: 'Jan. 31, 2026',
                 location: 'UOG Calvo Fieldhouse, Guam',
               },
             ].map((poster, i) => (
