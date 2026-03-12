@@ -12,7 +12,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img src="/images/logo.svg" alt="Marianas Open" className="h-12 w-12" />
+              <img src="/images/logos/mo-logo-white.png" alt="Marianas Open" className="h-12 w-12 object-contain" />
               <span className="font-heading font-bold text-lg uppercase tracking-wider">
                 Marianas Open
               </span>
@@ -68,10 +68,6 @@ export default function Footer() {
           <div className="flex items-center gap-4">
             <Link to="/terms" className="hover:text-text-secondary transition-colors">
               {t('footer.terms')}
-            </Link>
-            <span className="text-white/10">|</span>
-            <Link to="/admin" className="hover:text-text-secondary transition-colors">
-              Admin
             </Link>
             <span className="text-white/10">|</span>
             <p>{t('footer.builtBy')}</p>
