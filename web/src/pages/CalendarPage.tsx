@@ -240,7 +240,11 @@ export default function CalendarPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {ROAD_TO_OPEN_POSTERS.map((poster, i) => {
-              const isPastPoster = new Date(poster.isoDate) < new Date(new Date().toDateString());
+              const [year, month, day] = poster.isoDate.split('-').map(Number);
+              const posterDateLocal = new Date(year, month - 1, day);
+              const todayLocal = new Date();
+              todayLocal.setHours(0, 0, 0, 0);
+              const isPastPoster = posterDateLocal < todayLocal;
 
               return (
                 <ScrollReveal key={poster.title} delay={i * 0.1}>
