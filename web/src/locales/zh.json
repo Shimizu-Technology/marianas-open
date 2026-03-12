@@ -20,7 +20,7 @@
   },
   "hero": {
     "subtitle": "关岛顶级国际",
-    "title": "巴西柔术锦标赛",
+    "title": "关岛马里亚纳公开赛 巴西柔术锦标赛",
     "cta": "立即报名",
     "learnMore": "浏览赛事",
     "asjjfBadge": "ASJJF 五星级认证赛事"
@@ -36,7 +36,7 @@
     "prizePool": "$50K"
   },
   "home": {
-    "upcomingTitle": "2026 职业系列赛",
+    "upcomingTitle": "关岛职业系列赛 2026",
     "upcomingSubtitle": "征战亚洲各地，赢取总决赛资格。",
     "sponsorsTitle": "官方合作伙伴",
     "featuredTitle": "马里亚纳群岛最大的柔术锦标赛",
@@ -53,7 +53,7 @@
     "mainEvent": "主赛事"
   },
   "event": {
-    "title": "马里亚纳公开赛 2026",
+    "title": "关岛马里亚纳公开赛 2026",
     "tagline": "总决赛",
     "date": "2026年10月18日",
     "venue": "UOG卡尔沃体育馆",
@@ -74,11 +74,11 @@
     "step1": "访问 ASJJF.org",
     "step1Desc": "在亚洲运动柔术联合会网站上创建选手资料。",
     "step2": "选择赛事",
-    "step2Desc": "在赛事列表中找到「Marianas Open 2026」并选择参赛级别。",
+    "step2Desc": "在赛事列表中找到「Guam Marianas Open 2026」并选择参赛级别。",
     "step3": "完成付款",
     "step3Desc": "在线支付报名费。早鸟优惠可用。",
     "shareTitle": "分享此赛事",
-    "shareText": "2026马里亚纳公开赛——关岛国际柔术锦标赛！",
+    "shareText": "加入关岛马里亚纳公开赛2026——太平洋地区顶级国际巴西柔术锦标赛！",
     "totalPrizePool": "奖金总额",
     "schedule1": "开场 / 称重",
     "schedule2": "少儿 & 青少年组",
@@ -93,7 +93,7 @@
     "prizeBrownWeight": "棕带分级别",
     "prizeTeam": "团体奖杯",
     "prizeKids": "少儿总冠军",
-    "pastEventLabel": "2025 马里亚纳公开赛",
+    "pastEventLabel": "2025 关岛马里亚纳公开赛",
     "pastEventDesc": "来自20多个国家的1,000多名选手",
     "competitionMats": "6块比赛垫",
     "venueCapacity": "容纳5,000+人",
@@ -116,8 +116,8 @@
     "registrationComingSoon": "报名即将开放"
   },
   "calendar": {
-    "title": "2026 职业系列赛",
-    "subtitle": "6个国家7场赛事。一个总决赛。",
+    "title": "关岛职业系列赛 2026",
+    "subtitle": "6个国家7场赛事。一个总决赛在关岛举行。",
     "mapTitle": "追随征程",
     "mapSubtitle": "从地方选拔到国际舞台——征战亚洲各地，赢取马里亚纳公开赛参赛资格。",
     "register": "报名",
@@ -166,7 +166,7 @@
     "featureAIDesc": "AI自动捕捉关键时刻——降服、扫技和得分。",
     "featureNotify": "推送通知",
     "featureNotifyDesc": "当您喜爱的选手上场时收到通知。不错过任何比赛。",
-    "liveEventInfo": "马里亚纳公开赛 2026 — UOG卡尔沃体育馆",
+    "liveEventInfo": "关岛马里亚纳公开赛 2026 — UOG 卡尔沃体育馆",
     "liveBadge": "LIVE",
     "featured": "精选",
     "filterCategory": "类别",
@@ -206,12 +206,12 @@
     "backHome": "返回首页"
   },
   "about": {
-    "heroTitle": "关于马里亚纳斯公开赛",
+    "heroTitle": "关于关岛马里亚纳公开赛",
     "heroSubtitle": "自2007年以来关岛首屈一指的武术赛事",
     "storyTitle": "我们的故事",
-    "p1": "自2007年创办以来，马里亚纳斯公开赛已成长为太平洋地区最著名的武术赛事之一。每年在关岛举办，这项赛事已成为卓越的象征，将世界各地的运动员、家庭和支持者团结在一起。",
-    "p2": "马里亚纳斯公开赛不仅仅是一场比赛——它是社区、文化和武术精神的庆典。多年来，它已扩展为国际系列赛，在日本、菲律宾、韩国和关岛举办比赛。",
-    "p3": "每年，马里亚纳斯公开赛吸引从新手到冠军的各年龄、各水平的参赛者。",
+    "p1": "自2007年创办以来，马里亚纳公开赛已成长为太平洋地区最著名的武术赛事之一。每年在关岛举办，这项赛事已成为卓越的象征，将世界各地的运动员、家庭和支持者团结在一起。",
+    "p2": "马里亚纳公开赛不仅仅是一场比赛——它是社区、文化和武术精神的庆典。多年来，它已扩展为国际系列赛，在日本、菲律宾、韩国和关岛举办比赛。",
+    "p3": "每年，马里亚纳公开赛吸引从新手到冠军的各年龄、各水平的参赛者。",
     "p4": "赛事将由国际媒体报道并由KUAM新闻进行直播，让全球观众观看。",
     "p5": "加入我们，继续建设这一传统。让我们一起支持下一代武术家。",
     "timelineTitle": "我们的历程",
@@ -222,7 +222,7 @@
     "timeline2025": "来自6个国家1,300多名选手。为关岛带来200万美元经济效益。",
     "timeline2026": "国际Pro系列赛，6个国家7场赛事。",
     "contactTitle": "联系我们",
-    "contactDesc": "对马里亚纳斯公开赛有疑问？请联系我们的团队。"
+    "contactDesc": "对马里亚纳公开赛有疑问？请联系我们的团队。"
   },
   "terms": {
     "title": "条款与条件",
@@ -261,7 +261,7 @@
   },
   "rankings": {
     "title": "排名",
-    "subtitle": "马里亚纳斯公开赛Pro系列赛事的ASJJF排名积分。",
+    "subtitle": "马里亚纳公开赛Pro系列赛事的ASJJF排名积分。",
     "fighterPoints": "选手排名积分",
     "teamPoints": "团队排名积分（4星）",
     "eventRatings": "赛事星级评定",

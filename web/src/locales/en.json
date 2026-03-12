@@ -20,7 +20,7 @@
   },
   "hero": {
     "subtitle": "Guam's Premier Jiu-Jitsu Event",
-    "title": "Brazilian Jiu-Jitsu Championship",
+    "title": "Guam Marianas Open International Brazilian Jiu-Jitsu Championship",
     "cta": "Register Now",
     "learnMore": "Explore Events",
     "asjjfBadge": "ASJJF 5-Star Ranked Event"
@@ -36,7 +36,7 @@
     "prizePool": "$50K"
   },
   "home": {
-    "upcomingTitle": "2026 Pro Series",
+    "upcomingTitle": "Guam Pro Series 2026",
     "upcomingSubtitle": "Compete across Asia. Qualify for the Grand Championship.",
     "sponsorsTitle": "Official Partners",
     "featuredTitle": "The Marianas Open",
@@ -53,7 +53,7 @@
     "mainEvent": "Main Event"
   },
   "event": {
-    "title": "Marianas Open 2026",
+    "title": "Guam Marianas Open 2026",
     "tagline": "The Grand Championship",
     "date": "October 18, 2026",
     "venue": "UOG Calvo Fieldhouse",
@@ -74,11 +74,11 @@
     "step1": "Visit ASJJF.org",
     "step1Desc": "Create your competitor profile on the Asian Sport Jiu-Jitsu Federation website.",
     "step2": "Select Event",
-    "step2Desc": "Find 'Marianas Open 2026' in the event listings and select your division.",
+    "step2Desc": "Find 'Guam Marianas Open 2026' in the event listings and select your division.",
     "step3": "Complete Payment",
     "step3Desc": "Pay the registration fee online. Early bird discounts available.",
     "shareTitle": "Share This Event",
-    "shareText": "Marianas Open 2026 - International BJJ Championship in Guam!",
+    "shareText": "Join us at Guam Marianas Open 2026 - The Ultimate International BJJ Championship in the Pacific!",
     "totalPrizePool": "Total Prize Pool",
     "schedule1": "Doors Open / Weigh-ins",
     "schedule2": "Kids & Juvenile Divisions",
@@ -93,7 +93,7 @@
     "prizeBrownWeight": "Brown Belt Weight Divisions",
     "prizeTeam": "Team Trophy",
     "prizeKids": "Kids Grand Champion",
-    "pastEventLabel": "2025 Marianas Open",
+    "pastEventLabel": "2025 Guam Marianas Open",
     "pastEventDesc": "1,000+ athletes from 20+ countries",
     "competitionMats": "6 Competition Mats",
     "venueCapacity": "5,000+ Capacity",
@@ -116,8 +116,8 @@
     "registrationComingSoon": "Registration Coming Soon"
   },
   "calendar": {
-    "title": "2026 Pro Series",
-    "subtitle": "7 events across 6 countries. One grand championship.",
+    "title": "Guam Pro Series 2026",
+    "subtitle": "7 events across Asia-Pacific. One championship in Guam.",
     "mapTitle": "Follow the Journey",
     "mapSubtitle": "From local qualifiers to the international stage — compete across Asia and earn your spot at the Marianas Open.",
     "register": "Register",
@@ -166,7 +166,7 @@
     "featureAIDesc": "AI-powered highlights automatically capture key moments — submissions, sweeps, and scoring.",
     "featureNotify": "Push Notifications",
     "featureNotifyDesc": "Get notified when your favorite competitors step on the mat. Never miss a match.",
-    "liveEventInfo": "Marianas Open 2026 — UOG Calvo Fieldhouse",
+    "liveEventInfo": "Guam Marianas Open 2026 — UOG Calvo Fieldhouse",
     "liveBadge": "LIVE",
     "featured": "Featured",
     "filterCategory": "Category",
@@ -206,7 +206,7 @@
     "backHome": "Back to Home"
   },
   "about": {
-    "heroTitle": "About the Marianas Open",
+    "heroTitle": "About the Guam Marianas Open",
     "heroSubtitle": "Guam's premier martial arts tournament and international championship since 2007",
     "storyTitle": "Our Story",
     "p1": "Since its inception in 2007, the Marianas Open has grown into one of the premier martial arts tournaments in the Pacific region. Hosted annually in Guam, this event has emerged as a symbol of excellence, uniting athletes, families, and supporters from around the world.",

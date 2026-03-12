@@ -20,7 +20,7 @@
   },
   "hero": {
     "subtitle": "괌 최고의 국제",
-    "title": "브라질리안 주짓수 챔피언십",
+    "title": "괌 마리아나스 오픈 브라질리언 주짓수 챔피언십",
     "cta": "지금 등록",
     "learnMore": "대회 둘러보기",
     "asjjfBadge": "ASJJF 5성급 공인 대회"
@@ -36,7 +36,7 @@
     "prizePool": "$50K"
   },
   "home": {
-    "upcomingTitle": "2026 프로 시리즈",
+    "upcomingTitle": "괌 프로 시리즈 2026",
     "upcomingSubtitle": "아시아 전역에서 경쟁하고 그랜드 챔피언십 자격을 획득하세요.",
     "sponsorsTitle": "공식 파트너",
     "featuredTitle": "마리아나 제도 최대의 주짓수 대회",
@@ -53,7 +53,7 @@
     "mainEvent": "메인 이벤트"
   },
   "event": {
-    "title": "마리아나스 오픈 2026",
+    "title": "괌 마리아나스 오픈 2026",
     "tagline": "그랜드 챔피언십",
     "date": "2026년 10월 18일",
     "venue": "UOG 칼보 필드하우스",
@@ -74,11 +74,11 @@
     "step1": "ASJJF.org 방문",
     "step1Desc": "아시안 스포츠 주짓수 연맹 웹사이트에서 선수 프로필 생성.",
     "step2": "대회 선택",
-    "step2Desc": "대회 목록에서 'Marianas Open 2026'을 찾아 출전 부문 선택.",
+    "step2Desc": "대회 목록에서 'Guam Marianas Open 2026'을 찾아 출전 부문 선택.",
     "step3": "결제 완료",
     "step3Desc": "온라인으로 참가비 결제. 조기 등록 할인 가능.",
     "shareTitle": "이 대회 공유",
-    "shareText": "마리아나스 오픈 2026 — 괌 국제 주짓수 챔피언십!",
+    "shareText": "괌 마리아나스 오픈 2026에 참가하세요 - 태평양 최고의 국제 BJJ 챔피언십!",
     "totalPrizePool": "총 상금",
     "schedule1": "개장 / 계체",
     "schedule2": "키즈 & 주니어 부문",
@@ -93,7 +93,7 @@
     "prizeBrownWeight": "브라운벨트 체급별",
     "prizeTeam": "팀 트로피",
     "prizeKids": "키즈 그랜드 챔피언",
-    "pastEventLabel": "2025 마리아나스 오픈",
+    "pastEventLabel": "2025 괌 마리아나스 오픈",
     "pastEventDesc": "20개국 이상에서 1,000명 이상의 선수",
     "competitionMats": "6개 경기 매트",
     "venueCapacity": "수용 인원 5,000+",
@@ -116,8 +116,8 @@
     "registrationComingSoon": "등록 곧 시작"
   },
   "calendar": {
-    "title": "2026 프로 시리즈",
-    "subtitle": "6개국 7개 대회. 하나의 그랜드 챔피언십.",
+    "title": "괌 프로 시리즈 2026",
+    "subtitle": "6개국 7개 대회. 그중 하나의 그랜드 챔피언십은 괌에서 개최됩니다.",
     "mapTitle": "여정을 따라가다",
     "mapSubtitle": "지역 예선에서 국제 무대로 — 아시아 전역에서 경쟁하고 마리아나스 오픈 출전권을 획득하세요.",
     "register": "등록",
@@ -166,7 +166,7 @@
     "featureAIDesc": "AI가 서브미션, 스윕, 득점 등 핵심 순간을 자동으로 캡처.",
     "featureNotify": "푸시 알림",
     "featureNotifyDesc": "좋아하는 선수가 매트에 올라갈 때 알림을 받으세요. 경기를 놓치지 마세요.",
-    "liveEventInfo": "마리아나스 오픈 2026 — UOG 칼보 필드하우스",
+    "liveEventInfo": "괌 마리아나스 오픈 2026 — UOG 칼보 필드하우스",
     "liveBadge": "LIVE",
     "featured": "추천",
     "filterCategory": "카테고리",
@@ -206,7 +206,7 @@
     "backHome": "홈으로 돌아가기"
   },
   "about": {
-    "heroTitle": "마리아나스 오픈 소개",
+    "heroTitle": "괌 마리아나스 오픈 소개",
     "heroSubtitle": "2007년부터 이어져 온 괌의 프리미어 무술 대회",
     "storyTitle": "우리의 이야기",
     "p1": "2007년 창설 이래 마리아나스 오픈은 태평양 지역 최고의 무술 대회로 성장했습니다. 괌에서 매년 개최되며 전 세계 선수, 가족, 서포터를 하나로 모으는 탁월함의 상징이 되었습니다.",

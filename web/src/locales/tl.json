@@ -20,7 +20,7 @@
   },
   "hero": {
     "subtitle": "Pangunahing International ng Guam",
-    "title": "Brazilian Jiu-Jitsu Championship",
+    "title": "Guam Marianas Open Brazilian Jiu-Jitsu Championship",
     "cta": "Mag-register Na",
     "learnMore": "Tingnan ang mga Event",
     "asjjfBadge": "ASJJF 5-Star na Ranggo"
@@ -36,7 +36,7 @@
     "prizePool": "$50K"
   },
   "home": {
-    "upcomingTitle": "2026 Pro Series",
+    "upcomingTitle": "Guam Pro Series 2026",
     "upcomingSubtitle": "Lumaban sa buong Asia. Mag-qualify para sa Grand Championship.",
     "sponsorsTitle": "Opisyal na Partners",
     "featuredTitle": "Ang Pinakamalaking BJJ Tournament sa Marianas",
@@ -53,7 +53,7 @@
     "mainEvent": "Pangunahing Event"
   },
   "event": {
-    "title": "Marianas Open 2026",
+    "title": "Guam Marianas Open 2026",
     "tagline": "Ang Grand Championship",
     "date": "Oktubre 18, 2026",
     "venue": "UOG Calvo Fieldhouse",
@@ -74,11 +74,11 @@
     "step1": "Bumisita sa ASJJF.org",
     "step1Desc": "Gumawa ng iyong competitor profile sa Asian Sport Jiu-Jitsu Federation website.",
     "step2": "Pumili ng Event",
-    "step2Desc": "Hanapin ang 'Marianas Open 2026' sa listahan ng mga event at piliin ang iyong division.",
+    "step2Desc": "Hanapin ang 'Guam Marianas Open 2026' sa listahan ng mga event at piliin ang iyong division.",
     "step3": "Kumpletuhin ang Bayad",
     "step3Desc": "Magbayad ng registration fee online. May early bird discounts.",
     "shareTitle": "I-share ang Event na Ito",
-    "shareText": "Marianas Open 2026 — International BJJ Championship sa Guam!",
+    "shareText": "Sumali sa Guam Marianas Open 2026 - ang ultimate international BJJ championship sa Pacific!",
     "totalPrizePool": "Kabuuang Prize Pool",
     "schedule1": "Pagbukas / Weigh-ins",
     "schedule2": "Mga Dibisyon ng Mga Bata at Juvenile",
@@ -93,7 +93,7 @@
     "prizeBrownWeight": "Mga Dibisyon ng Timbang ng Brown Belt",
     "prizeTeam": "Tropeo ng Koponan",
     "prizeKids": "Kids Grand Champion",
-    "pastEventLabel": "2025 Marianas Open",
+    "pastEventLabel": "2025 Guam Marianas Open",
     "pastEventDesc": "1,000+ atleta mula sa 20+ bansa",
     "competitionMats": "6 na Competition Mats",
     "venueCapacity": "5,000+ na Kapasidad",
@@ -116,8 +116,8 @@
     "registrationComingSoon": "Magbubukas ang Pagpaparehistro"
   },
   "calendar": {
-    "title": "2026 Pro Series",
-    "subtitle": "7 event sa 6 na bansa. Isang grand championship.",
+    "title": "Guam Pro Series 2026",
+    "subtitle": "7 event sa 6 na bansa. Isang grand championship sa Guam.",
     "mapTitle": "Sundan ang Paglalakbay",
     "mapSubtitle": "Mula sa lokal na qualifiers hanggang sa international stage — lumaban sa buong Asia at makuha ang iyong puwesto sa Marianas Open.",
     "register": "Mag-register",
@@ -166,7 +166,7 @@
     "featureAIDesc": "Awtomatikong kinukuha ng AI ang mga pangunahing sandali — submissions, sweeps, at scoring.",
     "featureNotify": "Mga Push Notification",
     "featureNotifyDesc": "Maabisuhan kapag ang iyong paboritong kalahok ay umakyat sa mat. Huwag palampasin ang anumang laban.",
-    "liveEventInfo": "Marianas Open 2026 — UOG Calvo Fieldhouse",
+    "liveEventInfo": "Guam Marianas Open 2026 — UOG Calvo Fieldhouse",
     "liveBadge": "LIVE",
     "featured": "Tampok",
     "filterCategory": "Kategorya",
@@ -206,7 +206,7 @@
     "backHome": "Bumalik sa Home"
   },
   "about": {
-    "heroTitle": "Tungkol sa Marianas Open",
+    "heroTitle": "Tungkol sa Guam Marianas Open",
     "heroSubtitle": "Ang premier na torneo ng martial arts ng Guam mula 2007",
     "storyTitle": "Ang Aming Kwento",
     "p1": "Mula nang maitatag noong 2007, ang Marianas Open ay naging isa sa mga nangungunang torneo ng martial arts sa rehiyon ng Pasipiko. Ginaganap taun-taon sa Guam, ang kaganapang ito ay naging simbolo ng kahusayan, nagbubuklod ng mga atleta, pamilya, at tagasuporta mula sa buong mundo.",
