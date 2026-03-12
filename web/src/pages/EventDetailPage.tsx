@@ -227,19 +227,36 @@ export default function EventDetailPage() {
               </div>
             </ScrollReveal>
 
-            {/* Action photo */}
+            {/* Event poster / action photo */}
             <ScrollReveal delay={0.12}>
               <div className="relative overflow-hidden border border-white/5 h-full min-h-[250px]">
-                <ImageWithShimmer
-                  src="/images/action-match-4.webp"
-                  alt="Marianas Open competition"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy-900/80 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className="text-xs text-gold-400 font-heading uppercase tracking-wider">{t('event.pastEventLabel')}</div>
-                  <div className="text-sm text-text-secondary">{t('event.pastEventDesc')}</div>
-                </div>
+                {mainEvent?.is_main_event ? (
+                  <>
+                    <img
+                      src="/images/poster-copa.jpg"
+                      alt="Copa de Marianas 2026"
+                      className="w-full h-full object-cover object-top"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy-900/85 via-transparent to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="text-xs text-gold-400 font-heading uppercase tracking-wider">{t('event.officialPoster', 'Official Poster')}</div>
+                      <div className="text-sm text-text-secondary">Copa de Marianas 2026</div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <ImageWithShimmer
+                      src="/images/action-match-4.webp"
+                      alt="Marianas Open competition"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy-900/80 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="text-xs text-gold-400 font-heading uppercase tracking-wider">{t('event.pastEventLabel')}</div>
+                      <div className="text-sm text-text-secondary">{t('event.pastEventDesc')}</div>
+                    </div>
+                  </>
+                )}
               </div>
             </ScrollReveal>
 
@@ -353,6 +370,34 @@ export default function EventDetailPage() {
               </ScrollReveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Official Partners strip */}
+      <section className="py-14 border-y border-white/5 bg-navy-900/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <ScrollReveal>
+            <p className="text-center text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted mb-8">
+              {t('home.sponsorsTitle')}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
+              <a href="https://asjjf.org" target="_blank" rel="noopener noreferrer" className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+                <img src="/images/logos/asjjf-logo.png" alt="ASJJF" className="h-12 object-contain" />
+              </a>
+              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+                <img src="/images/logos/msjjf-logo-white.png" alt="MSJJF" className="h-10 object-contain" />
+              </div>
+              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+                <img src="/images/logos/copa-seal-logo.png" alt="Copa de Marianas" className="h-12 object-contain" />
+              </div>
+              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+                <img src="/images/logos/mp-seal-logo.png" alt="Marianas Pro" className="h-12 object-contain" />
+              </div>
+              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+                <img src="/images/logos/road-to-open-logo-white.png" alt="Road to the Open" className="h-9 object-contain" />
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 

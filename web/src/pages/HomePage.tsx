@@ -22,6 +22,17 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
+// Static logo lookup for well-known sponsors when API doesn't supply logo_url
+const SPONSOR_LOGO_MAP: Record<string, { src: string; url?: string }> = {
+  asjjf: { src: '/images/logos/asjjf-logo.png', url: 'https://asjjf.org' },
+  msjjf: { src: '/images/logos/msjjf-logo-white.png' },
+};
+
+function getSponsorLogo(name: string) {
+  const key = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return SPONSOR_LOGO_MAP[key] ?? null;
+}
+
 export default function HomePage() {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
@@ -315,48 +326,69 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Sponsors */}
-      <section className="py-24">
+      {/* Official Partners — logo strip */}
+      <section className="py-20 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
-            <div className="text-center mb-12">
-              <h2 className="text-sm font-heading font-semibold uppercase tracking-[0.3em] text-text-muted">
+            <div className="text-center mb-10">
+              <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted mb-1">
                 {t('home.sponsorsTitle')}
-              </h2>
+              </p>
+              <div className="w-8 h-px bg-gold-500/30 mx-auto mt-3" />
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.2}>
-            <div className="flex flex-wrap items-center justify-center gap-12 opacity-40">
+          {/* Org partner logos */}
+          <ScrollReveal delay={0.15}>
+            <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16 mb-10">
+              <a href="https://asjjf.org" target="_blank" rel="noopener noreferrer" className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+                <img src="/images/logos/asjjf-logo.png" alt="ASJJF" className="h-14 object-contain" />
+              </a>
+              <a href="https://marianasopen.com" target="_blank" rel="noopener noreferrer" className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+                <img src="/images/logos/msjjf-logo-white.png" alt="MSJJF" className="h-12 object-contain" />
+              </a>
+              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+                <img src="/images/logos/copa-seal-logo.png" alt="Copa de Marianas" className="h-14 object-contain" />
+              </div>
+              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+                <img src="/images/logos/road-to-open-logo-white.png" alt="Road to the Open" className="h-10 object-contain" />
+              </div>
+            </div>
+          </ScrollReveal>
+
+          {/* Commercial sponsors — text or logo from API */}
+          <ScrollReveal delay={0.3}>
+            <div className="flex flex-wrap items-center justify-center gap-8 opacity-35">
               {sponsorsLoading ? (
                 <div className="text-text-muted text-sm">...</div>
               ) : sponsors.length > 0 ? (
-                sponsors.map((sponsor) => (
-                  <div key={sponsor.id}>
-                    {sponsor.logo_url ? (
-                      <a
-                        href={sponsor.website_url || '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <img
-                          src={sponsor.logo_url}
-                          alt={sponsor.name}
-                          className="h-10 object-contain"
-                        />
-                      </a>
-                    ) : (
-                      <div className="text-lg font-heading font-bold uppercase tracking-wider text-text-secondary">
-                        {sponsor.name}
-                      </div>
-                    )}
-                  </div>
-                ))
+                sponsors.map((sponsor) => {
+                  const staticLogo = getSponsorLogo(sponsor.name);
+                  const logoSrc = sponsor.logo_url || staticLogo?.src || null;
+                  const logoUrl = sponsor.website_url || staticLogo?.url || null;
+                  return (
+                    <div key={sponsor.id}>
+                      {logoSrc ? (
+                        logoUrl ? (
+                          <a href={logoUrl} target="_blank" rel="noopener noreferrer">
+                            <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
+                          </a>
+                        ) : (
+                          <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
+                        )
+                      ) : (
+                        <div className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary">
+                          {sponsor.name}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               ) : (
-                ['ASJJF', 'GVB', 'United Airlines', 'Hyatt Regency', 'Dusit Thani'].map((name) => (
+                ['GVB', 'United Airlines', 'Hyatt Regency Guam', 'Dusit Thani Guam'].map((name) => (
                   <div
                     key={name}
-                    className="text-lg font-heading font-bold uppercase tracking-wider text-text-secondary"
+                    className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary"
                   >
                     {name}
                   </div>

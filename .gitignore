@@ -1,2 +1,4 @@
 .env
 .netlify/
+# Raw photography source assets (large zips — not tracked in git)
+assets/
