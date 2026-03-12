@@ -29,6 +29,21 @@ function ShareButton({ platform, onClick }: { platform: string; onClick: () => v
   );
 }
 
+const EVENT_POSTER_MAP: Record<string, { src: string; label: string }> = {
+  'copa-de-marianas-2026': {
+    src: '/images/poster-copa.jpg',
+    label: 'Copa de Marianas 2026',
+  },
+};
+
+const EVENT_PARTNERS = [
+  { name: 'ASJJF', src: '/images/logos/asjjf-logo.png', href: 'https://asjjf.org' },
+  { name: 'MSJJF', src: '/images/logos/msjjf-logo-white.png', href: 'https://marianasopen.com' },
+  { name: 'Copa de Marianas', src: '/images/logos/copa-seal-logo.png', href: 'https://asjjf.org/main/eventInfo/1837' },
+  { name: 'Marianas Pro', src: '/images/logos/mp-seal-logo.png', href: 'https://marianasopen.com/calendar' },
+  { name: 'Road to the Open', src: '/images/logos/road-to-open-logo-white.png', href: 'https://marianasopen.com/calendar' },
+] as const;
+
 export default function EventDetailPage() {
   const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
@@ -79,22 +94,7 @@ export default function EventDetailPage() {
 
   const heroImageUrl = getEventHeroImage(mainEvent?.slug || 'marianas-open-2026', mainEvent?.hero_image_url ?? null);
 
-  const EVENT_POSTER_MAP: Record<string, { src: string; label: string }> = {
-    'copa-de-marianas-2026': {
-      src: '/images/poster-copa.jpg',
-      label: 'Copa de Marianas 2026',
-    },
-  };
-
   const eventPoster = mainEvent?.slug ? EVENT_POSTER_MAP[mainEvent.slug] : undefined;
-
-  const EVENT_PARTNERS = [
-    { name: 'ASJJF', src: '/images/logos/asjjf-logo.png', href: 'https://asjjf.org' },
-    { name: 'MSJJF', src: '/images/logos/msjjf-logo-white.png', href: 'https://marianasopen.com' },
-    { name: 'Copa de Marianas', src: '/images/logos/copa-seal-logo.png', href: 'https://asjjf.org/main/eventInfo/1837' },
-    { name: 'Marianas Pro', src: '/images/logos/mp-seal-logo.png', href: 'https://marianasopen.com/calendar' },
-    { name: 'Road to the Open', src: '/images/logos/road-to-open-logo-white.png', href: 'https://marianasopen.com/calendar' },
-  ] as const;
 
   const shareUrl = 'https://marianasopen.com';
   const shareText = t('event.shareText');

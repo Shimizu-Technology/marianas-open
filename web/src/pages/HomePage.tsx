@@ -22,14 +22,29 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
+function normalizeSponsorKey(name: string) {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
 // Static logo lookup for well-known sponsors when API doesn't supply logo_url
 const SPONSOR_LOGO_MAP: Record<string, { src: string; url?: string }> = {
   asjjf: { src: '/images/logos/asjjf-logo.png', url: 'https://asjjf.org' },
-  msjjf: { src: '/images/logos/msjjf-logo-white.png' },
+  msjjf: { src: '/images/logos/msjjf-logo-white.png', url: 'https://marianasopen.com' },
+  copademarianas: { src: '/images/logos/copa-seal-logo.png', url: 'https://asjjf.org/main/eventInfo/1837' },
+  roadtotheopen: { src: '/images/logos/road-to-open-logo-white.png', url: 'https://marianasopen.com/calendar' },
 };
 
+const ORG_PARTNER_KEYS = ['asjjf', 'msjjf', 'copademarianas', 'roadtotheopen'] as const;
+
+const ORG_PARTNERS = [
+  { key: 'asjjf', name: 'ASJJF' },
+  { key: 'msjjf', name: 'MSJJF' },
+  { key: 'copademarianas', name: 'Copa de Marianas' },
+  { key: 'roadtotheopen', name: 'Road to the Open' },
+] as const;
+
 function getSponsorLogo(name: string) {
-  const key = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const key = normalizeSponsorKey(name);
   return SPONSOR_LOGO_MAP[key] ?? null;
 }
 
@@ -341,18 +356,26 @@ export default function HomePage() {
           {/* Org partner logos */}
           <ScrollReveal delay={0.15}>
             <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16 mb-10">
-              <a href="https://asjjf.org" target="_blank" rel="noopener noreferrer" className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <img src="/images/logos/asjjf-logo.png" alt="ASJJF" className="h-14 object-contain" />
-              </a>
-              <a href="https://marianasopen.com" target="_blank" rel="noopener noreferrer" className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <img src="/images/logos/msjjf-logo-white.png" alt="MSJJF" className="h-12 object-contain" />
-              </a>
-              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <img src="/images/logos/copa-seal-logo.png" alt="Copa de Marianas" className="h-14 object-contain" />
-              </div>
-              <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <img src="/images/logos/road-to-open-logo-white.png" alt="Road to the Open" className="h-10 object-contain" />
-              </div>
+              {ORG_PARTNERS.map((partner) => {
+                const logo = SPONSOR_LOGO_MAP[partner.key];
+                if (!logo) return null;
+
+                return (
+                  <a
+                    key={partner.key}
+                    href={logo.url || '#'}
+                    target={logo.url ? '_blank' : undefined}
+                    rel={logo.url ? 'noopener noreferrer' : undefined}
+                    className="opacity-60 hover:opacity-100 transition-opacity duration-300"
+                  >
+                    <img
+                      src={logo.src}
+                      alt={partner.name}
+                      className={`${partner.key === 'msjjf' ? 'h-12' : partner.key === 'roadtotheopen' ? 'h-10' : 'h-14'} object-contain`}
+                    />
+                  </a>
+                );
+              })}
             </div>
           </ScrollReveal>
 
@@ -362,28 +385,30 @@ export default function HomePage() {
               {sponsorsLoading ? (
                 <div className="text-text-muted text-sm">...</div>
               ) : sponsors.length > 0 ? (
-                sponsors.map((sponsor) => {
-                  const staticLogo = getSponsorLogo(sponsor.name);
-                  const logoSrc = sponsor.logo_url || staticLogo?.src || null;
-                  const logoUrl = sponsor.website_url || staticLogo?.url || null;
-                  return (
-                    <div key={sponsor.id}>
-                      {logoSrc ? (
-                        logoUrl ? (
-                          <a href={logoUrl} target="_blank" rel="noopener noreferrer">
+                sponsors
+                  .filter((sponsor) => !ORG_PARTNER_KEYS.includes(normalizeSponsorKey(sponsor.name) as typeof ORG_PARTNER_KEYS[number]))
+                  .map((sponsor) => {
+                    const staticLogo = getSponsorLogo(sponsor.name);
+                    const logoSrc = sponsor.logo_url || staticLogo?.src || null;
+                    const logoUrl = sponsor.website_url || staticLogo?.url || null;
+                    return (
+                      <div key={sponsor.id}>
+                        {logoSrc ? (
+                          logoUrl ? (
+                            <a href={logoUrl} target="_blank" rel="noopener noreferrer">
+                              <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
+                            </a>
+                          ) : (
                             <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
-                          </a>
+                          )
                         ) : (
-                          <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
-                        )
-                      ) : (
-                        <div className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary">
-                          {sponsor.name}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
+                          <div className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary">
+                            {sponsor.name}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
               ) : (
                 ['GVB', 'United Airlines', 'Hyatt Regency Guam', 'Dusit Thani Guam'].map((name) => (
                   <div
