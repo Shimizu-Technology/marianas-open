@@ -114,7 +114,8 @@
     "galleryCeremony": "Seremonya",
     "galleryVenue": "Lugar ng kompetisyon",
     "galleryPodium": "Seremonya ng podium",
-    "registrationComingSoon": "Magbubukas ang Pagpaparehistro"
+    "registrationComingSoon": "Magbubukas ang Pagpaparehistro",
+    "officialPoster": "Opisyal na Poster"
   },
   "calendar": {
     "title": "Guam Pro Series 2026",
@@ -129,7 +130,8 @@
     "upcoming": "Paparating",
     "pastResults": "Nakaraang Resulta",
     "noPastEvents": "Wala pang nakaraang mga event.",
-    "completed": "Tapos na"
+    "completed": "Tapos na",
+    "roadToOpen": "Qualifying Series"
   },
   "watch": {
     "title": "Panoorin",

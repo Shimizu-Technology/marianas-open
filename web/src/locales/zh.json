@@ -114,7 +114,8 @@
     "galleryCeremony": "仪式",
     "galleryVenue": "比赛场馆",
     "galleryPodium": "颁奖仪式",
-    "registrationComingSoon": "报名即将开放"
+    "registrationComingSoon": "报名即将开放",
+    "officialPoster": "官方海报"
   },
   "calendar": {
     "title": "关岛职业系列赛 2026",
@@ -129,7 +130,8 @@
     "upcoming": "即将举办",
     "pastResults": "过往赛果",
     "noPastEvents": "暂无过往赛事。",
-    "completed": "已结束"
+    "completed": "已结束",
+    "roadToOpen": "资格赛系列"
   },
   "watch": {
     "title": "观看",

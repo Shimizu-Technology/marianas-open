@@ -252,8 +252,7 @@ export default function CalendarPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {ROAD_TO_OPEN_POSTERS.map((poster, i) => {
-              const [year, month, day] = poster.isoDate.split('-').map(Number);
-              const posterDateLocal = new Date(year, month - 1, day);
+              const posterDateLocal = parseDateLocalSafe(poster.isoDate);
               const isPastPoster = posterDateLocal < todayLocal;
 
               return (
