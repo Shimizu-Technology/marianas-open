@@ -109,7 +109,7 @@ export default function HomePage() {
   const { events, loading: eventsLoading } = useEvents();
   const { sponsors, loading: sponsorsLoading } = useSponsors();
   const { images: siteImages } = useSiteImages();
-  const { t: sc } = useSiteContent();
+  const { t: sc, loading: siteContentLoading } = useSiteContent();
 
   const heroImage = '/images/hero-podium.jpg';
   const galleryFallbacks = [
@@ -156,6 +156,9 @@ export default function HomePage() {
         />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center">
+          {/* Hero text is hidden until site content resolves to prevent fallback→API swap flash. */}
+          {/* visibility:hidden preserves layout (no shift); once loaded it snaps in with the motion fade. */}
+          <div style={siteContentLoading ? { visibility: 'hidden' } : undefined}>
           <motion.div
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -213,6 +216,7 @@ export default function HomePage() {
               {t('hero.learnMore')}
             </Link>
           </motion.div>
+          </div>{/* end siteContentLoading guard */}
 
           {/* Stats bar */}
           <motion.div
