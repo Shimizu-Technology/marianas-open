@@ -1,4 +1,4 @@
-class FixAsjjfRegistrationUrls < ActiveRecord::Migration[7.1]
+class FixAsjjfRegistrationUrls < ActiveRecord::Migration[8.1]
   # Correct ASJJF event IDs verified against marianasopen.com (old site) on 2026-03-13.
   # Previous seeds.rb used placeholder IDs (1865-1868) that pointed to unrelated tournaments.
   CORRECTIONS = {

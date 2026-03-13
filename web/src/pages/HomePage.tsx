@@ -437,6 +437,7 @@ export default function HomePage() {
                     const fallback = SPONSOR_LOGO_FALLBACK[key];
                     const logoSrc = sponsor.logo_url || fallback?.src || null;
                     const logoUrl = sponsor.website_url || fallback?.url || null;
+                    const applyMonochromeFilter = !sponsor.logo_url && !!fallback?.src;
                     return (
                       <div key={sponsor.id}>
                         {logoSrc ? (
@@ -446,7 +447,7 @@ export default function HomePage() {
                                 src={logoSrc}
                                 alt={sponsor.name}
                                 className="h-8 object-contain"
-                                style={{ filter: 'brightness(0) invert(1)' }}
+                                style={applyMonochromeFilter ? { filter: 'brightness(0) invert(1)' } : undefined}
                               />
                             </a>
                           ) : (
@@ -454,7 +455,7 @@ export default function HomePage() {
                               src={logoSrc}
                               alt={sponsor.name}
                               className="h-8 object-contain"
-                              style={{ filter: 'brightness(0) invert(1)' }}
+                              style={applyMonochromeFilter ? { filter: 'brightness(0) invert(1)' } : undefined}
                             />
                           )
                         ) : (
