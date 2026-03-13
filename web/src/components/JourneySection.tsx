@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import type { Event } from '../services/api';
 import ScrollReveal from './ScrollReveal';
-import { getDateLocale } from '../utils/dateLocale';
+import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 
 type StopStatus = 'completed' | 'next' | 'upcoming';
 
@@ -25,8 +25,8 @@ interface JourneyStop {
 
 function getStopStatus(event: Event): StopStatus {
   const now = new Date();
-  const eventDate = new Date(event.date);
-  const endDate = event.end_date ? new Date(event.end_date) : eventDate;
+  const eventDate = parseDateLocalSafe(event.date);
+  const endDate = event.end_date ? parseDateLocalSafe(event.end_date) : eventDate;
 
   if (endDate < now) return 'completed';
   if (eventDate <= now && endDate >= now) return 'next';
@@ -183,7 +183,7 @@ function MobileStop({
           </span>
           <span className="flex items-center gap-1">
             <Calendar size={11} />
-            {new Date(event.date).toLocaleDateString(getDateLocale(lang), {
+            {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(lang), {
               month: 'short',
               day: 'numeric',
               year: 'numeric',
@@ -276,7 +276,7 @@ function DesktopStop({
         </div>
 
         <div className="text-[11px] text-text-muted mb-2">
-          {new Date(event.date).toLocaleDateString(getDateLocale(lang), {
+          {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(lang), {
             month: 'short',
             day: 'numeric',
             year: 'numeric',
@@ -310,10 +310,10 @@ export default function JourneySection({ events }: { events: Event[] }) {
 
     return events
       .filter((e) => {
-        const d = new Date(e.date);
+        const d = parseDateLocalSafe(e.date);
         return d >= cutoffStart && d < cutoffEnd;
       })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .sort((a, b) => parseDateLocalSafe(a.date).getTime() - parseDateLocalSafe(b.date).getTime())
       .map((event) => {
         let status = getStopStatus(event);
         // Override: only the first non-completed event gets "next"
