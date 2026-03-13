@@ -366,48 +366,50 @@ export default function JourneySection({ events }: { events: Event[] }) {
             ))}
           </div>
 
-          {/* Desktop: horizontal journey */}
+          {/* Desktop: horizontal journey (scrollable when content exceeds width) */}
           <div className="hidden lg:block">
-            <div className="relative">
-              {/* Connection line */}
-              <motion.div
-                className="absolute top-[9px] left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                initial={shouldReduceMotion ? {} : { scaleX: 0 }}
-                whileInView={{ scaleX: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1, ease: 'easeOut' }}
-                style={{ transformOrigin: 'left' }}
-              />
-              {/* Completed progress overlay */}
-              {(() => {
-                const completedCount = journeyStops.filter(
-                  (s) => s.status === 'completed'
-                ).length;
-                const pct =
-                  journeyStops.length > 1
-                    ? ((completedCount + 0.5) / journeyStops.length) * 100
-                    : 0;
-                return completedCount > 0 ? (
-                  <motion.div
-                    className="absolute top-[9px] left-0 h-px bg-gradient-to-r from-green-400/50 to-gold-500/50"
-                    initial={shouldReduceMotion ? {} : { width: 0 }}
-                    whileInView={{ width: `${pct}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}
-                  />
-                ) : null;
-              })()}
+            <div className="overflow-x-auto pb-2">
+              <div className="relative min-w-max px-1">
+                {/* Connection line */}
+                <motion.div
+                  className="absolute top-[9px] left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                  initial={shouldReduceMotion ? {} : { scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1, ease: 'easeOut' }}
+                  style={{ transformOrigin: 'left' }}
+                />
+                {/* Completed progress overlay */}
+                {(() => {
+                  const completedCount = journeyStops.filter(
+                    (s) => s.status === 'completed'
+                  ).length;
+                  const pct =
+                    journeyStops.length > 1
+                      ? ((completedCount + 0.5) / journeyStops.length) * 100
+                      : 0;
+                  return completedCount > 0 ? (
+                    <motion.div
+                      className="absolute top-[9px] left-0 h-px bg-gradient-to-r from-green-400/50 to-gold-500/50"
+                      initial={shouldReduceMotion ? {} : { width: 0 }}
+                      whileInView={{ width: `${pct}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}
+                    />
+                  ) : null;
+                })()}
 
-              <div className="flex justify-between gap-3">
-                {journeyStops.map((stop, i) => (
-                  <DesktopStop
-                    key={stop.event.id}
-                    stop={stop}
-                    index={i}
-                    t={t}
-                    lang={i18n.language}
-                  />
-                ))}
+                <div className="flex gap-3">
+                  {journeyStops.map((stop, i) => (
+                    <DesktopStop
+                      key={stop.event.id}
+                      stop={stop}
+                      index={i}
+                      t={t}
+                      lang={i18n.language}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
