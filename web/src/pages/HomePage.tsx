@@ -26,6 +26,44 @@ function normalizeSponsorKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+/**
+ * Static fallback logos for known commercial sponsors.
+ * Used when the API returns no sponsors or when a sponsor has no logo_url.
+ * Keys must match normalizeSponsorKey() output.
+ *
+ * License notes:
+ *   - hyatt:           Wikimedia Commons (pd) https://commons.wikimedia.org/wiki/File:Hyatt_Logo.svg
+ *   - dusit*:          Wikimedia Commons (pd-textlogo) https://commons.wikimedia.org/wiki/File:Dusit_Thani_Logo.svg
+ *   - gvb:             Official GVB website https://www.guamvisitorsbureau.com/ (event sponsor)
+ *   - unitedairlines:  PROVISIONAL — en.wikipedia.org fair-use; replace with sponsor-provided asset
+ */
+const SPONSOR_LOGO_FALLBACK: Record<string, { src: string; url: string }> = {
+  gvb: {
+    src: '/images/logos/sponsors/gvb-logo.png',
+    url: 'https://www.visitguam.com',
+  },
+  unitedairlines: {
+    src: '/images/logos/sponsors/united-airlines-logo.svg',
+    url: 'https://www.united.com',
+  },
+  hyattregencyguam: {
+    src: '/images/logos/sponsors/hyatt-logo.svg',
+    url: 'https://www.hyatt.com',
+  },
+  hyatt: {
+    src: '/images/logos/sponsors/hyatt-logo.svg',
+    url: 'https://www.hyatt.com',
+  },
+  dusitthaniguam: {
+    src: '/images/logos/sponsors/dusit-logo.svg',
+    url: 'https://www.dusit.com',
+  },
+  dusit: {
+    src: '/images/logos/sponsors/dusit-logo.svg',
+    url: 'https://www.dusit.com',
+  },
+};
+
 const ORG_PARTNERS = [
   {
     key: 'asjjf',
@@ -395,17 +433,29 @@ export default function HomePage() {
                 sponsors
                   .filter((sponsor) => !ORG_PARTNER_KEY_SET.has(normalizeSponsorKey(sponsor.name)))
                   .map((sponsor) => {
-                    const logoSrc = sponsor.logo_url || null;
-                    const logoUrl = sponsor.website_url || null;
+                    const key = normalizeSponsorKey(sponsor.name);
+                    const fallback = SPONSOR_LOGO_FALLBACK[key];
+                    const logoSrc = sponsor.logo_url || fallback?.src || null;
+                    const logoUrl = sponsor.website_url || fallback?.url || null;
                     return (
                       <div key={sponsor.id}>
                         {logoSrc ? (
                           logoUrl ? (
                             <a href={logoUrl} target="_blank" rel="noopener noreferrer">
-                              <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
+                              <img
+                                src={logoSrc}
+                                alt={sponsor.name}
+                                className="h-8 object-contain"
+                                style={{ filter: 'brightness(0) invert(1)' }}
+                              />
                             </a>
                           ) : (
-                            <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
+                            <img
+                              src={logoSrc}
+                              alt={sponsor.name}
+                              className="h-8 object-contain"
+                              style={{ filter: 'brightness(0) invert(1)' }}
+                            />
                           )
                         ) : (
                           <div className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary">
@@ -416,14 +466,37 @@ export default function HomePage() {
                     );
                   })
               ) : (
-                ['GVB', 'United Airlines', 'Hyatt Regency Guam', 'Dusit Thani Guam'].map((name) => (
-                  <div
-                    key={name}
-                    className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary"
-                  >
-                    {name}
-                  </div>
-                ))
+                /* Static fallback: show logos when available, text otherwise */
+                ['GVB', 'United Airlines', 'Hyatt Regency Guam', 'Dusit Thani Guam'].map((name) => {
+                  const key = normalizeSponsorKey(name);
+                  const fallback = SPONSOR_LOGO_FALLBACK[key];
+                  if (fallback) {
+                    return (
+                      <a
+                        key={name}
+                        href={fallback.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center"
+                      >
+                        <img
+                          src={fallback.src}
+                          alt={name}
+                          className="h-8 object-contain"
+                          style={{ filter: 'brightness(0) invert(1)' }}
+                        />
+                      </a>
+                    );
+                  }
+                  return (
+                    <div
+                      key={name}
+                      className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary"
+                    >
+                      {name}
+                    </div>
+                  );
+                })
               )}
             </div>
           </ScrollReveal>
