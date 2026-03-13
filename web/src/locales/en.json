@@ -360,8 +360,8 @@
   },
   "rules": {
     "title": "Competition Rules",
-    "subtitle": "Official Marianas Open — ASJJF Rulebook",
-    "intro": "The Marianas Open follows the official rules and regulations set by the Asian Sport Jiu-Jitsu Federation (ASJJF). All competitors are expected to review the full rulebook before competing. Click any section below to view the official rules on asjjf.org.",
+    "subtitle": "A clearer overview of the standards competitors should expect at Marianas Open events.",
+    "intro": "This page summarizes the rule areas competitors most often need before weigh-ins, bracket checks, and match day.",
     "officialNote": "Full official rulebook hosted by the Asian Sport Jiu-Jitsu Federation at",
     "sections": {
       "general": {
@@ -384,6 +384,17 @@
         "title": "Match Time Limits",
         "desc": "Official match durations by belt rank and age group"
       }
-    }
+    },
+    "badge": "Competitor guide",
+    "rulebookLabel": "Downloadable rules copy",
+    "downloadPdf": "Download rules PDF",
+    "opensExternally": "Opens the downloadable rules PDF in a new tab.",
+    "eventDayTitle": "Event-day reminders",
+    "fullRulebookTitle": "Need the full federation language?",
+    "officialSourceLinkText": "Open the live SJJIF rules source",
+    "maintenanceTitle": "Page status",
+    "lastUpdatedLabel": "Last updated:",
+    "contactTitle": "Questions about the rules?",
+    "footerCta": "Official federation rules:"
   }
 }

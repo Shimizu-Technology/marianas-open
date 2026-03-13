@@ -359,9 +359,9 @@
     "viewEvent": "Ver Evento"
   },
   "rules": {
-    "title": "Regras de Competição",
-    "subtitle": "Marianas Open Oficial — Livro de Regras ASJJF",
-    "intro": "O Marianas Open segue as regras e regulamentos oficiais estabelecidos pela Asian Sport Jiu-Jitsu Federation (ASJJF). Todos os competidores devem revisar o livro de regras completo antes de competir.",
+    "title": "Regras da Competição",
+    "subtitle": "Uma visão mais clara dos padrões que os competidores devem esperar nos eventos do Marianas Open.",
+    "intro": "Esta página resume as áreas de regras que os competidores mais precisam antes da pesagem, conferência de chave e dia da luta.",
     "officialNote": "Livro de regras oficial completo hospedado pela Asian Sport Jiu-Jitsu Federation em",
     "sections": {
       "general": {
@@ -384,6 +384,17 @@
         "title": "Limites de Tempo de Luta",
         "desc": "Durações oficiais de luta por graduação de faixa e faixa etária"
       }
-    }
+    },
+    "badge": "Guia do Competidor",
+    "rulebookLabel": "Cópia das regras para download",
+    "downloadPdf": "Baixar PDF das regras",
+    "opensExternally": "Abre o PDF das regras em uma nova aba.",
+    "eventDayTitle": "Lembretes do dia do evento",
+    "fullRulebookTitle": "Precisa do texto completo da federação?",
+    "officialSourceLinkText": "Abrir fonte oficial ao vivo da SJJIF",
+    "maintenanceTitle": "Status da página",
+    "lastUpdatedLabel": "Última atualização:",
+    "contactTitle": "Dúvidas sobre as regras?",
+    "footerCta": "Regras oficiais da federação:"
   }
 }

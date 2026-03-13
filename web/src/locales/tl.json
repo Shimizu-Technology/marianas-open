@@ -359,9 +359,9 @@
     "viewEvent": "Tingnan ang Event"
   },
   "rules": {
-    "title": "Mga Patakaran sa Kompetisyon",
-    "subtitle": "Opisyal na Marianas Open — ASJJF Rulebook",
-    "intro": "Sumusunod ang Marianas Open sa opisyal na mga patakaran at regulasyon na itinakda ng Asian Sport Jiu-Jitsu Federation (ASJJF). Inaasahang repasuhin ng lahat ng kalahok ang buong rulebook bago makipagkompetisyon.",
+    "title": "Mga Panuntunan ng Kompetisyon",
+    "subtitle": "Mas malinaw na gabay sa mga pamantayang dapat asahan ng mga competitor sa Marianas Open.",
+    "intro": "Binubuod ng page na ito ang mga bahagi ng rules na madalas kailangan ng competitors bago weigh-in, bracket check, at laban.",
     "officialNote": "Ang kumpletong opisyal na rulebook ay ini-host ng Asian Sport Jiu-Jitsu Federation sa",
     "sections": {
       "general": {
@@ -384,6 +384,17 @@
         "title": "Mga Limitasyon sa Oras ng Laban",
         "desc": "Opisyal na tagal ng laban ayon sa ranggo ng belt at grupo ng edad"
       }
-    }
+    },
+    "badge": "Gabay ng Competitor",
+    "rulebookLabel": "Nadadownload na kopya ng rules",
+    "downloadPdf": "I-download ang rules PDF",
+    "opensExternally": "Magbubukas ang rules PDF sa bagong tab.",
+    "eventDayTitle": "Mga paalala sa araw ng event",
+    "fullRulebookTitle": "Kailangan ang buong federation language?",
+    "officialSourceLinkText": "Buksan ang live SJJIF rules source",
+    "maintenanceTitle": "Katayuan ng page",
+    "lastUpdatedLabel": "Huling update:",
+    "contactTitle": "May tanong tungkol sa rules?",
+    "footerCta": "Opisyal na federation rules:"
   }
 }

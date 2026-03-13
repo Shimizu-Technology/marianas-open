@@ -359,9 +359,9 @@
     "viewEvent": "이벤트 보기"
   },
   "rules": {
-    "title": "경기 규칙",
-    "subtitle": "마리아나스 오픈 공식 — ASJJF 규칙집",
-    "intro": "마리아나스 오픈은 아시아 스포츠 주짓수 연맹(ASJJF)의 공식 규칙과 규정을 따릅니다. 모든 선수는 출전 전 공식 규칙집을 숙지하시기 바랍니다.",
+    "title": "대회 규정",
+    "subtitle": "마리아나스 오픈 참가자가 알아야 할 기준을 쉽게 정리한 안내입니다.",
+    "intro": "이 페이지는 계체, 대진 확인, 경기 당일 전에 선수들이 가장 자주 확인하는 규정 항목을 요약합니다.",
     "officialNote": "공식 규칙집은 아시아 스포츠 주짓수 연맹에서 호스팅합니다:",
     "sections": {
       "general": {
@@ -384,6 +384,17 @@
         "title": "경기 시간 제한",
         "desc": "벨트 등급 및 연령대별 공식 경기 시간"
       }
-    }
+    },
+    "badge": "선수 가이드",
+    "rulebookLabel": "다운로드 가능한 규정 문서",
+    "downloadPdf": "규정 PDF 다운로드",
+    "opensExternally": "규정 PDF를 새 탭에서 엽니다.",
+    "eventDayTitle": "대회 당일 안내",
+    "fullRulebookTitle": "연맹 규정 전문이 필요하신가요?",
+    "officialSourceLinkText": "SJJIF 최신 규정 열기",
+    "maintenanceTitle": "페이지 상태",
+    "lastUpdatedLabel": "최종 업데이트:",
+    "contactTitle": "규정 관련 문의",
+    "footerCta": "공식 연맹 규정:"
   }
 }

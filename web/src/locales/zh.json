@@ -360,8 +360,8 @@
   },
   "rules": {
     "title": "比赛规则",
-    "subtitle": "马里亚纳公开赛官方 — ASJJF 规则手册",
-    "intro": "马里亚纳公开赛遵循亚洲运动柔术联合会（ASJJF）制定的官方规则和规定。所有参赛者在参赛前须查阅完整规则手册。",
+    "subtitle": "更清晰地概述参赛者在马里亚纳公开赛应了解的规则标准。",
+    "intro": "本页面汇总了选手在称重、对阵确认和比赛日前最常需要查看的规则要点。",
     "officialNote": "完整官方规则手册由亚洲运动柔术联合会托管于",
     "sections": {
       "general": {
@@ -384,6 +384,17 @@
         "title": "比赛时间限制",
         "desc": "按腰带级别和年龄组划分的官方比赛时长"
       }
-    }
+    },
+    "badge": "参赛者指南",
+    "rulebookLabel": "可下载规则副本",
+    "downloadPdf": "下载规则 PDF",
+    "opensExternally": "将在新标签页打开规则 PDF。",
+    "eventDayTitle": "比赛日提醒",
+    "fullRulebookTitle": "需要查看联盟完整规则吗？",
+    "officialSourceLinkText": "打开 SJJIF 最新规则来源",
+    "maintenanceTitle": "页面状态",
+    "lastUpdatedLabel": "最后更新:",
+    "contactTitle": "有规则相关问题？",
+    "footerCta": "官方联盟规则:"
   }
 }
