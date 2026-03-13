@@ -10,6 +10,7 @@ namespace :media do
 
     fetch_final_status = lambda do |start_uri, max_hops: 2|
       uri = start_uri
+      current_base = start_uri
       hops = 0
 
       loop do
@@ -31,8 +32,9 @@ namespace :media do
           return ['MISSING_LOCATION', uri.to_s] if location.blank?
           return ['TOO_MANY_REDIRECTS', uri.to_s] if hops >= max_hops
 
-          uri = URI.parse(location)
-          uri = start_uri + location if uri.relative?
+          new_uri = URI.parse(location)
+          uri = new_uri.relative? ? current_base.merge(new_uri) : new_uri
+          current_base = uri
           hops += 1
           next
         end
