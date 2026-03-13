@@ -149,8 +149,8 @@ export default function RulesPage() {
                   </div>
                   <div className="space-y-3">
                     {Array.isArray(items) &&
-                      items.map((item) => (
-                        <div key={item} className="flex items-start gap-3">
+                      items.map((item, itemIndex) => (
+                        <div key={`${key}-${itemIndex}`} className="flex items-start gap-3">
                           <CheckCircle2 size={16} className="text-gold-500 shrink-0 mt-0.5" />
                           <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
                         </div>
@@ -183,8 +183,8 @@ export default function RulesPage() {
               </div>
               <div className="space-y-3">
                 {Array.isArray(eventDayChecklist) &&
-                  eventDayChecklist.map((item) => (
-                    <div key={item} className="flex items-start gap-3">
+                  eventDayChecklist.map((item, checklistIndex) => (
+                    <div key={`event-day-${checklistIndex}`} className="flex items-start gap-3">
                       <CheckCircle2 size={16} className="text-gold-500 shrink-0 mt-0.5" />
                       <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
                     </div>
