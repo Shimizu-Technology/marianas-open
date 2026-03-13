@@ -104,7 +104,7 @@ export default function RulesPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 border border-gold-500/30 rounded-full bg-gold-500/5">
             <BookOpen size={12} className="text-gold-500" />
             <span className="text-xs text-gold-400 font-heading uppercase tracking-widest font-medium">
-              {t('rulesHub.badge', 'Competitor guide')}
+              {t('rules.badge', 'Competitor guide')}
             </span>
           </div>
           <div className="flex items-center gap-3 mb-4">
@@ -112,12 +112,12 @@ export default function RulesPage() {
               <BookOpen size={24} className="text-gold-500" />
             </div>
             <h1 className="font-heading text-3xl sm:text-4xl font-bold">
-              {t('rulesHub.title', 'Competition Rules')}
+              {t('rules.title', 'Competition Rules')}
             </h1>
           </div>
           <p className="text-text-secondary max-w-3xl leading-relaxed">
             {t(
-              'rulesHub.subtitle',
+              'rules.subtitle',
               'A clearer, first-party overview of the standards competitors should expect at Marianas Open events.'
             )}
           </p>
@@ -130,24 +130,24 @@ export default function RulesPage() {
               <div>
                 <p className="text-text-primary text-lg leading-relaxed mb-4">
                   {t(
-                    'rulesHub.intro',
+                    'rules.intro',
                     'This page summarizes the rule areas competitors most often need before weigh-ins, bracket checks, and match day. It is designed to be easier to use than sending athletes into broken third-party rule pages.'
                   )}
                 </p>
                 <p className="text-text-secondary leading-relaxed">
                   {t(
-                    'rulesHub.note',
+                    'rules.note',
                     'Use the summaries below to prepare, then reference the official SJJIF rules source or download the PDF copy. If an organizer bulletin, bracket note, or official announcement gives event-specific instructions, follow those instructions on event day.'
                   )}
                 </p>
               </div>
               <div className="bg-navy-900/60 border border-white/5 rounded-xl p-5">
                 <p className="text-sm font-heading font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
-                  {t('rulesHub.rulebookLabel', 'Downloadable rules copy')}
+                  {t('rules.rulebookLabel', 'Downloadable rules copy')}
                 </p>
                 <p className="text-sm text-text-secondary leading-relaxed mb-5">
                   {t(
-                    'rulesHub.rulebookCopy',
+                    'rules.rulebookCopy',
                     'Download a PDF copy of the SJJIF rules currently referenced by Marianas Open materials.'
                   )}
                 </p>
@@ -158,10 +158,10 @@ export default function RulesPage() {
                   className="inline-flex w-full items-center justify-center gap-2 px-4 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:opacity-90 transition-opacity"
                 >
                   <FileDown size={16} />
-                  {t('rulesHub.downloadPdf', 'Download rules PDF')}
+                  {t('rules.downloadPdf', 'Download rules PDF')}
                 </a>
                 <p className="text-xs text-text-muted mt-3">
-                  {t('rulesHub.opensExternally', 'Opens the downloadable rules PDF in a new tab.')}
+                  {t('rules.opensExternally', 'Opens the downloadable rules PDF in a new tab.')}
                 </p>
               </div>
             </div>
@@ -208,11 +208,11 @@ export default function RulesPage() {
                 </div>
                 <div>
                   <h2 className="font-heading text-xl font-bold text-text-primary">
-                    {t('rulesHub.eventDayTitle', 'Event-day reminders')}
+                    {t('rules.eventDayTitle', 'Event-day reminders')}
                   </h2>
                   <p className="text-sm text-text-secondary">
                     {t(
-                      'rulesHub.eventDaySubtitle',
+                      'rules.eventDaySubtitle',
                       'The operational details below are just as important as the technical rules.'
                     )}
                   </p>
@@ -237,11 +237,11 @@ export default function RulesPage() {
                 </div>
                 <div>
                   <h2 className="font-heading text-xl font-bold text-text-primary">
-                    {t('rulesHub.fullRulebookTitle', 'Need the full federation language?')}
+                    {t('rules.fullRulebookTitle', 'Need the full federation language?')}
                   </h2>
                   <p className="text-sm text-text-secondary">
                     {t(
-                      'rulesHub.fullRulebookSubtitle',
+                      'rules.fullRulebookSubtitle',
                       'The live SJJIF rules source remains the primary reference for exact article wording and detailed exceptions.'
                     )}
                   </p>
@@ -254,11 +254,11 @@ export default function RulesPage() {
                 className="inline-flex items-center gap-2 text-gold-500 hover:underline"
               >
                 <ExternalLink size={16} />
-                {t('rulesHub.officialSourceLinkText', 'Open the live SJJIF rules source')}
+                {t('rules.officialSourceLinkText', 'Open the live SJJIF rules source')}
               </a>
               <p className="text-sm text-text-secondary leading-relaxed mt-4">
                 {t(
-                  'rulesHub.footerNote',
+                  'rules.footerNote',
                   'This local guide is meant to improve clarity and avoid dead-end federation links. It does not replace official SJJIF rules language or event-specific organizer instructions.'
                 )}
               </p>
@@ -275,11 +275,11 @@ export default function RulesPage() {
                 </div>
                 <div>
                   <h2 className="font-heading text-xl font-bold text-text-primary">
-                    {t('rulesHub.maintenanceTitle', 'Page status')}
+                    {t('rules.maintenanceTitle', 'Page status')}
                   </h2>
                   <p className="text-sm text-text-secondary">
                     {t(
-                      'rulesHub.maintenanceSubtitle',
+                      'rules.maintenanceSubtitle',
                       'This guide is maintained locally so competitors are not sent to unreliable third-party rules pages.'
                     )}
                   </p>
@@ -288,13 +288,13 @@ export default function RulesPage() {
               <div className="space-y-3 text-sm text-text-secondary">
                 <p>
                   <span className="text-text-primary font-semibold">
-                    {t('rulesHub.lastUpdatedLabel', 'Last updated:')}
+                    {t('rules.lastUpdatedLabel', 'Last updated:')}
                   </span>{' '}
                   {RULES_LAST_UPDATED}
                 </p>
                 <p>
                   {t(
-                    'rulesHub.maintenanceBody',
+                    'rules.maintenanceBody',
                     'If federation language, organizer procedures, or event-day requirements change, this page should be updated to match the latest approved guidance.'
                   )}
                 </p>
@@ -310,11 +310,11 @@ export default function RulesPage() {
                 </div>
                 <div>
                   <h2 className="font-heading text-xl font-bold text-text-primary">
-                    {t('rulesHub.contactTitle', 'Questions about the rules?')}
+                    {t('rules.contactTitle', 'Questions about the rules?')}
                   </h2>
                   <p className="text-sm text-text-secondary">
                     {t(
-                      'rulesHub.contactSubtitle',
+                      'rules.contactSubtitle',
                       'For event-specific clarifications, bracket issues, or organizer instructions, contact the Marianas Open team directly.'
                     )}
                   </p>
@@ -337,7 +337,7 @@ export default function RulesPage() {
                 </a>
                 <p className="text-sm text-text-muted">
                   {t(
-                    'rulesHub.contactNote',
+                    'rules.contactNote',
                     'Use the federation rules source or downloadable PDF for full rule language, but use the organizer contact above when you need answers specific to this event series.'
                   )}
                 </p>
@@ -349,7 +349,7 @@ export default function RulesPage() {
         <ScrollReveal delay={0.4}>
           <div className="border-t border-white/5 pt-8 mt-12">
             <p className="text-text-muted text-sm text-center">
-              {t('rulesHub.footerCta', 'Official federation rules:')}{' '}
+              {t('rules.footerCta', 'Official federation rules:')}{' '}
               <a
                 href={SJJIF_RULES_URL}
                 target="_blank"

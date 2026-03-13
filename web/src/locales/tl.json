@@ -385,30 +385,5 @@
         "desc": "Opisyal na tagal ng laban ayon sa ranggo ng belt at grupo ng edad"
       }
     }
-  },
-  "rulesHub": {
-    "badge": "Competitor guide",
-    "title": "Competition Rules",
-    "subtitle": "A clearer, first-party overview of the standards competitors should expect at Marianas Open events.",
-    "intro": "This page summarizes the rule areas competitors most often need before weigh-ins, bracket checks, and match day. It is designed to be easier to use than sending athletes into broken third-party rule pages.",
-    "note": "Use the summaries below to prepare, then reference the official SJJIF rules source or download the PDF copy. If an organizer bulletin, bracket note, or official announcement gives event-specific instructions, follow those instructions on event day.",
-    "rulebookLabel": "Downloadable rules copy",
-    "rulebookCopy": "Download a PDF copy of the SJJIF rules currently referenced by Marianas Open materials.",
-    "downloadPdf": "Download rules PDF",
-    "opensExternally": "Opens the downloadable rules PDF in a new tab.",
-    "eventDayTitle": "Event-day reminders",
-    "eventDaySubtitle": "The operational details below are just as important as the technical rules.",
-    "fullRulebookTitle": "Need the full federation language?",
-    "fullRulebookSubtitle": "The live SJJIF rules source remains the primary reference for exact article wording and detailed exceptions.",
-    "officialSourceLinkText": "Open the live SJJIF rules source",
-    "footerNote": "This local guide is meant to improve clarity and avoid dead-end federation links. It does not replace official SJJIF rules language or event-specific organizer instructions.",
-    "maintenanceTitle": "Page status",
-    "maintenanceSubtitle": "This guide is maintained locally so competitors are not sent to unreliable third-party rules pages.",
-    "lastUpdatedLabel": "Last updated:",
-    "maintenanceBody": "If federation language, organizer procedures, or event-day requirements change, this page should be updated to match the latest approved guidance.",
-    "contactTitle": "Questions about the rules?",
-    "contactSubtitle": "For event-specific clarifications, bracket issues, or organizer instructions, contact the Marianas Open team directly.",
-    "contactNote": "Use the federation rules source or downloadable PDF for full rule language, but use the organizer contact above when you need answers specific to this event series.",
-    "footerCta": "Official federation rules:"
   }
 }
