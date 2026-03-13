@@ -106,6 +106,9 @@ namespace :media do
         puts "- [#{status}] #{label} -> #{url}"
       end
       puts "\nTip: fix/remove these URLs so frontend fallbacks are not triggered."
+
+      # CI-friendly behavior: fail unless explicitly in report-only mode.
+      exit(1) unless ENV['MEDIA_AUDIT_REPORT_ONLY'] == '1'
     end
   end
 end

@@ -213,10 +213,10 @@ export default function PastEventsPage() {
                           to={`/events/${event.slug}`}
                           className="group block bg-navy-900/50 border border-white/5 hover:border-gold-500/20 transition-all duration-300 overflow-hidden h-full"
                         >
-                          {event.hero_image_url ? (
+                          {event.hero_image_url && resolveMediaUrl(event.hero_image_url) ? (
                             <div className="relative aspect-[16/9] overflow-hidden">
                               <ImageWithShimmer
-                                src={resolveMediaUrl(event.hero_image_url) || ''}
+                                src={resolveMediaUrl(event.hero_image_url) || '/images/venue-crowd.webp'}
                                 fallbackSrc="/images/venue-crowd.webp"
                                 alt={event.name}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
