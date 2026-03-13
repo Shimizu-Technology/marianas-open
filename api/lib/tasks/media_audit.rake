@@ -8,6 +8,42 @@ namespace :media do
   task audit_urls: :environment do
     checks = []
 
+    fetch_final_status = lambda do |start_uri, max_hops: 2|
+      uri = start_uri
+      hops = 0
+
+      loop do
+        response = Net::HTTP.start(
+          uri.host,
+          uri.port,
+          use_ssl: uri.scheme == 'https',
+          open_timeout: 5,
+          read_timeout: 8
+        ) do |http|
+          request = Net::HTTP::Head.new(uri.request_uri)
+          http.request(request)
+        end
+
+        code = response.code.to_i
+
+        if (300..399).cover?(code)
+          location = response['location']
+          return ['MISSING_LOCATION', uri.to_s] if location.blank?
+          return ['TOO_MANY_REDIRECTS', uri.to_s] if hops >= max_hops
+
+          uri = URI.parse(location)
+          uri = start_uri + location if uri.relative?
+          hops += 1
+          next
+        end
+
+        return [code, uri.to_s]
+      end
+    rescue StandardError => e
+      [e.class.name, uri&.to_s || start_uri.to_s]
+    end
+
+
     begin
       SiteImage.find_each do |img|
         url = img.image_url
@@ -53,19 +89,8 @@ namespace :media do
           next
         end
 
-        response = Net::HTTP.start(
-          uri.host,
-          uri.port,
-          use_ssl: uri.scheme == 'https',
-          open_timeout: 5,
-          read_timeout: 8
-        ) do |http|
-          request = Net::HTTP::Head.new(uri.request_uri)
-          http.request(request)
-        end
-
-        code = response.code.to_i
-        failures << [label, raw_url, code] if code >= 400
+        status, final_url = fetch_final_status.call(uri)
+        failures << [label, raw_url, "#{status} -> #{final_url}"] if status.is_a?(String) || status.to_i >= 400
       rescue StandardError => e
         failures << [label, raw_url, e.class.name]
       end
