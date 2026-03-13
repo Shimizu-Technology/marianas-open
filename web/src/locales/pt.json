@@ -383,6 +383,51 @@
       "time": {
         "title": "Limites de Tempo de Luta",
         "desc": "Durações oficiais de luta por graduação de faixa e faixa etária"
+      },
+      "competitionFormat": {
+        "title": "Formato de competição",
+        "description": "Como as lutas são estruturadas, arbitradas e decididas.",
+        "items": [
+          "As lutas seguem chaves no estilo da federação, comandos do árbitro e regras de divisão.",
+          "Grupo de idade, graduação de faixa e procedimentos de luta podem mudar o que é permitido em uma divisão.",
+          "Anúncios do organizador, chaves publicadas e instruções à beira do tatame ainda importam no dia do evento."
+        ]
+      },
+      "giNoGi": {
+        "title": "Quimono e no-gi",
+        "description": "O que os atletas devem usar e o que pode causar falha na verificação de uniforme.",
+        "items": [
+          "Os uniformes devem estar limpos, prontos para competição, e sem rasgos ou alterações inseguras.",
+          "O equipamento no-gi deve ter o ajuste correto, e os shorts não devem ter zíperes expostos ou bolsos inseguros.",
+          "Se o equipamento não atender aos padrões de inspeção, os competidores podem precisar trocar antes de competir."
+        ]
+      },
+      "pointsAdvantages": {
+        "title": "Pontos e vantagens",
+        "description": "Como a pontuação posicional, vantagens e penalidades afetam um resultado.",
+        "items": [
+          "A pontuação segue o regulamento para controle posicional, quedas, raspagens, passagens de guarda e finalizações dominantes.",
+          "Vantagens e penalidades são usadas quando os pontos não separam completamente os competidores.",
+          "O julgamento do árbitro e as decisões da mesa devem ser tratados como o resultado oficial no tatame."
+        ]
+      },
+      "illegalTechniques": {
+        "title": "Técnicas ilegais e segurança",
+        "description": "Expectativas de segurança, categorias de falta e riscos de desqualificação.",
+        "items": [
+          "Os movimentos ilegais variam por graduação de faixa e divisão de idade, então os atletas devem revisar o regulamento completo antes de competir.",
+          "Comportamento perigoso, conduta antidesportiva e submissões proibidas podem levar a penalidades ou desqualificação.",
+          "Higiene básica, unhas aparadas e equipamento seguro são obrigatórios para todos os competidores."
+        ]
+      },
+      "matchTimes": {
+        "title": "Tempos de luta e divisões",
+        "description": "O que influencia a duração da luta e a estrutura divisional.",
+        "items": [
+          "A duração da luta depende da divisão, idade e nível de faixa.",
+          "As divisões de gi e no-gi podem ter detalhes operacionais diferentes mesmo quando o fim de semana do evento é compartilhado.",
+          "Os atletas devem verificar sua chave, programação e instruções de pesagem antes do início do evento."
+        ]
       }
     },
     "badge": "Guia do Competidor",
@@ -395,6 +440,22 @@
     "maintenanceTitle": "Status da página",
     "lastUpdatedLabel": "Última atualização:",
     "contactTitle": "Dúvidas sobre as regras?",
-    "footerCta": "Regras oficiais da federação:"
+    "footerCta": "Regras oficiais da federação:",
+    "note": "Use os resumos abaixo para se preparar e, em seguida, consulte a fonte oficial das regras SJJIF ou baixe a cópia em PDF. Se um boletim do organizador, nota de chave ou anúncio oficial fornecer instruções específicas do evento, siga essas instruções no dia do evento.",
+    "rulebookCopy": "Baixe uma cópia em PDF das regras SJJIF atualmente referenciadas pelos materiais do Marianas Open.",
+    "eventDaySubtitle": "Os detalhes operacionais abaixo são tão importantes quanto as regras técnicas.",
+    "fullRulebookSubtitle": "A fonte ao vivo das regras SJJIF permanece a referência principal para a redação exata dos artigos e exceções detalhadas.",
+    "footerNote": "Este guia local visa melhorar a clareza e evitar links de federação sem saída. Não substitui o idioma oficial das regras SJJIF ou as instruções específicas do organizador do evento.",
+    "maintenanceSubtitle": "Este guia é mantido localmente para que os competidores não sejam enviados a páginas de regras de terceiros não confiáveis.",
+    "maintenanceBody": "Se o idioma da federação, os procedimentos do organizador ou os requisitos do dia do evento mudarem, esta página deverá ser atualizada para corresponder às orientações aprovadas mais recentes.",
+    "contactSubtitle": "Para esclarecimentos específicos do evento, problemas de chave ou instruções do organizador, entre em contato diretamente com a equipe do Marianas Open.",
+    "contactNote": "Use a fonte das regras da federação ou o PDF para download para a linguagem completa das regras, mas use o contato do organizador acima quando precisar de respostas específicas desta série de eventos.",
+    "eventDayChecklist": [
+      "Traga um documento de identidade com foto emitido pelo governo.",
+      "Verifique sua chave, programação e prazo de correção antes do dia do evento.",
+      "Confirme seu peso registrado em quilogramas e esteja pronto para os procedimentos de pesagem no dia do evento.",
+      "Chegue cedo porque as lutas podem avançar antes do horário previsto.",
+      "Use sandálias ou sapatos fora do tatame e traga um uniforme reserva, se possível."
+    ]
   }
 }
