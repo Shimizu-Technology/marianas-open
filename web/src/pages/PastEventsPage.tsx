@@ -7,6 +7,7 @@ import ScrollReveal from '../components/ScrollReveal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { api } from '../services/api';
 import type { Event } from '../services/api';
+import { resolveMediaUrl } from '../utils/images';
 
 function CountryFlag({ code, className = 'w-5 h-4' }: { code: string; className?: string }) {
   switch (code?.toUpperCase()) {
@@ -214,7 +215,7 @@ export default function PastEventsPage() {
                           {event.hero_image_url ? (
                             <div className="relative aspect-[16/9] overflow-hidden">
                               <img
-                                src={event.hero_image_url}
+                                src={resolveMediaUrl(event.hero_image_url) || ''}
                                 alt={event.name}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                               />

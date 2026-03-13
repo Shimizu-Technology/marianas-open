@@ -11,6 +11,7 @@ import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
+import { resolveMediaUrl } from '../utils/images';
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -26,34 +27,76 @@ function normalizeSponsorKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+/**
+ * Static fallback logos for known commercial sponsors.
+ * Used when the API returns no sponsors or when a sponsor has no logo_url.
+ * Keys must match normalizeSponsorKey() output.
+ *
+ * License notes:
+ *   - hyatt:           Wikimedia Commons (pd) https://commons.wikimedia.org/wiki/File:Hyatt_Logo.svg
+ *   - dusit*:          Wikimedia Commons (pd-textlogo) https://commons.wikimedia.org/wiki/File:Dusit_Thani_Logo.svg
+ *   - gvb:             Official GVB website https://www.guamvisitorsbureau.com/ (event sponsor)
+ *   - unitedairlines:  PROVISIONAL — en.wikipedia.org fair-use; replace with sponsor-provided asset
+ */
+const SPONSOR_LOGO_FALLBACK: Record<string, { src: string; url: string }> = {
+  gvb: {
+    src: '/images/logos/sponsors/gvb-logo.png',
+    url: 'https://www.visitguam.com',
+  },
+  gvbguamvisitorsbureau: {
+    src: '/images/logos/sponsors/gvb-logo.png',
+    url: 'https://www.visitguam.com',
+  },
+  unitedairlines: {
+    src: '/images/logos/sponsors/united-airlines-logo.svg',
+    url: 'https://www.united.com',
+  },
+  hyattregencyguam: {
+    src: '/images/logos/sponsors/hyatt-logo.svg',
+    url: 'https://www.hyatt.com',
+  },
+  hyatt: {
+    src: '/images/logos/sponsors/hyatt-logo.svg',
+    url: 'https://www.hyatt.com',
+  },
+  dusitthaniguam: {
+    src: '/images/logos/sponsors/dusit-logo.svg',
+    url: 'https://www.dusit.com',
+  },
+  dusit: {
+    src: '/images/logos/sponsors/dusit-logo.svg',
+    url: 'https://www.dusit.com',
+  },
+};
+
 const ORG_PARTNERS = [
   {
     key: 'asjjf',
     name: 'ASJJF',
     src: '/images/logos/asjjf-logo.png',
     url: 'https://asjjf.org',
-    heightClass: 'h-14',
+    heightClass: 'h-16',
   },
   {
     key: 'msjjf',
     name: 'MSJJF',
     src: '/images/logos/msjjf-logo-white.png',
     url: 'https://marianasopen.com',
-    heightClass: 'h-12',
+    heightClass: 'h-14',
   },
   {
     key: 'copademarianas',
     name: 'Copa de Marianas',
     src: '/images/logos/copa-seal-logo.png',
     url: 'https://asjjf.org/main/eventInfo/1837',
-    heightClass: 'h-14',
+    heightClass: 'h-16',
   },
   {
     key: 'roadtotheopen',
     name: 'Road to the Open',
     src: '/images/logos/road-to-open-logo-white.png',
     url: 'https://marianasopen.com/calendar',
-    heightClass: 'h-10',
+    heightClass: 'h-12',
   },
 ] as const;
 
@@ -388,24 +431,37 @@ export default function HomePage() {
 
           {/* Commercial sponsors — text or logo from API */}
           <ScrollReveal delay={0.3}>
-            <div className="flex flex-wrap items-center justify-center gap-8 opacity-35">
+            <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
               {sponsorsLoading ? (
                 <div className="text-text-muted text-sm">...</div>
               ) : sponsors.length > 0 ? (
                 sponsors
                   .filter((sponsor) => !ORG_PARTNER_KEY_SET.has(normalizeSponsorKey(sponsor.name)))
                   .map((sponsor) => {
-                    const logoSrc = sponsor.logo_url || null;
-                    const logoUrl = sponsor.website_url || null;
+                    const key = normalizeSponsorKey(sponsor.name);
+                    const fallback = SPONSOR_LOGO_FALLBACK[key];
+                    const logoSrc = resolveMediaUrl(sponsor.logo_url) || fallback?.src || null;
+                    const logoUrl = sponsor.website_url || fallback?.url || null;
+                    const applyMonochromeFilter = !sponsor.logo_url && !!fallback?.src;
                     return (
                       <div key={sponsor.id}>
                         {logoSrc ? (
                           logoUrl ? (
                             <a href={logoUrl} target="_blank" rel="noopener noreferrer">
-                              <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
+                              <img
+                                src={logoSrc}
+                                alt={sponsor.name}
+                                className="h-8 object-contain"
+                                style={applyMonochromeFilter ? { filter: 'brightness(0) invert(1)' } : undefined}
+                              />
                             </a>
                           ) : (
-                            <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
+                            <img
+                              src={logoSrc}
+                              alt={sponsor.name}
+                              className="h-8 object-contain"
+                              style={applyMonochromeFilter ? { filter: 'brightness(0) invert(1)' } : undefined}
+                            />
                           )
                         ) : (
                           <div className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary">
@@ -416,14 +472,37 @@ export default function HomePage() {
                     );
                   })
               ) : (
-                ['GVB', 'United Airlines', 'Hyatt Regency Guam', 'Dusit Thani Guam'].map((name) => (
-                  <div
-                    key={name}
-                    className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary"
-                  >
-                    {name}
-                  </div>
-                ))
+                /* Static fallback: show logos when available, text otherwise */
+                ['GVB', 'United Airlines', 'Hyatt Regency Guam', 'Dusit Thani Guam'].map((name) => {
+                  const key = normalizeSponsorKey(name);
+                  const fallback = SPONSOR_LOGO_FALLBACK[key];
+                  if (fallback) {
+                    return (
+                      <a
+                        key={name}
+                        href={fallback.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center"
+                      >
+                        <img
+                          src={fallback.src}
+                          alt={name}
+                          className="h-8 object-contain"
+                          style={{ filter: 'brightness(0) invert(1)' }}
+                        />
+                      </a>
+                    );
+                  }
+                  return (
+                    <div
+                      key={name}
+                      className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary"
+                    >
+                      {name}
+                    </div>
+                  );
+                })
               )}
             </div>
           </ScrollReveal>

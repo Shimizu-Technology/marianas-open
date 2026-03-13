@@ -7,7 +7,8 @@
     "about": "Sobre",
     "rankings": "Classificações",
     "competitors": "Competidores",
-    "pastEvents": "Eventos Anteriores"
+    "pastEvents": "Eventos Anteriores",
+    "rules": "Regras"
   },
   "pastEvents": {
     "badge": "Arquivo de eventos",
@@ -188,7 +189,8 @@
     "contact": "Contato",
     "rights": "Todos os direitos reservados.",
     "builtBy": "Desenvolvido por Shimizu Technology",
-    "terms": "Termos e Condições"
+    "terms": "Termos e Condições",
+    "rules": "Regras"
   },
   "common": {
     "guam": "Guam",
@@ -355,5 +357,44 @@
     "next": "Próximo",
     "upcoming": "Por vir",
     "viewEvent": "Ver Evento"
+  },
+  "rules": {
+    "title": "Regras da Competição",
+    "subtitle": "Uma visão mais clara dos padrões que os competidores devem esperar nos eventos do Marianas Open.",
+    "intro": "Esta página resume as áreas de regras que os competidores mais precisam antes da pesagem, conferência de chave e dia da luta.",
+    "officialNote": "Livro de regras oficial completo hospedado pela Asian Sport Jiu-Jitsu Federation em",
+    "sections": {
+      "general": {
+        "title": "Regras Gerais de Competição",
+        "desc": "Formato de luta, pontuação, regras de finalização e decisões do árbitro"
+      },
+      "uniform": {
+        "title": "Requisitos de Gi e Uniforme",
+        "desc": "Especificações de gi aprovadas, patches e padrões de roupas no-gi"
+      },
+      "prohibited": {
+        "title": "Técnicas Proibidas",
+        "desc": "Técnicas não permitidas por graduação de faixa e divisão de idade"
+      },
+      "points": {
+        "title": "Pontos e Vantagens",
+        "desc": "Como pontos, vantagens e penalidades são marcados"
+      },
+      "time": {
+        "title": "Limites de Tempo de Luta",
+        "desc": "Durações oficiais de luta por graduação de faixa e faixa etária"
+      }
+    },
+    "badge": "Guia do Competidor",
+    "rulebookLabel": "Cópia das regras para download",
+    "downloadPdf": "Baixar PDF das regras",
+    "opensExternally": "Abre o PDF das regras em uma nova aba.",
+    "eventDayTitle": "Lembretes do dia do evento",
+    "fullRulebookTitle": "Precisa do texto completo da federação?",
+    "officialSourceLinkText": "Abrir fonte oficial ao vivo da SJJIF",
+    "maintenanceTitle": "Status da página",
+    "lastUpdatedLabel": "Última atualização:",
+    "contactTitle": "Dúvidas sobre as regras?",
+    "footerCta": "Regras oficiais da federação:"
   }
 }

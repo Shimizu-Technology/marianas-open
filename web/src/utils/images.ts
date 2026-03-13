@@ -13,9 +13,39 @@ const eventHeroImages: Record<string, string> = {
   'marianas-open-2026': '/images/venue-mats.webp',
 };
 
+function getApiOrigin(): string {
+  const configured = import.meta.env.VITE_API_URL as string | undefined;
+  if (configured) {
+    try {
+      return new URL(configured).origin;
+    } catch {
+      return configured;
+    }
+  }
+  return 'http://localhost:3000';
+}
+
+/** Normalize backend/media URLs for production safety. */
+export function resolveMediaUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+
+  const apiOrigin = getApiOrigin();
+
+  // Relative ActiveStorage paths from API
+  if (url.startsWith('/')) return `${apiOrigin}${url}`;
+
+  // Localhost URLs from dev uploads should use configured API origin in deployed UI
+  // Accept any localhost/127.0.0.1 port (not just 3000) to avoid hard-coded dev-port drift.
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(url)) {
+    return url.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, apiOrigin);
+  }
+
+  return url;
+}
+
 /** Get hero image for an event — uses API URL if available, falls back to local */
 export function getEventHeroImage(slug: string, apiUrl: string | null): string {
-  return apiUrl || eventHeroImages[slug] || '/images/venue-crowd.webp';
+  return resolveMediaUrl(apiUrl) || eventHeroImages[slug] || '/images/venue-crowd.webp';
 }
 
 /** Organization logo fallback */

@@ -14,6 +14,7 @@ export default function Header() {
     { to: '/calendar', label: t('nav.events') },
     { to: '/events/past', label: t('nav.pastEvents') },
     { to: '/about', label: t('nav.about') },
+    { to: '/rules', label: t('nav.rules') },
     { to: '/rankings', label: t('nav.rankings') },
     { to: '/competitors', label: t('nav.competitors') },
     { to: '/watch', label: t('nav.watch') },
@@ -34,7 +35,7 @@ export default function Header() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden xl:flex items-center gap-8">
             {links.map((link) => (
               <Link
                 key={link.to}
@@ -54,7 +55,7 @@ export default function Header() {
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <button
-              className="md:hidden text-text-primary p-1"
+              className="xl:hidden text-text-primary p-1"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
             >
@@ -66,7 +67,7 @@ export default function Header() {
 
       {/* Mobile Nav */}
       {mobileOpen && (
-        <nav className="md:hidden bg-navy-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-1">
+        <nav className="xl:hidden bg-navy-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-1">
           {links.map((link) => (
             <Link
               key={link.to}

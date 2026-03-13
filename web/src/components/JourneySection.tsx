@@ -368,7 +368,7 @@ export default function JourneySection({ events }: { events: Event[] }) {
 
           {/* Desktop: horizontal journey (scrollable when content exceeds width) */}
           <div className="hidden lg:block">
-            <div className="overflow-x-auto pb-2">
+            <div className="overflow-x-auto overflow-y-hidden pb-2">
               <div className="relative min-w-max px-1">
                 {/* Connection line */}
                 <motion.div

@@ -7,7 +7,8 @@
     "about": "About",
     "rankings": "Rankings",
     "competitors": "Competitors",
-    "pastEvents": "Past Events"
+    "pastEvents": "Past Events",
+    "rules": "Rules"
   },
   "pastEvents": {
     "badge": "Event Archive",
@@ -188,7 +189,8 @@
     "contact": "Contact",
     "rights": "All rights reserved.",
     "builtBy": "Built by Shimizu Technology",
-    "terms": "Terms and Conditions"
+    "terms": "Terms and Conditions",
+    "rules": "Rules"
   },
   "common": {
     "guam": "Guam",
@@ -355,5 +357,44 @@
     "next": "Next",
     "upcoming": "Upcoming",
     "viewEvent": "View Event"
+  },
+  "rules": {
+    "title": "Competition Rules",
+    "subtitle": "A clearer overview of the standards competitors should expect at Marianas Open events.",
+    "intro": "This page summarizes the rule areas competitors most often need before weigh-ins, bracket checks, and match day.",
+    "officialNote": "Full official rulebook hosted by the Asian Sport Jiu-Jitsu Federation at",
+    "sections": {
+      "general": {
+        "title": "General Competition Rules",
+        "desc": "Match format, scoring, submission rules, and referee decisions"
+      },
+      "uniform": {
+        "title": "Gi & Uniform Requirements",
+        "desc": "Approved gi specifications, patches, and no-gi attire standards"
+      },
+      "prohibited": {
+        "title": "Prohibited Techniques",
+        "desc": "Techniques not permitted by belt rank and age division"
+      },
+      "points": {
+        "title": "Points & Advantages",
+        "desc": "How points, advantages, and penalties are scored"
+      },
+      "time": {
+        "title": "Match Time Limits",
+        "desc": "Official match durations by belt rank and age group"
+      }
+    },
+    "badge": "Competitor guide",
+    "rulebookLabel": "Downloadable rules copy",
+    "downloadPdf": "Download rules PDF",
+    "opensExternally": "Opens the downloadable rules PDF in a new tab.",
+    "eventDayTitle": "Event-day reminders",
+    "fullRulebookTitle": "Need the full federation language?",
+    "officialSourceLinkText": "Open the live SJJIF rules source",
+    "maintenanceTitle": "Page status",
+    "lastUpdatedLabel": "Last updated:",
+    "contactTitle": "Questions about the rules?",
+    "footerCta": "Official federation rules:"
   }
 }
