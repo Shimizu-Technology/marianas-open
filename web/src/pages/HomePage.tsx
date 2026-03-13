@@ -10,7 +10,7 @@ import { useEvents, useSponsors } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
-import { getDateLocale } from '../utils/dateLocale';
+import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -21,6 +21,44 @@ function StarRating({ count }: { count: number }) {
     </div>
   );
 }
+
+function normalizeSponsorKey(name: string) {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+const ORG_PARTNERS = [
+  {
+    key: 'asjjf',
+    name: 'ASJJF',
+    src: '/images/logos/asjjf-logo.png',
+    url: 'https://asjjf.org',
+    heightClass: 'h-14',
+  },
+  {
+    key: 'msjjf',
+    name: 'MSJJF',
+    src: '/images/logos/msjjf-logo-white.png',
+    url: 'https://marianasopen.com',
+    heightClass: 'h-12',
+  },
+  {
+    key: 'copademarianas',
+    name: 'Copa de Marianas',
+    src: '/images/logos/copa-seal-logo.png',
+    url: 'https://asjjf.org/main/eventInfo/1837',
+    heightClass: 'h-14',
+  },
+  {
+    key: 'roadtotheopen',
+    name: 'Road to the Open',
+    src: '/images/logos/road-to-open-logo-white.png',
+    url: 'https://marianasopen.com/calendar',
+    heightClass: 'h-10',
+  },
+] as const;
+
+const ORG_PARTNER_KEY_SET = new Set<string>(ORG_PARTNERS.map((partner) => partner.key));
+
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
@@ -263,10 +301,10 @@ export default function HomePage() {
                     {/* Date */}
                     <div className="shrink-0 w-28">
                       <div className="text-xs text-text-muted uppercase tracking-wider font-heading">
-                        {new Date(event.date).toLocaleDateString(getDateLocale(i18n.language), { month: 'short' })}
+                        {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { month: 'short' })}
                       </div>
                       <div className="text-2xl font-heading font-black">
-                        {new Date(event.date).toLocaleDateString(getDateLocale(i18n.language), { day: 'numeric' })}
+                        {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { day: 'numeric' })}
                       </div>
                     </div>
 
@@ -315,48 +353,73 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Sponsors */}
-      <section className="py-24">
+      {/* Official Partners — logo strip */}
+      <section className="py-20 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
-            <div className="text-center mb-12">
-              <h2 className="text-sm font-heading font-semibold uppercase tracking-[0.3em] text-text-muted">
+            <div className="text-center mb-10">
+              <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted mb-1">
                 {t('home.sponsorsTitle')}
-              </h2>
+              </p>
+              <div className="w-8 h-px bg-gold-500/30 mx-auto mt-3" />
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.2}>
-            <div className="flex flex-wrap items-center justify-center gap-12 opacity-40">
+          {/* Org partner logos */}
+          <ScrollReveal delay={0.15}>
+            <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16 mb-10">
+              {ORG_PARTNERS.map((partner) => (
+                <a
+                  key={partner.key}
+                  href={partner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="opacity-60 hover:opacity-100 transition-opacity duration-300"
+                >
+                  <img
+                    src={partner.src}
+                    alt={partner.name}
+                    className={`${partner.heightClass} object-contain`}
+                  />
+                </a>
+              ))}
+            </div>
+          </ScrollReveal>
+
+          {/* Commercial sponsors — text or logo from API */}
+          <ScrollReveal delay={0.3}>
+            <div className="flex flex-wrap items-center justify-center gap-8 opacity-35">
               {sponsorsLoading ? (
                 <div className="text-text-muted text-sm">...</div>
               ) : sponsors.length > 0 ? (
-                sponsors.map((sponsor) => (
-                  <div key={sponsor.id}>
-                    {sponsor.logo_url ? (
-                      <a
-                        href={sponsor.website_url || '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <img
-                          src={sponsor.logo_url}
-                          alt={sponsor.name}
-                          className="h-10 object-contain"
-                        />
-                      </a>
-                    ) : (
-                      <div className="text-lg font-heading font-bold uppercase tracking-wider text-text-secondary">
-                        {sponsor.name}
+                sponsors
+                  .filter((sponsor) => !ORG_PARTNER_KEY_SET.has(normalizeSponsorKey(sponsor.name)))
+                  .map((sponsor) => {
+                    const logoSrc = sponsor.logo_url || null;
+                    const logoUrl = sponsor.website_url || null;
+                    return (
+                      <div key={sponsor.id}>
+                        {logoSrc ? (
+                          logoUrl ? (
+                            <a href={logoUrl} target="_blank" rel="noopener noreferrer">
+                              <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
+                            </a>
+                          ) : (
+                            <img src={logoSrc} alt={sponsor.name} className="h-8 object-contain" />
+                          )
+                        ) : (
+                          <div className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary">
+                            {sponsor.name}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))
+                    );
+                  })
               ) : (
-                ['ASJJF', 'GVB', 'United Airlines', 'Hyatt Regency', 'Dusit Thani'].map((name) => (
+                ['GVB', 'United Airlines', 'Hyatt Regency Guam', 'Dusit Thani Guam'].map((name) => (
                   <div
                     key={name}
-                    className="text-lg font-heading font-bold uppercase tracking-wider text-text-secondary"
+                    className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary"
                   >
                     {name}
                   </div>

@@ -114,7 +114,8 @@
     "galleryCeremony": "セレモニー",
     "galleryVenue": "会場の様子",
     "galleryPodium": "表彰式",
-    "registrationComingSoon": "登録近日開始"
+    "registrationComingSoon": "登録近日開始",
+    "officialPoster": "公式ポスター"
   },
   "calendar": {
     "title": "グアム プロシリーズ 2026",
@@ -129,7 +130,8 @@
     "upcoming": "今後のイベント",
     "pastResults": "過去の結果",
     "noPastEvents": "過去のイベントはまだありません。",
-    "completed": "終了"
+    "completed": "終了",
+    "roadToOpen": "予選シリーズ"
   },
   "watch": {
     "title": "観戦",

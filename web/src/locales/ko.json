@@ -114,7 +114,8 @@
     "galleryCeremony": "세레모니",
     "galleryVenue": "경기장 모습",
     "galleryPodium": "시상식",
-    "registrationComingSoon": "등록 곧 시작"
+    "registrationComingSoon": "등록 곧 시작",
+    "officialPoster": "공식 포스터"
   },
   "calendar": {
     "title": "괌 프로 시리즈 2026",
@@ -129,7 +130,8 @@
     "upcoming": "예정된 이벤트",
     "pastResults": "지난 결과",
     "noPastEvents": "아직 지난 이벤트가 없습니다.",
-    "completed": "완료"
+    "completed": "완료",
+    "roadToOpen": "예선 시리즈"
   },
   "watch": {
     "title": "시청",

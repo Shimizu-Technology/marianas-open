@@ -114,7 +114,8 @@
     "galleryCeremony": "Ceremony",
     "galleryVenue": "Competition venue",
     "galleryPodium": "Podium ceremony",
-    "registrationComingSoon": "Registration Coming Soon"
+    "registrationComingSoon": "Registration Coming Soon",
+    "officialPoster": "Official Poster"
   },
   "calendar": {
     "title": "Guam Pro Series 2026",
@@ -129,7 +130,8 @@
     "upcoming": "Upcoming",
     "pastResults": "Past Results",
     "noPastEvents": "No past events yet.",
-    "completed": "Completed"
+    "completed": "Completed",
+    "roadToOpen": "Qualifying Series"
   },
   "watch": {
     "title": "Watch",

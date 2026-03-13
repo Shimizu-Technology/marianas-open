@@ -8,3 +8,12 @@ export function getDateLocale(lang: string) {
   };
   return map[lang] || 'en-US';
 }
+
+export function parseDateLocalSafe(value: string) {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const [, y, m, d] = match;
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+  return new Date(value);
+}

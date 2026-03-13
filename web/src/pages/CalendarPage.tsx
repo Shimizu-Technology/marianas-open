@@ -9,7 +9,33 @@ import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useEvents } from '../hooks/useApi';
 import type { Event } from '../services/api';
-import { getDateLocale } from '../utils/dateLocale';
+import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
+
+// Event/venue names are treated as official proper nouns from organizer assets.
+// Dates remain locale-formatted via `formatEventDate`.
+const ROAD_TO_OPEN_POSTERS = [
+  {
+    src: '/images/poster-mp-nagoya.jpg',
+    title: 'Marianas Pro Nagoya',
+    isoDate: '2026-03-14',
+    location: 'Aichi Budokan, Japan',
+    href: 'https://asjjf.org/main/eventInfo/1863',
+  },
+  {
+    src: '/images/poster-mp-korea.jpg',
+    title: 'Marianas Pro Korea',
+    isoDate: '2026-06-06',
+    location: 'SETEC, Seoul, Korea',
+    href: 'https://asjjf.org/main/eventInfo/1867',
+  },
+  {
+    src: '/images/poster-copa.jpg',
+    title: 'Copa de Marianas',
+    isoDate: '2026-01-31',
+    location: 'UOG Calvo Fieldhouse, Guam',
+    href: 'https://asjjf.org/main/eventInfo/1837',
+  },
+] as const;
 
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
@@ -22,7 +48,7 @@ export default function CalendarPage() {
   const pastEventsByYear = useMemo(() => {
     const grouped: Record<number, typeof pastEvents> = {};
     pastEvents.forEach(e => {
-      const year = new Date(e.date).getFullYear();
+      const year = parseDateLocalSafe(e.date).getFullYear();
       if (!grouped[year]) grouped[year] = [];
       grouped[year].push(e);
     });
@@ -33,9 +59,10 @@ export default function CalendarPage() {
 
   const formatEventDate = useCallback((dateStr: string, dateEndStr?: string | null) => {
     const locale = getDateLocale(i18n.language);
-    const main = new Date(dateStr).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' });
+
+    const main = parseDateLocalSafe(dateStr).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' });
     if (dateEndStr) {
-      const end = new Date(dateEndStr).toLocaleDateString(locale, { day: 'numeric' });
+      const end = parseDateLocalSafe(dateEndStr).toLocaleDateString(locale, { day: 'numeric' });
       return `${main} – ${end}`;
     }
     return main;
@@ -48,6 +75,9 @@ export default function CalendarPage() {
       </div>
     );
   }
+
+  const todayLocal = new Date();
+  todayLocal.setHours(0, 0, 0, 0);
 
   return (
     <div className="min-h-screen pt-20">
@@ -191,6 +221,74 @@ export default function CalendarPage() {
             ))}
           </div>
           )}
+        </div>
+      </section>
+
+      {/* Road to the Open — poster strip */}
+      <section className="py-20 border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <ScrollReveal>
+            <div className="flex items-center gap-4 mb-10">
+              <img
+                src="/images/logos/road-to-open-logo-white.png"
+                alt="Road to the Open"
+                className="h-8 object-contain opacity-80"
+              />
+              <div className="flex-1 h-px bg-white/5" />
+              <p className="text-xs font-heading uppercase tracking-[0.25em] text-text-muted">
+                {t('calendar.roadToOpen', 'Qualifying Series')}
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {ROAD_TO_OPEN_POSTERS.map((poster, i) => {
+              const posterDateLocal = parseDateLocalSafe(poster.isoDate);
+              const isPastPoster = posterDateLocal < todayLocal;
+
+              return (
+                <ScrollReveal key={poster.title} delay={i * 0.1}>
+                  <a
+                    href={poster.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group relative block overflow-hidden border transition-colors duration-300 ${
+                      isPastPoster
+                        ? 'border-white/10 hover:border-white/20 opacity-80'
+                        : 'border-white/5 hover:border-gold-500/20'
+                    }`}
+                  >
+                    <div className="relative aspect-[3/4] overflow-hidden">
+                      <img
+                        src={poster.src}
+                        alt={poster.title}
+                        className={`w-full h-full object-cover transition-transform duration-500 ${isPastPoster ? 'grayscale-[20%]' : 'group-hover:scale-105'}`}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-navy-900/95 via-navy-900/30 to-transparent" />
+                      {isPastPoster && (
+                        <div className="absolute top-3 right-3 px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/10 border border-white/20 text-text-secondary">
+                          {t('calendar.completed', 'Completed')}
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-text-primary mb-1">
+                        {poster.title}
+                      </h3>
+                      <p className="text-xs text-text-muted flex items-center gap-1.5">
+                        <Calendar size={10} className="text-gold-500 shrink-0" />
+                        {formatEventDate(poster.isoDate)}
+                      </p>
+                      <p className="text-xs text-text-muted flex items-center gap-1.5 mt-0.5">
+                        <MapPin size={10} className="text-gold-500 shrink-0" />
+                        {poster.location}
+                      </p>
+                    </div>
+                  </a>
+                </ScrollReveal>
+              );
+            })}
+          </div>
         </div>
       </section>
     </div>
