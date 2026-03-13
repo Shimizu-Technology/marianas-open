@@ -8,25 +8,37 @@ namespace :media do
   task audit_urls: :environment do
     checks = []
 
-    SiteImage.find_each do |img|
-      url = img.image_url
-      next if url.blank?
+    begin
+      SiteImage.find_each do |img|
+        url = img.image_url
+        next if url.blank?
 
-      checks << ["SiteImage##{img.id} (#{img.placement})", url]
+        checks << ["SiteImage##{img.id} (#{img.placement})", url]
+      end
+    rescue StandardError => e
+      warn "⚠️  Error collecting SiteImage URLs: #{e.class} - #{e.message}"
     end
 
-    Sponsor.find_each do |s|
-      url = s.logo_url
-      next if url.blank?
+    begin
+      Sponsor.find_each do |s|
+        url = s.logo_url
+        next if url.blank?
 
-      checks << ["Sponsor##{s.id} (#{s.name})", url]
+        checks << ["Sponsor##{s.id} (#{s.name})", url]
+      end
+    rescue StandardError => e
+      warn "⚠️  Error collecting Sponsor URLs: #{e.class} - #{e.message}"
     end
 
-    Event.find_each do |e|
-      url = e.hero_image_url
-      next if url.blank?
+    begin
+      Event.find_each do |e|
+        url = e.hero_image_url
+        next if url.blank?
 
-      checks << ["Event##{e.id} (#{e.slug})", url]
+        checks << ["Event##{e.id} (#{e.slug})", url]
+      end
+    rescue StandardError => e
+      warn "⚠️  Error collecting Event URLs: #{e.class} - #{e.message}"
     end
 
     puts "Auditing #{checks.size} URLs..."

@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Calendar, MapPin, Star, Trophy, ArrowRight, Medal } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ImageWithShimmer from '../components/ImageWithShimmer';
 import { api } from '../services/api';
 import type { Event } from '../services/api';
 import { resolveMediaUrl } from '../utils/images';
@@ -214,15 +215,11 @@ export default function PastEventsPage() {
                         >
                           {event.hero_image_url ? (
                             <div className="relative aspect-[16/9] overflow-hidden">
-                              <img
+                              <ImageWithShimmer
                                 src={resolveMediaUrl(event.hero_image_url) || ''}
+                                fallbackSrc="/images/venue-crowd.webp"
                                 alt={event.name}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  target.onerror = null;
-                                  target.src = '/images/venue-crowd.webp';
-                                }}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-transparent to-transparent" />
                               <div className="absolute top-3 left-3">
