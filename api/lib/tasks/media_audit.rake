@@ -8,16 +8,25 @@ namespace :media do
   task audit_urls: :environment do
     checks = []
 
-    SiteImage.where.not(image_url: [nil, '']).find_each do |img|
-      checks << ["SiteImage##{img.id} (#{img.placement})", img.image_url]
+    SiteImage.find_each do |img|
+      url = img.image_url
+      next if url.blank?
+
+      checks << ["SiteImage##{img.id} (#{img.placement})", url]
     end
 
-    Sponsor.where.not(logo_url: [nil, '']).find_each do |s|
-      checks << ["Sponsor##{s.id} (#{s.name})", s.logo_url]
+    Sponsor.find_each do |s|
+      url = s.logo_url
+      next if url.blank?
+
+      checks << ["Sponsor##{s.id} (#{s.name})", url]
     end
 
-    Event.where.not(hero_image_url: [nil, '']).find_each do |e|
-      checks << ["Event##{e.id} (#{e.slug})", e.hero_image_url]
+    Event.find_each do |e|
+      url = e.hero_image_url
+      next if url.blank?
+
+      checks << ["Event##{e.id} (#{e.slug})", url]
     end
 
     puts "Auditing #{checks.size} URLs..."

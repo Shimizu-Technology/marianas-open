@@ -18,7 +18,7 @@ export default function ImageWithShimmer({ src, alt, className = '', fallbackSrc
     setCurrentSrc(src);
     setLoaded(false);
     setDidFallback(false);
-  }, [src]);
+  }, [src, fallbackSrc]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
