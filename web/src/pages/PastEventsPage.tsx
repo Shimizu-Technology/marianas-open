@@ -218,6 +218,11 @@ export default function PastEventsPage() {
                                 src={resolveMediaUrl(event.hero_image_url) || ''}
                                 alt={event.name}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  target.onerror = null;
+                                  target.src = '/images/venue-crowd.webp';
+                                }}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-transparent to-transparent" />
                               <div className="absolute top-3 left-3">

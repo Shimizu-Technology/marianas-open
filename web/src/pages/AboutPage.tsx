@@ -19,8 +19,11 @@ export default function AboutPage() {
   const shouldReduceMotion = useReducedMotion();
   const { images: siteImages } = useSiteImages();
 
-  const heroImage = getImageUrl(siteImages, 'hero', '/images/venue-crowd.webp');
-  const galleryImage = getImageUrl(siteImages, 'gallery', '/images/action-match-2.webp');
+  const heroFallback = '/images/venue-crowd.webp';
+  const galleryFallback = '/images/action-match-2.webp';
+
+  const heroImage = getImageUrl(siteImages, 'hero', heroFallback);
+  const galleryImage = getImageUrl(siteImages, 'gallery', galleryFallback);
 
   const stats = [
     { value: t('stats.competitors'), label: t('stats.competitorsLabel'), icon: Users },
@@ -36,6 +39,7 @@ export default function AboutPage() {
         <div className="absolute inset-0">
           <ImageWithShimmer
             src={heroImage}
+            fallbackSrc={heroFallback}
             alt=""
             className="w-full h-full object-cover"
           />
@@ -115,6 +119,7 @@ export default function AboutPage() {
       <section className="relative h-64 sm:h-80 overflow-hidden">
         <ImageWithShimmer
           src={galleryImage}
+          fallbackSrc={galleryFallback}
           alt=""
           className="w-full h-full object-cover"
         />
