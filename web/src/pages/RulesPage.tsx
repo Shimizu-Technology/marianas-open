@@ -17,79 +17,35 @@ import {
 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 
-const RULEBOOK_PDF_URL = '/files/2018-sjjif-rulebook.pdf';
+// PDF URL is driven by the environment variable VITE_RULEBOOK_PDF_URL.
+// Set this to an S3 (or other CDN) URL in production once the compressed
+// upload is ready.  Falls back to the local public copy so dev/preview
+// always works without any additional config.
+//
+// Example .env.production:
+//   VITE_RULEBOOK_PDF_URL=https://your-bucket.s3.amazonaws.com/2018-sjjif-rulebook.pdf
+const RULEBOOK_PDF_URL =
+  import.meta.env.VITE_RULEBOOK_PDF_URL || '/files/2018-sjjif-rulebook.pdf';
+
 const SJJIF_RULES_URL = 'https://sjjif.com/publicPages/pages?pagesType=RULE_BOOK';
 const RULES_LAST_UPDATED = 'March 2026';
 
-const ruleSections: Array<{
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  items: string[];
-}> = [
-  {
-    title: 'Competition format',
-    description: 'How matches are structured, officiated, and decided.',
-    icon: BookOpen,
-    items: [
-      'Matches follow federation-style brackets, referee commands, and division rules.',
-      'Age group, belt rank, and match procedures can change what is allowed in a division.',
-      'Organizer announcements, posted brackets, and mat-side instructions still matter on event day.',
-    ],
-  },
-  {
-    title: 'Gi and no-gi uniforms',
-    description: 'What athletes should wear and what can cause a uniform check failure.',
-    icon: Shirt,
-    items: [
-      'Uniforms must be clean, competition-ready, and free of tears or unsafe alterations.',
-      'No-gi gear must fit properly, and shorts should not include exposed zippers or unsafe pockets.',
-      'If gear does not meet inspection standards, competitors may need to change before competing.',
-    ],
-  },
-  {
-    title: 'Points and advantages',
-    description: 'How positional scoring, advantages, and penalties affect a result.',
-    icon: Scale,
-    items: [
-      'Scoring follows the rulebook for positional control, takedowns, sweeps, passes, and dominant finishes.',
-      'Advantages and penalties are used when points do not fully separate competitors.',
-      'Referee judgment and table decisions should be treated as the official result on the mat.',
-    ],
-  },
-  {
-    title: 'Illegal techniques and safety',
-    description: 'Safety expectations, foul categories, and disqualification risks.',
-    icon: Shield,
-    items: [
-      'Illegal moves vary by belt rank and age division, so athletes should review the full rulebook before competing.',
-      'Dangerous behavior, unsportsmanlike conduct, and prohibited submissions can lead to penalties or disqualification.',
-      'Basic hygiene, trimmed nails, and safe equipment remain mandatory for all competitors.',
-    ],
-  },
-  {
-    title: 'Match times and divisions',
-    description: 'What influences bout length and divisional structure.',
-    icon: Clock3,
-    items: [
-      'Match duration depends on division, age, and belt level.',
-      'Gi and no-gi divisions may have different operational details even when the event weekend is shared.',
-      'Athletes should verify their bracket, schedule, and weigh-in instructions before the event starts.',
-    ],
-  },
-];
-
-const eventDayChecklist = [
-  'Bring a valid government photo ID.',
-  'Check your bracket, schedule, and correction deadline before event day.',
-  'Confirm your registered weight in kilograms and be ready for event-day weigh-in procedures.',
-  'Arrive early because matches can move ahead of schedule.',
-  'Wear sandals or shoes off the mat and bring a backup uniform if possible.',
+/** Maps i18n section keys to their Lucide icon. Icons cannot live in JSON. */
+const SECTION_KEYS: Array<{ key: string; icon: LucideIcon }> = [
+  { key: 'competitionFormat', icon: BookOpen },
+  { key: 'giNoGi', icon: Shirt },
+  { key: 'pointsAdvantages', icon: Scale },
+  { key: 'illegalTechniques', icon: Shield },
+  { key: 'matchTimes', icon: Clock3 },
 ];
 
 export default function RulesPage() {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
+
+  const eventDayChecklist = t('rules.eventDayChecklist', {
+    returnObjects: true,
+  }) as string[];
 
   return (
     <div className="min-h-screen pt-24 pb-20">
@@ -168,35 +124,42 @@ export default function RulesPage() {
           </div>
         </ScrollReveal>
 
-        {/* Rule sections */}
+        {/* Rule sections — content driven by i18n */}
         <div className="grid gap-5 lg:grid-cols-2 mb-12">
-          {ruleSections.map((section, i) => (
-            <ScrollReveal key={section.title} delay={i * 0.06}>
-              <section className="bg-surface border border-white/5 rounded-2xl p-6 h-full">
-                <div className="flex items-start gap-4 mb-5">
-                  <div className="p-3 bg-gold-500/10 rounded-xl border border-gold-500/20 shrink-0">
-                    <section.icon size={18} className="text-gold-500" />
-                  </div>
-                  <div>
-                    <h2 className="font-heading text-xl font-bold text-text-primary mb-1">
-                      {section.title}
-                    </h2>
-                    <p className="text-sm text-text-secondary leading-relaxed">
-                      {section.description}
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  {section.items.map((item) => (
-                    <div key={item} className="flex items-start gap-3">
-                      <CheckCircle2 size={16} className="text-gold-500 shrink-0 mt-0.5" />
-                      <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
+          {SECTION_KEYS.map(({ key, icon: Icon }, i) => {
+            const title = t(`rules.sections.${key}.title`);
+            const description = t(`rules.sections.${key}.description`);
+            const items = t(`rules.sections.${key}.items`, {
+              returnObjects: true,
+            }) as string[];
+
+            return (
+              <ScrollReveal key={key} delay={i * 0.06}>
+                <section className="bg-surface border border-white/5 rounded-2xl p-6 h-full">
+                  <div className="flex items-start gap-4 mb-5">
+                    <div className="p-3 bg-gold-500/10 rounded-xl border border-gold-500/20 shrink-0">
+                      <Icon size={18} className="text-gold-500" />
                     </div>
-                  ))}
-                </div>
-              </section>
-            </ScrollReveal>
-          ))}
+                    <div>
+                      <h2 className="font-heading text-xl font-bold text-text-primary mb-1">
+                        {title}
+                      </h2>
+                      <p className="text-sm text-text-secondary leading-relaxed">{description}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {Array.isArray(items) &&
+                      items.map((item) => (
+                        <div key={item} className="flex items-start gap-3">
+                          <CheckCircle2 size={16} className="text-gold-500 shrink-0 mt-0.5" />
+                          <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
+                        </div>
+                      ))}
+                  </div>
+                </section>
+              </ScrollReveal>
+            );
+          })}
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
@@ -219,12 +182,13 @@ export default function RulesPage() {
                 </div>
               </div>
               <div className="space-y-3">
-                {eventDayChecklist.map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <CheckCircle2 size={16} className="text-gold-500 shrink-0 mt-0.5" />
-                    <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
-                  </div>
-                ))}
+                {Array.isArray(eventDayChecklist) &&
+                  eventDayChecklist.map((item) => (
+                    <div key={item} className="flex items-start gap-3">
+                      <CheckCircle2 size={16} className="text-gold-500 shrink-0 mt-0.5" />
+                      <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
+                    </div>
+                  ))}
               </div>
             </section>
           </ScrollReveal>

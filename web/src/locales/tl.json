@@ -383,6 +383,51 @@
       "time": {
         "title": "Mga Limitasyon sa Oras ng Laban",
         "desc": "Opisyal na tagal ng laban ayon sa ranggo ng belt at grupo ng edad"
+      },
+      "competitionFormat": {
+        "title": "Format ng kompetisyon",
+        "description": "Kung paano nakaayos, pinamamahalaan, at napagpapasyahan ang mga laban.",
+        "items": [
+          "Ang mga laban ay sumusunod sa federation-style brackets, mga utos ng referee, at mga patakaran ng dibisyon.",
+          "Ang grupo ng edad, ranggo ng belt, at mga proseso ng laban ay maaaring magbago ng pinapahintulutan sa isang dibisyon.",
+          "Ang mga anunsyo ng organizer, mga napost na bracket, at mga instruksyon sa tabi ng mat ay mahalaga pa rin sa araw ng event."
+        ]
+      },
+      "giNoGi": {
+        "title": "Gi at no-gi na uniporme",
+        "description": "Ano ang dapat isuot ng mga atleta at ano ang maaaring maging sanhi ng pagpalya sa uniform check.",
+        "items": [
+          "Ang mga uniporme ay dapat na malinis, handa sa kompetisyon, at walang mga punit o hindi ligtas na pagbabago.",
+          "Ang no-gi gear ay dapat na maayos na akma, at ang mga shorts ay hindi dapat may nakalantad na zipper o hindi ligtas na bulsa.",
+          "Kung ang gear ay hindi nakakatugon sa mga pamantayan ng inspeksyon, ang mga competitor ay maaaring kailangang magpalit bago makalaban."
+        ]
+      },
+      "pointsAdvantages": {
+        "title": "Mga puntos at kalamangan",
+        "description": "Kung paano nakakaapekto ang positional scoring, mga kalamangan, at mga parusa sa resulta.",
+        "items": [
+          "Ang pagmamarka ay sumusunod sa rulebook para sa positional control, takedown, sweep, pass, at dominant na pagtatapos.",
+          "Ang mga kalamangan at parusa ay ginagamit kapag ang mga puntos ay hindi ganap na naghihiwalay ng mga competitor.",
+          "Ang pagpapasya ng referee at mga desisyon ng talahanayan ay dapat na ituring bilang opisyal na resulta sa mat."
+        ]
+      },
+      "illegalTechniques": {
+        "title": "Mga ilegal na teknik at kaligtasan",
+        "description": "Mga inaasahan sa kaligtasan, mga kategorya ng paglabag, at mga panganib ng diskwalipikasyon.",
+        "items": [
+          "Ang mga ilegal na galaw ay nagbabago ayon sa ranggo ng belt at dibisyon ng edad, kaya dapat suriin ng mga atleta ang buong rulebook bago makalaban.",
+          "Ang mapanganib na pag-uugali, hindi sportsman-like na gawi, at mga ipinagbabawal na submission ay maaaring humantong sa mga parusa o diskwalipikasyon.",
+          "Ang pangunahing kalinisan, pinutol na mga kuko, at ligtas na kagamitan ay sapilitan para sa lahat ng competitor."
+        ]
+      },
+      "matchTimes": {
+        "title": "Mga oras ng laban at dibisyon",
+        "description": "Kung ano ang nakakaimpluwensya sa haba ng laban at estruktura ng dibisyon.",
+        "items": [
+          "Ang tagal ng laban ay nakasalalay sa dibisyon, edad, at antas ng belt.",
+          "Ang mga dibisyon ng gi at no-gi ay maaaring may iba't ibang detalye ng operasyon kahit na ang event weekend ay ibinahagi.",
+          "Ang mga atleta ay dapat i-verify ang kanilang bracket, iskedyul, at mga instruksyon sa weigh-in bago magsimula ang event."
+        ]
       }
     },
     "badge": "Gabay ng Competitor",
@@ -395,6 +440,22 @@
     "maintenanceTitle": "Katayuan ng page",
     "lastUpdatedLabel": "Huling update:",
     "contactTitle": "May tanong tungkol sa rules?",
-    "footerCta": "Opisyal na federation rules:"
+    "footerCta": "Opisyal na federation rules:",
+    "note": "Gamitin ang mga buod sa ibaba para maghanda, pagkatapos ay sumangguni sa opisyal na SJJIF rules source o i-download ang PDF. Kung ang bulletin ng organizer, bracket note, o opisyal na anunsyo ay may event-specific na instruksyon, sundin ang mga instruksyong iyon sa araw ng event.",
+    "rulebookCopy": "Mag-download ng PDF na kopya ng SJJIF rules na kasalukuyang tinutukoy ng mga materyales ng Marianas Open.",
+    "eventDaySubtitle": "Ang mga operational na detalye sa ibaba ay kasinghalaga ng mga teknikal na patakaran.",
+    "fullRulebookSubtitle": "Ang live na SJJIF rules source ay nananatiling pangunahing sanggunian para sa eksaktong wording ng artikulo at detalyadong mga pagbubukod.",
+    "footerNote": "Ang lokal na gabay na ito ay nilayon upang mapabuti ang kalinawan at maiwasan ang mga patay na federation link. Hindi nito pinapalitan ang opisyal na SJJIF rules language o event-specific na instruksyon ng organizer.",
+    "maintenanceSubtitle": "Ang gabay na ito ay lokal na pinapanatili upang hindi mapadala ang mga competitor sa hindi mapagkakatiwalaang third-party rules pages.",
+    "maintenanceBody": "Kung ang federation language, organizer procedures, o event-day requirements ay magbabago, ang page na ito ay dapat i-update upang tumugma sa pinakabagong aprubadong gabay.",
+    "contactSubtitle": "Para sa mga paglilinaw na partikular sa event, isyu sa bracket, o instruksyon ng organizer, makipag-ugnayan nang direkta sa Marianas Open team.",
+    "contactNote": "Gamitin ang federation rules source o nada-download na PDF para sa buong rule language, ngunit gamitin ang organizer contact sa itaas kapag kailangan mo ng mga sagot na partikular sa event series na ito.",
+    "eventDayChecklist": [
+      "Magdala ng valid na government photo ID.",
+      "Suriin ang iyong bracket, iskedyul, at deadline ng pagwawasto bago mag-event day.",
+      "Kumpirmahin ang iyong nairehistro na timbang sa kilogram at maging handa para sa mga pamamaraan ng weigh-in sa araw ng event.",
+      "Dumating nang maaga dahil maaaring mauna ang mga laban sa iskedyul.",
+      "Magsuot ng sandalyas o sapatos kapag wala sa mat at magdala ng backup na uniporme kung maaari."
+    ]
   }
 }
