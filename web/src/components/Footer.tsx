@@ -66,6 +66,10 @@ export default function Footer() {
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-muted">
           <p>&copy; 2026 Marianas Open. {t('footer.rights')}</p>
           <div className="flex items-center gap-4">
+            <Link to="/rules" className="hover:text-text-secondary transition-colors">
+              {t('footer.rules')}
+            </Link>
+            <span className="text-white/10">|</span>
             <Link to="/terms" className="hover:text-text-secondary transition-colors">
               {t('footer.terms')}
             </Link>

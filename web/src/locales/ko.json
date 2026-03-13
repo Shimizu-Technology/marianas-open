@@ -7,7 +7,8 @@
     "about": "소개",
     "rankings": "랭킹",
     "competitors": "선수 소개",
-    "pastEvents": "지난 이벤트"
+    "pastEvents": "지난 이벤트",
+    "rules": "규칙"
   },
   "pastEvents": {
     "badge": "이벤트 아카이브",
@@ -188,7 +189,8 @@
     "contact": "문의",
     "rights": "모든 권리 보유.",
     "builtBy": "Shimizu Technology 제작",
-    "terms": "이용약관"
+    "terms": "이용약관",
+    "rules": "규칙"
   },
   "common": {
     "guam": "괌",
@@ -355,5 +357,33 @@
     "next": "다음",
     "upcoming": "예정",
     "viewEvent": "이벤트 보기"
+  },
+  "rules": {
+    "title": "경기 규칙",
+    "subtitle": "마리아나스 오픈 공식 — ASJJF 규칙집",
+    "intro": "마리아나스 오픈은 아시아 스포츠 주짓수 연맹(ASJJF)의 공식 규칙과 규정을 따릅니다. 모든 선수는 출전 전 공식 규칙집을 숙지하시기 바랍니다.",
+    "officialNote": "공식 규칙집은 아시아 스포츠 주짓수 연맹에서 호스팅합니다:",
+    "sections": {
+      "general": {
+        "title": "일반 경기 규칙",
+        "desc": "경기 형식, 채점, 서브미션 규칙 및 심판 결정"
+      },
+      "uniform": {
+        "title": "기 및 유니폼 요구사항",
+        "desc": "승인된 기 사양, 패치 및 노기 복장 기준"
+      },
+      "prohibited": {
+        "title": "금지 기술",
+        "desc": "벨트 등급 및 연령별로 허용되지 않는 기술"
+      },
+      "points": {
+        "title": "점수 및 어드밴티지",
+        "desc": "점수, 어드밴티지, 패널티 채점 방법"
+      },
+      "time": {
+        "title": "경기 시간 제한",
+        "desc": "벨트 등급 및 연령대별 공식 경기 시간"
+      }
+    }
   }
 }

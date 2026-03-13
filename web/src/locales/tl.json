@@ -7,7 +7,8 @@
     "about": "Tungkol",
     "rankings": "Mga ranggo",
     "competitors": "Mga Kalaban",
-    "pastEvents": "Nakaraang Events"
+    "pastEvents": "Nakaraang Events",
+    "rules": "Mga Patakaran"
   },
   "pastEvents": {
     "badge": "Archive ng Kaganapan",
@@ -188,7 +189,8 @@
     "contact": "Makipag-ugnayan",
     "rights": "Lahat ng karapatan ay nakalaan.",
     "builtBy": "Gawa ng Shimizu Technology",
-    "terms": "Mga Tuntunin at Kundisyon"
+    "terms": "Mga Tuntunin at Kundisyon",
+    "rules": "Mga Patakaran"
   },
   "common": {
     "guam": "Guam",
@@ -355,5 +357,33 @@
     "next": "Susunod",
     "upcoming": "Paparating",
     "viewEvent": "Tingnan ang Event"
+  },
+  "rules": {
+    "title": "Mga Patakaran sa Kompetisyon",
+    "subtitle": "Opisyal na Marianas Open — ASJJF Rulebook",
+    "intro": "Sumusunod ang Marianas Open sa opisyal na mga patakaran at regulasyon na itinakda ng Asian Sport Jiu-Jitsu Federation (ASJJF). Inaasahang repasuhin ng lahat ng kalahok ang buong rulebook bago makipagkompetisyon.",
+    "officialNote": "Ang kumpletong opisyal na rulebook ay ini-host ng Asian Sport Jiu-Jitsu Federation sa",
+    "sections": {
+      "general": {
+        "title": "Pangkalahatang Mga Patakaran sa Kompetisyon",
+        "desc": "Format ng laban, pagmamarka, mga patakaran sa submission, at desisyon ng referee"
+      },
+      "uniform": {
+        "title": "Mga Kinakailangan sa Gi at Uniporme",
+        "desc": "Mga aprubadong detalye ng gi, mga patch, at pamantayan ng no-gi attire"
+      },
+      "prohibited": {
+        "title": "Mga Ipinagbabawal na Teknik",
+        "desc": "Mga teknikang hindi pinahihintulutan ayon sa ranggo ng belt at grupo ng edad"
+      },
+      "points": {
+        "title": "Mga Puntos at Kalamangan",
+        "desc": "Paano nagmamarka ng mga puntos, kalamangan, at parusa"
+      },
+      "time": {
+        "title": "Mga Limitasyon sa Oras ng Laban",
+        "desc": "Opisyal na tagal ng laban ayon sa ranggo ng belt at grupo ng edad"
+      }
+    }
   }
 }

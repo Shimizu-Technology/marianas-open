@@ -7,7 +7,8 @@
     "about": "大会について",
     "rankings": "ランキング",
     "competitors": "選手紹介",
-    "pastEvents": "過去のイベント"
+    "pastEvents": "過去のイベント",
+    "rules": "ルール"
   },
   "pastEvents": {
     "badge": "イベントアーカイブ",
@@ -188,7 +189,8 @@
     "contact": "お問い合わせ",
     "rights": "全著作権所有。",
     "builtBy": "Shimizu Technology 制作",
-    "terms": "利用規約"
+    "terms": "利用規約",
+    "rules": "ルール"
   },
   "common": {
     "guam": "グアム",
@@ -355,5 +357,33 @@
     "next": "次回",
     "upcoming": "今後",
     "viewEvent": "イベント詳細"
+  },
+  "rules": {
+    "title": "競技ルール",
+    "subtitle": "マリアナズオープン公式 — ASJJF ルールブック",
+    "intro": "マリアナズオープンはアジアスポーツ柔術連盟（ASJJF）の定める公式ルール・規則に従います。すべての選手は出場前に公式ルールブックを確認してください。",
+    "officialNote": "公式ルールブックはアジアスポーツ柔術連盟が",
+    "sections": {
+      "general": {
+        "title": "競技一般ルール",
+        "desc": "試合形式、採点、サブミッション、レフェリー判定"
+      },
+      "uniform": {
+        "title": "道着・ユニフォーム規定",
+        "desc": "認定道着の仕様、パッチ、ノーギウェア基準"
+      },
+      "prohibited": {
+        "title": "禁止技",
+        "desc": "帯色・年齢別に禁止されているテクニック"
+      },
+      "points": {
+        "title": "ポイントとアドバンテージ",
+        "desc": "ポイント、アドバンテージ、ペナルティの採点方法"
+      },
+      "time": {
+        "title": "試合時間",
+        "desc": "帯色・年齢別の公式試合時間"
+      }
+    }
   }
 }

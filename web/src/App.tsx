@@ -16,6 +16,7 @@ const RankingsPage = lazy(() => import('./pages/RankingsPage'));
 const CompetitorProfilePage = lazy(() => import('./pages/CompetitorProfilePage'));
 const CompetitorsPage = lazy(() => import('./pages/CompetitorsPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
+const RulesPage = lazy(() => import('./pages/RulesPage'));
 const PastEventsPage = lazy(() => import('./pages/PastEventsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
@@ -61,6 +62,7 @@ function AnimatedRoutes() {
             <Route path="/competitors" element={<CompetitorsPage />} />
             <Route path="/competitors/profile" element={<CompetitorProfilePage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/rules" element={<RulesPage />} />
             <Route path="/watch" element={<WatchPage />} />
             <Route path="/events/past" element={<PastEventsPage />} />
             <Route path="/events/:slug" element={<EventDetailPage />} />
