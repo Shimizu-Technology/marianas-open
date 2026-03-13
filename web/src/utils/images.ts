@@ -35,8 +35,9 @@ export function resolveMediaUrl(url: string | null | undefined): string | null {
   if (url.startsWith('/')) return `${apiOrigin}${url}`;
 
   // Localhost URLs from dev uploads should use configured API origin in deployed UI
-  if (/^https?:\/\/(localhost|127\.0\.0\.1):3000/.test(url)) {
-    return url.replace(/^https?:\/\/(localhost|127\.0\.0\.1):3000/, apiOrigin);
+  // Accept any localhost/127.0.0.1 port (not just 3000) to avoid hard-coded dev-port drift.
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(url)) {
+    return url.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, apiOrigin);
   }
 
   return url;
