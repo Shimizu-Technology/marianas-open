@@ -11,6 +11,7 @@ import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
+import { resolveMediaUrl } from '../utils/images';
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -439,7 +440,7 @@ export default function HomePage() {
                   .map((sponsor) => {
                     const key = normalizeSponsorKey(sponsor.name);
                     const fallback = SPONSOR_LOGO_FALLBACK[key];
-                    const logoSrc = sponsor.logo_url || fallback?.src || null;
+                    const logoSrc = resolveMediaUrl(sponsor.logo_url) || fallback?.src || null;
                     const logoUrl = sponsor.website_url || fallback?.url || null;
                     const applyMonochromeFilter = !sponsor.logo_url && !!fallback?.src;
                     return (
