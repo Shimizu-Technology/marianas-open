@@ -33,7 +33,7 @@ export default function ImageWithShimmer({ src, alt, className = '', fallbackSrc
         className={className}
         onLoad={() => setLoaded(true)}
         onError={() => {
-          if (fallbackSrc && !didFallback) {
+          if (fallbackSrc && !didFallback && fallbackSrc !== currentSrc) {
             setDidFallback(true);
             setCurrentSrc(fallbackSrc);
             setLoaded(false);

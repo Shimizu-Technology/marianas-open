@@ -32,18 +32,19 @@ namespace :media do
           next
         end
 
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = uri.scheme == 'https'
-        http.open_timeout = 5
-        http.read_timeout = 8
-
-        request = Net::HTTP::Head.new(uri.request_uri)
-        response = http.request(request)
+        response = Net::HTTP.start(
+          uri.host,
+          uri.port,
+          use_ssl: uri.scheme == 'https',
+          open_timeout: 5,
+          read_timeout: 8
+        ) do |http|
+          request = Net::HTTP::Head.new(uri.request_uri)
+          http.request(request)
+        end
 
         code = response.code.to_i
-        if code >= 400
-          failures << [label, raw_url, code]
-        end
+        failures << [label, raw_url, code] if code >= 400
       rescue StandardError => e
         failures << [label, raw_url, e.class.name]
       end
