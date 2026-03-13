@@ -26,7 +26,7 @@ const ROAD_TO_OPEN_POSTERS = [
     title: 'Marianas Pro Korea',
     isoDate: '2026-06-06',
     location: 'SETEC, Seoul, Korea',
-    href: 'https://asjjf.org/main/eventInfo/1867',
+    href: 'https://asjjf.org/main/eventInfo/1909',
   },
   {
     src: '/images/poster-copa.jpg',
