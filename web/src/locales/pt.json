@@ -7,7 +7,8 @@
     "about": "Sobre",
     "rankings": "Classificações",
     "competitors": "Competidores",
-    "pastEvents": "Eventos Anteriores"
+    "pastEvents": "Eventos Anteriores",
+    "rules": "Regras"
   },
   "pastEvents": {
     "badge": "Arquivo de eventos",
@@ -188,7 +189,8 @@
     "contact": "Contato",
     "rights": "Todos os direitos reservados.",
     "builtBy": "Desenvolvido por Shimizu Technology",
-    "terms": "Termos e Condições"
+    "terms": "Termos e Condições",
+    "rules": "Regras"
   },
   "common": {
     "guam": "Guam",
@@ -355,5 +357,33 @@
     "next": "Próximo",
     "upcoming": "Por vir",
     "viewEvent": "Ver Evento"
+  },
+  "rules": {
+    "title": "Regras de Competição",
+    "subtitle": "Marianas Open Oficial — Livro de Regras ASJJF",
+    "intro": "O Marianas Open segue as regras e regulamentos oficiais estabelecidos pela Asian Sport Jiu-Jitsu Federation (ASJJF). Todos os competidores devem revisar o livro de regras completo antes de competir.",
+    "officialNote": "Livro de regras oficial completo hospedado pela Asian Sport Jiu-Jitsu Federation em",
+    "sections": {
+      "general": {
+        "title": "Regras Gerais de Competição",
+        "desc": "Formato de luta, pontuação, regras de finalização e decisões do árbitro"
+      },
+      "uniform": {
+        "title": "Requisitos de Gi e Uniforme",
+        "desc": "Especificações de gi aprovadas, patches e padrões de roupas no-gi"
+      },
+      "prohibited": {
+        "title": "Técnicas Proibidas",
+        "desc": "Técnicas não permitidas por graduação de faixa e divisão de idade"
+      },
+      "points": {
+        "title": "Pontos e Vantagens",
+        "desc": "Como pontos, vantagens e penalidades são marcados"
+      },
+      "time": {
+        "title": "Limites de Tempo de Luta",
+        "desc": "Durações oficiais de luta por graduação de faixa e faixa etária"
+      }
+    }
   }
 }

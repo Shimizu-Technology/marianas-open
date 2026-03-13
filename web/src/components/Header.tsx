@@ -14,6 +14,7 @@ export default function Header() {
     { to: '/calendar', label: t('nav.events') },
     { to: '/events/past', label: t('nav.pastEvents') },
     { to: '/about', label: t('nav.about') },
+    { to: '/rules', label: t('nav.rules') },
     { to: '/rankings', label: t('nav.rankings') },
     { to: '/competitors', label: t('nav.competitors') },
     { to: '/watch', label: t('nav.watch') },

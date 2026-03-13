@@ -18,7 +18,7 @@ export default function QRShare() {
   const shouldReduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
 
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://marianasopen.com';
   const langName = languageNames[i18n.language] || i18n.language;
 
   return (

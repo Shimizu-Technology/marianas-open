@@ -63,7 +63,7 @@ interface SocialShareProps {
 export default function SocialShare({ shareText, className = '' }: SocialShareProps) {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
-  const url = typeof window !== 'undefined' ? window.location.href : '';
+  const url = typeof window !== 'undefined' ? window.location.href : 'https://marianasopen.com';
   const text = shareText || t('share.defaultText');
 
   return (
