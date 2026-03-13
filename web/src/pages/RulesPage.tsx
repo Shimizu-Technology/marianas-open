@@ -248,13 +248,13 @@ export default function RulesPage() {
                 </div>
               </div>
               <a
-                href={RULEBOOK_PDF_URL}
+                href={SJJIF_RULES_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-gold-500 hover:underline"
               >
-                <FileDown size={16} />
-                {t('rulesHub.downloadLinkText', 'Open the downloadable rules PDF')}
+                <ExternalLink size={16} />
+                {t('rulesHub.officialSourceLinkText', 'Open the live SJJIF rules source')}
               </a>
               <p className="text-sm text-text-secondary leading-relaxed mt-4">
                 {t(
