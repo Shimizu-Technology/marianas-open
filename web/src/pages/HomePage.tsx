@@ -10,7 +10,7 @@ import { useEvents, useSponsors } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
-import { getDateLocale } from '../utils/dateLocale';
+import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -24,15 +24,6 @@ function StarRating({ count }: { count: number }) {
 
 function normalizeSponsorKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
-function parseDateLocalSafe(value: string) {
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (match) {
-    const [, y, m, d] = match;
-    return new Date(Number(y), Number(m) - 1, Number(d));
-  }
-  return new Date(value);
 }
 
 const ORG_PARTNERS = [

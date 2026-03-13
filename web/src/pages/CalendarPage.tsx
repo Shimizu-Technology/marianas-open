@@ -9,7 +9,7 @@ import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useEvents } from '../hooks/useApi';
 import type { Event } from '../services/api';
-import { getDateLocale } from '../utils/dateLocale';
+import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 
 // Event/venue names are treated as official proper nouns from organizer assets.
 // Dates remain locale-formatted via `formatEventDate`.
@@ -36,15 +36,6 @@ const ROAD_TO_OPEN_POSTERS = [
     href: 'https://asjjf.org/main/eventInfo/1837',
   },
 ] as const;
-
-function parseDateLocalSafe(value: string) {
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (match) {
-    const [, y, m, d] = match;
-    return new Date(Number(y), Number(m) - 1, Number(d));
-  }
-  return new Date(value);
-}
 
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
