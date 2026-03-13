@@ -26,6 +26,15 @@ function normalizeSponsorKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+function parseDateLocalSafe(value: string) {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const [, y, m, d] = match;
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+  return new Date(value);
+}
+
 const ORG_PARTNERS = [
   {
     key: 'asjjf',
@@ -301,10 +310,10 @@ export default function HomePage() {
                     {/* Date */}
                     <div className="shrink-0 w-28">
                       <div className="text-xs text-text-muted uppercase tracking-wider font-heading">
-                        {new Date(event.date).toLocaleDateString(getDateLocale(i18n.language), { month: 'short' })}
+                        {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { month: 'short' })}
                       </div>
                       <div className="text-2xl font-heading font-black">
-                        {new Date(event.date).toLocaleDateString(getDateLocale(i18n.language), { day: 'numeric' })}
+                        {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { day: 'numeric' })}
                       </div>
                     </div>
 
