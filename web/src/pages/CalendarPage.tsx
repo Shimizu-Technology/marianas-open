@@ -57,7 +57,7 @@ export default function CalendarPage() {
   const pastEventsByYear = useMemo(() => {
     const grouped: Record<number, typeof pastEvents> = {};
     pastEvents.forEach(e => {
-      const year = new Date(e.date).getFullYear();
+      const year = parseDateLocalSafe(e.date).getFullYear();
       if (!grouped[year]) grouped[year] = [];
       grouped[year].push(e);
     });
