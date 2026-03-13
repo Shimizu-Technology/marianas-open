@@ -13,9 +13,38 @@ const eventHeroImages: Record<string, string> = {
   'marianas-open-2026': '/images/venue-mats.webp',
 };
 
+function getApiOrigin(): string {
+  const configured = import.meta.env.VITE_API_URL as string | undefined;
+  if (configured) {
+    try {
+      return new URL(configured).origin;
+    } catch {
+      return configured;
+    }
+  }
+  return 'http://localhost:3000';
+}
+
+/** Normalize backend/media URLs for production safety. */
+export function resolveMediaUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+
+  const apiOrigin = getApiOrigin();
+
+  // Relative ActiveStorage paths from API
+  if (url.startsWith('/')) return `${apiOrigin}${url}`;
+
+  // Localhost URLs from dev uploads should use configured API origin in deployed UI
+  if (url.startsWith('http://localhost:3000') || url.startsWith('http://127.0.0.1:3000')) {
+    return url.replace(/^https?:\/\/(localhost|127\.0\.0\.1):3000/, apiOrigin);
+  }
+
+  return url;
+}
+
 /** Get hero image for an event — uses API URL if available, falls back to local */
 export function getEventHeroImage(slug: string, apiUrl: string | null): string {
-  return apiUrl || eventHeroImages[slug] || '/images/venue-crowd.webp';
+  return resolveMediaUrl(apiUrl) || eventHeroImages[slug] || '/images/venue-crowd.webp';
 }
 
 /** Organization logo fallback */

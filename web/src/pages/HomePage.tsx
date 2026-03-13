@@ -42,6 +42,10 @@ const SPONSOR_LOGO_FALLBACK: Record<string, { src: string; url: string }> = {
     src: '/images/logos/sponsors/gvb-logo.png',
     url: 'https://www.visitguam.com',
   },
+  gvbguamvisitorsbureau: {
+    src: '/images/logos/sponsors/gvb-logo.png',
+    url: 'https://www.visitguam.com',
+  },
   unitedairlines: {
     src: '/images/logos/sponsors/united-airlines-logo.svg',
     url: 'https://www.united.com',
@@ -70,28 +74,28 @@ const ORG_PARTNERS = [
     name: 'ASJJF',
     src: '/images/logos/asjjf-logo.png',
     url: 'https://asjjf.org',
-    heightClass: 'h-14',
+    heightClass: 'h-16',
   },
   {
     key: 'msjjf',
     name: 'MSJJF',
     src: '/images/logos/msjjf-logo-white.png',
     url: 'https://marianasopen.com',
-    heightClass: 'h-12',
+    heightClass: 'h-14',
   },
   {
     key: 'copademarianas',
     name: 'Copa de Marianas',
     src: '/images/logos/copa-seal-logo.png',
     url: 'https://asjjf.org/main/eventInfo/1837',
-    heightClass: 'h-14',
+    heightClass: 'h-16',
   },
   {
     key: 'roadtotheopen',
     name: 'Road to the Open',
     src: '/images/logos/road-to-open-logo-white.png',
     url: 'https://marianasopen.com/calendar',
-    heightClass: 'h-10',
+    heightClass: 'h-12',
   },
 ] as const;
 
@@ -426,7 +430,7 @@ export default function HomePage() {
 
           {/* Commercial sponsors — text or logo from API */}
           <ScrollReveal delay={0.3}>
-            <div className="flex flex-wrap items-center justify-center gap-8 opacity-35">
+            <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
               {sponsorsLoading ? (
                 <div className="text-text-muted text-sm">...</div>
               ) : sponsors.length > 0 ? (
