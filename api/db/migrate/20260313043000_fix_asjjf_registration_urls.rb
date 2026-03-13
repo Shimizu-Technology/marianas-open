@@ -10,7 +10,11 @@ class FixAsjjfRegistrationUrls < ActiveRecord::Migration[8.1]
 
   def up
     CORRECTIONS.each do |slug, url|
-      Event.where(slug: slug).update_all(registration_url: url)
+      execute <<~SQL
+        UPDATE events
+        SET registration_url = #{connection.quote(url)}
+        WHERE slug = #{connection.quote(slug)}
+      SQL
     end
   end
 
@@ -22,7 +26,11 @@ class FixAsjjfRegistrationUrls < ActiveRecord::Migration[8.1]
       "marianas-pro-korea-2026"     => "https://asjjf.org/main/eventInfo/1867",
       "marianas-pro-hong-kong-2026" => "https://asjjf.org/main/eventInfo/1868",
     }.each do |slug, url|
-      Event.where(slug: slug).update_all(registration_url: url)
+      execute <<~SQL
+        UPDATE events
+        SET registration_url = #{connection.quote(url)}
+        WHERE slug = #{connection.quote(slug)}
+      SQL
     end
   end
 end
