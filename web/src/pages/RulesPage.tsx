@@ -94,7 +94,7 @@ export default function RulesPage() {
                 <p className="text-text-secondary leading-relaxed">
                   {t(
                     'rules.note',
-                    'Use the summaries below to prepare, then reference the official SJJIF rules source or download the PDF copy. If an organizer bulletin, bracket note, or official announcement gives event-specific instructions, follow those instructions on event day.'
+                    'Use the summaries below to prepare, then reference the official ASJJF rules source and supporting SJJIF rulebook resources. If an organizer bulletin, bracket note, or official announcement gives event-specific instructions, follow those instructions on event day.'
                   )}
                 </p>
               </div>
@@ -105,7 +105,7 @@ export default function RulesPage() {
                 <p className="text-sm text-text-secondary leading-relaxed mb-5">
                   {t(
                     'rules.rulebookCopy',
-                    'Download a PDF copy of the SJJIF rules currently referenced by Marianas Open materials.'
+                    'Download a PDF copy of the SJJIF rulebook used as a supporting reference alongside ASJJF guidance.'
                   )}
                 </p>
                 <a
