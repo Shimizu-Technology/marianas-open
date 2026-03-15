@@ -436,16 +436,16 @@
     "opensExternally": "将在新标签页打开规则 PDF。",
     "eventDayTitle": "比赛日提醒",
     "fullRulebookTitle": "需要查看联盟完整规则吗？",
-    "officialSourceLinkText": "Open official ASJJF rules",
+    "officialSourceLinkText": "打开 ASJJF 官方规则",
     "maintenanceTitle": "页面状态",
     "lastUpdatedLabel": "最后更新:",
     "contactTitle": "有规则相关问题？",
-    "footerCta": "Official rules references:",
-    "note": "使用下方摘要做准备，然后参考官方SJJIF规则来源或下载PDF副本。如果主办方公告、对阵表备注或官方通知中有活动特定的指示，请在比赛当天遵从这些指示。",
-    "rulebookCopy": "下载马里亚纳公开赛当前参考的SJJIF规则PDF副本。",
+    "footerCta": "官方规则参考：",
+    "note": "请先通过下方摘要进行准备，然后参考 ASJJF 官方规则页面及 SJJIF 规则手册辅助资料。若主办方公告、分组备注或官方通知提供了赛事专项指示，请在比赛当天以该指示为准。",
+    "rulebookCopy": "下载 SJJIF 规则手册 PDF，作为 ASJJF 指引的辅助参考。",
     "eventDaySubtitle": "以下操作细节与技术规则同等重要。",
-    "fullRulebookSubtitle": "ASJJF is the primary official rules reference for this event series. SJJIF materials remain available as the underlying rulebook resource.",
-    "footerNote": "This local guide is meant to improve clarity and avoid dead-end links. It does not replace official ASJJF guidance, SJJIF rulebook language, or event-specific organizer instructions.",
+    "fullRulebookSubtitle": "本系列赛事的主要官方规则参考为 ASJJF。SJJIF 资料继续作为底层规则手册的辅助参考。",
+    "footerNote": "本地指南旨在提升清晰度并避免失效链接。它不能替代 ASJJF 官方指引、SJJIF 规则手册原文，或赛事当天主办方的专项指示。",
     "maintenanceSubtitle": "本指南在本地维护，以避免运动员被引导至不可靠的第三方规则页面。",
     "maintenanceBody": "如果联盟语言、主办方程序或比赛当天要求发生变化，应更新此页面以符合最新的已批准指导方针。",
     "contactSubtitle": "有关活动特定的澄清、对阵表问题或主办方指示，请直接联系马里亚纳公开赛团队。",
@@ -457,6 +457,6 @@
       "提前到达，因为比赛可能会提前进行。",
       "在场外穿拖鞋或鞋子，如有可能请携带备用道服。"
     ],
-    "secondarySourceLinkText": "Open SJJIF rulebook resources"
+    "secondarySourceLinkText": "打开 SJJIF 规则手册资源"
   }
 }
