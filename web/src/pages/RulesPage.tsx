@@ -206,7 +206,7 @@ export default function RulesPage() {
                   </h2>
                   <p className="text-sm text-text-secondary">
                     {t(
-                      'rules.fullRulebookSubtitleV2',
+                      'rules.fullRulebookSubtitle',
                       'ASJJF is the primary official rules reference for this event series. SJJIF materials remain available as the underlying rulebook resource.'
                     )}
                   </p>
@@ -220,7 +220,7 @@ export default function RulesPage() {
                   className="inline-flex items-center gap-2 text-gold-500 hover:underline"
                 >
                   <ExternalLink size={16} />
-                  {t('rules.officialSourceLinkTextV2', 'Open official ASJJF rules')}
+                  {t('rules.officialSourceLinkText', 'Open official ASJJF rules')}
                 </a>
                 <a
                   href={SJJIF_RULES_URL}
@@ -229,12 +229,12 @@ export default function RulesPage() {
                   className="inline-flex items-center gap-2 text-text-secondary hover:text-gold-500 transition-colors"
                 >
                   <ExternalLink size={16} />
-                  {t('rules.secondarySourceLinkText', 'Open SJJIF rulebook resources')}
+                  Open SJJIF rulebook resources
                 </a>
               </div>
               <p className="text-sm text-text-secondary leading-relaxed mt-4">
                 {t(
-                  'rules.footerNoteV2',
+                  'rules.footerNote',
                   'This local guide is meant to improve clarity and avoid dead-end links. It does not replace official ASJJF guidance, SJJIF rulebook language, or event-specific organizer instructions.'
                 )}
               </p>
@@ -325,7 +325,7 @@ export default function RulesPage() {
         <ScrollReveal delay={0.4}>
           <div className="border-t border-white/5 pt-8 mt-12">
             <p className="text-text-muted text-sm text-center">
-              {t('rules.footerCtaV2', 'Official rules references:')}{' '}
+              {t('rules.footerCta', 'Official rules references:')}{' '}
               <a
                 href={ASJJF_RULES_URL}
                 target="_blank"
