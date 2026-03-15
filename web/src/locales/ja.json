@@ -436,16 +436,16 @@
     "opensExternally": "ルールPDFを新しいタブで開きます。",
     "eventDayTitle": "大会当日の注意事項",
     "fullRulebookTitle": "連盟の全文ルールが必要ですか？",
-    "officialSourceLinkText": "SJJIF公式ルール（最新）を開く",
+    "officialSourceLinkText": "Open official ASJJF rules",
     "maintenanceTitle": "ページ状態",
     "lastUpdatedLabel": "最終更新:",
     "contactTitle": "ルールに関する質問",
-    "footerCta": "公式連盟ルール:",
+    "footerCta": "Official rules references:",
     "note": "下記の要約で準備し、SJJIFの公式ルールソースを参照するかPDFをダウンロードしてください。主催者通知、ブラケット注記、または公式発表に大会固有の指示がある場合は、大会当日にそれに従ってください。",
     "rulebookCopy": "マリアナズオープン資料で現在参照されているSJJIFルールのPDFコピーをダウンロードしてください。",
     "eventDaySubtitle": "以下の運営上の詳細は技術的なルールと同様に重要です。",
-    "fullRulebookSubtitle": "SJJIF最新ルールソースは正確な条文表現と詳細な例外の主要参照先です。",
-    "footerNote": "このローカルガイドは明確さを高め、行き詰まった連盟リンクを避けるためのものです。SJJIFの公式ルール言語や大会固有の主催者指示の代替ではありません。",
+    "fullRulebookSubtitle": "ASJJF is the primary official rules reference for this event series. SJJIF materials remain available as the underlying rulebook resource.",
+    "footerNote": "This local guide is meant to improve clarity and avoid dead-end links. It does not replace official ASJJF guidance, SJJIF rulebook language, or event-specific organizer instructions.",
     "maintenanceSubtitle": "このガイドは、選手が信頼性の低いサードパーティのルールページへ誘導されないよう、ローカルで管理されています。",
     "maintenanceBody": "連盟の規定、主催者の手順、または大会当日の要件が変更された場合、このページを最新の承認されたガイダンスに合わせて更新する必要があります。",
     "contactSubtitle": "大会固有の確認、ブラケットの問題、または主催者の指示については、マリアナズオープンチームに直接お問い合わせください。",
@@ -456,6 +456,7 @@
       "登録体重（キログラム）を確認し、大会当日の計量手順に備えてください。",
       "試合が予定より早く進む場合があるため、早めに到着してください。",
       "マット外ではサンダルまたは靴を着用し、可能であればバックアップユニフォームを持参してください。"
-    ]
+    ],
+    "secondarySourceLinkText": "Open SJJIF rulebook resources"
   }
 }

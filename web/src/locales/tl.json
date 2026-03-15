@@ -436,16 +436,16 @@
     "opensExternally": "Magbubukas ang rules PDF sa bagong tab.",
     "eventDayTitle": "Mga paalala sa araw ng event",
     "fullRulebookTitle": "Kailangan ang buong federation language?",
-    "officialSourceLinkText": "Buksan ang live SJJIF rules source",
+    "officialSourceLinkText": "Open official ASJJF rules",
     "maintenanceTitle": "Katayuan ng page",
     "lastUpdatedLabel": "Huling update:",
     "contactTitle": "May tanong tungkol sa rules?",
-    "footerCta": "Opisyal na federation rules:",
+    "footerCta": "Official rules references:",
     "note": "Gamitin ang mga buod sa ibaba para maghanda, pagkatapos ay sumangguni sa opisyal na SJJIF rules source o i-download ang PDF. Kung ang bulletin ng organizer, bracket note, o opisyal na anunsyo ay may event-specific na instruksyon, sundin ang mga instruksyong iyon sa araw ng event.",
     "rulebookCopy": "Mag-download ng PDF na kopya ng SJJIF rules na kasalukuyang tinutukoy ng mga materyales ng Marianas Open.",
     "eventDaySubtitle": "Ang mga operational na detalye sa ibaba ay kasinghalaga ng mga teknikal na patakaran.",
-    "fullRulebookSubtitle": "Ang live na SJJIF rules source ay nananatiling pangunahing sanggunian para sa eksaktong wording ng artikulo at detalyadong mga pagbubukod.",
-    "footerNote": "Ang lokal na gabay na ito ay nilayon upang mapabuti ang kalinawan at maiwasan ang mga patay na federation link. Hindi nito pinapalitan ang opisyal na SJJIF rules language o event-specific na instruksyon ng organizer.",
+    "fullRulebookSubtitle": "ASJJF is the primary official rules reference for this event series. SJJIF materials remain available as the underlying rulebook resource.",
+    "footerNote": "This local guide is meant to improve clarity and avoid dead-end links. It does not replace official ASJJF guidance, SJJIF rulebook language, or event-specific organizer instructions.",
     "maintenanceSubtitle": "Ang gabay na ito ay lokal na pinapanatili upang hindi mapadala ang mga competitor sa hindi mapagkakatiwalaang third-party rules pages.",
     "maintenanceBody": "Kung ang federation language, organizer procedures, o event-day requirements ay magbabago, ang page na ito ay dapat i-update upang tumugma sa pinakabagong aprubadong gabay.",
     "contactSubtitle": "Para sa mga paglilinaw na partikular sa event, isyu sa bracket, o instruksyon ng organizer, makipag-ugnayan nang direkta sa Marianas Open team.",
@@ -456,6 +456,7 @@
       "Kumpirmahin ang iyong nairehistro na timbang sa kilogram at maging handa para sa mga pamamaraan ng weigh-in sa araw ng event.",
       "Dumating nang maaga dahil maaaring mauna ang mga laban sa iskedyul.",
       "Magsuot ng sandalyas o sapatos kapag wala sa mat at magdala ng backup na uniporme kung maaari."
-    ]
+    ],
+    "secondarySourceLinkText": "Open SJJIF rulebook resources"
   }
 }
