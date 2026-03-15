@@ -229,7 +229,7 @@ export default function RulesPage() {
                   className="inline-flex items-center gap-2 text-text-secondary hover:text-gold-500 transition-colors"
                 >
                   <ExternalLink size={16} />
-                  Open SJJIF rulebook resources
+                  {t('rules.secondarySourceLinkText', 'Open SJJIF rulebook resources')}
                 </a>
               </div>
               <p className="text-sm text-text-secondary leading-relaxed mt-4">
