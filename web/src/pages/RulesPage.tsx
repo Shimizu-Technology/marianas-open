@@ -339,7 +339,7 @@ export default function RulesPage() {
                 href={SJJIF_RULES_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gold-500 hover:underline"
+                className="text-text-secondary hover:text-gold-500 hover:underline transition-colors"
               >
                 sjjif.com
               </a>
