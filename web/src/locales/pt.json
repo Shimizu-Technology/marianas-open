@@ -436,16 +436,16 @@
     "opensExternally": "Abre o PDF das regras em uma nova aba.",
     "eventDayTitle": "Lembretes do dia do evento",
     "fullRulebookTitle": "Precisa do texto completo da federação?",
-    "officialSourceLinkText": "Abrir fonte oficial ao vivo da SJJIF",
+    "officialSourceLinkText": "Abrir regras oficiais da ASJJF",
     "maintenanceTitle": "Status da página",
     "lastUpdatedLabel": "Última atualização:",
     "contactTitle": "Dúvidas sobre as regras?",
-    "footerCta": "Regras oficiais da federação:",
-    "note": "Use os resumos abaixo para se preparar e, em seguida, consulte a fonte oficial das regras SJJIF ou baixe a cópia em PDF. Se um boletim do organizador, nota de chave ou anúncio oficial fornecer instruções específicas do evento, siga essas instruções no dia do evento.",
-    "rulebookCopy": "Baixe uma cópia em PDF das regras SJJIF atualmente referenciadas pelos materiais do Marianas Open.",
+    "footerCta": "Referências oficiais de regras:",
+    "note": "Use os resumos abaixo para se preparar e, em seguida, consulte a fonte oficial de regras da ASJJF e os recursos de apoio do livro de regras da SJJIF. Se um boletim do organizador, observação da chave ou anúncio oficial trouxer instruções específicas do evento, siga essas instruções no dia do evento.",
+    "rulebookCopy": "Baixe uma cópia em PDF do livro de regras da SJJIF usado como referência de apoio junto às diretrizes da ASJJF.",
     "eventDaySubtitle": "Os detalhes operacionais abaixo são tão importantes quanto as regras técnicas.",
-    "fullRulebookSubtitle": "A fonte ao vivo das regras SJJIF permanece a referência principal para a redação exata dos artigos e exceções detalhadas.",
-    "footerNote": "Este guia local visa melhorar a clareza e evitar links de federação sem saída. Não substitui o idioma oficial das regras SJJIF ou as instruções específicas do organizador do evento.",
+    "fullRulebookSubtitle": "A ASJJF é a referência oficial principal de regras para esta série de eventos. Os materiais da SJJIF continuam disponíveis como recurso complementar do livro de regras.",
+    "footerNote": "Este guia local existe para melhorar a clareza e evitar links quebrados. Ele não substitui as orientações oficiais da ASJJF, a linguagem do livro de regras da SJJIF ou instruções específicas dos organizadores para o dia do evento.",
     "maintenanceSubtitle": "Este guia é mantido localmente para que os competidores não sejam enviados a páginas de regras de terceiros não confiáveis.",
     "maintenanceBody": "Se o idioma da federação, os procedimentos do organizador ou os requisitos do dia do evento mudarem, esta página deverá ser atualizada para corresponder às orientações aprovadas mais recentes.",
     "contactSubtitle": "Para esclarecimentos específicos do evento, problemas de chave ou instruções do organizador, entre em contato diretamente com a equipe do Marianas Open.",
@@ -456,6 +456,7 @@
       "Confirme seu peso registrado em quilogramas e esteja pronto para os procedimentos de pesagem no dia do evento.",
       "Chegue cedo porque as lutas podem avançar antes do horário previsto.",
       "Use sandálias ou sapatos fora do tatame e traga um uniforme reserva, se possível."
-    ]
+    ],
+    "secondarySourceLinkText": "Abrir recursos do livro de regras da SJJIF"
   }
 }

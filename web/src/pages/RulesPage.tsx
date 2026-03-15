@@ -27,6 +27,7 @@ import ScrollReveal from '../components/ScrollReveal';
 const RULEBOOK_PDF_URL =
   import.meta.env.VITE_RULEBOOK_PDF_URL || '/files/2018-sjjif-rulebook.pdf';
 
+const ASJJF_RULES_URL = 'https://asjjf.org/main/rules?pagesType=RULE_BOOK';
 const SJJIF_RULES_URL = 'https://sjjif.com/publicPages/pages?pagesType=RULE_BOOK';
 const RULES_LAST_UPDATED = 'March 2026';
 
@@ -93,7 +94,7 @@ export default function RulesPage() {
                 <p className="text-text-secondary leading-relaxed">
                   {t(
                     'rules.note',
-                    'Use the summaries below to prepare, then reference the official SJJIF rules source or download the PDF copy. If an organizer bulletin, bracket note, or official announcement gives event-specific instructions, follow those instructions on event day.'
+                    'Use the summaries below to prepare, then reference the official ASJJF rules source and supporting SJJIF rulebook resources. If an organizer bulletin, bracket note, or official announcement gives event-specific instructions, follow those instructions on event day.'
                   )}
                 </p>
               </div>
@@ -104,7 +105,7 @@ export default function RulesPage() {
                 <p className="text-sm text-text-secondary leading-relaxed mb-5">
                   {t(
                     'rules.rulebookCopy',
-                    'Download a PDF copy of the SJJIF rules currently referenced by Marianas Open materials.'
+                    'Download a PDF copy of the SJJIF rulebook used as a supporting reference alongside ASJJF guidance.'
                   )}
                 </p>
                 <a
@@ -206,24 +207,35 @@ export default function RulesPage() {
                   <p className="text-sm text-text-secondary">
                     {t(
                       'rules.fullRulebookSubtitle',
-                      'The live SJJIF rules source remains the primary reference for exact article wording and detailed exceptions.'
+                      'ASJJF is the primary official rules reference for this event series. SJJIF materials remain available as the underlying rulebook resource.'
                     )}
                   </p>
                 </div>
               </div>
-              <a
-                href={SJJIF_RULES_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-gold-500 hover:underline"
-              >
-                <ExternalLink size={16} />
-                {t('rules.officialSourceLinkText', 'Open the live SJJIF rules source')}
-              </a>
+              <div className="flex flex-col gap-3">
+                <a
+                  href={ASJJF_RULES_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-gold-500 hover:underline"
+                >
+                  <ExternalLink size={16} />
+                  {t('rules.officialSourceLinkText', 'Open official ASJJF rules')}
+                </a>
+                <a
+                  href={SJJIF_RULES_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-text-secondary hover:text-gold-500 transition-colors"
+                >
+                  <ExternalLink size={16} />
+                  {t('rules.secondarySourceLinkText', 'Open SJJIF rulebook resources')}
+                </a>
+              </div>
               <p className="text-sm text-text-secondary leading-relaxed mt-4">
                 {t(
                   'rules.footerNote',
-                  'This local guide is meant to improve clarity and avoid dead-end federation links. It does not replace official SJJIF rules language or event-specific organizer instructions.'
+                  'This local guide is meant to improve clarity and avoid dead-end links. It does not replace official ASJJF guidance, SJJIF rulebook language, or event-specific organizer instructions.'
                 )}
               </p>
             </section>
@@ -313,12 +325,21 @@ export default function RulesPage() {
         <ScrollReveal delay={0.4}>
           <div className="border-t border-white/5 pt-8 mt-12">
             <p className="text-text-muted text-sm text-center">
-              {t('rules.footerCta', 'Official federation rules:')}{' '}
+              {t('rules.footerCta', 'Official rules references:')}{' '}
+              <a
+                href={ASJJF_RULES_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gold-500 hover:underline"
+              >
+                asjjf.org
+              </a>
+              {' · '}
               <a
                 href={SJJIF_RULES_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gold-500 hover:underline"
+                className="text-text-secondary hover:text-gold-500 hover:underline transition-colors"
               >
                 sjjif.com
               </a>
