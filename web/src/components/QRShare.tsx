@@ -8,7 +8,7 @@ const languageNames: Record<string, string> = {
   en: 'English',
   ja: '日本語',
   ko: '한국어',
-  tl: 'Tagalog',
+  tl: 'Filipino',
   zh: '中文',
   pt: 'Português',
 };

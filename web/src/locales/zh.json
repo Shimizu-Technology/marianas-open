@@ -8,7 +8,8 @@
     "rankings": "排名",
     "competitors": "选手介绍",
     "pastEvents": "往届赛事",
-    "rules": "规则"
+    "rules": "规则",
+    "toggleMenu": "切换菜单"
   },
   "pastEvents": {
     "badge": "赛事档案",
@@ -175,7 +176,31 @@
     "featured": "精选",
     "filterCategory": "类别",
     "noVideosYet": "暂无视频",
-    "noVideosYetDesc": "请稍后查看比赛视频和精彩集锦。"
+    "noVideosYetDesc": "请稍后查看比赛视频和精彩集锦。",
+    "vs": "vs",
+    "weight": {
+      "rooster": "蝇量级",
+      "lightFeather": "羽量级",
+      "feather": "次轻量级",
+      "light": "轻量级",
+      "middle": "中量级",
+      "mediumHeavy": "中重量级",
+      "heavy": "重量级",
+      "superHeavy": "超重量级",
+      "ultraHeavy": "无差别级",
+      "openClass": "公开组"
+    },
+    "belt": {
+      "white": "白带",
+      "blue": "蓝带",
+      "purple": "紫带",
+      "brown": "棕带",
+      "black": "黑带"
+    },
+    "category": {
+      "gi": "道服",
+      "noGi": "无道服"
+    }
   },
   "share": {
     "defaultText": "查看马里亚纳公开赛——国际柔术锦标赛！",
@@ -293,7 +318,25 @@
     "noResults": "未找到符合筛选条件的结果。",
     "pointsReference": "积分参考",
     "eventStars": "赛事星级评定",
-    "formulaNote": "官方说明：选手排名使用5星分值，团队排名使用4星分值。单人组别与同队单人组别按官方排名页面的主办方规则执行。"
+    "formulaNote": "官方说明：选手排名使用5星分值，团队排名使用4星分值。单人组别与同队单人组别按官方排名页面的主办方规则执行。",
+    "giNoGi": "道服 / 无道服",
+    "belt": {
+      "all": "全部",
+      "black": "黑带",
+      "brown": "棕带",
+      "purple": "紫带",
+      "blue": "蓝带",
+      "white": "白带"
+    },
+    "gi": {
+      "combined": "综合",
+      "gi": "道服",
+      "noGi": "无道服"
+    },
+    "eventMarianasOpen": "马里亚纳斯公开赛",
+    "eventProTokyoNagoya": "东京/名古屋职业赛",
+    "eventProSeriesOthers": "职业系列赛（其他）",
+    "eventCopaDeMarianas": "马里亚纳斯杯"
   },
   "results": {
     "title": "赛事成绩",
@@ -309,6 +352,9 @@
     "placement1": "冠军",
     "placement2": "亚军",
     "placement3": "季军",
+    "placementBadge1": "第1",
+    "placementBadge2": "第2",
+    "placementBadge3": "第3",
     "searchPlaceholder": "按姓名或学院搜索...",
     "allBelts": "所有腰带",
     "allWeights": "所有级别",
@@ -324,12 +370,7 @@
     "total": "总计",
     "expandAll": "全部展开",
     "collapseAll": "全部折叠",
-    "filterResults": "筛选成绩",
-    "white": "白",
-    "blue": "蓝",
-    "purple": "紫",
-    "brown": "棕",
-    "black": "黑"
+    "filterResults": "筛选成绩"
   },
   "competitorProfile": {
     "title": "选手简介",
@@ -457,6 +498,32 @@
       "提前到达，因为比赛可能会提前进行。",
       "在场外穿拖鞋或鞋子，如有可能请携带备用道服。"
     ],
-    "secondarySourceLinkText": "打开 SJJIF 规则手册资源"
+    "secondarySourceLinkText": "打开 SJJIF 规则手册资源",
+    "lastUpdatedDate": "2026年3月"
+  },
+  "countries": {
+    "guam": "关岛",
+    "japan": "日本",
+    "southKorea": "韩国",
+    "philippines": "菲律宾",
+    "brazil": "巴西",
+    "unitedStates": "美国",
+    "taiwan": "台湾",
+    "nMarianIslands": "北马里亚纳群岛",
+    "france": "法国",
+    "palau": "帕劳",
+    "hongKong": "香港",
+    "australia": "澳大利亚",
+    "unitedKingdom": "英国",
+    "canada": "加拿大",
+    "singapore": "新加坡",
+    "india": "印度",
+    "mexico": "墨西哥",
+    "china": "中国",
+    "thailand": "泰国",
+    "indonesia": "印度尼西亚",
+    "micronesia": "密克罗尼西亚",
+    "marshallIslands": "马绍尔群岛",
+    "newZealand": "新西兰"
   }
 }

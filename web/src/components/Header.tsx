@@ -57,7 +57,7 @@ export default function Header() {
             <button
               className="xl:hidden text-text-primary p-1"
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
+              aria-label={t('nav.toggleMenu', 'Toggle menu')}
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>

@@ -10,6 +10,7 @@ const LANGUAGES = [
   { code: 'ko', label: '한국어' },
   { code: 'tl', label: 'Filipino' },
   { code: 'zh', label: '中文' },
+  { code: 'pt', label: 'Português' },
 ] as const;
 
 const SECTION_LABELS: Record<string, string> = {
@@ -179,6 +180,7 @@ function NewContentForm({ onCreated }: { onCreated: () => void }) {
     value_ko: '',
     value_tl: '',
     value_zh: '',
+    value_pt: '',
   });
 
   const handleCreate = async () => {
@@ -187,7 +189,7 @@ function NewContentForm({ onCreated }: { onCreated: () => void }) {
     try {
       await api.admin.createSiteContent(form);
       invalidateSiteContentCache();
-      setForm({ key: '', label: '', section: 'general', content_type: 'text', value_en: '', value_ja: '', value_ko: '', value_tl: '', value_zh: '' });
+      setForm({ key: '', label: '', section: 'general', content_type: 'text', value_en: '', value_ja: '', value_ko: '', value_tl: '', value_zh: '', value_pt: '' });
       setOpen(false);
       onCreated();
     } finally {

@@ -9,8 +9,20 @@ import type { RankingEntry } from '../services/api';
 
 type RankingTab = 'individual' | 'team' | 'country';
 
-const BELT_OPTIONS = ['All', 'Black', 'Brown', 'Purple', 'Blue', 'White'] as const;
-const GI_OPTIONS = ['Combined', 'Gi', 'No-Gi'] as const;
+const BELT_OPTIONS = [
+  { api: 'All',    key: 'all' },
+  { api: 'Black',  key: 'black' },
+  { api: 'Brown',  key: 'brown' },
+  { api: 'Purple', key: 'purple' },
+  { api: 'Blue',   key: 'blue' },
+  { api: 'White',  key: 'white' },
+] as const;
+
+const GI_OPTIONS = [
+  { api: 'Combined', key: 'combined' },
+  { api: 'Gi',       key: 'gi' },
+  { api: 'No-Gi',    key: 'noGi' },
+] as const;
 
 const BELT_COLORS: Record<string, string> = {
   Black: 'bg-gray-900 border-gray-700',
@@ -20,13 +32,13 @@ const BELT_COLORS: Record<string, string> = {
   White: 'bg-white/10 border-white/30',
 };
 
-const COUNTRY_NAMES: Record<string, string> = {
-  GUM: 'Guam', JPN: 'Japan', KOR: 'South Korea', PHL: 'Philippines',
-  BRA: 'Brazil', USA: 'United States', TAI: 'Taiwan', MNP: 'N. Mariana Islands',
-  FRA: 'France', PLW: 'Palau', HKG: 'Hong Kong', AUS: 'Australia',
-  GBR: 'United Kingdom', CAN: 'Canada', SGP: 'Singapore', IND: 'India',
-  MEX: 'Mexico', CHN: 'China', THA: 'Thailand', IDN: 'Indonesia',
-  FSM: 'Micronesia', MHL: 'Marshall Islands', NZL: 'New Zealand',
+const COUNTRY_CODE_KEYS: Record<string, string> = {
+  GUM: 'countries.guam', JPN: 'countries.japan', KOR: 'countries.southKorea', PHL: 'countries.philippines',
+  BRA: 'countries.brazil', USA: 'countries.unitedStates', TAI: 'countries.taiwan', MNP: 'countries.nMarianIslands',
+  FRA: 'countries.france', PLW: 'countries.palau', HKG: 'countries.hongKong', AUS: 'countries.australia',
+  GBR: 'countries.unitedKingdom', CAN: 'countries.canada', SGP: 'countries.singapore', IND: 'countries.india',
+  MEX: 'countries.mexico', CHN: 'countries.china', THA: 'countries.thailand', IDN: 'countries.indonesia',
+  FSM: 'countries.micronesia', MHL: 'countries.marshallIslands', NZL: 'countries.newZealand',
 };
 
 const STAR_TIERS = [
@@ -163,35 +175,35 @@ export default function RankingsPage() {
                       <div>
                         <label className="text-xs text-text-muted block mb-1.5">{t('rankings.beltRank', 'Belt Rank')}</label>
                         <div className="flex gap-1">
-                          {BELT_OPTIONS.map(b => (
+                          {BELT_OPTIONS.map((opt) => (
                             <button
-                              key={b}
-                              onClick={() => setBelt(b)}
+                              key={opt.api}
+                              onClick={() => setBelt(opt.api)}
                               className={`px-3 py-1 text-xs rounded-md border transition-all ${
-                                belt === b
-                                  ? (b === 'All' ? 'bg-gold-500/15 border-gold-500/30 text-gold-500' : `${BELT_COLORS[b]} text-white`)
+                                belt === opt.api
+                                  ? (opt.api === 'All' ? 'bg-gold-500/15 border-gold-500/30 text-gold-500' : `${BELT_COLORS[opt.api]} text-white`)
                                   : 'border-white/10 text-text-muted hover:border-white/20'
                               }`}
                             >
-                              {b}
+                              {t(`rankings.belt.${opt.key}`)}
                             </button>
                           ))}
                         </div>
                       </div>
                       <div>
-                        <label className="text-xs text-text-muted block mb-1.5">Gi / No-Gi</label>
+                        <label className="text-xs text-text-muted block mb-1.5">{t('rankings.giNoGi')}</label>
                         <div className="flex gap-1">
-                          {GI_OPTIONS.map(g => (
+                          {GI_OPTIONS.map((opt) => (
                             <button
-                              key={g}
-                              onClick={() => setGiNogi(g)}
+                              key={opt.api}
+                              onClick={() => setGiNogi(opt.api)}
                               className={`px-3 py-1 text-xs rounded-md border transition-all ${
-                                giNogi === g
+                                giNogi === opt.api
                                   ? 'bg-gold-500/15 border-gold-500/30 text-gold-500'
                                   : 'border-white/10 text-text-muted hover:border-white/20'
                               }`}
                             >
-                              {g}
+                              {t(`rankings.gi.${opt.key}`)}
                             </button>
                           ))}
                         </div>
@@ -254,7 +266,7 @@ export default function RankingsPage() {
                                       {entry.competitor_name}
                                     </Link>
                                   ) : tab === 'team' ? entry.academy :
-                                   COUNTRY_NAMES[entry.country_code || ''] || entry.country_code}
+                                   COUNTRY_CODE_KEYS[entry.country_code || ''] ? t(COUNTRY_CODE_KEYS[entry.country_code || '']) : entry.country_code}
                                 </span>
                                 {tab === 'individual' && entry.country_code && (
                                   <span className="ml-2 text-xs text-text-muted">{entry.country_code}</span>
@@ -339,19 +351,19 @@ export default function RankingsPage() {
                     <h4 className="text-xs text-text-muted mb-2 font-medium">{t('rankings.eventStars', 'Event Star Ratings')}</h4>
                     <div className="space-y-1.5 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-text-secondary">Marianas Open</span>
+                        <span className="text-text-secondary">{t('rankings.eventMarianasOpen')}</span>
                         <StarDisplay count={5} />
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-text-secondary">Pro Tokyo / Nagoya</span>
+                        <span className="text-text-secondary">{t('rankings.eventProTokyoNagoya')}</span>
                         <StarDisplay count={4} />
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-text-secondary">Pro Series (others)</span>
+                        <span className="text-text-secondary">{t('rankings.eventProSeriesOthers')}</span>
                         <StarDisplay count={3} />
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-text-secondary">Copa de Marianas</span>
+                        <span className="text-text-secondary">{t('rankings.eventCopaDeMarianas')}</span>
                         <StarDisplay count={3} />
                       </div>
                     </div>

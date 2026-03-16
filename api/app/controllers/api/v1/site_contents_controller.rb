@@ -10,7 +10,8 @@ module Api
             ja: c.value_ja,
             ko: c.value_ko,
             tl: c.value_tl,
-            zh: c.value_zh
+            zh: c.value_zh,
+            pt: c.value_pt
           }
         end
         render json: result

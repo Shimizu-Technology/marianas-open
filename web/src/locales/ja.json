@@ -8,7 +8,8 @@
     "rankings": "ランキング",
     "competitors": "選手紹介",
     "pastEvents": "過去のイベント",
-    "rules": "ルール"
+    "rules": "ルール",
+    "toggleMenu": "メニュー切替"
   },
   "pastEvents": {
     "badge": "イベントアーカイブ",
@@ -175,7 +176,31 @@
     "featured": "注目",
     "filterCategory": "カテゴリー",
     "noVideosYet": "動画はまだありません",
-    "noVideosYetDesc": "試合動画とハイライトは近日公開予定です。"
+    "noVideosYetDesc": "試合動画とハイライトは近日公開予定です。",
+    "vs": "vs",
+    "weight": {
+      "rooster": "ルースター",
+      "lightFeather": "ライトフェザー",
+      "feather": "フェザー",
+      "light": "ライト",
+      "middle": "ミドル",
+      "mediumHeavy": "ミディアムヘビー",
+      "heavy": "ヘビー",
+      "superHeavy": "スーパーヘビー",
+      "ultraHeavy": "ウルトラヘビー",
+      "openClass": "オープンクラス"
+    },
+    "belt": {
+      "white": "白帯",
+      "blue": "青帯",
+      "purple": "紫帯",
+      "brown": "茶帯",
+      "black": "黒帯"
+    },
+    "category": {
+      "gi": "着衣",
+      "noGi": "ノーギ"
+    }
   },
   "share": {
     "defaultText": "マリアナスオープン — 国際柔術選手権をチェック！",
@@ -293,7 +318,25 @@
     "noResults": "該当する結果が見つかりません。",
     "pointsReference": "ポイント表",
     "eventStars": "大会スター評価",
-    "formulaNote": "公式基準: ファイターランキングは5スター値、チームランキングは4スター値を使用。単独ブラケットおよび同チームのみのブラケットは、公式ランキングページの主催者ポリシーに従います。"
+    "formulaNote": "公式基準: ファイターランキングは5スター値、チームランキングは4スター値を使用。単独ブラケットおよび同チームのみのブラケットは、公式ランキングページの主催者ポリシーに従います。",
+    "giNoGi": "着衣 / ノーギ",
+    "belt": {
+      "all": "全て",
+      "black": "黒帯",
+      "brown": "茶帯",
+      "purple": "紫帯",
+      "blue": "青帯",
+      "white": "白帯"
+    },
+    "gi": {
+      "combined": "統合",
+      "gi": "着衣",
+      "noGi": "ノーギ"
+    },
+    "eventMarianasOpen": "マリアナスオープン",
+    "eventProTokyoNagoya": "プロ東京 / 名古屋",
+    "eventProSeriesOthers": "プロシリーズ（その他）",
+    "eventCopaDeMarianas": "コパ・デ・マリアナス"
   },
   "results": {
     "title": "大会結果",
@@ -309,6 +352,9 @@
     "placement1": "優勝",
     "placement2": "準優勝",
     "placement3": "3位",
+    "placementBadge1": "1位",
+    "placementBadge2": "2位",
+    "placementBadge3": "3位",
     "searchPlaceholder": "名前またはアカデミーで検索...",
     "allBelts": "全ての帯",
     "allWeights": "全階級",
@@ -324,12 +370,7 @@
     "total": "合計",
     "expandAll": "すべて展開",
     "collapseAll": "すべて折りたたむ",
-    "filterResults": "結果を絞り込む",
-    "white": "白",
-    "blue": "青",
-    "purple": "紫",
-    "brown": "茶",
-    "black": "黒"
+    "filterResults": "結果を絞り込む"
   },
   "competitorProfile": {
     "title": "選手プロフィール",
@@ -457,6 +498,32 @@
       "試合が予定より早く進む場合があるため、早めに到着してください。",
       "マット外ではサンダルまたは靴を着用し、可能であればバックアップユニフォームを持参してください。"
     ],
-    "secondarySourceLinkText": "SJJIFルールブック資料を開く"
+    "secondarySourceLinkText": "SJJIFルールブック資料を開く",
+    "lastUpdatedDate": "2026年3月"
+  },
+  "countries": {
+    "guam": "グアム",
+    "japan": "日本",
+    "southKorea": "韓国",
+    "philippines": "フィリピン",
+    "brazil": "ブラジル",
+    "unitedStates": "アメリカ",
+    "taiwan": "台湾",
+    "nMarianIslands": "北マリアナ諸島",
+    "france": "フランス",
+    "palau": "パラオ",
+    "hongKong": "香港",
+    "australia": "オーストラリア",
+    "unitedKingdom": "イギリス",
+    "canada": "カナダ",
+    "singapore": "シンガポール",
+    "india": "インド",
+    "mexico": "メキシコ",
+    "china": "中国",
+    "thailand": "タイ",
+    "indonesia": "インドネシア",
+    "micronesia": "ミクロネシア",
+    "marshallIslands": "マーシャル諸島",
+    "newZealand": "ニュージーランド"
   }
 }

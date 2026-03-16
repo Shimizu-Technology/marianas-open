@@ -14,26 +14,28 @@ const BELT_STYLES: Record<string, { bg: string; text: string; ring: string }> = 
   black:  { bg: 'bg-gray-900',     text: 'text-white',    ring: 'ring-gray-700/30' },
 };
 
-const COUNTRY_NAMES: Record<string, string> = {
-  JP: 'Japan', KR: 'South Korea', BR: 'Brazil', US: 'United States',
-  PH: 'Philippines', GU: 'Guam', TW: 'Taiwan', HK: 'Hong Kong',
+const COUNTRY_CODE_KEYS: Record<string, string> = {
+  JP: 'countries.japan', KR: 'countries.southKorea', BR: 'countries.brazil', US: 'countries.unitedStates',
+  PH: 'countries.philippines', GU: 'countries.guam', TW: 'countries.taiwan', HK: 'countries.hongKong',
 };
 
 function CountryFlag({ code }: { code: string }) {
+  const { t } = useTranslation();
   return (
     <img
       src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
-      alt={COUNTRY_NAMES[code] || code}
+      alt={COUNTRY_CODE_KEYS[code] ? t(COUNTRY_CODE_KEYS[code]) : code}
       className="w-5 h-3.5 object-cover rounded-sm inline-block"
     />
   );
 }
 
 function BeltBadge({ rank }: { rank: string }) {
+  const { t } = useTranslation();
   const s = BELT_STYLES[rank] || BELT_STYLES.white;
   return (
     <span className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold uppercase tracking-wider ${s.bg} ${s.text} ring-1 ${s.ring}`}>
-      {rank}
+      {t(`watch.belt.${rank}`, rank)}
     </span>
   );
 }
@@ -268,7 +270,7 @@ export default function CompetitorsPage() {
                 className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none">
                 <option value="">{t('competitors.allBelts')}</option>
                 {['white','blue','purple','brown','black'].map(b =>
-                  <option key={b} value={b}>{b.charAt(0).toUpperCase() + b.slice(1)}</option>
+                  <option key={b} value={b}>{t(`watch.belt.${b}`)}</option>
                 )}
               </select>
               <select value={weightFilter} onChange={e => setWeightFilter(e.target.value)}
@@ -279,7 +281,7 @@ export default function CompetitorsPage() {
               <select value={countryFilter} onChange={e => setCountryFilter(e.target.value)}
                 className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none">
                 <option value="">{t('competitors.allCountries')}</option>
-                {countries.map(c => <option key={c} value={c}>{COUNTRY_NAMES[c] || c}</option>)}
+                {countries.map(c => <option key={c} value={c}>{COUNTRY_CODE_KEYS[c] ? t(COUNTRY_CODE_KEYS[c]) : c}</option>)}
               </select>
             </div>
             {hasFilters && (

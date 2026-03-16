@@ -15,10 +15,10 @@ const BELT_COLORS: Record<string, { bg: string; text: string; border: string }> 
   black:  { bg: 'bg-[#1a1a1a]/40',   text: 'text-white',      border: 'border-white/20' },
 };
 
-const PLACEMENT_COLORS: Record<number, { bg: string; text: string; border: string; label: string }> = {
-  1: { bg: 'bg-[#D4A843]/15', text: 'text-[#D4A843]', border: 'border-[#D4A843]/40', label: '1st' },
-  2: { bg: 'bg-[#C0C0C0]/10', text: 'text-[#C0C0C0]', border: 'border-[#C0C0C0]/30', label: '2nd' },
-  3: { bg: 'bg-[#CD7F32]/10', text: 'text-[#CD7F32]', border: 'border-[#CD7F32]/30', label: '3rd' },
+const PLACEMENT_STYLES: Record<number, { bg: string; text: string; border: string; key: string }> = {
+  1: { bg: 'bg-[#D4A843]/15', text: 'text-[#D4A843]', border: 'border-[#D4A843]/40', key: 'results.placementBadge1' },
+  2: { bg: 'bg-[#C0C0C0]/10', text: 'text-[#C0C0C0]', border: 'border-[#C0C0C0]/30', key: 'results.placementBadge2' },
+  3: { bg: 'bg-[#CD7F32]/10', text: 'text-[#CD7F32]', border: 'border-[#CD7F32]/30', key: 'results.placementBadge3' },
 };
 
 function CountryFlag({ code, className = 'w-5 h-4' }: { code: string; className?: string }) {
@@ -34,17 +34,19 @@ function CountryFlag({ code, className = 'w-5 h-4' }: { code: string; className?
 }
 
 function BeltBadge({ belt }: { belt: string }) {
+  const { t } = useTranslation();
   const normalized = belt.toLowerCase().replace(/\s+belt$/, '');
   const colors = BELT_COLORS[normalized] || BELT_COLORS.white;
   return (
     <span className={`inline-flex items-center px-2.5 py-1 text-xs font-heading font-semibold uppercase tracking-wider border ${colors.bg} ${colors.text} ${colors.border}`}>
-      {belt}
+      {t(`watch.belt.${normalized}`, belt)}
     </span>
   );
 }
 
 function PlacementBadge({ placement }: { placement: number }) {
-  const colors = PLACEMENT_COLORS[placement];
+  const { t } = useTranslation();
+  const colors = PLACEMENT_STYLES[placement];
   if (!colors) {
     return (
       <span className="inline-flex items-center justify-center w-7 h-7 text-xs font-heading font-bold text-text-muted bg-white/5 border border-white/10">
@@ -54,7 +56,7 @@ function PlacementBadge({ placement }: { placement: number }) {
   }
   return (
     <span className={`inline-flex items-center justify-center w-7 h-7 text-xs font-heading font-bold border ${colors.bg} ${colors.text} ${colors.border}`}>
-      {colors.label}
+      {t(colors.key)}
     </span>
   );
 }
@@ -105,12 +107,13 @@ function BeltBreakdown({ breakdown }: { breakdown: Record<string, number> }) {
           {sorted.map((belt) => {
             const count = breakdown[belt];
             const pct = total > 0 ? (count / total) * 100 : 0;
-            const colors = BELT_COLORS[belt] || BELT_COLORS.white;
+            const normalized = belt.toLowerCase();
+            const colors = BELT_COLORS[normalized] || BELT_COLORS.white;
             return (
               <div key={belt} className="space-y-1">
                 <div className="flex justify-between items-center text-sm">
                   <span className={`font-heading font-semibold uppercase tracking-wider ${colors.text}`}>
-                    {t(`results.${belt}`)}
+                    {t(`watch.belt.${normalized}`, belt)}
                   </span>
                   <span className="text-text-muted tabular-nums">{count}</span>
                 </div>
@@ -217,7 +220,7 @@ function DivisionGroup({ division, isOpen, onToggle, index }: {
             <div className="px-4 sm:px-5 pb-5 space-y-2">
               {/* Podium results */}
               {podiumResults.map((result) => {
-                const pColors = PLACEMENT_COLORS[result.placement];
+                const pColors = PLACEMENT_STYLES[result.placement];
                 return (
                   <div
                     key={result.id}
