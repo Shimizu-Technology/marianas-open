@@ -36,7 +36,7 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
       defaults: '2025-11-30',
       capture_pageview: false,
       capture_pageleave: true,
-      autocapture: true,
+      autocapture: false,
     });
 
     postHogInitialized = true;

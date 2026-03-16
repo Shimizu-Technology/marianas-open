@@ -19,7 +19,9 @@ function Root() {
     return (
       <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
         <AuthProvider isClerkEnabled={true}>
-          <App />
+          <PostHogProvider>
+            <App />
+          </PostHogProvider>
         </AuthProvider>
       </ClerkProvider>
     )
@@ -27,15 +29,15 @@ function Root() {
 
   return (
     <AuthProvider isClerkEnabled={false}>
-      <App />
+      <PostHogProvider>
+        <App />
+      </PostHogProvider>
     </AuthProvider>
   )
 }
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <PostHogProvider>
-      <Root />
-    </PostHogProvider>
+    <Root />
   </StrictMode>,
 )
