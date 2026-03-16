@@ -20,21 +20,25 @@ const beltColors: Record<string, string> = {
   black: 'bg-gray-900 text-white border border-white/20',
 };
 
-const WEIGHT_CLASS_KEYS = [
-  'rooster', 'lightFeather', 'feather', 'light', 'middle',
-  'mediumHeavy', 'heavy', 'superHeavy', 'ultraHeavy', 'openClass',
+const WEIGHT_CLASSES = [
+  { api: 'Rooster',      key: 'rooster' },
+  { api: 'Light Feather', key: 'lightFeather' },
+  { api: 'Feather',      key: 'feather' },
+  { api: 'Light',        key: 'light' },
+  { api: 'Middle',       key: 'middle' },
+  { api: 'Medium Heavy', key: 'mediumHeavy' },
+  { api: 'Heavy',        key: 'heavy' },
+  { api: 'Super Heavy',  key: 'superHeavy' },
+  { api: 'Ultra Heavy',  key: 'ultraHeavy' },
+  { api: 'Open Class',   key: 'openClass' },
 ] as const;
 
-const WEIGHT_CLASS_API_VALUES = [
-  'Rooster', 'Light Feather', 'Feather', 'Light', 'Middle',
-  'Medium Heavy', 'Heavy', 'Super Heavy', 'Ultra Heavy', 'Open Class',
-];
+const WEIGHT_CLASS_API_VALUES = WEIGHT_CLASSES.map(w => w.api);
+const WEIGHT_CLASS_KEY_MAP: Record<string, string> = Object.fromEntries(
+  WEIGHT_CLASSES.map(w => [w.api, w.key])
+);
 
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black'];
-
-const WEIGHT_CLASS_KEY_MAP: Record<string, string> = Object.fromEntries(
-  WEIGHT_CLASS_API_VALUES.map((v, i) => [v, WEIGHT_CLASS_KEYS[i]])
-);
 
 export default function WatchPage() {
   const { t } = useTranslation();
