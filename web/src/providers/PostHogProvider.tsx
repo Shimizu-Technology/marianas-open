@@ -10,6 +10,7 @@ export const isPostHogEnabled = Boolean(POSTHOG_KEY && POSTHOG_KEY !== 'YOUR_POS
 
 let postHogInitialized = false;
 let postHogDisabledLogged = false;
+let initialCapturedPath: string | null = null;
 
 const PostHogReadyContext = createContext(false);
 const PostHogInitialPageviewCapturedContext = createContext(false);
@@ -35,8 +36,12 @@ export function PostHogPageView() {
     const currentPath = `${location.pathname}${location.search}`;
 
     // If provider already captured the initial pageview in posthog.init loaded callback,
-    // skip the first effect pass for that same URL to avoid duplicate first-hit events.
-    if (initialPageviewCaptured && lastCapturedPathRef.current === null) {
+    // skip only when this effect is still on that exact initial URL.
+    if (
+      initialPageviewCaptured &&
+      lastCapturedPathRef.current === null &&
+      initialCapturedPath === currentPath
+    ) {
       lastCapturedPathRef.current = currentPath;
       return;
     }
@@ -71,6 +76,9 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
 
     if (postHogInitialized) {
+      if (!initialCapturedPath && typeof window !== 'undefined') {
+        initialCapturedPath = `${window.location.pathname}${window.location.search}`;
+      }
       setInitialPageviewCaptured(true);
       setIsReady(true);
       return;
@@ -88,6 +96,7 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
           $pathname: window.location.pathname,
           $search: window.location.search,
         });
+        initialCapturedPath = `${window.location.pathname}${window.location.search}`;
         postHogInitialized = true;
         setInitialPageviewCaptured(true);
         setIsReady(true);
