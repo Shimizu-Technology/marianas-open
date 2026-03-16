@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import MobileLanguageFAB from './components/MobileLanguageFAB';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import { PostHogPageView } from './providers/PostHogProvider';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
@@ -77,6 +78,7 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
+      <PostHogPageView />
       <ScrollToTop />
       <Routes>
         {/* Admin routes — no Header/Footer */}
