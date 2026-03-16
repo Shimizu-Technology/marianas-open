@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider, usePostHog } from 'posthog-js/react';
 import { useLocation } from 'react-router-dom';
@@ -11,24 +11,33 @@ export const isPostHogEnabled = Boolean(POSTHOG_KEY && POSTHOG_KEY !== 'YOUR_POS
 let postHogInitialized = false;
 let postHogDisabledLogged = false;
 
+const PostHogReadyContext = createContext(false);
+
+function usePostHogReady() {
+  return useContext(PostHogReadyContext);
+}
+
 export function PostHogPageView() {
   const location = useLocation();
   const posthogClient = usePostHog();
+  const isPostHogReady = usePostHogReady();
 
   useEffect(() => {
-    if (!posthogClient || !isPostHogEnabled) return;
+    if (!posthogClient || !isPostHogEnabled || !isPostHogReady) return;
 
     posthogClient.capture('$pageview', {
       $current_url: window.location.href,
       $pathname: location.pathname,
       $search: location.search,
     });
-  }, [location.pathname, location.search, posthogClient]);
+  }, [location.pathname, location.search, posthogClient, isPostHogReady]);
 
   return null;
 }
 
 export function PostHogProvider({ children }: { children: ReactNode }) {
+  const [isReady, setIsReady] = useState(postHogInitialized);
+
   useEffect(() => {
     if (!isPostHogEnabled) {
       if (import.meta.env.DEV && !postHogDisabledLogged) {
@@ -38,7 +47,12 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    if (typeof window === 'undefined' || postHogInitialized) return;
+    if (typeof window === 'undefined') return;
+
+    if (postHogInitialized) {
+      setIsReady(true);
+      return;
+    }
 
     posthog.init(POSTHOG_KEY, {
       api_host: POSTHOG_HOST,
@@ -46,16 +60,24 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
       capture_pageview: false,
       capture_pageleave: true,
       autocapture: false,
+      loaded: () => {
+        postHogInitialized = true;
+        setIsReady(true);
+      },
     });
-
-    postHogInitialized = true;
   }, []);
+
+  const readyValue = useMemo(() => isReady, [isReady]);
 
   if (!isPostHogEnabled) {
     return <>{children}</>;
   }
 
-  return <PHProvider client={posthog}>{children}</PHProvider>;
+  return (
+    <PHProvider client={posthog}>
+      <PostHogReadyContext.Provider value={readyValue}>{children}</PostHogReadyContext.Provider>
+    </PHProvider>
+  );
 }
 
 export { usePostHog };
