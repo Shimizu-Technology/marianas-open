@@ -66,23 +66,35 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
   const [initialPageviewCaptured, setInitialPageviewCaptured] = useState(postHogInitialized);
 
   useEffect(() => {
+    let active = true;
+
     if (!isPostHogEnabled) {
       if (import.meta.env.DEV && !postHogDisabledLogged) {
         console.info('PostHog not configured - analytics disabled');
         postHogDisabledLogged = true;
       }
-      return;
+      return () => {
+        active = false;
+      };
     }
 
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {
+      return () => {
+        active = false;
+      };
+    }
 
     if (postHogInitialized) {
-      if (!initialCapturedPath && typeof window !== 'undefined') {
+      if (!initialCapturedPath) {
         initialCapturedPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
       }
-      setInitialPageviewCaptured(true);
-      setIsReady(true);
-      return;
+      if (active) {
+        setInitialPageviewCaptured(true);
+        setIsReady(true);
+      }
+      return () => {
+        active = false;
+      };
     }
 
     posthog.init(POSTHOG_KEY, {
@@ -92,6 +104,8 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
       capture_pageleave: true,
       autocapture: false,
       loaded: (ph) => {
+        if (!active) return;
+
         ph.capture('$pageview', {
           $current_url: window.location.href,
           $pathname: window.location.pathname,
@@ -104,6 +118,10 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
         setIsReady(true);
       },
     });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (!isPostHogEnabled) {
