@@ -32,6 +32,10 @@ const WEIGHT_CLASS_API_VALUES = [
 
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black'];
 
+const WEIGHT_CLASS_KEY_MAP: Record<string, string> = Object.fromEntries(
+  WEIGHT_CLASS_API_VALUES.map((v, i) => [v, WEIGHT_CLASS_KEYS[i]])
+);
+
 export default function WatchPage() {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
@@ -341,14 +345,14 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
         <div className="flex flex-wrap items-center gap-2">
           {video.weight_class && (
             <span className="px-2 py-0.5 bg-navy-800 text-text-secondary text-xs">
-              {video.weight_class}
+              {t(`watch.weight.${WEIGHT_CLASS_KEY_MAP[video.weight_class] || ''}`, video.weight_class)}
             </span>
           )}
           {video.event_name && (
             <span className="text-xs text-text-muted">{video.event_name}</span>
           )}
           {video.category && (
-            <span className="text-xs text-text-muted uppercase">{video.category}</span>
+            <span className="text-xs text-text-muted uppercase">{t(`watch.category.${video.category === 'gi' ? 'gi' : 'noGi'}`, video.category)}</span>
           )}
         </div>
 

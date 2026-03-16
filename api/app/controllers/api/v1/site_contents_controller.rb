@@ -11,7 +11,7 @@ module Api
             ko: c.value_ko,
             tl: c.value_tl,
             zh: c.value_zh,
-            pt: c.try(:value_pt)
+            pt: c.value_pt
           }
         end
         render json: result

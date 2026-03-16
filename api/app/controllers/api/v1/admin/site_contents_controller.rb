@@ -57,7 +57,7 @@ module Api
             value_ko: c.value_ko,
             value_tl: c.value_tl,
             value_zh: c.value_zh,
-            value_pt: c.try(:value_pt),
+            value_pt: c.value_pt,
             section: c.section,
             label: c.label,
             sort_order: c.sort_order
