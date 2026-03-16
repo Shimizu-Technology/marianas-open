@@ -9,10 +9,20 @@ import type { RankingEntry } from '../services/api';
 
 type RankingTab = 'individual' | 'team' | 'country';
 
-const BELT_OPTION_KEYS = ['all', 'black', 'brown', 'purple', 'blue', 'white'] as const;
-const BELT_OPTION_API = ['All', 'Black', 'Brown', 'Purple', 'Blue', 'White'] as const;
-const GI_OPTION_KEYS = ['combined', 'gi', 'noGi'] as const;
-const GI_OPTION_API = ['Combined', 'Gi', 'No-Gi'] as const;
+const BELT_OPTIONS = [
+  { api: 'All',    key: 'all' },
+  { api: 'Black',  key: 'black' },
+  { api: 'Brown',  key: 'brown' },
+  { api: 'Purple', key: 'purple' },
+  { api: 'Blue',   key: 'blue' },
+  { api: 'White',  key: 'white' },
+] as const;
+
+const GI_OPTIONS = [
+  { api: 'Combined', key: 'combined' },
+  { api: 'Gi',       key: 'gi' },
+  { api: 'No-Gi',    key: 'noGi' },
+] as const;
 
 const BELT_COLORS: Record<string, string> = {
   Black: 'bg-gray-900 border-gray-700',
@@ -165,17 +175,17 @@ export default function RankingsPage() {
                       <div>
                         <label className="text-xs text-text-muted block mb-1.5">{t('rankings.beltRank', 'Belt Rank')}</label>
                         <div className="flex gap-1">
-                          {BELT_OPTION_API.map((b, i) => (
+                          {BELT_OPTIONS.map((opt) => (
                             <button
-                              key={b}
-                              onClick={() => setBelt(b)}
+                              key={opt.api}
+                              onClick={() => setBelt(opt.api)}
                               className={`px-3 py-1 text-xs rounded-md border transition-all ${
-                                belt === b
-                                  ? (b === 'All' ? 'bg-gold-500/15 border-gold-500/30 text-gold-500' : `${BELT_COLORS[b]} text-white`)
+                                belt === opt.api
+                                  ? (opt.api === 'All' ? 'bg-gold-500/15 border-gold-500/30 text-gold-500' : `${BELT_COLORS[opt.api]} text-white`)
                                   : 'border-white/10 text-text-muted hover:border-white/20'
                               }`}
                             >
-                              {t(`rankings.belt.${BELT_OPTION_KEYS[i]}`)}
+                              {t(`rankings.belt.${opt.key}`)}
                             </button>
                           ))}
                         </div>
@@ -183,17 +193,17 @@ export default function RankingsPage() {
                       <div>
                         <label className="text-xs text-text-muted block mb-1.5">{t('rankings.giNoGi')}</label>
                         <div className="flex gap-1">
-                          {GI_OPTION_API.map((g, i) => (
+                          {GI_OPTIONS.map((opt) => (
                             <button
-                              key={g}
-                              onClick={() => setGiNogi(g)}
+                              key={opt.api}
+                              onClick={() => setGiNogi(opt.api)}
                               className={`px-3 py-1 text-xs rounded-md border transition-all ${
-                                giNogi === g
+                                giNogi === opt.api
                                   ? 'bg-gold-500/15 border-gold-500/30 text-gold-500'
                                   : 'border-white/10 text-text-muted hover:border-white/20'
                               }`}
                             >
-                              {t(`rankings.gi.${GI_OPTION_KEYS[i]}`)}
+                              {t(`rankings.gi.${opt.key}`)}
                             </button>
                           ))}
                         </div>

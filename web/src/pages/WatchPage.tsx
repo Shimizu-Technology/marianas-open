@@ -169,7 +169,7 @@ export default function WatchPage() {
                   className="w-full pl-11 pr-4 py-3 bg-navy-900 border border-white/10 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-gold-500/50 transition-colors"
                 />
               </div>
-              <FilterSelect value={weightFilter} onChange={setWeightFilter} label={t('watch.filterWeight')} allLabel={t('watch.filterAll')} options={WEIGHT_CLASS_API_VALUES} displayFn={(v) => t(`watch.weight.${WEIGHT_CLASS_KEY_MAP[v] || ''}`, v)} />
+              <FilterSelect value={weightFilter} onChange={setWeightFilter} label={t('watch.filterWeight')} allLabel={t('watch.filterAll')} options={WEIGHT_CLASS_API_VALUES} displayFn={(v) => { const key = WEIGHT_CLASS_KEY_MAP[v]; return key ? t(`watch.weight.${key}`, v) : v; }} />
               <FilterSelect value={beltFilter} onChange={setBeltFilter} label={t('watch.filterBelt')} allLabel={t('watch.filterAll')} options={BELT_RANKS} displayFn={(v) => t(`watch.belt.${v}`)} />
               <FilterSelect value={eventFilter} onChange={setEventFilter} label={t('watch.filterEvent')} allLabel={t('watch.filterAll')} options={eventNames} />
               <FilterSelect value={categoryFilter} onChange={setCategoryFilter} label={t('watch.filterCategory', 'Category')} allLabel={t('watch.filterAll')} options={['gi', 'no-gi']} displayFn={(v) => t(`watch.category.${v === 'gi' ? 'gi' : 'noGi'}`)} />
@@ -345,7 +345,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
         <div className="flex flex-wrap items-center gap-2">
           {video.weight_class && (
             <span className="px-2 py-0.5 bg-navy-800 text-text-secondary text-xs">
-              {t(`watch.weight.${WEIGHT_CLASS_KEY_MAP[video.weight_class] || ''}`, video.weight_class)}
+              {WEIGHT_CLASS_KEY_MAP[video.weight_class] ? t(`watch.weight.${WEIGHT_CLASS_KEY_MAP[video.weight_class]}`, video.weight_class) : video.weight_class}
             </span>
           )}
           {video.event_name && (
