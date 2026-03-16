@@ -1,10 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider, usePostHog } from 'posthog-js/react';
 import { useLocation } from 'react-router-dom';
 
 const POSTHOG_KEY = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
 const POSTHOG_HOST = import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
+const POSTHOG_REQUIRE_CONSENT = import.meta.env.VITE_PUBLIC_POSTHOG_REQUIRE_CONSENT === 'true';
 
 export const isPostHogEnabled = Boolean(POSTHOG_KEY && POSTHOG_KEY !== 'YOUR_POSTHOG_KEY');
 
@@ -91,7 +92,15 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
       capture_pageview: false,
       capture_pageleave: true,
       autocapture: false,
+      opt_out_capturing_by_default: POSTHOG_REQUIRE_CONSENT,
       loaded: (ph) => {
+        if (POSTHOG_REQUIRE_CONSENT) {
+          postHogInitialized = true;
+          setInitialPageviewCaptured(false);
+          setIsReady(true);
+          return;
+        }
+
         ph.capture('$pageview', {
           $current_url: window.location.href,
           $pathname: window.location.pathname,
@@ -106,20 +115,14 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const readyValue = useMemo(() => isReady, [isReady]);
-  const initialPageviewCapturedValue = useMemo(
-    () => initialPageviewCaptured,
-    [initialPageviewCaptured]
-  );
-
   if (!isPostHogEnabled) {
     return <>{children}</>;
   }
 
   return (
     <PHProvider client={posthog}>
-      <PostHogReadyContext.Provider value={readyValue}>
-        <PostHogInitialPageviewCapturedContext.Provider value={initialPageviewCapturedValue}>
+      <PostHogReadyContext.Provider value={isReady}>
+        <PostHogInitialPageviewCapturedContext.Provider value={initialPageviewCaptured}>
           {children}
         </PostHogInitialPageviewCapturedContext.Provider>
       </PostHogReadyContext.Provider>

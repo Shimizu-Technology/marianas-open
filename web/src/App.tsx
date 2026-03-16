@@ -78,6 +78,7 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
+      <PostHogPageView />
       <ScrollToTop />
       <Routes>
         {/* Admin routes — no Header/Footer */}
@@ -114,7 +115,6 @@ export default function App() {
           path="*"
           element={
             <div className="min-h-screen bg-navy-900 text-text-primary">
-              <PostHogPageView />
               <Header />
               <main>
                 <AnimatedRoutes />
