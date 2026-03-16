@@ -9,6 +9,7 @@ const POSTHOG_HOST = import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://us.i.p
 export const isPostHogEnabled = Boolean(POSTHOG_KEY && POSTHOG_KEY !== 'YOUR_POSTHOG_KEY');
 
 let postHogInitialized = false;
+let postHogDisabledLogged = false;
 
 export function PostHogPageView() {
   const location = useLocation();
@@ -29,7 +30,15 @@ export function PostHogPageView() {
 
 export function PostHogProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
-    if (!isPostHogEnabled || typeof window === 'undefined' || postHogInitialized) return;
+    if (!isPostHogEnabled) {
+      if (import.meta.env.DEV && !postHogDisabledLogged) {
+        console.info('PostHog not configured - analytics disabled');
+        postHogDisabledLogged = true;
+      }
+      return;
+    }
+
+    if (typeof window === 'undefined' || postHogInitialized) return;
 
     posthog.init(POSTHOG_KEY, {
       api_host: POSTHOG_HOST,
@@ -43,9 +52,6 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   if (!isPostHogEnabled) {
-    if (import.meta.env.DEV) {
-      console.info('PostHog not configured - analytics disabled');
-    }
     return <>{children}</>;
   }
 
