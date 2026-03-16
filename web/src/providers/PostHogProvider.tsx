@@ -63,7 +63,7 @@ export function PostHogPageView() {
 
 export function PostHogProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(postHogInitialized);
-  const [initialPageviewCaptured, setInitialPageviewCaptured] = useState(false);
+  const [initialPageviewCaptured, setInitialPageviewCaptured] = useState(postHogInitialized);
 
   useEffect(() => {
     if (!isPostHogEnabled) {
