@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider, usePostHog } from 'posthog-js/react';
 import { useLocation } from 'react-router-dom';
+import { useAuthContext } from '../contexts/AuthContext';
 
 const POSTHOG_KEY = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
 const POSTHOG_HOST = import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
@@ -13,21 +14,15 @@ let postHogDisabledLogged = false;
 let initialCapturedPath: string | null = null;
 
 const PostHogReadyContext = createContext(false);
-const PostHogInitialPageviewCapturedContext = createContext(false);
 
 function usePostHogReady() {
   return useContext(PostHogReadyContext);
-}
-
-function useInitialPageviewCaptured() {
-  return useContext(PostHogInitialPageviewCapturedContext);
 }
 
 export function PostHogPageView() {
   const location = useLocation();
   const posthogClient = usePostHog();
   const isPostHogReady = usePostHogReady();
-  const initialPageviewCaptured = useInitialPageviewCaptured();
   const lastCapturedPathRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -35,13 +30,8 @@ export function PostHogPageView() {
 
     const currentPath = `${location.pathname}${location.search}${location.hash}`;
 
-    // If provider already captured the initial pageview in posthog.init loaded callback,
-    // skip only when this effect is still on that exact initial URL.
-    if (
-      initialPageviewCaptured &&
-      lastCapturedPathRef.current === null &&
-      initialCapturedPath === currentPath
-    ) {
+    // Initial pageview is captured once in provider init. Skip duplicate on first effect run.
+    if (lastCapturedPathRef.current === null && initialCapturedPath === currentPath) {
       lastCapturedPathRef.current = currentPath;
       return;
     }
@@ -53,48 +43,56 @@ export function PostHogPageView() {
       $pathname: location.pathname,
       $search: location.search,
       $hash: location.hash,
+      area: location.pathname.startsWith('/admin') ? 'admin' : 'public',
     });
 
     lastCapturedPathRef.current = currentPath;
-  }, [location.pathname, location.search, location.hash, posthogClient, isPostHogReady, initialPageviewCaptured]);
+  }, [location.pathname, location.search, location.hash, posthogClient, isPostHogReady]);
+
+  return null;
+}
+
+function PostHogIdentitySync() {
+  const posthogClient = usePostHog();
+  const { isSignedIn, userId, isLoading } = useAuthContext();
+  const isPostHogReady = usePostHogReady();
+
+  useEffect(() => {
+    if (!posthogClient || !isPostHogEnabled || !isPostHogReady || isLoading) return;
+
+    if (isSignedIn && userId) {
+      posthogClient.identify(userId, {
+        user_id: userId,
+      });
+      return;
+    }
+
+    posthogClient.reset();
+  }, [posthogClient, isPostHogReady, isLoading, isSignedIn, userId]);
 
   return null;
 }
 
 export function PostHogProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(postHogInitialized);
-  const [initialPageviewCaptured, setInitialPageviewCaptured] = useState(postHogInitialized);
 
   useEffect(() => {
-    let active = true;
-
     if (!isPostHogEnabled) {
       if (import.meta.env.DEV && !postHogDisabledLogged) {
         console.info('PostHog not configured - analytics disabled');
         postHogDisabledLogged = true;
       }
-      return () => {
-        active = false;
-      };
+      return;
     }
 
-    if (typeof window === 'undefined') {
-      return () => {
-        active = false;
-      };
-    }
+    if (typeof window === 'undefined') return;
 
     if (postHogInitialized) {
       if (!initialCapturedPath) {
         initialCapturedPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
       }
-      if (active) {
-        setInitialPageviewCaptured(true);
-        setIsReady(true);
-      }
-      return () => {
-        active = false;
-      };
+      setIsReady(true);
+      return;
     }
 
     try {
@@ -104,30 +102,24 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
         capture_pageview: false,
         capture_pageleave: true,
         autocapture: false,
-        loaded: (ph) => {
-          if (!active) return;
-
-          ph.capture('$pageview', {
-            $current_url: window.location.href,
-            $pathname: window.location.pathname,
-            $search: window.location.search,
-            $hash: window.location.hash,
-          });
-          initialCapturedPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-          postHogInitialized = true;
-          setInitialPageviewCaptured(true);
-          setIsReady(true);
-        },
       });
+
+      posthog.capture('$pageview', {
+        $current_url: window.location.href,
+        $pathname: window.location.pathname,
+        $search: window.location.search,
+        $hash: window.location.hash,
+        area: window.location.pathname.startsWith('/admin') ? 'admin' : 'public',
+      });
+
+      initialCapturedPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      postHogInitialized = true;
+      setIsReady(true);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error('PostHog init failed:', error);
       }
     }
-
-    return () => {
-      active = false;
-    };
   }, []);
 
   if (!isPostHogEnabled) {
@@ -137,9 +129,8 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
   return (
     <PHProvider client={posthog}>
       <PostHogReadyContext.Provider value={isReady}>
-        <PostHogInitialPageviewCapturedContext.Provider value={initialPageviewCaptured}>
-          {children}
-        </PostHogInitialPageviewCapturedContext.Provider>
+        <PostHogIdentitySync />
+        {children}
       </PostHogReadyContext.Provider>
     </PHProvider>
   );
