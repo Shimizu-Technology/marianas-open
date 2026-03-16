@@ -20,10 +20,11 @@ const COUNTRY_CODE_KEYS: Record<string, string> = {
 };
 
 function CountryFlag({ code }: { code: string }) {
+  const { t } = useTranslation();
   return (
     <img
       src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
-      alt={code}
+      alt={COUNTRY_CODE_KEYS[code] ? t(COUNTRY_CODE_KEYS[code]) : code}
       className="w-5 h-3.5 object-cover rounded-sm inline-block"
     />
   );

@@ -169,7 +169,7 @@ export default function WatchPage() {
                   className="w-full pl-11 pr-4 py-3 bg-navy-900 border border-white/10 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-gold-500/50 transition-colors"
                 />
               </div>
-              <FilterSelect value={weightFilter} onChange={setWeightFilter} label={t('watch.filterWeight')} allLabel={t('watch.filterAll')} options={WEIGHT_CLASS_API_VALUES} displayFn={(_v, i) => i !== undefined ? t(`watch.weight.${WEIGHT_CLASS_KEYS[i]}`) : _v} />
+              <FilterSelect value={weightFilter} onChange={setWeightFilter} label={t('watch.filterWeight')} allLabel={t('watch.filterAll')} options={WEIGHT_CLASS_API_VALUES} displayFn={(v) => t(`watch.weight.${WEIGHT_CLASS_KEY_MAP[v] || ''}`, v)} />
               <FilterSelect value={beltFilter} onChange={setBeltFilter} label={t('watch.filterBelt')} allLabel={t('watch.filterAll')} options={BELT_RANKS} displayFn={(v) => t(`watch.belt.${v}`)} />
               <FilterSelect value={eventFilter} onChange={setEventFilter} label={t('watch.filterEvent')} allLabel={t('watch.filterAll')} options={eventNames} />
               <FilterSelect value={categoryFilter} onChange={setCategoryFilter} label={t('watch.filterCategory', 'Category')} allLabel={t('watch.filterAll')} options={['gi', 'no-gi']} displayFn={(v) => t(`watch.category.${v === 'gi' ? 'gi' : 'noGi'}`)} />
@@ -255,7 +255,7 @@ function FilterSelect({ value, onChange, label, allLabel, options, displayFn }: 
   label: string;
   allLabel: string;
   options: string[];
-  displayFn?: (v: string, i?: number) => string;
+  displayFn?: (v: string) => string;
 }) {
   return (
     <div className="relative">
@@ -265,8 +265,8 @@ function FilterSelect({ value, onChange, label, allLabel, options, displayFn }: 
         className="appearance-none pl-4 pr-10 py-3 bg-navy-900 border border-white/10 text-text-primary text-sm focus:outline-none focus:border-gold-500/50 transition-colors cursor-pointer"
       >
         <option value="">{label}: {allLabel}</option>
-        {options.map((o, i) => (
-          <option key={o} value={o}>{displayFn ? displayFn(o, i) : o}</option>
+        {options.map((o) => (
+          <option key={o} value={o}>{displayFn ? displayFn(o) : o}</option>
         ))}
       </select>
       <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />

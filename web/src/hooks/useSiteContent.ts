@@ -42,7 +42,10 @@ export function useSiteContent() {
     (key: string, fallback = ''): string => {
       if (!content || !content[key]) return fallback;
       const localized = content[key][lang as keyof typeof content[typeof key]] as string | undefined;
-      if (localized) return localized;
+      // Treat null, undefined, and empty string as "not set" — all fall through
+      // to the static i18next fallback. An admin clearing a CMS field to blank
+      // should see the default translation, not an empty gap in the UI.
+      if (localized != null && localized !== '') return localized;
       // If the CMS lacks a value for this language, prefer the static i18next
       // fallback (which has proper translations) over the CMS English value.
       if (fallback) return fallback;
