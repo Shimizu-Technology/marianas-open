@@ -107,12 +107,13 @@ function BeltBreakdown({ breakdown }: { breakdown: Record<string, number> }) {
           {sorted.map((belt) => {
             const count = breakdown[belt];
             const pct = total > 0 ? (count / total) * 100 : 0;
-            const colors = BELT_COLORS[belt] || BELT_COLORS.white;
+            const normalized = belt.toLowerCase();
+            const colors = BELT_COLORS[normalized] || BELT_COLORS.white;
             return (
               <div key={belt} className="space-y-1">
                 <div className="flex justify-between items-center text-sm">
                   <span className={`font-heading font-semibold uppercase tracking-wider ${colors.text}`}>
-                    {t(`watch.belt.${belt}`, belt)}
+                    {t(`watch.belt.${normalized}`, belt)}
                   </span>
                   <span className="text-text-muted tabular-nums">{count}</span>
                 </div>

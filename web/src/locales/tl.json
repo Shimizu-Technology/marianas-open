@@ -370,12 +370,7 @@
     "total": "Kabuuan",
     "expandAll": "Palawakin Lahat",
     "collapseAll": "I-collapse Lahat",
-    "filterResults": "I-filter ang Resulta",
-    "white": "Puti",
-    "blue": "Asul",
-    "purple": "Lila",
-    "brown": "Kayumanggi",
-    "black": "Itim"
+    "filterResults": "I-filter ang Resulta"
   },
   "competitorProfile": {
     "title": "Profile ng Kalaban",

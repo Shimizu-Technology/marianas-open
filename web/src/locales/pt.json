@@ -370,12 +370,7 @@
     "total": "Total",
     "expandAll": "Expandir tudo",
     "collapseAll": "Recolher tudo",
-    "filterResults": "Filtrar resultados",
-    "white": "Branco",
-    "blue": "Azul",
-    "purple": "Roxo",
-    "brown": "Marrom",
-    "black": "Preto"
+    "filterResults": "Filtrar resultados"
   },
   "competitorProfile": {
     "title": "Perfil do Competidor",

@@ -370,12 +370,7 @@
     "total": "합계",
     "expandAll": "모두 펼치기",
     "collapseAll": "모두 접기",
-    "filterResults": "결과 필터",
-    "white": "화이트",
-    "blue": "블루",
-    "purple": "퍼플",
-    "brown": "브라운",
-    "black": "블랙"
+    "filterResults": "결과 필터"
   },
   "competitorProfile": {
     "title": "선수 프로필",

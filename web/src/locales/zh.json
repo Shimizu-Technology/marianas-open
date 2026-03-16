@@ -370,12 +370,7 @@
     "total": "总计",
     "expandAll": "全部展开",
     "collapseAll": "全部折叠",
-    "filterResults": "筛选成绩",
-    "white": "白",
-    "blue": "蓝",
-    "purple": "紫",
-    "brown": "棕",
-    "black": "黑"
+    "filterResults": "筛选成绩"
   },
   "competitorProfile": {
     "title": "选手简介",

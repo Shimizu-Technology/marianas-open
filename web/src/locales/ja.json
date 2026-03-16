@@ -370,12 +370,7 @@
     "total": "合計",
     "expandAll": "すべて展開",
     "collapseAll": "すべて折りたたむ",
-    "filterResults": "結果を絞り込む",
-    "white": "白",
-    "blue": "青",
-    "purple": "紫",
-    "brown": "茶",
-    "black": "黒"
+    "filterResults": "結果を絞り込む"
   },
   "competitorProfile": {
     "title": "選手プロフィール",
