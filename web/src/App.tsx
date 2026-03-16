@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import MobileLanguageFAB from './components/MobileLanguageFAB';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import { PostHogPageView } from './providers/PostHogProvider';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
@@ -113,6 +114,7 @@ export default function App() {
           path="*"
           element={
             <div className="min-h-screen bg-navy-900 text-text-primary">
+              <PostHogPageView />
               <Header />
               <main>
                 <AnimatedRoutes />
