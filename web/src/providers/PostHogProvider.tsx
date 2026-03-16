@@ -97,27 +97,33 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
       };
     }
 
-    posthog.init(POSTHOG_KEY, {
-      api_host: POSTHOG_HOST,
-      defaults: '2025-11-30',
-      capture_pageview: false,
-      capture_pageleave: true,
-      autocapture: false,
-      loaded: (ph) => {
-        if (!active) return;
+    try {
+      posthog.init(POSTHOG_KEY, {
+        api_host: POSTHOG_HOST,
+        defaults: '2025-11-30',
+        capture_pageview: false,
+        capture_pageleave: true,
+        autocapture: false,
+        loaded: (ph) => {
+          if (!active) return;
 
-        ph.capture('$pageview', {
-          $current_url: window.location.href,
-          $pathname: window.location.pathname,
-          $search: window.location.search,
-          $hash: window.location.hash,
-        });
-        initialCapturedPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-        postHogInitialized = true;
-        setInitialPageviewCaptured(true);
-        setIsReady(true);
-      },
-    });
+          ph.capture('$pageview', {
+            $current_url: window.location.href,
+            $pathname: window.location.pathname,
+            $search: window.location.search,
+            $hash: window.location.hash,
+          });
+          initialCapturedPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+          postHogInitialized = true;
+          setInitialPageviewCaptured(true);
+          setIsReady(true);
+        },
+      });
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('PostHog init failed:', error);
+      }
+    }
 
     return () => {
       active = false;
