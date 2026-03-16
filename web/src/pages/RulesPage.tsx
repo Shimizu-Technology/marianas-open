@@ -266,7 +266,7 @@ export default function RulesPage() {
                   <span className="text-text-primary font-semibold">
                     {t('rules.lastUpdatedLabel', 'Last updated:')}
                   </span>{' '}
-                  {t(RULES_LAST_UPDATED_KEY)}
+                  {t(RULES_LAST_UPDATED_KEY, 'March 2026')}
                 </p>
                 <p>
                   {t(
