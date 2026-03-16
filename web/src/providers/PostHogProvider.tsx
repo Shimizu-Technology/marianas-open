@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider, usePostHog } from 'posthog-js/react';
 import { useLocation } from 'react-router-dom';
@@ -12,31 +12,52 @@ let postHogInitialized = false;
 let postHogDisabledLogged = false;
 
 const PostHogReadyContext = createContext(false);
+const PostHogInitialPageviewCapturedContext = createContext(false);
 
 function usePostHogReady() {
   return useContext(PostHogReadyContext);
+}
+
+function useInitialPageviewCaptured() {
+  return useContext(PostHogInitialPageviewCapturedContext);
 }
 
 export function PostHogPageView() {
   const location = useLocation();
   const posthogClient = usePostHog();
   const isPostHogReady = usePostHogReady();
+  const initialPageviewCaptured = useInitialPageviewCaptured();
+  const lastCapturedPathRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!posthogClient || !isPostHogEnabled || !isPostHogReady) return;
+
+    const currentPath = `${location.pathname}${location.search}`;
+
+    // If provider already captured the initial pageview in posthog.init loaded callback,
+    // skip the first effect pass for that same URL to avoid duplicate first-hit events.
+    if (initialPageviewCaptured && lastCapturedPathRef.current === null) {
+      lastCapturedPathRef.current = currentPath;
+      return;
+    }
+
+    if (lastCapturedPathRef.current === currentPath) return;
 
     posthogClient.capture('$pageview', {
       $current_url: window.location.href,
       $pathname: location.pathname,
       $search: location.search,
     });
-  }, [location.pathname, location.search, posthogClient, isPostHogReady]);
+
+    lastCapturedPathRef.current = currentPath;
+  }, [location.pathname, location.search, posthogClient, isPostHogReady, initialPageviewCaptured]);
 
   return null;
 }
 
 export function PostHogProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(postHogInitialized);
+  const [initialPageviewCaptured, setInitialPageviewCaptured] = useState(false);
 
   useEffect(() => {
     if (!isPostHogEnabled) {
@@ -50,6 +71,7 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
 
     if (postHogInitialized) {
+      setInitialPageviewCaptured(true);
       setIsReady(true);
       return;
     }
@@ -60,14 +82,24 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
       capture_pageview: false,
       capture_pageleave: true,
       autocapture: false,
-      loaded: () => {
+      loaded: (ph) => {
+        ph.capture('$pageview', {
+          $current_url: window.location.href,
+          $pathname: window.location.pathname,
+          $search: window.location.search,
+        });
         postHogInitialized = true;
+        setInitialPageviewCaptured(true);
         setIsReady(true);
       },
     });
   }, []);
 
   const readyValue = useMemo(() => isReady, [isReady]);
+  const initialPageviewCapturedValue = useMemo(
+    () => initialPageviewCaptured,
+    [initialPageviewCaptured]
+  );
 
   if (!isPostHogEnabled) {
     return <>{children}</>;
@@ -75,7 +107,11 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
 
   return (
     <PHProvider client={posthog}>
-      <PostHogReadyContext.Provider value={readyValue}>{children}</PostHogReadyContext.Provider>
+      <PostHogReadyContext.Provider value={readyValue}>
+        <PostHogInitialPageviewCapturedContext.Provider value={initialPageviewCapturedValue}>
+          {children}
+        </PostHogInitialPageviewCapturedContext.Provider>
+      </PostHogReadyContext.Provider>
     </PHProvider>
   );
 }
