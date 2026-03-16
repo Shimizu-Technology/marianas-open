@@ -8,15 +8,7 @@ const POSTHOG_HOST = import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://us.i.p
 
 export const isPostHogEnabled = Boolean(POSTHOG_KEY && POSTHOG_KEY !== 'YOUR_POSTHOG_KEY');
 
-if (isPostHogEnabled && typeof window !== 'undefined') {
-  posthog.init(POSTHOG_KEY, {
-    api_host: POSTHOG_HOST,
-    defaults: '2025-11-30',
-    capture_pageview: false,
-    capture_pageleave: true,
-    autocapture: true,
-  });
-}
+let postHogInitialized = false;
 
 export function PostHogPageView() {
   const location = useLocation();
@@ -36,6 +28,20 @@ export function PostHogPageView() {
 }
 
 export function PostHogProvider({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    if (!isPostHogEnabled || typeof window === 'undefined' || postHogInitialized) return;
+
+    posthog.init(POSTHOG_KEY, {
+      api_host: POSTHOG_HOST,
+      defaults: '2025-11-30',
+      capture_pageview: false,
+      capture_pageleave: true,
+      autocapture: true,
+    });
+
+    postHogInitialized = true;
+  }, []);
+
   if (!isPostHogEnabled) {
     if (import.meta.env.DEV) {
       console.info('PostHog not configured - analytics disabled');
