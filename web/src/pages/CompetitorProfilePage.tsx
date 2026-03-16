@@ -138,7 +138,7 @@ export default function CompetitorProfilePage() {
                                 <span className="text-text-muted">#{r.placement}</span>
                               )}
                             </td>
-                            <td className="p-3 text-text-secondary capitalize">{r.belt_rank}</td>
+                            <td className="p-3 text-text-secondary">{t(`watch.belt.${r.belt_rank}`, r.belt_rank)}</td>
                             <td className="p-3 text-right font-medium text-white">{r.points_earned}</td>
                           </motion.tr>
                         );

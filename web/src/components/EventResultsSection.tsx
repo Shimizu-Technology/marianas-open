@@ -112,7 +112,7 @@ function BeltBreakdown({ breakdown }: { breakdown: Record<string, number> }) {
               <div key={belt} className="space-y-1">
                 <div className="flex justify-between items-center text-sm">
                   <span className={`font-heading font-semibold uppercase tracking-wider ${colors.text}`}>
-                    {t(`results.${belt}`)}
+                    {t(`watch.belt.${belt}`, belt)}
                   </span>
                   <span className="text-text-muted tabular-nums">{count}</span>
                 </div>
