@@ -6,10 +6,10 @@ import { ArrowLeft, Trophy, Medal, Award, MapPin, Users, Calendar } from 'lucide
 import { api } from '../services/api';
 import type { CompetitorProfile } from '../services/api';
 
-const PLACEMENT_BADGE: Record<number, { label: string; className: string }> = {
-  1: { label: 'Gold', className: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' },
-  2: { label: 'Silver', className: 'bg-gray-400/20 text-gray-300 border border-gray-400/30' },
-  3: { label: 'Bronze', className: 'bg-amber-700/20 text-amber-500 border border-amber-600/30' },
+const PLACEMENT_STYLE: Record<number, { key: string; className: string }> = {
+  1: { key: 'competitorProfile.gold', className: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' },
+  2: { key: 'competitorProfile.silver', className: 'bg-gray-400/20 text-gray-300 border border-gray-400/30' },
+  3: { key: 'competitorProfile.bronze', className: 'bg-amber-700/20 text-amber-500 border border-amber-600/30' },
 };
 
 export default function CompetitorProfilePage() {
@@ -108,7 +108,7 @@ export default function CompetitorProfilePage() {
                     </thead>
                     <tbody>
                       {profile.results.map((r, i) => {
-                        const badge = PLACEMENT_BADGE[r.placement];
+                        const badge = PLACEMENT_STYLE[r.placement];
                         return (
                           <motion.tr
                             key={`${r.event_slug}-${r.division}-${i}`}
@@ -132,7 +132,7 @@ export default function CompetitorProfilePage() {
                             <td className="p-3">
                               {badge ? (
                                 <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${badge.className}`}>
-                                  {badge.label}
+                                  {t(badge.key)}
                                 </span>
                               ) : (
                                 <span className="text-text-muted">#{r.placement}</span>

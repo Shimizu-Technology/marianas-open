@@ -8,7 +8,8 @@
     "rankings": "Rankings",
     "competitors": "Competitors",
     "pastEvents": "Past Events",
-    "rules": "Rules"
+    "rules": "Rules",
+    "toggleMenu": "Toggle menu"
   },
   "pastEvents": {
     "badge": "Event Archive",
@@ -175,7 +176,31 @@
     "featured": "Featured",
     "filterCategory": "Category",
     "noVideosYet": "No videos yet",
-    "noVideosYetDesc": "Check back soon for match videos and highlights."
+    "noVideosYetDesc": "Check back soon for match videos and highlights.",
+    "vs": "vs",
+    "weight": {
+      "rooster": "Rooster",
+      "lightFeather": "Light Feather",
+      "feather": "Feather",
+      "light": "Light",
+      "middle": "Middle",
+      "mediumHeavy": "Medium Heavy",
+      "heavy": "Heavy",
+      "superHeavy": "Super Heavy",
+      "ultraHeavy": "Ultra Heavy",
+      "openClass": "Open Class"
+    },
+    "belt": {
+      "white": "White",
+      "blue": "Blue",
+      "purple": "Purple",
+      "brown": "Brown",
+      "black": "Black"
+    },
+    "category": {
+      "gi": "Gi",
+      "noGi": "No-Gi"
+    }
   },
   "share": {
     "defaultText": "Check out the Marianas Open — International BJJ Championship!",
@@ -293,7 +318,25 @@
     "noResults": "No results found for these filters.",
     "pointsReference": "Points Reference",
     "eventStars": "Event Star Ratings",
-    "formulaNote": "Official reference: Fighter ranking points use 5-Star values; team ranking points use 4-Star values. Alone brackets and same-team one brackets follow organizer policy on the official rankings page."
+    "formulaNote": "Official reference: Fighter ranking points use 5-Star values; team ranking points use 4-Star values. Alone brackets and same-team one brackets follow organizer policy on the official rankings page.",
+    "giNoGi": "Gi / No-Gi",
+    "belt": {
+      "all": "All",
+      "black": "Black",
+      "brown": "Brown",
+      "purple": "Purple",
+      "blue": "Blue",
+      "white": "White"
+    },
+    "gi": {
+      "combined": "Combined",
+      "gi": "Gi",
+      "noGi": "No-Gi"
+    },
+    "eventMarianasOpen": "Marianas Open",
+    "eventProTokyoNagoya": "Pro Tokyo / Nagoya",
+    "eventProSeriesOthers": "Pro Series (others)",
+    "eventCopaDeMarianas": "Copa de Marianas"
   },
   "results": {
     "title": "Event Results",
@@ -457,6 +500,32 @@
       "Arrive early because matches can move ahead of schedule.",
       "Wear sandals or shoes off the mat and bring a backup uniform if possible."
     ],
-    "secondarySourceLinkText": "Open SJJIF rulebook resources"
+    "secondarySourceLinkText": "Open SJJIF rulebook resources",
+    "lastUpdatedDate": "March 2026"
+  },
+  "countries": {
+    "guam": "Guam",
+    "japan": "Japan",
+    "southKorea": "South Korea",
+    "philippines": "Philippines",
+    "brazil": "Brazil",
+    "unitedStates": "United States",
+    "taiwan": "Taiwan",
+    "nMarianIslands": "N. Mariana Islands",
+    "france": "France",
+    "palau": "Palau",
+    "hongKong": "Hong Kong",
+    "australia": "Australia",
+    "unitedKingdom": "United Kingdom",
+    "canada": "Canada",
+    "singapore": "Singapore",
+    "india": "India",
+    "mexico": "Mexico",
+    "china": "China",
+    "thailand": "Thailand",
+    "indonesia": "Indonesia",
+    "micronesia": "Micronesia",
+    "marshallIslands": "Marshall Islands",
+    "newZealand": "New Zealand"
   }
 }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_13_163947) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_16_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -161,6 +161,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_13_163947) do
     t.text "value_en"
     t.text "value_ja"
     t.text "value_ko"
+    t.text "value_pt"
     t.text "value_tl"
     t.text "value_zh"
     t.index ["key"], name: "index_site_contents_on_key", unique: true

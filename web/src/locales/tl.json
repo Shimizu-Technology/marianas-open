@@ -8,7 +8,8 @@
     "rankings": "Mga ranggo",
     "competitors": "Mga Kalaban",
     "pastEvents": "Nakaraang Events",
-    "rules": "Mga Patakaran"
+    "rules": "Mga Patakaran",
+    "toggleMenu": "Toggle menu"
   },
   "pastEvents": {
     "badge": "Archive ng Kaganapan",
@@ -175,7 +176,31 @@
     "featured": "Tampok",
     "filterCategory": "Kategorya",
     "noVideosYet": "Wala pang mga video",
-    "noVideosYetDesc": "Bumalik sa lalong madaling panahon para sa mga video ng laban at mga highlight."
+    "noVideosYetDesc": "Bumalik sa lalong madaling panahon para sa mga video ng laban at mga highlight.",
+    "vs": "vs",
+    "weight": {
+      "rooster": "Rooster",
+      "lightFeather": "Light Feather",
+      "feather": "Feather",
+      "light": "Light",
+      "middle": "Middle",
+      "mediumHeavy": "Medium Heavy",
+      "heavy": "Heavy",
+      "superHeavy": "Super Heavy",
+      "ultraHeavy": "Ultra Heavy",
+      "openClass": "Open Class"
+    },
+    "belt": {
+      "white": "White",
+      "blue": "Blue",
+      "purple": "Purple",
+      "brown": "Brown",
+      "black": "Black"
+    },
+    "category": {
+      "gi": "Gi",
+      "noGi": "No-Gi"
+    }
   },
   "share": {
     "defaultText": "Tingnan ang Marianas Open — International BJJ Championship!",
@@ -293,7 +318,25 @@
     "noResults": "Walang resulta para sa mga filter na ito.",
     "pointsReference": "Sanggunian ng Puntos",
     "eventStars": "Mga Star Rating ng Event",
-    "formulaNote": "Opisyal na batayan: ang puntos ng manlalaban ay gumagamit ng 5-star values; ang puntos ng koponan ay gumagamit ng 4-star values. Ang alone brackets at same-team one brackets ay sumusunod sa patakaran ng organizer sa opisyal na rankings page."
+    "formulaNote": "Opisyal na batayan: ang puntos ng manlalaban ay gumagamit ng 5-star values; ang puntos ng koponan ay gumagamit ng 4-star values. Ang alone brackets at same-team one brackets ay sumusunod sa patakaran ng organizer sa opisyal na rankings page.",
+    "giNoGi": "Gi / No-Gi",
+    "belt": {
+      "all": "Lahat",
+      "black": "Black",
+      "brown": "Brown",
+      "purple": "Purple",
+      "blue": "Blue",
+      "white": "White"
+    },
+    "gi": {
+      "combined": "Pinagsama",
+      "gi": "Gi",
+      "noGi": "No-Gi"
+    },
+    "eventMarianasOpen": "Marianas Open",
+    "eventProTokyoNagoya": "Pro Tokyo / Nagoya",
+    "eventProSeriesOthers": "Pro Series (iba pa)",
+    "eventCopaDeMarianas": "Copa de Marianas"
   },
   "results": {
     "title": "Mga Resulta ng Event",
@@ -457,6 +500,32 @@
       "Dumating nang maaga dahil maaaring mauna ang mga laban sa iskedyul.",
       "Magsuot ng sandalyas o sapatos kapag wala sa mat at magdala ng backup na uniporme kung maaari."
     ],
-    "secondarySourceLinkText": "Buksan ang SJJIF rulebook resources"
+    "secondarySourceLinkText": "Buksan ang SJJIF rulebook resources",
+    "lastUpdatedDate": "Marso 2026"
+  },
+  "countries": {
+    "guam": "Guam",
+    "japan": "Japan",
+    "southKorea": "South Korea",
+    "philippines": "Pilipinas",
+    "brazil": "Brazil",
+    "unitedStates": "Estados Unidos",
+    "taiwan": "Taiwan",
+    "nMarianIslands": "N. Mariana Islands",
+    "france": "France",
+    "palau": "Palau",
+    "hongKong": "Hong Kong",
+    "australia": "Australia",
+    "unitedKingdom": "United Kingdom",
+    "canada": "Canada",
+    "singapore": "Singapore",
+    "india": "India",
+    "mexico": "Mexico",
+    "china": "China",
+    "thailand": "Thailand",
+    "indonesia": "Indonesia",
+    "micronesia": "Micronesia",
+    "marshallIslands": "Marshall Islands",
+    "newZealand": "New Zealand"
   }
 }

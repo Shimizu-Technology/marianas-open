@@ -29,7 +29,7 @@ const RULEBOOK_PDF_URL =
 
 const ASJJF_RULES_URL = 'https://asjjf.org/main/rules?pagesType=RULE_BOOK';
 const SJJIF_RULES_URL = 'https://sjjif.com/publicPages/pages?pagesType=RULE_BOOK';
-const RULES_LAST_UPDATED = 'March 2026';
+const RULES_LAST_UPDATED_KEY = 'rules.lastUpdatedDate';
 
 /** Maps i18n section keys to their Lucide icon. Icons cannot live in JSON. */
 const SECTION_KEYS: Array<{ key: string; icon: LucideIcon }> = [
@@ -266,7 +266,7 @@ export default function RulesPage() {
                   <span className="text-text-primary font-semibold">
                     {t('rules.lastUpdatedLabel', 'Last updated:')}
                   </span>{' '}
-                  {RULES_LAST_UPDATED}
+                  {t(RULES_LAST_UPDATED_KEY)}
                 </p>
                 <p>
                   {t(

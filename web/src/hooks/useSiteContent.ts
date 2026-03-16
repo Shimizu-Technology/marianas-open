@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
 import type { SiteContentMap } from '../services/api';
@@ -11,8 +11,7 @@ export function useSiteContent() {
   const [content, setContent] = useState<SiteContentMap | null>(cachedContent);
   const [loading, setLoading] = useState(!cachedContent);
   const { i18n } = useTranslation();
-  const langRef = useRef(i18n.language);
-  langRef.current = i18n.language;
+  const lang = i18n.language;
 
   useEffect(() => {
     if (cachedContent) {
@@ -42,10 +41,14 @@ export function useSiteContent() {
   const t = useCallback(
     (key: string, fallback = ''): string => {
       if (!content || !content[key]) return fallback;
-      const lang = langRef.current as keyof typeof content[typeof key];
-      return (content[key][lang] || content[key].en || fallback) as string;
+      const localized = content[key][lang as keyof typeof content[typeof key]] as string | undefined;
+      if (localized) return localized;
+      // If the CMS lacks a value for this language, prefer the static i18next
+      // fallback (which has proper translations) over the CMS English value.
+      if (fallback) return fallback;
+      return (content[key].en || '') as string;
     },
-    [content]
+    [content, lang]
   );
 
   return { content, loading, t };

@@ -8,7 +8,8 @@
     "rankings": "Classificações",
     "competitors": "Competidores",
     "pastEvents": "Eventos Anteriores",
-    "rules": "Regras"
+    "rules": "Regras",
+    "toggleMenu": "Alternar menu"
   },
   "pastEvents": {
     "badge": "Arquivo de eventos",
@@ -175,7 +176,31 @@
     "featured": "Destaque",
     "filterCategory": "Categoria",
     "noVideosYet": "Ainda sem vídeos",
-    "noVideosYetDesc": "Volte em breve para vídeos de lutas e destaques."
+    "noVideosYetDesc": "Volte em breve para vídeos de lutas e destaques.",
+    "vs": "vs",
+    "weight": {
+      "rooster": "Galo",
+      "lightFeather": "Pluma Leve",
+      "feather": "Pluma",
+      "light": "Leve",
+      "middle": "Médio",
+      "mediumHeavy": "Meio-Pesado",
+      "heavy": "Pesado",
+      "superHeavy": "Super Pesado",
+      "ultraHeavy": "Ultra Pesado",
+      "openClass": "Absoluto"
+    },
+    "belt": {
+      "white": "Branca",
+      "blue": "Azul",
+      "purple": "Roxa",
+      "brown": "Marrom",
+      "black": "Preta"
+    },
+    "category": {
+      "gi": "Gi",
+      "noGi": "No-Gi"
+    }
   },
   "share": {
     "defaultText": "Confira o Marianas Open — Campeonato Internacional de BJJ!",
@@ -293,7 +318,25 @@
     "noResults": "Nenhum resultado encontrado para estes filtros.",
     "pointsReference": "Referência de pontos",
     "eventStars": "Classificações por estrelas do evento",
-    "formulaNote": "Referência oficial: pontos de lutadores usam valores de 5 estrelas; pontos de equipe usam valores de 4 estrelas. Chaves sem oponente e chaves com apenas uma equipe seguem a política do organizador na página oficial de rankings."
+    "formulaNote": "Referência oficial: pontos de lutadores usam valores de 5 estrelas; pontos de equipe usam valores de 4 estrelas. Chaves sem oponente e chaves com apenas uma equipe seguem a política do organizador na página oficial de rankings.",
+    "giNoGi": "Gi / No-Gi",
+    "belt": {
+      "all": "Todos",
+      "black": "Preta",
+      "brown": "Marrom",
+      "purple": "Roxa",
+      "blue": "Azul",
+      "white": "Branca"
+    },
+    "gi": {
+      "combined": "Combinado",
+      "gi": "Gi",
+      "noGi": "No-Gi"
+    },
+    "eventMarianasOpen": "Marianas Open",
+    "eventProTokyoNagoya": "Pro Tokyo / Nagoya",
+    "eventProSeriesOthers": "Pro Series (outros)",
+    "eventCopaDeMarianas": "Copa de Marianas"
   },
   "results": {
     "title": "Resultados do Evento",
@@ -457,6 +500,32 @@
       "Chegue cedo porque as lutas podem avançar antes do horário previsto.",
       "Use sandálias ou sapatos fora do tatame e traga um uniforme reserva, se possível."
     ],
-    "secondarySourceLinkText": "Abrir recursos do livro de regras da SJJIF"
+    "secondarySourceLinkText": "Abrir recursos do livro de regras da SJJIF",
+    "lastUpdatedDate": "Março de 2026"
+  },
+  "countries": {
+    "guam": "Guam",
+    "japan": "Japão",
+    "southKorea": "Coreia do Sul",
+    "philippines": "Filipinas",
+    "brazil": "Brasil",
+    "unitedStates": "Estados Unidos",
+    "taiwan": "Taiwan",
+    "nMarianIslands": "Ilhas Marianas do Norte",
+    "france": "França",
+    "palau": "Palau",
+    "hongKong": "Hong Kong",
+    "australia": "Austrália",
+    "unitedKingdom": "Reino Unido",
+    "canada": "Canadá",
+    "singapore": "Singapura",
+    "india": "Índia",
+    "mexico": "México",
+    "china": "China",
+    "thailand": "Tailândia",
+    "indonesia": "Indonésia",
+    "micronesia": "Micronésia",
+    "marshallIslands": "Ilhas Marshall",
+    "newZealand": "Nova Zelândia"
   }
 }

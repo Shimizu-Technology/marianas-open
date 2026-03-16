@@ -8,7 +8,8 @@
     "rankings": "랭킹",
     "competitors": "선수 소개",
     "pastEvents": "지난 이벤트",
-    "rules": "규칙"
+    "rules": "규칙",
+    "toggleMenu": "메뉴 전환"
   },
   "pastEvents": {
     "badge": "이벤트 아카이브",
@@ -175,7 +176,31 @@
     "featured": "추천",
     "filterCategory": "카테고리",
     "noVideosYet": "아직 영상이 없습니다",
-    "noVideosYetDesc": "경기 영상과 하이라이트를 곧 확인하세요."
+    "noVideosYetDesc": "경기 영상과 하이라이트를 곧 확인하세요.",
+    "vs": "vs",
+    "weight": {
+      "rooster": "루스터",
+      "lightFeather": "라이트페더",
+      "feather": "페더",
+      "light": "라이트",
+      "middle": "미들",
+      "mediumHeavy": "미디엄헤비",
+      "heavy": "헤비",
+      "superHeavy": "슈퍼헤비",
+      "ultraHeavy": "울트라헤비",
+      "openClass": "오픈클래스"
+    },
+    "belt": {
+      "white": "화이트",
+      "blue": "블루",
+      "purple": "퍼플",
+      "brown": "브라운",
+      "black": "블랙"
+    },
+    "category": {
+      "gi": "기",
+      "noGi": "노기"
+    }
   },
   "share": {
     "defaultText": "마리아나스 오픈 — 국제 주짓수 챔피언십을 확인하세요!",
@@ -293,7 +318,25 @@
     "noResults": "해당 필터에 대한 결과가 없습니다.",
     "pointsReference": "포인트 기준",
     "eventStars": "대회 스타 등급",
-    "formulaNote": "공식 기준: 파이터 랭킹은 5스타 값을, 팀 랭킹은 4스타 값을 사용합니다. 단독 브래킷 및 동일 팀 단일 브래킷은 공식 랭킹 페이지의 주최자 정책을 따릅니다."
+    "formulaNote": "공식 기준: 파이터 랭킹은 5스타 값을, 팀 랭킹은 4스타 값을 사용합니다. 단독 브래킷 및 동일 팀 단일 브래킷은 공식 랭킹 페이지의 주최자 정책을 따릅니다.",
+    "giNoGi": "기 / 노기",
+    "belt": {
+      "all": "전체",
+      "black": "블랙",
+      "brown": "브라운",
+      "purple": "퍼플",
+      "blue": "블루",
+      "white": "화이트"
+    },
+    "gi": {
+      "combined": "통합",
+      "gi": "기",
+      "noGi": "노기"
+    },
+    "eventMarianasOpen": "마리아나스 오픈",
+    "eventProTokyoNagoya": "프로 도쿄 / 나고야",
+    "eventProSeriesOthers": "프로 시리즈 (기타)",
+    "eventCopaDeMarianas": "코파 데 마리아나스"
   },
   "results": {
     "title": "대회 결과",
@@ -457,6 +500,32 @@
       "경기가 일정보다 앞당겨질 수 있으므로 일찍 도착하세요.",
       "매트 밖에서는 샌들이나 신발을 착용하고 가능하면 예비 유니폼을 지참하세요."
     ],
-    "secondarySourceLinkText": "SJJIF 룰북 자료 열기"
+    "secondarySourceLinkText": "SJJIF 룰북 자료 열기",
+    "lastUpdatedDate": "2026년 3월"
+  },
+  "countries": {
+    "guam": "괌",
+    "japan": "일본",
+    "southKorea": "한국",
+    "philippines": "필리핀",
+    "brazil": "브라질",
+    "unitedStates": "미국",
+    "taiwan": "대만",
+    "nMarianIslands": "북마리아나 제도",
+    "france": "프랑스",
+    "palau": "팔라우",
+    "hongKong": "홍콩",
+    "australia": "호주",
+    "unitedKingdom": "영국",
+    "canada": "캐나다",
+    "singapore": "싱가포르",
+    "india": "인도",
+    "mexico": "멕시코",
+    "china": "중국",
+    "thailand": "태국",
+    "indonesia": "인도네시아",
+    "micronesia": "미크로네시아",
+    "marshallIslands": "마셜 제도",
+    "newZealand": "뉴질랜드"
   }
 }

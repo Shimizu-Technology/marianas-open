@@ -20,7 +20,12 @@ const beltColors: Record<string, string> = {
   black: 'bg-gray-900 text-white border border-white/20',
 };
 
-const WEIGHT_CLASSES = [
+const WEIGHT_CLASS_KEYS = [
+  'rooster', 'lightFeather', 'feather', 'light', 'middle',
+  'mediumHeavy', 'heavy', 'superHeavy', 'ultraHeavy', 'openClass',
+] as const;
+
+const WEIGHT_CLASS_API_VALUES = [
   'Rooster', 'Light Feather', 'Feather', 'Light', 'Middle',
   'Medium Heavy', 'Heavy', 'Super Heavy', 'Ultra Heavy', 'Open Class',
 ];
@@ -160,10 +165,10 @@ export default function WatchPage() {
                   className="w-full pl-11 pr-4 py-3 bg-navy-900 border border-white/10 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-gold-500/50 transition-colors"
                 />
               </div>
-              <FilterSelect value={weightFilter} onChange={setWeightFilter} label={t('watch.filterWeight')} allLabel={t('watch.filterAll')} options={WEIGHT_CLASSES} />
-              <FilterSelect value={beltFilter} onChange={setBeltFilter} label={t('watch.filterBelt')} allLabel={t('watch.filterAll')} options={BELT_RANKS} displayFn={v => v.charAt(0).toUpperCase() + v.slice(1)} />
+              <FilterSelect value={weightFilter} onChange={setWeightFilter} label={t('watch.filterWeight')} allLabel={t('watch.filterAll')} options={WEIGHT_CLASS_API_VALUES} displayFn={(_v, i) => i !== undefined ? t(`watch.weight.${WEIGHT_CLASS_KEYS[i]}`) : _v} />
+              <FilterSelect value={beltFilter} onChange={setBeltFilter} label={t('watch.filterBelt')} allLabel={t('watch.filterAll')} options={BELT_RANKS} displayFn={(v) => t(`watch.belt.${v}`)} />
               <FilterSelect value={eventFilter} onChange={setEventFilter} label={t('watch.filterEvent')} allLabel={t('watch.filterAll')} options={eventNames} />
-              <FilterSelect value={categoryFilter} onChange={setCategoryFilter} label={t('watch.filterCategory', 'Category')} allLabel={t('watch.filterAll')} options={['gi', 'no-gi']} displayFn={v => v === 'gi' ? 'Gi' : 'No-Gi'} />
+              <FilterSelect value={categoryFilter} onChange={setCategoryFilter} label={t('watch.filterCategory', 'Category')} allLabel={t('watch.filterAll')} options={['gi', 'no-gi']} displayFn={(v) => t(`watch.category.${v === 'gi' ? 'gi' : 'noGi'}`)} />
             </div>
           </ScrollReveal>
 
@@ -246,7 +251,7 @@ function FilterSelect({ value, onChange, label, allLabel, options, displayFn }: 
   label: string;
   allLabel: string;
   options: string[];
-  displayFn?: (v: string) => string;
+  displayFn?: (v: string, i?: number) => string;
 }) {
   return (
     <div className="relative">
@@ -256,8 +261,8 @@ function FilterSelect({ value, onChange, label, allLabel, options, displayFn }: 
         className="appearance-none pl-4 pr-10 py-3 bg-navy-900 border border-white/10 text-text-primary text-sm focus:outline-none focus:border-gold-500/50 transition-colors cursor-pointer"
       >
         <option value="">{label}: {allLabel}</option>
-        {options.map(o => (
-          <option key={o} value={o}>{displayFn ? displayFn(o) : o}</option>
+        {options.map((o, i) => (
+          <option key={o} value={o}>{displayFn ? displayFn(o, i) : o}</option>
         ))}
       </select>
       <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
@@ -266,6 +271,7 @@ function FilterSelect({ value, onChange, label, allLabel, options, displayFn }: 
 }
 
 function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: boolean; onToggle: () => void }) {
+  const { t } = useTranslation();
   const thumbnail = video.youtube_video_id
     ? `https://img.youtube.com/vi/${video.youtube_video_id}/mqdefault.jpg`
     : null;
@@ -308,7 +314,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
         {video.belt_rank && !expanded && (
           <div className="absolute top-2 left-2">
             <span className={`px-2 py-0.5 text-[10px] font-bold uppercase ${beltColors[video.belt_rank] || ''}`}>
-              {video.belt_rank}
+              {t(`watch.belt.${video.belt_rank}`)}
             </span>
           </div>
         )}
@@ -321,7 +327,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
             <span className="font-heading font-bold text-text-primary truncate">
               {video.competitor_1_name}
             </span>
-            <span className="text-text-muted text-xs shrink-0">vs</span>
+            <span className="text-text-muted text-xs shrink-0">{t('watch.vs')}</span>
             <span className="font-heading font-bold text-text-primary truncate">
               {video.competitor_2_name}
             </span>
