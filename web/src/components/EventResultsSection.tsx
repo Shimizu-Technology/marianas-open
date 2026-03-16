@@ -16,9 +16,9 @@ const BELT_COLORS: Record<string, { bg: string; text: string; border: string }> 
 };
 
 const PLACEMENT_STYLES: Record<number, { bg: string; text: string; border: string; key: string }> = {
-  1: { bg: 'bg-[#D4A843]/15', text: 'text-[#D4A843]', border: 'border-[#D4A843]/40', key: 'results.placement1' },
-  2: { bg: 'bg-[#C0C0C0]/10', text: 'text-[#C0C0C0]', border: 'border-[#C0C0C0]/30', key: 'results.placement2' },
-  3: { bg: 'bg-[#CD7F32]/10', text: 'text-[#CD7F32]', border: 'border-[#CD7F32]/30', key: 'results.placement3' },
+  1: { bg: 'bg-[#D4A843]/15', text: 'text-[#D4A843]', border: 'border-[#D4A843]/40', key: 'results.placementBadge1' },
+  2: { bg: 'bg-[#C0C0C0]/10', text: 'text-[#C0C0C0]', border: 'border-[#C0C0C0]/30', key: 'results.placementBadge2' },
+  3: { bg: 'bg-[#CD7F32]/10', text: 'text-[#CD7F32]', border: 'border-[#CD7F32]/30', key: 'results.placementBadge3' },
 };
 
 function CountryFlag({ code, className = 'w-5 h-4' }: { code: string; className?: string }) {

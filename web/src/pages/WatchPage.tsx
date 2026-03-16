@@ -170,7 +170,7 @@ export default function WatchPage() {
                 />
               </div>
               <FilterSelect value={weightFilter} onChange={setWeightFilter} label={t('watch.filterWeight')} allLabel={t('watch.filterAll')} options={WEIGHT_CLASS_API_VALUES} displayFn={(v) => { const key = WEIGHT_CLASS_KEY_MAP[v]; return key ? t(`watch.weight.${key}`, v) : v; }} />
-              <FilterSelect value={beltFilter} onChange={setBeltFilter} label={t('watch.filterBelt')} allLabel={t('watch.filterAll')} options={BELT_RANKS} displayFn={(v) => t(`watch.belt.${v}`)} />
+              <FilterSelect value={beltFilter} onChange={setBeltFilter} label={t('watch.filterBelt')} allLabel={t('watch.filterAll')} options={BELT_RANKS} displayFn={(v) => t(`watch.belt.${v}`, v)} />
               <FilterSelect value={eventFilter} onChange={setEventFilter} label={t('watch.filterEvent')} allLabel={t('watch.filterAll')} options={eventNames} />
               <FilterSelect value={categoryFilter} onChange={setCategoryFilter} label={t('watch.filterCategory', 'Category')} allLabel={t('watch.filterAll')} options={['gi', 'no-gi']} displayFn={(v) => t(`watch.category.${v === 'gi' ? 'gi' : 'noGi'}`)} />
             </div>
@@ -318,7 +318,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
         {video.belt_rank && !expanded && (
           <div className="absolute top-2 left-2">
             <span className={`px-2 py-0.5 text-[10px] font-bold uppercase ${beltColors[video.belt_rank] || ''}`}>
-              {t(`watch.belt.${video.belt_rank}`)}
+              {t(`watch.belt.${video.belt_rank}`, video.belt_rank)}
             </span>
           </div>
         )}
