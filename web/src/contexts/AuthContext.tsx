@@ -7,12 +7,14 @@ interface AuthContextType {
   isClerkEnabled: boolean
   isSignedIn: boolean
   isLoading: boolean
+  userId: string | null
 }
 
 const AuthContext = createContext<AuthContextType>({
   isClerkEnabled: false,
   isSignedIn: false,
   isLoading: true,
+  userId: null,
 })
 
 export function useAuthContext() {
@@ -20,7 +22,7 @@ export function useAuthContext() {
 }
 
 function ClerkAuthProvider({ children }: { children: ReactNode }) {
-  const { getToken, isLoaded, isSignedIn } = useAuth()
+  const { getToken, isLoaded, isSignedIn, userId } = useAuth()
 
   useEffect(() => {
     setAuthTokenGetter(async () => {
@@ -38,6 +40,7 @@ function ClerkAuthProvider({ children }: { children: ReactNode }) {
         isClerkEnabled: true,
         isSignedIn: isSignedIn ?? false,
         isLoading: !isLoaded,
+        userId: userId ?? null,
       }}
     >
       {children}
@@ -56,6 +59,7 @@ function NoAuthProvider({ children }: { children: ReactNode }) {
         isClerkEnabled: false,
         isSignedIn: false,
         isLoading: false,
+        userId: null,
       }}
     >
       {children}

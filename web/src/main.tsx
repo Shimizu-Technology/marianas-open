@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import './i18n'
 import './index.css'
 import App from './App'
+import { PostHogProvider } from './providers/PostHogProvider'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 const isClerkEnabled = Boolean(PUBLISHABLE_KEY && PUBLISHABLE_KEY !== 'YOUR_PUBLISHABLE_KEY')
@@ -18,7 +19,9 @@ function Root() {
     return (
       <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
         <AuthProvider isClerkEnabled={true}>
-          <App />
+          <PostHogProvider>
+            <App />
+          </PostHogProvider>
         </AuthProvider>
       </ClerkProvider>
     )
@@ -26,7 +29,9 @@ function Root() {
 
   return (
     <AuthProvider isClerkEnabled={false}>
-      <App />
+      <PostHogProvider>
+        <App />
+      </PostHogProvider>
     </AuthProvider>
   )
 }
