@@ -56,18 +56,27 @@ function PostHogIdentitySync() {
   const posthogClient = usePostHog();
   const { isSignedIn, userId, isLoading } = useAuthContext();
   const isPostHogReady = usePostHogReady();
+  const prevSignedInRef = useRef<boolean | null>(null);
 
   useEffect(() => {
     if (!posthogClient || !isPostHogEnabled || !isPostHogReady || isLoading) return;
+
+    const prevSignedIn = prevSignedInRef.current;
 
     if (isSignedIn && userId) {
       posthogClient.identify(userId, {
         user_id: userId,
       });
+      prevSignedInRef.current = true;
       return;
     }
 
-    posthogClient.reset();
+    // Only reset on actual sign-out transitions, not on first anonymous page load.
+    if (prevSignedIn === true && !isSignedIn) {
+      posthogClient.reset();
+    }
+
+    prevSignedInRef.current = false;
   }, [posthogClient, isPostHogReady, isLoading, isSignedIn, userId]);
 
   return null;
