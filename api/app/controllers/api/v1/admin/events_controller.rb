@@ -85,6 +85,27 @@ module Api
           render json: { event: @event.reload.as_json }
         end
 
+        # POST /api/v1/admin/events/auto_complete_past
+        # Finds all upcoming/published events whose end_date (or date) is before today
+        # and marks them as completed. Returns a summary of what changed.
+        def auto_complete_past
+          today = Date.current
+          candidates = Event.where(status: %w[upcoming published])
+            .where("COALESCE(end_date, date) < ?", today)
+
+          updated = []
+          candidates.each do |event|
+            event.update!(status: "completed")
+            updated << { id: event.id, name: event.name, date: event.date, slug: event.slug }
+          end
+
+          render json: {
+            message: updated.any? ? "Marked #{updated.count} event(s) as completed." : "No past events needed updating.",
+            updated_count: updated.count,
+            updated_events: updated
+          }
+        end
+
         private
 
         def set_event

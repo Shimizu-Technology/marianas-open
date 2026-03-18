@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel } from 'lucide-react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, CheckCircle2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -46,6 +46,22 @@ export default function EventsAdmin() {
   const [success, setSuccess] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
+  const [autoCompleting, setAutoCompleting] = useState(false)
+
+  const handleAutoCompletePast = async () => {
+    setAutoCompleting(true)
+    setError('')
+    try {
+      const res = await api.admin.autoCompletePastEvents()
+      setSuccess(res.message)
+      await loadEvents()
+      setTimeout(() => setSuccess(''), 5000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Auto-complete failed')
+    } finally {
+      setAutoCompleting(false)
+    }
+  }
 
   const loadEvents = useCallback(async () => {
     try {
@@ -199,13 +215,24 @@ export default function EventsAdmin() {
           <h1 className="font-heading text-2xl font-bold text-text-primary">Events</h1>
         </div>
         {!editing && (
-          <button
-            onClick={() => { setForm(emptyForm); setEditing('new'); setError('') }}
-            className="flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Create Event
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAutoCompletePast}
+              disabled={autoCompleting}
+              className="flex items-center gap-2 px-4 py-2 bg-white/5 text-text-secondary text-sm font-medium hover:bg-white/10 hover:text-text-primary transition-colors disabled:opacity-50"
+              title="Automatically mark any events whose date has passed as 'completed'"
+            >
+              {autoCompleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              {autoCompleting ? 'Updating...' : 'Mark Past as Completed'}
+            </button>
+            <button
+              onClick={() => { setForm(emptyForm); setEditing('new'); setError('') }}
+              className="flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Create Event
+            </button>
+          </div>
         )}
       </div>
 

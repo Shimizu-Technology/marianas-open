@@ -26,6 +26,9 @@ Rails.application.routes.draw do
             get :import_results_preview
             post :import_results
           end
+          collection do
+            post :auto_complete_past
+          end
           resources :event_results, only: [:index, :create, :update, :destroy], path: 'results' do
             collection do
               post :bulk_create
