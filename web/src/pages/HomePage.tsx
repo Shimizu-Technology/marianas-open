@@ -577,7 +577,9 @@ export default function HomePage() {
                 {t('shimizu.description')}
               </p>
               <a
-                href="mailto:leon@shimizu-technology.com"
+                href="https://shimizu-technology.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-gold-500 text-sm font-heading font-semibold uppercase tracking-wider hover:text-gold-400 transition-colors"
               >
                 {t('shimizu.cta')}

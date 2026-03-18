@@ -5,8 +5,11 @@ import { api } from '../../services/api'
 import type { Sponsor, SponsorFormData } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
 
-const TIERS = ['title', 'gold', 'silver', 'bronze', 'supporting'] as const
+const TIERS = ['presenting', 'partner', 'official', 'title', 'gold', 'silver', 'bronze', 'supporting'] as const
 const TIER_COLORS: Record<string, string> = {
+  presenting: 'text-gold',
+  partner: 'text-blue-400',
+  official: 'text-green-400',
   title: 'text-gold',
   gold: 'text-yellow-400',
   silver: 'text-gray-300',
@@ -14,7 +17,7 @@ const TIER_COLORS: Record<string, string> = {
   supporting: 'text-text-muted',
 }
 
-const emptyForm: SponsorFormData = { name: '', tier: 'supporting', website_url: '', sort_order: 0 }
+const emptyForm: SponsorFormData = { name: '', tier: 'official', website_url: '', sort_order: 0 }
 
 export default function SponsorsAdmin() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([])

@@ -74,7 +74,7 @@ export default function Footer() {
               {t('footer.terms')}
             </Link>
             <span className="text-white/10">|</span>
-            <p>{t('footer.builtBy')}</p>
+            <a href="https://shimizu-technology.com" target="_blank" rel="noopener noreferrer" className="hover:text-text-secondary transition-colors">{t('footer.builtBy')}</a>
           </div>
         </div>
       </div>
