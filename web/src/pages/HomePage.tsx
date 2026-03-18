@@ -34,7 +34,7 @@ const ORG_PARTNERS = [
     label: 'Asian Sport Jiu-Jitsu Federation',
     src: '/images/logos/asjjf-logo.png',
     url: 'https://asjjf.org',
-    heightClass: 'h-20 sm:h-24',
+    heightClass: 'h-24 sm:h-28',
   },
   {
     key: 'msjjf',
@@ -42,7 +42,7 @@ const ORG_PARTNERS = [
     label: 'Marianas Sport Jiu-Jitsu Federation',
     src: '/images/logos/msjjf-logo-white.png',
     url: 'https://marianasopen.com',
-    heightClass: 'h-16 sm:h-20',
+    heightClass: 'h-20 sm:h-24',
   },
   {
     key: 'copademarianas',
@@ -50,7 +50,7 @@ const ORG_PARTNERS = [
     label: 'International Championship',
     src: '/images/logos/copa-seal-logo.png',
     url: 'https://asjjf.org/main/eventInfo/1837',
-    heightClass: 'h-20 sm:h-24',
+    heightClass: 'h-24 sm:h-28',
   },
   {
     key: 'roadtotheopen',
@@ -58,7 +58,7 @@ const ORG_PARTNERS = [
     label: '2026 Pro Series',
     src: '/images/logos/road-to-open-logo-white.png',
     url: 'https://marianasopen.com/calendar',
-    heightClass: 'h-14 sm:h-16',
+    heightClass: 'h-16 sm:h-20',
   },
 ] as const;
 
@@ -407,7 +407,7 @@ export default function HomePage() {
                     />
                   </div>
                   <div>
-                    <div className="text-[11px] font-heading font-semibold uppercase tracking-wider text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="text-[11px] font-heading font-semibold uppercase tracking-wider text-text-muted group-hover:text-text-secondary transition-colors duration-300">
                       {partner.label}
                     </div>
                   </div>
@@ -419,7 +419,7 @@ export default function HomePage() {
       </section>
 
       {/* Official Sponsors Section */}
-      <section className="py-24 sm:py-32 bg-surface border-t border-white/5">
+      <section className="pt-16 sm:pt-20 pb-24 sm:pb-32 bg-surface border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
             <div className="text-center mb-16">
