@@ -83,6 +83,66 @@ events_data.each_with_index do |data, i|
   puts "Created event: #{event.name}"
 end
 
+# Event accommodations
+{
+  "marianas-pro-manila-2026" => [
+    {
+      hotel_name: "Ibis Styles Manila Araneta City",
+      description: <<~TEXT.strip,
+        Athlete accommodation support for Guam Marianas Pro Manila 2026.
+
+        How to book:
+        Send your reservation request to the emails below with the subject line "Marianas Pro Manila Special Group Rates".
+
+        Include the following information:
+        1. Guest names
+        2. Stay dates
+        3. Preferred room type
+        4. Estimated time of arrival (ETA)
+        5. Flight details (if airport pickup is needed)
+
+        Stay just steps away from the action at Ibis Styles Manila Araneta City, located directly within the Gateway Mall 2 complex. The Quantum Skyview venue is only a few minutes' walk from the hotel lobby.
+      TEXT
+      room_types: <<~TEXT.strip,
+        Standard Twin
+        - Occupancy: Double
+
+        Family Room
+        - Occupancy: Max 2 adults + 2 kids or max 3 adults
+      TEXT
+      rate_info: <<~TEXT.strip,
+        Accommodation support dates: April 25-28, 2026
+
+        Standard Twin
+        - Stay dates: April 23-26, 2026
+        - Rate: Php 3,800 / night (~ USD 68*)
+
+        Family Room
+        - Stay dates: April 23-26, 2026
+        - Rate: Php 7,800 / night (~ USD 140*)
+
+        *USD rates are approximate and may vary depending on exchange rates at the time of booking.
+      TEXT
+      check_in_date: "2026-04-25",
+      check_out_date: "2026-04-28",
+      booking_code: "Marianas Pro Manila",
+      contact_email: "H7090@accor.com, Michee.Crudo@accor.com",
+      contact_phone: "+63 2 8248 8444",
+      sort_order: 1,
+      active: true
+    }
+  ]
+}.each do |slug, accommodations|
+  event = Event.find_by(slug: slug)
+  next unless event
+
+  accommodations.each do |data|
+    event.event_accommodations.create!(data)
+  end
+
+  puts "Created #{accommodations.length} accommodations for #{event.name}"
+end
+
 # Main event schedule
 main_event = Event.find_by!(slug: "marianas-open-2026")
 [

@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2 } from 'lucide-react';
+import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
 import ImageWithShimmer from '../components/ImageWithShimmer';
@@ -43,6 +43,10 @@ const EVENT_PARTNERS = [
   { name: 'Marianas Pro', src: '/images/logos/mp-seal-logo.png', href: 'https://marianasopen.com', heightClass: 'h-12' },
   { name: 'Road to the Open', src: '/images/logos/road-to-open-logo-white.png', href: 'https://marianasopen.com/calendar', heightClass: 'h-9' },
 ] as const;
+
+function splitCommaSeparated(value: string | null | undefined) {
+  return value ? value.split(/\s*,\s*/).filter(Boolean) : [];
+}
 
 export default function EventDetailPage() {
   const { t } = useTranslation();
@@ -378,27 +382,30 @@ export default function EventDetailPage() {
             </ScrollReveal>
 
             <div className={`grid gap-4 ${activeAccommodations.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' : 'grid-cols-1 md:grid-cols-2'}`}>
-              {activeAccommodations.map((acc) => (
+              {activeAccommodations.map((acc) => {
+                const contactEmails = splitCommaSeparated(acc.contact_email);
+
+                return (
                 <ScrollReveal key={acc.id}>
                   <div className="bg-surface border border-gold-500/20 p-6 sm:p-8 h-full hover:border-gold-500/40 transition-colors duration-300">
                     <Hotel size={24} className="text-gold-500 mb-4" />
                     <h3 className="font-heading font-bold text-lg text-text-primary mb-2">{acc.hotel_name}</h3>
 
                     {acc.description && (
-                      <p className="text-text-secondary text-sm leading-relaxed mb-4">{acc.description}</p>
+                      <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-line mb-4">{acc.description}</p>
                     )}
 
                     <div className="space-y-2 text-sm mb-6">
                       {acc.room_types && (
                         <div className="flex gap-2">
                           <span className="text-text-muted shrink-0 w-24">{t('event.roomTypes', 'Rooms')}</span>
-                          <span className="text-text-secondary">{acc.room_types}</span>
+                          <span className="text-text-secondary whitespace-pre-line">{acc.room_types}</span>
                         </div>
                       )}
                       {acc.rate_info && (
                         <div className="flex gap-2">
                           <span className="text-text-muted shrink-0 w-24">{t('event.rates', 'Rates')}</span>
-                          <span className="text-gold-400 font-semibold">{acc.rate_info}</span>
+                          <span className="text-gold-400 font-semibold whitespace-pre-line">{acc.rate_info}</span>
                         </div>
                       )}
                       {acc.inclusions && (
@@ -423,6 +430,35 @@ export default function EventDetailPage() {
                           <span className="font-mono text-gold-400 bg-gold-500/10 px-2 py-0.5">{acc.booking_code}</span>
                         </div>
                       )}
+                      {contactEmails.length > 0 && (
+                        <div className="flex gap-2">
+                          <span className="text-text-muted shrink-0 w-24">{t('event.bookingEmails', 'Email')}</span>
+                          <div className="space-y-1">
+                            {contactEmails.map((email) => (
+                              <a
+                                key={email}
+                                href={`mailto:${email}`}
+                                className="flex items-center gap-2 text-text-secondary hover:text-gold-400 transition-colors break-all"
+                              >
+                                <Mail size={14} className="text-gold-500 shrink-0" />
+                                <span>{email}</span>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {acc.contact_phone && (
+                        <div className="flex gap-2">
+                          <span className="text-text-muted shrink-0 w-24">{t('event.bookingPhone', 'Phone')}</span>
+                          <a
+                            href={`tel:${acc.contact_phone.replace(/\s+/g, '')}`}
+                            className="flex items-center gap-2 text-text-secondary hover:text-gold-400 transition-colors"
+                          >
+                            <Phone size={14} className="text-gold-500 shrink-0" />
+                            <span>{acc.contact_phone}</span>
+                          </a>
+                        </div>
+                      )}
                     </div>
 
                     {acc.booking_url && (
@@ -438,7 +474,7 @@ export default function EventDetailPage() {
                     )}
                   </div>
                 </ScrollReveal>
-              ))}
+              )})}
             </div>
           </div>
         </section>
