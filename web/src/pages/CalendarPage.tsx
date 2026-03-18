@@ -16,14 +16,14 @@ import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 const ROAD_TO_OPEN_POSTERS = [
   {
     src: '/images/poster-mp-nagoya.jpg',
-    title: 'Marianas Pro Nagoya',
+    title: 'Guam Marianas Pro Nagoya',
     isoDate: '2026-03-14',
     location: 'Aichi Budokan, Japan',
     href: 'https://asjjf.org/main/eventInfo/1863',
   },
   {
     src: '/images/poster-mp-korea.jpg',
-    title: 'Marianas Pro Korea',
+    title: 'Guam Marianas Pro Korea',
     isoDate: '2026-06-06',
     location: 'SETEC, Seoul, Korea',
     href: 'https://asjjf.org/main/eventInfo/1909',
