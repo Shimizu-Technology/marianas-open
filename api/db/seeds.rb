@@ -108,9 +108,13 @@ puts "Created prize categories for main event"
 
 # Sponsors
 [
-  { name: "ASJJF", tier: "title", sort_order: 1 },
-  { name: "GVB (Guam Visitors Bureau)", tier: "title", sort_order: 2 },
-  { name: "Holiday Resort & Spa", tier: "gold", sort_order: 3 },
+  { name: "ASJJF", tier: "partner", sort_order: 1, website_url: "https://asjjf.org" },
+  { name: "GVB (Guam Visitors Bureau)", tier: "presenting", sort_order: 1, website_url: "https://www.visitguam.com" },
+  { name: "ITE", tier: "official", sort_order: 2, website_url: "https://shop.ite.net" },
+  { name: "Hertz & Dollar", tier: "official", sort_order: 3, website_url: "https://www.hertz.com/us/en/location/guam/guam/gumt50" },
+  { name: "Stroll Guam", tier: "official", sort_order: 4, website_url: "https://stroll.international" },
+  { name: "IP&E & Shell", tier: "official", sort_order: 5 },
+  { name: "Holiday Resort & Spa", tier: "official", sort_order: 6 },
 ].each do |data|
   sponsor = org.sponsors.create!(data)
   puts "Created sponsor: #{sponsor.name}"

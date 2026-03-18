@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink } from 'lucide-react';
+import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink, Handshake } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -26,48 +26,6 @@ function StarRating({ count }: { count: number }) {
 function normalizeSponsorKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
-
-/**
- * Static fallback logos for known commercial sponsors.
- * Used when the API returns no sponsors or when a sponsor has no logo_url.
- * Keys must match normalizeSponsorKey() output.
- *
- * License notes:
- *   - hyatt:           Wikimedia Commons (pd) https://commons.wikimedia.org/wiki/File:Hyatt_Logo.svg
- *   - dusit*:          Wikimedia Commons (pd-textlogo) https://commons.wikimedia.org/wiki/File:Dusit_Thani_Logo.svg
- *   - gvb:             Official GVB website https://www.guamvisitorsbureau.com/ (event sponsor)
- *   - unitedairlines:  PROVISIONAL — en.wikipedia.org fair-use; replace with sponsor-provided asset
- */
-const SPONSOR_LOGO_FALLBACK: Record<string, { src: string; url: string }> = {
-  gvb: {
-    src: '/images/logos/sponsors/gvb-logo.png',
-    url: 'https://www.visitguam.com',
-  },
-  gvbguamvisitorsbureau: {
-    src: '/images/logos/sponsors/gvb-logo.png',
-    url: 'https://www.visitguam.com',
-  },
-  unitedairlines: {
-    src: '/images/logos/sponsors/united-airlines-logo.svg',
-    url: 'https://www.united.com',
-  },
-  hyattregencyguam: {
-    src: '/images/logos/sponsors/hyatt-logo.svg',
-    url: 'https://www.hyatt.com',
-  },
-  hyatt: {
-    src: '/images/logos/sponsors/hyatt-logo.svg',
-    url: 'https://www.hyatt.com',
-  },
-  dusitthaniguam: {
-    src: '/images/logos/sponsors/dusit-logo.svg',
-    url: 'https://www.dusit.com',
-  },
-  dusit: {
-    src: '/images/logos/sponsors/dusit-logo.svg',
-    url: 'https://www.dusit.com',
-  },
-};
 
 const ORG_PARTNERS = [
   {
@@ -100,14 +58,20 @@ const ORG_PARTNERS = [
   },
 ] as const;
 
-const ORG_PARTNER_KEY_SET = new Set<string>(ORG_PARTNERS.map((partner) => partner.key));
+const OFFICIAL_SPONSORS_STATIC = [
+  { name: 'ITE', description: 'WiFi & SIM Cards', url: 'https://shop.ite.net' },
+  { name: 'Hertz & Dollar', description: 'Car Rentals', url: 'https://www.hertz.com/us/en/location/guam/guam/gumt50' },
+  { name: 'Stroll Guam', description: 'Transportation', url: 'https://stroll.international' },
+  { name: 'IP&E & Shell', description: 'Fuel', url: null },
+  { name: 'Holiday Resort & Spa', description: null, url: null },
+] as const;
 
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const { events, loading: eventsLoading } = useEvents();
-  const { sponsors, loading: sponsorsLoading } = useSponsors();
+  const { sponsors } = useSponsors();
   const { images: siteImages } = useSiteImages();
   const { t: sc, loading: siteContentLoading } = useSiteContent();
 
@@ -412,15 +376,14 @@ export default function HomePage() {
           <ScrollReveal>
             <div className="text-center mb-10">
               <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted mb-1">
-                {t('home.sponsorsTitle')}
+                {t('home.partnersTitle')}
               </p>
               <div className="w-8 h-px bg-gold-500/30 mx-auto mt-3" />
             </div>
           </ScrollReveal>
 
-          {/* Org partner logos */}
           <ScrollReveal delay={0.15}>
-            <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16 mb-10">
+            <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
               {ORG_PARTNERS.map((partner) => (
                 <a
                   key={partner.key}
@@ -438,82 +401,125 @@ export default function HomePage() {
               ))}
             </div>
           </ScrollReveal>
+        </div>
+      </section>
 
-          {/* Commercial sponsors — text or logo from API */}
-          <ScrollReveal delay={0.3}>
-            <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
-              {sponsorsLoading ? (
-                <div className="text-text-muted text-sm">...</div>
-              ) : sponsors.length > 0 ? (
-                sponsors
-                  .filter((sponsor) => !ORG_PARTNER_KEY_SET.has(normalizeSponsorKey(sponsor.name)))
-                  .map((sponsor) => {
-                    const key = normalizeSponsorKey(sponsor.name);
-                    const fallback = SPONSOR_LOGO_FALLBACK[key];
-                    const logoSrc = resolveMediaUrl(sponsor.logo_url) || fallback?.src || null;
-                    const logoUrl = sponsor.website_url || fallback?.url || null;
-                    const applyMonochromeFilter = !sponsor.logo_url && !!fallback?.src;
-                    return (
-                      <div key={sponsor.id}>
-                        {logoSrc ? (
-                          logoUrl ? (
-                            <a href={logoUrl} target="_blank" rel="noopener noreferrer">
-                              <img
-                                src={logoSrc}
-                                alt={sponsor.name}
-                                className="h-8 object-contain"
-                                style={applyMonochromeFilter ? { filter: 'brightness(0) invert(1)' } : undefined}
-                              />
-                            </a>
-                          ) : (
-                            <img
-                              src={logoSrc}
-                              alt={sponsor.name}
-                              className="h-8 object-contain"
-                              style={applyMonochromeFilter ? { filter: 'brightness(0) invert(1)' } : undefined}
-                            />
-                          )
+      {/* Official Sponsors Section */}
+      <section className="py-24 sm:py-32 bg-surface border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 border border-gold-500/30 rounded-full bg-gold-500/5">
+                <Handshake size={14} className="text-gold-500" />
+                <span className="text-sm text-gold-400 font-medium tracking-wide">
+                  {t('home.sponsorsTitle')}
+                </span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-heading font-black uppercase mb-4">
+                {t('home.sponsorsSectionHeading')}
+              </h2>
+              <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+                {t('home.sponsorsIntro')}
+              </p>
+            </div>
+          </ScrollReveal>
+
+          {/* Presenting Partner — GVB */}
+          <ScrollReveal delay={0.1}>
+            <div className="mb-16">
+              <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-gold-500 text-center mb-8">
+                {t('home.presentingPartner')}
+              </p>
+              {(() => {
+                const gvbSponsor = sponsors.find(s => normalizeSponsorKey(s.name).includes('gvb'));
+                const gvbLogo = resolveMediaUrl(gvbSponsor?.logo_url) || '/images/logos/sponsors/gvb-logo.png';
+                const gvbUrl = gvbSponsor?.website_url || 'https://www.visitguam.com';
+                return (
+                  <div className="max-w-2xl mx-auto text-center">
+                    <a
+                      href={gvbUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mb-6 hover:opacity-80 transition-opacity"
+                    >
+                      <img
+                        src={gvbLogo}
+                        alt="Guam Visitors Bureau"
+                        className="h-24 sm:h-28 object-contain mx-auto"
+                      />
+                    </a>
+                    <p className="text-text-secondary text-sm sm:text-base leading-relaxed italic max-w-xl mx-auto">
+                      &ldquo;{t('home.gvbQuote')}&rdquo;
+                    </p>
+                  </div>
+                );
+              })()}
+            </div>
+          </ScrollReveal>
+
+          {/* Official Sponsors Grid */}
+          <ScrollReveal delay={0.2}>
+            <div className="border-t border-white/5 pt-12">
+              <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted text-center mb-10">
+                {t('home.officialSponsors')}
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {(() => {
+                  const officialFromApi = sponsors.filter(
+                    s => s.tier === 'official' && !normalizeSponsorKey(s.name).includes('gvb')
+                  );
+                  const items = officialFromApi.length > 0
+                    ? officialFromApi.map(s => ({
+                        name: s.name,
+                        url: s.website_url,
+                        logoSrc: resolveMediaUrl(s.logo_url),
+                        description: null as string | null,
+                      }))
+                    : OFFICIAL_SPONSORS_STATIC.map(s => ({
+                        name: s.name,
+                        url: s.url,
+                        logoSrc: null as string | null,
+                        description: s.description,
+                      }));
+
+                  return items.map((item) => {
+                    const inner = (
+                      <div className="bg-navy-900 border border-white/5 hover:border-gold-500/20 p-6 flex flex-col items-center justify-center text-center h-full transition-colors duration-300 min-h-[120px]">
+                        {item.logoSrc ? (
+                          <img
+                            src={item.logoSrc}
+                            alt={item.name}
+                            className="h-10 sm:h-12 object-contain mb-2"
+                          />
                         ) : (
-                          <div className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary">
-                            {sponsor.name}
+                          <div className="font-heading font-bold text-sm sm:text-base uppercase tracking-wider text-text-primary mb-1">
+                            {item.name}
+                          </div>
+                        )}
+                        {item.description && (
+                          <div className="text-[11px] text-text-muted uppercase tracking-wider">
+                            {item.description}
                           </div>
                         )}
                       </div>
                     );
-                  })
-              ) : (
-                /* Static fallback: show logos when available, text otherwise */
-                ['GVB', 'Holiday Resort & Spa'].map((name) => {
-                  const key = normalizeSponsorKey(name);
-                  const fallback = SPONSOR_LOGO_FALLBACK[key];
-                  if (fallback) {
-                    return (
+
+                    return item.url ? (
                       <a
-                        key={name}
-                        href={fallback.url}
+                        key={item.name}
+                        href={item.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center"
+                        className="block"
                       >
-                        <img
-                          src={fallback.src}
-                          alt={name}
-                          className="h-8 object-contain"
-                          style={{ filter: 'brightness(0) invert(1)' }}
-                        />
+                        {inner}
                       </a>
+                    ) : (
+                      <div key={item.name}>{inner}</div>
                     );
-                  }
-                  return (
-                    <div
-                      key={name}
-                      className="text-sm font-heading font-bold uppercase tracking-wider text-text-secondary"
-                    >
-                      {name}
-                    </div>
-                  );
-                })
-              )}
+                  });
+                })()}
+              </div>
             </div>
           </ScrollReveal>
         </div>
