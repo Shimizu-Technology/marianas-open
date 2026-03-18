@@ -97,7 +97,7 @@ export default function HomePage() {
   const { events, loading: eventsLoading } = useEvents();
   const { sponsors } = useSponsors();
   const { images: siteImages } = useSiteImages();
-  const { t: sc, loading: siteContentLoading } = useSiteContent();
+  const { content: siteContent, t: sc, loading: siteContentLoading, hasCachedContent } = useSiteContent();
 
   const heroImage = '/images/hero-podium.jpg';
   const galleryFallbacks = [
@@ -118,6 +118,7 @@ export default function HomePage() {
     { value: sc('stat_prize_pool', t('stats.prizePool')), label: sc('stat_prize_pool_label', t('stats.prizePoolLabel')), icon: Trophy },
     { value: sc('stat_established', t('stats.since')), label: sc('stat_established_label', t('stats.sinceLabel')), icon: Calendar },
   ];
+  const showHeroSkeleton = siteContentLoading && !hasCachedContent && !siteContent;
 
   return (
     <div className="min-h-screen">
@@ -144,67 +145,86 @@ export default function HomePage() {
         />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center">
-          {/* Hero text is hidden until site content resolves to prevent fallback→API swap flash. */}
-          {/* visibility:hidden preserves layout (no shift); once loaded it snaps in with the motion fade. */}
-          <div style={siteContentLoading ? { visibility: 'hidden' } : undefined}>
-          <motion.div
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-gold-500/30 rounded-full bg-gold-500/5">
-              <Star size={14} className="text-gold-500 fill-gold-500" />
-              <span className="text-sm text-gold-400 font-medium tracking-wide">
-                {sc('hero_badge', t('hero.asjjfBadge'))}
-              </span>
+          {showHeroSkeleton ? (
+            <div className="animate-pulse">
+              <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-gold-500/20 rounded-full bg-gold-500/5">
+                <div className="w-3.5 h-3.5 rounded-full bg-gold-500/40" />
+                <div className="h-4 w-44 rounded bg-gold-500/20" />
+              </div>
+
+              <div className="h-5 sm:h-6 w-64 max-w-full mx-auto mb-4 rounded bg-white/10" />
+
+              <div className="space-y-3 mb-8">
+                <div className="h-14 sm:h-20 lg:h-24 w-full max-w-4xl mx-auto rounded bg-white/10" />
+                <div className="h-14 sm:h-20 lg:h-24 w-3/4 max-w-3xl mx-auto rounded bg-gold-500/15" />
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+                <div className="h-14 w-56 rounded bg-gold-500/25" />
+                <div className="h-14 w-56 rounded bg-white/10" />
+              </div>
             </div>
-          </motion.div>
+          ) : (
+            <>
+              <motion.div
+                initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-gold-500/30 rounded-full bg-gold-500/5">
+                  <Star size={14} className="text-gold-500 fill-gold-500" />
+                  <span className="text-sm text-gold-400 font-medium tracking-wide">
+                    {sc('hero_badge', t('hero.asjjfBadge'))}
+                  </span>
+                </div>
+              </motion.div>
 
-          <motion.p
-            className="text-text-secondary text-lg sm:text-xl tracking-[0.2em] uppercase font-heading mb-4"
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-          >
-            {sc('hero_subtitle', t('hero.subtitle'))}
-          </motion.p>
+              <motion.p
+                className="text-text-secondary text-lg sm:text-xl tracking-[0.2em] uppercase font-heading mb-4"
+                initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.1 }}
+              >
+                {sc('hero_subtitle', t('hero.subtitle'))}
+              </motion.p>
 
-          <motion.h1
-            className="text-5xl sm:text-7xl lg:text-8xl font-heading font-black uppercase tracking-tight leading-[0.9] mb-8"
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <span className="text-text-primary">{sc('hero_title_line1', t('hero.title').split(' ').slice(0, -1).join(' '))}</span>
-            <br />
-            <span className="bg-gradient-to-r from-gold-500 to-gold-300 bg-clip-text text-transparent">
-              {sc('hero_title_line2', t('hero.title').split(' ').slice(-1)[0])}
-            </span>
-          </motion.h1>
+              <motion.h1
+                className="text-5xl sm:text-7xl lg:text-8xl font-heading font-black uppercase tracking-tight leading-[0.9] mb-8"
+                initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                <span className="text-text-primary">{sc('hero_title_line1', t('hero.title').split(' ').slice(0, -1).join(' '))}</span>
+                <br />
+                <span className="bg-gradient-to-r from-gold-500 to-gold-300 bg-clip-text text-transparent">
+                  {sc('hero_title_line2', t('hero.title').split(' ').slice(-1)[0])}
+                </span>
+              </motion.h1>
 
-          <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <a
-              href="https://asjjf.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center gap-2 px-8 py-4 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-all duration-300"
-            >
-              {t('hero.cta')}
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </a>
-            <Link
-              to="/calendar"
-              className="inline-flex items-center gap-2 px-8 py-4 border border-white/20 text-text-primary font-heading font-medium uppercase tracking-wider text-sm hover:bg-white/5 transition-all duration-300"
-            >
-              {t('hero.learnMore')}
-            </Link>
-          </motion.div>
-          </div>{/* end siteContentLoading guard */}
+              <motion.div
+                className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+                initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
+                <a
+                  href="https://asjjf.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-2 px-8 py-4 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-all duration-300"
+                >
+                  {t('hero.cta')}
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </a>
+                <Link
+                  to="/calendar"
+                  className="inline-flex items-center gap-2 px-8 py-4 border border-white/20 text-text-primary font-heading font-medium uppercase tracking-wider text-sm hover:bg-white/5 transition-all duration-300"
+                >
+                  {t('hero.learnMore')}
+                </Link>
+              </motion.div>
+            </>
+          )}
 
           {/* Stats bar */}
           <motion.div

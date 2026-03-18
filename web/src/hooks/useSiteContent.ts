@@ -3,8 +3,43 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
 import type { SiteContentMap } from '../services/api';
 
+const SITE_CONTENT_CACHE_KEY = 'marianas-site-content-cache-v1';
+
+function readPersistentCache(): SiteContentMap | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = window.localStorage.getItem(SITE_CONTENT_CACHE_KEY);
+    if (!raw) return null;
+
+    return JSON.parse(raw) as SiteContentMap;
+  } catch {
+    return null;
+  }
+}
+
+function writePersistentCache(content: SiteContentMap) {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.setItem(SITE_CONTENT_CACHE_KEY, JSON.stringify(content));
+  } catch {
+    // Ignore storage write failures; in-memory cache still works.
+  }
+}
+
+function clearPersistentCache() {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.removeItem(SITE_CONTENT_CACHE_KEY);
+  } catch {
+    // Ignore storage clear failures.
+  }
+}
+
 // Module-level cache so content persists across mounts/navigations
-let cachedContent: SiteContentMap | null = null;
+let cachedContent: SiteContentMap | null = readPersistentCache();
 let fetchPromise: Promise<SiteContentMap> | null = null;
 
 export function useSiteContent() {
@@ -17,7 +52,6 @@ export function useSiteContent() {
     if (cachedContent) {
       setContent(cachedContent);
       setLoading(false);
-      return;
     }
 
     if (!fetchPromise) {
@@ -27,6 +61,7 @@ export function useSiteContent() {
     fetchPromise
       .then((data) => {
         cachedContent = data;
+        writePersistentCache(data);
         setContent(data);
       })
       .catch(() => {
@@ -54,11 +89,12 @@ export function useSiteContent() {
     [content, lang]
   );
 
-  return { content, loading, t };
+  return { content, loading, hasCachedContent: !!cachedContent, t };
 }
 
 /** Invalidate cache (call after admin edits) */
 export function invalidateSiteContentCache() {
   cachedContent = null;
   fetchPromise = null;
+  clearPersistentCache();
 }
