@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { useAuth, useUser, RedirectToSignIn } from '@clerk/clerk-react'
+import { useAuth, useUser, SignIn } from '@clerk/clerk-react'
 import { api, setAuthTokenGetter } from '../../services/api'
 import type { UserProfile } from '../../services/api'
 import LoadingSpinner from '../LoadingSpinner'
@@ -79,7 +79,19 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
   }
 
   if (authStatus === 'unauthorized' || !isSignedIn) {
-    return <RedirectToSignIn />
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-navy-900">
+        <SignIn
+          routing="hash"
+          appearance={{
+            elements: {
+              rootBox: 'mx-auto',
+              card: 'shadow-2xl',
+            },
+          }}
+        />
+      </div>
+    )
   }
 
   if (authStatus === 'access_denied') {
