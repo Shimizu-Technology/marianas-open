@@ -83,6 +83,8 @@ export default function Footer() {
             </Link>
             <span className="text-white/10">|</span>
             <a href="https://shimizu-technology.com" target="_blank" rel="noopener noreferrer" className="hover:text-text-secondary transition-colors">{t('footer.builtBy')}</a>
+            <span className="text-white/10">|</span>
+            <Link to="/admin" className="hover:text-text-secondary transition-colors">Admin</Link>
           </div>
         </div>
       </div>

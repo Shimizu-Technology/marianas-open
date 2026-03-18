@@ -361,7 +361,14 @@ User.find_or_create_by!(email: "jerry.shimizutechnology@gmail.com") do |u|
   u.last_name = "Shimizu"
   u.role = "admin"
 end
-puts "Created admin user"
+
+User.find_or_create_by!(email: "shimizutechnology@gmail.com") do |u|
+  u.clerk_id = "pending_admin_#{SecureRandom.uuid}"
+  u.first_name = "Leon"
+  u.last_name = "Shimizu"
+  u.role = "admin"
+end
+puts "Created admin users"
 
 # Competitors
 Competitor.destroy_all
