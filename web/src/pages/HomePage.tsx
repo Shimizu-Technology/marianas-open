@@ -31,6 +31,7 @@ const ORG_PARTNERS = [
   {
     key: 'asjjf',
     name: 'ASJJF',
+    label: 'Asian Sport Jiu-Jitsu Federation',
     src: '/images/logos/asjjf-logo.png',
     url: 'https://asjjf.org',
     heightClass: 'h-16',
@@ -38,6 +39,7 @@ const ORG_PARTNERS = [
   {
     key: 'msjjf',
     name: 'MSJJF',
+    label: 'Marianas Sport Jiu-Jitsu Federation',
     src: '/images/logos/msjjf-logo-white.png',
     url: 'https://marianasopen.com',
     heightClass: 'h-14',
@@ -45,6 +47,7 @@ const ORG_PARTNERS = [
   {
     key: 'copademarianas',
     name: 'Copa de Marianas',
+    label: 'International Championship',
     src: '/images/logos/copa-seal-logo.png',
     url: 'https://asjjf.org/main/eventInfo/1837',
     heightClass: 'h-16',
@@ -52,6 +55,7 @@ const ORG_PARTNERS = [
   {
     key: 'roadtotheopen',
     name: 'Road to the Open',
+    label: '2026 Pro Series',
     src: '/images/logos/road-to-open-logo-white.png',
     url: 'https://marianasopen.com/calendar',
     heightClass: 'h-12',
@@ -371,11 +375,11 @@ export default function HomePage() {
       </section>
 
       {/* Official Partners — logo strip */}
-      <section className="py-20 border-t border-white/5">
+      <section className="py-24 sm:py-32 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
-            <div className="text-center mb-10">
-              <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted mb-1">
+            <div className="text-center mb-14">
+              <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted mb-2">
                 {t('home.partnersTitle')}
               </p>
               <div className="w-8 h-px bg-gold-500/30 mx-auto mt-3" />
@@ -383,20 +387,27 @@ export default function HomePage() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.15}>
-            <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-12 max-w-4xl mx-auto">
               {ORG_PARTNERS.map((partner) => (
                 <a
                   key={partner.key}
                   href={partner.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="opacity-60 hover:opacity-100 transition-opacity duration-300"
+                  className="group flex flex-col items-center gap-3 text-center"
                 >
-                  <img
-                    src={partner.src}
-                    alt={partner.name}
-                    className={`${partner.heightClass} object-contain`}
-                  />
+                  <div className="opacity-70 group-hover:opacity-100 transition-all duration-300 group-hover:-translate-y-0.5">
+                    <img
+                      src={partner.src}
+                      alt={partner.name}
+                      className={`${partner.heightClass} object-contain`}
+                    />
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-heading font-semibold uppercase tracking-wider text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {partner.label}
+                    </div>
+                  </div>
                 </a>
               ))}
             </div>
@@ -484,7 +495,7 @@ export default function HomePage() {
 
                   return items.map((item) => {
                     const inner = (
-                      <div className="bg-navy-900 border border-white/5 hover:border-gold-500/20 p-6 flex flex-col items-center justify-center text-center h-full transition-colors duration-300 min-h-[120px]">
+                      <div className="group/card bg-navy-900 border border-white/5 hover:border-gold-500/20 p-6 flex flex-col items-center justify-center text-center h-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-500/5 min-h-[120px]">
                         {item.logoSrc ? (
                           <img
                             src={item.logoSrc}
@@ -492,7 +503,7 @@ export default function HomePage() {
                             className="h-10 sm:h-12 object-contain mb-2"
                           />
                         ) : (
-                          <div className="font-heading font-bold text-sm sm:text-base uppercase tracking-wider text-text-primary mb-1">
+                          <div className="font-heading font-bold text-sm sm:text-base uppercase tracking-wider text-text-primary group-hover/card:text-gold-400 transition-colors duration-300 mb-1">
                             {item.name}
                           </div>
                         )}
