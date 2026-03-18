@@ -107,8 +107,45 @@ export interface Event {
   prize_pool: string | null;
   status: string;
   hero_image_url: string | null;
+  live_stream_url: string | null;
+  live_stream_active: boolean;
   event_schedule_items: EventScheduleItem[];
   prize_categories: PrizeCategory[];
+  event_accommodations: EventAccommodation[];
+}
+
+export interface EventAccommodation {
+  id: number;
+  event_id: number;
+  hotel_name: string;
+  description: string | null;
+  room_types: string | null;
+  rate_info: string | null;
+  inclusions: string | null;
+  check_in_date: string | null;
+  check_out_date: string | null;
+  booking_url: string | null;
+  booking_code: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  sort_order: number;
+  active: boolean;
+}
+
+export interface EventAccommodationFormData {
+  hotel_name: string;
+  description: string;
+  room_types: string;
+  rate_info: string;
+  inclusions: string;
+  check_in_date: string;
+  check_out_date: string;
+  booking_url: string;
+  booking_code: string;
+  contact_email: string;
+  contact_phone: string;
+  sort_order: number;
+  active: boolean;
 }
 
 export interface Sponsor {
@@ -200,6 +237,8 @@ export interface EventFormData {
   status: string;
   latitude: string;
   longitude: string;
+  live_stream_url: string;
+  live_stream_active: boolean;
   event_schedule_items_attributes: EventScheduleItem[];
   prize_categories_attributes: PrizeCategory[];
 }
@@ -272,6 +311,7 @@ export type SiteContentGrouped = Record<string, SiteContentEntry[]>;
 
 export interface EventResult {
   id: number;
+  event_id: number;
   division: string;
   gender: string;
   belt_rank: string;
@@ -281,6 +321,34 @@ export interface EventResult {
   competitor_name: string;
   academy: string | null;
   country_code: string;
+  competitor_id: number | null;
+  submission_method: string | null;
+  notes: string | null;
+}
+
+export interface EventResultFormData {
+  division: string;
+  gender: string;
+  belt_rank: string;
+  age_category: string;
+  weight_class: string;
+  placement: number;
+  competitor_name: string;
+  academy: string;
+  country_code: string;
+}
+
+export interface ImportPreview {
+  event: { id: number; name: string; slug: string };
+  existing_results_count: number;
+  preview: { total_results: number; divisions: number; countries: number; academies: number };
+  sample: { division: string; placement: number; competitor_name: string; academy: string; country_code: string }[];
+}
+
+export interface ImportResult {
+  message: string;
+  imported: number;
+  summary: Record<string, unknown>;
 }
 
 export interface EventResultDivision {
@@ -420,6 +488,50 @@ export const api = {
       formData.append('image', file);
       return fetchApiUpload<{ event: Event }>(`/api/v1/admin/events/${id}/upload_image`, formData);
     },
+
+    // Event Results
+    getEventResults: (eventId: number) =>
+      fetchApi<EventResult[]>(`/api/v1/admin/events/${eventId}/results`, {}, true),
+    createEventResult: (eventId: number, data: EventResultFormData) =>
+      fetchApi<EventResult>(`/api/v1/admin/events/${eventId}/results`, {
+        method: 'POST',
+        body: JSON.stringify({ event_result: data }),
+      }, true),
+    bulkCreateEventResults: (eventId: number, results: EventResultFormData[]) =>
+      fetchApi<{ created: number; errors: { index: number; errors: string[] }[] }>(
+        `/api/v1/admin/events/${eventId}/results/bulk_create`, {
+          method: 'POST',
+          body: JSON.stringify({ results }),
+        }, true),
+    updateEventResult: (eventId: number, resultId: number, data: Partial<EventResultFormData>) =>
+      fetchApi<EventResult>(`/api/v1/admin/events/${eventId}/results/${resultId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ event_result: data }),
+      }, true),
+    deleteEventResult: (eventId: number, resultId: number) =>
+      fetchApi<void>(`/api/v1/admin/events/${eventId}/results/${resultId}`, { method: 'DELETE' }, true),
+    deleteAllEventResults: (eventId: number) =>
+      fetchApi<{ deleted: number }>(`/api/v1/admin/events/${eventId}/results/destroy_all`, { method: 'DELETE' }, true),
+    importResultsPreview: (eventId: number) =>
+      fetchApi<ImportPreview>(`/api/v1/admin/events/${eventId}/import_results_preview`, {}, true),
+    importResults: (eventId: number) =>
+      fetchApi<ImportResult>(`/api/v1/admin/events/${eventId}/import_results`, { method: 'POST' }, true),
+
+    // Event Accommodations
+    getAccommodations: (eventId: number) =>
+      fetchApi<{ accommodations: EventAccommodation[] }>(`/api/v1/admin/events/${eventId}/accommodations`, {}, true),
+    createAccommodation: (eventId: number, data: Partial<EventAccommodationFormData>) =>
+      fetchApi<{ accommodation: EventAccommodation }>(`/api/v1/admin/events/${eventId}/accommodations`, {
+        method: 'POST',
+        body: JSON.stringify({ accommodation: data }),
+      }, true),
+    updateAccommodation: (eventId: number, id: number, data: Partial<EventAccommodationFormData>) =>
+      fetchApi<{ accommodation: EventAccommodation }>(`/api/v1/admin/events/${eventId}/accommodations/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ accommodation: data }),
+      }, true),
+    deleteAccommodation: (eventId: number, id: number) =>
+      fetchApi<void>(`/api/v1/admin/events/${eventId}/accommodations/${id}`, { method: 'DELETE' }, true),
 
     // Sponsors
     getSponsors: () => fetchApi<{ sponsors: Sponsor[] }>('/api/v1/admin/sponsors', {}, true),

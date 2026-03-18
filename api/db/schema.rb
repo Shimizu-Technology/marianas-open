@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_19_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_19_020000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -64,6 +64,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_000000) do
     t.index ["belt_rank"], name: "index_competitors_on_belt_rank"
     t.index ["country_code"], name: "index_competitors_on_country_code"
     t.index ["weight_class"], name: "index_competitors_on_weight_class"
+  end
+
+  create_table "event_accommodations", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "booking_code"
+    t.string "booking_url"
+    t.date "check_in_date"
+    t.date "check_out_date"
+    t.string "contact_email"
+    t.string "contact_phone"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.bigint "event_id", null: false
+    t.string "hotel_name", null: false
+    t.string "inclusions"
+    t.string "rate_info"
+    t.string "room_types"
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "active"], name: "index_event_accommodations_on_event_id_and_active"
+    t.index ["event_id"], name: "index_event_accommodations_on_event_id"
   end
 
   create_table "event_gallery_images", force: :cascade do |t|
@@ -125,6 +146,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_000000) do
     t.date "end_date"
     t.boolean "is_main_event"
     t.decimal "latitude"
+    t.boolean "live_stream_active", default: false, null: false
+    t.string "live_stream_url"
     t.decimal "longitude"
     t.string "name"
     t.bigint "organization_id", null: false
@@ -243,6 +266,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_000000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "event_accommodations", "events"
   add_foreign_key "event_gallery_images", "events"
   add_foreign_key "event_results", "competitors"
   add_foreign_key "event_results", "events"

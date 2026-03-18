@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { lazy, Suspense, useEffect } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import LiveStreamBanner from './components/LiveStreamBanner';
 import MobileLanguageFAB from './components/MobileLanguageFAB';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -32,6 +33,7 @@ const ImagesAdmin = lazy(() => import('./pages/admin/ImagesAdmin'));
 const SettingsAdmin = lazy(() => import('./pages/admin/SettingsAdmin'));
 const ContentAdmin = lazy(() => import('./pages/admin/ContentAdmin'));
 const CompetitorsAdmin = lazy(() => import('./pages/admin/CompetitorsAdmin'));
+const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -94,6 +96,7 @@ export default function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="events" element={<EventsAdmin />} />
+          <Route path="events/:eventId/results" element={<EventResultsAdmin />} />
           <Route path="sponsors" element={<SponsorsAdmin />} />
           <Route path="videos" element={<VideosAdmin />} />
           <Route path="competitors" element={<CompetitorsAdmin />} />
@@ -116,6 +119,7 @@ export default function App() {
           element={
             <div className="min-h-screen bg-navy-900 text-text-primary">
               <Header />
+              <LiveStreamBanner />
               <main>
                 <AnimatedRoutes />
               </main>

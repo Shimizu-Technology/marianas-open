@@ -32,6 +32,7 @@ Rails.application.routes.draw do
               delete :destroy_all
             end
           end
+          resources :event_accommodations, only: [:index, :create, :update, :destroy], path: 'accommodations'
         end
         resources :videos
         resources :sponsors do

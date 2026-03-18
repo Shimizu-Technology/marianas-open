@@ -11,6 +11,7 @@ import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { api } from '../services/api';
 import type { Video } from '../services/api';
+import { useEvents } from '../hooks/useApi';
 
 const beltColors: Record<string, string> = {
   white: 'bg-white text-gray-900',
@@ -51,6 +52,8 @@ export default function WatchPage() {
   const [eventFilter, setEventFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [expandedVideo, setExpandedVideo] = useState<number | null>(null);
+  const { events } = useEvents();
+  const liveEvent = events.find(e => e.live_stream_active && e.live_stream_url);
 
   useEffect(() => {
     api.getVideos()
@@ -120,6 +123,41 @@ export default function WatchPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Live Stream Section */}
+      {liveEvent && (
+        <section className="py-8 sm:py-12 bg-gradient-to-b from-red-900/20 to-transparent">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <ScrollReveal>
+              <div className="border border-red-500/30 bg-red-500/5 p-6 sm:p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-xs font-heading font-bold uppercase tracking-wider text-red-400">
+                      Live Now
+                    </span>
+                  </div>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-heading font-black uppercase text-text-primary mb-2">
+                  {liveEvent.name}
+                </h2>
+                <p className="text-text-secondary text-sm mb-6">
+                  {liveEvent.venue_name} · {liveEvent.city}, {liveEvent.country}
+                </p>
+                <a
+                  href={liveEvent.live_stream_url!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white font-heading font-bold uppercase tracking-wider text-sm hover:bg-red-500 transition-colors"
+                >
+                  <Play size={16} className="fill-current" />
+                  Watch Live Stream
+                </a>
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
 
       {/* Featured Videos */}
       {featuredVideos.length > 0 && (

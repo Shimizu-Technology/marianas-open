@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp } from 'lucide-react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
-import type { Event, EventFormData, EventScheduleItem, PrizeCategory } from '../../services/api'
+import type { Event, EventFormData, EventScheduleItem, PrizeCategory, EventAccommodation, EventAccommodationFormData } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
 
 const emptyForm: EventFormData = {
@@ -10,6 +11,7 @@ const emptyForm: EventFormData = {
   venue_name: '', venue_address: '', city: '', country: '', country_code: '',
   asjjf_stars: 0, is_main_event: false, prize_pool: '', registration_url: '',
   status: 'draft', latitude: '', longitude: '',
+  live_stream_url: '', live_stream_active: false,
   event_schedule_items_attributes: [],
   prize_categories_attributes: [],
 }
@@ -24,6 +26,7 @@ function eventToForm(e: Event): EventFormData {
     prize_pool: e.prize_pool || '', registration_url: e.registration_url || '',
     status: e.status || 'draft',
     latitude: e.latitude?.toString() || '', longitude: e.longitude?.toString() || '',
+    live_stream_url: e.live_stream_url || '', live_stream_active: e.live_stream_active || false,
     event_schedule_items_attributes: e.event_schedule_items.map(s => ({
       id: s.id, time: s.time, description: s.description, sort_order: s.sort_order,
     })),
@@ -262,6 +265,7 @@ export default function EventsAdmin() {
                 onChange={v => updateForm('status', v)}
                 options={[
                   { value: 'draft', label: 'Draft' },
+                  { value: 'upcoming', label: 'Upcoming' },
                   { value: 'published', label: 'Published' },
                   { value: 'completed', label: 'Completed' },
                   { value: 'cancelled', label: 'Cancelled' },
@@ -285,6 +289,47 @@ export default function EventsAdmin() {
                 Main Event
               </label>
             </div>
+
+            {/* Live Stream */}
+            <div className="border border-white/5">
+              <button
+                type="button"
+                onClick={() => toggleSection('livestream')}
+                className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-text-primary hover:bg-white/[0.02] transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Radio className="w-4 h-4 text-text-muted" />
+                  Live Stream
+                  {form.live_stream_active && <span className="text-xs px-2 py-0.5 bg-red-500/20 text-red-400 animate-pulse">LIVE</span>}
+                </span>
+                {expandedSections.livestream ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+              {expandedSections.livestream && (
+                <div className="p-4 border-t border-white/5 space-y-3">
+                  <Field
+                    label="Live Stream URL"
+                    value={form.live_stream_url}
+                    onChange={v => updateForm('live_stream_url', v)}
+                    placeholder="https://www.youtube.com/@themarianasopen/live"
+                  />
+                  <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.live_stream_active}
+                      onChange={e => updateForm('live_stream_active', e.target.checked)}
+                      className="accent-gold"
+                    />
+                    <span>Stream is LIVE now</span>
+                    {form.live_stream_active && <span className="text-xs text-red-400">(Visitors will see a live banner)</span>}
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Accommodations (only when editing existing event) */}
+            {typeof editing === 'number' && (
+              <AccommodationsSection eventId={editing} />
+            )}
 
             <div>
               <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Description</label>
@@ -447,24 +492,35 @@ export default function EventsAdmin() {
                     </td>
                     <td className="px-5 py-3">
                       <span className={`text-xs px-2 py-0.5 ${
+                        event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
                         event.status === 'published' ? 'bg-green-500/10 text-green-400' :
-                        event.status === 'draft' ? 'bg-white/5 text-text-muted' :
-                        'bg-gold/10 text-gold'
+                        event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
+                        event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
+                        'bg-white/5 text-text-muted'
                       }`}>
                         {event.status}
                       </span>
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
+                        <Link
+                          to={`/admin/events/${event.id}/results`}
+                          className="p-1.5 text-text-muted hover:text-gold transition-colors"
+                          title="Manage Results"
+                        >
+                          <Trophy className="w-3.5 h-3.5" />
+                        </Link>
                         <button
                           onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
                           className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
+                          title="Edit"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(event.id)}
                           className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                          title="Delete"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -517,6 +573,168 @@ export default function EventsAdmin() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  )
+}
+
+function AccommodationsSection({ eventId }: { eventId: number }) {
+  const [accommodations, setAccommodations] = useState<EventAccommodation[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState<number | 'new' | null>(null)
+  const [form, setForm] = useState<EventAccommodationFormData>({
+    hotel_name: '', description: '', room_types: '', rate_info: '',
+    inclusions: '', check_in_date: '', check_out_date: '',
+    booking_url: '', booking_code: '', contact_email: '', contact_phone: '',
+    sort_order: 0, active: true,
+  })
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    try {
+      const res = await api.admin.getAccommodations(eventId)
+      setAccommodations(res.accommodations)
+    } catch { /* ignore */ } finally { setLoading(false) }
+  }, [eventId])
+
+  useEffect(() => { load() }, [load])
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      if (editing === 'new') {
+        await api.admin.createAccommodation(eventId, form)
+      } else if (typeof editing === 'number') {
+        await api.admin.updateAccommodation(eventId, editing, form)
+      }
+      setEditing(null)
+      await load()
+    } catch { /* ignore */ } finally { setSaving(false) }
+  }
+
+  const handleDelete = async (id: number) => {
+    await api.admin.deleteAccommodation(eventId, id)
+    await load()
+  }
+
+  const editAccommodation = (a: EventAccommodation) => {
+    setForm({
+      hotel_name: a.hotel_name, description: a.description || '',
+      room_types: a.room_types || '', rate_info: a.rate_info || '',
+      inclusions: a.inclusions || '', check_in_date: a.check_in_date || '',
+      check_out_date: a.check_out_date || '', booking_url: a.booking_url || '',
+      booking_code: a.booking_code || '', contact_email: a.contact_email || '',
+      contact_phone: a.contact_phone || '', sort_order: a.sort_order, active: a.active,
+    })
+    setEditing(a.id)
+  }
+
+  return (
+    <div className="border border-white/5">
+      <div className="px-4 py-3 flex items-center justify-between">
+        <span className="flex items-center gap-2 text-sm font-medium text-text-primary">
+          <Hotel className="w-4 h-4 text-text-muted" />
+          Accommodations ({accommodations.length})
+        </span>
+        {editing === null && (
+          <button
+            onClick={() => {
+              setForm({ hotel_name: '', description: '', room_types: '', rate_info: '', inclusions: '', check_in_date: '', check_out_date: '', booking_url: '', booking_code: '', contact_email: '', contact_phone: '', sort_order: accommodations.length, active: true })
+              setEditing('new')
+            }}
+            className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80"
+          >
+            <Plus className="w-3 h-3" /> Add
+          </button>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-text-muted" /></div>
+      ) : (
+        <div className="border-t border-white/5">
+          {accommodations.map(a => (
+            <div key={a.id} className="px-4 py-3 flex items-center justify-between border-b border-white/5 last:border-0">
+              <div>
+                <div className="text-sm text-text-primary font-medium">{a.hotel_name}</div>
+                <div className="text-xs text-text-muted">{a.check_in_date && a.check_out_date ? `${a.check_in_date} — ${a.check_out_date}` : 'No dates set'}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-1.5 py-0.5 ${a.active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-text-muted'}`}>
+                  {a.active ? 'Active' : 'Hidden'}
+                </span>
+                <button onClick={() => editAccommodation(a)} className="p-1 text-text-muted hover:text-text-primary"><Pencil className="w-3 h-3" /></button>
+                <button onClick={() => handleDelete(a.id)} className="p-1 text-text-muted hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+              </div>
+            </div>
+          ))}
+
+          {editing !== null && (
+            <div className="p-4 space-y-3 bg-white/[0.01]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Hotel Name *</label>
+                  <input value={form.hotel_name} onChange={e => setForm(p => ({ ...p, hotel_name: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Rate Info</label>
+                  <input value={form.rate_info} onChange={e => setForm(p => ({ ...p, rate_info: e.target.value }))} placeholder="e.g. From $89/night" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Room Types</label>
+                  <input value={form.room_types} onChange={e => setForm(p => ({ ...p, room_types: e.target.value }))} placeholder="Standard Queen, Standard Twin, Family" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Inclusions</label>
+                  <input value={form.inclusions} onChange={e => setForm(p => ({ ...p, inclusions: e.target.value }))} placeholder="Breakfast for 2, Wi-Fi" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Check-in Date</label>
+                  <input type="date" value={form.check_in_date} onChange={e => setForm(p => ({ ...p, check_in_date: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Check-out Date</label>
+                  <input type="date" value={form.check_out_date} onChange={e => setForm(p => ({ ...p, check_out_date: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Booking URL</label>
+                  <input value={form.booking_url} onChange={e => setForm(p => ({ ...p, booking_url: e.target.value }))} placeholder="https://..." className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Booking Code</label>
+                  <input value={form.booking_code} onChange={e => setForm(p => ({ ...p, booking_code: e.target.value }))} placeholder="MARIANAS2026" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Contact Email</label>
+                  <input value={form.contact_email} onChange={e => setForm(p => ({ ...p, contact_email: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Contact Phone</label>
+                  <input value={form.contact_phone} onChange={e => setForm(p => ({ ...p, contact_phone: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Description</label>
+                <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none resize-none" />
+              </div>
+              <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+                <input type="checkbox" checked={form.active} onChange={e => setForm(p => ({ ...p, active: e.target.checked }))} className="accent-gold" />
+                Active (visible on public site)
+              </label>
+              <div className="flex gap-2">
+                <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-4 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 disabled:opacity-50">
+                  {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button onClick={() => setEditing(null)} className="px-4 py-1.5 text-text-muted text-xs hover:text-text-primary">Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {accommodations.length === 0 && editing === null && (
+            <div className="p-4 text-center text-text-muted text-xs">No accommodations yet.</div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

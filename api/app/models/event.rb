@@ -6,6 +6,7 @@ class Event < ApplicationRecord
   has_many :prize_categories, dependent: :destroy
   has_many :videos, dependent: :nullify
   has_many :event_results, dependent: :destroy
+  has_many :event_accommodations, dependent: :destroy
   has_one_attached :hero_image
 
   accepts_nested_attributes_for :event_schedule_items, allow_destroy: true
@@ -18,7 +19,8 @@ class Event < ApplicationRecord
       methods: [:hero_image_url],
       include: {
         event_schedule_items: { except: [:created_at, :updated_at] },
-        prize_categories: { except: [:created_at, :updated_at] }
+        prize_categories: { except: [:created_at, :updated_at] },
+        event_accommodations: { except: [:created_at, :updated_at] }
       },
       except: [:created_at, :updated_at]
     ))
