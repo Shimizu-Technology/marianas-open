@@ -84,13 +84,36 @@ export default function EventDetailPage() {
     { division: t('event.prizeKids'), prize: '$500' },
   ];
 
+  const hasCashPrizes = mainEvent?.prize_categories?.some(c => Number(c.amount) > 0) ?? false;
+  const hasTripPackages = mainEvent?.prize_categories?.some(c => Number(c.amount) === 0) ?? false;
+
   const prizeBreakdown = mainEvent && mainEvent.prize_categories?.length > 0
     ? mainEvent.prize_categories
         .sort((a, b) => a.sort_order - b.sort_order)
-        .map(cat => ({ division: cat.name, prize: `$${Number(cat.amount).toLocaleString()}` }))
+        .map(cat => {
+          const amt = Number(cat.amount);
+          return {
+            division: cat.name,
+            prize: amt > 0 ? `$${amt.toLocaleString()}` : '',
+          };
+        })
     : fallbackPrizeBreakdown;
 
   const prizePoolDisplay = mainEvent?.prize_pool ? `$${Number(mainEvent.prize_pool).toLocaleString()}` : '$50,000';
+
+  const formatEventDate = (event: typeof mainEvent) => {
+    if (!event?.date) return t('event.date');
+    const start = new Date(event.date + 'T00:00:00');
+    const opts: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' };
+    if (event.end_date && event.end_date !== event.date) {
+      const end = new Date(event.end_date + 'T00:00:00');
+      if (start.getMonth() === end.getMonth()) {
+        return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}–${end.getDate()}, ${start.getFullYear()}`;
+      }
+      return `${start.toLocaleDateString('en-US', opts)} – ${end.toLocaleDateString('en-US', opts)}`;
+    }
+    return start.toLocaleDateString('en-US', opts);
+  };
 
   const heroImageUrl = getEventHeroImage(mainEvent?.slug || 'marianas-open-2026', mainEvent?.hero_image_url ?? null);
 
@@ -182,7 +205,7 @@ export default function EventDetailPage() {
             <div className="flex flex-wrap gap-6 text-sm text-text-secondary">
               <div className="flex items-center gap-2">
                 <Calendar size={16} className="text-gold-500" />
-                {t('event.date')}
+                {formatEventDate(mainEvent)}
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-gold-500" />
@@ -190,7 +213,7 @@ export default function EventDetailPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Trophy size={16} className="text-gold-500" />
-                {prizePoolDisplay}
+                {hasCashPrizes ? prizePoolDisplay : hasTripPackages ? t('event.tripPackages', 'Trip Packages to Guam') : prizePoolDisplay}
               </div>
             </div>
           </motion.div>
@@ -227,17 +250,31 @@ export default function EventDetailPage() {
               </div>
             </ScrollReveal>
 
-            {/* Prize Pool */}
+            {/* Prize Pool / Trip Packages */}
             <ScrollReveal delay={0.1}>
               <div className="bg-gradient-to-br from-gold-500/10 to-transparent border border-gold-500/20 p-8 h-full">
                 <Trophy size={24} className="text-gold-500 mb-4" />
-                <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>
-                <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
-                <div className="space-y-3 text-sm">
+                {hasCashPrizes ? (
+                  <>
+                    <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>
+                    <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
+                  </>
+                ) : hasTripPackages ? (
+                  <>
+                    <div className="text-2xl sm:text-3xl font-heading font-black text-gold-500 mb-2">{t('event.winYourWay', 'Win Your Way to Guam!')}</div>
+                    <div className="text-sm text-text-secondary mb-6">{t('event.tripPackageDesc', 'Compete for a trip package to the Marianas Open International Championship 2026 — $50,000 cash prize pool!')}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>
+                    <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
+                  </>
+                )}
+                <div className="space-y-3 text-sm max-h-64 overflow-y-auto pr-2">
                   {prizeBreakdown.map((item, i) => (
-                    <div key={i} className="flex justify-between text-text-secondary">
-                      <span>{item.division}</span>
-                      <span className="text-gold-400 font-semibold">{item.prize}</span>
+                    <div key={i} className="flex justify-between gap-2 text-text-secondary">
+                      <span className="shrink">{item.division}</span>
+                      {item.prize && <span className="text-gold-400 font-semibold shrink-0">{item.prize}</span>}
                     </div>
                   ))}
                 </div>
@@ -297,18 +334,17 @@ export default function EventDetailPage() {
                   </div>
                   <div className="bg-navy-900 border border-white/5 p-4 text-center">
                     <MapPin size={20} className="text-gold-500 mx-auto mb-2" />
-                    <div className="text-sm text-text-secondary">{t('event.venueUniversity')}</div>
-                    <div className="text-sm text-text-secondary">{t('event.venueAddress')}</div>
+                    <div className="text-sm text-text-secondary">{mainEvent?.city || t('event.venueUniversity')}</div>
+                    <div className="text-sm text-text-secondary">{mainEvent?.country || t('event.venueAddress')}</div>
                   </div>
                 </div>
                 {/* Embedded Map with fallback */}
                 <div className="relative overflow-hidden border border-white/5 aspect-[16/7]">
-                  {/* Fallback shown when map iframe cannot load */}
                   <div className="absolute inset-0 bg-navy-800 flex flex-col items-center justify-center gap-3 z-0">
                     <MapPin size={28} className="text-gold-500" />
-                    <p className="text-text-secondary text-sm">{t('event.venue')} · {t('event.location')}</p>
+                    <p className="text-text-secondary text-sm">{mainEvent ? `${mainEvent.venue_name} · ${mainEvent.city}, ${mainEvent.country}` : `${t('event.venue')} · ${t('event.location')}`}</p>
                     <a
-                      href="https://maps.google.com/?q=UOG+Calvo+Fieldhouse+Guam"
+                      href={`https://maps.google.com/?q=${encodeURIComponent(mainEvent ? `${mainEvent.venue_name} ${mainEvent.city} ${mainEvent.country}` : 'UOG Calvo Fieldhouse Guam')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-gold-500 text-xs font-heading font-semibold uppercase tracking-wider hover:text-gold-400 transition-colors"
@@ -316,14 +352,6 @@ export default function EventDetailPage() {
                       {t('event.viewOnGoogleMaps')} <ExternalLink size={12} />
                     </a>
                   </div>
-                  <iframe
-                    title="UOG Calvo Fieldhouse Map"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3869.8!2d144.7937!3d13.4443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x671f827d25a3a3a3%3A0x12345!2sUOG+Calvo+Fieldhouse!5e0!3m2!1sen!2sgu!4v1700000000000!5m2!1sen!2sgu"
-                    className="w-full h-full border-0 relative z-10"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    allowFullScreen
-                  />
                 </div>
               </div>
             </ScrollReveal>

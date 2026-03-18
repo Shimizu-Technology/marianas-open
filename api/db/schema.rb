@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_16_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_18_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -64,6 +64,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_16_120000) do
     t.index ["belt_rank"], name: "index_competitors_on_belt_rank"
     t.index ["country_code"], name: "index_competitors_on_country_code"
     t.index ["weight_class"], name: "index_competitors_on_weight_class"
+  end
+
+  create_table "event_gallery_images", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "alt_text"
+    t.string "caption"
+    t.datetime "created_at", null: false
+    t.bigint "event_id", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "active"], name: "index_event_gallery_images_on_event_id_and_active"
+    t.index ["event_id", "sort_order"], name: "index_event_gallery_images_on_event_id_and_sort_order"
+    t.index ["event_id"], name: "index_event_gallery_images_on_event_id"
   end
 
   create_table "event_results", force: :cascade do |t|
@@ -229,6 +243,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_16_120000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "event_gallery_images", "events"
   add_foreign_key "event_results", "competitors"
   add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"
