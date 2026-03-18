@@ -62,21 +62,44 @@ const ORG_PARTNERS = [
   },
 ] as const;
 
+const SPONSOR_LOGO_MAP: Record<string, string> = {
+  'triple j': '/images/logos/sponsors/triple-j-logo.png',
+  'pacific points': '/images/logos/sponsors/pacific-points-logo.png',
+  "foody's": '/images/logos/sponsors/foodys-logo.png',
+  'deal depot': '/images/logos/sponsors/deal-depot-logo.png',
+  'cfpt': '/images/logos/sponsors/cfpt-logo.png',
+  'fokai': '/images/logos/sponsors/fokai-logo.png',
+  'jamz media': '/images/logos/sponsors/jamz-media-logo.jpeg',
+  'cherry media': '/images/logos/sponsors/cherry-media-logo.png',
+  'mannge pops': '/images/logos/sponsors/mannge-pops-logo.png',
+  'aloha maid': '/images/logos/sponsors/aloha-maid-logo.png',
+  'fence masters': '/images/logos/sponsors/fence-masters-logo.png',
+  'ite': '/images/logos/sponsors/ite-logo.png',
+  'hertz & dollar': '/images/logos/sponsors/hertz-dollar-logo.jpg',
+  'stroll guam': '/images/logos/sponsors/stroll-guam-logo.png',
+};
+
+function getSponsorLogo(name: string, apiLogoUrl?: string | null): string | null {
+  const resolved = apiLogoUrl ? resolveMediaUrl(apiLogoUrl) : null;
+  if (resolved) return resolved;
+  return SPONSOR_LOGO_MAP[name.toLowerCase()] ?? null;
+}
+
 const OFFICIAL_SPONSORS_STATIC = [
-  { name: 'Triple J', logo: '/images/logos/sponsors/triple-j-logo.png' },
-  { name: 'Pacific Points', logo: '/images/logos/sponsors/pacific-points-logo.png' },
-  { name: "Foody's", logo: null },
-  { name: 'Deal Depot', logo: '/images/logos/sponsors/deal-depot-logo.png' },
-  { name: 'CFPT', logo: null },
-  { name: 'Fokai', logo: '/images/logos/sponsors/fokai-logo.png' },
-  { name: 'Jamz Media', logo: '/images/logos/sponsors/jamz-media-logo.jpeg' },
-  { name: 'Cherry Media', logo: '/images/logos/sponsors/cherry-media-logo.png' },
-  { name: 'Mannge Pops', logo: null },
-  { name: 'Aloha Maid', logo: '/images/logos/sponsors/aloha-maid-logo.png' },
-  { name: 'Fence Masters', logo: '/images/logos/sponsors/fence-masters-logo.png' },
-  { name: 'ITE', logo: '/images/logos/sponsors/ite-logo.png', url: 'https://shop.ite.net' },
-  { name: 'Hertz & Dollar', logo: '/images/logos/sponsors/hertz-dollar-logo.jpg', url: 'https://www.hertz.com/us/en/location/guam/guam/gumt50' },
-  { name: 'Stroll Guam', logo: '/images/logos/sponsors/stroll-guam-logo.png', url: 'https://stroll.international' },
+  { name: 'Triple J' },
+  { name: 'Pacific Points' },
+  { name: "Foody's" },
+  { name: 'Deal Depot' },
+  { name: 'CFPT' },
+  { name: 'Fokai' },
+  { name: 'Jamz Media' },
+  { name: 'Cherry Media' },
+  { name: 'Mannge Pops' },
+  { name: 'Aloha Maid' },
+  { name: 'Fence Masters' },
+  { name: 'ITE', url: 'https://shop.ite.net' },
+  { name: 'Hertz & Dollar', url: 'https://www.hertz.com/us/en/location/guam/guam/gumt50' },
+  { name: 'Stroll Guam', url: 'https://stroll.international' },
 ] as const;
 
 
@@ -493,12 +516,12 @@ export default function HomePage() {
                     ? officialFromApi.map(s => ({
                         name: s.name,
                         url: s.website_url,
-                        logoSrc: resolveMediaUrl(s.logo_url),
+                        logoSrc: getSponsorLogo(s.name, s.logo_url),
                       }))
                     : OFFICIAL_SPONSORS_STATIC.map(s => ({
                         name: s.name,
                         url: ('url' in s ? s.url : null) as string | null,
-                        logoSrc: s.logo as string | null,
+                        logoSrc: getSponsorLogo(s.name),
                       }));
 
                   return items.map((item) => {
