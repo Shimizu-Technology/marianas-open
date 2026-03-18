@@ -110,9 +110,7 @@ puts "Created prize categories for main event"
 [
   { name: "ASJJF", tier: "title", sort_order: 1 },
   { name: "GVB (Guam Visitors Bureau)", tier: "title", sort_order: 2 },
-  { name: "United Airlines", tier: "gold", sort_order: 3 },
-  { name: "Hyatt Regency Guam", tier: "gold", sort_order: 4 },
-  { name: "Dusit Thani Guam", tier: "gold", sort_order: 5 },
+  { name: "Holiday Resort & Spa", tier: "gold", sort_order: 3 },
 ].each do |data|
   sponsor = org.sponsors.create!(data)
   puts "Created sponsor: #{sponsor.name}"

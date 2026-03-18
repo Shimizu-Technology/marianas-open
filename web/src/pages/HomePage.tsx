@@ -483,7 +483,7 @@ export default function HomePage() {
                   })
               ) : (
                 /* Static fallback: show logos when available, text otherwise */
-                ['GVB', 'United Airlines', 'Hyatt Regency Guam', 'Dusit Thani Guam'].map((name) => {
+                ['GVB', 'Holiday Resort & Spa'].map((name) => {
                   const key = normalizeSponsorKey(name);
                   const fallback = SPONSOR_LOGO_FALLBACK[key];
                   if (fallback) {
