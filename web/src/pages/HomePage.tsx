@@ -34,7 +34,7 @@ const ORG_PARTNERS = [
     label: 'Asian Sport Jiu-Jitsu Federation',
     src: '/images/logos/asjjf-logo.png',
     url: 'https://asjjf.org',
-    heightClass: 'h-16',
+    heightClass: 'h-20 sm:h-24',
   },
   {
     key: 'msjjf',
@@ -42,7 +42,7 @@ const ORG_PARTNERS = [
     label: 'Marianas Sport Jiu-Jitsu Federation',
     src: '/images/logos/msjjf-logo-white.png',
     url: 'https://marianasopen.com',
-    heightClass: 'h-14',
+    heightClass: 'h-16 sm:h-20',
   },
   {
     key: 'copademarianas',
@@ -50,7 +50,7 @@ const ORG_PARTNERS = [
     label: 'International Championship',
     src: '/images/logos/copa-seal-logo.png',
     url: 'https://asjjf.org/main/eventInfo/1837',
-    heightClass: 'h-16',
+    heightClass: 'h-20 sm:h-24',
   },
   {
     key: 'roadtotheopen',
@@ -58,7 +58,7 @@ const ORG_PARTNERS = [
     label: '2026 Pro Series',
     src: '/images/logos/road-to-open-logo-white.png',
     url: 'https://marianasopen.com/calendar',
-    heightClass: 'h-12',
+    heightClass: 'h-14 sm:h-16',
   },
 ] as const;
 
@@ -382,7 +382,10 @@ export default function HomePage() {
               <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted mb-2">
                 {t('home.partnersTitle')}
               </p>
-              <div className="w-8 h-px bg-gold-500/30 mx-auto mt-3" />
+              <div className="w-8 h-px bg-gold-500/30 mx-auto mt-3 mb-5" />
+              <p className="text-text-secondary text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
+                {t('home.partnersDesc')}
+              </p>
             </div>
           </ScrollReveal>
 
