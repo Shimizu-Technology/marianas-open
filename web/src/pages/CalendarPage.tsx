@@ -30,7 +30,7 @@ const ROAD_TO_OPEN_POSTERS = [
   },
   {
     src: '/images/poster-copa.jpg',
-    title: 'Copa de Marianas',
+    title: 'Guam Copa de Marianas',
     isoDate: '2026-01-31',
     location: 'UOG Calvo Fieldhouse, Guam',
     href: 'https://asjjf.org/main/eventInfo/1837',

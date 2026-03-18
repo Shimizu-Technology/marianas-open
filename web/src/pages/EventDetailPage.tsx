@@ -32,7 +32,7 @@ function ShareButton({ platform, onClick }: { platform: string; onClick: () => v
 const EVENT_POSTER_MAP: Record<string, { src: string; label: string }> = {
   'copa-de-marianas-2026': {
     src: '/images/poster-copa.jpg',
-    label: 'Copa de Marianas 2026',
+    label: 'Guam Copa de Marianas 2026',
   },
 };
 
