@@ -390,26 +390,24 @@ export default function HomePage() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.15}>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-12 max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10 max-w-4xl mx-auto">
               {ORG_PARTNERS.map((partner) => (
                 <a
                   key={partner.key}
                   href={partner.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex flex-col items-center gap-3 text-center"
+                  className="group flex flex-col items-center justify-between text-center h-40 sm:h-44"
                 >
-                  <div className="opacity-70 group-hover:opacity-100 transition-all duration-300 group-hover:-translate-y-0.5">
+                  <div className="flex-1 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-all duration-300 group-hover:-translate-y-0.5">
                     <img
                       src={partner.src}
                       alt={partner.name}
                       className={`${partner.heightClass} object-contain`}
                     />
                   </div>
-                  <div>
-                    <div className="text-[11px] font-heading font-semibold uppercase tracking-wider text-text-muted group-hover:text-text-secondary transition-colors duration-300">
-                      {partner.label}
-                    </div>
+                  <div className="text-[10px] sm:text-[11px] font-heading font-semibold uppercase tracking-wider text-text-muted group-hover:text-text-secondary transition-colors duration-300 leading-tight mt-2">
+                    {partner.label}
                   </div>
                 </a>
               ))}
@@ -477,7 +475,7 @@ export default function HomePage() {
               <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted text-center mb-10">
                 {t('home.officialSponsors')}
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+              <div className="flex flex-wrap justify-center gap-4">
                 {(() => {
                   const officialFromApi = sponsors.filter(
                     s => s.tier === 'official' && !normalizeSponsorKey(s.name).includes('gvb')
@@ -498,7 +496,7 @@ export default function HomePage() {
 
                   return items.map((item) => {
                     const inner = (
-                      <div className="group/card bg-navy-900 border border-white/5 hover:border-gold-500/20 p-6 flex flex-col items-center justify-center text-center h-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-500/5 min-h-[120px]">
+                      <div className="group/card bg-navy-900 border border-white/5 hover:border-gold-500/20 p-6 flex flex-col items-center justify-center text-center h-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-500/5 min-h-[120px] w-[calc(50vw-2rem)] sm:w-44 md:w-48">
                         {item.logoSrc ? (
                           <img
                             src={item.logoSrc}
