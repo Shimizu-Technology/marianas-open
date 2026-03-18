@@ -516,6 +516,10 @@ export const api = {
       fetchApi<ImportPreview>(`/api/v1/admin/events/${eventId}/import_results_preview`, {}, true),
     importResults: (eventId: number) =>
       fetchApi<ImportResult>(`/api/v1/admin/events/${eventId}/import_results`, { method: 'POST' }, true),
+    autoCompletePastEvents: () =>
+      fetchApi<{ message: string; updated_count: number; updated_events: Array<{ id: number; name: string; date: string; slug: string }> }>(
+        '/api/v1/admin/events/auto_complete_past', { method: 'POST' }, true
+      ),
 
     // Event Accommodations
     getAccommodations: (eventId: number) =>
