@@ -157,66 +157,7 @@ export default function CalendarPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {upcomingEvents.map((event, i) => (
               <ScrollReveal key={event.id} delay={i * 0.08}>
-                <div
-                  className={`group p-6 border transition-all duration-300 hover:border-gold-500/30 h-full flex flex-col ${
-                    event.is_main_event
-                      ? 'bg-gradient-to-br from-gold-500/10 to-transparent border-gold-500/20 lg:col-span-1'
-                      : 'bg-navy-900 border-white/5'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs font-heading font-bold uppercase tracking-widest text-text-muted bg-navy-800 px-2 py-1 border border-white/5">
-                      {event.country_code}
-                    </span>
-                    <div className="flex gap-0.5">
-                      {Array.from({ length: event.asjjf_stars }).map((_, j) => (
-                        <Star key={j} size={12} className="fill-gold-500 text-gold-500" />
-                      ))}
-                    </div>
-                  </div>
-
-                  <h3 className={`font-heading font-bold text-lg mb-2 ${
-                    event.is_main_event ? 'text-gold-500' : 'text-text-primary'
-                  }`}>
-                    {event.name}
-                  </h3>
-
-                  <div className="space-y-2 text-sm text-text-secondary mb-6 flex-1">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} className="text-text-muted shrink-0" />
-                      {formatEventDate(event.date, event.end_date)}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin size={14} className="text-text-muted shrink-0" />
-                      {event.venue_name}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <a
-                      href={event.registration_url || 'https://asjjf.org'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
-                        event.is_main_event
-                          ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
-                          : 'bg-navy-700 text-text-primary hover:bg-navy-600'
-                      }`}
-                    >
-                      {t('calendar.register')}
-                      <ExternalLink size={12} />
-                    </a>
-                    {event.is_main_event && (
-                      <Link
-                        to="/event"
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gold-500/30 text-gold-500 text-sm font-heading font-bold uppercase tracking-wider hover:bg-gold-500/10 transition-colors"
-                      >
-                        {t('calendar.details')}
-                        <ArrowRight size={12} />
-                      </Link>
-                    )}
-                  </div>
-                </div>
+                <EventCard event={event} formatDate={formatEventDate} t={t} />
               </ScrollReveal>
             ))}
           </div>
@@ -302,7 +243,8 @@ function EventCard({ event, formatDate, t, isPast }: {
   isPast?: boolean;
 }) {
   return (
-    <div
+    <Link
+      to={`/events/${event.slug}`}
       className={`group p-6 border transition-all duration-300 hover:border-gold-500/30 h-full flex flex-col ${
         event.is_main_event && !isPast
           ? 'bg-gradient-to-br from-gold-500/10 to-transparent border-gold-500/20'
@@ -327,7 +269,7 @@ function EventCard({ event, formatDate, t, isPast }: {
         </div>
       </div>
 
-      <h3 className={`font-heading font-bold text-lg mb-2 ${
+      <h3 className={`font-heading font-bold text-lg mb-2 group-hover:text-gold-400 transition-colors ${
         event.is_main_event && !isPast ? 'text-gold-500' : 'text-text-primary'
       }`}>
         {event.name}
@@ -350,6 +292,7 @@ function EventCard({ event, formatDate, t, isPast }: {
             href={event.registration_url || 'https://asjjf.org'}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
               event.is_main_event
                 ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
@@ -359,17 +302,21 @@ function EventCard({ event, formatDate, t, isPast }: {
             {t('calendar.register')}
             <ExternalLink size={12} />
           </a>
-          {event.is_main_event && (
-            <Link
-              to="/event"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gold-500/30 text-gold-500 text-sm font-heading font-bold uppercase tracking-wider hover:bg-gold-500/10 transition-colors"
-            >
-              {t('calendar.details')}
-              <ArrowRight size={12} />
-            </Link>
-          )}
+          <span
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gold-500/30 text-gold-500 text-sm font-heading font-bold uppercase tracking-wider hover:bg-gold-500/10 transition-colors"
+          >
+            {t('calendar.details')}
+            <ArrowRight size={12} />
+          </span>
         </div>
       )}
-    </div>
+
+      {isPast && (
+        <div className="flex items-center gap-1 text-xs text-gold-500/70 group-hover:text-gold-400 transition-colors">
+          <span className="font-heading uppercase tracking-wider">{t('pastEvents.viewDetails', 'View Details')}</span>
+          <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+        </div>
+      )}
+    </Link>
   );
 }
