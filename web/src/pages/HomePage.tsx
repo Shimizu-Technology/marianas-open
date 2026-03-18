@@ -4,24 +4,12 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink, Handshake } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
-import LoadingSpinner from '../components/LoadingSpinner';
 import JourneySection from '../components/JourneySection';
 import { useEvents, useSponsors } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
-import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { resolveMediaUrl } from '../utils/images';
-
-function StarRating({ count }: { count: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: count }).map((_, i) => (
-        <Star key={i} size={12} className="fill-gold-500 text-gold-500" />
-      ))}
-    </div>
-  );
-}
 
 function normalizeSponsorKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -104,7 +92,7 @@ const OFFICIAL_SPONSORS_STATIC = [
 
 
 export default function HomePage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const { events, loading: eventsLoading } = useEvents();
   const { sponsors } = useSponsors();
@@ -322,89 +310,6 @@ export default function HomePage() {
       {!eventsLoading && events.length > 0 && (
         <JourneySection events={events} />
       )}
-
-      {/* 2026 Pro Series Timeline */}
-      <section className="py-24 sm:py-32 bg-surface">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <ScrollReveal>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-5xl font-heading font-black uppercase mb-4">
-                {t('home.upcomingTitle')}
-              </h2>
-              <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-                {t('home.upcomingSubtitle')}
-              </p>
-            </div>
-          </ScrollReveal>
-
-          {eventsLoading ? (
-            <LoadingSpinner />
-          ) : (
-            <div className="space-y-3">
-              {events.map((event, i) => (
-                <ScrollReveal key={event.id} delay={i * 0.08}>
-                  <Link
-                    to={event.is_main_event ? '/event' : '/calendar'}
-                    className={`group flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 p-6 border transition-all duration-300 hover:border-gold-500/30 ${
-                      event.is_main_event
-                        ? 'bg-gradient-to-r from-gold-500/10 to-transparent border-gold-500/20'
-                        : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
-                    }`}
-                  >
-                    {/* Date */}
-                    <div className="shrink-0 w-28">
-                      <div className="text-xs text-text-muted uppercase tracking-wider font-heading">
-                        {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { month: 'short' })}
-                      </div>
-                      <div className="text-2xl font-heading font-black">
-                        {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { day: 'numeric' })}
-                      </div>
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className={`font-heading font-bold text-lg truncate ${
-                          event.is_main_event ? 'text-gold-500' : 'text-text-primary'
-                        }`}>
-                          {event.name}
-                        </h3>
-                        {event.is_main_event && (
-                          <span className="shrink-0 text-xs px-2 py-0.5 bg-gold-500 text-navy-900 font-bold uppercase tracking-wider">
-                            {t('home.mainEvent')}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-text-secondary">
-                        {event.venue_name} · {event.city}, {event.country}
-                      </p>
-                    </div>
-
-                    {/* Stars + Arrow */}
-                    <div className="flex items-center gap-4 shrink-0">
-                      <StarRating count={event.asjjf_stars} />
-                      <ArrowRight
-                        size={16}
-                        className="text-text-muted group-hover:text-gold-500 group-hover:translate-x-1 transition-all"
-                      />
-                    </div>
-                  </Link>
-                </ScrollReveal>
-              ))}
-            </div>
-          )}
-
-          <ScrollReveal className="text-center mt-12">
-            <Link
-              to="/calendar"
-              className="inline-flex items-center gap-2 px-8 py-4 border border-gold-500/30 text-gold-500 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-500/10 transition-all duration-300"
-            >
-              {t('home.viewCalendar')}
-              <ArrowRight size={16} />
-            </Link>
-          </ScrollReveal>
-        </div>
-      </section>
 
       {/* Official Partners — logo strip */}
       <section className="py-24 sm:py-32 border-t border-white/5">
