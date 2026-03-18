@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Instagram, Facebook, Mail } from 'lucide-react';
+import { Instagram, Facebook, Mail, Youtube } from 'lucide-react';
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -43,6 +43,14 @@ export default function Footer() {
                 className="text-text-secondary hover:text-gold-500 transition-colors"
               >
                 <Facebook size={20} />
+              </a>
+              <a
+                href="https://www.youtube.com/@TheMarianasOpen"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-secondary hover:text-gold-500 transition-colors"
+              >
+                <Youtube size={20} />
               </a>
             </div>
           </div>
