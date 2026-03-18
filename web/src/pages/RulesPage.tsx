@@ -298,11 +298,11 @@ export default function RulesPage() {
               </div>
               <div className="space-y-4">
                 <a
-                  href="mailto:steveshimizu@outlook.com"
+                  href="mailto:moguam@marianasopen.com"
                   className="flex items-center gap-3 text-text-secondary hover:text-gold-500 transition-colors"
                 >
                   <Mail size={16} className="shrink-0" />
-                  <span>steveshimizu@outlook.com</span>
+                  <span>moguam@marianasopen.com</span>
                 </a>
                 <a
                   href="tel:+16717779044"

@@ -53,11 +53,11 @@ export default function Footer() {
               {t('footer.contact')}
             </h4>
             <a
-              href="mailto:steveshimizu@outlook.com"
+              href="mailto:moguam@marianasopen.com"
               className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
             >
               <Mail size={16} />
-              steveshimizu@outlook.com
+              moguam@marianasopen.com
             </a>
             <p className="text-sm text-text-secondary">(671) 777-9044</p>
           </div>

@@ -18,7 +18,7 @@ org = Organization.create!(
   description: "Guam's Premier International Brazilian Jiu-Jitsu Championship",
   primary_color: "#004581",
   secondary_color: "#D4A843",
-  contact_email: "steveshimizu@outlook.com",
+  contact_email: "moguam@marianasopen.com",
   phone: "(671) 777-9044",
   website_url: "https://marianasopen.com",
   instagram_url: "https://instagram.com/themarianasopen",

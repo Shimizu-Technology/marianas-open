@@ -176,11 +176,11 @@ export default function AboutPage() {
           <ScrollReveal delay={0.1}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <a
-                href="mailto:steveshimizu@outlook.com"
+                href="mailto:moguam@marianasopen.com"
                 className="flex items-center gap-2 text-text-secondary hover:text-gold-500 transition-colors"
               >
                 <Mail size={18} />
-                steveshimizu@outlook.com
+                moguam@marianasopen.com
               </a>
               <span className="hidden sm:block text-white/10">|</span>
               <div className="flex items-center gap-2 text-text-secondary">
