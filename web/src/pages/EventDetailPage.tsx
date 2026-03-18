@@ -466,7 +466,6 @@ export default function EventDetailPage() {
                 <p className="text-text-secondary text-sm leading-relaxed mb-4">{t('event.hotelsDesc')}</p>
                 <div className="space-y-3 text-sm">
                   <div className="bg-navy-800 p-3 border border-white/5">
-                    <div className="font-heading font-semibold text-text-primary">Holiday Resort & Spa</div>
                     <div className="text-text-muted text-xs mt-1">{t('event.hotelHolidayDesc')}</div>
                   </div>
                 </div>

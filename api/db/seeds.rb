@@ -110,11 +110,20 @@ puts "Created prize categories for main event"
 [
   { name: "ASJJF", tier: "partner", sort_order: 1, website_url: "https://asjjf.org" },
   { name: "GVB (Guam Visitors Bureau)", tier: "presenting", sort_order: 1, website_url: "https://www.visitguam.com" },
-  { name: "ITE", tier: "official", sort_order: 2, website_url: "https://shop.ite.net" },
-  { name: "Hertz & Dollar", tier: "official", sort_order: 3, website_url: "https://www.hertz.com/us/en/location/guam/guam/gumt50" },
-  { name: "Stroll Guam", tier: "official", sort_order: 4, website_url: "https://stroll.international" },
-  { name: "IP&E & Shell", tier: "official", sort_order: 5 },
-  { name: "Holiday Resort & Spa", tier: "official", sort_order: 6 },
+  { name: "Triple J",       tier: "official", sort_order: 2 },
+  { name: "Pacific Points",  tier: "official", sort_order: 3 },
+  { name: "Foody's",         tier: "official", sort_order: 4 },
+  { name: "Deal Depot",      tier: "official", sort_order: 5 },
+  { name: "CFPT",            tier: "official", sort_order: 6 },
+  { name: "Fokai",           tier: "official", sort_order: 7 },
+  { name: "Jamz Media",      tier: "official", sort_order: 8 },
+  { name: "Cherry Media",    tier: "official", sort_order: 9 },
+  { name: "Mannge Pops",     tier: "official", sort_order: 10 },
+  { name: "Aloha Maid",      tier: "official", sort_order: 11 },
+  { name: "Fence Masters",   tier: "official", sort_order: 12 },
+  { name: "ITE",             tier: "official", sort_order: 13, website_url: "https://shop.ite.net" },
+  { name: "Hertz & Dollar",  tier: "official", sort_order: 14, website_url: "https://www.hertz.com/us/en/location/guam/guam/gumt50" },
+  { name: "Stroll Guam",     tier: "official", sort_order: 15, website_url: "https://stroll.international" },
 ].each do |data|
   sponsor = org.sponsors.create!(data)
   puts "Created sponsor: #{sponsor.name}"

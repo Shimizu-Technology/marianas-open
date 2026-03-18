@@ -63,11 +63,20 @@ const ORG_PARTNERS = [
 ] as const;
 
 const OFFICIAL_SPONSORS_STATIC = [
-  { name: 'ITE', description: 'WiFi & SIM Cards', url: 'https://shop.ite.net' },
-  { name: 'Hertz & Dollar', description: 'Car Rentals', url: 'https://www.hertz.com/us/en/location/guam/guam/gumt50' },
-  { name: 'Stroll Guam', description: 'Transportation', url: 'https://stroll.international' },
-  { name: 'IP&E & Shell', description: 'Fuel', url: null },
-  { name: 'Holiday Resort & Spa', description: null, url: null },
+  { name: 'Triple J', logo: '/images/logos/sponsors/triple-j-logo.png' },
+  { name: 'Pacific Points', logo: '/images/logos/sponsors/pacific-points-logo.png' },
+  { name: "Foody's", logo: null },
+  { name: 'Deal Depot', logo: '/images/logos/sponsors/deal-depot-logo.png' },
+  { name: 'CFPT', logo: null },
+  { name: 'Fokai', logo: '/images/logos/sponsors/fokai-logo.png' },
+  { name: 'Jamz Media', logo: '/images/logos/sponsors/jamz-media-logo.jpeg' },
+  { name: 'Cherry Media', logo: '/images/logos/sponsors/cherry-media-logo.png' },
+  { name: 'Mannge Pops', logo: null },
+  { name: 'Aloha Maid', logo: '/images/logos/sponsors/aloha-maid-logo.png' },
+  { name: 'Fence Masters', logo: '/images/logos/sponsors/fence-masters-logo.png' },
+  { name: 'ITE', logo: '/images/logos/sponsors/ite-logo.png', url: 'https://shop.ite.net' },
+  { name: 'Hertz & Dollar', logo: '/images/logos/sponsors/hertz-dollar-logo.jpg', url: 'https://www.hertz.com/us/en/location/guam/guam/gumt50' },
+  { name: 'Stroll Guam', logo: '/images/logos/sponsors/stroll-guam-logo.png', url: 'https://stroll.international' },
 ] as const;
 
 
@@ -444,7 +453,7 @@ export default function HomePage() {
               </p>
               {(() => {
                 const gvbSponsor = sponsors.find(s => normalizeSponsorKey(s.name).includes('gvb'));
-                const gvbLogo = resolveMediaUrl(gvbSponsor?.logo_url) || '/images/logos/sponsors/gvb-logo.png';
+                const gvbLogo = resolveMediaUrl(gvbSponsor?.logo_url) || '/images/logos/sponsors/gvb-logo-white.png';
                 const gvbUrl = gvbSponsor?.website_url || 'https://www.visitguam.com';
                 return (
                   <div className="max-w-2xl mx-auto text-center">
@@ -475,7 +484,7 @@ export default function HomePage() {
               <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted text-center mb-10">
                 {t('home.officialSponsors')}
               </p>
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl mx-auto">
                 {(() => {
                   const officialFromApi = sponsors.filter(
                     s => s.tier === 'official' && !normalizeSponsorKey(s.name).includes('gvb')
@@ -485,32 +494,27 @@ export default function HomePage() {
                         name: s.name,
                         url: s.website_url,
                         logoSrc: resolveMediaUrl(s.logo_url),
-                        description: null as string | null,
                       }))
                     : OFFICIAL_SPONSORS_STATIC.map(s => ({
                         name: s.name,
-                        url: s.url,
-                        logoSrc: null as string | null,
-                        description: s.description,
+                        url: ('url' in s ? s.url : null) as string | null,
+                        logoSrc: s.logo as string | null,
                       }));
 
                   return items.map((item) => {
                     const inner = (
-                      <div className="group/card bg-navy-900 border border-white/5 hover:border-gold-500/20 p-6 flex flex-col items-center justify-center text-center h-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-500/5 min-h-[120px] w-[calc(50vw-2rem)] sm:w-44 md:w-48">
+                      <div className="group/card bg-navy-900/80 border border-white/5 hover:border-gold-500/20 rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-500/5 w-[calc(33.333vw-1.5rem)] sm:w-36 md:w-40 h-24 sm:h-28">
                         {item.logoSrc ? (
-                          <img
-                            src={item.logoSrc}
-                            alt={item.name}
-                            className="h-10 sm:h-12 object-contain mb-2"
-                          />
-                        ) : (
-                          <div className="font-heading font-bold text-sm sm:text-base uppercase tracking-wider text-text-primary group-hover/card:text-gold-400 transition-colors duration-300 mb-1">
-                            {item.name}
+                          <div className="bg-white/95 rounded-md px-3 py-2 flex items-center justify-center w-full h-full">
+                            <img
+                              src={item.logoSrc}
+                              alt={item.name}
+                              className="max-h-14 sm:max-h-16 max-w-full object-contain"
+                            />
                           </div>
-                        )}
-                        {item.description && (
-                          <div className="text-[11px] text-text-muted uppercase tracking-wider">
-                            {item.description}
+                        ) : (
+                          <div className="font-heading font-bold text-xs sm:text-sm uppercase tracking-wider text-text-primary group-hover/card:text-gold-400 transition-colors duration-300">
+                            {item.name}
                           </div>
                         )}
                       </div>
