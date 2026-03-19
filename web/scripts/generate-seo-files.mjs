@@ -27,7 +27,7 @@ function extractEventSlugs() {
   if (!fs.existsSync(seedFile)) return [];
 
   const content = fs.readFileSync(seedFile, 'utf8');
-  const matches = [...content.matchAll(/slug:\s*"([^"]+)"/g)].map((match) => match[1]);
+  const matches = [...content.matchAll(/slug:\s*["']([^"']+)["']/g)].map((match) => match[1]);
   return [...new Set(matches)].sort();
 }
 

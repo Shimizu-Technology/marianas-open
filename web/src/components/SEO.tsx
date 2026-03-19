@@ -84,9 +84,11 @@ export default function SEO({
       <meta name="twitter:image" content={imageUrl} />
 
       {structuredData.map((item, index) => (
-        <script key={index} type="application/ld+json">
-          {JSON.stringify(item)}
-        </script>
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}
+        />
       ))}
     </Helmet>
   );

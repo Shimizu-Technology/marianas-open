@@ -265,7 +265,7 @@ export default function EventDetailPage() {
     ? `/events/${mainEvent.slug}`
     : slug
       ? `/events/${slug}`
-      : '/event';
+      : '/events';
   const seoTitle = mainEvent
     ? `${mainEvent.name} ${formatEventDate(mainEvent)}`
     : 'Event Details';
