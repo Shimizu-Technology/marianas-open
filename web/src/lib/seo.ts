@@ -1,6 +1,7 @@
 export const SITE_URL = 'https://marianasopen.com';
 export const SITE_NAME = 'Marianas Open';
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/hero-podium.jpg`;
+export const YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@TheMarianasOpen';
 export const DEFAULT_DESCRIPTION =
   "Guam's premier international Brazilian Jiu-Jitsu championship featuring qualifier events across Asia-Pacific and the Marianas Open grand championship.";
 export const DEFAULT_KEYWORDS =
@@ -10,7 +11,7 @@ export const THEME_COLOR = '#07111f';
 export const SOCIAL_LINKS = [
   'https://instagram.com/themarianasopen',
   'https://facebook.com/marianasopen',
-  'https://www.youtube.com/@TheMarianasOpen',
+  YOUTUBE_CHANNEL_URL,
 ];
 
 export function toAbsoluteUrl(pathOrUrl?: string | null) {

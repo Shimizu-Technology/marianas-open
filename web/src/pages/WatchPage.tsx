@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
-  Search, Play, Clock, Filter, ChevronDown, X,
+  Search, Play, Clock, Filter, ChevronDown, X, Youtube,
   Camera, UserSearch, Sparkles, Bell,
 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
@@ -10,6 +10,7 @@ import SocialShare from '../components/SocialShare';
 import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SEO from '../components/SEO';
+import { YOUTUBE_CHANNEL_URL } from '../lib/seo';
 import { api } from '../services/api';
 import type { Video } from '../services/api';
 import { useEvents } from '../hooks/useApi';
@@ -118,21 +119,32 @@ export default function WatchPage() {
         ]}
       />
       {/* Hero */}
-      <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-navy-800 to-navy-900" />
+      <section className="relative py-12 sm:py-16 overflow-hidden">
+        <div className="absolute inset-0 bg-linear-to-b from-navy-800 to-navy-900" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <motion.div
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] mb-6">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] mb-4">
               {t('watch.title')}
             </h1>
-            <p className="text-text-secondary text-lg max-w-xl mx-auto mb-6">
+            <p className="text-text-secondary text-lg max-w-xl mx-auto mb-8">
               {t('watch.subtitle')}
             </p>
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center mb-8">
+              <a
+                href={YOUTUBE_CHANNEL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-gold-500 text-navy-950 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors shadow-lg shadow-gold-500/20"
+              >
+                <Youtube size={18} />
+                {t('watch.youtubeCta', 'Visit Our YouTube Channel')}
+              </a>
+            </div>
+            <div className="flex items-center justify-center gap-3 opacity-60 hover:opacity-100 transition-opacity">
               <SocialShare shareText={t('share.watchText')} />
               <QRShare />
             </div>
@@ -142,7 +154,7 @@ export default function WatchPage() {
 
       {/* Live Stream Section */}
       {liveEvent && (
-        <section className="py-8 sm:py-12 bg-gradient-to-b from-red-900/20 to-transparent">
+        <section className="py-8 sm:py-12 bg-linear-to-b from-red-900/20 to-transparent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <ScrollReveal>
               <div className="border border-red-500/30 bg-red-500/5 p-6 sm:p-8">
@@ -177,12 +189,18 @@ export default function WatchPage() {
 
       {/* Featured Videos */}
       {featuredVideos.length > 0 && (
-        <section className="py-8 sm:py-12">
+        <section id="featured-videos" className="py-10 sm:py-16 scroll-mt-28">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <ScrollReveal>
-              <h2 className="text-2xl sm:text-3xl font-heading font-black uppercase mb-6">
-                {t('watch.featured', 'Featured')}
-              </h2>
+              <div className="mb-8">
+                <div className="w-12 h-0.5 bg-gold-500 mb-4" />
+                <h2 className="text-2xl sm:text-3xl font-heading font-black uppercase mb-2">
+                  {t('watch.featuredTitle', 'Featured Videos')}
+                </h2>
+                <p className="text-text-secondary max-w-2xl">
+                  {t('watch.featuredDesc', 'Catch the latest highlights, full matches, and standout moments from Marianas Open events.')}
+                </p>
+              </div>
             </ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {featuredVideos.map((video, i) => (
@@ -240,6 +258,15 @@ export default function WatchPage() {
               <Play size={48} className="mx-auto text-text-muted mb-4 opacity-30" />
               <p className="text-text-muted text-lg">{t('watch.noVideosYet', 'No videos yet')}</p>
               <p className="text-text-muted text-sm mt-2">{t('watch.noVideosYetDesc', 'Check back soon for match videos and highlights.')}</p>
+              <a
+                href={YOUTUBE_CHANNEL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 mt-6 px-5 py-3 border border-gold-500/30 text-gold-400 font-heading font-bold uppercase tracking-wider text-sm hover:border-gold-500/60 hover:text-gold-300 transition-colors"
+              >
+                <Youtube size={16} />
+                {t('watch.youtubeCta', 'Visit Our YouTube Channel')}
+              </a>
             </div>
           ) : filteredVideos.length === 0 ? (
             <div className="text-center py-16 text-text-muted">
@@ -361,7 +388,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
             </div>
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-navy-700/50 to-navy-900/80 flex items-center justify-center">
+          <div className="absolute inset-0 bg-linear-to-br from-navy-700/50 to-navy-900/80 flex items-center justify-center">
             <Play size={20} className="text-white/30" />
           </div>
         )}
