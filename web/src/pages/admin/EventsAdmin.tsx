@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText } from 'lucide-react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, CheckCircle, PlayCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -81,6 +81,22 @@ export default function EventsAdmin() {
   const [success, setSuccess] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
+  const [statusUpdating, setStatusUpdating] = useState<number | null>(null)
+
+  const handleQuickStatusChange = async (eventId: number, newStatus: string) => {
+    setStatusUpdating(eventId)
+    setError('')
+    try {
+      await api.admin.updateEvent(eventId, { status: newStatus })
+      await loadEvents()
+      setSuccess(`Event marked as ${newStatus}`)
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Status update failed')
+    } finally {
+      setStatusUpdating(null)
+    }
+  }
 
   const loadEvents = useCallback(async () => {
     try {
@@ -1000,15 +1016,44 @@ export default function EventsAdmin() {
                           </span>
                         </td>
                         <td className="px-5 py-3">
-                          <span className={`text-xs px-2 py-0.5 ${
-                            event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
-                            event.status === 'published' ? 'bg-green-500/10 text-green-400' :
-                            event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
-                            event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
-                            'bg-white/5 text-text-muted'
-                          }`}>
-                            {event.status}
-                          </span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`text-xs px-2 py-0.5 ${
+                              event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
+                              event.status === 'published' ? 'bg-green-500/10 text-green-400' :
+                              event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
+                              event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
+                              'bg-white/5 text-text-muted'
+                            }`}>
+                              {event.status}
+                            </span>
+                            {statusUpdating === event.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin text-text-muted" />
+                            ) : (
+                              <>
+                                {event.status !== 'upcoming' && (
+                                  <button
+                                    onClick={() => handleQuickStatusChange(event.id, 'upcoming')}
+                                    className="text-xs px-2 py-0.5 bg-gold/5 text-gold/70 hover:bg-gold/20 hover:text-gold transition-colors"
+                                    title="Mark as Upcoming"
+                                  >
+                                    Upcoming
+                                  </button>
+                                )}
+                                {event.status !== 'completed' && (
+                                  <button
+                                    onClick={() => handleQuickStatusChange(event.id, 'completed')}
+                                    className="text-xs px-2 py-0.5 bg-blue-500/5 text-blue-400/70 hover:bg-blue-500/20 hover:text-blue-400 transition-colors"
+                                    title="Mark as Completed"
+                                  >
+                                    <span className="flex items-center gap-1">
+                                      <CheckCircle className="w-2.5 h-2.5" />
+                                      Done
+                                    </span>
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
                         </td>
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-2">
@@ -1059,6 +1104,30 @@ export default function EventsAdmin() {
                       }`}>
                         {event.status}
                       </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {statusUpdating === event.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin text-text-muted" />
+                      ) : (
+                        <>
+                          {event.status !== 'upcoming' && (
+                            <button
+                              onClick={() => handleQuickStatusChange(event.id, 'upcoming')}
+                              className="text-xs px-2 py-0.5 bg-gold/5 text-gold/70 hover:bg-gold/20 hover:text-gold transition-colors"
+                            >
+                              Mark Upcoming
+                            </button>
+                          )}
+                          {event.status !== 'completed' && (
+                            <button
+                              onClick={() => handleQuickStatusChange(event.id, 'completed')}
+                              className="text-xs px-2 py-0.5 bg-blue-500/5 text-blue-400/70 hover:bg-blue-500/20 hover:text-blue-400 transition-colors"
+                            >
+                              Mark Done
+                            </button>
+                          )}
+                        </>
+                      )}
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1 text-gold text-xs">
