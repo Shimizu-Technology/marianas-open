@@ -5,6 +5,7 @@ import { motion, MotionConfig } from 'framer-motion';
 import { ArrowLeft, Trophy, Medal, Award, MapPin, Users, Calendar } from 'lucide-react';
 import { api } from '../services/api';
 import type { CompetitorProfile } from '../services/api';
+import SEO from '../components/SEO';
 
 const PLACEMENT_STYLE: Record<number, { key: string; className: string }> = {
   1: { key: 'competitorProfile.gold', className: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' },
@@ -32,6 +33,13 @@ export default function CompetitorProfilePage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen bg-dark pt-24 pb-16">
+        <SEO
+          title={profile ? `${profile.competitor_name} Profile` : 'Competitor Profile'}
+          description={profile ? `Competitive history and results for ${profile.competitor_name} at Marianas Open events.` : 'Competitor profile and event results.'}
+          path={name ? `/competitors/profile?name=${encodeURIComponent(name)}` : '/competitors/profile'}
+          image="/images/podium-2.webp"
+          noindex
+        />
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <Link
             to="/rankings"

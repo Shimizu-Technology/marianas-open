@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion, MotionConfig } from 'framer-motion';
 import { Trophy, Users, Globe, Star, Medal, ChevronDown, Filter } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import SEO from '../components/SEO';
 import { api } from '../services/api';
 import type { RankingEntry } from '../services/api';
 
@@ -114,6 +115,21 @@ export default function RankingsPage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen pt-24 pb-20">
+        <SEO
+          title="Rankings"
+          description="View Marianas Open athlete, academy, and country rankings across belts and Gi or No-Gi competition."
+          path="/rankings"
+          image="/images/podium-1.webp"
+          structuredData={[
+            {
+              '@context': 'https://schema.org',
+              '@type': 'CollectionPage',
+              name: 'Marianas Open Rankings',
+              url: 'https://marianasopen.com/rankings',
+              description: 'Athlete, academy, and country rankings for Marianas Open competition.',
+            },
+          ]}
+        />
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {/* Header */}
           <motion.div

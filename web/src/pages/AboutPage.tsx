@@ -3,7 +3,9 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Users, Globe, Trophy, Calendar, MapPin, Mail, Phone } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
+import SEO from '../components/SEO';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
+import { getOrganizationSchema } from '../lib/seo';
 
 const timeline = [
   { year: '2007', key: 'timeline2007' },
@@ -34,6 +36,13 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen">
+      <SEO
+        title="About"
+        description="Learn the story of Marianas Open, the international Brazilian Jiu-Jitsu championship built in Guam and connected to competitors across Asia-Pacific."
+        path="/about"
+        image={heroImage}
+        structuredData={[getOrganizationSchema()]}
+      />
       {/* Hero */}
       <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">

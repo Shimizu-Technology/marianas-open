@@ -5,6 +5,7 @@ import { Search, X, Instagram, Youtube, Trophy } from 'lucide-react';
 import { api } from '../services/api';
 import type { Competitor } from '../services/api';
 import ScrollReveal from '../components/ScrollReveal';
+import SEO from '../components/SEO';
 
 const BELT_STYLES: Record<string, { bg: string; text: string; ring: string }> = {
   white:  { bg: 'bg-white/90',     text: 'text-gray-900', ring: 'ring-white/30' },
@@ -239,6 +240,21 @@ export default function CompetitorsPage() {
 
   return (
     <div className="pt-24 pb-16">
+      <SEO
+        title="Competitors"
+        description="Explore athlete profiles, academies, records, and medal results from Marianas Open competitors."
+        path="/competitors"
+        image="/images/action-match-2.webp"
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'Marianas Open Competitors',
+            url: 'https://marianasopen.com/competitors',
+            description: 'Competitor directory and athlete profiles for Marianas Open.',
+          },
+        ]}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero */}
         <ScrollReveal>

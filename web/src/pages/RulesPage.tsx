@@ -16,6 +16,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import SEO from '../components/SEO';
 
 // PDF URL is driven by the environment variable VITE_RULEBOOK_PDF_URL.
 // Set this to an S3 (or other CDN) URL in production once the compressed
@@ -50,6 +51,12 @@ export default function RulesPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-20">
+      <SEO
+        title="Competition Rules"
+        description="Review Marianas Open competition rules, event-day guidance, rulebook resources, and competitor expectations before match day."
+        path="/rules"
+        image="/images/venue-mats.webp"
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div

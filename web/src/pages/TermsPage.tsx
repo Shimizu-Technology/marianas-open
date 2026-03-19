@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { FileText } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import SEO from '../components/SEO';
 
 const sections = [
   'refund',
@@ -25,6 +26,12 @@ export default function TermsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-20">
+      <SEO
+        title="Terms and Conditions"
+        description="Read Marianas Open terms, competitor conditions, organizer notices, and event participation policies."
+        path="/terms"
+        image="/images/hero-podium.jpg"
+      />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div

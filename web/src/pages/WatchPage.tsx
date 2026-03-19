@@ -9,6 +9,7 @@ import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
 import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
+import SEO from '../components/SEO';
 import { api } from '../services/api';
 import type { Video } from '../services/api';
 import { useEvents } from '../hooks/useApi';
@@ -101,6 +102,21 @@ export default function WatchPage() {
 
   return (
     <div className="min-h-screen pt-20">
+      <SEO
+        title="Watch"
+        description="Watch featured Marianas Open matches, live streams, and the growing match library from events across Guam and Asia-Pacific."
+        path="/watch"
+        image="/images/action-match-3.webp"
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'Marianas Open Watch',
+            url: 'https://marianasopen.com/watch',
+            description: 'Live streams and match videos from Marianas Open events.',
+          },
+        ]}
+      />
       {/* Hero */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-navy-800 to-navy-900" />

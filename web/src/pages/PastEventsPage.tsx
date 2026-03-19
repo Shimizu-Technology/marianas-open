@@ -6,6 +6,7 @@ import { Calendar, MapPin, Star, Trophy, ArrowRight, Medal } from 'lucide-react'
 import ScrollReveal from '../components/ScrollReveal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ImageWithShimmer from '../components/ImageWithShimmer';
+import SEO from '../components/SEO';
 import { api } from '../services/api';
 import type { Event } from '../services/api';
 import { resolveMediaUrl } from '../utils/images';
@@ -149,6 +150,21 @@ export default function PastEventsPage() {
 
   return (
     <div className="min-h-screen pt-20">
+      <SEO
+        title="Past Events"
+        description="Review completed Marianas Open tournaments, past qualifier events, and championship history across Guam and Asia-Pacific."
+        path="/events/past"
+        image="/images/ceremony-1.webp"
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'Marianas Open Past Events',
+            url: 'https://marianasopen.com/events/past',
+            description: 'Completed Marianas Open tournaments and past event archive.',
+          },
+        ]}
+      />
       {/* Hero */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-navy-800 to-navy-900" />
