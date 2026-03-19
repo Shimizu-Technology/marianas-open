@@ -72,11 +72,24 @@ export default function EventDetailPage() {
     { time: '8:00 PM', event: t('event.schedule7') },
   ];
 
-  const scheduleItems = mainEvent && mainEvent.event_schedule_items?.length > 0
+  const hasRealScheduleItems = !!mainEvent && (mainEvent.event_schedule_items?.length ?? 0) > 0;
+  const scheduleItems = hasRealScheduleItems
     ? mainEvent.event_schedule_items
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(item => ({ time: item.time, event: item.description }))
-    : fallbackScheduleItems;
+    : mainEvent?.is_main_event
+      ? fallbackScheduleItems
+      : [];
+  const scheduleDescription = mainEvent?.is_main_event
+    ? t('event.scheduleDesc')
+    : hasRealScheduleItems
+      ? t(
+          'event.scheduleOrganizerDesc',
+          'Official match schedule provided by the organizer. Matches may begin up to 30 minutes early, so athletes should be in the warm-up area at least 40 minutes before their division.'
+        )
+      : isCompleted
+        ? t('event.scheduleUnavailablePast', 'Official schedule was not published for this event.')
+        : t('event.scheduleComingSoon', 'Official schedule will be posted once it is released by the organizer.');
 
   // Fallback prize breakdown from i18n if API has none
   const fallbackPrizeBreakdown = [
@@ -241,20 +254,28 @@ export default function EventDetailPage() {
                     {t('event.schedule')}
                   </h3>
                 </div>
-                <p className="text-text-secondary text-sm mb-6">{t('event.scheduleDesc')}</p>
-                <div className="space-y-0">
-                  {scheduleItems.map((item, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-4 py-3 border-b border-white/5 last:border-0"
-                    >
-                      <span className="text-gold-500 font-heading font-bold text-sm w-24 shrink-0">
-                        {item.time}
-                      </span>
-                      <span className="text-text-primary text-sm">{item.event}</span>
+                {scheduleItems.length > 0 ? (
+                  <>
+                    <p className="text-text-secondary text-sm mb-6">{scheduleDescription}</p>
+                    <div className="space-y-0">
+                    {scheduleItems.map((item, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-4 py-3 border-b border-white/5 last:border-0"
+                      >
+                        <span className="text-gold-500 font-heading font-bold text-sm w-24 shrink-0">
+                          {item.time}
+                        </span>
+                        <span className="text-text-primary text-sm">{item.event}</span>
+                      </div>
+                    ))}
                     </div>
-                  ))}
-                </div>
+                  </>
+                ) : (
+                  <div className="border border-dashed border-white/10 px-4 py-5 text-sm text-text-muted">
+                    {scheduleDescription}
+                  </div>
+                )}
               </div>
             </ScrollReveal>
 

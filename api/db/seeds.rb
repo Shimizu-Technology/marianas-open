@@ -143,18 +143,47 @@ end
   puts "Created #{accommodations.length} accommodations for #{event.name}"
 end
 
-# Main event schedule
-main_event = Event.find_by!(slug: "marianas-open-2026")
-[
-  { time: "7:00 AM", description: "Doors Open / Weigh-ins", sort_order: 1 },
-  { time: "8:00 AM", description: "Kids & Juvenile Divisions", sort_order: 2 },
-  { time: "10:00 AM", description: "Adult White & Blue Belt", sort_order: 3 },
-  { time: "1:00 PM", description: "Adult Purple & Brown Belt", sort_order: 4 },
-  { time: "4:00 PM", description: "Black Belt Divisions", sort_order: 5 },
-  { time: "6:00 PM", description: "Black Belt Finals / Open Class", sort_order: 6 },
-  { time: "8:00 PM", description: "Awards Ceremony", sort_order: 7 },
-].each { |item| main_event.event_schedule_items.create!(item) }
-puts "Created schedule items for main event"
+# Event schedules
+{
+  "marianas-pro-nagoya-2026" => [
+    { time: "8:00 AM", description: "Doors Open", sort_order: 1 },
+    { time: "9:00 AM", description: "Official Weigh-ins", sort_order: 2 },
+    { time: "10:00 AM", description: "First matches begin. Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 3 },
+  ],
+  "marianas-pro-manila-2026" => [
+    { time: "April 25 (Saturday)", description: "All Gi Juvenile, Adult, and Masters divisions.", sort_order: 1 },
+    { time: "April 26 (Sunday)", description: "All Kids divisions.", sort_order: 2 },
+  ],
+  "marianas-pro-taiwan-2026" => [
+    { time: "May 30 (Saturday)", description: "All Gi Juvenile, Adult, and Masters divisions.", sort_order: 1 },
+    { time: "May 31 (Sunday)", description: "All Kids divisions.", sort_order: 2 },
+  ],
+  "marianas-pro-korea-2026" => [
+    { time: "June 6 (Saturday)", description: "Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 1 },
+  ],
+  "marianas-pro-hong-kong-2026" => [
+    { time: "July 18 (Saturday)", description: "Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 1 },
+    { time: "July 19 (Sunday)", description: "Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 2 },
+  ],
+  "marianas-open-2026" => [
+    { time: "7:00 AM", description: "Doors Open / Weigh-ins", sort_order: 1 },
+    { time: "8:00 AM", description: "Kids & Juvenile Divisions", sort_order: 2 },
+    { time: "10:00 AM", description: "Adult White & Blue Belt", sort_order: 3 },
+    { time: "1:00 PM", description: "Adult Purple & Brown Belt", sort_order: 4 },
+    { time: "4:00 PM", description: "Black Belt Divisions", sort_order: 5 },
+    { time: "6:00 PM", description: "Black Belt Finals / Open Class", sort_order: 6 },
+    { time: "8:00 PM", description: "Awards Ceremony", sort_order: 7 },
+  ],
+}.each do |slug, schedule_items|
+  event = Event.find_by(slug: slug)
+  next unless event
+
+  schedule_items.each do |item|
+    event.event_schedule_items.create!(item)
+  end
+
+  puts "Created #{schedule_items.length} schedule items for #{event.name}"
+end
 
 # Prize categories
 [
