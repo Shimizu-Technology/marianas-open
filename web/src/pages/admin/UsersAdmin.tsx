@@ -87,7 +87,7 @@ export default function UsersAdmin() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div className="flex items-center gap-3">
           <Users className="w-6 h-6 text-gold" />
           <h1 className="font-heading text-2xl font-bold text-text-primary">Users</h1>
@@ -95,7 +95,7 @@ export default function UsersAdmin() {
         {editing !== 'invite' && (
           <button
             onClick={() => { setEditing('invite'); setError('') }}
-            className="flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
           >
             <UserPlus className="w-4 h-4" />
             Invite User
@@ -163,11 +163,11 @@ export default function UsersAdmin() {
                 />
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleInvite}
                 disabled={saving || !inviteForm.email}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                 {saving ? 'Inviting...' : 'Invite'}
@@ -179,64 +179,133 @@ export default function UsersAdmin() {
       )}
 
       {/* Users Table */}
-      <div className="bg-surface border border-white/5">
+        <div className="bg-surface border border-white/5 overflow-hidden">
         {users.length === 0 ? (
           <div className="p-8 text-center text-text-muted text-sm">No users</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/5 text-left">
-                <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Name</th>
-                <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Email</th>
-                <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Role</th>
-                <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Joined</th>
-                <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide w-24"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {users.map(user => (
-                <tr key={user.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-5 py-3 text-text-primary font-medium">
-                    {user.full_name}
-                    {user.id === currentUserId && <span className="ml-2 text-xs text-text-muted">(you)</span>}
-                  </td>
-                  <td className="px-5 py-3 text-text-secondary">{user.email}</td>
-                  <td className="px-5 py-3">
-                    {editing === user.id ? (
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={editRole}
-                          onChange={e => setEditRole(e.target.value)}
-                          className="bg-white/[0.03] border border-white/10 px-2 py-1 text-xs text-text-primary focus:border-gold/40 focus:outline-none"
-                        >
-                          {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
-                        </select>
-                        <button
-                          onClick={() => handleUpdateRole(user.id)}
-                          disabled={saving}
-                          className="p-1 text-gold hover:text-gold/80"
-                        >
-                          <Save className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => setEditing(null)} className="p-1 text-text-muted hover:text-text-primary">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+            <>
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm min-w-[720px]">
+                  <thead>
+                    <tr className="border-b border-white/5 text-left">
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Name</th>
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Email</th>
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Role</th>
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Joined</th>
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide w-24"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {users.map(user => (
+                      <tr key={user.id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="px-5 py-3 text-text-primary font-medium">
+                          {user.full_name}
+                          {user.id === currentUserId && <span className="ml-2 text-xs text-text-muted">(you)</span>}
+                        </td>
+                        <td className="px-5 py-3 text-text-secondary">{user.email}</td>
+                        <td className="px-5 py-3">
+                          {editing === user.id ? (
+                            <div className="flex items-center gap-2">
+                              <select
+                                value={editRole}
+                                onChange={e => setEditRole(e.target.value)}
+                                className="bg-white/[0.03] border border-white/10 px-2 py-1 text-xs text-text-primary focus:border-gold/40 focus:outline-none"
+                              >
+                                {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                              </select>
+                              <button
+                                onClick={() => handleUpdateRole(user.id)}
+                                disabled={saving}
+                                className="p-1 text-gold hover:text-gold/80"
+                              >
+                                <Save className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => setEditing(null)} className="p-1 text-text-muted hover:text-text-primary">
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <span className={`text-xs px-2 py-0.5 ${
+                              user.role === 'admin' ? 'bg-gold/10 text-gold' :
+                              user.role === 'staff' ? 'bg-blue-500/10 text-blue-400' :
+                              'bg-white/5 text-text-muted'
+                            }`}>
+                              {user.role}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-5 py-3 text-text-muted text-xs">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => { setEditRole(user.role); setEditing(user.id); setError('') }}
+                              className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            {user.id !== currentUserId && (
+                              <button
+                                onClick={() => setDeleteConfirm(user.id)}
+                                className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="md:hidden divide-y divide-white/5">
+                {users.map(user => (
+                  <div key={user.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-sm text-text-primary font-medium">
+                          {user.full_name}
+                          {user.id === currentUserId && <span className="ml-2 text-xs text-text-muted">(you)</span>}
+                        </div>
+                        <div className="text-xs text-text-secondary mt-1 break-all">{user.email}</div>
+                        <div className="text-xs text-text-muted mt-1">
+                          Joined {new Date(user.created_at).toLocaleDateString()}
+                        </div>
                       </div>
-                    ) : (
-                      <span className={`text-xs px-2 py-0.5 ${
-                        user.role === 'admin' ? 'bg-gold/10 text-gold' :
-                        user.role === 'staff' ? 'bg-blue-500/10 text-blue-400' :
-                        'bg-white/5 text-text-muted'
-                      }`}>
-                        {user.role}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3 text-text-muted text-xs">
-                    {new Date(user.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-2">
+                      {editing === user.id ? (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <select
+                            value={editRole}
+                            onChange={e => setEditRole(e.target.value)}
+                            className="bg-white/[0.03] border border-white/10 px-2 py-1 text-xs text-text-primary focus:border-gold/40 focus:outline-none"
+                          >
+                            {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                          </select>
+                          <button
+                            onClick={() => handleUpdateRole(user.id)}
+                            disabled={saving}
+                            className="p-1 text-gold hover:text-gold/80"
+                          >
+                            <Save className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => setEditing(null)} className="p-1 text-text-muted hover:text-text-primary">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className={`text-xs px-2 py-0.5 shrink-0 ${
+                          user.role === 'admin' ? 'bg-gold/10 text-gold' :
+                          user.role === 'staff' ? 'bg-blue-500/10 text-blue-400' :
+                          'bg-white/5 text-text-muted'
+                        }`}>
+                          {user.role}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => { setEditRole(user.role); setEditing(user.id); setError('') }}
                         className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
@@ -252,11 +321,10 @@ export default function UsersAdmin() {
                         </button>
                       )}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                ))}
+              </div>
+            </>
         )}
       </div>
 

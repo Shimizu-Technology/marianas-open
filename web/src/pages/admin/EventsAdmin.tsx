@@ -1,10 +1,26 @@
 import { useEffect, useState, useCallback } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel } from 'lucide-react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
-import type { Event, EventFormData, EventScheduleItem, PrizeCategory, EventAccommodation, EventAccommodationFormData } from '../../services/api'
+import type {
+  Event,
+  EventFormData,
+  EventScheduleItem,
+  PrizeCategory,
+  EventAccommodation,
+  EventAccommodationFormData,
+  EventGalleryImage,
+  EventGalleryImageFormData,
+  EventVenueHighlight,
+  EventRegistrationStep,
+  EventRegistrationFeeSection,
+  EventRegistrationInfoItem,
+  EventTravelItem,
+  EventVisaItem,
+} from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
+import { resolveMediaUrl } from '../../utils/images'
 
 const emptyForm: EventFormData = {
   name: '', slug: '', description: '', date: '', end_date: '',
@@ -12,6 +28,15 @@ const emptyForm: EventFormData = {
   asjjf_stars: 0, is_main_event: false, prize_pool: '', registration_url: '',
   status: 'draft', latitude: '', longitude: '',
   live_stream_url: '', live_stream_active: false,
+  tagline: '', schedule_note: '',
+  venue_highlights: [],
+  registration_steps: [],
+  registration_fee_sections: [],
+  registration_info_items: [],
+  travel_description: '',
+  travel_items: [],
+  visa_description: '',
+  visa_items: [],
   event_schedule_items_attributes: [],
   prize_categories_attributes: [],
 }
@@ -27,6 +52,16 @@ function eventToForm(e: Event): EventFormData {
     status: e.status || 'draft',
     latitude: e.latitude?.toString() || '', longitude: e.longitude?.toString() || '',
     live_stream_url: e.live_stream_url || '', live_stream_active: e.live_stream_active || false,
+    tagline: e.tagline || '',
+    schedule_note: e.schedule_note || '',
+    venue_highlights: e.venue_highlights || [],
+    registration_steps: e.registration_steps || [],
+    registration_fee_sections: e.registration_fee_sections || [],
+    registration_info_items: e.registration_info_items || [],
+    travel_description: e.travel_description || '',
+    travel_items: e.travel_items || [],
+    visa_description: e.visa_description || '',
+    visa_items: e.visa_items || [],
     event_schedule_items_attributes: e.event_schedule_items.map(s => ({
       id: s.id, time: s.time, description: s.description, sort_order: s.sort_order,
     })),
@@ -181,6 +216,185 @@ export default function EventsAdmin() {
     })
   }
 
+  const addVenueHighlight = () => {
+    setForm(prev => ({
+      ...prev,
+      venue_highlights: [...prev.venue_highlights, { title: '', description: '' }],
+    }))
+  }
+
+  const updateVenueHighlight = (idx: number, field: keyof EventVenueHighlight, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      venue_highlights: prev.venue_highlights.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      ),
+    }))
+  }
+
+  const removeVenueHighlight = (idx: number) => {
+    setForm(prev => ({
+      ...prev,
+      venue_highlights: prev.venue_highlights.filter((_, i) => i !== idx),
+    }))
+  }
+
+  const addRegistrationStep = () => {
+    setForm(prev => ({
+      ...prev,
+      registration_steps: [...prev.registration_steps, { title: '', description: '', url: '', link_label: '' }],
+    }))
+  }
+
+  const updateRegistrationStep = (idx: number, field: keyof EventRegistrationStep, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      registration_steps: prev.registration_steps.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      ),
+    }))
+  }
+
+  const removeRegistrationStep = (idx: number) => {
+    setForm(prev => ({
+      ...prev,
+      registration_steps: prev.registration_steps.filter((_, i) => i !== idx),
+    }))
+  }
+
+  const addRegistrationFeeSection = () => {
+    setForm(prev => ({
+      ...prev,
+      registration_fee_sections: [...prev.registration_fee_sections, { title: '', rows: [{ deadline: '', fee: '', option: '' }] }],
+    }))
+  }
+
+  const updateRegistrationFeeSection = (idx: number, field: keyof EventRegistrationFeeSection, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      registration_fee_sections: prev.registration_fee_sections.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      ),
+    }))
+  }
+
+  const removeRegistrationFeeSection = (idx: number) => {
+    setForm(prev => ({
+      ...prev,
+      registration_fee_sections: prev.registration_fee_sections.filter((_, i) => i !== idx),
+    }))
+  }
+
+  const addRegistrationFeeRow = (sectionIdx: number) => {
+    setForm(prev => ({
+      ...prev,
+      registration_fee_sections: prev.registration_fee_sections.map((section, i) =>
+        i === sectionIdx
+          ? { ...section, rows: [...section.rows, { deadline: '', fee: '', option: '' }] }
+          : section
+      ),
+    }))
+  }
+
+  const updateRegistrationFeeRow = (
+    sectionIdx: number,
+    rowIdx: number,
+    field: 'deadline' | 'fee' | 'option',
+    value: string
+  ) => {
+    setForm(prev => ({
+      ...prev,
+      registration_fee_sections: prev.registration_fee_sections.map((section, i) =>
+        i === sectionIdx
+          ? {
+              ...section,
+              rows: section.rows.map((row, j) => (j === rowIdx ? { ...row, [field]: value } : row)),
+            }
+          : section
+      ),
+    }))
+  }
+
+  const removeRegistrationFeeRow = (sectionIdx: number, rowIdx: number) => {
+    setForm(prev => ({
+      ...prev,
+      registration_fee_sections: prev.registration_fee_sections.map((section, i) =>
+        i === sectionIdx
+          ? { ...section, rows: section.rows.filter((_, j) => j !== rowIdx) }
+          : section
+      ),
+    }))
+  }
+
+  const addRegistrationInfoItem = () => {
+    setForm(prev => ({
+      ...prev,
+      registration_info_items: [...prev.registration_info_items, { label: '', value: '' }],
+    }))
+  }
+
+  const updateRegistrationInfoItem = (idx: number, field: keyof EventRegistrationInfoItem, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      registration_info_items: prev.registration_info_items.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      ),
+    }))
+  }
+
+  const removeRegistrationInfoItem = (idx: number) => {
+    setForm(prev => ({
+      ...prev,
+      registration_info_items: prev.registration_info_items.filter((_, i) => i !== idx),
+    }))
+  }
+
+  const addTravelItem = () => {
+    setForm(prev => ({
+      ...prev,
+      travel_items: [...prev.travel_items, { title: '', description: '', value: '', url: '', link_label: '' }],
+    }))
+  }
+
+  const updateTravelItem = (idx: number, field: keyof EventTravelItem, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      travel_items: prev.travel_items.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      ),
+    }))
+  }
+
+  const removeTravelItem = (idx: number) => {
+    setForm(prev => ({
+      ...prev,
+      travel_items: prev.travel_items.filter((_, i) => i !== idx),
+    }))
+  }
+
+  const addVisaItem = () => {
+    setForm(prev => ({
+      ...prev,
+      visa_items: [...prev.visa_items, { title: '', description: '' }],
+    }))
+  }
+
+  const updateVisaItem = (idx: number, field: keyof EventVisaItem, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      visa_items: prev.visa_items.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      ),
+    }))
+  }
+
+  const removeVisaItem = (idx: number) => {
+    setForm(prev => ({
+      ...prev,
+      visa_items: prev.visa_items.filter((_, i) => i !== idx),
+    }))
+  }
+
   const currentEvent = typeof editing === 'number' ? events.find(e => e.id === editing) : null
 
   if (loading) {
@@ -193,7 +407,7 @@ export default function EventsAdmin() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div className="flex items-center gap-3">
           <CalendarDays className="w-6 h-6 text-gold" />
           <h1 className="font-heading text-2xl font-bold text-text-primary">Events</h1>
@@ -201,7 +415,7 @@ export default function EventsAdmin() {
         {!editing && (
           <button
             onClick={() => { setForm(emptyForm); setEditing('new'); setError('') }}
-            className="flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Create Event
@@ -331,6 +545,11 @@ export default function EventsAdmin() {
               <AccommodationsSection eventId={editing} />
             )}
 
+            {/* Event Gallery (only when editing existing event) */}
+            {typeof editing === 'number' && (
+              <EventGallerySection eventId={editing} />
+            )}
+
             <div>
               <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Description</label>
               <textarea
@@ -341,10 +560,298 @@ export default function EventsAdmin() {
               />
             </div>
 
+            <div className="border border-white/5">
+              <button
+                type="button"
+                onClick={() => toggleSection('detailContent')}
+                className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-text-primary hover:bg-white/[0.02] transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-text-muted" />
+                  Event Page Content
+                </span>
+                {expandedSections.detailContent ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+              {expandedSections.detailContent && (
+                <div className="p-4 border-t border-white/5 space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field
+                      label="Tagline"
+                      value={form.tagline}
+                      onChange={v => updateForm('tagline', v)}
+                      placeholder="The Grand Championship"
+                    />
+                    <div>
+                      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Schedule Note</label>
+                      <textarea
+                        value={form.schedule_note}
+                        onChange={e => updateForm('schedule_note', e.target.value)}
+                        rows={3}
+                        className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
+                        placeholder="Official match schedule provided by the organizer..."
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Travel Description</label>
+                      <textarea
+                        value={form.travel_description}
+                        onChange={e => updateForm('travel_description', e.target.value)}
+                        rows={3}
+                        className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
+                        placeholder="Helpful travel context for this specific event."
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Visa Description</label>
+                      <textarea
+                        value={form.visa_description}
+                        onChange={e => updateForm('visa_description', e.target.value)}
+                        rows={3}
+                        className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
+                        placeholder="Visa or entry guidance for this event."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-heading text-sm font-semibold text-text-primary">Venue Highlights</h3>
+                      <button onClick={addVenueHighlight} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
+                        <Plus className="w-3 h-3" /> Add Highlight
+                      </button>
+                    </div>
+                    {form.venue_highlights.map((item, idx) => (
+                      <div key={`venue-${idx}`} className="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-3 items-start">
+                        <input
+                          value={item.title}
+                          onChange={e => updateVenueHighlight(idx, 'title', e.target.value)}
+                          placeholder="Highlight title"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <input
+                          value={item.description}
+                          onChange={e => updateVenueHighlight(idx, 'description', e.target.value)}
+                          placeholder="Highlight description"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <button onClick={() => removeVenueHighlight(idx)} className="p-2 text-text-muted hover:text-red-400">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-heading text-sm font-semibold text-text-primary">Registration Steps</h3>
+                      <button onClick={addRegistrationStep} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
+                        <Plus className="w-3 h-3" /> Add Step
+                      </button>
+                    </div>
+                    {form.registration_steps.map((item, idx) => (
+                      <div key={`registration-${idx}`} className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-white/5 p-3">
+                        <input
+                          value={item.title || ''}
+                          onChange={e => updateRegistrationStep(idx, 'title', e.target.value)}
+                          placeholder="Step title"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <input
+                          value={item.link_label || ''}
+                          onChange={e => updateRegistrationStep(idx, 'link_label', e.target.value)}
+                          placeholder="Optional link label"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <div className="md:col-span-2">
+                          <textarea
+                            value={item.description}
+                            onChange={e => updateRegistrationStep(idx, 'description', e.target.value)}
+                            rows={2}
+                            placeholder="Step description"
+                            className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
+                          />
+                        </div>
+                        <input
+                          value={item.url || ''}
+                          onChange={e => updateRegistrationStep(idx, 'url', e.target.value)}
+                          placeholder="Optional URL"
+                          className="md:col-span-2 w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <button onClick={() => removeRegistrationStep(idx)} className="justify-self-start p-2 text-text-muted hover:text-red-400">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-heading text-sm font-semibold text-text-primary">Registration Fee Tables</h3>
+                      <button onClick={addRegistrationFeeSection} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
+                        <Plus className="w-3 h-3" /> Add Table
+                      </button>
+                    </div>
+                    {form.registration_fee_sections.map((section, sectionIdx) => (
+                      <div key={`fee-section-${sectionIdx}`} className="border border-white/5 p-3 space-y-3">
+                        <div className="flex items-start gap-3">
+                          <input
+                            value={section.title}
+                            onChange={e => updateRegistrationFeeSection(sectionIdx, 'title', e.target.value)}
+                            placeholder="Table title"
+                            className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                          />
+                          <button onClick={() => removeRegistrationFeeSection(sectionIdx)} className="p-2 text-text-muted hover:text-red-400">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          {section.rows.map((row, rowIdx) => (
+                            <div key={`fee-row-${sectionIdx}-${rowIdx}`} className="grid grid-cols-1 md:grid-cols-[1.4fr_0.9fr_1fr_auto] gap-3 items-start">
+                              <input
+                                value={row.deadline}
+                                onChange={e => updateRegistrationFeeRow(sectionIdx, rowIdx, 'deadline', e.target.value)}
+                                placeholder="Deadline"
+                                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                              />
+                              <input
+                                value={row.fee}
+                                onChange={e => updateRegistrationFeeRow(sectionIdx, rowIdx, 'fee', e.target.value)}
+                                placeholder="Fee"
+                                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                              />
+                              <input
+                                value={row.option}
+                                onChange={e => updateRegistrationFeeRow(sectionIdx, rowIdx, 'option', e.target.value)}
+                                placeholder="Division option"
+                                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                              />
+                              <button onClick={() => removeRegistrationFeeRow(sectionIdx, rowIdx)} className="p-2 text-text-muted hover:text-red-400">
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <button onClick={() => addRegistrationFeeRow(sectionIdx)} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
+                          <Plus className="w-3 h-3" /> Add Row
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-heading text-sm font-semibold text-text-primary">Registration Info</h3>
+                      <button onClick={addRegistrationInfoItem} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
+                        <Plus className="w-3 h-3" /> Add Item
+                      </button>
+                    </div>
+                    {form.registration_info_items.map((item, idx) => (
+                      <div key={`registration-info-${idx}`} className="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-3 items-start">
+                        <input
+                          value={item.label}
+                          onChange={e => updateRegistrationInfoItem(idx, 'label', e.target.value)}
+                          placeholder="Label"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <textarea
+                          value={item.value}
+                          onChange={e => updateRegistrationInfoItem(idx, 'value', e.target.value)}
+                          rows={2}
+                          placeholder="Value"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
+                        />
+                        <button onClick={() => removeRegistrationInfoItem(idx)} className="p-2 text-text-muted hover:text-red-400">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-heading text-sm font-semibold text-text-primary">Travel Cards</h3>
+                      <button onClick={addTravelItem} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
+                        <Plus className="w-3 h-3" /> Add Card
+                      </button>
+                    </div>
+                    {form.travel_items.map((item, idx) => (
+                      <div key={`travel-${idx}`} className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-white/5 p-3">
+                        <input
+                          value={item.title}
+                          onChange={e => updateTravelItem(idx, 'title', e.target.value)}
+                          placeholder="Card title"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <input
+                          value={item.value || ''}
+                          onChange={e => updateTravelItem(idx, 'value', e.target.value)}
+                          placeholder="Optional value"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <div className="md:col-span-2">
+                          <textarea
+                            value={item.description}
+                            onChange={e => updateTravelItem(idx, 'description', e.target.value)}
+                            rows={2}
+                            placeholder="Card description"
+                            className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
+                          />
+                        </div>
+                        <input
+                          value={item.url || ''}
+                          onChange={e => updateTravelItem(idx, 'url', e.target.value)}
+                          placeholder="Optional URL"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <input
+                          value={item.link_label || ''}
+                          onChange={e => updateTravelItem(idx, 'link_label', e.target.value)}
+                          placeholder="Optional link label"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <button onClick={() => removeTravelItem(idx)} className="justify-self-start p-2 text-text-muted hover:text-red-400">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-heading text-sm font-semibold text-text-primary">Visa Items</h3>
+                      <button onClick={addVisaItem} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
+                        <Plus className="w-3 h-3" /> Add Visa Item
+                      </button>
+                    </div>
+                    {form.visa_items.map((item, idx) => (
+                      <div key={`visa-${idx}`} className="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-3 items-start">
+                        <input
+                          value={item.title}
+                          onChange={e => updateVisaItem(idx, 'title', e.target.value)}
+                          placeholder="Visa item title"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                        />
+                        <textarea
+                          value={item.description}
+                          onChange={e => updateVisaItem(idx, 'description', e.target.value)}
+                          rows={2}
+                          placeholder="Visa item description"
+                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
+                        />
+                        <button onClick={() => removeVisaItem(idx)} className="p-2 text-text-muted hover:text-red-400">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Hero Image */}
             {typeof editing === 'number' && (
               <ImageUpload
-                currentUrl={currentEvent?.hero_image_url || null}
+                currentUrl={resolveMediaUrl(currentEvent?.hero_image_url) || null}
                 onUpload={handleImageUpload}
                 label="Hero Image"
               />
@@ -463,35 +970,87 @@ export default function EventsAdmin() {
         </motion.div>
       ) : (
         /* Events Table */
-        <div className="bg-surface border border-white/5">
+        <div className="bg-surface border border-white/5 overflow-hidden">
           {events.length === 0 ? (
             <div className="p-8 text-center text-text-muted text-sm">No events yet. Create your first event.</div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/5 text-left">
-                  <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Name</th>
-                  <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Date</th>
-                  <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Location</th>
-                  <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Stars</th>
-                  <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Status</th>
-                  <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide w-24"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
+            <>
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm min-w-[720px]">
+                  <thead>
+                    <tr className="border-b border-white/5 text-left">
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Name</th>
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Date</th>
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Location</th>
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Stars</th>
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Status</th>
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide w-24"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {events.map(event => (
+                      <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="px-5 py-3 text-text-primary font-medium">{event.name}</td>
+                        <td className="px-5 py-3 text-text-secondary">{event.date}</td>
+                        <td className="px-5 py-3 text-text-secondary">{event.city}, {event.country}</td>
+                        <td className="px-5 py-3">
+                          <span className="flex items-center gap-1 text-gold">
+                            <Star className="w-3 h-3 fill-current" />
+                            {event.asjjf_stars || 0}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className={`text-xs px-2 py-0.5 ${
+                            event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
+                            event.status === 'published' ? 'bg-green-500/10 text-green-400' :
+                            event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
+                            event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
+                            'bg-white/5 text-text-muted'
+                          }`}>
+                            {event.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-2">
+                            <Link
+                              to={`/admin/events/${event.id}/results`}
+                              className="p-1.5 text-text-muted hover:text-gold transition-colors"
+                              title="Manage Results"
+                            >
+                              <Trophy className="w-3.5 h-3.5" />
+                            </Link>
+                            <button
+                              onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
+                              className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
+                              title="Edit"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(event.id)}
+                              className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="md:hidden divide-y divide-white/5">
                 {events.map(event => (
-                  <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-5 py-3 text-text-primary font-medium">{event.name}</td>
-                    <td className="px-5 py-3 text-text-secondary">{event.date}</td>
-                    <td className="px-5 py-3 text-text-secondary">{event.city}, {event.country}</td>
-                    <td className="px-5 py-3">
-                      <span className="flex items-center gap-1 text-gold">
-                        <Star className="w-3 h-3 fill-current" />
-                        {event.asjjf_stars || 0}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className={`text-xs px-2 py-0.5 ${
+                  <div key={event.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-sm text-text-primary font-medium">{event.name}</div>
+                        <div className="text-xs text-text-secondary mt-1">{event.date}</div>
+                        <div className="text-xs text-text-muted mt-1">{event.city}, {event.country}</div>
+                      </div>
+                      <span className={`text-xs px-2 py-0.5 shrink-0 ${
                         event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
                         event.status === 'published' ? 'bg-green-500/10 text-green-400' :
                         event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
@@ -500,8 +1059,12 @@ export default function EventsAdmin() {
                       }`}>
                         {event.status}
                       </span>
-                    </td>
-                    <td className="px-5 py-3">
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1 text-gold text-xs">
+                        <Star className="w-3 h-3 fill-current" />
+                        {event.asjjf_stars || 0} stars
+                      </span>
                       <div className="flex items-center gap-2">
                         <Link
                           to={`/admin/events/${event.id}/results`}
@@ -525,11 +1088,11 @@ export default function EventsAdmin() {
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
         </div>
       )}
@@ -732,6 +1295,206 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
 
           {accommodations.length === 0 && editing === null && (
             <div className="p-4 text-center text-text-muted text-xs">No accommodations yet.</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function EventGallerySection({ eventId }: { eventId: number }) {
+  const [galleryImages, setGalleryImages] = useState<EventGalleryImage[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState<number | 'new' | null>(null)
+  const [form, setForm] = useState<EventGalleryImageFormData>({
+    title: '',
+    alt_text: '',
+    caption: '',
+    sort_order: 0,
+    active: true,
+  })
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    try {
+      const res = await api.admin.getEventGalleryImages(eventId)
+      setGalleryImages(res.gallery_images)
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false)
+    }
+  }, [eventId])
+
+  useEffect(() => { load() }, [load])
+
+  const resetForm = () => {
+    setForm({
+      title: '',
+      alt_text: '',
+      caption: '',
+      sort_order: galleryImages.length,
+      active: true,
+    })
+    setPendingFile(null)
+  }
+
+  const editGalleryImage = (image: EventGalleryImage) => {
+    setForm({
+      title: image.title || '',
+      alt_text: image.alt_text || '',
+      caption: image.caption || '',
+      sort_order: image.sort_order,
+      active: image.active,
+    })
+    setPendingFile(null)
+    setEditing(image.id)
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      if (editing === 'new') {
+        if (!pendingFile) return
+        const formData = new FormData()
+        formData.append('title', form.title)
+        formData.append('alt_text', form.alt_text)
+        formData.append('caption', form.caption)
+        formData.append('sort_order', String(form.sort_order))
+        formData.append('active', String(form.active))
+        formData.append('image', pendingFile)
+        await api.admin.createEventGalleryImage(eventId, formData)
+      } else if (typeof editing === 'number') {
+        await api.admin.updateEventGalleryImage(eventId, editing, form)
+        if (pendingFile) {
+          await api.admin.uploadEventGalleryImage(eventId, editing, pendingFile)
+        }
+      }
+      setEditing(null)
+      setPendingFile(null)
+      await load()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    await api.admin.deleteEventGalleryImage(eventId, id)
+    await load()
+  }
+
+  return (
+    <div className="border border-white/5">
+      <div className="px-4 py-3 flex items-center justify-between">
+        <span className="flex items-center gap-2 text-sm font-medium text-text-primary">
+          <ImageIcon className="w-4 h-4 text-text-muted" />
+          Event Gallery ({galleryImages.length})
+        </span>
+        {editing === null && (
+          <button
+            onClick={() => {
+              resetForm()
+              setEditing('new')
+            }}
+            className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80"
+          >
+            <Plus className="w-3 h-3" /> Add
+          </button>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-text-muted" /></div>
+      ) : (
+        <div className="border-t border-white/5">
+          {galleryImages.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border-b border-white/5">
+              {galleryImages.map(image => (
+                <div key={image.id} className="border border-white/5 bg-white/[0.01]">
+                  <div className="aspect-[16/9] bg-white/[0.02] overflow-hidden">
+                    {resolveMediaUrl(image.image_url) ? (
+                      <img
+                        src={resolveMediaUrl(image.image_url) || undefined}
+                        alt={image.alt_text || image.title || 'Gallery image'}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <ImageIcon className="w-6 h-6 text-text-muted/40" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm text-text-primary font-medium truncate">{image.title || 'Untitled image'}</div>
+                      <div className="text-xs text-text-muted truncate">
+                        Sort #{image.sort_order}{image.caption ? ` · ${image.caption}` : ''}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-xs px-1.5 py-0.5 ${image.active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-text-muted'}`}>
+                        {image.active ? 'Active' : 'Hidden'}
+                      </span>
+                      <button onClick={() => editGalleryImage(image)} className="p-1 text-text-muted hover:text-text-primary"><Pencil className="w-3 h-3" /></button>
+                      <button onClick={() => handleDelete(image.id)} className="p-1 text-text-muted hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {editing !== null && (
+            <div className="p-4 space-y-3 bg-white/[0.01]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Title</label>
+                  <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Alt Text</label>
+                  <input value={form.alt_text} onChange={e => setForm(p => ({ ...p, alt_text: e.target.value }))} placeholder="Describe the image" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Caption</label>
+                  <input value={form.caption} onChange={e => setForm(p => ({ ...p, caption: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Sort Order</label>
+                  <input type="number" value={form.sort_order} onChange={e => setForm(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">
+                    {editing === 'new' ? 'Image File *' : 'Replace Image'}
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={e => setPendingFile(e.target.files?.[0] || null)}
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary file:mr-3 file:border-0 file:bg-gold/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-gold"
+                  />
+                  {pendingFile && (
+                    <div className="mt-1 text-xs text-text-muted">{pendingFile.name}</div>
+                  )}
+                </div>
+              </div>
+              <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+                <input type="checkbox" checked={form.active} onChange={e => setForm(p => ({ ...p, active: e.target.checked }))} className="accent-gold" />
+                Active (visible on public site)
+              </label>
+              <div className="flex gap-2">
+                <button onClick={handleSave} disabled={saving || (editing === 'new' && !pendingFile)} className="flex items-center gap-1.5 px-4 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 disabled:opacity-50">
+                  {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button onClick={() => { setEditing(null); setPendingFile(null) }} className="px-4 py-1.5 text-text-muted text-xs hover:text-text-primary">Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {galleryImages.length === 0 && editing === null && (
+            <div className="p-4 text-center text-text-muted text-xs">No gallery images yet.</div>
           )}
         </div>
       )}

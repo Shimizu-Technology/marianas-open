@@ -100,7 +100,7 @@ export default function VideosAdmin() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div className="flex items-center gap-3">
           <Play className="w-6 h-6 text-gold" />
           <h1 className="font-heading text-2xl font-bold text-text-primary">Videos</h1>
@@ -109,7 +109,7 @@ export default function VideosAdmin() {
         {!editing && (
           <button
             onClick={() => { setForm(emptyForm); setEditing('new'); setError('') }}
-            className="flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Video

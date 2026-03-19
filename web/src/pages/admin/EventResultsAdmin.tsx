@@ -242,12 +242,12 @@ export default function EventResultsAdmin() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex items-start gap-3">
           <button onClick={() => navigate('/admin/events')} className="p-1.5 text-text-muted hover:text-text-primary transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-gold" />
               <h1 className="font-heading text-xl font-bold text-text-primary">{event.name}</h1>
@@ -262,11 +262,11 @@ export default function EventResultsAdmin() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           {event.status !== 'completed' && results.length > 0 && (
             <button
               onClick={handleMarkCompleted}
-              className="flex items-center gap-2 px-3 py-2 bg-green-500/10 text-green-400 text-xs font-medium hover:bg-green-500/15 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2 bg-green-500/10 text-green-400 text-xs font-medium hover:bg-green-500/15 transition-colors"
             >
               <CheckCircle className="w-3.5 h-3.5" />
               Mark Completed
@@ -275,7 +275,7 @@ export default function EventResultsAdmin() {
           {!editing && (
             <button
               onClick={() => { setForm(emptyResultForm); setEditing('new') }}
-              className="flex items-center gap-2 px-3 py-2 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Result
@@ -312,13 +312,15 @@ export default function EventResultsAdmin() {
 
       {/* ASJJF Import Section */}
       <div className="mb-6 bg-surface border border-white/5 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-start sm:items-center gap-2">
             <Download className="w-4 h-4 text-text-muted" />
-            <span className="text-sm font-medium text-text-primary">ASJJF Import</span>
-            <span className="text-xs text-text-muted">(Import results from asjjf.org)</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+              <span className="text-sm font-medium text-text-primary">ASJJF Import</span>
+              <span className="text-xs text-text-muted">(Import results from asjjf.org)</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {importStep === 'idle' && (
               <button
                 onClick={handleImportPreview}
@@ -544,8 +546,8 @@ export default function EventResultsAdmin() {
               </button>
 
               {!collapsedDivisions[division] && (
-                <div className="border-t border-white/5">
-                  <table className="w-full text-sm">
+                <div className="border-t border-white/5 overflow-x-auto">
+                  <table className="w-full text-sm min-w-[560px]">
                     <thead>
                       <tr className="border-b border-white/5 text-xs text-text-muted">
                         <th className="text-left px-4 py-2 w-16">Place</th>

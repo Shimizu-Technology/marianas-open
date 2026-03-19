@@ -9,7 +9,7 @@ import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EventResultsSection from '../components/EventResultsSection';
 import { useEvents } from '../hooks/useApi';
-import { getEventHeroImage } from '../utils/images';
+import { getEventHeroImage, resolveMediaUrl } from '../utils/images';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -36,6 +36,14 @@ const EVENT_POSTER_MAP: Record<string, { src: string; label: string }> = {
   },
 };
 
+const EVENT_ACCOMMODATION_IMAGE_MAP: Record<string, string[]> = {
+  'marianas-pro-manila-2026': [
+    '/images/hotel1.jpeg',
+    '/images/hotel2.jpeg',
+    '/images/hotel3.jpeg',
+  ],
+};
+
 const EVENT_PARTNERS = [
   { name: 'ASJJF', src: '/images/logos/asjjf-logo.png', href: 'https://asjjf.org', heightClass: 'h-12' },
   { name: 'MSJJF', src: '/images/logos/msjjf-logo-white.png', href: 'https://marianasopen.com', heightClass: 'h-10' },
@@ -46,6 +54,14 @@ const EVENT_PARTNERS = [
 
 function splitCommaSeparated(value: string | null | undefined) {
   return value ? value.split(/\s*,\s*/).filter(Boolean) : [];
+}
+
+function hasMeaningfulText(value: string | null | undefined) {
+  return !!value && value.trim().length > 0;
+}
+
+function getValidItems<T extends { title?: string | null; description?: string | null }>(items: T[] | null | undefined) {
+  return (items ?? []).filter(item => hasMeaningfulText(item.title) && hasMeaningfulText(item.description));
 }
 
 export default function EventDetailPage() {
@@ -121,6 +137,110 @@ export default function EventDetailPage() {
   const activeAccommodations = (mainEvent?.event_accommodations ?? [])
     .filter(a => a.active)
     .sort((a, b) => a.sort_order - b.sort_order);
+  const accommodationImages = mainEvent?.slug ? (EVENT_ACCOMMODATION_IMAGE_MAP[mainEvent.slug] ?? []) : [];
+
+  const venueHighlights = getValidItems(mainEvent?.venue_highlights);
+  const registrationSteps = (mainEvent?.registration_steps ?? []).filter(step => hasMeaningfulText(step.title) && hasMeaningfulText(step.description));
+  const registrationFeeSections = (mainEvent?.registration_fee_sections ?? [])
+    .filter(section => hasMeaningfulText(section.title) && (section.rows ?? []).some(row => hasMeaningfulText(row.deadline) && hasMeaningfulText(row.fee) && hasMeaningfulText(row.option)));
+  const registrationInfoItems = (mainEvent?.registration_info_items ?? [])
+    .filter(item => hasMeaningfulText(item.label) && hasMeaningfulText(item.value));
+  const travelItems = (mainEvent?.travel_items ?? []).filter(item => hasMeaningfulText(item.title) && (hasMeaningfulText(item.description) || hasMeaningfulText(item.value)));
+  const visaItems = getValidItems(mainEvent?.visa_items);
+
+  const eventTagline = mainEvent?.tagline
+    || (mainEvent?.is_main_event ? t('event.tagline') : t('event.qualifierTagline', 'Official Qualifier'));
+  const asjjfRankText = t('event.asjjfRankDynamic', {
+    count: mainEvent?.asjjf_stars || 5,
+    defaultValue: `ASJJF ${mainEvent?.asjjf_stars || 5}-Star Ranked Event`,
+  });
+  const shareUrl = mainEvent?.slug
+    ? `https://marianasopen.com/events/${mainEvent.slug}`
+    : 'https://marianasopen.com';
+  const defaultRegistrationSteps = mainEvent ? [
+    {
+      step: '01',
+      title: t('event.step1'),
+      desc: t('event.step1Desc'),
+      url: '',
+      linkLabel: '',
+    },
+    {
+      step: '02',
+      title: t('event.step2'),
+      desc: t('event.step2Dynamic', {
+        eventName: mainEvent.name,
+        defaultValue: `Open "${mainEvent.name}" in the event listings and confirm your division.`,
+      }),
+      url: '',
+      linkLabel: '',
+    },
+    {
+      step: '03',
+      title: t('event.step3'),
+      desc: t('event.step3Desc'),
+      url: '',
+      linkLabel: '',
+    },
+  ] : [
+    { step: '01', title: t('event.step1'), desc: t('event.step1Desc'), url: '', linkLabel: '' },
+    { step: '02', title: t('event.step2'), desc: t('event.step2Desc'), url: '', linkLabel: '' },
+    { step: '03', title: t('event.step3'), desc: t('event.step3Desc'), url: '', linkLabel: '' },
+  ];
+  const displayRegistrationSteps = registrationSteps.length > 0
+    ? registrationSteps.map((step, idx) => ({
+        step: String(idx + 1).padStart(2, '0'),
+        title: step.title,
+        desc: step.description,
+        url: step.url || '',
+        linkLabel: step.link_label || '',
+      }))
+    : defaultRegistrationSteps;
+  const travelDescription = mainEvent?.travel_description
+    || (mainEvent?.is_main_event ? t('event.travelDesc') : '');
+  const displayTravelItems = travelItems.length > 0
+    ? travelItems
+    : mainEvent?.is_main_event
+      ? [
+          {
+            title: t('event.flights'),
+            description: t('event.flightsDesc'),
+            value: `${t('event.flightTokyo')}, ${t('event.flightManila')}, ${t('event.flightSeoul')}, ${t('event.flightHonolulu')}`,
+            url: '',
+            link_label: '',
+          },
+        ]
+      : [];
+  const visaDescription = mainEvent?.visa_description
+    || (mainEvent?.is_main_event ? t('event.visaDesc') : '');
+  const displayVisaItems = visaItems.length > 0
+    ? visaItems
+    : mainEvent?.is_main_event
+      ? [
+          { title: t('event.visaEsta'), description: t('event.visaEstaDesc') },
+          { title: t('event.visaGuamCnmi'), description: t('event.visaGuamCnmiDesc') },
+        ]
+      : [];
+  const shouldShowTravelSection = mainEvent?.is_main_event
+    || hasMeaningfulText(travelDescription)
+    || hasMeaningfulText(visaDescription)
+    || displayTravelItems.length > 0
+    || displayVisaItems.length > 0
+    || activeAccommodations.length > 0;
+  const displayVenueHighlights = venueHighlights.length > 0
+    ? venueHighlights
+    : mainEvent
+      ? [{ title: mainEvent.city, description: mainEvent.country }]
+      : [];
+
+  const galleryImages = (mainEvent?.event_gallery_images ?? [])
+    .filter(image => image.active && resolveMediaUrl(image.image_url))
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map(image => ({
+      src: resolveMediaUrl(image.image_url) || '',
+      alt: image.alt_text || image.title || t('event.galleryMatch'),
+      caption: image.caption || image.title || '',
+    }));
 
   const formatEventDate = (event: typeof mainEvent) => {
     if (!event?.date) return t('event.date');
@@ -135,13 +255,13 @@ export default function EventDetailPage() {
     }
     return start.toLocaleDateString('en-US', opts);
   };
+  const shareText = mainEvent
+    ? `${mainEvent.name} — ${formatEventDate(mainEvent)} — ${mainEvent.venue_name}`
+    : t('event.shareText');
 
   const heroImageUrl = getEventHeroImage(mainEvent?.slug || 'marianas-open-2026', mainEvent?.hero_image_url ?? null);
 
   const eventPoster = mainEvent?.slug ? EVENT_POSTER_MAP[mainEvent.slug] : undefined;
-
-  const shareUrl = 'https://marianasopen.com';
-  const shareText = t('event.shareText');
 
   const handleShare = (platform: string) => {
     const urls: Record<string, string> = {
@@ -195,7 +315,7 @@ export default function EventDetailPage() {
                 <Star key={i} size={16} className="fill-gold-500 text-gold-500" />
               ))}
               <span className="text-gold-400 text-sm font-heading ml-2 uppercase tracking-wider">
-                {t('event.asjjfRank')}
+                {asjjfRankText}
               </span>
             </div>
 
@@ -220,7 +340,7 @@ export default function EventDetailPage() {
             </h1>
 
             <p className="text-xl text-text-secondary font-heading uppercase tracking-wider mb-8">
-              {t('event.tagline')}
+              {eventTagline}
             </p>
 
             <div className="flex flex-wrap gap-6 text-sm text-text-secondary">
@@ -355,18 +475,17 @@ export default function EventDetailPage() {
                 <p className="text-text-secondary text-sm mb-4">
                   {mainEvent ? `${mainEvent.venue_address}, ${mainEvent.city}, ${mainEvent.country}` : t('event.location')}
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <div className="bg-navy-900 border border-white/5 p-4 text-center">
-                    <Users size={20} className="text-gold-500 mx-auto mb-2" />
-                    <div className="text-sm text-text-secondary">{t('event.competitionMats')}</div>
-                    <div className="text-sm text-text-secondary">{t('event.venueCapacity')}</div>
+                {displayVenueHighlights.length > 0 && (
+                  <div className={`grid grid-cols-1 gap-4 mb-4 ${displayVenueHighlights.length > 1 ? 'sm:grid-cols-2' : ''}`}>
+                    {displayVenueHighlights.map((highlight, idx) => (
+                      <div key={`${highlight.title}-${idx}`} className="bg-navy-900 border border-white/5 p-4 text-center">
+                        <Users size={20} className="text-gold-500 mx-auto mb-2" />
+                        <div className="text-sm text-text-primary font-medium">{highlight.title}</div>
+                        <div className="text-sm text-text-secondary">{highlight.description}</div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="bg-navy-900 border border-white/5 p-4 text-center">
-                    <MapPin size={20} className="text-gold-500 mx-auto mb-2" />
-                    <div className="text-sm text-text-secondary">{mainEvent?.city || t('event.venueUniversity')}</div>
-                    <div className="text-sm text-text-secondary">{mainEvent?.country || t('event.venueAddress')}</div>
-                  </div>
-                </div>
+                )}
                 <div className="relative overflow-hidden border border-white/5 aspect-[16/7]">
                   <div className="absolute inset-0 bg-navy-800 flex flex-col items-center justify-center gap-3 z-0">
                     <MapPin size={28} className="text-gold-500" />
@@ -389,8 +508,15 @@ export default function EventDetailPage() {
 
       {/* Official Accommodation — dynamic from API (shown right after venue) */}
       {activeAccommodations.length > 0 && (
-        <section className="py-16 sm:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <section className="relative py-16 sm:py-20 overflow-hidden">
+          {accommodationImages[0] && (
+            <div className="absolute inset-0 pointer-events-none">
+              <img src={accommodationImages[0]} alt="" className="w-full h-full object-cover opacity-[0.12]" />
+              <div className="absolute inset-0 bg-navy-900/70" />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-navy-900/60 to-navy-900" />
+            </div>
+          )}
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
             <ScrollReveal>
               <div className="text-center mb-12">
                 <h2 className="text-2xl sm:text-4xl font-heading font-black uppercase mb-3">
@@ -402,101 +528,219 @@ export default function EventDetailPage() {
               </div>
             </ScrollReveal>
 
-            <div className={`grid gap-4 ${activeAccommodations.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' : 'grid-cols-1 md:grid-cols-2'}`}>
-              {activeAccommodations.map((acc) => {
-                const contactEmails = splitCommaSeparated(acc.contact_email);
-
-                return (
-                <ScrollReveal key={acc.id}>
-                  <div className="bg-surface border border-gold-500/20 p-6 sm:p-8 h-full hover:border-gold-500/40 transition-colors duration-300">
-                    <Hotel size={24} className="text-gold-500 mb-4" />
-                    <h3 className="font-heading font-bold text-lg text-text-primary mb-2">{acc.hotel_name}</h3>
-
-                    {acc.description && (
-                      <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-line mb-4">{acc.description}</p>
-                    )}
-
-                    <div className="space-y-2 text-sm mb-6">
-                      {acc.room_types && (
-                        <div className="flex gap-2">
-                          <span className="text-text-muted shrink-0 w-24">{t('event.roomTypes', 'Rooms')}</span>
-                          <span className="text-text-secondary whitespace-pre-line">{acc.room_types}</span>
-                        </div>
-                      )}
-                      {acc.rate_info && (
-                        <div className="flex gap-2">
-                          <span className="text-text-muted shrink-0 w-24">{t('event.rates', 'Rates')}</span>
-                          <span className="text-gold-400 font-semibold whitespace-pre-line">{acc.rate_info}</span>
-                        </div>
-                      )}
-                      {acc.inclusions && (
-                        <div className="flex gap-2">
-                          <span className="text-text-muted shrink-0 w-24">{t('event.inclusions', 'Includes')}</span>
-                          <span className="text-text-secondary">{acc.inclusions}</span>
-                        </div>
-                      )}
-                      {acc.check_in_date && acc.check_out_date && (
-                        <div className="flex gap-2">
-                          <span className="text-text-muted shrink-0 w-24">{t('event.dates', 'Dates')}</span>
-                          <span className="text-text-secondary">
-                            {new Date(acc.check_in_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            {' — '}
-                            {new Date(acc.check_out_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                          </span>
-                        </div>
-                      )}
-                      {acc.booking_code && (
-                        <div className="flex gap-2">
-                          <span className="text-text-muted shrink-0 w-24">{t('event.promoCode', 'Code')}</span>
-                          <span className="font-mono text-gold-400 bg-gold-500/10 px-2 py-0.5">{acc.booking_code}</span>
-                        </div>
-                      )}
-                      {contactEmails.length > 0 && (
-                        <div className="flex gap-2">
-                          <span className="text-text-muted shrink-0 w-24">{t('event.bookingEmails', 'Email')}</span>
-                          <div className="space-y-1">
-                            {contactEmails.map((email) => (
-                              <a
-                                key={email}
-                                href={`mailto:${email}`}
-                                className="flex items-center gap-2 text-text-secondary hover:text-gold-400 transition-colors break-all"
-                              >
-                                <Mail size={14} className="text-gold-500 shrink-0" />
-                                <span>{email}</span>
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {acc.contact_phone && (
-                        <div className="flex gap-2">
-                          <span className="text-text-muted shrink-0 w-24">{t('event.bookingPhone', 'Phone')}</span>
-                          <a
-                            href={`tel:${acc.contact_phone.replace(/\s+/g, '')}`}
-                            className="flex items-center gap-2 text-text-secondary hover:text-gold-400 transition-colors"
-                          >
-                            <Phone size={14} className="text-gold-500 shrink-0" />
-                            <span>{acc.contact_phone}</span>
-                          </a>
-                        </div>
-                      )}
+            {activeAccommodations.length === 1 && accommodationImages.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-4 max-w-6xl mx-auto items-stretch">
+                <ScrollReveal>
+                  <div className="grid grid-cols-2 gap-4 h-full min-h-[420px]">
+                    <div className="col-span-2 relative overflow-hidden border border-white/10 bg-navy-900">
+                      <img src={accommodationImages[0]} alt="" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-transparent to-transparent" />
                     </div>
-
-                    {acc.booking_url && (
-                      <a
-                        href={acc.booking_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-xs hover:bg-gold-400 transition-colors"
-                      >
-                        {t('event.bookNow', 'Book Now')}
-                        <ExternalLink size={12} />
-                      </a>
-                    )}
+                    {accommodationImages.slice(1, 3).map((src, index) => (
+                      <div key={src} className="relative overflow-hidden border border-white/10 bg-navy-900 min-h-[180px]">
+                        <img src={src} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-navy-900/50 via-transparent to-transparent" />
+                        <div className="absolute bottom-3 left-3 text-[10px] font-heading uppercase tracking-[0.28em] text-white/70">
+                          {index === 0 ? t('event.lobbyAndExterior', 'Lobby & Exterior') : t('event.roomAndAmenities', 'Room & Amenities')}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </ScrollReveal>
-              )})}
-            </div>
+
+                {activeAccommodations.map((acc) => {
+                  const contactEmails = splitCommaSeparated(acc.contact_email);
+
+                  return (
+                    <ScrollReveal key={acc.id} delay={0.05}>
+                      <div className="bg-surface/95 border border-gold-500/20 p-6 sm:p-8 h-full backdrop-blur-sm hover:border-gold-500/40 transition-colors duration-300">
+                        <Hotel size={24} className="text-gold-500 mb-4" />
+                        <h3 className="font-heading font-bold text-lg text-text-primary mb-2">{acc.hotel_name}</h3>
+
+                        {acc.description && (
+                          <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-line mb-4">{acc.description}</p>
+                        )}
+
+                        <div className="space-y-2 text-sm mb-6">
+                          {acc.room_types && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.roomTypes', 'Rooms')}</span>
+                              <span className="text-text-secondary whitespace-pre-line">{acc.room_types}</span>
+                            </div>
+                          )}
+                          {acc.rate_info && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.rates', 'Rates')}</span>
+                              <span className="text-gold-400 font-semibold whitespace-pre-line">{acc.rate_info}</span>
+                            </div>
+                          )}
+                          {acc.inclusions && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.inclusions', 'Includes')}</span>
+                              <span className="text-text-secondary">{acc.inclusions}</span>
+                            </div>
+                          )}
+                          {acc.check_in_date && acc.check_out_date && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.dates', 'Dates')}</span>
+                              <span className="text-text-secondary">
+                                {new Date(acc.check_in_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                {' — '}
+                                {new Date(acc.check_out_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </span>
+                            </div>
+                          )}
+                          {acc.booking_code && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.promoCode', 'Code')}</span>
+                              <span className="font-mono text-gold-400 bg-gold-500/10 px-2 py-0.5">{acc.booking_code}</span>
+                            </div>
+                          )}
+                          {contactEmails.length > 0 && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.bookingEmails', 'Email')}</span>
+                              <div className="space-y-1">
+                                {contactEmails.map((email) => (
+                                  <a
+                                    key={email}
+                                    href={`mailto:${email}`}
+                                    className="flex items-center gap-2 text-text-secondary hover:text-gold-400 transition-colors break-all"
+                                  >
+                                    <Mail size={14} className="text-gold-500 shrink-0" />
+                                    <span>{email}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {acc.contact_phone && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.bookingPhone', 'Phone')}</span>
+                              <a
+                                href={`tel:${acc.contact_phone.replace(/\s+/g, '')}`}
+                                className="flex items-center gap-2 text-text-secondary hover:text-gold-400 transition-colors"
+                              >
+                                <Phone size={14} className="text-gold-500 shrink-0" />
+                                <span>{acc.contact_phone}</span>
+                              </a>
+                            </div>
+                          )}
+                        </div>
+
+                        {acc.booking_url && (
+                          <a
+                            href={acc.booking_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-xs hover:bg-gold-400 transition-colors"
+                          >
+                            {t('event.bookNow', 'Book Now')}
+                            <ExternalLink size={12} />
+                          </a>
+                        )}
+                      </div>
+                    </ScrollReveal>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className={`grid gap-4 ${activeAccommodations.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' : 'grid-cols-1 md:grid-cols-2'}`}>
+                {activeAccommodations.map((acc) => {
+                  const contactEmails = splitCommaSeparated(acc.contact_email);
+
+                  return (
+                    <ScrollReveal key={acc.id}>
+                      <div className="bg-surface border border-gold-500/20 p-6 sm:p-8 h-full hover:border-gold-500/40 transition-colors duration-300">
+                        <Hotel size={24} className="text-gold-500 mb-4" />
+                        <h3 className="font-heading font-bold text-lg text-text-primary mb-2">{acc.hotel_name}</h3>
+
+                        {acc.description && (
+                          <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-line mb-4">{acc.description}</p>
+                        )}
+
+                        <div className="space-y-2 text-sm mb-6">
+                          {acc.room_types && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.roomTypes', 'Rooms')}</span>
+                              <span className="text-text-secondary whitespace-pre-line">{acc.room_types}</span>
+                            </div>
+                          )}
+                          {acc.rate_info && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.rates', 'Rates')}</span>
+                              <span className="text-gold-400 font-semibold whitespace-pre-line">{acc.rate_info}</span>
+                            </div>
+                          )}
+                          {acc.inclusions && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.inclusions', 'Includes')}</span>
+                              <span className="text-text-secondary">{acc.inclusions}</span>
+                            </div>
+                          )}
+                          {acc.check_in_date && acc.check_out_date && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.dates', 'Dates')}</span>
+                              <span className="text-text-secondary">
+                                {new Date(acc.check_in_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                {' — '}
+                                {new Date(acc.check_out_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </span>
+                            </div>
+                          )}
+                          {acc.booking_code && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.promoCode', 'Code')}</span>
+                              <span className="font-mono text-gold-400 bg-gold-500/10 px-2 py-0.5">{acc.booking_code}</span>
+                            </div>
+                          )}
+                          {contactEmails.length > 0 && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.bookingEmails', 'Email')}</span>
+                              <div className="space-y-1">
+                                {contactEmails.map((email) => (
+                                  <a
+                                    key={email}
+                                    href={`mailto:${email}`}
+                                    className="flex items-center gap-2 text-text-secondary hover:text-gold-400 transition-colors break-all"
+                                  >
+                                    <Mail size={14} className="text-gold-500 shrink-0" />
+                                    <span>{email}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {acc.contact_phone && (
+                            <div className="flex gap-2">
+                              <span className="text-text-muted shrink-0 w-24">{t('event.bookingPhone', 'Phone')}</span>
+                              <a
+                                href={`tel:${acc.contact_phone.replace(/\s+/g, '')}`}
+                                className="flex items-center gap-2 text-text-secondary hover:text-gold-400 transition-colors"
+                              >
+                                <Phone size={14} className="text-gold-500 shrink-0" />
+                                <span>{acc.contact_phone}</span>
+                              </a>
+                            </div>
+                          )}
+                        </div>
+
+                        {acc.booking_url && (
+                          <a
+                            href={acc.booking_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-xs hover:bg-gold-400 transition-colors"
+                          >
+                            {t('event.bookNow', 'Book Now')}
+                            <ExternalLink size={12} />
+                          </a>
+                        )}
+                      </div>
+                    </ScrollReveal>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -510,11 +754,7 @@ export default function EventDetailPage() {
                 {t('event.howToRegister')}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                {[
-                  { step: '01', title: t('event.step1'), desc: t('event.step1Desc'), icon: ExternalLink },
-                  { step: '02', title: t('event.step2'), desc: t('event.step2Desc'), icon: FileCheck },
-                  { step: '03', title: t('event.step3'), desc: t('event.step3Desc'), icon: Trophy },
-                ].map((s) => (
+                {displayRegistrationSteps.map((s) => (
                   <div key={s.step} className="relative">
                     <div className="flex items-start gap-4">
                       <div className="shrink-0 w-14 h-14 flex items-center justify-center bg-gold-500/10 border border-gold-500/20">
@@ -523,6 +763,17 @@ export default function EventDetailPage() {
                       <div className="space-y-2">
                         <h4 className="font-heading font-bold text-sm uppercase tracking-wider">{s.title}</h4>
                         <p className="text-text-secondary text-sm leading-relaxed">{s.desc}</p>
+                        {s.url && (
+                          <a
+                            href={s.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-gold-400 hover:text-gold-300 transition-colors"
+                          >
+                            {s.linkLabel || t('event.learnMoreLink', 'Learn more')}
+                            <ExternalLink size={12} />
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -544,96 +795,173 @@ export default function EventDetailPage() {
         </div>
       </section>
 
-      {/* Travel Info — conditionally show/hide hotel card based on official accommodation */}
-      <section className="py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <ScrollReveal>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-5xl font-heading font-black uppercase mb-4">
-                {t('event.travelTitle')}
-              </h2>
-              <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-                {t('event.travelDesc')}
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <div className={`grid grid-cols-1 gap-3 ${activeAccommodations.length > 0 ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
-            <ScrollReveal>
-              <div className="bg-navy-900 border border-white/5 p-8 h-full hover:border-gold-500/20 transition-colors duration-300">
-                <Plane size={24} className="text-gold-500 mb-4" />
-                <h3 className="font-heading font-bold text-lg mb-3">{t('event.flights')}</h3>
-                <p className="text-text-secondary text-sm leading-relaxed mb-4">{t('event.flightsDesc')}</p>
-                <div className="space-y-2 text-sm text-text-muted">
-                  <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span>{t('event.flightTokyo')}</span>
-                    <span className="text-text-secondary">3.5 hrs</span>
-                  </div>
-                  <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span>{t('event.flightManila')}</span>
-                    <span className="text-text-secondary">3.5 hrs</span>
-                  </div>
-                  <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span>{t('event.flightSeoul')}</span>
-                    <span className="text-text-secondary">4 hrs</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{t('event.flightHonolulu')}</span>
-                    <span className="text-text-secondary">7 hrs</span>
-                  </div>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {activeAccommodations.length === 0 && (
-              <ScrollReveal delay={0.1}>
-                <div className="bg-navy-900 border border-white/5 p-8 h-full hover:border-gold-500/20 transition-colors duration-300">
-                  <Hotel size={24} className="text-gold-500 mb-4" />
-                  <h3 className="font-heading font-bold text-lg mb-3">{t('event.hotels')}</h3>
-                  <p className="text-text-secondary text-sm leading-relaxed mb-4">{t('event.hotelsDesc')}</p>
-                  <div className="space-y-3 text-sm">
-                    <div className="bg-navy-800 p-3 border border-white/5">
-                      <div className="text-text-muted text-xs mt-1">{t('event.hotelHolidayDesc')}</div>
+      {(registrationFeeSections.length > 0 || registrationInfoItems.length > 0) && (
+        <section className="py-16 sm:py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_0.9fr] gap-4">
+              {registrationFeeSections.length > 0 && (
+                <ScrollReveal>
+                  <div className="bg-navy-900 border border-white/5 p-6 sm:p-8 h-full">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Users size={20} className="text-gold-500" />
+                      <h3 className="font-heading font-bold text-xl uppercase tracking-wider">
+                        {t('event.registrationFees', 'Registration Fees')}
+                      </h3>
+                    </div>
+                    <div className="space-y-6">
+                      {registrationFeeSections.map((section) => (
+                        <div key={section.title}>
+                          <h4 className="font-heading text-sm font-bold uppercase tracking-[0.24em] text-gold-400 mb-3">
+                            {section.title}
+                          </h4>
+                          <div className="overflow-x-auto border border-white/5">
+                            <table className="w-full min-w-[540px] text-left text-sm">
+                              <thead className="bg-white/[0.03]">
+                                <tr>
+                                  <th className="px-4 py-3 font-heading uppercase tracking-[0.2em] text-[11px] text-text-muted">
+                                    {t('event.deadline', 'Deadline')}
+                                  </th>
+                                  <th className="px-4 py-3 font-heading uppercase tracking-[0.2em] text-[11px] text-text-muted">
+                                    {t('event.fee', 'Fee')}
+                                  </th>
+                                  <th className="px-4 py-3 font-heading uppercase tracking-[0.2em] text-[11px] text-text-muted">
+                                    {t('event.divisionOption', 'Division Option')}
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {section.rows.map((row, index) => (
+                                  <tr key={`${section.title}-${row.deadline}-${index}`} className="border-t border-white/5">
+                                    <td className="px-4 py-3 text-text-secondary">{row.deadline}</td>
+                                    <td className="px-4 py-3 text-gold-400 font-semibold whitespace-nowrap">{row.fee}</td>
+                                    <td className="px-4 py-3 text-text-secondary">{row.option}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-              </ScrollReveal>
-            )}
+                </ScrollReveal>
+              )}
 
-            <ScrollReveal delay={activeAccommodations.length > 0 ? 0.1 : 0.2}>
-              <div className="bg-navy-900 border border-white/5 p-8 h-full hover:border-gold-500/20 transition-colors duration-300">
-                <FileCheck size={24} className="text-gold-500 mb-4" />
-                <h3 className="font-heading font-bold text-lg mb-3">{t('event.visa')}</h3>
-                <p className="text-text-secondary text-sm leading-relaxed mb-4">{t('event.visaDesc')}</p>
-                <div className="space-y-2 text-sm text-text-muted">
-                  <div className="bg-navy-800 p-3 border border-white/5">
-                    <div className="font-heading font-semibold text-gold-400 text-xs uppercase tracking-wider mb-1">{t('event.visaEsta')}</div>
-                    <div className="text-text-secondary text-xs">{t('event.visaEstaDesc')}</div>
+              {registrationInfoItems.length > 0 && (
+                <ScrollReveal delay={0.05}>
+                  <div className="bg-surface border border-gold-500/15 p-6 sm:p-8 h-full">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Calendar size={20} className="text-gold-500" />
+                      <h3 className="font-heading font-bold text-xl uppercase tracking-wider">
+                        {t('event.importantRegistrationInfo', 'Important Registration Info')}
+                      </h3>
+                    </div>
+                    <div className="space-y-3">
+                      {registrationInfoItems.map((item) => (
+                        <div key={`${item.label}-${item.value}`} className="border border-white/5 bg-white/[0.02] px-4 py-3">
+                          <div className="text-[11px] font-heading uppercase tracking-[0.22em] text-gold-400 mb-1">
+                            {item.label}
+                          </div>
+                          <div className="text-sm text-text-secondary whitespace-pre-line">
+                            {item.value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="bg-navy-800 p-3 border border-white/5">
-                    <div className="font-heading font-semibold text-gold-400 text-xs uppercase tracking-wider mb-1">{t('event.visaGuamCnmi')}</div>
-                    <div className="text-text-secondary text-xs">{t('event.visaGuamCnmiDesc')}</div>
-                  </div>
-                </div>
+                </ScrollReveal>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Travel Information */}
+      {shouldShowTravelSection && (
+        <section className="py-20 sm:py-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <ScrollReveal>
+              <div className="text-center mb-16">
+                <h2 className="text-3xl sm:text-5xl font-heading font-black uppercase mb-4">
+                  {t('event.travelTitle')}
+                </h2>
+                {travelDescription && (
+                  <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+                    {travelDescription}
+                  </p>
+                )}
               </div>
             </ScrollReveal>
+
+            <div className={`grid grid-cols-1 gap-3 ${(displayTravelItems.length > 0 || displayVisaItems.length > 0 || activeAccommodations.length > 0) ? 'md:grid-cols-2' : ''}`}>
+              {displayTravelItems.map((item, index) => (
+                <ScrollReveal key={`${item.title}-${index}`} delay={index * 0.05}>
+                  <div className="bg-navy-900 border border-white/5 p-8 h-full hover:border-gold-500/20 transition-colors duration-300">
+                    <Plane size={24} className="text-gold-500 mb-4" />
+                    <h3 className="font-heading font-bold text-lg mb-3">{item.title}</h3>
+                    {item.value && (
+                      <div className="text-gold-400 font-heading font-semibold text-sm uppercase tracking-wider mb-3">
+                        {item.value}
+                      </div>
+                    )}
+                    {item.description && <p className="text-text-secondary text-sm leading-relaxed">{item.description}</p>}
+                    {item.url && (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 mt-4 text-xs text-gold-400 hover:text-gold-300 transition-colors"
+                      >
+                        {item.link_label || t('event.learnMoreLink', 'Learn more')}
+                        <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </div>
+                </ScrollReveal>
+              ))}
+
+              {displayVisaItems.length > 0 && (
+                <ScrollReveal delay={displayTravelItems.length * 0.05}>
+                  <div className="bg-navy-900 border border-white/5 p-8 h-full hover:border-gold-500/20 transition-colors duration-300">
+                    <FileCheck size={24} className="text-gold-500 mb-4" />
+                    <h3 className="font-heading font-bold text-lg mb-3">{t('event.visa')}</h3>
+                    {visaDescription && (
+                      <p className="text-text-secondary text-sm leading-relaxed mb-4">{visaDescription}</p>
+                    )}
+                    <div className="space-y-2 text-sm text-text-muted">
+                      {displayVisaItems.map((item, index) => (
+                        <div key={`${item.title}-${index}`} className="bg-navy-800 p-3 border border-white/5">
+                          <div className="font-heading font-semibold text-gold-400 text-xs uppercase tracking-wider mb-1">{item.title}</div>
+                          <div className="text-text-secondary text-xs">{item.description}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </ScrollReveal>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Photo Gallery Strip */}
       <section className="py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { src: '/images/action-match-1.webp', alt: t('event.galleryMatch') },
-              { src: '/images/ceremony-1.webp', alt: t('event.galleryCeremony') },
-              { src: '/images/venue-mats.webp', alt: t('event.galleryVenue') },
-              { src: '/images/podium-2.webp', alt: t('event.galleryPodium') },
-            ].map((img, i) => (
+            {(galleryImages.length > 0 ? galleryImages : [
+              { src: '/images/action-match-1.webp', alt: t('event.galleryMatch'), caption: '' },
+              { src: '/images/ceremony-1.webp', alt: t('event.galleryCeremony'), caption: '' },
+              { src: '/images/venue-mats.webp', alt: t('event.galleryVenue'), caption: '' },
+              { src: '/images/podium-2.webp', alt: t('event.galleryPodium'), caption: '' },
+            ]).map((img, i) => (
               <ScrollReveal key={i} delay={i * 0.08}>
                 <div className="relative overflow-hidden aspect-[3/2] border border-white/5 group">
                   <ImageWithShimmer src={img.src} alt={img.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {img.caption && (
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-900/90 to-transparent p-3">
+                      <div className="text-xs text-text-secondary truncate">{img.caption}</div>
+                    </div>
+                  )}
                 </div>
               </ScrollReveal>
             ))}

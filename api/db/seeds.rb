@@ -83,6 +83,95 @@ events_data.each_with_index do |data, i|
   puts "Created event: #{event.name}"
 end
 
+# Event detail page content
+{
+  "copa-de-marianas-2026" => {
+    tagline: "Season Opener"
+  },
+  "marianas-pro-nagoya-2026" => {
+    tagline: "Official Qualifier"
+  },
+  "marianas-pro-manila-2026" => {
+    tagline: "Official Qualifier",
+    venue_highlights: [
+      { title: "Gateway Mall 2", description: "Quantum Skyview Deck, Upper Ground B" },
+      { title: "Quezon City", description: "Metro Manila, Philippines" }
+    ],
+    registration_steps: [
+      { title: "Visit ASJJF.org", description: "Open the official ASJJF event page for Guam Marianas Pro Manila 2026 and review the published event information.", url: "https://asjjf.org/main/eventInfo/1923", link_label: "Open ASJJF event page" },
+      { title: "Select Your Division", description: "Confirm your age, belt, and weight division for the Manila event before completing checkout." },
+      { title: "Complete Registration", description: "Finish payment before the registration deadline on April 15, 2026. Corrections close on April 17, 2026." }
+    ],
+    registration_fee_sections: [
+      {
+        title: "Kids Divisions",
+        rows: [
+          { deadline: "Until February 10, 2026 11:59 PM", fee: "Php1,800", option: "Weight Division" },
+          { deadline: "Until March 10, 2026 11:59 PM", fee: "Php2,200", option: "Weight Division" },
+          { deadline: "Until April 15, 2026 11:59 PM", fee: "Php2,600", option: "Weight Division" },
+          { deadline: "Until April 18, 2026 11:59 PM", fee: "Php3,300", option: "Weight Division" }
+        ]
+      },
+      {
+        title: "Juvenile / Adult / Master Divisions",
+        rows: [
+          { deadline: "Until February 10, 2026 11:59 PM", fee: "Php1,800", option: "Weight Division" },
+          { deadline: "Until February 10, 2026 11:59 PM", fee: "Php2,300", option: "Weight Division + Open Weight" },
+          { deadline: "Until March 10, 2026 11:59 PM", fee: "Php2,200", option: "Weight Division" },
+          { deadline: "Until March 10, 2026 11:59 PM", fee: "Php2,700", option: "Weight Division + Open Weight" },
+          { deadline: "Until April 15, 2026 11:59 PM", fee: "Php2,600", option: "Weight Division" },
+          { deadline: "Until April 15, 2026 11:59 PM", fee: "Php3,200", option: "Weight Division + Open Weight" },
+          { deadline: "Until April 18, 2026 11:59 PM", fee: "Php3,300", option: "Weight Division" },
+          { deadline: "Until April 18, 2026 11:59 PM", fee: "Php3,900", option: "Weight Division + Open Weight" }
+        ]
+      }
+    ],
+    registration_info_items: [
+      { label: "Registration closes", value: "April 15, 2026 at 11:59 PM" },
+      { label: "Correction deadline", value: "April 17, 2026 at 11:59 PM" },
+      { label: "Refund request deadline", value: "April 20, 2026 for athletes with no opponents in their division" },
+      { label: "Registration check day", value: "April 18, 2026" },
+      { label: "Organizer correction day", value: "April 21, 2026" },
+      { label: "Schedule and brackets release", value: "April 23, 2026" }
+    ],
+    travel_description: "Plan your trip to Quezon City, Metro Manila. The competition venue at Gateway Mall 2 is inside Araneta City, with the official athlete hotel just a short walk from the mats.",
+    travel_items: [
+      { title: "Arrival Airport", value: "MNL", description: "Fly into Ninoy Aquino International Airport (MNL) and plan ground transportation to Araneta City in Quezon City." },
+      { title: "Venue Access", description: "Gateway Mall 2 and Ibis Styles Manila Araneta City are both inside the Araneta City complex, making venue access easy once you arrive." }
+    ],
+    visa_description: "Entry rules vary by passport and travel purpose. Confirm the latest Philippines entry requirements before booking flights or accommodations.",
+    visa_items: [
+      { title: "Passport Check", description: "Make sure your passport validity and any required entry permissions meet current Philippines travel rules for your nationality." },
+      { title: "Travel Documents", description: "Bring your passport, booking confirmations, and any onward-travel or arrival documents required by your airline or immigration." }
+    ]
+  },
+  "marianas-pro-taiwan-2026" => {
+    tagline: "Official Qualifier"
+  },
+  "marianas-pro-korea-2026" => {
+    tagline: "Official Qualifier"
+  },
+  "guam-marianas-dumau-open-2026" => {
+    tagline: "Road to the Open"
+  },
+  "marianas-pro-hong-kong-2026" => {
+    tagline: "Official Qualifier"
+  },
+  "marianas-open-2026" => {
+    tagline: "The Grand Championship",
+    venue_highlights: [
+      { title: "6 Competition Mats", description: "5,000+ Capacity" },
+      { title: "University of Guam", description: "Mangilao, Guam 96913" }
+    ]
+  }
+}.each do |slug, attrs|
+  event = Event.find_by(slug: slug)
+  next unless event
+
+  event.update!(attrs)
+  puts "Updated detail page content for #{event.name}"
+end
+
 # Event accommodations
 {
   "marianas-pro-manila-2026" => [

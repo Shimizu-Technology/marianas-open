@@ -52,7 +52,7 @@ The **Marianas Open** is the biggest and longest-running jiu-jitsu tournament or
 - **$2M economic impact** (per GVB's ROI formula)
 - **100+ entries from the Philippines alone** (first time hitting that mark)
 - Partners in **Korea, Japan, Taiwan, Philippines**
-- Featured in **30,000+ printed magazines across Asia**
+- Featured in **40,000 printed magazines across Asia**
 - Covered by **every newscast in the Philippines**
 - Australia's BJJ federation offered Guam to host the **World Championship** (capacity issue — would need to accommodate ~10,000 competitors)
 
@@ -165,7 +165,7 @@ Steve Shimizu: *"Our partners are predicting Guam will be the next biggest jiu j
 - **KUAM News** — TV coverage
 - **Post Guam** — regular coverage
 - **Philippine newscasts** — increasing coverage with 100+ Filipino entries
-- **30,000+ printed magazines across Asia** — mentioned by Steve in GVB pitch
+- **40,000 printed magazines across Asia** — mentioned by Steve in GVB pitch
 
 ---
 

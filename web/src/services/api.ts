@@ -87,6 +87,66 @@ export interface PrizeCategory {
   _destroy?: boolean;
 }
 
+export interface EventGalleryImage {
+  id: number;
+  event_id: number;
+  title: string | null;
+  alt_text: string | null;
+  caption: string | null;
+  sort_order: number;
+  active: boolean;
+  image_url: string | null;
+}
+
+export interface EventGalleryImageFormData {
+  title: string;
+  alt_text: string;
+  caption: string;
+  sort_order: number;
+  active: boolean;
+}
+
+export interface EventVenueHighlight {
+  title: string;
+  description: string;
+}
+
+export interface EventRegistrationStep {
+  title: string;
+  description: string;
+  url?: string | null;
+  link_label?: string | null;
+}
+
+export interface EventRegistrationFeeRow {
+  deadline: string;
+  fee: string;
+  option: string;
+}
+
+export interface EventRegistrationFeeSection {
+  title: string;
+  rows: EventRegistrationFeeRow[];
+}
+
+export interface EventRegistrationInfoItem {
+  label: string;
+  value: string;
+}
+
+export interface EventTravelItem {
+  title: string;
+  description: string;
+  value?: string | null;
+  url?: string | null;
+  link_label?: string | null;
+}
+
+export interface EventVisaItem {
+  title: string;
+  description: string;
+}
+
 export interface Event {
   id: number;
   name: string;
@@ -109,9 +169,20 @@ export interface Event {
   hero_image_url: string | null;
   live_stream_url: string | null;
   live_stream_active: boolean;
+  tagline: string | null;
+  schedule_note: string | null;
+  venue_highlights: EventVenueHighlight[];
+  registration_steps: EventRegistrationStep[];
+  registration_fee_sections: EventRegistrationFeeSection[];
+  registration_info_items: EventRegistrationInfoItem[];
+  travel_description: string | null;
+  travel_items: EventTravelItem[];
+  visa_description: string | null;
+  visa_items: EventVisaItem[];
   event_schedule_items: EventScheduleItem[];
   prize_categories: PrizeCategory[];
   event_accommodations: EventAccommodation[];
+  event_gallery_images: EventGalleryImage[];
 }
 
 export interface EventAccommodation {
@@ -239,6 +310,16 @@ export interface EventFormData {
   longitude: string;
   live_stream_url: string;
   live_stream_active: boolean;
+  tagline: string;
+  schedule_note: string;
+  venue_highlights: EventVenueHighlight[];
+  registration_steps: EventRegistrationStep[];
+  registration_fee_sections: EventRegistrationFeeSection[];
+  registration_info_items: EventRegistrationInfoItem[];
+  travel_description: string;
+  travel_items: EventTravelItem[];
+  visa_description: string;
+  visa_items: EventVisaItem[];
   event_schedule_items_attributes: EventScheduleItem[];
   prize_categories_attributes: PrizeCategory[];
 }
@@ -532,6 +613,24 @@ export const api = {
       }, true),
     deleteAccommodation: (eventId: number, id: number) =>
       fetchApi<void>(`/api/v1/admin/events/${eventId}/accommodations/${id}`, { method: 'DELETE' }, true),
+
+    // Event Gallery Images
+    getEventGalleryImages: (eventId: number) =>
+      fetchApi<{ gallery_images: EventGalleryImage[] }>(`/api/v1/admin/events/${eventId}/gallery-images`, {}, true),
+    createEventGalleryImage: (eventId: number, data: FormData) =>
+      fetchApiUpload<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images`, data),
+    updateEventGalleryImage: (eventId: number, id: number, data: Partial<EventGalleryImageFormData>) =>
+      fetchApi<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    uploadEventGalleryImage: (eventId: number, id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return fetchApiUpload<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images/${id}/upload`, formData);
+    },
+    deleteEventGalleryImage: (eventId: number, id: number) =>
+      fetchApi<void>(`/api/v1/admin/events/${eventId}/gallery-images/${id}`, { method: 'DELETE' }, true),
 
     // Sponsors
     getSponsors: () => fetchApi<{ sponsors: Sponsor[] }>('/api/v1/admin/sponsors', {}, true),

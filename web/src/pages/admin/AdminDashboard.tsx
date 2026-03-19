@@ -73,13 +73,13 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-6 sm:mb-8">
         <LayoutDashboard className="w-6 h-6 text-gold" />
         <h1 className="font-heading text-2xl font-bold text-text-primary">Dashboard</h1>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {cards.map((card, i) => (
           <motion.div
             key={card.label}
@@ -103,17 +103,17 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex gap-3 mb-8">
+      <div className="flex flex-col sm:flex-row gap-3 mb-6 sm:mb-8">
         <Link
           to="/admin/events"
-          className="flex items-center gap-2 px-4 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
+          className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Create Event
         </Link>
         <Link
           to="/admin/sponsors"
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/5 text-text-secondary text-sm font-medium hover:bg-white/8 transition-colors"
+          className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2.5 bg-white/5 text-text-secondary text-sm font-medium hover:bg-white/8 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Sponsor
@@ -130,14 +130,14 @@ export default function AdminDashboard() {
         ) : (
           <div className="divide-y divide-white/5">
             {recentEvents.map((event) => (
-              <div key={event.id} className="px-5 py-3 flex items-center justify-between">
-                <div>
+              <div key={event.id} className="px-4 sm:px-5 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="min-w-0">
                   <div className="text-sm text-text-primary font-medium">{event.name}</div>
                   <div className="text-xs text-text-muted mt-0.5">
                     {event.city}, {event.country} — {event.date}
                   </div>
                 </div>
-                <span className={`text-xs px-2 py-0.5 ${
+                <span className={`text-xs px-2 py-0.5 self-start sm:self-auto ${
                   event.status === 'published' ? 'bg-green-500/10 text-green-400' :
                   event.status === 'draft' ? 'bg-white/5 text-text-muted' :
                   'bg-gold/10 text-gold'

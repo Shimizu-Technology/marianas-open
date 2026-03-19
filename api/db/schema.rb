@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_19_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_19_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -152,12 +152,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_120000) do
     t.string "name"
     t.bigint "organization_id", null: false
     t.decimal "prize_pool"
+    t.jsonb "registration_fee_sections", default: [], null: false
+    t.jsonb "registration_info_items", default: [], null: false
+    t.jsonb "registration_steps", default: [], null: false
     t.string "registration_url"
+    t.text "schedule_note"
     t.string "slug"
     t.string "status"
+    t.string "tagline"
+    t.text "travel_description"
+    t.jsonb "travel_items", default: [], null: false
     t.datetime "updated_at", null: false
     t.string "venue_address"
+    t.jsonb "venue_highlights", default: [], null: false
     t.string "venue_name"
+    t.text "visa_description"
+    t.jsonb "visa_items", default: [], null: false
     t.index ["organization_id"], name: "index_events_on_organization_id"
   end
 

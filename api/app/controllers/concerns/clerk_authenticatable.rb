@@ -20,7 +20,7 @@ module ClerkAuthenticatable
     end
 
     clerk_id = decoded["sub"]
-    email = decoded["email"] || decoded["primary_email_address"]
+    email = decoded["email"] || decoded["primary_email_address"] || params[:email]
     first_name = decoded["first_name"]
     last_name = decoded["last_name"]
 

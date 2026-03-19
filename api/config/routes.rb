@@ -33,6 +33,11 @@ Rails.application.routes.draw do
             end
           end
           resources :event_accommodations, only: [:index, :create, :update, :destroy], path: 'accommodations'
+        resources :event_gallery_images, only: [:index, :create, :update, :destroy], path: 'gallery-images' do
+          member do
+            post :upload
+          end
+        end
         end
         resources :videos
         resources :sponsors do
