@@ -70,7 +70,6 @@ Allow: /
 Sitemap: ${SITE_URL}/sitemap.xml
 
 Disallow: /admin
-Disallow: /admin/*
 Disallow: /api/
 `;
 }
