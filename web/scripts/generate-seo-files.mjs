@@ -27,7 +27,10 @@ function extractEventSlugs() {
   if (!fs.existsSync(seedFile)) return [];
 
   const content = fs.readFileSync(seedFile, 'utf8');
-  const matches = [...content.matchAll(/slug:\s*["']([^"']+)["']/g)].map((match) => match[1]);
+  const eventsDataMatch = content.match(/events_data\s*=\s*\[(.*?)\]\s*\n\s*events_data\.each_with_index/mis);
+  if (!eventsDataMatch) return [];
+
+  const matches = [...eventsDataMatch[1].matchAll(/slug:\s*["']([^"']+)["']/g)].map((match) => match[1]);
   return [...new Set(matches)].sort();
 }
 

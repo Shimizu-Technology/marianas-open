@@ -55,7 +55,7 @@ export default function SEO({
   const { i18n } = useTranslation();
 
   const pageTitle = buildTitle(title);
-  const canonicalUrl = buildCanonicalUrl(path || `${location.pathname}${location.search}`);
+  const canonicalUrl = buildCanonicalUrl(path || location.pathname);
   const imageUrl = toAbsoluteUrl(image);
   const robotsContent = noindex ? 'noindex, nofollow' : 'index, follow';
 
