@@ -7,6 +7,7 @@ import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
 import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
+import SEO from '../components/SEO';
 import { useEvents } from '../hooks/useApi';
 import type { Event } from '../services/api';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
@@ -81,6 +82,21 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen pt-20">
+      <SEO
+        title="Event Calendar"
+        description="Browse the Guam Marianas Pro Series, upcoming qualifier events across Asia-Pacific, and past results from Marianas Open tournaments."
+        path="/calendar"
+        image="/images/hero-podium.jpg"
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'Marianas Open Event Calendar',
+            url: 'https://marianasopen.com/calendar',
+            description: 'Upcoming and past Marianas Open events, qualifiers, and championships.',
+          },
+        ]}
+      />
       {/* Hero */}
       <section className="relative py-20 sm:py-28 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-navy-800 to-navy-900" />

@@ -2,12 +2,18 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
+import SEO from '../components/SEO';
 
 export default function NotFoundPage() {
   const { t } = useTranslation();
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center">
+      <SEO
+        title="Page Not Found"
+        description="The requested Marianas Open page could not be found."
+        noindex
+      />
       <motion.h1
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}

@@ -8,6 +8,7 @@ import ImageWithShimmer from '../components/ImageWithShimmer';
 import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EventResultsSection from '../components/EventResultsSection';
+import SEO from '../components/SEO';
 import { useEvents } from '../hooks/useApi';
 import { getEventHeroImage, resolveMediaUrl } from '../utils/images';
 
@@ -260,6 +261,46 @@ export default function EventDetailPage() {
     : t('event.shareText');
 
   const heroImageUrl = getEventHeroImage(mainEvent?.slug || 'marianas-open-2026', mainEvent?.hero_image_url ?? null);
+  const canonicalPath = mainEvent?.slug
+    ? `/events/${mainEvent.slug}`
+    : slug
+      ? `/events/${slug}`
+      : '/events';
+  const seoTitle = mainEvent
+    ? `${mainEvent.name} ${formatEventDate(mainEvent)}`
+    : 'Event Details';
+  const seoDescription = mainEvent
+    ? `${mainEvent.name} takes place at ${mainEvent.venue_name} in ${mainEvent.city}, ${mainEvent.country} on ${formatEventDate(mainEvent)}.`
+    : 'Official Marianas Open event details, schedule, venue information, registration, and results.';
+  const eventSchema = mainEvent ? {
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: mainEvent.name,
+    description: seoDescription,
+    startDate: mainEvent.date,
+    endDate: mainEvent.end_date || mainEvent.date,
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: mainEvent.status === 'completed'
+      ? 'https://schema.org/EventCompleted'
+      : 'https://schema.org/EventScheduled',
+    image: heroImageUrl ? [heroImageUrl] : undefined,
+    location: {
+      '@type': 'Place',
+      name: mainEvent.venue_name,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: mainEvent.venue_address,
+        addressLocality: mainEvent.city,
+        addressCountry: mainEvent.country_code || mainEvent.country,
+      },
+    },
+    organizer: {
+      '@type': 'SportsOrganization',
+      name: 'Marianas Open',
+      url: 'https://marianasopen.com',
+    },
+    url: `https://marianasopen.com/events/${mainEvent.slug}`,
+  } : null;
 
   const eventPoster = mainEvent?.slug ? EVENT_POSTER_MAP[mainEvent.slug] : undefined;
 
@@ -283,6 +324,14 @@ export default function EventDetailPage() {
 
   return (
     <div className="min-h-screen pt-20">
+      <SEO
+        title={seoTitle}
+        description={seoDescription}
+        path={canonicalPath}
+        image={heroImageUrl}
+        type="website"
+        structuredData={eventSchema ? [eventSchema] : []}
+      />
       {/* Hero with background image */}
       <section className="relative py-24 sm:py-32 overflow-hidden">
         <div className="absolute inset-0">

@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ClerkProvider } from '@clerk/clerk-react'
+import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider } from './contexts/AuthContext'
 import './i18n'
 import './index.css'
@@ -22,21 +23,25 @@ function Root() {
         afterSignOutUrl="/"
         signInFallbackRedirectUrl="/admin"
       >
-        <AuthProvider isClerkEnabled={true}>
-          <PostHogProvider>
-            <App />
-          </PostHogProvider>
-        </AuthProvider>
+        <HelmetProvider>
+          <AuthProvider isClerkEnabled={true}>
+            <PostHogProvider>
+              <App />
+            </PostHogProvider>
+          </AuthProvider>
+        </HelmetProvider>
       </ClerkProvider>
     )
   }
 
   return (
-    <AuthProvider isClerkEnabled={false}>
-      <PostHogProvider>
-        <App />
-      </PostHogProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider isClerkEnabled={false}>
+        <PostHogProvider>
+          <App />
+        </PostHogProvider>
+      </AuthProvider>
+    </HelmetProvider>
   )
 }
 

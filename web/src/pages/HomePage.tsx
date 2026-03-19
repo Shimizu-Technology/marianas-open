@@ -5,11 +5,13 @@ import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink, Handsha
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import JourneySection from '../components/JourneySection';
+import SEO from '../components/SEO';
 import { useEvents, useSponsors } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { resolveMediaUrl } from '../utils/images';
+import { getOrganizationSchema, getWebsiteSchema } from '../lib/seo';
 
 function normalizeSponsorKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -122,6 +124,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      <SEO
+        title="International Brazilian Jiu-Jitsu Championship"
+        description={sc('hero_description', "Marianas Open is Guam's premier international Brazilian Jiu-Jitsu championship, featuring qualifier events across Asia-Pacific and a grand championship in Guam.")}
+        path="/"
+        image={heroImage}
+        structuredData={[getWebsiteSchema(), getOrganizationSchema()]}
+      />
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background image */}

@@ -2,3 +2,5 @@
 .netlify/
 # Raw photography source assets (large zips — not tracked in git)
 assets/
+web/public/robots.txt
+web/public/sitemap.xml
