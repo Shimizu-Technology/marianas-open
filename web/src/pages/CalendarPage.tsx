@@ -303,21 +303,58 @@ function EventCard({ event, formatDate, t, isPast }: {
       </div>
 
       {!isPast && (
-        <div className="flex gap-2">
-          <a
-            href={event.registration_url || 'https://asjjf.org'}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
-              event.is_main_event
-                ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
-                : 'bg-navy-700 text-text-primary hover:bg-navy-600'
-            }`}
-          >
-            {t('calendar.register')}
-            <ExternalLink size={12} />
-          </a>
+        <div className="flex flex-col gap-2">
+          {(event.registration_url_gi || event.registration_url_nogi) ? (
+            <>
+              {event.registration_url_gi && (
+                <a
+                  href={event.registration_url_gi}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
+                    event.is_main_event
+                      ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
+                      : 'bg-navy-700 text-text-primary hover:bg-navy-600'
+                  }`}
+                >
+                  {t('calendar.registerGi', 'Register (Gi)')}
+                  <ExternalLink size={12} />
+                </a>
+              )}
+              {event.registration_url_nogi && (
+                <a
+                  href={event.registration_url_nogi}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
+                    event.is_main_event
+                      ? 'bg-gold-500/80 text-navy-900 hover:bg-gold-400'
+                      : 'bg-navy-800 text-text-primary hover:bg-navy-700'
+                  }`}
+                >
+                  {t('calendar.registerNogi', 'Register (No-Gi)')}
+                  <ExternalLink size={12} />
+                </a>
+              )}
+            </>
+          ) : (
+            <a
+              href={event.registration_url || 'https://asjjf.org'}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
+                event.is_main_event
+                  ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
+                  : 'bg-navy-700 text-text-primary hover:bg-navy-600'
+              }`}
+            >
+              {t('calendar.register')}
+              <ExternalLink size={12} />
+            </a>
+          )}
           <span
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gold-500/30 text-gold-500 text-sm font-heading font-bold uppercase tracking-wider hover:bg-gold-500/10 transition-colors"
           >
