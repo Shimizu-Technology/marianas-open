@@ -318,7 +318,7 @@ function EventCard({ event, formatDate, t, isPast }: {
                       : 'bg-navy-700 text-text-primary hover:bg-navy-600'
                   }`}
                 >
-                  {t('calendar.register')} (Gi)
+                  {t('calendar.registerGi', 'Register (Gi)')}
                   <ExternalLink size={12} />
                 </a>
               )}
@@ -334,7 +334,7 @@ function EventCard({ event, formatDate, t, isPast }: {
                       : 'bg-navy-800 text-text-primary hover:bg-navy-700'
                   }`}
                 >
-                  {t('calendar.register')} (No-Gi)
+                  {t('calendar.registerNogi', 'Register (No-Gi)')}
                   <ExternalLink size={12} />
                 </a>
               )}

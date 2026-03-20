@@ -838,7 +838,7 @@ export default function EventDetailPage() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
                       >
-                        {t('home.registerNow')} (Gi)
+                        {t('home.registerNowGi', 'Register Now (Gi)')}
                         <ExternalLink size={14} />
                       </a>
                     )}
@@ -849,7 +849,7 @@ export default function EventDetailPage() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-6 py-3 border border-gold-500 text-gold-500 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-500/10 transition-colors"
                       >
-                        {t('home.registerNow')} (No-Gi)
+                        {t('home.registerNowNogi', 'Register Now (No-Gi)')}
                         <ExternalLink size={14} />
                       </a>
                     )}
