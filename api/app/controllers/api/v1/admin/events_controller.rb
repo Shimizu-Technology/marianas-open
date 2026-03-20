@@ -98,6 +98,7 @@ module Api
             :name, :slug, :description, :date, :end_date,
             :venue_name, :venue_address, :city, :country, :country_code,
             :asjjf_stars, :is_main_event, :prize_pool, :registration_url,
+            :registration_url_gi, :registration_url_nogi,
             :status, :latitude, :longitude,
             :live_stream_url, :live_stream_active,
             :tagline, :schedule_note, :travel_description, :visa_description,

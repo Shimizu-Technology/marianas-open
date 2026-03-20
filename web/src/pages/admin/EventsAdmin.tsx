@@ -25,7 +25,8 @@ import { resolveMediaUrl } from '../../utils/images'
 const emptyForm: EventFormData = {
   name: '', slug: '', description: '', date: '', end_date: '',
   venue_name: '', venue_address: '', city: '', country: '', country_code: '',
-  asjjf_stars: 0, is_main_event: false, prize_pool: '', registration_url: '',
+  asjjf_stars: 0, is_main_event: false, prize_pool: '',
+  registration_url: '', registration_url_gi: '', registration_url_nogi: '',
   status: 'draft', latitude: '', longitude: '',
   live_stream_url: '', live_stream_active: false,
   tagline: '', schedule_note: '',
@@ -48,7 +49,10 @@ function eventToForm(e: Event): EventFormData {
     venue_name: e.venue_name || '', venue_address: e.venue_address || '',
     city: e.city || '', country: e.country || '', country_code: e.country_code || '',
     asjjf_stars: e.asjjf_stars || 0, is_main_event: e.is_main_event || false,
-    prize_pool: e.prize_pool || '', registration_url: e.registration_url || '',
+    prize_pool: e.prize_pool || '',
+    registration_url: e.registration_url || '',
+    registration_url_gi: e.registration_url_gi || '',
+    registration_url_nogi: e.registration_url_nogi || '',
     status: e.status || 'draft',
     latitude: e.latitude?.toString() || '', longitude: e.longitude?.toString() || '',
     live_stream_url: e.live_stream_url || '', live_stream_active: e.live_stream_active || false,
@@ -487,7 +491,9 @@ export default function EventsAdmin() {
               />
               <Field label="ASJJF Stars" type="number" value={form.asjjf_stars.toString()} onChange={v => updateForm('asjjf_stars', parseInt(v) || 0)} />
               <Field label="Prize Pool" value={form.prize_pool} onChange={v => updateForm('prize_pool', v)} placeholder="$10,000" />
-              <Field label="ASJJF Registration URL" value={form.registration_url} onChange={v => updateForm('registration_url', v)} placeholder="https://asjjf.org/events/..." />
+              <Field label="ASJJF Registration URL (Gi)" value={form.registration_url_gi} onChange={v => updateForm('registration_url_gi', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
+              <Field label="ASJJF Registration URL (No-Gi)" value={form.registration_url_nogi} onChange={v => updateForm('registration_url_nogi', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
+              <Field label="ASJJF Registration URL (Legacy)" value={form.registration_url} onChange={v => updateForm('registration_url', v)} placeholder="https://asjjf.org/events/..." />
               <Field label="Latitude" value={form.latitude} onChange={v => updateForm('latitude', v)} />
               <Field label="Longitude" value={form.longitude} onChange={v => updateForm('longitude', v)} />
             </div>
