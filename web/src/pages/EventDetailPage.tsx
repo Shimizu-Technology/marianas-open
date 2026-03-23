@@ -67,7 +67,7 @@ export default function EventDetailPage() {
   // Schedule: only from API, no hardcoded fallback
   const hasRealScheduleItems = !!mainEvent && (mainEvent.event_schedule_items?.length ?? 0) > 0;
   const scheduleItems = hasRealScheduleItems
-    ? mainEvent.event_schedule_items
+    ? [...mainEvent.event_schedule_items]
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(item => ({ time: item.time, event: item.description }))
     : [];
@@ -86,7 +86,7 @@ export default function EventDetailPage() {
   const hasTripPackages = mainEvent?.prize_categories?.some(c => Number(c.amount) === 0) ?? false;
 
   const prizeBreakdown = mainEvent && mainEvent.prize_categories?.length > 0
-    ? mainEvent.prize_categories
+    ? [...mainEvent.prize_categories]
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(cat => {
           const amt = Number(cat.amount);

@@ -620,8 +620,9 @@ export default function EventsAdmin() {
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">ASJJF Event IDs (for results import)</label>
                 <input
-                  value={form.asjjf_event_ids.join(', ')}
-                  onChange={e => {
+                  key={editing}
+                  defaultValue={form.asjjf_event_ids.join(', ')}
+                  onBlur={e => {
                     const ids = e.target.value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n > 0)
                     updateForm('asjjf_event_ids', ids)
                   }}
