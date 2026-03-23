@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { Handshake, Plus, Pencil, Trash2, X, Loader2, Save, ChevronUp, ChevronDown, GripVertical, Eye, Upload } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useSearchParams } from 'react-router-dom'
 import { api } from '../../services/api'
 import type { Sponsor, SponsorFormData } from '../../services/api'
 import { getSponsorLogo, resolveMediaUrl } from '../../utils/images'
@@ -22,6 +21,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useEditingParam } from '../../hooks/useEditingParam'
 
 const TIERS = ['presenting', 'partner', 'official', 'title', 'gold', 'silver', 'bronze', 'supporting'] as const
 const TIER_COLORS: Record<string, string> = {
@@ -145,21 +145,7 @@ function SortableSponsorRow({ sponsor, idx, total, onMove, onEdit, onDelete }: S
 export default function SponsorsAdmin() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchParams, setSearchParams] = useSearchParams()
-  const editParam = searchParams.get('edit')
-  const editing: number | 'new' | null = editParam === 'new' ? 'new' : editParam ? parseInt(editParam) || null : null
-
-  const setEditing = useCallback((value: number | 'new' | null) => {
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev)
-      if (value === null) {
-        next.delete('edit')
-      } else {
-        next.set('edit', String(value))
-      }
-      return next
-    }, { replace: true })
-  }, [setSearchParams])
+  const [editing, setEditing] = useEditingParam()
 
   const [form, setForm] = useState<SponsorFormData>(emptyForm)
   const [pendingLogo, setPendingLogo] = useState<File | null>(null)

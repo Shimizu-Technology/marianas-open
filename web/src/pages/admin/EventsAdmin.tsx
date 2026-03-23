@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
 import type {
   Event,
@@ -21,12 +21,8 @@ import type {
 } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
 import { resolveMediaUrl } from '../../utils/images'
-
-function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
+import { formatDate } from '../../utils/dates'
+import { useEditingParam } from '../../hooks/useEditingParam'
 
 type SortField = 'name' | 'date' | 'location' | 'stars' | 'status'
 type SortDir = 'asc' | 'desc'
@@ -34,7 +30,8 @@ type SortDir = 'asc' | 'desc'
 const emptyForm: EventFormData = {
   name: '', slug: '', description: '', date: '', end_date: '',
   venue_name: '', venue_address: '', city: '', country: '', country_code: '',
-  asjjf_stars: 0, is_main_event: false, prize_pool: '', prize_title: '', prize_description: '', registration_url: '',
+  asjjf_stars: 0, is_main_event: false, prize_pool: '', prize_title: '', prize_description: '',
+  registration_url: '', registration_url_gi: '', registration_url_nogi: '',
   status: 'draft', latitude: '', longitude: '',
   live_stream_url: '', live_stream_active: false,
   tagline: '', schedule_note: '',
@@ -58,7 +55,10 @@ function eventToForm(e: Event): EventFormData {
     venue_name: e.venue_name || '', venue_address: e.venue_address || '',
     city: e.city || '', country: e.country || '', country_code: e.country_code || '',
     asjjf_stars: e.asjjf_stars || 0, is_main_event: e.is_main_event || false,
-    prize_pool: e.prize_pool || '', prize_title: e.prize_title || '', prize_description: e.prize_description || '', registration_url: e.registration_url || '',
+    prize_pool: e.prize_pool || '', prize_title: e.prize_title || '', prize_description: e.prize_description || '',
+    registration_url: e.registration_url || '',
+    registration_url_gi: e.registration_url_gi || '',
+    registration_url_nogi: e.registration_url_nogi || '',
     status: e.status || 'draft',
     latitude: e.latitude?.toString() || '', longitude: e.longitude?.toString() || '',
     live_stream_url: e.live_stream_url || '', live_stream_active: e.live_stream_active || false,
@@ -85,21 +85,7 @@ function eventToForm(e: Event): EventFormData {
 export default function EventsAdmin() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchParams, setSearchParams] = useSearchParams()
-  const editParam = searchParams.get('edit')
-  const editing: number | 'new' | null = editParam === 'new' ? 'new' : editParam ? parseInt(editParam) || null : null
-
-  const setEditing = useCallback((value: number | 'new' | null) => {
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev)
-      if (value === null) {
-        next.delete('edit')
-      } else {
-        next.set('edit', String(value))
-      }
-      return next
-    }, { replace: true })
-  }, [setSearchParams])
+  const [editing, setEditing] = useEditingParam()
 
   const [form, setForm] = useState<EventFormData>(emptyForm)
   const [saving, setSaving] = useState(false)
@@ -606,7 +592,9 @@ export default function EventsAdmin() {
               <Field label="Prize Pool" value={form.prize_pool} onChange={v => updateForm('prize_pool', v)} placeholder="$10,000" />
               <Field label="Prize Card Title" value={form.prize_title} onChange={v => updateForm('prize_title', v)} placeholder="e.g. Win Your Way to Guam!" />
               <Field label="Prize Card Description" value={form.prize_description} onChange={v => updateForm('prize_description', v)} placeholder="e.g. Compete for a trip package to..." />
-              <Field label="ASJJF Registration URL" value={form.registration_url} onChange={v => updateForm('registration_url', v)} placeholder="https://asjjf.org/events/..." />
+              <Field label="ASJJF Registration URL (Gi)" value={form.registration_url_gi} onChange={v => updateForm('registration_url_gi', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
+              <Field label="ASJJF Registration URL (No-Gi)" value={form.registration_url_nogi} onChange={v => updateForm('registration_url_nogi', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
+              <Field label="ASJJF Registration URL (Legacy)" value={form.registration_url} onChange={v => updateForm('registration_url', v)} placeholder="https://asjjf.org/events/..." />
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">ASJJF Event IDs (for results import)</label>
                 <input

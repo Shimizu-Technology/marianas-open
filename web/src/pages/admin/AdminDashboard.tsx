@@ -4,12 +4,7 @@ import { LayoutDashboard, CalendarDays, Handshake, Users, Plus, ArrowRight, Load
 import { motion } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Event } from '../../services/api'
-
-function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
+import { formatDate } from '../../utils/dates'
 
 interface Stats {
   totalEvents: number

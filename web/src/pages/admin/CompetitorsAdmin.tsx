@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { Users, Plus, Pencil, Trash2, X, Loader2, Save, Search } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Competitor, CompetitorFormData } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
+import { useEditingParam } from '../../hooks/useEditingParam'
 
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black'] as const
 const WEIGHT_CLASSES = [
@@ -29,21 +29,7 @@ const emptyForm: CompetitorFormData = {
 export default function CompetitorsAdmin() {
   const [competitors, setCompetitors] = useState<Competitor[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchParams, setSearchParams] = useSearchParams()
-  const editParam = searchParams.get('edit')
-  const editing: number | 'new' | null = editParam === 'new' ? 'new' : editParam ? parseInt(editParam) || null : null
-
-  const setEditing = useCallback((value: number | 'new' | null) => {
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev)
-      if (value === null) {
-        next.delete('edit')
-      } else {
-        next.set('edit', String(value))
-      }
-      return next
-    }, { replace: true })
-  }, [setSearchParams])
+  const [editing, setEditing] = useEditingParam()
 
   const [form, setForm] = useState<CompetitorFormData>(emptyForm)
   const [saving, setSaving] = useState(false)

@@ -35,8 +35,16 @@ module Api
             return render json: { error: "No image provided" }, status: :unprocessable_entity
           end
 
-          @accommodation.image.attach(params[:image])
-          render json: { accommodation: @accommodation.reload.as_json }
+          begin
+            @accommodation.image.attach(params[:image])
+            if @accommodation.image.attached?
+              render json: { accommodation: @accommodation.reload.as_json }
+            else
+              render json: { error: "Image could not be attached" }, status: :unprocessable_entity
+            end
+          rescue => e
+            render json: { error: e.message }, status: :unprocessable_entity
+          end
         end
 
         def destroy

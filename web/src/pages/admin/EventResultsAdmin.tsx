@@ -8,12 +8,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Event, EventResult, EventResultFormData, ImportPreview } from '../../services/api'
-
-function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
+import { formatDate } from '../../utils/dates'
 
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black']
 const GENDERS = ['male', 'female']

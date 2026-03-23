@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { Play, Plus, Pencil, Trash2, X, Loader2, Save, Star } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Video, VideoFormData, Event } from '../../services/api'
+import { useEditingParam } from '../../hooks/useEditingParam'
 
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black'] as const
 const CATEGORIES = ['gi', 'no-gi'] as const
@@ -35,21 +35,7 @@ export default function VideosAdmin() {
   const [videos, setVideos] = useState<Video[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchParams, setSearchParams] = useSearchParams()
-  const editParam = searchParams.get('edit')
-  const editing: number | 'new' | null = editParam === 'new' ? 'new' : editParam ? parseInt(editParam) || null : null
-
-  const setEditing = useCallback((value: number | 'new' | null) => {
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev)
-      if (value === null) {
-        next.delete('edit')
-      } else {
-        next.set('edit', String(value))
-      }
-      return next
-    }, { replace: true })
-  }, [setSearchParams])
+  const [editing, setEditing] = useEditingParam()
 
   const [form, setForm] = useState<VideoFormData>(emptyForm)
   const [saving, setSaving] = useState(false)

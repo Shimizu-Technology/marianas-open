@@ -125,7 +125,7 @@ export default function EventDetailPage() {
     || (mainEvent?.is_main_event ? t('event.tagline') : t('event.qualifierTagline', 'Official Qualifier'));
   const asjjfRankText = t('event.asjjfRankDynamic', {
     count: mainEvent?.asjjf_stars || 5,
-    defaultValue: `ASJJF ${mainEvent?.asjjf_stars || 0}-Star Ranked Event`,
+    defaultValue: `ASJJF ${mainEvent?.asjjf_stars || 5}-Star Ranked Event`,
   });
   const shareUrl = mainEvent?.slug
     ? `https://marianasopen.com/events/${mainEvent.slug}`
@@ -772,19 +772,44 @@ export default function EventDetailPage() {
                   </div>
                 ))}
               </div>
-              {mainEvent?.registration_url && (
-              <div className="mt-8">
-                <a
-                  href={mainEvent.registration_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
-                >
-                  {t('home.registerNow')}
-                  <ExternalLink size={14} />
-                </a>
+              <div className="mt-8 flex flex-wrap gap-3">
+                {(mainEvent?.registration_url_gi || mainEvent?.registration_url_nogi) ? (
+                  <>
+                    {mainEvent?.registration_url_gi && (
+                      <a
+                        href={mainEvent.registration_url_gi}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
+                      >
+                        {t('home.registerNowGi', 'Register Now (Gi)')}
+                        <ExternalLink size={14} />
+                      </a>
+                    )}
+                    {mainEvent?.registration_url_nogi && (
+                      <a
+                        href={mainEvent.registration_url_nogi}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-6 py-3 border border-gold-500 text-gold-500 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-500/10 transition-colors"
+                      >
+                        {t('home.registerNowNogi', 'Register Now (No-Gi)')}
+                        <ExternalLink size={14} />
+                      </a>
+                    )}
+                  </>
+                ) : (
+                  <a
+                    href={mainEvent?.registration_url || 'https://asjjf.org'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
+                  >
+                    {t('home.registerNow')}
+                    <ExternalLink size={14} />
+                  </a>
+                )}
               </div>
-              )}
             </div>
           </ScrollReveal>
         </div>

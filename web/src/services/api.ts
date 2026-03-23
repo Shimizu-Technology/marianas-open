@@ -164,6 +164,8 @@ export interface Event {
   asjjf_stars: number;
   is_main_event: boolean;
   registration_url: string | null;
+  registration_url_gi: string | null;
+  registration_url_nogi: string | null;
   prize_pool: string | null;
   prize_title: string | null;
   prize_description: string | null;
@@ -311,6 +313,8 @@ export interface EventFormData {
   prize_title: string;
   prize_description: string;
   registration_url: string;
+  registration_url_gi: string;
+  registration_url_nogi: string;
   status: string;
   latitude: string;
   longitude: string;
