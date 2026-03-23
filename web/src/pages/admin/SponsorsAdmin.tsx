@@ -306,7 +306,11 @@ export default function SponsorsAdmin() {
     const activeSponsor = sponsors.find(s => s.id === activeId)
     const overSponsor = sponsors.find(s => s.id === overId)
     if (!activeSponsor || !overSponsor) return
-    if (activeSponsor.tier !== overSponsor.tier) return
+    if (activeSponsor.tier !== overSponsor.tier) {
+      setError('Sponsors can only be reordered within the same tier')
+      setTimeout(() => setError(''), 2000)
+      return
+    }
 
     const sameTier = sponsors
       .filter(s => s.tier === activeSponsor.tier)

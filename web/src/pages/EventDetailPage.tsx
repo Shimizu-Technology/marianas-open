@@ -316,10 +316,12 @@ export default function EventDetailPage() {
                 <MapPin size={16} className="text-gold-500" />
                 {mainEvent ? `${mainEvent.venue_name}` : t('event.venue')}
               </div>
+              {(hasCashPrizes || hasTripPackages || prizePoolDisplay) && (
               <div className="flex items-center gap-2">
                 <Trophy size={16} className="text-gold-500" />
-                {hasCashPrizes ? (prizePoolDisplay || t('event.totalPrizePool')) : hasTripPackages ? t('event.tripPackages', 'Trip Packages to Guam') : (prizePoolDisplay || t('event.totalPrizePool'))}
+                {hasCashPrizes ? (prizePoolDisplay || t('event.totalPrizePool')) : hasTripPackages ? t('event.tripPackages', 'Trip Packages to Guam') : prizePoolDisplay}
               </div>
+              )}
             </div>
           </motion.div>
         </div>
