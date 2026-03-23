@@ -213,8 +213,12 @@ export default function EventsAdmin() {
 
   const handleImageUpload = async (file: File) => {
     if (typeof editing !== 'number') return
-    await api.admin.uploadEventImage(editing, file)
-    await loadEvents()
+    try {
+      await api.admin.uploadEventImage(editing, file)
+      await loadEvents()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Image upload failed')
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

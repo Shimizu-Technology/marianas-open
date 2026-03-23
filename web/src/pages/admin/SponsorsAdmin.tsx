@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { Handshake, Plus, Pencil, Trash2, X, Loader2, Save, ChevronUp, ChevronDown, GripVertical, Eye, Upload } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
@@ -240,8 +240,12 @@ export default function SponsorsAdmin() {
       return
     }
     if (typeof editing !== 'number') return
-    await api.admin.uploadSponsorLogo(editing, file)
-    await load()
+    try {
+      await api.admin.uploadSponsorLogo(editing, file)
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Logo upload failed')
+    }
   }
 
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -250,8 +254,19 @@ export default function SponsorsAdmin() {
     if (logoInputRef.current) logoInputRef.current.value = ''
   }
 
+  const previewLogoUrl = useMemo(
+    () => (pendingLogo ? URL.createObjectURL(pendingLogo) : null),
+    [pendingLogo]
+  )
+
+  useEffect(() => {
+    return () => {
+      if (previewLogoUrl?.startsWith('blob:')) URL.revokeObjectURL(previewLogoUrl)
+    }
+  }, [previewLogoUrl])
+
   const getPreviewLogoUrl = (): string | null => {
-    if (pendingLogo) return URL.createObjectURL(pendingLogo)
+    if (previewLogoUrl) return previewLogoUrl
     if (typeof editing === 'number') {
       return resolveMediaUrl(currentSponsor?.logo_url) || getSponsorLogo(form.name)
     }
