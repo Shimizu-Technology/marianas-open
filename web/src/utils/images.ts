@@ -1,17 +1,6 @@
 /**
- * Fallback image mappings for when Active Storage URLs are unavailable.
- * Maps event slugs to local WebP images bundled in public/images/.
+ * Image utilities for resolving media URLs from the API.
  */
-
-const eventHeroImages: Record<string, string> = {
-  'copa-de-marianas-2026': '/images/action-match-1.webp',
-  'marianas-pro-nagoya-2026': '/images/action-match-2.webp',
-  'marianas-pro-manila-2026': '/images/action-match-3.webp',
-  'marianas-pro-taiwan-2026': '/images/action-match-4.webp',
-  'marianas-pro-korea-2026': '/images/podium-1.webp',
-  'marianas-pro-hong-kong-2026': '/images/podium-2.webp',
-  'marianas-open-2026': '/images/venue-mats.webp',
-};
 
 function getApiOrigin(): string {
   const configured = import.meta.env.VITE_API_URL as string | undefined;
@@ -35,7 +24,6 @@ export function resolveMediaUrl(url: string | null | undefined): string | null {
   if (url.startsWith('/')) return `${apiOrigin}${url}`;
 
   // Localhost URLs from dev uploads should use configured API origin in deployed UI
-  // Accept any localhost/127.0.0.1 port (not just 3000) to avoid hard-coded dev-port drift.
   if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(url)) {
     return url.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, apiOrigin);
   }
@@ -43,9 +31,11 @@ export function resolveMediaUrl(url: string | null | undefined): string | null {
   return url;
 }
 
-/** Get hero image for an event — uses API URL if available, falls back to local */
-export function getEventHeroImage(slug: string, apiUrl: string | null): string {
-  return resolveMediaUrl(apiUrl) || eventHeroImages[slug] || '/images/venue-crowd.webp';
+const GENERIC_HERO = '/images/venue-crowd.webp';
+
+/** Get hero image for an event — uses API URL if available, falls back to generic */
+export function getEventHeroImage(_slug: string, apiUrl: string | null): string {
+  return resolveMediaUrl(apiUrl) || GENERIC_HERO;
 }
 
 /** Organization logo fallback */
@@ -56,4 +46,38 @@ export function getOrgLogo(apiUrl: string | null): string {
 /** Organization banner fallback */
 export function getOrgBanner(apiUrl: string | null): string {
   return apiUrl || '/images/venue-crowd.webp';
+}
+
+const SPONSOR_LOGO_MAP: Record<string, string> = {
+  'triple j': '/images/logos/sponsors/triple-j-logo.png',
+  'pacific points': '/images/logos/sponsors/pacific-points-logo.png',
+  "foody's": '/images/logos/sponsors/foodys-logo.png',
+  'deal depot': '/images/logos/sponsors/deal-depot-logo.png',
+  'cfpt': '/images/logos/sponsors/cfpt-logo.png',
+  'fokai': '/images/logos/sponsors/fokai-logo.png',
+  'jamz media': '/images/logos/sponsors/jamz-media-logo.jpeg',
+  'cherry media': '/images/logos/sponsors/cherry-media-logo.png',
+  'mannge pops': '/images/logos/sponsors/mannge-pops-logo.png',
+  'aloha maid': '/images/logos/sponsors/aloha-maid-logo.png',
+  'fence masters': '/images/logos/sponsors/fence-masters-logo.png',
+  'ite': '/images/logos/sponsors/ite-logo.png',
+  'hertz & dollar': '/images/logos/sponsors/hertz-dollar-logo.jpg',
+  'stroll guam': '/images/logos/sponsors/stroll-guam-logo.png',
+};
+
+/** Resolve sponsor logo: prefer Active Storage URL, fall back to local image map. */
+export function getSponsorLogo(name: string, apiLogoUrl?: string | null): string | null {
+  const resolved = apiLogoUrl ? resolveMediaUrl(apiLogoUrl) : null;
+  if (resolved) return resolved;
+  return SPONSOR_LOGO_MAP[name.toLowerCase()] ?? null;
+}
+
+/** Ensure a URL has a protocol prefix so it doesn't become a relative link. */
+export function normalizeExternalUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/^[a-z][a-z0-9+\-.]*:/i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
 }

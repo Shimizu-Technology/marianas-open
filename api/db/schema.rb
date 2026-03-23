@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_19_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_23_043447) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -151,7 +151,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_180000) do
     t.decimal "longitude"
     t.string "name"
     t.bigint "organization_id", null: false
+    t.text "prize_description"
     t.decimal "prize_pool"
+    t.string "prize_title"
     t.jsonb "registration_fee_sections", default: [], null: false
     t.jsonb "registration_info_items", default: [], null: false
     t.jsonb "registration_steps", default: [], null: false

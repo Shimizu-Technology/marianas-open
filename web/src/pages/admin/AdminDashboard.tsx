@@ -4,6 +4,7 @@ import { LayoutDashboard, CalendarDays, Handshake, Users, Plus, ArrowRight, Load
 import { motion } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Event } from '../../services/api'
+import { formatDate } from '../../utils/dates'
 
 interface Stats {
   totalEvents: number
@@ -134,7 +135,7 @@ export default function AdminDashboard() {
                 <div className="min-w-0">
                   <div className="text-sm text-text-primary font-medium">{event.name}</div>
                   <div className="text-xs text-text-muted mt-0.5">
-                    {event.city}, {event.country} — {event.date}
+                    {event.city}, {event.country} — {formatDate(event.date)}
                   </div>
                 </div>
                 <span className={`text-xs px-2 py-0.5 self-start sm:self-auto ${

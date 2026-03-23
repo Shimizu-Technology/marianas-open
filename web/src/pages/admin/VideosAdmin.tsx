@@ -3,6 +3,7 @@ import { Play, Plus, Pencil, Trash2, X, Loader2, Save, Star } from 'lucide-react
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Video, VideoFormData, Event } from '../../services/api'
+import { useEditingParam } from '../../hooks/useEditingParam'
 
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black'] as const
 const CATEGORIES = ['gi', 'no-gi'] as const
@@ -34,7 +35,8 @@ export default function VideosAdmin() {
   const [videos, setVideos] = useState<Video[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState<number | 'new' | null>(null)
+  const [editing, setEditing] = useEditingParam()
+
   const [form, setForm] = useState<VideoFormData>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -55,19 +57,48 @@ export default function VideosAdmin() {
 
   useEffect(() => { load() }, [load])
 
+  useEffect(() => {
+    if (editing === 'new') {
+      setForm(emptyForm)
+    } else if (typeof editing === 'number' && videos.length > 0) {
+      const video = videos.find(v => v.id === editing)
+      if (video) {
+        setForm({
+          title: video.title,
+          youtube_url: video.youtube_url,
+          competitor_1_name: video.competitor_1_name || '',
+          competitor_2_name: video.competitor_2_name || '',
+          weight_class: video.weight_class || '',
+          belt_rank: video.belt_rank || '',
+          round: video.round || '',
+          result: video.result || '',
+          duration_seconds: video.duration_seconds,
+          category: video.category || '',
+          sort_order: video.sort_order,
+          featured: video.featured,
+          status: video.status,
+          event_id: video.event_id,
+        })
+      }
+    }
+  }, [editing, videos])
+
   const handleSave = async () => {
     setSaving(true)
     setError('')
     try {
       if (editing === 'new') {
-        await api.admin.createVideo(form)
+        const res = await api.admin.createVideo(form)
         setSuccess('Video created')
+        await load()
+        if (res.video?.id) {
+          setEditing(res.video.id)
+        }
       } else if (typeof editing === 'number') {
         await api.admin.updateVideo(editing, form)
         setSuccess('Video updated')
+        await load()
       }
-      setEditing(null)
-      await load()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
@@ -252,7 +283,7 @@ export default function VideosAdmin() {
                 <input
                   type="number"
                   value={form.sort_order}
-                  onChange={e => setForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                  onChange={e => setForm(prev => ({ ...prev, sort_order: parseInt(e.target.value, 10) || 0 }))}
                   className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none"
                 />
               </div>

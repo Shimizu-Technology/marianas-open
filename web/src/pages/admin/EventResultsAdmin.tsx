@@ -8,6 +8,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Event, EventResult, EventResultFormData, ImportPreview } from '../../services/api'
+import { formatDate } from '../../utils/dates'
 
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black']
 const GENDERS = ['male', 'female']
@@ -253,7 +254,7 @@ export default function EventResultsAdmin() {
               <h1 className="font-heading text-xl font-bold text-text-primary">{event.name}</h1>
             </div>
             <p className="text-xs text-text-muted mt-0.5">
-              {event.date} &middot; {event.city}, {event.country} &middot;
+              {formatDate(event.date)} &middot; {event.city}, {event.country} &middot;
               <span className={`ml-1 px-1.5 py-0.5 text-[10px] ${
                 event.status === 'completed' ? 'bg-green-500/10 text-green-400' :
                 event.status === 'published' ? 'bg-blue-500/10 text-blue-400' :
@@ -358,12 +359,12 @@ export default function EventResultsAdmin() {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4 space-y-3">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="bg-white/[0.03] p-3 text-center">
-                <div className="text-lg font-bold text-text-primary">{importPreview.preview.total_results}</div>
+                <div className="text-lg font-bold text-text-primary">{importPreview.preview.total}</div>
                 <div className="text-[10px] text-text-muted uppercase">Results to Import</div>
               </div>
               <div className="bg-white/[0.03] p-3 text-center">
-                <div className="text-lg font-bold text-text-primary">{importPreview.preview.divisions}</div>
-                <div className="text-[10px] text-text-muted uppercase">Divisions</div>
+                <div className="text-lg font-bold text-text-primary">{Object.keys(importPreview.preview.by_belt || {}).length}</div>
+                <div className="text-[10px] text-text-muted uppercase">Belt Ranks</div>
               </div>
               <div className="bg-white/[0.03] p-3 text-center">
                 <div className="text-lg font-bold text-text-primary">{importPreview.preview.countries}</div>
@@ -462,7 +463,7 @@ export default function EventResultsAdmin() {
                   options={GENDERS.map(g => ({ value: g, label: g.charAt(0).toUpperCase() + g.slice(1) }))} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <SelectField label="Placement" value={form.placement.toString()} onChange={v => setForm(f => ({ ...f, placement: parseInt(v) }))}
+                <SelectField label="Placement" value={form.placement.toString()} onChange={v => setForm(f => ({ ...f, placement: parseInt(v, 10) }))}
                   options={PLACEMENTS.map(p => ({ value: p.toString(), label: `${PLACEMENT_LABELS[p].label} (${p})` }))} />
                 <Field label="Weight Class" value={form.weight_class} onChange={v => setForm(f => ({ ...f, weight_class: v }))} placeholder="e.g. Light" />
                 <Field label="Age Category" value={form.age_category} onChange={v => setForm(f => ({ ...f, age_category: v }))} placeholder="e.g. adult" />

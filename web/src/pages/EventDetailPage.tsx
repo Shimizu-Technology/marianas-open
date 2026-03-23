@@ -9,8 +9,8 @@ import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EventResultsSection from '../components/EventResultsSection';
 import SEO from '../components/SEO';
-import { useEvents } from '../hooks/useApi';
-import { getEventHeroImage, resolveMediaUrl } from '../utils/images';
+import { useEvents, useSponsors } from '../hooks/useApi';
+import { getEventHeroImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -37,22 +37,6 @@ const EVENT_POSTER_MAP: Record<string, { src: string; label: string }> = {
   },
 };
 
-const EVENT_ACCOMMODATION_IMAGE_MAP: Record<string, string[]> = {
-  'marianas-pro-manila-2026': [
-    '/images/hotel1.jpeg',
-    '/images/hotel2.jpeg',
-    '/images/hotel3.jpeg',
-  ],
-};
-
-const EVENT_PARTNERS = [
-  { name: 'ASJJF', src: '/images/logos/asjjf-logo.png', href: 'https://asjjf.org', heightClass: 'h-12' },
-  { name: 'MSJJF', src: '/images/logos/msjjf-logo-white.png', href: 'https://marianasopen.com', heightClass: 'h-10' },
-  { name: 'Copa de Marianas', src: '/images/logos/copa-seal-logo.png', href: 'https://asjjf.org/main/eventInfo/1837', heightClass: 'h-12' },
-  { name: 'Marianas Pro', src: '/images/logos/mp-seal-logo.png', href: 'https://marianasopen.com', heightClass: 'h-12' },
-  { name: 'Road to the Open', src: '/images/logos/road-to-open-logo-white.png', href: 'https://marianasopen.com/calendar', heightClass: 'h-9' },
-] as const;
-
 function splitCommaSeparated(value: string | null | undefined) {
   return value ? value.split(/\s*,\s*/).filter(Boolean) : [];
 }
@@ -71,6 +55,8 @@ export default function EventDetailPage() {
   const shouldReduceMotion = useReducedMotion();
   const { events, loading } = useEvents();
 
+  const { sponsors } = useSponsors();
+
   // If slug provided, show that event; otherwise show main event
   const mainEvent = slug
     ? events.find(e => e.slug === slug) || null
@@ -78,51 +64,29 @@ export default function EventDetailPage() {
 
   const isCompleted = mainEvent?.status === 'completed';
 
-  // Fallback schedule items from i18n if API has none
-  const fallbackScheduleItems = [
-    { time: '7:00 AM', event: t('event.schedule1') },
-    { time: '8:00 AM', event: t('event.schedule2') },
-    { time: '10:00 AM', event: t('event.schedule3') },
-    { time: '1:00 PM', event: t('event.schedule4') },
-    { time: '4:00 PM', event: t('event.schedule5') },
-    { time: '6:00 PM', event: t('event.schedule6') },
-    { time: '8:00 PM', event: t('event.schedule7') },
-  ];
-
+  // Schedule: only from API, no hardcoded fallback
   const hasRealScheduleItems = !!mainEvent && (mainEvent.event_schedule_items?.length ?? 0) > 0;
   const scheduleItems = hasRealScheduleItems
-    ? mainEvent.event_schedule_items
+    ? [...mainEvent.event_schedule_items]
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(item => ({ time: item.time, event: item.description }))
-    : mainEvent?.is_main_event
-      ? fallbackScheduleItems
-      : [];
-  const scheduleDescription = mainEvent?.is_main_event
-    ? t('event.scheduleDesc')
-    : hasRealScheduleItems
-      ? t(
+    : [];
+  const scheduleDescription = hasRealScheduleItems
+    ? (mainEvent.schedule_note?.trim()
+        || t(
           'event.scheduleOrganizerDesc',
           'Official match schedule provided by the organizer. Matches may begin up to 30 minutes early, so athletes should be in the warm-up area at least 40 minutes before their division.'
-        )
-      : isCompleted
-        ? t('event.scheduleUnavailablePast', 'Official schedule was not published for this event.')
-        : t('event.scheduleComingSoon', 'Official schedule will be posted once it is released by the organizer.');
+        ))
+    : isCompleted
+      ? t('event.scheduleUnavailablePast', 'Official schedule was not published for this event.')
+      : t('event.scheduleComingSoon', 'Official schedule will be posted once it is released by the organizer.');
 
-  // Fallback prize breakdown from i18n if API has none
-  const fallbackPrizeBreakdown = [
-    { division: t('event.prizeBlackOpenM'), prize: '$10,000' },
-    { division: t('event.prizeBlackOpenF'), prize: '$10,000' },
-    { division: t('event.prizeBlackWeight'), prize: '$3,000' },
-    { division: t('event.prizeBrownWeight'), prize: '$1,500' },
-    { division: t('event.prizeTeam'), prize: '$2,500' },
-    { division: t('event.prizeKids'), prize: '$500' },
-  ];
-
+  // Prizes: only from API, no hardcoded fallback
   const hasCashPrizes = mainEvent?.prize_categories?.some(c => Number(c.amount) > 0) ?? false;
   const hasTripPackages = mainEvent?.prize_categories?.some(c => Number(c.amount) === 0) ?? false;
 
   const prizeBreakdown = mainEvent && mainEvent.prize_categories?.length > 0
-    ? mainEvent.prize_categories
+    ? [...mainEvent.prize_categories]
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(cat => {
           const amt = Number(cat.amount);
@@ -131,14 +95,16 @@ export default function EventDetailPage() {
             prize: amt > 0 ? `$${amt.toLocaleString()}` : '',
           };
         })
-    : fallbackPrizeBreakdown;
+    : [];
 
-  const prizePoolDisplay = mainEvent?.prize_pool ? `$${Number(mainEvent.prize_pool).toLocaleString()}` : '$50,000';
+  const prizePoolDisplay = mainEvent?.prize_pool ? `$${Number(mainEvent.prize_pool).toLocaleString()}` : null;
 
   const activeAccommodations = (mainEvent?.event_accommodations ?? [])
     .filter(a => a.active)
     .sort((a, b) => a.sort_order - b.sort_order);
-  const accommodationImages = mainEvent?.slug ? (EVENT_ACCOMMODATION_IMAGE_MAP[mainEvent.slug] ?? []) : [];
+  const accommodationImages = activeAccommodations
+    .map(a => a.image_url ? resolveMediaUrl(a.image_url) : null)
+    .filter((url): url is string => url !== null && url !== undefined);
 
   const venueHighlights = getValidItems(mainEvent?.venue_highlights);
   const registrationSteps = (mainEvent?.registration_steps ?? []).filter(step => hasMeaningfulText(step.title) && hasMeaningfulText(step.description));
@@ -158,36 +124,7 @@ export default function EventDetailPage() {
   const shareUrl = mainEvent?.slug
     ? `https://marianasopen.com/events/${mainEvent.slug}`
     : 'https://marianasopen.com';
-  const defaultRegistrationSteps = mainEvent ? [
-    {
-      step: '01',
-      title: t('event.step1'),
-      desc: t('event.step1Desc'),
-      url: '',
-      linkLabel: '',
-    },
-    {
-      step: '02',
-      title: t('event.step2'),
-      desc: t('event.step2Dynamic', {
-        eventName: mainEvent.name,
-        defaultValue: `Open "${mainEvent.name}" in the event listings and confirm your division.`,
-      }),
-      url: '',
-      linkLabel: '',
-    },
-    {
-      step: '03',
-      title: t('event.step3'),
-      desc: t('event.step3Desc'),
-      url: '',
-      linkLabel: '',
-    },
-  ] : [
-    { step: '01', title: t('event.step1'), desc: t('event.step1Desc'), url: '', linkLabel: '' },
-    { step: '02', title: t('event.step2'), desc: t('event.step2Desc'), url: '', linkLabel: '' },
-    { step: '03', title: t('event.step3'), desc: t('event.step3Desc'), url: '', linkLabel: '' },
-  ];
+  // Registration steps: only from API
   const displayRegistrationSteps = registrationSteps.length > 0
     ? registrationSteps.map((step, idx) => ({
         step: String(idx + 1).padStart(2, '0'),
@@ -196,34 +133,12 @@ export default function EventDetailPage() {
         url: step.url || '',
         linkLabel: step.link_label || '',
       }))
-    : defaultRegistrationSteps;
-  const travelDescription = mainEvent?.travel_description
-    || (mainEvent?.is_main_event ? t('event.travelDesc') : '');
-  const displayTravelItems = travelItems.length > 0
-    ? travelItems
-    : mainEvent?.is_main_event
-      ? [
-          {
-            title: t('event.flights'),
-            description: t('event.flightsDesc'),
-            value: `${t('event.flightTokyo')}, ${t('event.flightManila')}, ${t('event.flightSeoul')}, ${t('event.flightHonolulu')}`,
-            url: '',
-            link_label: '',
-          },
-        ]
-      : [];
-  const visaDescription = mainEvent?.visa_description
-    || (mainEvent?.is_main_event ? t('event.visaDesc') : '');
-  const displayVisaItems = visaItems.length > 0
-    ? visaItems
-    : mainEvent?.is_main_event
-      ? [
-          { title: t('event.visaEsta'), description: t('event.visaEstaDesc') },
-          { title: t('event.visaGuamCnmi'), description: t('event.visaGuamCnmiDesc') },
-        ]
-      : [];
-  const shouldShowTravelSection = mainEvent?.is_main_event
-    || hasMeaningfulText(travelDescription)
+    : [];
+  const travelDescription = mainEvent?.travel_description || '';
+  const displayTravelItems = travelItems;
+  const visaDescription = mainEvent?.visa_description || '';
+  const displayVisaItems = visaItems;
+  const shouldShowTravelSection = hasMeaningfulText(travelDescription)
     || hasMeaningfulText(visaDescription)
     || displayTravelItems.length > 0
     || displayVisaItems.length > 0
@@ -360,9 +275,9 @@ export default function EventDetailPage() {
             className="max-w-4xl"
           >
             <div className="flex items-center gap-2 mb-6">
-              {Array.from({ length: mainEvent?.asjjf_stars || 5 }).map((_, i) => (
+              {mainEvent?.asjjf_stars ? Array.from({ length: mainEvent.asjjf_stars }).map((_, i) => (
                 <Star key={i} size={16} className="fill-gold-500 text-gold-500" />
-              ))}
+              )) : null}
               <span className="text-gold-400 text-sm font-heading ml-2 uppercase tracking-wider">
                 {asjjfRankText}
               </span>
@@ -401,10 +316,12 @@ export default function EventDetailPage() {
                 <MapPin size={16} className="text-gold-500" />
                 {mainEvent ? `${mainEvent.venue_name}` : t('event.venue')}
               </div>
+              {(hasCashPrizes || hasTripPackages || prizePoolDisplay) && (
               <div className="flex items-center gap-2">
                 <Trophy size={16} className="text-gold-500" />
-                {hasCashPrizes ? prizePoolDisplay : hasTripPackages ? t('event.tripPackages', 'Trip Packages to Guam') : prizePoolDisplay}
+                {hasCashPrizes ? (prizePoolDisplay || t('event.totalPrizePool')) : hasTripPackages ? t('event.tripPackages', 'Trip Packages to Guam') : prizePoolDisplay}
               </div>
+              )}
             </div>
           </motion.div>
         </div>
@@ -414,6 +331,17 @@ export default function EventDetailPage() {
       <section className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {/* About — from admin description, spans full width */}
+            {hasMeaningfulText(mainEvent?.description) && (
+            <ScrollReveal className="lg:col-span-3 md:col-span-2">
+              <div className="bg-surface/50 border border-white/5 px-8 py-6">
+                <p className="text-text-secondary text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                  {mainEvent!.description}
+                </p>
+              </div>
+            </ScrollReveal>
+            )}
+
             {/* Schedule — spans 2 cols */}
             <ScrollReveal className="lg:col-span-2">
               <div className="bg-surface border border-white/5 p-8 h-full">
@@ -448,23 +376,28 @@ export default function EventDetailPage() {
               </div>
             </ScrollReveal>
 
-            {/* Prize Pool / Trip Packages */}
+            {/* Prize Pool / Trip Packages — only render when prize data exists */}
+            {(hasCashPrizes || hasTripPackages || prizePoolDisplay) && (
             <ScrollReveal delay={0.1}>
               <div className="bg-gradient-to-br from-gold-500/10 to-transparent border border-gold-500/20 p-8 h-full">
                 <Trophy size={24} className="text-gold-500 mb-4" />
                 {hasCashPrizes ? (
                   <>
-                    <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>
+                    {prizePoolDisplay && <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>}
                     <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
                   </>
                 ) : hasTripPackages ? (
                   <>
-                    <div className="text-2xl sm:text-3xl font-heading font-black text-gold-500 mb-2">{t('event.winYourWay', 'Win Your Way to Guam!')}</div>
-                    <div className="text-sm text-text-secondary mb-6">{t('event.tripPackageDesc', 'Compete for a trip package to the Marianas Open International Championship 2026 — $50,000 cash prize pool!')}</div>
+                    <div className="text-2xl sm:text-3xl font-heading font-black text-gold-500 mb-2">
+                      {mainEvent?.prize_title?.trim() || t('event.winYourWay', 'Win Your Way to Guam!')}
+                    </div>
+                    <div className="text-sm text-text-secondary mb-6">
+                      {mainEvent?.prize_description?.trim() || t('event.tripPackageDesc', `Compete for a trip package to the Marianas Open International Championship — ${prizePoolDisplay || '$50,000'} cash prize pool!`)}
+                    </div>
                   </>
                 ) : (
                   <>
-                    <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>
+                    {prizePoolDisplay && <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>}
                     <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
                   </>
                 )}
@@ -478,6 +411,7 @@ export default function EventDetailPage() {
                 </div>
               </div>
             </ScrollReveal>
+            )}
 
             {/* Event poster / action photo */}
             <ScrollReveal delay={0.12}>
@@ -540,7 +474,14 @@ export default function EventDetailPage() {
                     <MapPin size={28} className="text-gold-500" />
                     <p className="text-text-secondary text-sm">{mainEvent ? `${mainEvent.venue_name} · ${mainEvent.city}, ${mainEvent.country}` : `${t('event.venue')} · ${t('event.location')}`}</p>
                     <a
-                      href={`https://maps.google.com/?q=${encodeURIComponent(mainEvent ? `${mainEvent.venue_name} ${mainEvent.city} ${mainEvent.country}` : 'UOG Calvo Fieldhouse Guam')}`}
+                      href={mainEvent?.latitude && mainEvent?.longitude
+                        ? `https://maps.google.com/?q=${mainEvent.latitude},${mainEvent.longitude}`
+                        : `https://maps.google.com/?q=${encodeURIComponent(mainEvent
+                            ? (mainEvent.venue_address
+                                ? `${mainEvent.venue_address}, ${mainEvent.city}, ${mainEvent.country}`
+                                : `${mainEvent.venue_name} ${mainEvent.city} ${mainEvent.country}`)
+                            : 'UOG Calvo Fieldhouse Guam')}`
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-gold-500 text-xs font-heading font-semibold uppercase tracking-wider hover:text-gold-400 transition-colors"
@@ -794,7 +735,8 @@ export default function EventDetailPage() {
         </section>
       )}
 
-      {/* How to Register */}
+      {/* How to Register — only if steps or URL configured */}
+      {(displayRegistrationSteps.length > 0 || mainEvent?.registration_url) && (
       <section className="py-16 sm:py-20 bg-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
@@ -870,6 +812,7 @@ export default function EventDetailPage() {
           </ScrollReveal>
         </div>
       </section>
+      )}
 
       {(registrationFeeSections.length > 0 || registrationInfoItems.length > 0) && (
         <section className="py-16 sm:py-20">
@@ -1020,16 +963,12 @@ export default function EventDetailPage() {
         </section>
       )}
 
-      {/* Photo Gallery Strip */}
+      {/* Photo Gallery Strip — only when gallery images exist */}
+      {galleryImages.length > 0 && (
       <section className="py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {(galleryImages.length > 0 ? galleryImages : [
-              { src: '/images/action-match-1.webp', alt: t('event.galleryMatch'), caption: '' },
-              { src: '/images/ceremony-1.webp', alt: t('event.galleryCeremony'), caption: '' },
-              { src: '/images/venue-mats.webp', alt: t('event.galleryVenue'), caption: '' },
-              { src: '/images/podium-2.webp', alt: t('event.galleryPodium'), caption: '' },
-            ]).map((img, i) => (
+            {galleryImages.map((img, i) => (
               <ScrollReveal key={i} delay={i * 0.08}>
                 <div className="relative overflow-hidden aspect-[3/2] border border-white/5 group">
                   <ImageWithShimmer src={img.src} alt={img.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -1044,8 +983,10 @@ export default function EventDetailPage() {
           </div>
         </div>
       </section>
+      )}
 
-      {/* Official Partners strip */}
+      {/* Official Sponsors — from database */}
+      {sponsors.length > 0 && (
       <section className="py-14 border-y border-white/5 bg-navy-900/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
@@ -1053,25 +994,44 @@ export default function EventDetailPage() {
               {t('home.sponsorsTitle')}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
-              {EVENT_PARTNERS.map((partner) => (
+              {[...sponsors]
+                .sort((a, b) => a.sort_order - b.sort_order)
+                .map((sponsor) => {
+                const href = normalizeExternalUrl(sponsor.website_url)
+                const logoSrc = getSponsorLogo(sponsor.name, sponsor.logo_url)
+                const inner = logoSrc ? (
+                  <img
+                    src={logoSrc}
+                    alt={sponsor.name}
+                    className="h-10 sm:h-12 object-contain"
+                  />
+                ) : (
+                  <span className="text-sm font-medium text-text-muted">{sponsor.name}</span>
+                )
+                return href ? (
                 <a
-                  key={partner.name}
-                  href={partner.href}
+                  key={sponsor.id}
+                  href={href}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="opacity-60 hover:opacity-100 transition-opacity duration-300"
                 >
-                  <img
-                    src={partner.src}
-                    alt={partner.name}
-                    className={`${partner.heightClass} object-contain`}
-                  />
+                  {inner}
                 </a>
-              ))}
+                ) : (
+                <div
+                  key={sponsor.id}
+                  className="opacity-60"
+                >
+                  {inner}
+                </div>
+                )
+              })}
             </div>
           </ScrollReveal>
         </div>
       </section>
+      )}
 
       {/* Results Section — only for completed events */}
       {isCompleted && mainEvent && (

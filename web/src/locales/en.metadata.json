@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "calendar": {
+      "context": "Navigation label for the 'Pro Series' page — a circuit of qualifying jiu-jitsu tournaments across Asia-Pacific"
+    },
+    "watch": {
+      "context": "Navigation label for watching live streams and match videos — verb, as in 'Watch matches'"
+    }
+  },
+  "hero": {
+    "subtitle": {
+      "context": "Tagline for the Marianas Open — a Brazilian Jiu-Jitsu championship held in Guam"
+    },
+    "asjjfBadge": {
+      "context": "ASJJF = Asia Sport Jiu-Jitsu Federation. Star ranking indicates tournament prestige."
+    }
+  },
+  "event": {
+    "tripPackages": {
+      "context": "Jiu-jitsu tournament prizes: winners receive funded trip packages to compete at the championship in Guam"
+    },
+    "winYourWay": {
+      "context": "Motivational headline for prize section — encouraging athletes to compete and win a trip to Guam"
+    },
+    "tripPackageDesc": {
+      "context": "Description of trip package prizes — athletes win travel to the Marianas Open International Championship"
+    },
+    "asjjfRankDynamic": {
+      "context": "ASJJF (Asia Sport Jiu-Jitsu Federation) star ranking badge. {{count}} is a number 1-5."
+    },
+    "competitionMats": {
+      "context": "Competition mats — padded floor areas where jiu-jitsu matches take place simultaneously"
+    },
+    "qualifierTagline": {
+      "context": "Indicates this event is an official qualifying tournament for the Grand Championship"
+    },
+    "visaEsta": {
+      "context": "ESTA = Electronic System for Travel Authorization. A US visa waiver program."
+    },
+    "visaGuamCnmi": {
+      "context": "CNMI = Commonwealth of the Northern Mariana Islands. A special visa waiver program for Guam and CNMI."
+    }
+  },
+  "watch": {
+    "visionTitle": {
+      "context": "BJJ = Brazilian Jiu-Jitsu. This is about future live streaming features for matches."
+    },
+    "category": {
+      "gi": {
+        "context": "Gi = the traditional uniform worn in Brazilian Jiu-Jitsu. This is a competition category name, do NOT translate."
+      },
+      "noGi": {
+        "context": "No-Gi = grappling without the traditional uniform. This is a competition category name, do NOT translate."
+      }
+    },
+    "weight": {
+      "rooster": {
+        "context": "Jiu-jitsu weight class name — lightest division, typically under 57.5kg"
+      }
+    }
+  },
+  "rankings": {
+    "subtitle": {
+      "context": "ASJJF = Asia Sport Jiu-Jitsu Federation. Ranking points are earned by competing in sanctioned events."
+    },
+    "alone": {
+      "context": "In jiu-jitsu, 'Alone' means a competitor won their division bracket with no opponents — an automatic win"
+    },
+    "gi": {
+      "gi": {
+        "context": "Gi = the traditional uniform in Brazilian Jiu-Jitsu. Competition category name, do NOT translate."
+      },
+      "noGi": {
+        "context": "No-Gi = grappling without the traditional uniform. Competition category name, do NOT translate."
+      }
+    }
+  },
+  "calendar": {
+    "roadToOpen": {
+      "context": "The qualifying tournament series that leads to the main Marianas Open championship"
+    }
+  },
+  "rules": {
+    "sections": {
+      "giNoGi": {
+        "title": {
+          "context": "Gi and no-gi are jiu-jitsu competition formats. 'Gi' is the traditional uniform; 'no-gi' is without it."
+        }
+      }
+    }
+  },
+  "shimizu": {
+    "title": {
+      "context": "Shimizu Technology is the software company that built this website. Company name, do NOT translate."
+    }
+  }
+}

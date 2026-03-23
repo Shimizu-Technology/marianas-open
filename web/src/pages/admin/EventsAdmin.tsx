@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText } from 'lucide-react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -21,15 +21,21 @@ import type {
 } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
 import { resolveMediaUrl } from '../../utils/images'
+import { formatDate } from '../../utils/dates'
+import { useEditingParam } from '../../hooks/useEditingParam'
+
+type SortField = 'name' | 'date' | 'location' | 'stars' | 'status'
+type SortDir = 'asc' | 'desc'
 
 const emptyForm: EventFormData = {
   name: '', slug: '', description: '', date: '', end_date: '',
   venue_name: '', venue_address: '', city: '', country: '', country_code: '',
-  asjjf_stars: 0, is_main_event: false, prize_pool: '',
+  asjjf_stars: 0, is_main_event: false, prize_pool: '', prize_title: '', prize_description: '',
   registration_url: '', registration_url_gi: '', registration_url_nogi: '',
   status: 'draft', latitude: '', longitude: '',
   live_stream_url: '', live_stream_active: false,
   tagline: '', schedule_note: '',
+  asjjf_event_ids: [],
   venue_highlights: [],
   registration_steps: [],
   registration_fee_sections: [],
@@ -49,7 +55,7 @@ function eventToForm(e: Event): EventFormData {
     venue_name: e.venue_name || '', venue_address: e.venue_address || '',
     city: e.city || '', country: e.country || '', country_code: e.country_code || '',
     asjjf_stars: e.asjjf_stars || 0, is_main_event: e.is_main_event || false,
-    prize_pool: e.prize_pool || '',
+    prize_pool: e.prize_pool || '', prize_title: e.prize_title || '', prize_description: e.prize_description || '',
     registration_url: e.registration_url || '',
     registration_url_gi: e.registration_url_gi || '',
     registration_url_nogi: e.registration_url_nogi || '',
@@ -58,6 +64,7 @@ function eventToForm(e: Event): EventFormData {
     live_stream_url: e.live_stream_url || '', live_stream_active: e.live_stream_active || false,
     tagline: e.tagline || '',
     schedule_note: e.schedule_note || '',
+    asjjf_event_ids: e.asjjf_event_ids || [],
     venue_highlights: e.venue_highlights || [],
     registration_steps: e.registration_steps || [],
     registration_fee_sections: e.registration_fee_sections || [],
@@ -78,13 +85,32 @@ function eventToForm(e: Event): EventFormData {
 export default function EventsAdmin() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState<number | 'new' | null>(null)
+  const [editing, setEditing] = useEditingParam()
+
   const [form, setForm] = useState<EventFormData>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
+  const [pendingHeroImage, setPendingHeroImage] = useState<File | null>(null)
+  const heroInputRef = useRef<HTMLInputElement>(null)
+
+  const pendingHeroPreviewUrl = useMemo(
+    () => (pendingHeroImage ? URL.createObjectURL(pendingHeroImage) : null),
+    [pendingHeroImage]
+  )
+
+  useEffect(() => {
+    return () => {
+      if (pendingHeroPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(pendingHeroPreviewUrl)
+    }
+  }, [pendingHeroPreviewUrl])
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [sortField, setSortField] = useState<SortField>('date')
+  const [sortDir, setSortDir] = useState<SortDir>('desc')
 
   const loadEvents = useCallback(async () => {
     try {
@@ -99,18 +125,90 @@ export default function EventsAdmin() {
 
   useEffect(() => { loadEvents() }, [loadEvents])
 
+  useEffect(() => {
+    if (editing === 'new') {
+      setForm(emptyForm)
+      setPendingHeroImage(null)
+    } else if (typeof editing === 'number' && events.length > 0) {
+      const event = events.find(e => e.id === editing)
+      if (event) {
+        setForm(eventToForm(event))
+        setPendingHeroImage(null)
+      }
+    }
+  }, [editing, events])
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDir(field === 'date' ? 'desc' : 'asc')
+    }
+  }
+
+  const filteredEvents = useMemo(() => {
+    let result = events
+
+    if (statusFilter !== 'all') {
+      result = result.filter(e => e.status === statusFilter)
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(e =>
+        e.name.toLowerCase().includes(q) ||
+        e.city?.toLowerCase().includes(q) ||
+        e.country?.toLowerCase().includes(q) ||
+        e.slug.toLowerCase().includes(q)
+      )
+    }
+
+    const sorted = [...result].sort((a, b) => {
+      let cmp = 0
+      switch (sortField) {
+        case 'name': cmp = a.name.localeCompare(b.name); break
+        case 'date': cmp = (a.date || '').localeCompare(b.date || ''); break
+        case 'location': cmp = `${a.city} ${a.country}`.localeCompare(`${b.city} ${b.country}`); break
+        case 'stars': cmp = (a.asjjf_stars || 0) - (b.asjjf_stars || 0); break
+        case 'status': cmp = (a.status || '').localeCompare(b.status || ''); break
+      }
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+
+    return sorted
+  }, [events, searchQuery, statusFilter, sortField, sortDir])
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    events.forEach(e => { counts[e.status] = (counts[e.status] || 0) + 1 })
+    return counts
+  }, [events])
+
   const handleSave = async () => {
     setSaving(true)
     setError('')
     try {
+      let savedEventId: number | null = null
       if (editing === 'new') {
-        await api.admin.createEvent(form)
-        setSuccess('Event created')
+        const res = await api.admin.createEvent(form)
+        savedEventId = res.event.id
+        setEditing(savedEventId)
+        let imageUploadFailed = false
+        if (pendingHeroImage && savedEventId) {
+          try {
+            await api.admin.uploadEventImage(savedEventId, pendingHeroImage)
+          } catch (imgErr) {
+            imageUploadFailed = true
+            setError(imgErr instanceof Error ? imgErr.message : 'Event created but hero image upload failed')
+          }
+        }
+        if (!imageUploadFailed) setSuccess('Event created')
       } else if (typeof editing === 'number') {
         await api.admin.updateEvent(editing, form)
         setSuccess('Event updated')
       }
-      setEditing(null)
+      setPendingHeroImage(null)
       await loadEvents()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -134,11 +232,15 @@ export default function EventsAdmin() {
 
   const handleImageUpload = async (file: File) => {
     if (typeof editing !== 'number') return
+    try {
     await api.admin.uploadEventImage(editing, file)
     await loadEvents()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Image upload failed')
+    }
   }
 
-  const updateForm = (field: string, value: string | number | boolean) => {
+  const updateForm = (field: string, value: string | number | boolean | number[]) => {
     setForm(prev => ({ ...prev, [field]: value }))
   }
 
@@ -412,9 +514,17 @@ export default function EventsAdmin() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-        <div className="flex items-center gap-3">
-          <CalendarDays className="w-6 h-6 text-gold" />
-          <h1 className="font-heading text-2xl font-bold text-text-primary">Events</h1>
+        <div
+          className={`flex items-center gap-3 ${editing ? 'cursor-pointer group' : ''}`}
+          onClick={editing ? () => { setEditing(null); setError('') } : undefined}
+        >
+          <CalendarDays className={`w-6 h-6 text-gold ${editing ? 'group-hover:text-gold/70' : ''}`} />
+          <h1 className={`font-heading text-2xl font-bold text-text-primary ${editing ? 'group-hover:text-gold transition-colors' : ''}`}>
+            Events
+          </h1>
+          {editing && (
+            <span className="text-xs text-text-muted group-hover:text-text-secondary transition-colors">(back to list)</span>
+          )}
         </div>
         {!editing && (
           <button
@@ -460,9 +570,20 @@ export default function EventsAdmin() {
             <h2 className="font-heading text-sm font-semibold text-text-primary">
               {editing === 'new' ? 'New Event' : 'Edit Event'}
             </h2>
+            <div className="flex items-center gap-3">
+              {typeof editing === 'number' && (
+                <Link
+                  to={`/admin/events/${editing}/results`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 transition-colors"
+                >
+                  <Trophy className="w-3.5 h-3.5" />
+                  Manage Results
+                </Link>
+              )}
             <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
               <X className="w-4 h-4" />
             </button>
+            </div>
           </div>
 
           <div className="p-5 space-y-5">
@@ -489,11 +610,27 @@ export default function EventsAdmin() {
                   { value: 'cancelled', label: 'Cancelled' },
                 ]}
               />
-              <Field label="ASJJF Stars" type="number" value={form.asjjf_stars.toString()} onChange={v => updateForm('asjjf_stars', parseInt(v) || 0)} />
+              <Field label="ASJJF Stars" type="number" value={form.asjjf_stars.toString()} onChange={v => updateForm('asjjf_stars', parseInt(v, 10) || 0)} />
               <Field label="Prize Pool" value={form.prize_pool} onChange={v => updateForm('prize_pool', v)} placeholder="$10,000" />
+              <Field label="Prize Card Title" value={form.prize_title} onChange={v => updateForm('prize_title', v)} placeholder="e.g. Win Your Way to Guam!" />
+              <Field label="Prize Card Description" value={form.prize_description} onChange={v => updateForm('prize_description', v)} placeholder="e.g. Compete for a trip package to..." />
               <Field label="ASJJF Registration URL (Gi)" value={form.registration_url_gi} onChange={v => updateForm('registration_url_gi', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
               <Field label="ASJJF Registration URL (No-Gi)" value={form.registration_url_nogi} onChange={v => updateForm('registration_url_nogi', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
               <Field label="ASJJF Registration URL (Legacy)" value={form.registration_url} onChange={v => updateForm('registration_url', v)} placeholder="https://asjjf.org/events/..." />
+              <div>
+                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">ASJJF Event IDs (for results import)</label>
+                <input
+                  key={`${editing}-${form.asjjf_event_ids.join(',')}`}
+                  defaultValue={form.asjjf_event_ids.join(', ')}
+                  onBlur={e => {
+                    const ids = e.target.value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n > 0)
+                    updateForm('asjjf_event_ids', ids)
+                  }}
+                  placeholder="1863, 1864 (comma-separated)"
+                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                />
+                <p className="text-[10px] text-text-muted mt-1">Numeric IDs from asjjf.org event URLs. Gi and No-Gi are separate IDs.</p>
+              </div>
               <Field label="Latitude" value={form.latitude} onChange={v => updateForm('latitude', v)} />
               <Field label="Longitude" value={form.longitude} onChange={v => updateForm('longitude', v)} />
             </div>
@@ -855,13 +992,71 @@ export default function EventsAdmin() {
             </div>
 
             {/* Hero Image */}
-            {typeof editing === 'number' && (
-              <ImageUpload
-                currentUrl={resolveMediaUrl(currentEvent?.hero_image_url) || null}
-                onUpload={handleImageUpload}
-                label="Hero Image"
-              />
-            )}
+            {(() => {
+              const heroUrl = typeof editing === 'number'
+                ? resolveMediaUrl(currentEvent?.hero_image_url) || null
+                : pendingHeroPreviewUrl
+
+              const handleHeroFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                if (typeof editing === 'number') {
+                  await handleImageUpload(file)
+                } else {
+                  setPendingHeroImage(file)
+                }
+              }
+
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-4">
+                    <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">Hero Image</label>
+                    <input ref={heroInputRef} type="file" accept="image/*" onChange={handleHeroFileChange} className="hidden" />
+                    <button
+                      type="button"
+                      onClick={() => heroInputRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-text-secondary rounded transition-colors"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      {heroUrl ? 'Change Image' : 'Upload Image'}
+                    </button>
+                    {pendingHeroImage && (
+                      <button
+                        type="button"
+                        onClick={() => setPendingHeroImage(null)}
+                        className="text-text-muted hover:text-red-400 transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  {heroUrl && (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <Eye className="w-3.5 h-3.5 text-text-muted" />
+                        <span className="text-[10px] text-text-muted uppercase tracking-wide">Site Preview — how it appears on the event page hero</span>
+                      </div>
+                      <div className="relative overflow-hidden border border-white/10 rounded aspect-[16/6]">
+                        <img src={heroUrl} alt="Hero preview" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-navy-900/75" />
+                        <div className="absolute inset-0 bg-linear-to-t from-navy-900 via-navy-900/50 to-transparent" />
+                        <div className="absolute bottom-3 left-4 right-4 z-10">
+                          <div className="text-gold-500 text-[10px] font-heading uppercase tracking-wider mb-1">
+                            {form.asjjf_stars > 0 ? `${'★'.repeat(form.asjjf_stars)} ASJJF ${form.asjjf_stars}-STAR RANKED EVENT` : ''}
+                          </div>
+                          <div className="text-white font-heading font-black text-sm sm:text-base uppercase leading-tight">
+                            {form.name || 'Event Name'}
+                          </div>
+                          {form.tagline && (
+                            <div className="text-text-secondary text-[10px] font-heading uppercase tracking-wider mt-1">{form.tagline}</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Schedule Items */}
             <div className="border border-white/5">
@@ -885,7 +1080,7 @@ export default function EventsAdmin() {
                           value={item.time}
                           onChange={e => updateScheduleItem(idx, 'time', e.target.value)}
                           placeholder="9:00 AM"
-                          className="w-28 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                          className="w-44 shrink-0 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
                         />
                         <input
                           value={item.description}
@@ -936,7 +1131,7 @@ export default function EventsAdmin() {
                         <input
                           value={item.amount}
                           onChange={e => updatePrizeCategory(idx, 'amount', e.target.value)}
-                          placeholder="$0"
+                          placeholder="Amount (0 if non-cash)"
                           className="w-28 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
                         />
                         <button onClick={() => removePrizeCategory(idx)} className="p-1.5 text-text-muted hover:text-red-400">
@@ -977,47 +1172,83 @@ export default function EventsAdmin() {
       ) : (
         /* Events Table */
         <div className="bg-surface border border-white/5 overflow-hidden">
-          {events.length === 0 ? (
-            <div className="p-8 text-center text-text-muted text-sm">No events yet. Create your first event.</div>
+          {/* Search + Filter Bar */}
+          <div className="px-4 py-3 border-b border-white/5 flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+              <input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search events..."
+                className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none"
+            >
+              <option value="all">All statuses ({events.length})</option>
+              {Object.entries(statusCounts).sort().map(([status, count]) => (
+                <option key={status} value={status}>{status} ({count})</option>
+              ))}
+            </select>
+          </div>
+
+          {filteredEvents.length === 0 ? (
+            <div className="p-8 text-center text-text-muted text-sm">
+              {events.length === 0 ? 'No events yet. Create your first event.' : 'No events match your filters.'}
+            </div>
           ) : (
             <>
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm min-w-[720px]">
-                  <thead>
-                    <tr className="border-b border-white/5 text-left">
-                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Name</th>
-                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Date</th>
-                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Location</th>
-                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Stars</th>
-                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide">Status</th>
-                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide w-24"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {events.map(event => (
-                      <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="px-5 py-3 text-text-primary font-medium">{event.name}</td>
-                        <td className="px-5 py-3 text-text-secondary">{event.date}</td>
-                        <td className="px-5 py-3 text-text-secondary">{event.city}, {event.country}</td>
-                        <td className="px-5 py-3">
-                          <span className="flex items-center gap-1 text-gold">
-                            <Star className="w-3 h-3 fill-current" />
-                            {event.asjjf_stars || 0}
+              <thead>
+                <tr className="border-b border-white/5 text-left">
+                      {([['name', 'Name'], ['date', 'Date'], ['location', 'Location'], ['stars', 'Stars'], ['status', 'Status']] as [SortField, string][]).map(([field, label]) => (
+                        <th
+                          key={field}
+                          onClick={() => toggleSort(field)}
+                          className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide cursor-pointer hover:text-text-secondary select-none transition-colors"
+                        >
+                          <span className="inline-flex items-center gap-1">
+                            {label}
+                            {sortField === field ? (
+                              sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                            ) : (
+                              <ArrowUpDown className="w-3 h-3 opacity-30" />
+                            )}
                           </span>
-                        </td>
-                        <td className="px-5 py-3">
-                          <span className={`text-xs px-2 py-0.5 ${
+                        </th>
+                      ))}
+                  <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide w-24"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                    {filteredEvents.map(event => (
+                  <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-5 py-3 text-text-primary font-medium">{event.name}</td>
+                        <td className="px-5 py-3 text-text-secondary whitespace-nowrap">{formatDate(event.date)}</td>
+                    <td className="px-5 py-3 text-text-secondary">{event.city}, {event.country}</td>
+                    <td className="px-5 py-3">
+                      <span className="flex items-center gap-1 text-gold">
+                        <Star className="w-3 h-3 fill-current" />
+                        {event.asjjf_stars || 0}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3">
+                      <span className={`text-xs px-2 py-0.5 ${
                             event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
-                            event.status === 'published' ? 'bg-green-500/10 text-green-400' :
+                        event.status === 'published' ? 'bg-green-500/10 text-green-400' :
                             event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
                             event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
                             'bg-white/5 text-text-muted'
-                          }`}>
-                            {event.status}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3">
-                          <div className="flex items-center gap-2">
+                      }`}>
+                        {event.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2">
                             <Link
                               to={`/admin/events/${event.id}/results`}
                               className="p-1.5 text-text-muted hover:text-gold transition-colors"
@@ -1025,35 +1256,35 @@ export default function EventsAdmin() {
                             >
                               <Trophy className="w-3.5 h-3.5" />
                             </Link>
-                            <button
-                              onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
-                              className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
+                        <button
+                          onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
+                          className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                               title="Edit"
-                            >
-                              <Pencil className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm(event.id)}
-                              className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(event.id)}
+                          className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
                               title="Delete"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
               </div>
 
               <div className="md:hidden divide-y divide-white/5">
-                {events.map(event => (
+                {filteredEvents.map(event => (
                   <div key={event.id} className="p-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="text-sm text-text-primary font-medium">{event.name}</div>
-                        <div className="text-xs text-text-secondary mt-1">{event.date}</div>
+                        <div className="text-xs text-text-secondary mt-1">{formatDate(event.date)}</div>
                         <div className="text-xs text-text-muted mt-1">{event.city}, {event.country}</div>
                       </div>
                       <span className={`text-xs px-2 py-0.5 shrink-0 ${
@@ -1150,6 +1381,7 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
   const [accommodations, setAccommodations] = useState<EventAccommodation[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<number | 'new' | null>(null)
+  const [error, setError] = useState('')
   const [form, setForm] = useState<EventAccommodationFormData>({
     hotel_name: '', description: '', room_types: '', rate_info: '',
     inclusions: '', check_in_date: '', check_out_date: '',
@@ -1162,13 +1394,16 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
     try {
       const res = await api.admin.getAccommodations(eventId)
       setAccommodations(res.accommodations)
-    } catch { /* ignore */ } finally { setLoading(false) }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load accommodations')
+    } finally { setLoading(false) }
   }, [eventId])
 
   useEffect(() => { load() }, [load])
 
   const handleSave = async () => {
     setSaving(true)
+    setError('')
     try {
       if (editing === 'new') {
         await api.admin.createAccommodation(eventId, form)
@@ -1177,12 +1412,19 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
       }
       setEditing(null)
       await load()
-    } catch { /* ignore */ } finally { setSaving(false) }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save accommodation')
+    } finally { setSaving(false) }
   }
 
   const handleDelete = async (id: number) => {
-    await api.admin.deleteAccommodation(eventId, id)
-    await load()
+    setError('')
+    try {
+      await api.admin.deleteAccommodation(eventId, id)
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete accommodation')
+    }
   }
 
   const editAccommodation = (a: EventAccommodation) => {
@@ -1217,15 +1459,24 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
         )}
       </div>
 
+      {error && (
+        <div className="mx-4 mb-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2">{error}</div>
+      )}
+
       {loading ? (
         <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-text-muted" /></div>
       ) : (
         <div className="border-t border-white/5">
           {accommodations.map(a => (
             <div key={a.id} className="px-4 py-3 flex items-center justify-between border-b border-white/5 last:border-0">
-              <div>
-                <div className="text-sm text-text-primary font-medium">{a.hotel_name}</div>
-                <div className="text-xs text-text-muted">{a.check_in_date && a.check_out_date ? `${a.check_in_date} — ${a.check_out_date}` : 'No dates set'}</div>
+              <div className="flex items-center gap-3">
+                {a.image_url && (
+                  <img src={resolveMediaUrl(a.image_url) || ''} alt={a.hotel_name} className="w-12 h-12 object-cover rounded" />
+                )}
+                <div>
+                  <div className="text-sm text-text-primary font-medium">{a.hotel_name}</div>
+                  <div className="text-xs text-text-muted">{a.check_in_date && a.check_out_date ? `${formatDate(a.check_in_date)} — ${formatDate(a.check_out_date)}` : 'No dates set'}</div>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`text-xs px-1.5 py-0.5 ${a.active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-text-muted'}`}>
@@ -1289,6 +1540,20 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
                 <input type="checkbox" checked={form.active} onChange={e => setForm(p => ({ ...p, active: e.target.checked }))} className="accent-gold" />
                 Active (visible on public site)
               </label>
+              {typeof editing === 'number' && (
+                <ImageUpload
+                  currentUrl={resolveMediaUrl(accommodations.find(a => a.id === editing)?.image_url) || null}
+                  onUpload={async (file) => {
+                    try {
+                      await api.admin.uploadAccommodationImage(eventId, editing, file)
+                      await load()
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : 'Image upload failed')
+                    }
+                  }}
+                  label="Hotel Photo"
+                />
+              )}
               <div className="flex gap-2">
                 <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-4 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 disabled:opacity-50">
                   {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
@@ -1312,6 +1577,7 @@ function EventGallerySection({ eventId }: { eventId: number }) {
   const [galleryImages, setGalleryImages] = useState<EventGalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<number | 'new' | null>(null)
+  const [error, setError] = useState('')
   const [form, setForm] = useState<EventGalleryImageFormData>({
     title: '',
     alt_text: '',
@@ -1326,8 +1592,8 @@ function EventGallerySection({ eventId }: { eventId: number }) {
     try {
       const res = await api.admin.getEventGalleryImages(eventId)
       setGalleryImages(res.gallery_images)
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load gallery')
     } finally {
       setLoading(false)
     }
@@ -1380,14 +1646,21 @@ function EventGallerySection({ eventId }: { eventId: number }) {
       setEditing(null)
       setPendingFile(null)
       await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save gallery image')
     } finally {
       setSaving(false)
     }
   }
 
   const handleDelete = async (id: number) => {
-    await api.admin.deleteEventGalleryImage(eventId, id)
-    await load()
+    setError('')
+    try {
+      await api.admin.deleteEventGalleryImage(eventId, id)
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete gallery image')
+    }
   }
 
   return (
@@ -1409,6 +1682,10 @@ function EventGallerySection({ eventId }: { eventId: number }) {
           </button>
         )}
       </div>
+
+      {error && (
+        <div className="mx-4 mb-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2">{error}</div>
+      )}
 
       {loading ? (
         <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-text-muted" /></div>
@@ -1468,7 +1745,7 @@ function EventGallerySection({ eventId }: { eventId: number }) {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Sort Order</label>
-                  <input type="number" value={form.sort_order} onChange={e => setForm(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  <input type="number" value={form.sort_order} onChange={e => setForm(p => ({ ...p, sort_order: parseInt(e.target.value, 10) || 0 }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">

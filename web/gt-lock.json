@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "branchId": "",
+  "entries": [
+    {
+      "fileId": "b1791c7a47875ce85f2f1e57ef6c25a9b993660f9bcc840d8f21daac6161b5a0",
+      "versionId": "d4c914ba867179ae3ac6022831576c7ea42e37ad01fb4bb8b47ecc1c9a7c7481",
+      "translations": {
+        "ja": {
+          "updatedAt": "2026-03-23T06:41:57.920Z",
+          "fileName": "src/locales/ja.json",
+          "postProcessHash": "09c1d1356a68dc4da9ab38ba938cf163f337a36f461af03740ac42fdfffd3bce"
+        },
+        "ko": {
+          "updatedAt": "2026-03-23T06:41:57.920Z",
+          "fileName": "src/locales/ko.json",
+          "postProcessHash": "e93bb44b0f8984d84e9fec886d912297278bc7909ff14899625784b82bf3ece8"
+        },
+        "pt": {
+          "updatedAt": "2026-03-23T06:41:57.920Z",
+          "fileName": "src/locales/pt.json",
+          "postProcessHash": "0c2c94da62eb20a471182ef574322cc3823274f5d4d57fdcbfe3beee50b79bdf"
+        },
+        "zh": {
+          "updatedAt": "2026-03-23T06:41:57.921Z",
+          "fileName": "src/locales/zh.json",
+          "postProcessHash": "9f081efb32a7a5989e6e1cbd469c867d56745a1912ac460b3c14d4b468fac44d"
+        },
+        "tl": {
+          "updatedAt": "2026-03-23T06:41:57.919Z",
+          "fileName": "src/locales/tl.json",
+          "postProcessHash": "ee85eec1f55a3bd496434645727167d4550eca1ff89aa4de07531f17be0b838f"
+        }
+      },
+      "fileName": "src/locales/en.json",
+      "staged": false
+    }
+  ]
+}

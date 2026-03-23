@@ -20,6 +20,7 @@ class EventResult < ApplicationRecord
   WEIGHT_CLASSES = %w[rooster light_feather feather light middle medium_heavy heavy super_heavy ultra_heavy open_weight].freeze
 
   def as_json(options = {})
-    super(options.merge(except: [:created_at, :updated_at]))
+    merged_except = (Array(options[:except]) + [:created_at, :updated_at]).uniq
+    super(options.merge(except: merged_except))
   end
 end
