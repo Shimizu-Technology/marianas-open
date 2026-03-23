@@ -483,9 +483,9 @@ export default function SponsorsAdmin() {
 
             {/* Site Preview */}
             {(() => {
-              const previewLogoUrl = getPreviewLogoUrl()
+              const logoPreviewSrc = getPreviewLogoUrl()
 
-              return previewLogoUrl ? (
+              return logoPreviewSrc ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Eye className="w-3.5 h-3.5 text-text-muted" />
@@ -501,7 +501,7 @@ export default function SponsorsAdmin() {
                         <div className="bg-navy-900/80 border border-white/5 hover:border-gold-500/20 rounded-lg p-5 flex flex-col items-center justify-center w-48 h-36 transition-colors">
                           <div className="bg-white/95 rounded-md px-4 py-3 flex items-center justify-center w-full h-full">
                             <img
-                              src={previewLogoUrl}
+                              src={logoPreviewSrc}
                               alt={form.name || 'Logo preview'}
                               className="max-w-full max-h-full object-contain"
                             />
@@ -519,7 +519,7 @@ export default function SponsorsAdmin() {
                       <div className="flex justify-center">
                         <div className="opacity-60 hover:opacity-100 transition-opacity duration-300 cursor-default">
                           <img
-                            src={previewLogoUrl}
+                            src={logoPreviewSrc}
                             alt={form.name || 'Logo preview'}
                             className="h-12 object-contain"
                           />

@@ -192,8 +192,13 @@ export default function EventsAdmin() {
       if (editing === 'new') {
         const res = await api.admin.createEvent(form)
         savedEventId = res.event.id
+        setEditing(savedEventId)
         if (pendingHeroImage && savedEventId) {
-          await api.admin.uploadEventImage(savedEventId, pendingHeroImage)
+          try {
+            await api.admin.uploadEventImage(savedEventId, pendingHeroImage)
+          } catch (imgErr) {
+            setError(imgErr instanceof Error ? imgErr.message : 'Event created but hero image upload failed')
+          }
         }
         setSuccess('Event created')
       } else if (typeof editing === 'number') {
@@ -202,9 +207,6 @@ export default function EventsAdmin() {
       }
       setPendingHeroImage(null)
       await loadEvents()
-      if (editing === 'new' && savedEventId) {
-        setEditing(savedEventId)
-      }
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
