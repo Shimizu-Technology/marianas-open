@@ -283,8 +283,8 @@ export default function SponsorsAdmin() {
     if (swapIdx < 0 || swapIdx >= sameTier.length) return
 
     const other = sameTier[swapIdx]
-    const myOrder = sponsor.sort_order || 0
-    const otherOrder = other.sort_order || 0
+    const myOrder = idx + 1
+    const otherOrder = swapIdx + 1
 
     try {
       await Promise.all([

@@ -96,6 +96,17 @@ export default function EventsAdmin() {
   const [pendingHeroImage, setPendingHeroImage] = useState<File | null>(null)
   const heroInputRef = useRef<HTMLInputElement>(null)
 
+  const pendingHeroPreviewUrl = useMemo(
+    () => (pendingHeroImage ? URL.createObjectURL(pendingHeroImage) : null),
+    [pendingHeroImage]
+  )
+
+  useEffect(() => {
+    return () => {
+      if (pendingHeroPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(pendingHeroPreviewUrl)
+    }
+  }, [pendingHeroPreviewUrl])
+
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [sortField, setSortField] = useState<SortField>('date')
@@ -976,7 +987,7 @@ export default function EventsAdmin() {
             {(() => {
               const heroUrl = typeof editing === 'number'
                 ? resolveMediaUrl(currentEvent?.hero_image_url) || null
-                : pendingHeroImage ? URL.createObjectURL(pendingHeroImage) : null
+                : pendingHeroPreviewUrl
 
               const handleHeroFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 const file = e.target.files?.[0]
