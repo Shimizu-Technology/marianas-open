@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText } from 'lucide-react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Copy } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -130,6 +130,30 @@ export default function EventsAdmin() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Delete failed')
     }
+  }
+
+  const handleCopyEvent = (event: Event) => {
+    const copied = eventToForm(event)
+    // Clear identity fields so it's clearly a new event
+    copied.name = `${event.name} (Copy)`
+    copied.slug = ''
+    copied.date = ''
+    copied.end_date = ''
+    copied.status = 'draft'
+    copied.live_stream_url = ''
+    copied.live_stream_active = false
+    // Strip IDs from nested items so they're created fresh
+    copied.event_schedule_items_attributes = copied.event_schedule_items_attributes.map(
+      ({ id: _id, ...rest }) => rest
+    )
+    copied.prize_categories_attributes = copied.prize_categories_attributes.map(
+      ({ id: _id, ...rest }) => rest
+    )
+    setForm(copied)
+    setEditing('new')
+    setError('')
+    setSuccess('')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleImageUpload = async (file: File) => {
@@ -1026,6 +1050,13 @@ export default function EventsAdmin() {
                               <Trophy className="w-3.5 h-3.5" />
                             </Link>
                             <button
+                              onClick={() => handleCopyEvent(event)}
+                              className="p-1.5 text-text-muted hover:text-blue-400 transition-colors"
+                              title="Copy to new event"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                            <button
                               onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
                               className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                               title="Edit"
@@ -1079,6 +1110,13 @@ export default function EventsAdmin() {
                         >
                           <Trophy className="w-3.5 h-3.5" />
                         </Link>
+                        <button
+                          onClick={() => handleCopyEvent(event)}
+                          className="p-1.5 text-text-muted hover:text-blue-400 transition-colors"
+                          title="Copy to new event"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
                           className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
