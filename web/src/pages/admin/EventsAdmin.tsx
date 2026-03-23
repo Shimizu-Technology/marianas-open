@@ -126,7 +126,10 @@ export default function EventsAdmin() {
   useEffect(() => { loadEvents() }, [loadEvents])
 
   useEffect(() => {
-    if (typeof editing === 'number' && events.length > 0) {
+    if (editing === 'new') {
+      setForm(emptyForm)
+      setPendingHeroImage(null)
+    } else if (typeof editing === 'number' && events.length > 0) {
       const event = events.find(e => e.id === editing)
       if (event) {
         setForm(eventToForm(event))
@@ -1373,6 +1376,7 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
   const [accommodations, setAccommodations] = useState<EventAccommodation[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<number | 'new' | null>(null)
+  const [error, setError] = useState('')
   const [form, setForm] = useState<EventAccommodationFormData>({
     hotel_name: '', description: '', room_types: '', rate_info: '',
     inclusions: '', check_in_date: '', check_out_date: '',
@@ -1385,13 +1389,16 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
     try {
       const res = await api.admin.getAccommodations(eventId)
       setAccommodations(res.accommodations)
-    } catch { /* ignore */ } finally { setLoading(false) }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load accommodations')
+    } finally { setLoading(false) }
   }, [eventId])
 
   useEffect(() => { load() }, [load])
 
   const handleSave = async () => {
     setSaving(true)
+    setError('')
     try {
       if (editing === 'new') {
         await api.admin.createAccommodation(eventId, form)
@@ -1400,12 +1407,19 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
       }
       setEditing(null)
       await load()
-    } catch { /* ignore */ } finally { setSaving(false) }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save accommodation')
+    } finally { setSaving(false) }
   }
 
   const handleDelete = async (id: number) => {
-    await api.admin.deleteAccommodation(eventId, id)
-    await load()
+    setError('')
+    try {
+      await api.admin.deleteAccommodation(eventId, id)
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete accommodation')
+    }
   }
 
   const editAccommodation = (a: EventAccommodation) => {
@@ -1439,6 +1453,10 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
           </button>
         )}
       </div>
+
+      {error && (
+        <div className="mx-4 mb-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2">{error}</div>
+      )}
 
       {loading ? (
         <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-text-muted" /></div>
@@ -1550,6 +1568,7 @@ function EventGallerySection({ eventId }: { eventId: number }) {
   const [galleryImages, setGalleryImages] = useState<EventGalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<number | 'new' | null>(null)
+  const [error, setError] = useState('')
   const [form, setForm] = useState<EventGalleryImageFormData>({
     title: '',
     alt_text: '',
@@ -1564,8 +1583,8 @@ function EventGallerySection({ eventId }: { eventId: number }) {
     try {
       const res = await api.admin.getEventGalleryImages(eventId)
       setGalleryImages(res.gallery_images)
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load gallery')
     } finally {
       setLoading(false)
     }
@@ -1618,14 +1637,21 @@ function EventGallerySection({ eventId }: { eventId: number }) {
       setEditing(null)
       setPendingFile(null)
       await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save gallery image')
     } finally {
       setSaving(false)
     }
   }
 
   const handleDelete = async (id: number) => {
-    await api.admin.deleteEventGalleryImage(eventId, id)
-    await load()
+    setError('')
+    try {
+      await api.admin.deleteEventGalleryImage(eventId, id)
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete gallery image')
+    }
   }
 
   return (
@@ -1647,6 +1673,10 @@ function EventGallerySection({ eventId }: { eventId: number }) {
           </button>
         )}
       </div>
+
+      {error && (
+        <div className="mx-4 mb-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2">{error}</div>
+      )}
 
       {loading ? (
         <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-text-muted" /></div>

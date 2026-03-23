@@ -1,4 +1,8 @@
 class Set2026AsjjfEventIds < ActiveRecord::Migration[8.1]
+  class EventForMigration < ApplicationRecord
+    self.table_name = 'events'
+  end
+
   ASJJF_IDS_2026 = {
     "copa-de-marianas-2026"        => [1837, 1838],
     "marianas-pro-nagoya-2026"     => [1863, 1864],
@@ -10,15 +14,13 @@ class Set2026AsjjfEventIds < ActiveRecord::Migration[8.1]
 
   def up
     ASJJF_IDS_2026.each do |slug, ids|
-      event = Event.find_by(slug: slug)
-      event&.update_columns(asjjf_event_ids: ids)
+      EventForMigration.where(slug: slug).update_all(asjjf_event_ids: ids)
     end
   end
 
   def down
     ASJJF_IDS_2026.each_key do |slug|
-      event = Event.find_by(slug: slug)
-      event&.update_columns(asjjf_event_ids: [])
+      EventForMigration.where(slug: slug).update_all(asjjf_event_ids: [])
     end
   end
 end

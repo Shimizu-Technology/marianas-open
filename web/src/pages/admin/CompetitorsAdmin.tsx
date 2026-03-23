@@ -52,7 +52,9 @@ export default function CompetitorsAdmin() {
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
-    if (typeof editing === 'number' && competitors.length > 0) {
+    if (editing === 'new') {
+      setForm(emptyForm)
+    } else if (typeof editing === 'number' && competitors.length > 0) {
       const c = competitors.find(x => x.id === editing)
       if (c) {
         setForm({

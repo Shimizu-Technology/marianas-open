@@ -10,7 +10,8 @@ class Video < ApplicationRecord
   scope :featured, -> { where(featured: true) }
 
   def as_json(options = {})
-    super(options.merge(except: [:created_at, :updated_at])).tap do |hash|
+    merged_except = (Array(options[:except]) + [:created_at, :updated_at]).uniq
+    super(options.merge(except: merged_except)).tap do |hash|
       hash['event_name'] = event&.name
     end
   end

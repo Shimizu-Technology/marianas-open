@@ -12,7 +12,8 @@ class EventAccommodation < ApplicationRecord
   image_url_for :image
 
   def as_json(options = {})
-    super(options.merge(except: [:created_at, :updated_at])).merge(
+    merged_except = (Array(options[:except]) + [:created_at, :updated_at]).uniq
+    super(options.merge(except: merged_except)).merge(
       "image_url" => image_url
     )
   end

@@ -58,7 +58,9 @@ export default function VideosAdmin() {
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
-    if (typeof editing === 'number' && videos.length > 0) {
+    if (editing === 'new') {
+      setForm(emptyForm)
+    } else if (typeof editing === 'number' && videos.length > 0) {
       const video = videos.find(v => v.id === editing)
       if (video) {
         setForm({

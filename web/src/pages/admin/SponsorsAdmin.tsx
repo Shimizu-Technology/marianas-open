@@ -175,7 +175,10 @@ export default function SponsorsAdmin() {
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
-    if (typeof editing === 'number' && sponsors.length > 0) {
+    if (editing === 'new') {
+      setForm({ ...emptyForm, sort_order: nextSortOrder() })
+      setPendingLogo(null)
+    } else if (typeof editing === 'number' && sponsors.length > 0) {
       const sponsor = sponsors.find(s => s.id === editing)
       if (sponsor) {
         setForm({
