@@ -74,41 +74,33 @@ function SortableSponsorRow({ sponsor, idx, total, onMove, onEdit, onDelete }: S
       }`}
     >
       <div className="flex items-center gap-3">
-        {/* Drag handle — desktop: visible grip, mobile: up/down arrows */}
+        {/* Drag handle + mobile arrows */}
         <div className="flex flex-col items-center gap-0.5 mr-1">
-          {/* Desktop: drag grip handle */}
+          {/* Mobile: up arrow */}
+          <button
+            onClick={() => onMove(sponsor, 'up')}
+            disabled={idx === 0}
+            className="p-0.5 text-text-muted hover:text-gold disabled:opacity-20 disabled:cursor-not-allowed transition-colors sm:hidden"
+          >
+            <ChevronUp className="w-3.5 h-3.5" />
+          </button>
+          {/* Single drag handle — responsive sizing */}
           <div
             {...attributes}
             {...listeners}
-            className="hidden sm:flex cursor-grab active:cursor-grabbing p-1 text-text-muted hover:text-gold transition-colors touch-none"
+            className="cursor-grab active:cursor-grabbing p-1 text-text-muted hover:text-gold transition-colors touch-none"
             title="Drag to reorder"
           >
-            <GripVertical className="w-4 h-4" />
+            <GripVertical className="w-3 h-3 sm:w-4 sm:h-4" />
           </div>
-          {/* Mobile: up/down arrows */}
-          <div className="flex sm:hidden flex-col items-center gap-0.5">
-            <button
-              onClick={() => onMove(sponsor, 'up')}
-              disabled={idx === 0}
-              className="p-0.5 text-text-muted hover:text-gold disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronUp className="w-3.5 h-3.5" />
-            </button>
-            <div
-              {...attributes}
-              {...listeners}
-              className="cursor-grab active:cursor-grabbing text-white/10 touch-none"
-            >
-              <GripVertical className="w-3 h-3" />
-            </div>
-            <button
-              onClick={() => onMove(sponsor, 'down')}
-              disabled={idx === total - 1}
-              className="p-0.5 text-text-muted hover:text-gold disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          {/* Mobile: down arrow */}
+          <button
+            onClick={() => onMove(sponsor, 'down')}
+            disabled={idx === total - 1}
+            className="p-0.5 text-text-muted hover:text-gold disabled:opacity-20 disabled:cursor-not-allowed transition-colors sm:hidden"
+          >
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
         </div>
         {logoSrc ? (
           <img src={logoSrc} alt={sponsor.name} className="w-8 h-8 object-contain" />

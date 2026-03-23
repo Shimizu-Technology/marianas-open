@@ -19,7 +19,11 @@ if (existsSync(envPath)) {
 }
 
 if (process.env.GT_API_KEY && process.env.GT_PROJECT_ID) {
-  execSync('npx gt translate', { stdio: 'inherit', cwd: resolve(__dirname, '..') })
+  try {
+    execSync('npx gt translate', { stdio: 'inherit', cwd: resolve(__dirname, '..') })
+  } catch (e) {
+    console.warn(`\n⚠️  Translation update failed (continuing build): ${e.message}`)
+  }
 } else {
   console.log('GT keys not set — skipping translation')
 }
