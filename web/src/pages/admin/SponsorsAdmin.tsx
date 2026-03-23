@@ -202,15 +202,21 @@ export default function SponsorsAdmin() {
     try {
       if (editing === 'new') {
         const res = await api.admin.createSponsor(form)
-        if (pendingLogo && res.sponsor?.id) {
-          await api.admin.uploadSponsorLogo(res.sponsor.id, pendingLogo)
-        }
-        setSuccess('Sponsor created')
-        setPendingLogo(null)
-        await load()
         if (res.sponsor?.id) {
           setEditing(res.sponsor.id)
         }
+        let logoUploadFailed = false
+        if (pendingLogo && res.sponsor?.id) {
+          try {
+            await api.admin.uploadSponsorLogo(res.sponsor.id, pendingLogo)
+          } catch (logoErr) {
+            logoUploadFailed = true
+            setError(logoErr instanceof Error ? logoErr.message : 'Sponsor created but logo upload failed')
+          }
+        }
+        if (!logoUploadFailed) setSuccess('Sponsor created')
+        setPendingLogo(null)
+        await load()
       } else if (typeof editing === 'number') {
         await api.admin.updateSponsor(editing, form)
         setSuccess('Sponsor updated')

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "translate": "npx gt translate",
-    "translate:safe": "if [ -f .env ]; then set -a; . ./.env; set +a; fi; if [ -n \"$GT_API_KEY\" ] && [ -n \"$GT_PROJECT_ID\" ]; then npx gt translate; else echo 'GT keys not set — skipping translation'; fi",
+    "translate:safe": "node scripts/translate-safe.mjs",
     "build": "npm run translate:safe && node scripts/generate-seo-files.mjs && tsc -b && vite build",
     "build:no-translate": "node scripts/generate-seo-files.mjs && tsc -b && vite build",
     "lint": "eslint .",
