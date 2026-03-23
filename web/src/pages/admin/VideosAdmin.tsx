@@ -283,7 +283,7 @@ export default function VideosAdmin() {
                 <input
                   type="number"
                   value={form.sort_order}
-                  onChange={e => setForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                  onChange={e => setForm(prev => ({ ...prev, sort_order: parseInt(e.target.value, 10) || 0 }))}
                   className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none"
                 />
               </div>

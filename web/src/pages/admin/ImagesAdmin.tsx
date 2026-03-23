@@ -322,7 +322,7 @@ export default function ImagesAdmin() {
                     <input
                       type="number"
                       value={editing.sort_order}
-                      onChange={(e) => setEditing(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                      onChange={(e) => setEditing(prev => ({ ...prev, sort_order: parseInt(e.target.value, 10) || 0 }))}
                       className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/50 focus:outline-none transition-colors"
                     />
                   </div>

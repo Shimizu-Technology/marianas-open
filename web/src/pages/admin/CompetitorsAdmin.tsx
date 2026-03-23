@@ -206,17 +206,17 @@ export default function CompetitorsAdmin() {
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Wins</label>
-                  <input type="number" value={form.wins} onChange={e => setForm(p => ({ ...p, wins: parseInt(e.target.value) || 0 }))}
+                  <input type="number" value={form.wins} onChange={e => setForm(p => ({ ...p, wins: parseInt(e.target.value, 10) || 0 }))}
                     className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Losses</label>
-                  <input type="number" value={form.losses} onChange={e => setForm(p => ({ ...p, losses: parseInt(e.target.value) || 0 }))}
+                  <input type="number" value={form.losses} onChange={e => setForm(p => ({ ...p, losses: parseInt(e.target.value, 10) || 0 }))}
                     className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Draws</label>
-                  <input type="number" value={form.draws} onChange={e => setForm(p => ({ ...p, draws: parseInt(e.target.value) || 0 }))}
+                  <input type="number" value={form.draws} onChange={e => setForm(p => ({ ...p, draws: parseInt(e.target.value, 10) || 0 }))}
                     className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
                 </div>
               </div>
@@ -238,17 +238,17 @@ export default function CompetitorsAdmin() {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Gold Medals</label>
-                <input type="number" value={form.gold_medals} onChange={e => setForm(p => ({ ...p, gold_medals: parseInt(e.target.value) || 0 }))}
+                <input type="number" value={form.gold_medals} onChange={e => setForm(p => ({ ...p, gold_medals: parseInt(e.target.value, 10) || 0 }))}
                   className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Silver Medals</label>
-                <input type="number" value={form.silver_medals} onChange={e => setForm(p => ({ ...p, silver_medals: parseInt(e.target.value) || 0 }))}
+                <input type="number" value={form.silver_medals} onChange={e => setForm(p => ({ ...p, silver_medals: parseInt(e.target.value, 10) || 0 }))}
                   className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Bronze Medals</label>
-                <input type="number" value={form.bronze_medals} onChange={e => setForm(p => ({ ...p, bronze_medals: parseInt(e.target.value) || 0 }))}
+                <input type="number" value={form.bronze_medals} onChange={e => setForm(p => ({ ...p, bronze_medals: parseInt(e.target.value, 10) || 0 }))}
                   className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
               </div>
             </div>

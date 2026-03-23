@@ -463,7 +463,7 @@ export default function EventResultsAdmin() {
                   options={GENDERS.map(g => ({ value: g, label: g.charAt(0).toUpperCase() + g.slice(1) }))} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <SelectField label="Placement" value={form.placement.toString()} onChange={v => setForm(f => ({ ...f, placement: parseInt(v) }))}
+                <SelectField label="Placement" value={form.placement.toString()} onChange={v => setForm(f => ({ ...f, placement: parseInt(v, 10) }))}
                   options={PLACEMENTS.map(p => ({ value: p.toString(), label: `${PLACEMENT_LABELS[p].label} (${p})` }))} />
                 <Field label="Weight Class" value={form.weight_class} onChange={v => setForm(f => ({ ...f, weight_class: v }))} placeholder="e.g. Light" />
                 <Field label="Age Category" value={form.age_category} onChange={v => setForm(f => ({ ...f, age_category: v }))} placeholder="e.g. adult" />

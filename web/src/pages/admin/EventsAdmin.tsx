@@ -232,15 +232,15 @@ export default function EventsAdmin() {
   const handleImageUpload = async (file: File) => {
     if (typeof editing !== 'number') return
     try {
-      await api.admin.uploadEventImage(editing, file)
-      await loadEvents()
+    await api.admin.uploadEventImage(editing, file)
+    await loadEvents()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Image upload failed')
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateForm = (field: string, value: any) => {
+  const updateForm = (field: string, value: string | number | boolean | number[]) => {
     setForm(prev => ({ ...prev, [field]: value }))
   }
 
@@ -580,9 +580,9 @@ export default function EventsAdmin() {
                   Manage Results
                 </Link>
               )}
-              <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
-                <X className="w-4 h-4" />
-              </button>
+            <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
+              <X className="w-4 h-4" />
+            </button>
             </div>
           </div>
 
@@ -610,7 +610,7 @@ export default function EventsAdmin() {
                   { value: 'cancelled', label: 'Cancelled' },
                 ]}
               />
-              <Field label="ASJJF Stars" type="number" value={form.asjjf_stars.toString()} onChange={v => updateForm('asjjf_stars', parseInt(v) || 0)} />
+              <Field label="ASJJF Stars" type="number" value={form.asjjf_stars.toString()} onChange={v => updateForm('asjjf_stars', parseInt(v, 10) || 0)} />
               <Field label="Prize Pool" value={form.prize_pool} onChange={v => updateForm('prize_pool', v)} placeholder="$10,000" />
               <Field label="Prize Card Title" value={form.prize_title} onChange={v => updateForm('prize_title', v)} placeholder="e.g. Win Your Way to Guam!" />
               <Field label="Prize Card Description" value={form.prize_description} onChange={v => updateForm('prize_description', v)} placeholder="e.g. Compete for a trip package to..." />
@@ -622,7 +622,7 @@ export default function EventsAdmin() {
                 <input
                   value={form.asjjf_event_ids.join(', ')}
                   onChange={e => {
-                    const ids = e.target.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0)
+                    const ids = e.target.value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n > 0)
                     updateForm('asjjf_event_ids', ids)
                   }}
                   placeholder="1863, 1864 (comma-separated)"
@@ -1202,8 +1202,8 @@ export default function EventsAdmin() {
             <>
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm min-w-[720px]">
-                  <thead>
-                    <tr className="border-b border-white/5 text-left">
+              <thead>
+                <tr className="border-b border-white/5 text-left">
                       {([['name', 'Name'], ['date', 'Date'], ['location', 'Location'], ['stars', 'Stars'], ['status', 'Status']] as [SortField, string][]).map(([field, label]) => (
                         <th
                           key={field}
@@ -1220,34 +1220,34 @@ export default function EventsAdmin() {
                           </span>
                         </th>
                       ))}
-                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide w-24"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide w-24"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
                     {filteredEvents.map(event => (
-                      <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="px-5 py-3 text-text-primary font-medium">{event.name}</td>
+                  <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-5 py-3 text-text-primary font-medium">{event.name}</td>
                         <td className="px-5 py-3 text-text-secondary whitespace-nowrap">{formatDate(event.date)}</td>
-                        <td className="px-5 py-3 text-text-secondary">{event.city}, {event.country}</td>
-                        <td className="px-5 py-3">
-                          <span className="flex items-center gap-1 text-gold">
-                            <Star className="w-3 h-3 fill-current" />
-                            {event.asjjf_stars || 0}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3">
-                          <span className={`text-xs px-2 py-0.5 ${
+                    <td className="px-5 py-3 text-text-secondary">{event.city}, {event.country}</td>
+                    <td className="px-5 py-3">
+                      <span className="flex items-center gap-1 text-gold">
+                        <Star className="w-3 h-3 fill-current" />
+                        {event.asjjf_stars || 0}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3">
+                      <span className={`text-xs px-2 py-0.5 ${
                             event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
-                            event.status === 'published' ? 'bg-green-500/10 text-green-400' :
+                        event.status === 'published' ? 'bg-green-500/10 text-green-400' :
                             event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
                             event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
                             'bg-white/5 text-text-muted'
-                          }`}>
-                            {event.status}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3">
-                          <div className="flex items-center gap-2">
+                      }`}>
+                        {event.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2">
                             <Link
                               to={`/admin/events/${event.id}/results`}
                               className="p-1.5 text-text-muted hover:text-gold transition-colors"
@@ -1255,26 +1255,26 @@ export default function EventsAdmin() {
                             >
                               <Trophy className="w-3.5 h-3.5" />
                             </Link>
-                            <button
-                              onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
-                              className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
+                        <button
+                          onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
+                          className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                               title="Edit"
-                            >
-                              <Pencil className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm(event.id)}
-                              className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(event.id)}
+                          className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
                               title="Delete"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
               </div>
 
               <div className="md:hidden divide-y divide-white/5">
@@ -1744,7 +1744,7 @@ function EventGallerySection({ eventId }: { eventId: number }) {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Sort Order</label>
-                  <input type="number" value={form.sort_order} onChange={e => setForm(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  <input type="number" value={form.sort_order} onChange={e => setForm(p => ({ ...p, sort_order: parseInt(e.target.value, 10) || 0 }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">
