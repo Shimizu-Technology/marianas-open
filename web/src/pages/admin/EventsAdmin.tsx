@@ -239,7 +239,6 @@ export default function EventsAdmin() {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateForm = (field: string, value: string | number | boolean | number[]) => {
     setForm(prev => ({ ...prev, [field]: value }))
   }
@@ -620,7 +619,7 @@ export default function EventsAdmin() {
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">ASJJF Event IDs (for results import)</label>
                 <input
-                  key={editing}
+                  key={`${editing}-${form.asjjf_event_ids.join(',')}`}
                   defaultValue={form.asjjf_event_ids.join(', ')}
                   onBlur={e => {
                     const ids = e.target.value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n > 0)
