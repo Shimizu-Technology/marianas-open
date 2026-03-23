@@ -97,7 +97,7 @@ export default function EventDetailPage() {
         })
     : [];
 
-  const prizePoolDisplay = mainEvent?.prize_pool ? `$${Number(mainEvent.prize_pool).toLocaleString()}` : '';
+  const prizePoolDisplay = mainEvent?.prize_pool ? `$${Number(mainEvent.prize_pool).toLocaleString()}` : null;
 
   const activeAccommodations = (mainEvent?.event_accommodations ?? [])
     .filter(a => a.active)
@@ -318,7 +318,7 @@ export default function EventDetailPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Trophy size={16} className="text-gold-500" />
-                {hasCashPrizes ? prizePoolDisplay : hasTripPackages ? t('event.tripPackages', 'Trip Packages to Guam') : prizePoolDisplay}
+                {hasCashPrizes ? (prizePoolDisplay || t('event.totalPrizePool')) : hasTripPackages ? t('event.tripPackages', 'Trip Packages to Guam') : (prizePoolDisplay || t('event.totalPrizePool'))}
               </div>
             </div>
           </motion.div>
@@ -380,7 +380,7 @@ export default function EventDetailPage() {
                 <Trophy size={24} className="text-gold-500 mb-4" />
                 {hasCashPrizes ? (
                   <>
-                    <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>
+                    {prizePoolDisplay && <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>}
                     <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
                   </>
                 ) : hasTripPackages ? (
@@ -394,7 +394,7 @@ export default function EventDetailPage() {
                   </>
                 ) : (
                   <>
-                    <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>
+                    {prizePoolDisplay && <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>}
                     <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
                   </>
                 )}
@@ -990,7 +990,7 @@ export default function EventDetailPage() {
               {t('home.sponsorsTitle')}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
-              {sponsors
+              {[...sponsors]
                 .sort((a, b) => a.sort_order - b.sort_order)
                 .map((sponsor) => {
                 const href = normalizeExternalUrl(sponsor.website_url)
