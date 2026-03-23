@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -10,10 +9,8 @@ import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EventResultsSection from '../components/EventResultsSection';
 import SEO from '../components/SEO';
-import { useEvents } from '../hooks/useApi';
+import { useEvents, useSponsors } from '../hooks/useApi';
 import { getEventHeroImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
-import { api } from '../services/api';
-import type { Sponsor } from '../services/api';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -58,10 +55,7 @@ export default function EventDetailPage() {
   const shouldReduceMotion = useReducedMotion();
   const { events, loading } = useEvents();
 
-  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
-  useEffect(() => {
-    api.getSponsors().then(setSponsors).catch(() => {});
-  }, []);
+  const { sponsors } = useSponsors();
 
   // If slug provided, show that event; otherwise show main event
   const mainEvent = slug

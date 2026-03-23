@@ -284,15 +284,13 @@ export default function SponsorsAdmin() {
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1
     if (swapIdx < 0 || swapIdx >= sameTier.length) return
 
-    const other = sameTier[swapIdx]
-    const myOrder = idx + 1
-    const otherOrder = swapIdx + 1
+    const reordered = [...sameTier]
+    ;[reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]]
 
     try {
-      await Promise.all([
-        api.admin.updateSponsor(sponsor.id, { sort_order: otherOrder }),
-        api.admin.updateSponsor(other.id, { sort_order: myOrder }),
-      ])
+      await Promise.all(
+        reordered.map((s, i) => api.admin.updateSponsor(s.id, { sort_order: i + 1 }))
+      )
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Move failed')
