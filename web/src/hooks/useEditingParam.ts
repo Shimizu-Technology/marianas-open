@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 export function useEditingParam() {
   const [searchParams, setSearchParams] = useSearchParams()
   const editParam = searchParams.get('edit')
-  const editing: number | 'new' | null = editParam === 'new' ? 'new' : editParam ? parseInt(editParam) || null : null
+  const editing: number | 'new' | null = editParam === 'new' ? 'new' : editParam ? parseInt(editParam, 10) || null : null
 
   const setEditing = useCallback((value: number | 'new' | null) => {
     setSearchParams(prev => {

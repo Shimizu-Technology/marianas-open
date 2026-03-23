@@ -193,14 +193,16 @@ export default function EventsAdmin() {
         const res = await api.admin.createEvent(form)
         savedEventId = res.event.id
         setEditing(savedEventId)
+        let imageUploadFailed = false
         if (pendingHeroImage && savedEventId) {
           try {
             await api.admin.uploadEventImage(savedEventId, pendingHeroImage)
           } catch (imgErr) {
+            imageUploadFailed = true
             setError(imgErr instanceof Error ? imgErr.message : 'Event created but hero image upload failed')
           }
         }
-        setSuccess('Event created')
+        if (!imageUploadFailed) setSuccess('Event created')
       } else if (typeof editing === 'number') {
         await api.admin.updateEvent(editing, form)
         setSuccess('Event updated')
@@ -1541,8 +1543,12 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
                 <ImageUpload
                   currentUrl={resolveMediaUrl(accommodations.find(a => a.id === editing)?.image_url) || null}
                   onUpload={async (file) => {
-                    await api.admin.uploadAccommodationImage(eventId, editing, file)
-                    await load()
+                    try {
+                      await api.admin.uploadAccommodationImage(eventId, editing, file)
+                      await load()
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : 'Image upload failed')
+                    }
                   }}
                   label="Hotel Photo"
                 />
