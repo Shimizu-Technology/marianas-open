@@ -376,7 +376,8 @@ export default function EventDetailPage() {
               </div>
             </ScrollReveal>
 
-            {/* Prize Pool / Trip Packages */}
+            {/* Prize Pool / Trip Packages — only render when prize data exists */}
+            {(hasCashPrizes || hasTripPackages || prizePoolDisplay) && (
             <ScrollReveal delay={0.1}>
               <div className="bg-gradient-to-br from-gold-500/10 to-transparent border border-gold-500/20 p-8 h-full">
                 <Trophy size={24} className="text-gold-500 mb-4" />
@@ -410,6 +411,7 @@ export default function EventDetailPage() {
                 </div>
               </div>
             </ScrollReveal>
+            )}
 
             {/* Event poster / action photo */}
             <ScrollReveal delay={0.12}>

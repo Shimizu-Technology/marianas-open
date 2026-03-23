@@ -133,6 +133,7 @@ export default function EventsAdmin() {
       const event = events.find(e => e.id === editing)
       if (event) {
         setForm(eventToForm(event))
+        setPendingHeroImage(null)
       }
     }
   }, [editing, events])
