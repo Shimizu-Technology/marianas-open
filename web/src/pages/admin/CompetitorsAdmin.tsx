@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Users, Plus, Pencil, Trash2, X, Loader2, Save, Search } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
@@ -28,7 +29,22 @@ const emptyForm: CompetitorFormData = {
 export default function CompetitorsAdmin() {
   const [competitors, setCompetitors] = useState<Competitor[]>([])
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState<number | 'new' | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const editParam = searchParams.get('edit')
+  const editing: number | 'new' | null = editParam === 'new' ? 'new' : editParam ? parseInt(editParam) || null : null
+
+  const setEditing = useCallback((value: number | 'new' | null) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev)
+      if (value === null) {
+        next.delete('edit')
+      } else {
+        next.set('edit', String(value))
+      }
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
+
   const [form, setForm] = useState<CompetitorFormData>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -49,17 +65,37 @@ export default function CompetitorsAdmin() {
 
   useEffect(() => { load() }, [load])
 
+  useEffect(() => {
+    if (typeof editing === 'number' && competitors.length > 0) {
+      const c = competitors.find(x => x.id === editing)
+      if (c) {
+        setForm({
+          first_name: c.first_name, last_name: c.last_name, nickname: c.nickname || '',
+          country_code: c.country_code || '', belt_rank: c.belt_rank || '',
+          weight_class: c.weight_class || '', academy: c.academy || '', bio: c.bio || '',
+          instagram_url: c.instagram_url || '', youtube_url: c.youtube_url || '',
+          wins: c.wins, losses: c.losses, draws: c.draws,
+          gold_medals: c.gold_medals, silver_medals: c.silver_medals, bronze_medals: c.bronze_medals,
+        })
+      }
+    }
+  }, [editing, competitors])
+
   const handleSave = async () => {
     setSaving(true); setError('')
     try {
       if (editing === 'new') {
-        await api.admin.createCompetitor(form)
+        const res = await api.admin.createCompetitor(form)
         setSuccess('Competitor created')
+        await load()
+        if (res.competitor?.id) {
+          setEditing(res.competitor.id)
+        }
       } else if (typeof editing === 'number') {
         await api.admin.updateCompetitor(editing, form)
         setSuccess('Competitor updated')
+        await load()
       }
-      setEditing(null); await load()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://assets.gtx.dev/config-schema.json",
+  "defaultLocale": "en",
+  "locales": [
+    "ja",
+    "ko",
+    "zh",
+    "tl",
+    "pt"
+  ],
+  "customMapping": {
+    "tl": {
+      "code": "fil",
+      "name": "Filipino"
+    }
+  },
+  "files": {
+    "json": {
+      "include": [
+        "src/locales/[locale].json"
+      ]
+    }
+  }
+}

@@ -9,6 +9,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Event, EventResult, EventResultFormData, ImportPreview } from '../../services/api'
 
+function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr + 'T00:00:00')
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black']
 const GENDERS = ['male', 'female']
 const PLACEMENTS = [1, 2, 3]
@@ -253,7 +259,7 @@ export default function EventResultsAdmin() {
               <h1 className="font-heading text-xl font-bold text-text-primary">{event.name}</h1>
             </div>
             <p className="text-xs text-text-muted mt-0.5">
-              {event.date} &middot; {event.city}, {event.country} &middot;
+              {formatDate(event.date)} &middot; {event.city}, {event.country} &middot;
               <span className={`ml-1 px-1.5 py-0.5 text-[10px] ${
                 event.status === 'completed' ? 'bg-green-500/10 text-green-400' :
                 event.status === 'published' ? 'bg-blue-500/10 text-blue-400' :
@@ -358,12 +364,12 @@ export default function EventResultsAdmin() {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4 space-y-3">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="bg-white/[0.03] p-3 text-center">
-                <div className="text-lg font-bold text-text-primary">{importPreview.preview.total_results}</div>
+                <div className="text-lg font-bold text-text-primary">{importPreview.preview.total}</div>
                 <div className="text-[10px] text-text-muted uppercase">Results to Import</div>
               </div>
               <div className="bg-white/[0.03] p-3 text-center">
-                <div className="text-lg font-bold text-text-primary">{importPreview.preview.divisions}</div>
-                <div className="text-[10px] text-text-muted uppercase">Divisions</div>
+                <div className="text-lg font-bold text-text-primary">{Object.keys(importPreview.preview.by_belt || {}).length}</div>
+                <div className="text-[10px] text-text-muted uppercase">Belt Ranks</div>
               </div>
               <div className="bg-white/[0.03] p-3 text-center">
                 <div className="text-lg font-bold text-text-primary">{importPreview.preview.countries}</div>

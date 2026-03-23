@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Play, Plus, Pencil, Trash2, X, Loader2, Save, Star } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
@@ -34,7 +35,22 @@ export default function VideosAdmin() {
   const [videos, setVideos] = useState<Video[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState<number | 'new' | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const editParam = searchParams.get('edit')
+  const editing: number | 'new' | null = editParam === 'new' ? 'new' : editParam ? parseInt(editParam) || null : null
+
+  const setEditing = useCallback((value: number | 'new' | null) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev)
+      if (value === null) {
+        next.delete('edit')
+      } else {
+        next.set('edit', String(value))
+      }
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
+
   const [form, setForm] = useState<VideoFormData>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -55,19 +71,46 @@ export default function VideosAdmin() {
 
   useEffect(() => { load() }, [load])
 
+  useEffect(() => {
+    if (typeof editing === 'number' && videos.length > 0) {
+      const video = videos.find(v => v.id === editing)
+      if (video) {
+        setForm({
+          title: video.title,
+          youtube_url: video.youtube_url,
+          competitor_1_name: video.competitor_1_name || '',
+          competitor_2_name: video.competitor_2_name || '',
+          weight_class: video.weight_class || '',
+          belt_rank: video.belt_rank || '',
+          round: video.round || '',
+          result: video.result || '',
+          duration_seconds: video.duration_seconds,
+          category: video.category || '',
+          sort_order: video.sort_order,
+          featured: video.featured,
+          status: video.status,
+          event_id: video.event_id,
+        })
+      }
+    }
+  }, [editing, videos])
+
   const handleSave = async () => {
     setSaving(true)
     setError('')
     try {
       if (editing === 'new') {
-        await api.admin.createVideo(form)
+        const res = await api.admin.createVideo(form)
         setSuccess('Video created')
+        await load()
+        if (res.video?.id) {
+          setEditing(res.video.id)
+        }
       } else if (typeof editing === 'number') {
         await api.admin.updateVideo(editing, form)
         setSuccess('Video updated')
+        await load()
       }
-      setEditing(null)
-      await load()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')

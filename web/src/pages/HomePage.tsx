@@ -10,7 +10,7 @@ import { useEvents, useSponsors } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
-import { resolveMediaUrl } from '../utils/images';
+import { resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 import { getOrganizationSchema, getWebsiteSchema } from '../lib/seo';
 
 function normalizeSponsorKey(name: string) {
@@ -51,29 +51,6 @@ const ORG_PARTNERS = [
     heightClass: 'h-16 sm:h-20',
   },
 ] as const;
-
-const SPONSOR_LOGO_MAP: Record<string, string> = {
-  'triple j': '/images/logos/sponsors/triple-j-logo.png',
-  'pacific points': '/images/logos/sponsors/pacific-points-logo.png',
-  "foody's": '/images/logos/sponsors/foodys-logo.png',
-  'deal depot': '/images/logos/sponsors/deal-depot-logo.png',
-  'cfpt': '/images/logos/sponsors/cfpt-logo.png',
-  'fokai': '/images/logos/sponsors/fokai-logo.png',
-  'jamz media': '/images/logos/sponsors/jamz-media-logo.jpeg',
-  'cherry media': '/images/logos/sponsors/cherry-media-logo.png',
-  'mannge pops': '/images/logos/sponsors/mannge-pops-logo.png',
-  'aloha maid': '/images/logos/sponsors/aloha-maid-logo.png',
-  'fence masters': '/images/logos/sponsors/fence-masters-logo.png',
-  'ite': '/images/logos/sponsors/ite-logo.png',
-  'hertz & dollar': '/images/logos/sponsors/hertz-dollar-logo.jpg',
-  'stroll guam': '/images/logos/sponsors/stroll-guam-logo.png',
-};
-
-function getSponsorLogo(name: string, apiLogoUrl?: string | null): string | null {
-  const resolved = apiLogoUrl ? resolveMediaUrl(apiLogoUrl) : null;
-  if (resolved) return resolved;
-  return SPONSOR_LOGO_MAP[name.toLowerCase()] ?? null;
-}
 
 const OFFICIAL_SPONSORS_STATIC = [
   { name: 'Triple J' },
@@ -480,7 +457,7 @@ export default function HomePage() {
                     return item.url ? (
                       <a
                         key={item.name}
-                        href={item.url}
+                        href={normalizeExternalUrl(item.url) || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block"

@@ -101,6 +101,7 @@ module Api
             :status, :latitude, :longitude,
             :live_stream_url, :live_stream_active,
             :tagline, :schedule_note, :travel_description, :visa_description,
+            :prize_title, :prize_description,
             asjjf_event_ids: [],
             venue_highlights: [:title, :description],
             registration_steps: [:title, :description, :url, :link_label],

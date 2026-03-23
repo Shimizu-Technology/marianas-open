@@ -165,12 +165,15 @@ export interface Event {
   is_main_event: boolean;
   registration_url: string | null;
   prize_pool: string | null;
+  prize_title: string | null;
+  prize_description: string | null;
   status: string;
   hero_image_url: string | null;
   live_stream_url: string | null;
   live_stream_active: boolean;
   tagline: string | null;
   schedule_note: string | null;
+  asjjf_event_ids: number[];
   venue_highlights: EventVenueHighlight[];
   registration_steps: EventRegistrationStep[];
   registration_fee_sections: EventRegistrationFeeSection[];
@@ -201,6 +204,7 @@ export interface EventAccommodation {
   contact_phone: string | null;
   sort_order: number;
   active: boolean;
+  image_url: string | null;
 }
 
 export interface EventAccommodationFormData {
@@ -304,6 +308,8 @@ export interface EventFormData {
   asjjf_stars: number;
   is_main_event: boolean;
   prize_pool: string;
+  prize_title: string;
+  prize_description: string;
   registration_url: string;
   status: string;
   latitude: string;
@@ -312,6 +318,7 @@ export interface EventFormData {
   live_stream_active: boolean;
   tagline: string;
   schedule_note: string;
+  asjjf_event_ids: number[];
   venue_highlights: EventVenueHighlight[];
   registration_steps: EventRegistrationStep[];
   registration_fee_sections: EventRegistrationFeeSection[];
@@ -422,7 +429,7 @@ export interface EventResultFormData {
 export interface ImportPreview {
   event: { id: number; name: string; slug: string };
   existing_results_count: number;
-  preview: { total_results: number; divisions: number; countries: number; academies: number };
+  preview: { total: number; countries: number; academies: number; by_belt?: Record<string, number> };
   sample: { division: string; placement: number; competitor_name: string; academy: string; country_code: string }[];
 }
 
@@ -613,6 +620,11 @@ export const api = {
       }, true),
     deleteAccommodation: (eventId: number, id: number) =>
       fetchApi<void>(`/api/v1/admin/events/${eventId}/accommodations/${id}`, { method: 'DELETE' }, true),
+    uploadAccommodationImage: (eventId: number, id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return fetchApiUpload<{ accommodation: EventAccommodation }>(`/api/v1/admin/events/${eventId}/accommodations/${id}/upload`, formData);
+    },
 
     // Event Gallery Images
     getEventGalleryImages: (eventId: number) =>

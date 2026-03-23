@@ -32,7 +32,11 @@ Rails.application.routes.draw do
               delete :destroy_all
             end
           end
-          resources :event_accommodations, only: [:index, :create, :update, :destroy], path: 'accommodations'
+          resources :event_accommodations, only: [:index, :create, :update, :destroy], path: 'accommodations' do
+            member do
+              post :upload
+            end
+          end
         resources :event_gallery_images, only: [:index, :create, :update, :destroy], path: 'gallery-images' do
           member do
             post :upload

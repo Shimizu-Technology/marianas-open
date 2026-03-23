@@ -6,17 +6,17 @@ module Api
 
         before_action :require_staff!
         before_action :set_event
-        before_action :set_accommodation, only: [:update, :destroy]
+        before_action :set_accommodation, only: [:update, :destroy, :upload]
 
         def index
           accommodations = @event.event_accommodations.sorted
-          render json: { accommodations: accommodations.as_json(except: [:created_at, :updated_at]) }
+          render json: { accommodations: accommodations.as_json }
         end
 
         def create
           accommodation = @event.event_accommodations.build(accommodation_params)
           if accommodation.save
-            render json: { accommodation: accommodation.as_json(except: [:created_at, :updated_at]) }, status: :created
+            render json: { accommodation: accommodation.as_json }, status: :created
           else
             render json: { errors: accommodation.errors.full_messages }, status: :unprocessable_entity
           end
@@ -24,10 +24,19 @@ module Api
 
         def update
           if @accommodation.update(accommodation_params)
-            render json: { accommodation: @accommodation.as_json(except: [:created_at, :updated_at]) }
+            render json: { accommodation: @accommodation.as_json }
           else
             render json: { errors: @accommodation.errors.full_messages }, status: :unprocessable_entity
           end
+        end
+
+        def upload
+          unless params[:image].present?
+            return render json: { error: "No image provided" }, status: :unprocessable_entity
+          end
+
+          @accommodation.image.attach(params[:image])
+          render json: { accommodation: @accommodation.reload.as_json }
         end
 
         def destroy
