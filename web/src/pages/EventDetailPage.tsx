@@ -997,10 +997,19 @@ export default function EventDetailPage() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
               {sponsors
-                .filter(s => getSponsorLogo(s.name, s.logo_url))
                 .sort((a, b) => a.sort_order - b.sort_order)
                 .map((sponsor) => {
                 const href = normalizeExternalUrl(sponsor.website_url)
+                const logoSrc = getSponsorLogo(sponsor.name, sponsor.logo_url)
+                const inner = logoSrc ? (
+                  <img
+                    src={logoSrc}
+                    alt={sponsor.name}
+                    className="h-10 sm:h-12 object-contain"
+                  />
+                ) : (
+                  <span className="text-sm font-medium text-text-muted">{sponsor.name}</span>
+                )
                 return href ? (
                 <a
                   key={sponsor.id}
@@ -1009,22 +1018,14 @@ export default function EventDetailPage() {
                   rel="noopener noreferrer"
                   className="opacity-60 hover:opacity-100 transition-opacity duration-300"
                 >
-                  <img
-                    src={getSponsorLogo(sponsor.name, sponsor.logo_url) || ''}
-                    alt={sponsor.name}
-                    className="h-10 sm:h-12 object-contain"
-                  />
+                  {inner}
                 </a>
                 ) : (
                 <div
                   key={sponsor.id}
                   className="opacity-60"
                 >
-                  <img
-                    src={getSponsorLogo(sponsor.name, sponsor.logo_url) || ''}
-                    alt={sponsor.name}
-                    className="h-10 sm:h-12 object-contain"
-                  />
+                  {inner}
                 </div>
                 )
               })}
