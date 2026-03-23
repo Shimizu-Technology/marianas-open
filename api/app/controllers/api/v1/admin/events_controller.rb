@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_staff!
-        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :import_results_preview, :import_results]
+        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :import_results_preview, :import_results, :retranslate]
 
         def index
           org = Organization.first
@@ -83,6 +83,12 @@ module Api
 
           @event.hero_image.attach(params[:image])
           render json: { event: @event.reload.as_json }
+        end
+
+        # POST /api/v1/admin/events/:id/retranslate
+        def retranslate
+          @event.retranslate!
+          render json: { message: "Translation enqueued for event and child records", event: @event.reload.as_json }
         end
 
         private

@@ -9,6 +9,7 @@ import ImageWithShimmer from '../components/ImageWithShimmer';
 import SEO from '../components/SEO';
 import { api } from '../services/api';
 import type { Event } from '../services/api';
+import { useTranslatedField } from '../hooks/useTranslatedField';
 import { resolveMediaUrl } from '../utils/images';
 
 function CountryFlag({ code, className = 'w-5 h-4' }: { code: string; className?: string }) {
@@ -118,6 +119,7 @@ const cardVariants = {
 export default function PastEventsPage() {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
+  const tf = useTranslatedField();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -248,7 +250,7 @@ export default function PastEventsPage() {
                                 backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, white 10px, white 11px)',
                               }} />
                               <span className="text-5xl font-heading font-black text-white/[0.04] uppercase select-none">
-                                {event.name.split(' ').pop()}
+                                {tf(event, 'name').split(' ').pop()}
                               </span>
                               <div className="absolute top-3 left-3">
                                 <StarRating stars={event.asjjf_stars} />
@@ -258,7 +260,7 @@ export default function PastEventsPage() {
 
                           <div className="p-5 space-y-3">
                             <h3 className="font-heading font-bold text-lg text-text-primary group-hover:text-gold-500 transition-colors leading-tight">
-                              {event.name}
+                              {tf(event, 'name')}
                             </h3>
                             <div className="space-y-2">
                               <div className="flex items-center gap-2 text-sm text-text-secondary">
@@ -267,11 +269,11 @@ export default function PastEventsPage() {
                               </div>
                               <div className="flex items-center gap-2 text-sm text-text-secondary">
                                 <MapPin size={14} className="text-text-muted shrink-0" />
-                                <span className="truncate">{event.venue_name}</span>
+                                <span className="truncate">{tf(event, 'venue_name')}</span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-text-secondary">
                                 <CountryFlag code={event.country_code} className="w-5 h-4 shrink-0" />
-                                <span>{event.city}, {event.country}</span>
+                                <span>{tf(event, 'city')}, {tf(event, 'country')}</span>
                               </div>
                             </div>
                             <div className="flex items-center gap-3 pt-1">

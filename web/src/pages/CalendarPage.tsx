@@ -11,6 +11,7 @@ import SEO from '../components/SEO';
 import { useEvents } from '../hooks/useApi';
 import type { Event } from '../services/api';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
+import { useTranslatedField } from '../hooks/useTranslatedField';
 
 // Event/venue names are treated as official proper nouns from organizer assets.
 // Dates remain locale-formatted via `formatEventDate`.
@@ -258,6 +259,7 @@ function EventCard({ event, formatDate, t, isPast }: {
   t: ReturnType<typeof import('react-i18next').useTranslation>['t'];
   isPast?: boolean;
 }) {
+  const tf = useTranslatedField();
   return (
     <Link
       to={`/events/${event.slug}`}
@@ -288,7 +290,7 @@ function EventCard({ event, formatDate, t, isPast }: {
       <h3 className={`font-heading font-bold text-lg mb-2 group-hover:text-gold-400 transition-colors ${
         event.is_main_event && !isPast ? 'text-gold-500' : 'text-text-primary'
       }`}>
-        {event.name}
+        {tf(event, 'name')}
       </h3>
 
       <div className="space-y-2 text-sm text-text-secondary mb-6 flex-1">
@@ -298,7 +300,7 @@ function EventCard({ event, formatDate, t, isPast }: {
         </div>
         <div className="flex items-center gap-2">
           <MapPin size={14} className="text-text-muted shrink-0" />
-          {event.venue_name}
+          {tf(event, 'venue_name')}
         </div>
       </div>
 

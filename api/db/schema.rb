@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_23_043447) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_23_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -82,6 +82,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_23_043447) do
     t.string "rate_info"
     t.string "room_types"
     t.integer "sort_order", default: 0, null: false
+    t.string "translation_status", default: "untranslated", null: false
+    t.jsonb "translations", default: {}, null: false
     t.datetime "updated_at", null: false
     t.index ["event_id", "active"], name: "index_event_accommodations_on_event_id_and_active"
     t.index ["event_id"], name: "index_event_accommodations_on_event_id"
@@ -130,6 +132,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_23_043447) do
     t.bigint "event_id", null: false
     t.integer "sort_order"
     t.string "time"
+    t.string "translation_status", default: "untranslated", null: false
+    t.jsonb "translations", default: {}, null: false
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_event_schedule_items_on_event_id"
   end
@@ -158,10 +162,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_23_043447) do
     t.jsonb "registration_info_items", default: [], null: false
     t.jsonb "registration_steps", default: [], null: false
     t.string "registration_url"
+    t.string "registration_url_gi"
+    t.string "registration_url_nogi"
     t.text "schedule_note"
     t.string "slug"
     t.string "status"
     t.string "tagline"
+    t.string "translation_status", default: "untranslated", null: false
+    t.jsonb "translations", default: {}, null: false
     t.text "travel_description"
     t.jsonb "travel_items", default: [], null: false
     t.datetime "updated_at", null: false
@@ -195,6 +203,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_23_043447) do
     t.bigint "event_id", null: false
     t.string "name"
     t.integer "sort_order"
+    t.string "translation_status", default: "untranslated", null: false
+    t.jsonb "translations", default: {}, null: false
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_prize_categories_on_event_id"
   end

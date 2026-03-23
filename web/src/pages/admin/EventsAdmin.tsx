@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload } from 'lucide-react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -79,6 +79,7 @@ function eventToForm(e: Event): EventFormData {
     prize_categories_attributes: e.prize_categories.map(p => ({
       id: p.id, name: p.name, amount: p.amount, sort_order: p.sort_order,
     })),
+    translation_status: e.translation_status,
   }
 }
 
@@ -237,6 +238,18 @@ export default function EventsAdmin() {
     await loadEvents()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Image upload failed')
+    }
+  }
+
+  const handleRetranslate = async () => {
+    if (typeof editing !== 'number') return
+    try {
+      await api.admin.retranslateEvent(editing)
+      setSuccess('Translation enqueued — check back in a few seconds')
+      await loadEvents()
+      setTimeout(() => setSuccess(''), 5000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Retranslate failed')
     }
   }
 
@@ -572,6 +585,7 @@ export default function EventsAdmin() {
             </h2>
             <div className="flex items-center gap-3">
               {typeof editing === 'number' && (
+                <>
                 <Link
                   to={`/admin/events/${editing}/results`}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 transition-colors"
@@ -579,6 +593,25 @@ export default function EventsAdmin() {
                   <Trophy className="w-3.5 h-3.5" />
                   Manage Results
                 </Link>
+                <button
+                  onClick={handleRetranslate}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-400 text-xs font-medium hover:bg-blue-500/15 transition-colors"
+                  title="Retranslate this event and all its child records"
+                >
+                  <Languages className="w-3.5 h-3.5" />
+                  Translate
+                </button>
+                {form.translation_status && form.translation_status !== 'untranslated' && (
+                  <span className={`flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                    form.translation_status === 'translated' ? 'bg-green-500/10 text-green-400' :
+                    form.translation_status === 'pending' ? 'bg-yellow-500/10 text-yellow-400' :
+                    form.translation_status === 'failed' ? 'bg-red-500/10 text-red-400' : 'bg-white/5 text-text-muted'
+                  }`}>
+                    {form.translation_status === 'pending' && <RefreshCw className="w-3 h-3 animate-spin" />}
+                    {form.translation_status}
+                  </span>
+                )}
+                </>
               )}
             <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
               <X className="w-4 h-4" />

@@ -13,6 +13,7 @@ import {
   Circle,
 } from 'lucide-react';
 import type { Event } from '../services/api';
+import { useTranslatedField } from '../hooks/useTranslatedField';
 import ScrollReveal from './ScrollReveal';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 
@@ -108,6 +109,7 @@ function MobileStop({
 }) {
   const { event, status } = stop;
   const isMain = event.is_main_event;
+  const tf = useTranslatedField();
   const isLast = index === total - 1;
 
   return (
@@ -173,13 +175,13 @@ function MobileStop({
           }`}
         >
           {isMain && <Trophy size={14} className="inline mr-1.5 -mt-0.5" />}
-          {event.name}
+          {tf(event, 'name')}
         </h3>
 
         <div className="flex items-center gap-3 text-xs text-text-secondary">
           <span className="flex items-center gap-1">
             <MapPin size={11} />
-            {event.city}, {event.country}
+            {tf(event, 'city')}, {tf(event, 'country')}
           </span>
           <span className="flex items-center gap-1">
             <Calendar size={11} />
@@ -214,6 +216,7 @@ function DesktopStop({
 }) {
   const { event, status } = stop;
   const isMain = event.is_main_event;
+  const tf = useTranslatedField();
 
   return (
     <motion.div
@@ -267,12 +270,12 @@ function DesktopStop({
             isMain ? 'text-gold-500 text-base' : 'text-text-primary'
           }`}
         >
-          {event.name}
+          {tf(event, 'name')}
         </h3>
 
         <div className="flex items-center justify-center gap-1 text-[11px] text-text-secondary mb-1">
           <MapPin size={10} />
-          {event.city}, {event.country}
+          {tf(event, 'city')}, {tf(event, 'country')}
         </div>
 
         <div className="text-[11px] text-text-muted mb-2">

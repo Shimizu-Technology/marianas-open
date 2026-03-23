@@ -25,6 +25,7 @@ Rails.application.routes.draw do
             post :upload_image
             get :import_results_preview
             post :import_results
+            post :retranslate
           end
           resources :event_results, only: [:index, :create, :update, :destroy], path: 'results' do
             collection do

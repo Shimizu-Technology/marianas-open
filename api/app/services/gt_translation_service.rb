@@ -1,0 +1,88 @@
+require "digest"
+
+class GtTranslationService
+  BASE_URL = "https://runtime2.gtx.dev".freeze
+  API_VERSION = "2026-03-06.v1".freeze
+  TARGET_LOCALES = %w[ja ko zh tl pt].freeze
+
+  class TranslationError < StandardError; end
+
+  def initialize
+    @api_key = ENV["GT_API_KEY"]
+    @project_id = ENV["GT_PROJECT_ID"]
+  end
+
+  def configured?
+    @api_key.present? && @project_id.present?
+  end
+
+  # Translate a hash of { field_name => english_text } into all target locales.
+  # Returns { "field_name" => { "ja" => "...", "ko" => "...", ... }, ... }
+  def translate_fields(fields, context: nil)
+    raise TranslationError, "GT API not configured" unless configured?
+
+    results = {}
+    fields.each_key { |f| results[f] = {} }
+
+    TARGET_LOCALES.each do |locale|
+      requests = {}
+      fields.each do |field_name, text|
+        next if text.blank?
+        hash_key = Digest::SHA256.hexdigest("#{field_name}:#{text}")[0..15]
+        entry = { "source" => text }
+        if context
+          entry["metadata"] = { "context" => context }
+        end
+        requests[hash_key] = entry
+      end
+
+      next if requests.empty?
+
+      response = call_api(requests, locale)
+
+      field_names = fields.keys.select { |f| fields[f].present? }
+      hash_keys = field_names.map { |f| Digest::SHA256.hexdigest("#{f}:#{fields[f]}")[0..15] }
+
+      hash_keys.each_with_index do |hk, idx|
+        field_name = field_names[idx]
+        result = response[hk]
+        if result.is_a?(Hash) && result["translation"]
+          results[field_name][locale] = result["translation"]
+        end
+      end
+    end
+
+    results
+  end
+
+  private
+
+  def call_api(requests, target_locale)
+    response = HTTParty.post(
+      "#{BASE_URL}/v2/translate",
+      headers: {
+        "Content-Type" => "application/json",
+        "x-gt-api-key" => @api_key,
+        "x-gt-project-id" => @project_id,
+        "gt-api-version" => API_VERSION
+      },
+      body: {
+        requests: requests,
+        targetLocale: target_locale,
+        sourceLocale: "en",
+        metadata: {}
+      }.to_json,
+      timeout: 30
+    )
+
+    unless response.success?
+      raise TranslationError, "GT API returned #{response.code}: #{response.body}"
+    end
+
+    JSON.parse(response.body)
+  rescue Net::OpenTimeout, Net::ReadTimeout => e
+    raise TranslationError, "GT API timeout: #{e.message}"
+  rescue JSON::ParserError => e
+    raise TranslationError, "GT API returned invalid JSON: #{e.message}"
+  end
+end
