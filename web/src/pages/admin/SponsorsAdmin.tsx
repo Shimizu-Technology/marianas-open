@@ -184,6 +184,7 @@ export default function SponsorsAdmin() {
           website_url: sponsor.website_url || '',
           sort_order: sponsor.sort_order || 0,
         })
+        setPendingLogo(null)
       }
     }
   }, [editing, sponsors, nextSortOrder])
