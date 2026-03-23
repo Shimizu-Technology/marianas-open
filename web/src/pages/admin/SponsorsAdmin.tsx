@@ -174,6 +174,11 @@ export default function SponsorsAdmin() {
 
   useEffect(() => { load() }, [load])
 
+  const nextSortOrder = useCallback(() => {
+    if (sponsors.length === 0) return 1
+    return Math.max(...sponsors.map(s => s.sort_order || 0)) + 1
+  }, [sponsors])
+
   useEffect(() => {
     if (editing === 'new') {
       setForm({ ...emptyForm, sort_order: nextSortOrder() })
@@ -189,12 +194,7 @@ export default function SponsorsAdmin() {
         })
       }
     }
-  }, [editing, sponsors])
-
-  const nextSortOrder = () => {
-    if (sponsors.length === 0) return 1
-    return Math.max(...sponsors.map(s => s.sort_order || 0)) + 1
-  }
+  }, [editing, sponsors, nextSortOrder])
 
   const handleSave = async () => {
     setSaving(true)
