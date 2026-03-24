@@ -241,14 +241,41 @@ export default function EventsAdmin() {
     }
   }
 
+  const [translating, setTranslating] = useState(false)
+
   const handleRetranslate = async () => {
     if (typeof editing !== 'number') return
+    setTranslating(true)
     try {
       await api.admin.retranslateEvent(editing)
-      setSuccess('Translation enqueued — check back in a few seconds')
-      await loadEvents()
-      setTimeout(() => setSuccess(''), 5000)
+      setSuccess('Translating... this takes about 30-60 seconds')
+
+      const poll = async (attempts: number) => {
+        if (attempts <= 0) {
+          setTranslating(false)
+          setSuccess('Translation is still processing. Refresh the page in a moment.')
+          setTimeout(() => setSuccess(''), 5000)
+          return
+        }
+        await new Promise(r => setTimeout(r, 5000))
+        await loadEvents()
+        const updated = events.find(e => e.id === editing)
+        if (updated?.translation_status === 'translated' || updated?.translation_status === 'failed') {
+          setTranslating(false)
+          if (updated.translation_status === 'translated') {
+            setSuccess('Translation complete!')
+          } else {
+            setError('Translation failed — check server logs')
+          }
+          setForm(prev => ({ ...prev, translation_status: updated.translation_status }))
+          setTimeout(() => { setSuccess(''); setError('') }, 5000)
+        } else {
+          poll(attempts - 1)
+        }
+      }
+      poll(18)
     } catch (err) {
+      setTranslating(false)
       setError(err instanceof Error ? err.message : 'Retranslate failed')
     }
   }
@@ -595,11 +622,16 @@ export default function EventsAdmin() {
                 </Link>
                 <button
                   onClick={handleRetranslate}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-400 text-xs font-medium hover:bg-blue-500/15 transition-colors"
+                  disabled={translating}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+                    translating
+                      ? 'bg-blue-500/5 text-blue-400/50 cursor-wait'
+                      : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/15'
+                  }`}
                   title="Retranslate this event and all its child records"
                 >
-                  <Languages className="w-3.5 h-3.5" />
-                  Translate
+                  {translating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Languages className="w-3.5 h-3.5" />}
+                  {translating ? 'Translating...' : 'Translate'}
                 </button>
                 {form.translation_status && form.translation_status !== 'untranslated' && (
                   <span className={`flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
