@@ -63,9 +63,9 @@ class TranslateRecordJob < ApplicationJob
     end
 
     if cascade && record.is_a?(Event)
-      record.event_schedule_items.find_each(&:retranslate!)
-      record.prize_categories.find_each(&:retranslate!)
-      record.event_accommodations.find_each(&:retranslate!)
+      record.event_schedule_items.where.not(translation_status: "pending").find_each(&:retranslate!)
+      record.prize_categories.where.not(translation_status: "pending").find_each(&:retranslate!)
+      record.event_accommodations.where.not(translation_status: "pending").find_each(&:retranslate!)
     end
   rescue GtTranslationService::TranslationError => e
     Rails.logger.error("[TranslateRecordJob] Failed #{class_name}##{record_id}: #{e.message}")

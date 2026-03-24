@@ -1,5 +1,3 @@
-require "digest"
-
 class GtTranslationService
   BASE_URL = "https://runtime2.gtx.dev".freeze
   API_VERSION = "2026-03-06.v1".freeze
@@ -28,24 +26,18 @@ class GtTranslationService
       requests = {}
       fields.each do |field_name, text|
         next if text.blank?
-        hash_key = Digest::SHA256.hexdigest("#{field_name}:#{text}")[0..15]
         entry = { "source" => text }
-        if context
-          entry["metadata"] = { "context" => context }
-        end
-        requests[hash_key] = entry
+        entry["metadata"] = { "context" => context } if context
+        requests[field_name] = entry
       end
 
       next if requests.empty?
 
       response = call_api(requests, locale)
 
-      field_names = fields.keys.select { |f| fields[f].present? }
-      hash_keys = field_names.map { |f| Digest::SHA256.hexdigest("#{f}:#{fields[f]}")[0..15] }
-
-      hash_keys.each_with_index do |hk, idx|
-        field_name = field_names[idx]
-        result = response[hk]
+      fields.each_key do |field_name|
+        next if fields[field_name].blank?
+        result = response[field_name]
         if result.is_a?(Hash) && result["translation"]
           results[field_name][locale] = result["translation"]
         end
