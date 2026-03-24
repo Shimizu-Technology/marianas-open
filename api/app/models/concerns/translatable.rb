@@ -46,6 +46,9 @@ module Translatable
   end
 
   def retranslate!
+    service = GtTranslationService.new
+    return unless service.configured?
+
     update_column(:translation_status, "pending")
     TranslateRecordJob.perform_later(self.class.name, id, "changed_fields" => nil, "cascade" => true)
   end

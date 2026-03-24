@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_23_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -87,6 +87,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_23_100000) do
     t.datetime "updated_at", null: false
     t.index ["event_id", "active"], name: "index_event_accommodations_on_event_id_and_active"
     t.index ["event_id"], name: "index_event_accommodations_on_event_id"
+    t.index ["translation_status"], name: "index_event_accommodations_on_translation_status"
   end
 
   create_table "event_gallery_images", force: :cascade do |t|
@@ -136,6 +137,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_23_100000) do
     t.jsonb "translations", default: {}, null: false
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_event_schedule_items_on_event_id"
+    t.index ["translation_status"], name: "index_event_schedule_items_on_translation_status"
   end
 
   create_table "events", force: :cascade do |t|
@@ -179,6 +181,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_23_100000) do
     t.text "visa_description"
     t.jsonb "visa_items", default: [], null: false
     t.index ["organization_id"], name: "index_events_on_organization_id"
+    t.index ["translation_status"], name: "index_events_on_translation_status"
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -207,6 +210,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_23_100000) do
     t.jsonb "translations", default: {}, null: false
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_prize_categories_on_event_id"
+    t.index ["translation_status"], name: "index_prize_categories_on_translation_status"
   end
 
   create_table "site_contents", force: :cascade do |t|

@@ -877,7 +877,7 @@ export default function EventDetailPage() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {section.rows.map((row, index) => (
+                                {(section.rows ?? []).map((row, index) => (
                                   <tr key={`${section.title}-${row.deadline}-${index}`} className="border-t border-white/5">
                                     <td className="px-4 py-3 text-text-secondary">{row.deadline}</td>
                                     <td className="px-4 py-3 text-gold-400 font-semibold whitespace-nowrap">{row.fee}</td>

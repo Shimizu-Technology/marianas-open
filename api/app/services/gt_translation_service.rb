@@ -72,7 +72,7 @@ class GtTranslationService
         sourceLocale: "en",
         metadata: {}
       }.to_json,
-      timeout: 30
+      timeout: 15
     )
 
     unless response.success?

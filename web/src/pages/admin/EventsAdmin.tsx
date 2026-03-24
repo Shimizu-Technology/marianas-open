@@ -127,6 +127,10 @@ export default function EventsAdmin() {
   useEffect(() => { loadEvents() }, [loadEvents])
 
   useEffect(() => {
+    return () => { pollingRef.current = false }
+  }, [editing])
+
+  useEffect(() => {
     if (editing === 'new') {
       setForm(emptyForm)
       setPendingHeroImage(null)
@@ -252,14 +256,18 @@ export default function EventsAdmin() {
   }
 
   const [translating, setTranslating] = useState(false)
+  const pollingRef = useRef(false)
 
   const pollTranslationStatus = useCallback(async (eventId: number) => {
+    pollingRef.current = true
     setTranslating(true)
     for (let attempt = 0; attempt < 24; attempt++) {
       await new Promise(r => setTimeout(r, 3000))
+      if (!pollingRef.current) return
       try {
         const { event: updated } = await api.admin.getEvent(eventId)
         if (updated.translation_status === 'translated' || updated.translation_status === 'failed') {
+          pollingRef.current = false
           setTranslating(false)
           setForm(prev => ({ ...prev, translation_status: updated.translation_status }))
           setEvents(prev => prev.map(e => e.id === eventId ? { ...e, translation_status: updated.translation_status } : e))
@@ -275,6 +283,7 @@ export default function EventsAdmin() {
         // keep polling
       }
     }
+    pollingRef.current = false
     setTranslating(false)
     setSuccess('Translation is still processing. Refresh the page in a moment.')
     setTimeout(() => setSuccess(''), 5000)
