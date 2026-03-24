@@ -259,7 +259,7 @@ function EventCard({ event, formatDate, t, isPast }: {
   t: ReturnType<typeof import('react-i18next').useTranslation>['t'];
   isPast?: boolean;
 }) {
-  const tf = useTranslatedField();
+  const { tf } = useTranslatedField();
   return (
     <Link
       to={`/events/${event.slug}`}

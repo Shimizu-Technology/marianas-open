@@ -58,7 +58,7 @@ export default function EventDetailPage() {
 
   const { sponsors } = useSponsors();
 
-  const tf = useTranslatedField();
+  const { tf, tfa } = useTranslatedField();
 
   // If slug provided, show that event; otherwise show main event
   const mainEvent = slug
@@ -122,14 +122,26 @@ export default function EventDetailPage() {
     .map(a => a.image_url ? resolveMediaUrl(a.image_url) : null)
     .filter((url): url is string => url !== null && url !== undefined);
 
-  const venueHighlights = getValidItems(mainEvent?.venue_highlights);
-  const registrationSteps = (mainEvent?.registration_steps ?? []).filter(step => hasMeaningfulText(step.title) && hasMeaningfulText(step.description));
-  const registrationFeeSections = (mainEvent?.registration_fee_sections ?? [])
+  // Use translated JSONB arrays for current locale (falls back to English)
+  const venueHighlightsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string }>(mainEvent, 'venue_highlights' as keyof typeof mainEvent & string) : [];
+  const venueHighlights = getValidItems(venueHighlightsRaw.length > 0 ? venueHighlightsRaw : mainEvent?.venue_highlights);
+
+  const registrationStepsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string; url?: string; link_label?: string }>(mainEvent, 'registration_steps' as keyof typeof mainEvent & string) : [];
+  const registrationSteps = (registrationStepsRaw.length > 0 ? registrationStepsRaw : (mainEvent?.registration_steps ?? [])).filter(step => hasMeaningfulText(step.title) && hasMeaningfulText(step.description));
+
+  const registrationFeeSectionsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; rows?: { deadline: string; fee: string; option: string }[] }>(mainEvent, 'registration_fee_sections' as keyof typeof mainEvent & string) : [];
+  const registrationFeeSections = (registrationFeeSectionsRaw.length > 0 ? registrationFeeSectionsRaw : (mainEvent?.registration_fee_sections ?? []))
     .filter(section => hasMeaningfulText(section.title) && (section.rows ?? []).some(row => hasMeaningfulText(row.deadline) && hasMeaningfulText(row.fee) && hasMeaningfulText(row.option)));
-  const registrationInfoItems = (mainEvent?.registration_info_items ?? [])
+
+  const registrationInfoItemsRaw = mainEvent ? tfa<typeof mainEvent, { label: string; value: string }>(mainEvent, 'registration_info_items' as keyof typeof mainEvent & string) : [];
+  const registrationInfoItems = (registrationInfoItemsRaw.length > 0 ? registrationInfoItemsRaw : (mainEvent?.registration_info_items ?? []))
     .filter(item => hasMeaningfulText(item.label) && hasMeaningfulText(item.value));
-  const travelItems = (mainEvent?.travel_items ?? []).filter(item => hasMeaningfulText(item.title) && (hasMeaningfulText(item.description) || hasMeaningfulText(item.value)));
-  const visaItems = getValidItems(mainEvent?.visa_items);
+
+  const travelItemsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string; value?: string; url?: string; link_label?: string }>(mainEvent, 'travel_items' as keyof typeof mainEvent & string) : [];
+  const travelItems = (travelItemsRaw.length > 0 ? travelItemsRaw : (mainEvent?.travel_items ?? [])).filter(item => hasMeaningfulText(item.title) && (hasMeaningfulText(item.description) || hasMeaningfulText(item.value)));
+
+  const visaItemsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string }>(mainEvent, 'visa_items' as keyof typeof mainEvent & string) : [];
+  const visaItems = getValidItems(visaItemsRaw.length > 0 ? visaItemsRaw : mainEvent?.visa_items);
 
   const eventTagline = eventTaglineRaw
     || (mainEvent?.is_main_event ? t('event.tagline') : t('event.qualifierTagline', 'Official Qualifier'));

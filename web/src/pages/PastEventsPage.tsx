@@ -119,7 +119,7 @@ const cardVariants = {
 export default function PastEventsPage() {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
-  const tf = useTranslatedField();
+  const { tf } = useTranslatedField();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 

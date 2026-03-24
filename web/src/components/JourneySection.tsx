@@ -109,7 +109,7 @@ function MobileStop({
 }) {
   const { event, status } = stop;
   const isMain = event.is_main_event;
-  const tf = useTranslatedField();
+  const { tf } = useTranslatedField();
   const isLast = index === total - 1;
 
   return (
@@ -216,7 +216,7 @@ function DesktopStop({
 }) {
   const { event, status } = stop;
   const isMain = event.is_main_event;
-  const tf = useTranslatedField();
+  const { tf } = useTranslatedField();
 
   return (
     <motion.div

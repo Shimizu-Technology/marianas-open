@@ -19,6 +19,14 @@ class Event < ApplicationRecord
   translatable_fields :name, :description, :tagline, :venue_name, :city, :country,
                       :schedule_note, :prize_title, :prize_description,
                       :travel_description, :visa_description
+  translatable_json_fields(
+    { field: :venue_highlights, sub_fields: [:title, :description] },
+    { field: :registration_steps, sub_fields: [:title, :description] },
+    { field: :registration_fee_sections, sub_fields: [:title] },
+    { field: :registration_info_items, sub_fields: [:label, :value] },
+    { field: :travel_items, sub_fields: [:title, :description] },
+    { field: :visa_items, sub_fields: [:title, :description] }
+  )
   translation_context "Marianas Open jiu-jitsu tournament events. Translate naturally for the target audience."
 
   def as_json(options = {})

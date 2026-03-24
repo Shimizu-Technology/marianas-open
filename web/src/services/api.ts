@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-export type TranslationsBlob = Record<string, Record<string, string>>;
+export type TranslationsBlob = Record<string, Record<string, unknown>>;
 export type TranslationStatus = 'untranslated' | 'pending' | 'translated' | 'failed';
 
 export interface CompetitorProfileResult {
