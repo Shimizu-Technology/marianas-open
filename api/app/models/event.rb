@@ -21,8 +21,8 @@ class Event < ApplicationRecord
                       :travel_description, :visa_description
   translatable_json_fields(
     { field: :venue_highlights, sub_fields: [:title, :description] },
-    { field: :registration_steps, sub_fields: [:title, :description] },
-    { field: :registration_fee_sections, sub_fields: [:title] },
+    { field: :registration_steps, sub_fields: [:title, :description, :link_label] },
+    { field: :registration_fee_sections, sub_fields: [:title], nested: { rows: [:deadline, :option] } },
     { field: :registration_info_items, sub_fields: [:label, :value] },
     { field: :travel_items, sub_fields: [:title, :description] },
     { field: :visa_items, sub_fields: [:title, :description] }

@@ -21,7 +21,11 @@ module Translatable
     # )
     def translatable_json_fields(*configs)
       @_translatable_json_fields = configs.map do |c|
-        { field: c[:field].to_s, sub_fields: c[:sub_fields].map(&:to_s) }
+        result = { field: c[:field].to_s, sub_fields: c[:sub_fields].map(&:to_s) }
+        if c[:nested]
+          result[:nested] = c[:nested].transform_keys(&:to_s).transform_values { |v| v.map(&:to_s) }
+        end
+        result
       end
     end
 
