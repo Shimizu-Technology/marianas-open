@@ -1,5 +1,8 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+export type TranslationsBlob = Record<string, Record<string, unknown>>;
+export type TranslationStatus = 'untranslated' | 'pending' | 'translated' | 'failed';
+
 export interface CompetitorProfileResult {
   event_name: string;
   event_slug: string;
@@ -77,6 +80,8 @@ export interface EventScheduleItem {
   description: string;
   sort_order: number;
   _destroy?: boolean;
+  translations?: TranslationsBlob;
+  translation_status?: TranslationStatus;
 }
 
 export interface PrizeCategory {
@@ -85,6 +90,8 @@ export interface PrizeCategory {
   amount: string;
   sort_order: number;
   _destroy?: boolean;
+  translations?: TranslationsBlob;
+  translation_status?: TranslationStatus;
 }
 
 export interface EventGalleryImage {
@@ -188,6 +195,8 @@ export interface Event {
   prize_categories: PrizeCategory[];
   event_accommodations: EventAccommodation[];
   event_gallery_images: EventGalleryImage[];
+  translations?: TranslationsBlob;
+  translation_status?: TranslationStatus;
 }
 
 export interface EventAccommodation {
@@ -207,6 +216,8 @@ export interface EventAccommodation {
   sort_order: number;
   active: boolean;
   image_url: string | null;
+  translations?: TranslationsBlob;
+  translation_status?: TranslationStatus;
 }
 
 export interface EventAccommodationFormData {
@@ -333,6 +344,7 @@ export interface EventFormData {
   visa_items: EventVisaItem[];
   event_schedule_items_attributes: EventScheduleItem[];
   prize_categories_attributes: PrizeCategory[];
+  translation_status?: TranslationStatus;
 }
 
 export interface SponsorFormData {
@@ -608,6 +620,9 @@ export const api = {
       fetchApi<ImportPreview>(`/api/v1/admin/events/${eventId}/import_results_preview`, {}, true),
     importResults: (eventId: number) =>
       fetchApi<ImportResult>(`/api/v1/admin/events/${eventId}/import_results`, { method: 'POST' }, true),
+
+    retranslateEvent: (eventId: number) =>
+      fetchApi<{ message: string; event: Event }>(`/api/v1/admin/events/${eventId}/retranslate`, { method: 'POST' }, true),
 
     // Event Accommodations
     getAccommodations: (eventId: number) =>

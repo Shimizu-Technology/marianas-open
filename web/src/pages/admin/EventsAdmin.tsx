@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload } from 'lucide-react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -79,6 +79,7 @@ function eventToForm(e: Event): EventFormData {
     prize_categories_attributes: e.prize_categories.map(p => ({
       id: p.id, name: p.name, amount: p.amount, sort_order: p.sort_order,
     })),
+    translation_status: e.translation_status,
   }
 }
 
@@ -124,6 +125,10 @@ export default function EventsAdmin() {
   }, [])
 
   useEffect(() => { loadEvents() }, [loadEvents])
+
+  useEffect(() => {
+    return () => { pollingGenRef.current++ }
+  }, [editing])
 
   useEffect(() => {
     if (editing === 'new') {
@@ -204,9 +209,19 @@ export default function EventsAdmin() {
           }
         }
         if (!imageUploadFailed) setSuccess('Event created')
+        if (savedEventId && res.event.translation_status === 'pending') {
+          setForm(prev => ({ ...prev, translation_status: 'pending' }))
+          setSuccess('Event created — translating...')
+          pollTranslationStatus(savedEventId)
+        }
       } else if (typeof editing === 'number') {
-        await api.admin.updateEvent(editing, form)
+        const res = await api.admin.updateEvent(editing, form)
         setSuccess('Event updated')
+        if (res.event.translation_status === 'pending') {
+          setForm(prev => ({ ...prev, translation_status: 'pending' }))
+          setSuccess('Event saved — translating changes...')
+          pollTranslationStatus(editing)
+        }
       }
       setPendingHeroImage(null)
       await loadEvents()
@@ -237,6 +252,53 @@ export default function EventsAdmin() {
     await loadEvents()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Image upload failed')
+    }
+  }
+
+  const [translating, setTranslating] = useState(false)
+  const pollingGenRef = useRef(0)
+
+  const pollTranslationStatus = useCallback(async (eventId: number) => {
+    const generation = ++pollingGenRef.current
+    setTranslating(true)
+    for (let attempt = 0; attempt < 24; attempt++) {
+      await new Promise(r => setTimeout(r, 3000))
+      if (generation !== pollingGenRef.current) return
+      try {
+        const { event: updated } = await api.admin.getEvent(eventId)
+        if (updated.translation_status === 'translated' || updated.translation_status === 'failed') {
+          if (generation !== pollingGenRef.current) return
+          setTranslating(false)
+          setForm(prev => ({ ...prev, translation_status: updated.translation_status }))
+          setEvents(prev => prev.map(e => e.id === eventId ? { ...e, translation_status: updated.translation_status } : e))
+          if (updated.translation_status === 'translated') {
+            setSuccess('Translation complete!')
+          } else {
+            setError('Translation failed — check server logs')
+          }
+          setTimeout(() => { setSuccess(''); setError('') }, 5000)
+          return
+        }
+      } catch {
+        // keep polling
+      }
+    }
+    if (generation !== pollingGenRef.current) return
+    setTranslating(false)
+    setSuccess('Translation is still processing. Refresh the page in a moment.')
+    setTimeout(() => setSuccess(''), 5000)
+  }, [])
+
+  const handleRetranslate = async () => {
+    if (typeof editing !== 'number') return
+    setTranslating(true)
+    try {
+      await api.admin.retranslateEvent(editing)
+      setSuccess('Translating...')
+      pollTranslationStatus(editing)
+    } catch (err) {
+      setTranslating(false)
+      setError(err instanceof Error ? err.message : 'Retranslate failed')
     }
   }
 
@@ -572,6 +634,7 @@ export default function EventsAdmin() {
             </h2>
             <div className="flex items-center gap-3">
               {typeof editing === 'number' && (
+                <>
                 <Link
                   to={`/admin/events/${editing}/results`}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 transition-colors"
@@ -579,6 +642,30 @@ export default function EventsAdmin() {
                   <Trophy className="w-3.5 h-3.5" />
                   Manage Results
                 </Link>
+                <button
+                  onClick={handleRetranslate}
+                  disabled={translating}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+                    translating
+                      ? 'bg-blue-500/5 text-blue-400/50 cursor-wait'
+                      : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/15'
+                  }`}
+                  title="Retranslate this event and all its child records"
+                >
+                  {translating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Languages className="w-3.5 h-3.5" />}
+                  {translating ? 'Translating...' : 'Translate'}
+                </button>
+                {form.translation_status && form.translation_status !== 'untranslated' && (
+                  <span className={`flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                    form.translation_status === 'translated' ? 'bg-green-500/10 text-green-400' :
+                    form.translation_status === 'pending' ? 'bg-yellow-500/10 text-yellow-400' :
+                    form.translation_status === 'failed' ? 'bg-red-500/10 text-red-400' : 'bg-white/5 text-text-muted'
+                  }`}>
+                    {form.translation_status === 'pending' && <RefreshCw className="w-3 h-3 animate-spin" />}
+                    {form.translation_status}
+                  </span>
+                )}
+                </>
               )}
             <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
               <X className="w-4 h-4" />

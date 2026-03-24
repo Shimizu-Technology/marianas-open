@@ -1,5 +1,6 @@
 class Event < ApplicationRecord
   include HasImageUrl
+  include Translatable
 
   belongs_to :organization
   has_many :event_schedule_items, dependent: :destroy
@@ -14,6 +15,19 @@ class Event < ApplicationRecord
   accepts_nested_attributes_for :prize_categories, allow_destroy: true
 
   image_url_for :hero_image
+
+  translatable_fields :name, :description, :tagline, :venue_name, :city, :country,
+                      :schedule_note, :prize_title, :prize_description,
+                      :travel_description, :visa_description
+  translatable_json_fields(
+    { field: :venue_highlights, sub_fields: [:title, :description] },
+    { field: :registration_steps, sub_fields: [:title, :description, :link_label] },
+    { field: :registration_fee_sections, sub_fields: [:title], nested: { rows: [:deadline, :option] } },
+    { field: :registration_info_items, sub_fields: [:label, :value] },
+    { field: :travel_items, sub_fields: [:title, :description] },
+    { field: :visa_items, sub_fields: [:title, :description] }
+  )
+  translation_context "Marianas Open jiu-jitsu tournament events. Translate naturally for the target audience."
 
   def as_json(options = {})
     super(options.merge(

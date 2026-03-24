@@ -167,89 +167,129 @@ For ambiguous terms in the Marianas Open context, a companion metadata file
 
 ---
 
-## Phase 2: Dynamic Content Translation (Future)
+## Phase 2: Dynamic Content Translation (Implemented)
 
-### What It Will Translate
+### What It Translates
 
 All content entered by the Marianas Open admin team:
-- Event descriptions, taglines, schedule notes
+- Event names, descriptions, taglines, venue names, cities, countries, schedule notes
+- Prize titles and descriptions
+- Travel and visa descriptions
+- JSONB array fields: venue highlights, registration steps, fee sections (including nested rows), info items, travel items, visa items
 - Schedule item descriptions
 - Prize category names
-- Accommodation details (hotel names, descriptions, room types)
-- Registration steps and fee labels
-- Travel and visa item descriptions
-- Sponsor descriptions (if added)
+- Accommodation details (hotel names, descriptions, room types, rates, inclusions)
 
-### Planned Architecture
+### Architecture
 
 ```
   Admin saves event ──► Rails API ──► Save to DB (English)
                                           │
                                           ▼
-                                   Background Job
-                                   (ActiveJob + Sidekiq)
+                                   before_save callback
+                                   (tracks which fields changed)
                                           │
                                           ▼
-                                   Translation API
-                                   (GT / OpenAI / Google)
+                                   after_commit callback
+                                   (Translatable concern)
+                                          │
+                                          ▼
+                                   TranslateRecordJob
+                                   (only translates changed fields)
+                                          │
+                                          ▼
+                                   GtTranslationService
+                                   (calls GT API for 5 target locales)
                                           │
                                           ▼
                                    Save translations
                                    (JSONB column per record)
                                           │
                                           ▼
-                                   API returns translations
-                                   alongside original content
-                                          │
-                                          ▼
-                                   Frontend checks user locale
-                                   and displays translated version
+                                   Frontend useTranslatedField()
+                                   { tf, tfa } reads translations
+                                   for current locale
 ```
 
-### Storage Design (Option C — JSONB blob per record)
+### Key Design Decisions
 
-Each model with translatable content gets a `translations` JSONB column:
+- **Incremental translation**: Only fields that actually changed are sent to the GT API. Editing just a description triggers ~5 API calls (one per locale) instead of 100+.
+- **`before_save` change tracking**: Uses `will_save_change_to_attribute?` in `before_save` to reliably capture dirty fields, even for records saved through `accepts_nested_attributes_for` (where `saved_change_to_attribute?` in `after_commit` can be unreliable).
+- **No auto-cascade**: Saving an event does NOT re-translate child records (schedule items, prizes, accommodations). Each child has its own `after_commit` and translates independently when changed.
+- **Manual cascade via button**: The admin "Translate" button (`retranslate!`) does a full re-translation of the event + all children. Use this to force-refresh everything.
+
+### Storage Design (JSONB blob per record)
+
+Each translatable model has a `translations` JSONB column and a `translation_status` string column:
 
 ```ruby
-# Example: Event model
-# translations column stores:
-{
-  "description": {
-    "ja": "マリアナス・プロシリーズがマニラに...",
-    "ko": "마리아나스 프로 시리즈가 마닐라에...",
-    "zh": "马里亚纳斯职业系列赛来到马尼拉...",
-    "tl": "Ang Marianas Pro Series ay darating sa Manila...",
-    "pt": "A Marianas Pro Series chega a Manila..."
-  },
-  "prize_title": {
-    "ja": "グアムへの道を勝ち取れ！",
-    "ko": "괌행 티켓을 쟁취하세요!",
-    ...
-  }
-}
+# Simple text fields
+event.translations["name"]["ja"]  # => "グアム Copa de Marianas 2026"
+
+# JSONB array fields (stored per-locale as full array copies)
+event.translations["venue_highlights"]["ja"]  # => [{ "title" => "...", "description" => "..." }, ...]
+event.translations["registration_fee_sections"]["ko"]  # => [{ "title" => "...", "rows" => [...] }, ...]
+
+event.translation_status  # => "translated" | "pending" | "failed" | "untranslated"
 ```
+
+### Backend Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `GtTranslationService` | `api/app/services/gt_translation_service.rb` | Calls GT API (`runtime2.gtx.dev/v2/translate`) via HTTParty |
+| `Translatable` concern | `api/app/models/concerns/translatable.rb` | `before_save` tracks changes, `after_commit` enqueues job |
+| `TranslateRecordJob` | `api/app/jobs/translate_record_job.rb` | Translates only changed fields, supports cascade option |
+| `ApplicationJob` | `api/app/jobs/application_job.rb` | Base job class with retry policy (3 attempts) |
+
+### Translatable Models
+
+| Model | Simple Fields | JSONB Array Fields |
+|-------|--------------|-------------------|
+| `Event` | name, description, tagline, venue_name, city, country, schedule_note, prize_title, prize_description, travel_description, visa_description | venue_highlights, registration_steps, registration_fee_sections (with nested rows), registration_info_items, travel_items, visa_items |
+| `EventScheduleItem` | description | — |
+| `PrizeCategory` | name | — |
+| `EventAccommodation` | hotel_name, description, room_types, inclusions, rate_info | — |
 
 ### Frontend Integration
 
 ```typescript
-// Helper to get translated or fallback text
-function useTranslatedField(record: any, field: string): string {
-  const { i18n } = useTranslation();
-  const locale = i18n.language;
+import { useTranslatedField } from '../hooks/useTranslatedField';
 
-  if (locale === 'en') return record[field];
-  return record.translations?.[field]?.[locale] || record[field];
-}
+const { tf, tfa } = useTranslatedField();
+
+// tf: simple string fields — returns translated string or falls back to English
+const name = tf(event, 'name');              // "グアム Copa de Marianas 2026" (ja)
+const desc = tf(scheduleItem, 'description'); // "開場" (ja)
+
+// tfa: JSONB array fields — returns locale-specific array or falls back to English
+const highlights = tfa(event, 'venue_highlights');  // [{ title: "...", description: "..." }]
+const steps = tfa(event, 'registration_steps');     // [{ title: "...", description: "..." }]
 ```
 
-### Implementation Details (deferred to Phase 2)
+### Admin Features
 
-- Background job fires after create/update of translatable records
-- Translation runs asynchronously; English content is available immediately
-- Translations appear within seconds (async job completes)
-- Re-translation triggered when source field content changes
-- Admin can see translation status per record (translated / pending / failed)
-- Fallback: if translation is missing, display English original
+- **Auto-translation on save**: Any change to a translatable field triggers automatic translation of just that field
+- **Retranslate button**: `POST /api/v1/admin/events/:id/retranslate` — full re-translation of event + all child records
+- **Translation status badge**: Shows `TRANSLATED` / `PENDING` / `FAILED` in the admin event edit form
+- **Auto-polling**: After save or retranslate, the UI polls for status updates every 3 seconds and updates automatically
+
+### Environment Variables
+
+Add to backend `.env` (same keys as frontend):
+```
+GT_API_KEY=gtx-api-xxxxx
+GT_PROJECT_ID=prj_xxxxx
+```
+
+### How Translation Triggers
+
+1. Admin saves a record (event, schedule item, prize category, or accommodation)
+2. `before_save` captures which translatable fields are about to change
+3. `after_commit` checks if any translatable fields changed, enqueues `TranslateRecordJob` with only those field names
+4. Job calls `GtTranslationService.translate_fields` for each target locale (ja, ko, zh, tl, pt)
+5. Results merged into existing `translations` JSONB column, status set to `"translated"`
+6. Frontend reads `translations` from API response and displays locale-appropriate version via `tf`/`tfa`
 
 ---
 
@@ -272,10 +312,10 @@ No changes to `web/src/i18n.ts` or any component's `useTranslation` usage are ne
 
 | Aspect | Phase 1 (Static) | Phase 2 (Dynamic) |
 |--------|------------------|--------------------|
-| **Status** | Implementing now | Future |
+| **Status** | Implemented | Implemented |
 | **Content** | UI labels, headers, buttons | Admin-entered event data |
-| **Trigger** | Build-time (CI/CD) | After admin save |
-| **Tool** | GT CLI (`npx gt translate`) | Backend job + Translation API |
-| **Storage** | Locale JSON files in repo | JSONB column in database |
-| **Runtime** | react-i18next loads JSON | Frontend helper reads translations |
-| **Cost** | Free tier / $5 mo | API costs per translation |
+| **Trigger** | Build-time (CI/CD) | After admin save (after_commit) |
+| **Tool** | GT CLI (`npx gt translate`) | GT API via `GtTranslationService` + ActiveJob |
+| **Storage** | Locale JSON files in repo | JSONB `translations` column per record |
+| **Runtime** | react-i18next loads JSON | `useTranslatedField()` hook reads translations |
+| **Cost** | Starter ($5/mo) | Same GT account — included in usage |

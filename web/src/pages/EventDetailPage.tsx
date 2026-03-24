@@ -11,6 +11,7 @@ import EventResultsSection from '../components/EventResultsSection';
 import SEO from '../components/SEO';
 import { useEvents, useSponsors } from '../hooks/useApi';
 import { getEventHeroImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
+import { useTranslatedField } from '../hooks/useTranslatedField';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -57,6 +58,8 @@ export default function EventDetailPage() {
 
   const { sponsors } = useSponsors();
 
+  const { tf, tfa } = useTranslatedField();
+
   // If slug provided, show that event; otherwise show main event
   const mainEvent = slug
     ? events.find(e => e.slug === slug) || null
@@ -64,15 +67,28 @@ export default function EventDetailPage() {
 
   const isCompleted = mainEvent?.status === 'completed';
 
+  // Translated dynamic fields (fall back to English original when translation unavailable)
+  const eventName = tf(mainEvent, 'name') || mainEvent?.name || '';
+  const eventDescription = tf(mainEvent, 'description');
+  const eventVenueName = tf(mainEvent, 'venue_name') || mainEvent?.venue_name || '';
+  const eventCity = tf(mainEvent, 'city') || mainEvent?.city || '';
+  const eventCountry = tf(mainEvent, 'country') || mainEvent?.country || '';
+  const eventScheduleNote = tf(mainEvent, 'schedule_note');
+  const eventPrizeTitle = tf(mainEvent, 'prize_title');
+  const eventPrizeDescription = tf(mainEvent, 'prize_description');
+  const eventTravelDescription = tf(mainEvent, 'travel_description');
+  const eventVisaDescription = tf(mainEvent, 'visa_description');
+  const eventTaglineRaw = tf(mainEvent, 'tagline');
+
   // Schedule: only from API, no hardcoded fallback
   const hasRealScheduleItems = !!mainEvent && (mainEvent.event_schedule_items?.length ?? 0) > 0;
   const scheduleItems = hasRealScheduleItems
     ? [...mainEvent.event_schedule_items]
         .sort((a, b) => a.sort_order - b.sort_order)
-        .map(item => ({ time: item.time, event: item.description }))
+        .map(item => ({ time: item.time, event: tf(item, 'description') || item.description }))
     : [];
   const scheduleDescription = hasRealScheduleItems
-    ? (mainEvent.schedule_note?.trim()
+    ? (eventScheduleNote?.trim()
         || t(
           'event.scheduleOrganizerDesc',
           'Official match schedule provided by the organizer. Matches may begin up to 30 minutes early, so athletes should be in the warm-up area at least 40 minutes before their division.'
@@ -91,7 +107,7 @@ export default function EventDetailPage() {
         .map(cat => {
           const amt = Number(cat.amount);
           return {
-            division: cat.name,
+            division: tf(cat, 'name') || cat.name,
             prize: amt > 0 ? `$${amt.toLocaleString()}` : '',
           };
         })
@@ -106,16 +122,28 @@ export default function EventDetailPage() {
     .map(a => a.image_url ? resolveMediaUrl(a.image_url) : null)
     .filter((url): url is string => url !== null && url !== undefined);
 
-  const venueHighlights = getValidItems(mainEvent?.venue_highlights);
-  const registrationSteps = (mainEvent?.registration_steps ?? []).filter(step => hasMeaningfulText(step.title) && hasMeaningfulText(step.description));
-  const registrationFeeSections = (mainEvent?.registration_fee_sections ?? [])
-    .filter(section => hasMeaningfulText(section.title) && (section.rows ?? []).some(row => hasMeaningfulText(row.deadline) && hasMeaningfulText(row.fee) && hasMeaningfulText(row.option)));
-  const registrationInfoItems = (mainEvent?.registration_info_items ?? [])
-    .filter(item => hasMeaningfulText(item.label) && hasMeaningfulText(item.value));
-  const travelItems = (mainEvent?.travel_items ?? []).filter(item => hasMeaningfulText(item.title) && (hasMeaningfulText(item.description) || hasMeaningfulText(item.value)));
-  const visaItems = getValidItems(mainEvent?.visa_items);
+  // Use translated JSONB arrays for current locale (falls back to English)
+  const venueHighlightsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string }>(mainEvent, 'venue_highlights' as keyof typeof mainEvent & string) : [];
+  const venueHighlights = getValidItems(venueHighlightsRaw.length > 0 ? venueHighlightsRaw : mainEvent?.venue_highlights);
 
-  const eventTagline = mainEvent?.tagline
+  const registrationStepsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string; url?: string; link_label?: string }>(mainEvent, 'registration_steps' as keyof typeof mainEvent & string) : [];
+  const registrationSteps = (registrationStepsRaw.length > 0 ? registrationStepsRaw : (mainEvent?.registration_steps ?? [])).filter(step => hasMeaningfulText(step.title) && hasMeaningfulText(step.description));
+
+  const registrationFeeSectionsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; rows?: { deadline: string; fee: string; option: string }[] }>(mainEvent, 'registration_fee_sections' as keyof typeof mainEvent & string) : [];
+  const registrationFeeSections = (registrationFeeSectionsRaw.length > 0 ? registrationFeeSectionsRaw : (mainEvent?.registration_fee_sections ?? []))
+    .filter(section => hasMeaningfulText(section.title) && (section.rows ?? []).some(row => hasMeaningfulText(row.deadline) && hasMeaningfulText(row.fee) && hasMeaningfulText(row.option)));
+
+  const registrationInfoItemsRaw = mainEvent ? tfa<typeof mainEvent, { label: string; value: string }>(mainEvent, 'registration_info_items' as keyof typeof mainEvent & string) : [];
+  const registrationInfoItems = (registrationInfoItemsRaw.length > 0 ? registrationInfoItemsRaw : (mainEvent?.registration_info_items ?? []))
+    .filter(item => hasMeaningfulText(item.label) && hasMeaningfulText(item.value));
+
+  const travelItemsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string; value?: string; url?: string; link_label?: string }>(mainEvent, 'travel_items' as keyof typeof mainEvent & string) : [];
+  const travelItems = (travelItemsRaw.length > 0 ? travelItemsRaw : (mainEvent?.travel_items ?? [])).filter(item => hasMeaningfulText(item.title) && (hasMeaningfulText(item.description) || hasMeaningfulText(item.value)));
+
+  const visaItemsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string }>(mainEvent, 'visa_items' as keyof typeof mainEvent & string) : [];
+  const visaItems = getValidItems(visaItemsRaw.length > 0 ? visaItemsRaw : mainEvent?.visa_items);
+
+  const eventTagline = eventTaglineRaw
     || (mainEvent?.is_main_event ? t('event.tagline') : t('event.qualifierTagline', 'Official Qualifier'));
   const asjjfRankText = t('event.asjjfRankDynamic', {
     count: mainEvent?.asjjf_stars || 5,
@@ -134,9 +162,9 @@ export default function EventDetailPage() {
         linkLabel: step.link_label || '',
       }))
     : [];
-  const travelDescription = mainEvent?.travel_description || '';
+  const travelDescription = eventTravelDescription || '';
   const displayTravelItems = travelItems;
-  const visaDescription = mainEvent?.visa_description || '';
+  const visaDescription = eventVisaDescription || '';
   const displayVisaItems = visaItems;
   const shouldShowTravelSection = hasMeaningfulText(travelDescription)
     || hasMeaningfulText(visaDescription)
@@ -146,7 +174,7 @@ export default function EventDetailPage() {
   const displayVenueHighlights = venueHighlights.length > 0
     ? venueHighlights
     : mainEvent
-      ? [{ title: mainEvent.city, description: mainEvent.country }]
+      ? [{ title: eventCity, description: eventCountry }]
       : [];
 
   const galleryImages = (mainEvent?.event_gallery_images ?? [])
@@ -172,7 +200,7 @@ export default function EventDetailPage() {
     return start.toLocaleDateString('en-US', opts);
   };
   const shareText = mainEvent
-    ? `${mainEvent.name} — ${formatEventDate(mainEvent)} — ${mainEvent.venue_name}`
+    ? `${eventName} — ${formatEventDate(mainEvent)} — ${eventVenueName}`
     : t('event.shareText');
 
   const heroImageUrl = getEventHeroImage(mainEvent?.slug || 'marianas-open-2026', mainEvent?.hero_image_url ?? null);
@@ -182,15 +210,15 @@ export default function EventDetailPage() {
       ? `/events/${slug}`
       : '/events';
   const seoTitle = mainEvent
-    ? `${mainEvent.name} ${formatEventDate(mainEvent)}`
+    ? `${eventName} ${formatEventDate(mainEvent)}`
     : 'Event Details';
   const seoDescription = mainEvent
-    ? `${mainEvent.name} takes place at ${mainEvent.venue_name} in ${mainEvent.city}, ${mainEvent.country} on ${formatEventDate(mainEvent)}.`
+    ? `${eventName} takes place at ${eventVenueName} in ${eventCity}, ${eventCountry} on ${formatEventDate(mainEvent)}.`
     : 'Official Marianas Open event details, schedule, venue information, registration, and results.';
   const eventSchema = mainEvent ? {
     '@context': 'https://schema.org',
     '@type': 'SportsEvent',
-    name: mainEvent.name,
+    name: eventName,
     description: seoDescription,
     startDate: mainEvent.date,
     endDate: mainEvent.end_date || mainEvent.date,
@@ -201,12 +229,12 @@ export default function EventDetailPage() {
     image: heroImageUrl ? [heroImageUrl] : undefined,
     location: {
       '@type': 'Place',
-      name: mainEvent.venue_name,
+      name: eventVenueName,
       address: {
         '@type': 'PostalAddress',
         streetAddress: mainEvent.venue_address,
-        addressLocality: mainEvent.city,
-        addressCountry: mainEvent.country_code || mainEvent.country,
+        addressLocality: eventCity,
+        addressCountry: mainEvent.country_code || eventCountry,
       },
     },
     organizer: {
@@ -286,10 +314,10 @@ export default function EventDetailPage() {
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] mb-6">
               {mainEvent ? (
                 <>
-                  <span className="text-text-primary">{mainEvent.name.split(' ').slice(0, -1).join(' ')}</span>
+                  <span className="text-text-primary">{eventName.split(' ').slice(0, -1).join(' ')}</span>
                   <br />
                   <span className="bg-gradient-to-r from-gold-500 to-gold-300 bg-clip-text text-transparent">
-                    {mainEvent.name.split(' ').slice(-1)[0]}
+                    {eventName.split(' ').slice(-1)[0]}
                   </span>
                 </>
               ) : (
@@ -314,7 +342,7 @@ export default function EventDetailPage() {
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-gold-500" />
-                {mainEvent ? `${mainEvent.venue_name}` : t('event.venue')}
+                {mainEvent ? `${eventVenueName}` : t('event.venue')}
               </div>
               {(hasCashPrizes || hasTripPackages || prizePoolDisplay) && (
               <div className="flex items-center gap-2">
@@ -332,11 +360,11 @@ export default function EventDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {/* About — from admin description, spans full width */}
-            {hasMeaningfulText(mainEvent?.description) && (
+            {hasMeaningfulText(eventDescription) && (
             <ScrollReveal className="lg:col-span-3 md:col-span-2">
               <div className="bg-surface/50 border border-white/5 px-8 py-6">
                 <p className="text-text-secondary text-sm sm:text-base leading-relaxed whitespace-pre-line">
-                  {mainEvent!.description}
+                  {eventDescription}
                 </p>
               </div>
             </ScrollReveal>
@@ -389,10 +417,10 @@ export default function EventDetailPage() {
                 ) : hasTripPackages ? (
                   <>
                     <div className="text-2xl sm:text-3xl font-heading font-black text-gold-500 mb-2">
-                      {mainEvent?.prize_title?.trim() || t('event.winYourWay', 'Win Your Way to Guam!')}
+                      {eventPrizeTitle?.trim() || t('event.winYourWay', 'Win Your Way to Guam!')}
                     </div>
                     <div className="text-sm text-text-secondary mb-6">
-                      {mainEvent?.prize_description?.trim() || t('event.tripPackageDesc', `Compete for a trip package to the Marianas Open International Championship — ${prizePoolDisplay || '$50,000'} cash prize pool!`)}
+                      {eventPrizeDescription?.trim() || t('event.tripPackageDesc', `Compete for a trip package to the Marianas Open International Championship — ${prizePoolDisplay || '$50,000'} cash prize pool!`)}
                     </div>
                   </>
                 ) : (
@@ -452,11 +480,11 @@ export default function EventDetailPage() {
                 <div className="flex items-center gap-3 mb-4">
                   <MapPin size={20} className="text-gold-500" />
                   <h3 className="font-heading font-bold text-xl uppercase tracking-wider">
-                    {mainEvent ? mainEvent.venue_name : t('event.venue')}
+                    {mainEvent ? eventVenueName : t('event.venue')}
                   </h3>
                 </div>
                 <p className="text-text-secondary text-sm mb-4">
-                  {mainEvent ? `${mainEvent.venue_address}, ${mainEvent.city}, ${mainEvent.country}` : t('event.location')}
+                  {mainEvent ? `${mainEvent.venue_address}, ${eventCity}, ${eventCountry}` : t('event.location')}
                 </p>
                 {displayVenueHighlights.length > 0 && (
                   <div className={`grid grid-cols-1 gap-4 mb-4 ${displayVenueHighlights.length > 1 ? 'sm:grid-cols-2' : ''}`}>
@@ -472,14 +500,14 @@ export default function EventDetailPage() {
                 <div className="relative overflow-hidden border border-white/5 aspect-[16/7]">
                   <div className="absolute inset-0 bg-navy-800 flex flex-col items-center justify-center gap-3 z-0">
                     <MapPin size={28} className="text-gold-500" />
-                    <p className="text-text-secondary text-sm">{mainEvent ? `${mainEvent.venue_name} · ${mainEvent.city}, ${mainEvent.country}` : `${t('event.venue')} · ${t('event.location')}`}</p>
+                    <p className="text-text-secondary text-sm">{mainEvent ? `${eventVenueName} · ${eventCity}, ${eventCountry}` : `${t('event.venue')} · ${t('event.location')}`}</p>
                     <a
                       href={mainEvent?.latitude && mainEvent?.longitude
                         ? `https://maps.google.com/?q=${mainEvent.latitude},${mainEvent.longitude}`
                         : `https://maps.google.com/?q=${encodeURIComponent(mainEvent
                             ? (mainEvent.venue_address
-                                ? `${mainEvent.venue_address}, ${mainEvent.city}, ${mainEvent.country}`
-                                : `${mainEvent.venue_name} ${mainEvent.city} ${mainEvent.country}`)
+                                ? `${mainEvent.venue_address}, ${eventCity}, ${eventCountry}`
+                                : `${eventVenueName} ${eventCity} ${eventCountry}`)
                             : 'UOG Calvo Fieldhouse Guam')}`
                       }
                       target="_blank"
@@ -545,29 +573,29 @@ export default function EventDetailPage() {
                     <ScrollReveal key={acc.id} delay={0.05}>
                       <div className="bg-surface/95 border border-gold-500/20 p-6 sm:p-8 h-full backdrop-blur-sm hover:border-gold-500/40 transition-colors duration-300">
                         <Hotel size={24} className="text-gold-500 mb-4" />
-                        <h3 className="font-heading font-bold text-lg text-text-primary mb-2">{acc.hotel_name}</h3>
+                        <h3 className="font-heading font-bold text-lg text-text-primary mb-2">{tf(acc, 'hotel_name')}</h3>
 
-                        {acc.description && (
-                          <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-line mb-4">{acc.description}</p>
+                        {(tf(acc, 'description') || acc.description) && (
+                          <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-line mb-4">{tf(acc, 'description')}</p>
                         )}
 
                         <div className="space-y-2 text-sm mb-6">
                           {acc.room_types && (
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.roomTypes', 'Rooms')}</span>
-                              <span className="text-text-secondary whitespace-pre-line">{acc.room_types}</span>
+                              <span className="text-text-secondary whitespace-pre-line">{tf(acc, 'room_types')}</span>
                             </div>
                           )}
                           {acc.rate_info && (
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.rates', 'Rates')}</span>
-                              <span className="text-gold-400 font-semibold whitespace-pre-line">{acc.rate_info}</span>
+                              <span className="text-gold-400 font-semibold whitespace-pre-line">{tf(acc, 'rate_info')}</span>
                             </div>
                           )}
                           {acc.inclusions && (
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.inclusions', 'Includes')}</span>
-                              <span className="text-text-secondary">{acc.inclusions}</span>
+                              <span className="text-text-secondary">{tf(acc, 'inclusions')}</span>
                             </div>
                           )}
                           {acc.check_in_date && acc.check_out_date && (
@@ -642,29 +670,29 @@ export default function EventDetailPage() {
                     <ScrollReveal key={acc.id}>
                       <div className="bg-surface border border-gold-500/20 p-6 sm:p-8 h-full hover:border-gold-500/40 transition-colors duration-300">
                         <Hotel size={24} className="text-gold-500 mb-4" />
-                        <h3 className="font-heading font-bold text-lg text-text-primary mb-2">{acc.hotel_name}</h3>
+                        <h3 className="font-heading font-bold text-lg text-text-primary mb-2">{tf(acc, 'hotel_name')}</h3>
 
-                        {acc.description && (
-                          <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-line mb-4">{acc.description}</p>
+                        {(tf(acc, 'description') || acc.description) && (
+                          <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-line mb-4">{tf(acc, 'description')}</p>
                         )}
 
                         <div className="space-y-2 text-sm mb-6">
                           {acc.room_types && (
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.roomTypes', 'Rooms')}</span>
-                              <span className="text-text-secondary whitespace-pre-line">{acc.room_types}</span>
+                              <span className="text-text-secondary whitespace-pre-line">{tf(acc, 'room_types')}</span>
                             </div>
                           )}
                           {acc.rate_info && (
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.rates', 'Rates')}</span>
-                              <span className="text-gold-400 font-semibold whitespace-pre-line">{acc.rate_info}</span>
+                              <span className="text-gold-400 font-semibold whitespace-pre-line">{tf(acc, 'rate_info')}</span>
                             </div>
                           )}
                           {acc.inclusions && (
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.inclusions', 'Includes')}</span>
-                              <span className="text-text-secondary">{acc.inclusions}</span>
+                              <span className="text-text-secondary">{tf(acc, 'inclusions')}</span>
                             </div>
                           )}
                           {acc.check_in_date && acc.check_out_date && (
@@ -849,7 +877,7 @@ export default function EventDetailPage() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {section.rows.map((row, index) => (
+                                {(section.rows ?? []).map((row, index) => (
                                   <tr key={`${section.title}-${row.deadline}-${index}`} className="border-t border-white/5">
                                     <td className="px-4 py-3 text-text-secondary">{row.deadline}</td>
                                     <td className="px-4 py-3 text-gold-400 font-semibold whitespace-nowrap">{row.fee}</td>
