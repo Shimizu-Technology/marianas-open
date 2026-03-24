@@ -3,7 +3,10 @@ class TranslateRecordJob < ApplicationJob
 
   discard_on ActiveJob::DeserializationError
 
-  def perform(class_name, record_id)
+  def perform(class_name, record_id, options = {})
+    changed_fields = options["changed_fields"] # nil = translate all, array = only those
+    cascade = options.fetch("cascade", false)
+
     klass = class_name.safe_constantize
     return unless klass&.include?(Translatable)
 
@@ -19,29 +22,36 @@ class TranslateRecordJob < ApplicationJob
     merged = record.translations.deep_dup
     translated_keys = []
 
-    fields = record.translatable_field_values
-    if fields.any?
-      translations = service.translate_fields(fields, context: klass.translation_context)
+    text_fields = record.translatable_field_values
+    if changed_fields
+      text_fields = text_fields.select { |k, _| changed_fields.include?(k) }
+    end
+
+    if text_fields.any?
+      translations = service.translate_fields(text_fields, context: klass.translation_context)
       translations.each do |field, locales|
         merged[field] ||= {}
         locales.each { |locale, text| merged[field][locale] = text }
       end
-      translated_keys.concat(fields.keys)
+      translated_keys.concat(text_fields.keys)
     end
 
-    if record.class.respond_to?(:translatable_json_field_names)
-      record.class.translatable_json_field_names.each do |config|
-        field_name = config[:field].to_s
-        sub_fields = config[:sub_fields].map(&:to_s)
-        nested = config[:nested] || {}
-        items = record.send(field_name)
-        next if items.blank? || !items.is_a?(Array)
+    json_configs = record.class.respond_to?(:translatable_json_field_names) ? record.class.translatable_json_field_names : []
+    if changed_fields
+      json_configs = json_configs.select { |c| changed_fields.include?(c[:field]) }
+    end
 
-        translated_items = translate_json_array(service, items, sub_fields, nested, klass.translation_context)
-        if translated_items
-          merged[field_name] = translated_items
-          translated_keys << field_name
-        end
+    json_configs.each do |config|
+      field_name = config[:field].to_s
+      sub_fields = config[:sub_fields].map(&:to_s)
+      nested = config[:nested] || {}
+      items = record.send(field_name)
+      next if items.blank? || !items.is_a?(Array)
+
+      translated_items = translate_json_array(service, items, sub_fields, nested, klass.translation_context)
+      if translated_items
+        merged[field_name] = translated_items
+        translated_keys << field_name
       end
     end
 
@@ -52,7 +62,7 @@ class TranslateRecordJob < ApplicationJob
       Rails.logger.info("[TranslateRecordJob] Translated #{class_name}##{record_id}: #{translated_keys.join(', ')}")
     end
 
-    if record.is_a?(Event)
+    if cascade && record.is_a?(Event)
       record.event_schedule_items.find_each(&:retranslate!)
       record.prize_categories.find_each(&:retranslate!)
       record.event_accommodations.find_each(&:retranslate!)

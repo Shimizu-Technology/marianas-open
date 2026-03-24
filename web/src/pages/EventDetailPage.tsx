@@ -229,12 +229,12 @@ export default function EventDetailPage() {
     image: heroImageUrl ? [heroImageUrl] : undefined,
     location: {
       '@type': 'Place',
-      name: mainEvent.venue_name,
+      name: eventVenueName,
       address: {
         '@type': 'PostalAddress',
         streetAddress: mainEvent.venue_address,
-        addressLocality: mainEvent.city,
-        addressCountry: mainEvent.country_code || mainEvent.country,
+        addressLocality: eventCity,
+        addressCountry: mainEvent.country_code || eventCountry,
       },
     },
     organizer: {
@@ -480,7 +480,7 @@ export default function EventDetailPage() {
                 <div className="flex items-center gap-3 mb-4">
                   <MapPin size={20} className="text-gold-500" />
                   <h3 className="font-heading font-bold text-xl uppercase tracking-wider">
-                    {mainEvent ? mainEvent.venue_name : t('event.venue')}
+                    {mainEvent ? eventVenueName : t('event.venue')}
                   </h3>
                 </div>
                 <p className="text-text-secondary text-sm mb-4">
@@ -506,8 +506,8 @@ export default function EventDetailPage() {
                         ? `https://maps.google.com/?q=${mainEvent.latitude},${mainEvent.longitude}`
                         : `https://maps.google.com/?q=${encodeURIComponent(mainEvent
                             ? (mainEvent.venue_address
-                                ? `${mainEvent.venue_address}, ${mainEvent.city}, ${mainEvent.country}`
-                                : `${mainEvent.venue_name} ${mainEvent.city} ${mainEvent.country}`)
+                                ? `${mainEvent.venue_address}, ${eventCity}, ${eventCountry}`
+                                : `${eventVenueName} ${eventCity} ${eventCountry}`)
                             : 'UOG Calvo Fieldhouse Guam')}`
                       }
                       target="_blank"

@@ -2,7 +2,8 @@ module Translatable
   extend ActiveSupport::Concern
 
   included do
-    after_commit :enqueue_translation, on: [:create, :update], if: :any_translatable_fields_changed?
+    before_save :track_translatable_changes
+    after_commit :enqueue_translation, on: [:create, :update], if: :has_translatable_changes?
   end
 
   class_methods do
@@ -14,11 +15,6 @@ module Translatable
       @_translatable_fields || []
     end
 
-    # Declare JSONB array fields with their translatable sub-keys.
-    # Example: translatable_json_fields(
-    #   { field: :travel_items, sub_fields: [:title, :description] },
-    #   { field: :visa_items, sub_fields: [:title, :description] }
-    # )
     def translatable_json_fields(*configs)
       @_translatable_json_fields = configs.map do |c|
         result = { field: c[:field].to_s, sub_fields: c[:sub_fields].map(&:to_s) }
@@ -51,22 +47,33 @@ module Translatable
 
   def retranslate!
     update_column(:translation_status, "pending")
-    TranslateRecordJob.perform_later(self.class.name, id)
+    TranslateRecordJob.perform_later(self.class.name, id, "changed_fields" => nil, "cascade" => true)
   end
 
   private
 
-  def any_translatable_fields_changed?
-    text_changed = self.class.translatable_field_names.any? { |f| saved_change_to_attribute?(f) }
-    json_changed = self.class.translatable_json_field_names.any? { |c| saved_change_to_attribute?(c[:field]) }
-    text_changed || json_changed
+  def track_translatable_changes
+    @_translatable_changes = []
+    self.class.translatable_field_names.each do |f|
+      @_translatable_changes << f if will_save_change_to_attribute?(f)
+    end
+    self.class.translatable_json_field_names.each do |c|
+      @_translatable_changes << c[:field] if will_save_change_to_attribute?(c[:field])
+    end
+  end
+
+  def has_translatable_changes?
+    @_translatable_changes.present?
   end
 
   def enqueue_translation
     service = GtTranslationService.new
     return unless service.configured?
 
+    changed = @_translatable_changes || []
     update_column(:translation_status, "pending")
-    TranslateRecordJob.perform_later(self.class.name, id)
+    TranslateRecordJob.perform_later(self.class.name, id, "changed_fields" => changed, "cascade" => false)
+  ensure
+    @_translatable_changes = nil
   end
 end

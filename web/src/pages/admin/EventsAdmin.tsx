@@ -205,9 +205,19 @@ export default function EventsAdmin() {
           }
         }
         if (!imageUploadFailed) setSuccess('Event created')
+        if (savedEventId && res.event.translation_status === 'pending') {
+          setForm(prev => ({ ...prev, translation_status: 'pending' }))
+          setSuccess('Event created — translating...')
+          pollTranslationStatus(savedEventId)
+        }
       } else if (typeof editing === 'number') {
-        await api.admin.updateEvent(editing, form)
+        const res = await api.admin.updateEvent(editing, form)
         setSuccess('Event updated')
+        if (res.event.translation_status === 'pending') {
+          setForm(prev => ({ ...prev, translation_status: 'pending' }))
+          setSuccess('Event saved — translating changes...')
+          pollTranslationStatus(editing)
+        }
       }
       setPendingHeroImage(null)
       await loadEvents()
@@ -243,37 +253,40 @@ export default function EventsAdmin() {
 
   const [translating, setTranslating] = useState(false)
 
-  const handleRetranslate = async () => {
-    if (typeof editing !== 'number') return
+  const pollTranslationStatus = useCallback(async (eventId: number) => {
     setTranslating(true)
-    try {
-      await api.admin.retranslateEvent(editing)
-      setSuccess('Translating... this takes about 30-60 seconds')
-
-      const poll = async (attempts: number) => {
-        if (attempts <= 0) {
+    for (let attempt = 0; attempt < 24; attempt++) {
+      await new Promise(r => setTimeout(r, 3000))
+      try {
+        const { event: updated } = await api.admin.getEvent(eventId)
+        if (updated.translation_status === 'translated' || updated.translation_status === 'failed') {
           setTranslating(false)
-          setSuccess('Translation is still processing. Refresh the page in a moment.')
-          setTimeout(() => setSuccess(''), 5000)
-          return
-        }
-        await new Promise(r => setTimeout(r, 5000))
-        await loadEvents()
-        const updated = events.find(e => e.id === editing)
-        if (updated?.translation_status === 'translated' || updated?.translation_status === 'failed') {
-          setTranslating(false)
+          setForm(prev => ({ ...prev, translation_status: updated.translation_status }))
+          setEvents(prev => prev.map(e => e.id === eventId ? { ...e, translation_status: updated.translation_status } : e))
           if (updated.translation_status === 'translated') {
             setSuccess('Translation complete!')
           } else {
             setError('Translation failed — check server logs')
           }
-          setForm(prev => ({ ...prev, translation_status: updated.translation_status }))
           setTimeout(() => { setSuccess(''); setError('') }, 5000)
-        } else {
-          poll(attempts - 1)
+          return
         }
+      } catch {
+        // keep polling
       }
-      poll(18)
+    }
+    setTranslating(false)
+    setSuccess('Translation is still processing. Refresh the page in a moment.')
+    setTimeout(() => setSuccess(''), 5000)
+  }, [])
+
+  const handleRetranslate = async () => {
+    if (typeof editing !== 'number') return
+    setTranslating(true)
+    try {
+      await api.admin.retranslateEvent(editing)
+      setSuccess('Translating...')
+      pollTranslationStatus(editing)
     } catch (err) {
       setTranslating(false)
       setError(err instanceof Error ? err.message : 'Retranslate failed')
