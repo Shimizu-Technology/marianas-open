@@ -86,7 +86,7 @@ export default function CompetitorsAdmin() {
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchInput, setSearchInput] = useState('')
-  const searchTimer = useRef<ReturnType<typeof setTimeout>>()
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const [sortField, setSortField] = useState<SortField>('points')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [page, setPage] = useState(1)

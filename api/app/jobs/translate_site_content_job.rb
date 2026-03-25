@@ -24,9 +24,14 @@ class TranslateSiteContentJob < ApplicationJob
     attrs[:value_zh] = locale_map["zh"] if locale_map["zh"].present?
     attrs[:value_tl] = locale_map["tl"] if locale_map["tl"].present?
     attrs[:value_pt] = locale_map["pt"] if locale_map["pt"].present?
-    attrs[:translation_status] = "translated"
 
-    content.update_columns(attrs) if attrs.any?
+    if attrs.any?
+      attrs[:translation_status] = "translated"
+      content.update_columns(attrs)
+    else
+      content.update_column(:translation_status, "failed")
+      Rails.logger.warn("[TranslateSiteContentJob] No translations returned for SiteContent##{site_content_id} (#{content.key})")
+    end
     Rails.logger.info("[TranslateSiteContentJob] Translated SiteContent##{site_content_id} (#{content.key}): #{locale_map.keys.join(', ')}")
   rescue GtTranslationService::TranslationError => e
     Rails.logger.error("[TranslateSiteContentJob] Failed SiteContent##{site_content_id}: #{e.message}")

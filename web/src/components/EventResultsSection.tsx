@@ -274,7 +274,7 @@ interface EventResultsSectionProps {
   importedAt?: string | null;
 }
 
-export default function EventResultsSection({ eventSlug, sourceUrls, importedAt }: EventResultsSectionProps) {
+export default function EventResultsSection({ eventSlug, sourceUrls, importedAt: _importedAt }: EventResultsSectionProps) {
   const { t } = useTranslation();
   const [results, setResults] = useState<EventResultDivision[]>([]);
   const [summary, setSummary] = useState<EventResultsSummary | null>(null);

@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Building2, Medal, Loader2, ChevronDown } from 'lucide-react';
 import { api } from '../services/api';
@@ -121,7 +120,7 @@ function AcademyDetailModal({ slug, onClose }: { slug: string; onClose: () => vo
                 <div className="text-xs text-text-muted uppercase">Bronze</div>
               </div>
               <div className="bg-white/[0.03] border border-white/5 p-3 text-center">
-                <div className="text-lg font-bold text-text-primary">{detail.athletes}</div>
+                <div className="text-lg font-bold text-text-primary">{Array.isArray(detail.athletes) ? detail.athletes.length : detail.athletes}</div>
                 <div className="text-xs text-text-muted uppercase">Athletes</div>
               </div>
             </div>
@@ -177,7 +176,6 @@ function AcademyDetailModal({ slug, onClose }: { slug: string; onClose: () => vo
 }
 
 export default function TeamsPage() {
-  const { t } = useTranslation();
   const [academies, setAcademies] = useState<Academy[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Eye, EyeOff, GripVertical, X, Save, Image as ImageIcon } from 'lucide-react';
 import { api } from '../../services/api';
@@ -42,6 +42,17 @@ export default function ImagesAdmin() {
   const [filter, setFilter] = useState<string>('all');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const successTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    return () => { clearTimeout(successTimerRef.current); };
+  }, []);
+
+  const showSuccess = (msg: string) => {
+    clearTimeout(successTimerRef.current);
+    setSuccess(msg);
+    successTimerRef.current = setTimeout(() => setSuccess(''), 3000);
+  };
 
   const fetchImages = useCallback(async () => {
     try {
@@ -88,8 +99,7 @@ export default function ImagesAdmin() {
       setShowForm(false);
       setEditing(emptyForm);
       setPendingFile(null);
-      setSuccess(editing.id ? 'Image updated' : 'Image created');
-      setTimeout(() => setSuccess(''), 3000);
+      showSuccess(editing.id ? 'Image updated' : 'Image created');
       await fetchImages();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save image');
@@ -99,11 +109,11 @@ export default function ImagesAdmin() {
   };
 
   const handleDelete = async (id: number) => {
+    setError('');
     try {
       await api.admin.deleteSiteImage(id);
       setDeleteConfirm(null);
-      setSuccess('Image deleted');
-      setTimeout(() => setSuccess(''), 3000);
+      showSuccess('Image deleted');
       await fetchImages();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete image');
@@ -112,6 +122,7 @@ export default function ImagesAdmin() {
   };
 
   const handleToggleActive = async (image: SiteImage) => {
+    setError('');
     try {
       await api.admin.updateSiteImage(image.id, { active: !image.active });
       await fetchImages();

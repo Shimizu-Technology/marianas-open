@@ -230,6 +230,11 @@ export default function ContentAdmin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const successTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    return () => { clearTimeout(successTimerRef.current); };
+  }, []);
 
   const fetchContents = useCallback(async () => {
     try {
@@ -281,18 +286,24 @@ export default function ContentAdmin() {
   }, [fetchContents, pollForPendingTranslations]);
 
   const handleSave = async (entry: SiteContentEntry) => {
-    await api.admin.updateSiteContent(entry.id, entry);
-    setSuccess('Content saved — translations will update automatically');
-    setTimeout(() => setSuccess(''), 4000);
-    invalidateSiteContentCache();
-    await fetchAndPoll();
+    try {
+      await api.admin.updateSiteContent(entry.id, entry);
+      clearTimeout(successTimerRef.current);
+      setSuccess('Content saved — translations will update automatically');
+      successTimerRef.current = setTimeout(() => setSuccess(''), 4000);
+      invalidateSiteContentCache();
+      await fetchAndPoll();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save content');
+    }
   };
 
   const handleRetranslate = async (id: number) => {
     try {
       await api.admin.retranslateSiteContent(id);
+      clearTimeout(successTimerRef.current);
       setSuccess('Re-translation queued');
-      setTimeout(() => setSuccess(''), 3000);
+      successTimerRef.current = setTimeout(() => setSuccess(''), 3000);
       await fetchAndPoll();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to retranslate');

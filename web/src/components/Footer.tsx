@@ -11,7 +11,6 @@ export default function Footer() {
   const org = useOrg();
 
   const logoSrc = org.logo_url || LOGO_FALLBACK;
-  const hasSocials = org.instagram_url || org.facebook_url || YOUTUBE_CHANNEL_URL;
 
   return (
     <footer className="bg-surface border-t border-white/5">
@@ -31,53 +30,51 @@ export default function Footer() {
           </div>
 
           {/* Social */}
-          {hasSocials && (
-            <div className="space-y-4">
-              <h4 className="font-heading font-semibold text-sm uppercase tracking-wider text-gold-500">
-                {t('footer.followUs')}
-              </h4>
-              <div className="flex gap-4">
-                {org.instagram_url && (
-                  <a
-                    href={org.instagram_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-text-secondary hover:text-gold-500 transition-colors"
-                  >
-                    <Instagram size={20} />
-                  </a>
-                )}
-                {org.facebook_url && (
-                  <a
-                    href={org.facebook_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-text-secondary hover:text-gold-500 transition-colors"
-                  >
-                    <Facebook size={20} />
-                  </a>
-                )}
+          <div className="space-y-4">
+            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider text-gold-500">
+              {t('footer.followUs')}
+            </h4>
+            <div className="flex gap-4">
+              {org.instagram_url && (
                 <a
-                  href={YOUTUBE_CHANNEL_URL}
+                  href={org.instagram_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-text-secondary hover:text-gold-500 transition-colors"
                 >
-                  <Youtube size={20} />
+                  <Instagram size={20} />
                 </a>
-                {org.website_url && (
-                  <a
-                    href={org.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-text-secondary hover:text-gold-500 transition-colors"
-                  >
-                    <Globe size={20} />
-                  </a>
-                )}
-              </div>
+              )}
+              {org.facebook_url && (
+                <a
+                  href={org.facebook_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-gold-500 transition-colors"
+                >
+                  <Facebook size={20} />
+                </a>
+              )}
+              <a
+                href={YOUTUBE_CHANNEL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-secondary hover:text-gold-500 transition-colors"
+              >
+                <Youtube size={20} />
+              </a>
+              {org.website_url && (
+                <a
+                  href={org.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-gold-500 transition-colors"
+                >
+                  <Globe size={20} />
+                </a>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Contact */}
           <div className="space-y-4">
