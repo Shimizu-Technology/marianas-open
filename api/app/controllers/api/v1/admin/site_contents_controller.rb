@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_staff!
-        before_action :set_site_content, only: [:update, :destroy]
+        before_action :set_site_content, only: [:update, :destroy, :retranslate]
 
         def index
           contents = SiteContent.all.order(:section, :sort_order)
@@ -37,6 +37,16 @@ module Api
           head :no_content
         end
 
+        def retranslate
+          if @site_content.value_en.blank?
+            return render json: { error: "No English value to translate" }, status: :unprocessable_entity
+          end
+
+          @site_content.update_column(:translation_status, "pending")
+          TranslateSiteContentJob.perform_later(@site_content.id)
+          render json: { site_content: serialize(@site_content.reload) }
+        end
+
         private
 
         def set_site_content
@@ -60,7 +70,8 @@ module Api
             value_pt: c.value_pt,
             section: c.section,
             label: c.label,
-            sort_order: c.sort_order
+            sort_order: c.sort_order,
+            translation_status: c.translation_status
           }
         end
       end

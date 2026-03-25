@@ -59,7 +59,11 @@ Rails.application.routes.draw do
             post :upload_photo
           end
         end
-        resources :site_contents, path: 'site-contents'
+        resources :site_contents, path: 'site-contents' do
+          member do
+            post :retranslate
+          end
+        end
         resources :site_images, path: 'site-images' do
           member do
             post :upload

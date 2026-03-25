@@ -411,6 +411,7 @@ export interface SiteContentEntry {
   section: string;
   label: string;
   sort_order: number;
+  translation_status: 'translated' | 'pending' | 'failed';
 }
 
 export type SiteContentMap = Record<string, { en: string | null; ja: string | null; ko: string | null; tl: string | null; zh: string | null; pt: string | null }>;
@@ -756,6 +757,8 @@ export const api = {
       }, true),
     deleteSiteContent: (id: number) =>
       fetchApi<void>(`/api/v1/admin/site-contents/${id}`, { method: 'DELETE' }, true),
+    retranslateSiteContent: (id: number) =>
+      fetchApi<{ site_content: SiteContentEntry }>(`/api/v1/admin/site-contents/${id}/retranslate`, { method: 'POST' }, true),
 
     // Organization
     getOrganization: () => fetchApi<Organization>('/api/v1/admin/organization', {}, true),
