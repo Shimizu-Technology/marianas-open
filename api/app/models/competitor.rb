@@ -33,9 +33,9 @@ class Competitor < ApplicationRecord
       results.each do |r|
         stars = r.event_stars || 3
         case r.placement
-        when 1 then gold += 1; total_points += 15 * stars
-        when 2 then silver += 1; total_points += 7 * stars
-        when 3 then bronze += 1; total_points += 3 * stars
+        when 1 then gold += 1; total_points += RankingCalculator::PLACEMENT_MULTIPLIERS[1] * stars
+        when 2 then silver += 1; total_points += RankingCalculator::PLACEMENT_MULTIPLIERS[2] * stars
+        when 3 then bronze += 1; total_points += RankingCalculator::PLACEMENT_MULTIPLIERS[3] * stars
         end
         event_ids << r.event_id
       end

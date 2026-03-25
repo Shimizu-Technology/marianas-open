@@ -17,6 +17,12 @@ class RankingCalculator
     multiplier * (stars || 3)
   end
 
+  # SQL fragment for computing total points: SUM(CASE placement WHEN 1 THEN 15 ... END * stars)
+  def self.points_sql(placement_col: "event_results.placement", stars_col: "COALESCE(events.asjjf_stars, 3)")
+    cases = PLACEMENT_MULTIPLIERS.map { |p, m| "WHEN #{p} THEN #{m}" }.join(" ")
+    "SUM(CASE #{placement_col} #{cases} ELSE 0 END * #{stars_col})"
+  end
+
   # Returns individual competitor rankings.
   # Groups by competitor_id when available, falls back to name for unlinked results.
   def self.individual(options = {})
@@ -116,43 +122,44 @@ class RankingCalculator
       .first(options[:limit] || 50)
   end
 
-  private
+  class << self
+    private
 
-  def self.base_query(options)
-    scope = EventResult
-      .joins(:event)
-      .left_joins(:competitor)
-      .select(
-        "event_results.*, events.asjjf_stars as event_stars, events.id as event_id, " \
-        "event_results.competitor_id, competitors.academy_id as competitor_academy_id"
-      )
+    def base_query(options)
+      scope = EventResult
+        .joins(:event)
+        .left_joins(:competitor)
+        .select(
+          "event_results.*, events.asjjf_stars as event_stars, events.id as event_id, " \
+          "event_results.competitor_id, competitors.academy_id as competitor_academy_id"
+        )
 
-    scope = scope.where("LOWER(event_results.belt_rank) = ?", options[:belt].downcase) if options[:belt].present?
-    scope = scope.where(gender: options[:gender]) if options[:gender].present?
-    scope = scope.where(event_id: options[:event_id]) if options[:event_id].present?
+      scope = scope.where("LOWER(event_results.belt_rank) = ?", options[:belt].downcase) if options[:belt].present?
+      scope = scope.where(gender: options[:gender]) if options[:gender].present?
+      scope = scope.where(event_id: options[:event_id]) if options[:event_id].present?
 
-    # Gi/No-Gi filtering based on event name or division prefix
-    if options[:gi_nogi].present?
-      case options[:gi_nogi].downcase
-      when "gi"
-        scope = scope.where("event_results.division NOT LIKE '[NOGI]%'")
-      when "no-gi", "nogi"
-        scope = scope.where("event_results.division LIKE '[NOGI]%'")
+      if options[:gi_nogi].present?
+        case options[:gi_nogi].downcase
+        when "gi"
+          scope = scope.where("event_results.division NOT LIKE '[NOGI]%'")
+        when "no-gi", "nogi"
+          scope = scope.where("event_results.division LIKE '[NOGI]%'")
+        end
       end
+
+      scope.to_a
     end
 
-    scope.to_a
-  end
+    def normalize_name(name)
+      return "" if name.blank?
+      name.strip.downcase.gsub(/\s+/, " ")
+    end
 
-  def self.normalize_name(name)
-    return "" if name.blank?
-    name.strip.downcase.gsub(/\s+/, " ")
-  end
-
-  def self.most_common(arr)
-    arr.compact.reject(&:blank?)
-       .group_by(&:itself)
-       .max_by { |_, v| v.size }
-       &.first
+    def most_common(arr)
+      arr.compact.reject(&:blank?)
+         .group_by(&:itself)
+         .max_by { |_, v| v.size }
+         &.first
+    end
   end
 end

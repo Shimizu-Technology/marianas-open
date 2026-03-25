@@ -97,7 +97,7 @@ module Api
               "COUNT(*) FILTER (WHERE event_results.placement = 1) as gold",
               "COUNT(*) FILTER (WHERE event_results.placement = 2) as silver",
               "COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze",
-              "SUM(CASE event_results.placement WHEN 1 THEN 15 WHEN 2 THEN 7 WHEN 3 THEN 3 ELSE 0 END * COALESCE(events.asjjf_stars, 3)) as total_points"
+              "#{RankingCalculator.points_sql} as total_points"
             )
 
           rows.each_with_object({}) do |row, map|
