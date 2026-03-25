@@ -34,8 +34,8 @@ class ClerkInvitationService
 
     if response.success?
       parsed = response.parsed_response
-      Rails.logger.info("Clerk invitation created for #{email}: id=#{parsed['id']} status=#{parsed['status']} url=#{parsed['url']}")
-      Rails.logger.info("Clerk invitation full response: #{parsed.inspect}")
+      Rails.logger.info("Clerk invitation created for #{email}: id=#{parsed['id']} status=#{parsed['status']}")
+      Rails.logger.debug("Clerk invitation full response: #{parsed.inspect}") if Rails.env.development?
       { success: true, invitation_id: parsed["id"], status: parsed["status"], url: parsed["url"] }
     else
       error = response.parsed_response

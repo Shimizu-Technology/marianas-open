@@ -92,7 +92,7 @@ module Api
             email_queued = true
           end
 
-          @user.update(invited_at: Time.current)
+          @user.update(invited_at: Time.current) if email_queued
           render json: {
             user: user_json(@user),
             invitation_sent: email_queued,

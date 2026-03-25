@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_235718) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_25_011923) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -306,6 +306,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_235718) do
   add_foreign_key "events", "organizations"
   add_foreign_key "prize_categories", "events"
   add_foreign_key "sponsors", "organizations"
-  add_foreign_key "users", "users", column: "invited_by_id"
+  add_foreign_key "users", "users", column: "invited_by_id", on_delete: :nullify
   add_foreign_key "videos", "events"
 end

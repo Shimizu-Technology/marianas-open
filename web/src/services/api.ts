@@ -554,9 +554,8 @@ export const api = {
   },
 
   // Auth
-  getCurrentUser: (email?: string) => {
-    const params = email ? `?email=${encodeURIComponent(email)}` : '';
-    return fetchApi<{ user: UserProfile }>(`/api/v1/me${params}`, {}, true);
+  getCurrentUser: () => {
+    return fetchApi<{ user: UserProfile }>(`/api/v1/me`, {}, true);
   },
 
   // Admin - Users
