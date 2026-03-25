@@ -30,21 +30,13 @@ module Api
             return render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
           end
 
-          invitation_result = send_clerk_invitation(user)
+          invitation_url = create_clerk_invitation_and_get_url(user)
+          send_invite_email(user, invitation_url)
 
-          if invitation_result[:success]
-            user.update(clerk_invitation_id: invitation_result[:invitation_id])
-            render json: {
-              user: user_json(user),
-              invitation_sent: true
-            }, status: :created
-          else
-            render json: {
-              user: user_json(user),
-              invitation_sent: false,
-              invitation_error: invitation_result[:error]
-            }, status: :created
-          end
+          render json: {
+            user: user_json(user),
+            invitation_sent: true
+          }, status: :created
         end
 
         # PATCH /api/v1/admin/users/:id
@@ -81,17 +73,11 @@ module Api
             return render json: { error: "User has already accepted their invitation" }, status: :unprocessable_entity
           end
 
-          invitation_result = send_clerk_invitation(@user, ignore_existing: true)
+          invitation_url = create_clerk_invitation_and_get_url(@user, ignore_existing: true)
+          send_invite_email(@user, invitation_url)
 
-          if invitation_result[:success]
-            @user.update(clerk_invitation_id: invitation_result[:invitation_id], invited_at: Time.current)
-            render json: { user: user_json(@user), invitation_sent: true }
-          else
-            render json: {
-              error: "Failed to resend invitation: #{invitation_result[:error]}",
-              invitation_sent: false
-            }, status: :unprocessable_entity
-          end
+          @user.update(invited_at: Time.current)
+          render json: { user: user_json(@user), invitation_sent: true }
         end
 
         private
@@ -114,19 +100,26 @@ module Api
           permitted
         end
 
-        def send_clerk_invitation(user, ignore_existing: false)
+        def create_clerk_invitation_and_get_url(user, ignore_existing: false)
           service = ClerkInvitationService.new
-          unless service.configured?
-            return { success: false, error: "Clerk API not configured" }
-          end
+          return nil unless service.configured?
 
           redirect_url = build_redirect_url
-          service.create_invitation(
+          result = service.create_invitation(
             email: user.email,
             redirect_url: redirect_url,
             public_metadata: { role: user.role },
             ignore_existing: ignore_existing
           )
+
+          if result[:success]
+            user.update(clerk_invitation_id: result[:invitation_id])
+            result[:url]
+          end
+        end
+
+        def send_invite_email(user, invitation_url)
+          SendUserInviteEmailJob.perform_later(user.id, current_user&.id, invitation_url)
         end
 
         def build_redirect_url

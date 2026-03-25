@@ -14,11 +14,13 @@ class ClerkInvitationService
 
     body = {
       email_address: email,
-      notify: true,
+      notify: false,
       ignore_existing: ignore_existing
     }
     body[:redirect_url] = redirect_url if redirect_url.present?
     body[:public_metadata] = public_metadata if public_metadata.present?
+
+    Rails.logger.info("Clerk invitation request for #{email}: #{body.to_json}")
 
     response = HTTParty.post(
       "#{BASE_URL}/invitations",
@@ -32,7 +34,9 @@ class ClerkInvitationService
 
     if response.success?
       parsed = response.parsed_response
-      { success: true, invitation_id: parsed["id"], status: parsed["status"] }
+      Rails.logger.info("Clerk invitation created for #{email}: id=#{parsed['id']} status=#{parsed['status']} url=#{parsed['url']}")
+      Rails.logger.info("Clerk invitation full response: #{parsed.inspect}")
+      { success: true, invitation_id: parsed["id"], status: parsed["status"], url: parsed["url"] }
     else
       error = response.parsed_response
       error_message = extract_error_message(error)

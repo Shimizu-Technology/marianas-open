@@ -44,3 +44,5 @@ gem "image_processing", "~> 1.2"
 gem 'jwt'
 gem 'httparty'
 gem 'dotenv-rails', groups: [:development, :test]
+
+gem "resend", "~> 1.0"
