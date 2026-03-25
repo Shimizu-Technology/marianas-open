@@ -561,8 +561,8 @@ export const api = {
 
   // Admin - Users
   getUsers: () => fetchApi<{ users: UserProfile[] }>('/api/v1/admin/users', {}, true),
-  createUser: (data: { email: string; role: string; first_name?: string; last_name?: string }) =>
-    fetchApi<{ user: UserProfile }>('/api/v1/admin/users', {
+  createUser: (data: { email: string; role: string }) =>
+    fetchApi<{ user: UserProfile; invitation_sent: boolean; invitation_error?: string }>('/api/v1/admin/users', {
       method: 'POST',
       body: JSON.stringify(data),
     }, true),

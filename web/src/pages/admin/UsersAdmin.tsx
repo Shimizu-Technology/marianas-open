@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { UserProfile } from '../../services/api'
 
-const ROLES = ['admin', 'staff', 'viewer'] as const
+const ROLES = ['admin', 'staff'] as const
 
 function StatusBadge({ user }: { user: UserProfile }) {
   if (user.invitation_pending) {
@@ -27,7 +27,7 @@ export default function UsersAdmin() {
   const [users, setUsers] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<number | 'invite' | null>(null)
-  const [inviteForm, setInviteForm] = useState({ email: '', role: 'staff' as string, first_name: '', last_name: '' })
+  const [inviteForm, setInviteForm] = useState({ email: '', role: 'staff' as string })
   const [editRole, setEditRole] = useState('')
   const [saving, setSaving] = useState(false)
   const [resending, setResending] = useState<number | null>(null)
@@ -54,14 +54,14 @@ export default function UsersAdmin() {
     setSaving(true)
     setError('')
     try {
-      const res = await api.createUser(inviteForm) as { user: UserProfile; invitation_sent: boolean; invitation_error?: string }
+      const res = await api.createUser(inviteForm)
       if (res.invitation_sent) {
         setSuccess('Invitation email sent!')
       } else {
         setSuccess(`User created, but invitation email failed: ${res.invitation_error || 'Unknown error'}. You can resend it.`)
       }
       setEditing(null)
-      setInviteForm({ email: '', role: 'staff', first_name: '', last_name: '' })
+      setInviteForm({ email: '', role: 'staff' })
       await load()
       setTimeout(() => setSuccess(''), 5000)
     } catch (err) {
@@ -164,9 +164,9 @@ export default function UsersAdmin() {
           </div>
           <div className="p-5">
             <p className="text-xs text-text-secondary mb-4">
-              An invitation email will be sent via Clerk. The user will create their account through that link.
+              An invitation email will be sent via Clerk. The user will create their account and set their name through that link.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Email *</label>
                 <input
@@ -186,24 +186,6 @@ export default function UsersAdmin() {
                 >
                   {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">First Name</label>
-                <input
-                  value={inviteForm.first_name}
-                  onChange={e => setInviteForm(prev => ({ ...prev, first_name: e.target.value }))}
-                  placeholder="Optional"
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Last Name</label>
-                <input
-                  value={inviteForm.last_name}
-                  onChange={e => setInviteForm(prev => ({ ...prev, last_name: e.target.value }))}
-                  placeholder="Optional"
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                />
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">

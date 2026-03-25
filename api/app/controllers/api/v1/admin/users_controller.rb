@@ -20,8 +20,8 @@ module Api
 
         # POST /api/v1/admin/users
         def create
-          user = User.new(user_params)
-          user.clerk_id = "pending_#{SecureRandom.uuid}" if user.clerk_id.blank?
+          user = User.new(invite_params)
+          user.clerk_id = "pending_#{SecureRandom.uuid}"
           user.invitation_status = "pending"
           user.invited_by = current_user
           user.invited_at = Time.current
@@ -104,6 +104,14 @@ module Api
 
         def user_params
           params.permit(:email, :first_name, :last_name, :role)
+        end
+
+        def invite_params
+          permitted = params.permit(:email, :role)
+          unless %w[admin staff].include?(permitted[:role])
+            permitted[:role] = "staff"
+          end
+          permitted
         end
 
         def send_clerk_invitation(user, ignore_existing: false)
