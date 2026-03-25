@@ -41,6 +41,8 @@ export default function ImagesAdmin() {
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>('all');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const fetchImages = useCallback(async () => {
     try {
@@ -57,9 +59,9 @@ export default function ImagesAdmin() {
 
   const handleSave = async () => {
     setSaving(true);
+    setError('');
     try {
       if (editing.id) {
-        // Update metadata
         await api.admin.updateSiteImage(editing.id, {
           title: editing.title,
           alt_text: editing.alt_text,
@@ -68,12 +70,10 @@ export default function ImagesAdmin() {
           active: editing.active,
           caption: editing.caption,
         });
-        // Upload new image if changed
         if (pendingFile) {
           await api.admin.uploadSiteImage(editing.id, pendingFile);
         }
       } else {
-        // Create new
         const formData = new FormData();
         formData.append('title', editing.title);
         formData.append('alt_text', editing.alt_text);
@@ -89,9 +89,11 @@ export default function ImagesAdmin() {
       setShowForm(false);
       setEditing(emptyForm);
       setPendingFile(null);
+      setSuccess(editing.id ? 'Image updated' : 'Image created');
+      setTimeout(() => setSuccess(''), 3000);
       await fetchImages();
     } catch (err) {
-      console.error('Failed to save:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save image');
     } finally {
       setSaving(false);
     }
@@ -101,9 +103,12 @@ export default function ImagesAdmin() {
     try {
       await api.admin.deleteSiteImage(id);
       setDeleteConfirm(null);
+      setSuccess('Image deleted');
+      setTimeout(() => setSuccess(''), 3000);
       await fetchImages();
     } catch (err) {
-      console.error('Failed to delete:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete image');
+      setDeleteConfirm(null);
     }
   };
 
@@ -112,7 +117,7 @@ export default function ImagesAdmin() {
       await api.admin.updateSiteImage(image.id, { active: !image.active });
       await fetchImages();
     } catch (err) {
-      console.error('Failed to toggle:', err);
+      setError(err instanceof Error ? err.message : 'Failed to toggle image');
     }
   };
 
@@ -169,6 +174,19 @@ export default function ImagesAdmin() {
           Add Image
         </button>
       </div>
+
+      <AnimatePresence>
+        {success && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="px-4 py-2 bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
+          >{success}</motion.div>
+        )}
+        {error && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+          >{error}</motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Filter tabs */}
       <div className="flex gap-1 border-b border-white/5 pb-px">

@@ -8,6 +8,7 @@ import MobileLanguageFAB from './components/MobileLanguageFAB';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { PostHogPageView } from './providers/PostHogProvider';
+import { OrganizationProvider } from './contexts/OrganizationContext';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
@@ -117,15 +118,17 @@ export default function App() {
         <Route
           path="*"
           element={
-            <div className="min-h-screen bg-navy-900 text-text-primary">
-              <Header />
-              <LiveStreamBanner />
-              <main>
-                <AnimatedRoutes />
-              </main>
-              <Footer />
-              <MobileLanguageFAB />
-            </div>
+            <OrganizationProvider>
+              <div className="min-h-screen bg-navy-900 text-text-primary">
+                <Header />
+                <LiveStreamBanner />
+                <main>
+                  <AnimatedRoutes />
+                </main>
+                <Footer />
+                <MobileLanguageFAB />
+              </div>
+            </OrganizationProvider>
           }
         />
       </Routes>
