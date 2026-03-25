@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_admin!
-        before_action :set_user, only: [:show, :update, :destroy]
+        before_action :set_user, only: [:show, :update, :destroy, :resend_invitation]
 
         # GET /api/v1/admin/users
         def index
@@ -20,14 +20,29 @@ module Api
 
         # POST /api/v1/admin/users
         def create
-          user = User.new(user_params)
-          user.clerk_id = "pending_#{SecureRandom.uuid}" if user.clerk_id.blank?
+          user = User.new(invite_params)
+          user.clerk_id = "pending_#{SecureRandom.uuid}"
+          user.invitation_status = "pending"
+          user.invited_by = current_user
 
-          if user.save
-            render json: { user: user_json(user) }, status: :created
-          else
-            render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+          unless user.save
+            return render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
           end
+
+          clerk_result = create_clerk_invitation_and_get_url(user)
+          email_queued = false
+
+          if clerk_result[:success] && clerk_result[:url].present?
+            send_invite_email(user, clerk_result[:url])
+            email_queued = true
+            user.update(invited_at: Time.current)
+          end
+
+          render json: {
+            user: user_json(user),
+            invitation_sent: email_queued,
+            invitation_error: clerk_result[:success] ? nil : clerk_result[:error]
+          }, status: :created
         end
 
         # PATCH /api/v1/admin/users/:id
@@ -49,8 +64,40 @@ module Api
             return render json: { error: "Cannot delete the last admin user" }, status: :unprocessable_entity
           end
 
+          if @user.clerk_invitation_id.present? && @user.invitation_pending?
+            service = ClerkInvitationService.new
+            service.revoke_invitation(@user.clerk_invitation_id) if service.configured?
+          end
+
           @user.destroy
           head :no_content
+        end
+
+        # POST /api/v1/admin/users/:id/resend_invitation
+        def resend_invitation
+          unless @user.invitation_pending?
+            return render json: { error: "Invitation cannot be resent (status: #{@user.invitation_status})" }, status: :unprocessable_entity
+          end
+
+          if @user.clerk_invitation_id.present?
+            service = ClerkInvitationService.new
+            service.revoke_invitation(@user.clerk_invitation_id) if service.configured?
+          end
+
+          clerk_result = create_clerk_invitation_and_get_url(@user, ignore_existing: true)
+          email_queued = false
+
+          if clerk_result[:success] && clerk_result[:url].present?
+            send_invite_email(@user, clerk_result[:url])
+            email_queued = true
+          end
+
+          @user.update(invited_at: Time.current) if email_queued
+          render json: {
+            user: user_json(@user),
+            invitation_sent: email_queued,
+            invitation_error: clerk_result[:success] ? nil : clerk_result[:error]
+          }
         end
 
         private
@@ -65,6 +112,46 @@ module Api
           params.permit(:email, :first_name, :last_name, :role)
         end
 
+        def invite_params
+          permitted = params.permit(:email, :role)
+          unless %w[admin staff].include?(permitted[:role])
+            permitted[:role] = "staff"
+          end
+          permitted
+        end
+
+        def create_clerk_invitation_and_get_url(user, ignore_existing: false)
+          service = ClerkInvitationService.new
+          unless service.configured?
+            return { success: false, error: "Clerk API not configured" }
+          end
+
+          redirect_url = build_redirect_url
+          result = service.create_invitation(
+            email: user.email,
+            redirect_url: redirect_url,
+            public_metadata: { role: user.role },
+            ignore_existing: ignore_existing
+          )
+
+          if result[:success]
+            user.update(clerk_invitation_id: result[:invitation_id])
+            { success: true, url: result[:url] }
+          else
+            { success: false, error: result[:error] || "Clerk invitation failed" }
+          end
+        end
+
+        def send_invite_email(user, invitation_url)
+          SendUserInviteEmailJob.perform_later(user.id, current_user&.id, invitation_url)
+        end
+
+        def build_redirect_url
+          allowed = ENV.fetch("ALLOWED_ORIGINS", "http://localhost:5173")
+          origin = allowed.split(",").first.strip
+          "#{origin}/admin"
+        end
+
         def user_json(user)
           {
             id: user.id,
@@ -76,6 +163,9 @@ module Api
             role: user.role,
             is_admin: user.is_admin,
             is_staff: user.is_staff,
+            invitation_status: user.invitation_status,
+            invitation_pending: user.invitation_pending?,
+            invited_at: user.invited_at,
             created_at: user.created_at,
             updated_at: user.updated_at
           }

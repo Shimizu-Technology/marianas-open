@@ -255,6 +255,9 @@ export interface UserProfile {
   role: 'admin' | 'staff' | 'viewer';
   is_admin: boolean;
   is_staff: boolean;
+  invitation_status: 'pending' | 'accepted' | 'expired' | 'revoked';
+  invitation_pending: boolean;
+  invited_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -551,15 +554,14 @@ export const api = {
   },
 
   // Auth
-  getCurrentUser: (email?: string) => {
-    const params = email ? `?email=${encodeURIComponent(email)}` : '';
-    return fetchApi<{ user: UserProfile }>(`/api/v1/me${params}`, {}, true);
+  getCurrentUser: () => {
+    return fetchApi<{ user: UserProfile }>(`/api/v1/me`, {}, true);
   },
 
   // Admin - Users
   getUsers: () => fetchApi<{ users: UserProfile[] }>('/api/v1/admin/users', {}, true),
-  createUser: (data: { email: string; role: string; first_name?: string; last_name?: string }) =>
-    fetchApi<{ user: UserProfile }>('/api/v1/admin/users', {
+  createUser: (data: { email: string; role: string }) =>
+    fetchApi<{ user: UserProfile; invitation_sent: boolean; invitation_error?: string }>('/api/v1/admin/users', {
       method: 'POST',
       body: JSON.stringify(data),
     }, true),
@@ -570,6 +572,10 @@ export const api = {
     }, true),
   deleteUser: (id: number) =>
     fetchApi<void>(`/api/v1/admin/users/${id}`, { method: 'DELETE' }, true),
+  resendInvitation: (id: number) =>
+    fetchApi<{ user: UserProfile; invitation_sent: boolean; invitation_error?: string }>(`/api/v1/admin/users/${id}/resend_invitation`, {
+      method: 'POST',
+    }, true),
 
   // Admin - Events
   admin: {

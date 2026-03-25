@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { useAuth, useUser, SignIn } from '@clerk/clerk-react'
+import { useAuth, SignIn } from '@clerk/clerk-react'
 import { api, setAuthTokenGetter } from '../../services/api'
 import type { UserProfile } from '../../services/api'
 import LoadingSpinner from '../LoadingSpinner'
@@ -14,7 +14,6 @@ type AuthStatus = 'loading' | 'checking' | 'authorized' | 'unauthorized' | 'acce
 
 export default function ClerkProtectedContent({ children, requiredRole }: ClerkProtectedContentProps) {
   const { isLoaded, isSignedIn, getToken } = useAuth()
-  const { user: clerkUser } = useUser()
   const [authStatus, setAuthStatus] = useState<AuthStatus>('loading')
   const [, setCurrentUser] = useState<UserProfile | null>(null)
   const authSetupRef = useRef(false)
@@ -43,8 +42,7 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
       setAuthStatus('checking')
 
       try {
-        const email = clerkUser?.primaryEmailAddress?.emailAddress
-        const response = await api.getCurrentUser(email)
+        const response = await api.getCurrentUser()
 
         if (response.user) {
           const user = response.user
@@ -72,7 +70,7 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
     }
 
     verifyUser()
-  }, [isLoaded, isSignedIn, requiredRole, clerkUser])
+  }, [isLoaded, isSignedIn, requiredRole])
 
   if (!isLoaded || authStatus === 'loading' || authStatus === 'checking') {
     return <LoadingSpinner />
@@ -82,7 +80,7 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
     return (
       <div className="min-h-screen flex items-center justify-center bg-navy-900">
         <SignIn
-          forceRedirectUrl={window.location.pathname}
+          routing="hash"
           appearance={{
             elements: {
               rootBox: 'mx-auto',

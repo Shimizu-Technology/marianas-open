@@ -19,7 +19,11 @@ Rails.application.routes.draw do
 
       # Admin
       namespace :admin do
-        resources :users
+        resources :users do
+          member do
+            post :resend_invitation
+          end
+        end
         resources :events do
           member do
             post :upload_image

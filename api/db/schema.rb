@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_25_011923) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -257,14 +257,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_100000) do
 
   create_table "users", force: :cascade do |t|
     t.string "clerk_id", null: false
+    t.string "clerk_invitation_id"
     t.datetime "created_at", null: false
     t.string "email", null: false
     t.string "first_name"
+    t.string "invitation_status", default: "accepted", null: false
+    t.datetime "invited_at"
+    t.bigint "invited_by_id"
     t.string "last_name"
     t.string "role", default: "viewer", null: false
     t.datetime "updated_at", null: false
     t.index ["clerk_id"], name: "index_users_on_clerk_id", unique: true
+    t.index ["clerk_invitation_id"], name: "index_users_on_clerk_invitation_id", unique: true, where: "(clerk_invitation_id IS NOT NULL)"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["invitation_status"], name: "index_users_on_invitation_status"
   end
 
   create_table "videos", force: :cascade do |t|
@@ -300,5 +306,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_100000) do
   add_foreign_key "events", "organizations"
   add_foreign_key "prize_categories", "events"
   add_foreign_key "sponsors", "organizations"
+  add_foreign_key "users", "users", column: "invited_by_id", on_delete: :nullify
   add_foreign_key "videos", "events"
 end
