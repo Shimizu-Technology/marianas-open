@@ -157,8 +157,8 @@ class UserInviteEmailService
                     <tr>
                       <td style="padding: 16px 32px 0 32px; text-align: center;">
                         <p style="margin: 0 0 3px 0; font-size: 11px; color: #6b7280;">Or open this link in your browser:</p>
-                        <p style="margin: 0; font-size: 11px;">
-                          <a href="#{h(display_url)}" style="color: #D4A843; text-decoration: none;">#{h(display_url)}</a>
+                        <p style="margin: 0; font-size: 11px; word-break: break-all;">
+                          <a href="#{h(button_link)}" style="color: #D4A843; text-decoration: none;">#{h(display_url)}</a>
                         </p>
                       </td>
                     </tr>

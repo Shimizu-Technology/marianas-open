@@ -24,7 +24,6 @@ module Api
           user.clerk_id = "pending_#{SecureRandom.uuid}"
           user.invitation_status = "pending"
           user.invited_by = current_user
-          user.invited_at = Time.current
 
           unless user.save
             return render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
@@ -36,6 +35,7 @@ module Api
           if clerk_result[:success] && clerk_result[:url].present?
             send_invite_email(user, clerk_result[:url])
             email_queued = true
+            user.update(invited_at: Time.current)
           end
 
           render json: {
@@ -76,7 +76,7 @@ module Api
         # POST /api/v1/admin/users/:id/resend_invitation
         def resend_invitation
           unless @user.invitation_pending?
-            return render json: { error: "User has already accepted their invitation" }, status: :unprocessable_entity
+            return render json: { error: "Invitation cannot be resent (status: #{@user.invitation_status})" }, status: :unprocessable_entity
           end
 
           if @user.clerk_invitation_id.present?
