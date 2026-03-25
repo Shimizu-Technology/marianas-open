@@ -6,11 +6,10 @@ import type { SiteImage } from '../../services/api';
 import ImageUpload from '../../components/ImageUpload';
 
 const PLACEMENTS = [
-  { value: 'hero', label: 'Hero Background', description: 'Main hero section background' },
-  { value: 'gallery', label: 'Gallery', description: 'Bento grid and gallery sections' },
-  { value: 'about', label: 'About', description: 'About page images' },
-  { value: 'event_default', label: 'Event Default', description: 'Default event hero image' },
-  { value: 'sponsor_default', label: 'Sponsor Default', description: 'Default sponsor logo' },
+  { value: 'hero', label: 'Hero Background', description: 'Homepage full-screen hero background image' },
+  { value: 'featured', label: 'Featured Backgrounds', description: 'Background images for homepage stats tiles and About page image break' },
+  { value: 'about', label: 'About Hero', description: 'About page hero image' },
+  { value: 'event_default', label: 'Event Default', description: 'Fallback hero for events without their own image' },
 ] as const;
 
 interface EditingSiteImage {
@@ -26,7 +25,7 @@ interface EditingSiteImage {
 const emptyForm: EditingSiteImage = {
   title: '',
   alt_text: '',
-  placement: 'gallery',
+  placement: 'featured',
   sort_order: 0,
   active: true,
   caption: '',
@@ -136,7 +135,7 @@ export default function ImagesAdmin() {
   };
 
   const openNew = () => {
-    setEditing({ ...emptyForm, placement: filter !== 'all' ? filter : 'gallery' });
+    setEditing({ ...emptyForm, placement: filter !== 'all' ? filter : 'featured' });
     setPendingFile(null);
     setShowForm(true);
   };

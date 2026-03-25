@@ -14,28 +14,27 @@ class RankingCalculator
 
   def self.points_for(placement, stars)
     multiplier = PLACEMENT_MULTIPLIERS[placement] || 0
-    multiplier * (stars || 3) # default 3-star if not set
+    multiplier * (stars || 3)
   end
 
   # Returns individual competitor rankings.
-  # Options:
-  #   belt:    filter by belt rank
-  #   gi_nogi: "Gi", "No-Gi", or nil (combined)
-  #   gender:  "male" or "female"
-  #   limit:   max results (default 50)
+  # Groups by competitor_id when available, falls back to name for unlinked results.
   def self.individual(options = {})
     results = base_query(options)
 
-    grouped = results.group_by { |r| normalize_name(r.competitor_name) }
+    grouped = results.group_by do |r|
+      r.competitor_id.present? ? "id:#{r.competitor_id}" : "name:#{normalize_name(r.competitor_name)}"
+    end
 
-    rankings = grouped.map do |name, records|
+    rankings = grouped.map do |_key, records|
       total_points = records.sum { |r| points_for(r.placement, r.event_stars) }
       golds   = records.count { |r| r.placement == 1 }
       silvers = records.count { |r| r.placement == 2 }
       bronzes = records.count { |r| r.placement == 3 }
 
       {
-        competitor_name: records.first.competitor_name, # use original casing from first record
+        competitor_name: records.first.competitor_name,
+        competitor_id: records.first.competitor_id,
         academy: most_common(records.map(&:academy)),
         country_code: most_common(records.map(&:country_code)),
         total_points: total_points,
@@ -53,25 +52,35 @@ class RankingCalculator
   end
 
   # Returns academy/team rankings.
+  # Groups by academy_id when available, falls back to academy name string.
   def self.teams(options = {})
     results = base_query(options)
 
-    grouped = results.group_by { |r| normalize_name(r.academy.presence || "Independent") }
+    grouped = results.group_by do |r|
+      if r.respond_to?(:competitor_academy_id) && r.competitor_academy_id.present?
+        "id:#{r.competitor_academy_id}"
+      else
+        "name:#{normalize_name(r.academy.presence || 'Independent')}"
+      end
+    end
 
-    rankings = grouped.map do |academy, records|
+    rankings = grouped.map do |_key, records|
       total_points = records.sum { |r| points_for(r.placement, r.event_stars) }
       golds   = records.count { |r| r.placement == 1 }
       silvers = records.count { |r| r.placement == 2 }
       bronzes = records.count { |r| r.placement == 3 }
 
+      academy_id = records.first.respond_to?(:competitor_academy_id) ? records.first.competitor_academy_id : nil
+
       {
         academy: records.first.academy.presence || "Independent",
+        academy_id: academy_id,
         country_code: most_common(records.map(&:country_code)),
         total_points: total_points,
         gold: golds,
         silver: silvers,
         bronze: bronzes,
-        athletes: records.map { |r| normalize_name(r.competitor_name) }.uniq.count,
+        athletes: records.map { |r| r.competitor_id || normalize_name(r.competitor_name) }.uniq.count,
         events_competed: records.map(&:event_id).uniq.count
       }
     end
@@ -112,7 +121,11 @@ class RankingCalculator
   def self.base_query(options)
     scope = EventResult
       .joins(:event)
-      .select("event_results.*, events.asjjf_stars as event_stars, events.id as event_id")
+      .left_joins(:competitor)
+      .select(
+        "event_results.*, events.asjjf_stars as event_stars, events.id as event_id, " \
+        "event_results.competitor_id, competitors.academy_id as competitor_academy_id"
+      )
 
     scope = scope.where("LOWER(event_results.belt_rank) = ?", options[:belt].downcase) if options[:belt].present?
     scope = scope.where(gender: options[:gender]) if options[:gender].present?

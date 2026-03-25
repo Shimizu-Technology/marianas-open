@@ -23,6 +23,7 @@ export default function Header() {
     { to: '/rules', label: t('nav.rules') },
     { to: '/rankings', label: t('nav.rankings') },
     { to: '/competitors', label: t('nav.competitors') },
+    { to: '/teams', label: 'Teams' },
     { to: '/watch', label: t('nav.watch') },
   ];
 

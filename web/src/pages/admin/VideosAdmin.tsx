@@ -25,10 +25,16 @@ const emptyForm: VideoFormData = {
 }
 
 function getYouTubeId(url: string): string | null {
-  if (!url) return null
-  if (url.includes('youtu.be/')) return url.split('/').pop()?.split('?')[0] || null
-  const match = url.match(/[?&]v=([^&]+)/)
-  return match ? match[1] : null
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes('youtu.be')) return u.pathname.split('/')[1]?.split('?')[0] || null;
+    const pathMatch = u.pathname.match(/^\/(live|shorts|embed|v)\/([^/?]+)/);
+    if (pathMatch) return pathMatch[2];
+    return u.searchParams.get('v') || null;
+  } catch {
+    return null;
+  }
 }
 
 export default function VideosAdmin() {
@@ -146,6 +152,14 @@ export default function VideosAdmin() {
             Add Video
           </button>
         )}
+      </div>
+
+      <div className="mb-4 p-4 bg-surface border border-white/5 text-xs text-text-secondary leading-relaxed">
+        <p>
+          <strong className="text-text-primary">Manage videos displayed on the Watch page.</strong>{' '}
+          Add YouTube video URLs and they will automatically show with thumbnails. Featured videos appear
+          prominently at the top. Link videos to specific events and competitors for better organization.
+        </p>
       </div>
 
       <AnimatePresence>

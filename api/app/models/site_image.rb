@@ -3,7 +3,7 @@ class SiteImage < ApplicationRecord
 
   has_one_attached :image
 
-  validates :placement, presence: true, inclusion: { in: %w[hero gallery about event_default sponsor_default] }
+  validates :placement, presence: true, inclusion: { in: %w[hero featured about event_default] }
 
   scope :active, -> { where(active: true) }
   scope :by_placement, ->(p) { where(placement: p).order(:sort_order) }

@@ -9,8 +9,28 @@ module Api
         before_action :set_result, only: [:update, :destroy]
 
         def index
-          results = @event.event_results.order(:division, :placement)
-          render json: results
+          page = (params[:page] || 1).to_i
+          per_page = [(params[:per_page] || 100).to_i, 200].min
+
+          base_scope = @event.event_results.order(:division, :placement)
+          base_scope = base_scope.where("competitor_name ILIKE :q OR event_results.academy ILIKE :q", q: "%#{params[:search]}%") if params[:search].present?
+          base_scope = base_scope.where(belt_rank: params[:belt_rank]) if params[:belt_rank].present?
+
+          total = base_scope.count
+
+          records = base_scope
+            .left_joins(:competitor)
+            .select("event_results.*, competitors.academy_id as linked_academy_id")
+            .offset((page - 1) * per_page)
+            .limit(per_page)
+
+          results = records.map do |r|
+            json = r.as_json
+            json["linked_academy_id"] = r.try(:linked_academy_id)
+            json
+          end
+
+          render json: { results: results, total: total, page: page, per_page: per_page }
         end
 
         def create

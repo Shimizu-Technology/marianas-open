@@ -33,9 +33,9 @@ export function resolveMediaUrl(url: string | null | undefined): string | null {
 
 const GENERIC_HERO = '/images/venue-crowd.webp';
 
-/** Get hero image for an event — uses API URL if available, falls back to generic */
-export function getEventHeroImage(_slug: string, apiUrl: string | null): string {
-  return resolveMediaUrl(apiUrl) || GENERIC_HERO;
+/** Get hero image for an event — uses API URL if available, falls back to optional default, then generic */
+export function getEventHeroImage(_slug: string, apiUrl: string | null, adminDefault?: string | null): string {
+  return resolveMediaUrl(apiUrl) || adminDefault || GENERIC_HERO;
 }
 
 /** Organization logo fallback */

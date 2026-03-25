@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Save, Plus, Trash2, ChevronDown, ChevronRight, X, Loader2, Languages, RefreshCw } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Save, ChevronDown, ChevronRight, X, Loader2, Languages, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../services/api';
 import type { SiteContentEntry, SiteContentGrouped } from '../../services/api';
@@ -44,13 +44,11 @@ function SectionGroup({
   section,
   entries,
   onSave,
-  onDelete,
   onRetranslate,
 }: {
   section: string;
   entries: SiteContentEntry[];
   onSave: (entry: SiteContentEntry) => Promise<void>;
-  onDelete: (id: number) => Promise<void>;
   onRetranslate: (id: number) => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(true);
@@ -82,11 +80,6 @@ function SectionGroup({
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this content entry? This cannot be undone.')) return;
-    await onDelete(id);
   };
 
   return (
@@ -221,13 +214,6 @@ function SectionGroup({
                         <RefreshCw size={14} />
                       </button>
                     )}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleDelete(entry.id); }}
-                      className="shrink-0 p-1.5 text-text-muted hover:text-red-400 transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 size={14} />
-                    </button>
                   </div>
                 </div>
               )}
@@ -235,126 +221,6 @@ function SectionGroup({
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-function NewContentForm({ onCreated }: { onCreated: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    key: '',
-    label: '',
-    section: 'general',
-    content_type: 'text',
-    value_en: '',
-  });
-
-  const handleCreate = async () => {
-    if (!form.key || !form.label) return;
-    setSaving(true);
-    try {
-      await api.admin.createSiteContent(form);
-      invalidateSiteContentCache();
-      setForm({ key: '', label: '', section: 'general', content_type: 'text', value_en: '' });
-      setOpen(false);
-      onCreated();
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 border border-white/10 text-text-secondary text-sm hover:bg-white/5 transition-colors"
-      >
-        <Plus size={14} />
-        Add Content Entry
-      </button>
-    );
-  }
-
-  return (
-    <div className="border border-white/10 bg-surface p-6 space-y-4">
-      <h3 className="font-heading font-semibold text-sm uppercase tracking-wider text-text-primary">
-        New Content Entry
-      </h3>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs text-text-muted mb-1 uppercase tracking-wider">Key (unique)</label>
-          <input
-            type="text"
-            value={form.key}
-            onChange={(e) => setForm({ ...form, key: e.target.value })}
-            placeholder="e.g. hero_tagline"
-            className="w-full bg-navy-900 border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold-500/50 focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="block text-xs text-text-muted mb-1 uppercase tracking-wider">Label</label>
-          <input
-            type="text"
-            value={form.label}
-            onChange={(e) => setForm({ ...form, label: e.target.value })}
-            placeholder="e.g. Hero Tagline"
-            className="w-full bg-navy-900 border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold-500/50 focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="block text-xs text-text-muted mb-1 uppercase tracking-wider">Section</label>
-          <select
-            value={form.section}
-            onChange={(e) => setForm({ ...form, section: e.target.value })}
-            className="w-full bg-navy-900 border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold-500/50 focus:outline-none"
-          >
-            {Object.entries(SECTION_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs text-text-muted mb-1 uppercase tracking-wider">Type</label>
-          <select
-            value={form.content_type}
-            onChange={(e) => setForm({ ...form, content_type: e.target.value })}
-            className="w-full bg-navy-900 border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold-500/50 focus:outline-none"
-          >
-            <option value="text">Text</option>
-            <option value="number">Number</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label className="block text-xs text-text-muted mb-1 uppercase tracking-wider">English Value</label>
-        <input
-          type="text"
-          value={form.value_en}
-          onChange={(e) => setForm({ ...form, value_en: e.target.value })}
-          placeholder="Enter the English text — other languages will be auto-translated"
-          className="w-full bg-navy-900 border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold-500/50 focus:outline-none"
-        />
-        <p className="text-[11px] text-text-muted mt-1">
-          Other languages will be auto-translated on save.
-        </p>
-      </div>
-      <div className="flex gap-3">
-        <button
-          onClick={handleCreate}
-          disabled={saving || !form.key || !form.label}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gold-500 text-navy-900 text-sm font-bold uppercase tracking-wider hover:bg-gold-400 disabled:opacity-50 transition-colors"
-        >
-          <Plus size={14} />
-          {saving ? 'Creating...' : 'Create'}
-        </button>
-        <button
-          onClick={() => setOpen(false)}
-          className="px-4 py-2 border border-white/10 text-text-secondary text-sm hover:bg-white/5 transition-colors"
-        >
-          Cancel
-        </button>
-      </div>
     </div>
   );
 }
@@ -369,8 +235,10 @@ export default function ContentAdmin() {
     try {
       const data = await api.admin.getSiteContents();
       setGrouped(data.site_contents);
+      return data.site_contents;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load site contents');
+      return null;
     } finally {
       setLoading(false);
     }
@@ -378,20 +246,46 @@ export default function ContentAdmin() {
 
   useEffect(() => { fetchContents(); }, [fetchContents]);
 
+  const pollingRef = useRef(0);
+
+  useEffect(() => {
+    return () => { pollingRef.current++; };
+  }, []);
+
+  const pollForPendingTranslations = useCallback(async () => {
+    const generation = ++pollingRef.current;
+    for (let i = 0; i < 20; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      if (generation !== pollingRef.current) return;
+      try {
+        const data = await api.admin.getSiteContents();
+        if (generation !== pollingRef.current) return;
+        const allEntries = Object.values(data.site_contents).flat();
+        const hasPending = allEntries.some((e: SiteContentEntry) => e.translation_status === 'pending');
+        setGrouped(data.site_contents);
+        if (!hasPending) return;
+      } catch {
+        return;
+      }
+    }
+  }, []);
+
+  const fetchAndPoll = useCallback(async () => {
+    const contents = await fetchContents();
+    if (contents) {
+      const allEntries = Object.values(contents).flat();
+      if (allEntries.some((e: SiteContentEntry) => e.translation_status === 'pending')) {
+        pollForPendingTranslations();
+      }
+    }
+  }, [fetchContents, pollForPendingTranslations]);
+
   const handleSave = async (entry: SiteContentEntry) => {
     await api.admin.updateSiteContent(entry.id, entry);
     setSuccess('Content saved — translations will update automatically');
     setTimeout(() => setSuccess(''), 4000);
     invalidateSiteContentCache();
-    await fetchContents();
-  };
-
-  const handleDelete = async (id: number) => {
-    await api.admin.deleteSiteContent(id);
-    setSuccess('Content entry deleted');
-    setTimeout(() => setSuccess(''), 3000);
-    invalidateSiteContentCache();
-    await fetchContents();
+    await fetchAndPoll();
   };
 
   const handleRetranslate = async (id: number) => {
@@ -399,7 +293,7 @@ export default function ContentAdmin() {
       await api.admin.retranslateSiteContent(id);
       setSuccess('Re-translation queued');
       setTimeout(() => setSuccess(''), 3000);
-      await fetchContents();
+      await fetchAndPoll();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to retranslate');
     }
@@ -420,14 +314,11 @@ export default function ContentAdmin() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-heading font-black uppercase tracking-tight">Site Content</h1>
-          <p className="text-text-secondary text-sm mt-1">
-            Manage homepage text, stats, and page content. Translations are automatic — just edit in English.
-          </p>
-        </div>
-        <NewContentForm onCreated={fetchContents} />
+      <div>
+        <h1 className="text-2xl font-heading font-black uppercase tracking-tight">Site Content</h1>
+        <p className="text-text-secondary text-sm mt-1">
+          Manage homepage text, stats, and page content. Translations are automatic — just edit in English.
+        </p>
       </div>
 
       <AnimatePresence>
@@ -450,7 +341,6 @@ export default function ContentAdmin() {
             section={section}
             entries={grouped[section]}
             onSave={handleSave}
-            onDelete={handleDelete}
             onRetranslate={handleRetranslate}
           />
         ))}

@@ -4,6 +4,7 @@ export type TranslationsBlob = Record<string, Record<string, unknown>>;
 export type TranslationStatus = 'untranslated' | 'pending' | 'translated' | 'failed';
 
 export interface CompetitorProfileResult {
+  event_id: number;
   event_name: string;
   event_slug: string;
   event_date: string;
@@ -27,7 +28,9 @@ export interface CompetitorProfile {
 
 export interface RankingEntry {
   competitor_name?: string;
+  competitor_id?: number;
   academy?: string;
+  academy_id?: number;
   country_code?: string;
   total_points: number;
   gold: number;
@@ -183,6 +186,8 @@ export interface Event {
   tagline: string | null;
   schedule_note: string | null;
   asjjf_event_ids: number[];
+  asjjf_source_urls: string[];
+  results_imported_at: string | null;
   venue_highlights: EventVenueHighlight[];
   registration_steps: EventRegistrationStep[];
   registration_fee_sections: EventRegistrationFeeSection[];
@@ -303,7 +308,7 @@ export interface SiteImage {
   id: number;
   title: string | null;
   alt_text: string | null;
-  placement: 'hero' | 'gallery' | 'about' | 'event_default' | 'sponsor_default';
+  placement: 'hero' | 'featured' | 'about' | 'event_default';
   sort_order: number;
   active: boolean;
   caption: string | null;
@@ -367,6 +372,7 @@ export interface Competitor {
   belt_rank: string | null;
   weight_class: string | null;
   academy: string | null;
+  academy_id: number | null;
   bio: string | null;
   instagram_url: string | null;
   youtube_url: string | null;
@@ -376,7 +382,21 @@ export interface Competitor {
   gold_medals: number;
   silver_medals: number;
   bronze_medals: number;
+  total_points: number;
+  events_competed: number;
+  results_count: number;
   photo_url: string | null;
+}
+
+export interface CompetitorsResponse {
+  competitors: Competitor[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export interface CompetitorDetail extends Competitor {
+  results: CompetitorProfileResult[];
 }
 
 export interface CompetitorFormData {
@@ -393,9 +413,47 @@ export interface CompetitorFormData {
   wins: number;
   losses: number;
   draws: number;
-  gold_medals: number;
-  silver_medals: number;
-  bronze_medals: number;
+}
+
+export interface Academy {
+  id: number;
+  name: string;
+  slug: string;
+  country_code: string | null;
+  location: string | null;
+  website_url: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  description: string | null;
+  logo_url: string | null;
+  total_points: number;
+  gold: number;
+  silver: number;
+  bronze: number;
+  athletes: number;
+  events_competed: number;
+  results_count: number;
+}
+
+export interface AcademyDetail extends Omit<Academy, 'athletes'> {
+  athletes: { id: number; first_name: string; last_name: string; full_name: string; belt_rank: string | null; country_code: string | null; photo_url: string | null; total_points: number; gold: number; silver: number; bronze: number }[];
+}
+
+export interface AcademiesResponse {
+  academies: Academy[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export interface AcademyFormData {
+  name: string;
+  country_code: string;
+  location: string;
+  website_url: string;
+  instagram_url: string;
+  facebook_url: string;
+  description: string;
 }
 
 export interface SiteContentEntry {
@@ -430,6 +488,7 @@ export interface EventResult {
   academy: string | null;
   country_code: string;
   competitor_id: number | null;
+  linked_academy_id: number | null;
   submission_method: string | null;
   notes: string | null;
 }
@@ -541,9 +600,14 @@ export const api = {
   getSponsors: () => fetchApi<Sponsor[]>('/api/v1/sponsors'),
   getCompetitors: (params?: Record<string, string>) => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
-    return fetchApi<Competitor[]>(`/api/v1/competitors${query}`);
+    return fetchApi<CompetitorsResponse>(`/api/v1/competitors${query}`);
   },
-  getCompetitor: (id: number) => fetchApi<Competitor>(`/api/v1/competitors/${id}`),
+  getCompetitor: (id: number) => fetchApi<CompetitorDetail>(`/api/v1/competitors/${id}`),
+  getAcademies: (params?: Record<string, string>) => {
+    const query = params ? '?' + new URLSearchParams(params).toString() : '';
+    return fetchApi<AcademiesResponse>(`/api/v1/academies${query}`);
+  },
+  getAcademy: (slug: string) => fetchApi<AcademyDetail>(`/api/v1/academies/${slug}`),
   getVideos: (params?: Record<string, string>) => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
     return fetchApi<Video[]>(`/api/v1/videos${query}`);
@@ -594,6 +658,8 @@ export const api = {
       }, true),
     deleteEvent: (id: number) =>
       fetchApi<void>(`/api/v1/admin/events/${id}`, { method: 'DELETE' }, true),
+    cloneEvent: (id: number) =>
+      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/clone`, { method: 'POST' }, true),
     uploadEventImage: (id: number, file: File) => {
       const formData = new FormData();
       formData.append('image', file);
@@ -601,8 +667,10 @@ export const api = {
     },
 
     // Event Results
-    getEventResults: (eventId: number) =>
-      fetchApi<EventResult[]>(`/api/v1/admin/events/${eventId}/results`, {}, true),
+    getEventResults: (eventId: number, params?: Record<string, string>) => {
+      const query = params ? '?' + new URLSearchParams(params).toString() : '';
+      return fetchApi<{ results: EventResult[]; total: number; page: number; per_page: number }>(`/api/v1/admin/events/${eventId}/results${query}`, {}, true);
+    },
     createEventResult: (eventId: number, data: EventResultFormData) =>
       fetchApi<EventResult>(`/api/v1/admin/events/${eventId}/results`, {
         method: 'POST',
@@ -691,7 +759,11 @@ export const api = {
     },
 
     // Competitors
-    getCompetitors: () => fetchApi<{ competitors: Competitor[] }>('/api/v1/admin/competitors', {}, true),
+    getCompetitors: (params?: Record<string, string>) => {
+      const query = params ? '?' + new URLSearchParams(params).toString() : '';
+      return fetchApi<{ competitors: Competitor[]; total: number; page: number; per_page: number }>(`/api/v1/admin/competitors${query}`, {}, true);
+    },
+    getCompetitor: (id: number) => fetchApi<{ competitor: CompetitorDetail }>(`/api/v1/admin/competitors/${id}`, {}, true),
     createCompetitor: (data: Partial<CompetitorFormData>) =>
       fetchApi<{ competitor: Competitor }>('/api/v1/admin/competitors', {
         method: 'POST',
@@ -708,6 +780,22 @@ export const api = {
       const formData = new FormData();
       formData.append('photo', file);
       return fetchApiUpload<{ competitor: Competitor }>(`/api/v1/admin/competitors/${id}/upload_photo`, formData);
+    },
+
+    // Academies
+    getAcademies: () => fetchApi<{ academies: Academy[] }>('/api/v1/admin/academies', {}, true),
+    getAcademy: (id: number) => fetchApi<{ academy: AcademyDetail }>(`/api/v1/admin/academies/${id}`, {}, true),
+    updateAcademy: (id: number, data: Partial<AcademyFormData>) =>
+      fetchApi<{ academy: Academy }>(`/api/v1/admin/academies/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    deleteAcademy: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/academies/${id}`, { method: 'DELETE' }, true),
+    uploadAcademyLogo: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('logo', file);
+      return fetchApiUpload<{ academy: Academy }>(`/api/v1/admin/academies/${id}/upload_logo`, formData);
     },
 
     // Videos
