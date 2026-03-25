@@ -80,7 +80,7 @@ export default function UsersAdmin() {
       if (res.invitation_sent) {
         setSuccess('Invitation email resent!')
       } else {
-        setSuccess(`Invitation resent, but email may not have been delivered. You can try again.`)
+        setError(`Invitation email failed: ${res.invitation_error || 'Unknown error'}. You can try again.`)
       }
       await load()
       setTimeout(() => setSuccess(''), 3000)
