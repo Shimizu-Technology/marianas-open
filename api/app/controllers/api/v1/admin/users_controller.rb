@@ -30,12 +30,18 @@ module Api
             return render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
           end
 
-          invitation_url = create_clerk_invitation_and_get_url(user)
-          send_invite_email(user, invitation_url)
+          clerk_result = create_clerk_invitation_and_get_url(user)
+          email_queued = false
+
+          if clerk_result[:success] && clerk_result[:url].present?
+            send_invite_email(user, clerk_result[:url])
+            email_queued = true
+          end
 
           render json: {
             user: user_json(user),
-            invitation_sent: true
+            invitation_sent: email_queued,
+            invitation_error: clerk_result[:success] ? nil : clerk_result[:error]
           }, status: :created
         end
 
@@ -73,11 +79,25 @@ module Api
             return render json: { error: "User has already accepted their invitation" }, status: :unprocessable_entity
           end
 
-          invitation_url = create_clerk_invitation_and_get_url(@user, ignore_existing: true)
-          send_invite_email(@user, invitation_url)
+          if @user.clerk_invitation_id.present?
+            service = ClerkInvitationService.new
+            service.revoke_invitation(@user.clerk_invitation_id) if service.configured?
+          end
+
+          clerk_result = create_clerk_invitation_and_get_url(@user, ignore_existing: true)
+          email_queued = false
+
+          if clerk_result[:success] && clerk_result[:url].present?
+            send_invite_email(@user, clerk_result[:url])
+            email_queued = true
+          end
 
           @user.update(invited_at: Time.current)
-          render json: { user: user_json(@user), invitation_sent: true }
+          render json: {
+            user: user_json(@user),
+            invitation_sent: email_queued,
+            invitation_error: clerk_result[:success] ? nil : clerk_result[:error]
+          }
         end
 
         private
@@ -102,7 +122,9 @@ module Api
 
         def create_clerk_invitation_and_get_url(user, ignore_existing: false)
           service = ClerkInvitationService.new
-          return nil unless service.configured?
+          unless service.configured?
+            return { success: false, error: "Clerk API not configured" }
+          end
 
           redirect_url = build_redirect_url
           result = service.create_invitation(
@@ -114,7 +136,9 @@ module Api
 
           if result[:success]
             user.update(clerk_invitation_id: result[:invitation_id])
-            result[:url]
+            { success: true, url: result[:url] }
+          else
+            { success: false, error: result[:error] || "Clerk invitation failed" }
           end
         end
 

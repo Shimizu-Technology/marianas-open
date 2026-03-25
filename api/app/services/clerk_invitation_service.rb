@@ -66,7 +66,7 @@ class ClerkInvitationService
       error_message = extract_error_message(response.parsed_response)
       { success: false, error: error_message }
     end
-  rescue HTTParty::Error, Timeout::Error => e
+  rescue HTTParty::Error, Timeout::Error, Errno::ECONNREFUSED => e
     { success: false, error: e.message }
   end
 

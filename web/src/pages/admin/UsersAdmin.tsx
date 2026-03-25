@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { UserProfile } from '../../services/api'
 
-const ROLES = ['admin', 'staff'] as const
+const INVITE_ROLES = ['admin', 'staff'] as const
+const EDIT_ROLES = ['admin', 'staff', 'viewer'] as const
 
 function StatusBadge({ user }: { user: UserProfile }) {
   if (user.invitation_pending) {
@@ -75,8 +76,12 @@ export default function UsersAdmin() {
     setResending(userId)
     setError('')
     try {
-      await api.resendInvitation(userId)
-      setSuccess('Invitation email resent!')
+      const res = await api.resendInvitation(userId)
+      if (res.invitation_sent) {
+        setSuccess('Invitation email resent!')
+      } else {
+        setSuccess(`Invitation resent, but email may not have been delivered. You can try again.`)
+      }
       await load()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -184,7 +189,7 @@ export default function UsersAdmin() {
                   onChange={e => setInviteForm(prev => ({ ...prev, role: e.target.value }))}
                   className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none"
                 >
-                  {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                  {INVITE_ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
                 </select>
               </div>
             </div>
@@ -238,7 +243,7 @@ export default function UsersAdmin() {
                               onChange={e => setEditRole(e.target.value)}
                               className="bg-white/[0.03] border border-white/10 px-2 py-1 text-xs text-text-primary focus:border-gold/40 focus:outline-none"
                             >
-                              {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                              {EDIT_ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
                             </select>
                             <button
                               onClick={() => handleUpdateRole(user.id)}
@@ -328,7 +333,7 @@ export default function UsersAdmin() {
                             onChange={e => setEditRole(e.target.value)}
                             className="bg-white/[0.03] border border-white/10 px-2 py-1 text-xs text-text-primary focus:border-gold/40 focus:outline-none"
                           >
-                            {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                            {EDIT_ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
                           </select>
                           <button
                             onClick={() => handleUpdateRole(user.id)}

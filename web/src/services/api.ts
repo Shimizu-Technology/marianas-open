@@ -574,7 +574,7 @@ export const api = {
   deleteUser: (id: number) =>
     fetchApi<void>(`/api/v1/admin/users/${id}`, { method: 'DELETE' }, true),
   resendInvitation: (id: number) =>
-    fetchApi<{ user: UserProfile; invitation_sent: boolean }>(`/api/v1/admin/users/${id}/resend_invitation`, {
+    fetchApi<{ user: UserProfile; invitation_sent: boolean; invitation_error?: string }>(`/api/v1/admin/users/${id}/resend_invitation`, {
       method: 'POST',
     }, true),
 
