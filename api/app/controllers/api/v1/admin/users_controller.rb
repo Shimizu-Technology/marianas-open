@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_admin!
-        before_action :set_user, only: [:show, :update, :destroy]
+        before_action :set_user, only: [:show, :update, :destroy, :resend_invitation]
 
         # GET /api/v1/admin/users
         def index
@@ -22,11 +22,28 @@ module Api
         def create
           user = User.new(user_params)
           user.clerk_id = "pending_#{SecureRandom.uuid}" if user.clerk_id.blank?
+          user.invitation_status = "pending"
+          user.invited_by = current_user
+          user.invited_at = Time.current
 
-          if user.save
-            render json: { user: user_json(user) }, status: :created
+          unless user.save
+            return render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+          end
+
+          invitation_result = send_clerk_invitation(user)
+
+          if invitation_result[:success]
+            user.update(clerk_invitation_id: invitation_result[:invitation_id])
+            render json: {
+              user: user_json(user),
+              invitation_sent: true
+            }, status: :created
           else
-            render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+            render json: {
+              user: user_json(user),
+              invitation_sent: false,
+              invitation_error: invitation_result[:error]
+            }, status: :created
           end
         end
 
@@ -49,8 +66,32 @@ module Api
             return render json: { error: "Cannot delete the last admin user" }, status: :unprocessable_entity
           end
 
+          if @user.clerk_invitation_id.present? && @user.invitation_pending?
+            service = ClerkInvitationService.new
+            service.revoke_invitation(@user.clerk_invitation_id) if service.configured?
+          end
+
           @user.destroy
           head :no_content
+        end
+
+        # POST /api/v1/admin/users/:id/resend_invitation
+        def resend_invitation
+          unless @user.invitation_pending?
+            return render json: { error: "User has already accepted their invitation" }, status: :unprocessable_entity
+          end
+
+          invitation_result = send_clerk_invitation(@user, ignore_existing: true)
+
+          if invitation_result[:success]
+            @user.update(clerk_invitation_id: invitation_result[:invitation_id], invited_at: Time.current)
+            render json: { user: user_json(@user), invitation_sent: true }
+          else
+            render json: {
+              error: "Failed to resend invitation: #{invitation_result[:error]}",
+              invitation_sent: false
+            }, status: :unprocessable_entity
+          end
         end
 
         private
@@ -65,6 +106,27 @@ module Api
           params.permit(:email, :first_name, :last_name, :role)
         end
 
+        def send_clerk_invitation(user, ignore_existing: false)
+          service = ClerkInvitationService.new
+          unless service.configured?
+            return { success: false, error: "Clerk API not configured" }
+          end
+
+          redirect_url = build_redirect_url
+          service.create_invitation(
+            email: user.email,
+            redirect_url: redirect_url,
+            public_metadata: { role: user.role },
+            ignore_existing: ignore_existing
+          )
+        end
+
+        def build_redirect_url
+          allowed = ENV.fetch("ALLOWED_ORIGINS", "http://localhost:5173")
+          origin = allowed.split(",").first.strip
+          "#{origin}/admin"
+        end
+
         def user_json(user)
           {
             id: user.id,
@@ -76,6 +138,9 @@ module Api
             role: user.role,
             is_admin: user.is_admin,
             is_staff: user.is_staff,
+            invitation_status: user.invitation_status,
+            invitation_pending: user.invitation_pending?,
+            invited_at: user.invited_at,
             created_at: user.created_at,
             updated_at: user.updated_at
           }

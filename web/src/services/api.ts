@@ -255,6 +255,9 @@ export interface UserProfile {
   role: 'admin' | 'staff' | 'viewer';
   is_admin: boolean;
   is_staff: boolean;
+  invitation_status: 'pending' | 'accepted' | 'expired' | 'revoked';
+  invitation_pending: boolean;
+  invited_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -570,6 +573,10 @@ export const api = {
     }, true),
   deleteUser: (id: number) =>
     fetchApi<void>(`/api/v1/admin/users/${id}`, { method: 'DELETE' }, true),
+  resendInvitation: (id: number) =>
+    fetchApi<{ user: UserProfile; invitation_sent: boolean }>(`/api/v1/admin/users/${id}/resend_invitation`, {
+      method: 'POST',
+    }, true),
 
   // Admin - Events
   admin: {

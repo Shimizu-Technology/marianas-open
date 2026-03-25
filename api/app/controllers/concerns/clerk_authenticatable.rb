@@ -20,7 +20,7 @@ module ClerkAuthenticatable
     end
 
     clerk_id = decoded["sub"]
-    email = decoded["email"] || decoded["primary_email_address"] || params[:email]
+    email = decoded["email"] || decoded["primary_email_address"]
     first_name = decoded["first_name"]
     last_name = decoded["last_name"]
 
@@ -89,7 +89,11 @@ module ClerkAuthenticatable
       user = User.find_by("LOWER(email) = ?", email.downcase)
 
       if user
-        user.update(clerk_id: clerk_id, first_name: first_name, last_name: last_name)
+        attrs = { clerk_id: clerk_id }
+        attrs[:first_name] = first_name if first_name.present?
+        attrs[:last_name] = last_name if last_name.present?
+        attrs[:invitation_status] = "accepted" if user.invitation_pending?
+        user.update(attrs)
         return user
       end
     end

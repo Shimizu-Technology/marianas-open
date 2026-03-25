@@ -82,7 +82,7 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
     return (
       <div className="min-h-screen flex items-center justify-center bg-navy-900">
         <SignIn
-          forceRedirectUrl={window.location.pathname}
+          routing="hash"
           appearance={{
             elements: {
               rootBox: 'mx-auto',
