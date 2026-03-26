@@ -136,7 +136,7 @@ export default function CompetitorProfilePage() {
             className="inline-flex items-center gap-2 text-text-muted hover:text-white transition-colors mb-6"
           >
             <ArrowLeft size={16} />
-            {t('competitorProfile.backToRankings')}
+            Back
           </button>
 
           {loading && (
