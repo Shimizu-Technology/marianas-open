@@ -60,7 +60,7 @@ export default function AcademyPage() {
         />
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/teams')}
             className="inline-flex items-center gap-2 text-text-muted hover:text-white transition-colors mb-6"
           >
             <ArrowLeft size={16} />
