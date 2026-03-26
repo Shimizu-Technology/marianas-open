@@ -22,6 +22,7 @@ function Root() {
         publishableKey={PUBLISHABLE_KEY}
         afterSignOutUrl="/"
         signInFallbackRedirectUrl="/admin"
+        signUpFallbackRedirectUrl="/admin"
       >
         <HelmetProvider>
           <AuthProvider isClerkEnabled={true}>
