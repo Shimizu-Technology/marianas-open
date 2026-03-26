@@ -24,6 +24,15 @@ module ClerkAuthenticatable
     first_name = decoded["first_name"]
     last_name = decoded["last_name"]
 
+    if email.blank? && clerk_id.present?
+      clerk_user = fetch_clerk_user(clerk_id)
+      if clerk_user
+        email = clerk_user[:email]
+        first_name ||= clerk_user[:first_name]
+        last_name ||= clerk_user[:last_name]
+      end
+    end
+
     @current_user = find_or_create_user(
       clerk_id: clerk_id,
       email: email,
@@ -109,5 +118,31 @@ module ClerkAuthenticatable
 
   def render_forbidden(message = "Forbidden")
     render json: { error: message }, status: :forbidden
+  end
+
+  def fetch_clerk_user(clerk_id)
+    secret = ENV["CLERK_SECRET_KEY"]
+    return nil if secret.blank?
+
+    response = HTTParty.get(
+      "https://api.clerk.com/v1/users/#{clerk_id}",
+      headers: { "Authorization" => "Bearer #{secret}" },
+      timeout: 5
+    )
+
+    return nil unless response.success?
+
+    data = response.parsed_response
+    primary_email_id = data["primary_email_address_id"]
+    email = data.dig("email_addresses")&.find { |e| e["id"] == primary_email_id }&.dig("email_address")
+
+    {
+      email: email,
+      first_name: data["first_name"],
+      last_name: data["last_name"]
+    }
+  rescue HTTParty::Error, Timeout::Error => e
+    Rails.logger.warn("Failed to fetch Clerk user #{clerk_id}: #{e.message}")
+    nil
   end
 end
