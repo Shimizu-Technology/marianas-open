@@ -8,6 +8,8 @@
 #   CompetitorLinker.link_all                     # backfill all unlinked results
 #   CompetitorLinker.find_or_create("Santos Rafael", sample_result)
 #
+require "zlib"
+
 class CompetitorLinker
   VALID_BELTS = %w[white blue purple brown black].freeze
   BELT_ORDER = { "white" => 0, "blue" => 1, "purple" => 2, "brown" => 3, "black" => 4 }.freeze
@@ -72,13 +74,21 @@ class CompetitorLinker
       belt = extract_belt(sample_result)
       country = normalize_country(sample_result&.country_code)
 
-      Competitor.create!(
-        first_name: first_name,
-        last_name: last_name,
-        academy: sample_result&.academy,
-        country_code: country,
-        belt_rank: belt
-      )
+      Competitor.transaction do
+        lock_key = Zlib.crc32("competitor:#{normalized}") % (2**31)
+        Competitor.connection.execute("SELECT pg_advisory_xact_lock(#{lock_key})")
+
+        competitor = find_by_name(normalized)
+        return competitor if competitor
+
+        Competitor.create!(
+          first_name: first_name,
+          last_name: last_name,
+          academy: sample_result&.academy,
+          country_code: country,
+          belt_rank: belt
+        )
+      end
     end
 
     def normalize_country(code)

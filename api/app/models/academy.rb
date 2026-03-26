@@ -6,7 +6,7 @@ class Academy < ApplicationRecord
   validates :slug, presence: true, uniqueness: true
   validates :country_code, length: { is: 2 }, allow_blank: true
 
-  before_validation :generate_slug, if: -> { slug.blank? || name_changed? }
+  before_validation :generate_slug, if: -> { slug.blank? }
 
   scope :search_by_name, ->(query) {
     where("name ILIKE ?", "%#{query}%")
