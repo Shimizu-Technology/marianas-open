@@ -146,7 +146,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-100 flex items-start justify-center pt-[10vh] sm:pt-[15vh] bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] sm:pt-[15vh] bg-black/60 backdrop-blur-sm"
       onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
     >
       <div
