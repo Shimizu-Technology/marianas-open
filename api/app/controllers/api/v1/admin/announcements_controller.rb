@@ -67,7 +67,12 @@ module Api
         end
 
         def deactivate_others(announcement)
-          Announcement.where.not(id: announcement.id).where(active: true).update_all(active: false)
+          now = Time.current
+          currently_live = Announcement.where(active: true)
+            .where.not(id: announcement.id)
+            .where("starts_at IS NULL OR starts_at <= ?", now)
+            .where("ends_at IS NULL OR ends_at >= ?", now)
+          currently_live.update_all(active: false, updated_at: now)
         end
       end
     end

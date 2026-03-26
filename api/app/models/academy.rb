@@ -13,7 +13,11 @@ class Academy < ApplicationRecord
   }
 
   scope :matching_name_or_alias, ->(name) {
-    where("LOWER(name) = LOWER(?) OR aliases @> ?", name.strip, [name.strip].to_json)
+    stripped = name.strip
+    where(
+      "LOWER(name) = LOWER(?) OR EXISTS (SELECT 1 FROM jsonb_array_elements_text(aliases) AS a WHERE LOWER(a) = LOWER(?))",
+      stripped, stripped
+    )
   }
 
   scope :with_competitors, -> { where(id: Competitor.where.not(academy_id: nil).select(:academy_id).distinct) }
