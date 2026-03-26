@@ -42,7 +42,14 @@ class AcademyLinker
 
     def find_or_create(name, country_code = nil)
       normalized = normalize(name)
-      return Academy.find_or_create_by!(name: "Independent") { |a| a.slug = "independent" } if normalized.blank?
+
+      if normalized.blank?
+        begin
+          return Academy.find_or_create_by!(name: "Independent") { |a| a.slug = "independent" }
+        rescue ActiveRecord::RecordNotUnique
+          return Academy.find_by!(name: "Independent")
+        end
+      end
 
       academy = Academy.where("LOWER(TRIM(name)) = ?", normalized).first
       return academy if academy

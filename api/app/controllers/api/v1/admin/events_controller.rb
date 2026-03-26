@@ -108,6 +108,8 @@ module Api
           )
           new_event.slug = generate_unique_slug(new_event.name)
 
+          acc_blobs = []
+
           ActiveRecord::Base.transaction do
             new_event.save!
 
@@ -129,24 +131,25 @@ module Api
               new_acc.translations = {}
               new_acc.translation_status = "untranslated"
               new_acc.save!
-              if acc.image.attached?
-                blob = acc.image.blob
-                new_acc.image.attach(
-                  io: blob.open,
-                  filename: blob.filename,
-                  content_type: blob.content_type
-                )
-              end
+              acc_blobs << [new_acc, acc.image.blob] if acc.image.attached?
             end
+          end
 
-            if @event.hero_image.attached?
-              blob = @event.hero_image.blob
-              new_event.hero_image.attach(
-                io: blob.open,
-                filename: blob.filename,
-                content_type: blob.content_type
-              )
-            end
+          acc_blobs.each do |new_acc, blob|
+            new_acc.image.attach(
+              io: blob.open,
+              filename: blob.filename,
+              content_type: blob.content_type
+            )
+          end
+
+          if @event.hero_image.attached?
+            blob = @event.hero_image.blob
+            new_event.hero_image.attach(
+              io: blob.open,
+              filename: blob.filename,
+              content_type: blob.content_type
+            )
           end
 
           render json: { event: new_event.reload.as_json }, status: :created
