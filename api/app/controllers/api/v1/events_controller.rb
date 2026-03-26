@@ -1,15 +1,17 @@
 module Api
   module V1
     class EventsController < ApplicationController
+      PUBLIC_STATUSES = %w[upcoming live completed cancelled].freeze
+
       def index
-        events = Event.where.not(status: "draft")
+        events = Event.where(status: PUBLIC_STATUSES)
                       .includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } }, { event_gallery_images: { image_attachment: :blob } })
                       .order(:date)
         render json: events
       end
 
       def show
-        event = Event.where.not(status: "draft")
+        event = Event.where(status: PUBLIC_STATUSES)
                      .includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } }, { event_gallery_images: { image_attachment: :blob } })
                      .find_by!(slug: params[:slug])
         render json: event

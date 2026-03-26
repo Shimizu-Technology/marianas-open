@@ -61,7 +61,7 @@ class AcademyLinker
         country_code: country
       )
     rescue ActiveRecord::RecordNotUnique
-      Academy.matching_name_or_alias(name).first!
+      Academy.matching_name_or_alias(name.strip.gsub(/\s+/, " ")).first!
     end
 
     private
