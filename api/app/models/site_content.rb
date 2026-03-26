@@ -21,6 +21,7 @@ class SiteContent < ApplicationRecord
 
   def enqueue_translation
     return if value_en.blank?
+    return if translation_status == "pending"
 
     service = GtTranslationService.new
     return unless service.configured?

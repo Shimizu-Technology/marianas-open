@@ -110,10 +110,15 @@ function CompetitorDetailModal({ competitorId, onClose }: { competitorId: number
   const { t } = useTranslation();
   const [detail, setDetail] = useState<CompetitorDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    api.getCompetitor(competitorId).then(setDetail).finally(() => setLoading(false));
+    setError(false);
+    api.getCompetitor(competitorId)
+      .then(setDetail)
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   }, [competitorId]);
 
   return (
@@ -127,7 +132,14 @@ function CompetitorDetailModal({ competitorId, onClose }: { competitorId: number
         onClick={e => e.stopPropagation()}
         className="bg-navy-900 border border-white/10 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
       >
-        {loading || !detail ? (
+        {error ? (
+          <div className="flex flex-col items-center justify-center h-64 gap-3">
+            <p className="text-sm text-red-400">Failed to load competitor details.</p>
+            <button onClick={onClose} className="text-sm text-text-muted hover:text-text-primary transition-colors">
+              Close
+            </button>
+          </div>
+        ) : loading || !detail ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-6 h-6 text-gold animate-spin" />
           </div>
