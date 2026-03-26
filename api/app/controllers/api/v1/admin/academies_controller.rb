@@ -13,7 +13,7 @@ module Api
 
           total = scope.count
           page = (params[:page] || 1).to_i
-          per_page = [(params[:per_page] || 50).to_i, 100].min
+          per_page = (params[:per_page] || 500).to_i
 
           records = scope
             .joins(stats_join_sql)

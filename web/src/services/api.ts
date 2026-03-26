@@ -784,7 +784,7 @@ export const api = {
 
     // Academies
     getAcademies: (params?: Record<string, string>) => {
-      const query = params ? '?' + new URLSearchParams(params).toString() : '?per_page=500';
+      const query = params ? '?' + new URLSearchParams(params).toString() : '';
       return fetchApi<{ academies: Academy[]; total: number; page: number; per_page: number }>(`/api/v1/admin/academies${query}`, {}, true);
     },
     getAcademy: (id: number) => fetchApi<{ academy: AcademyDetail }>(`/api/v1/admin/academies/${id}`, {}, true),

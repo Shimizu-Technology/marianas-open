@@ -130,12 +130,22 @@ module Api
               new_acc.translation_status = "untranslated"
               new_acc.save!
               if acc.image.attached?
-                new_acc.image.attach(acc.image.blob)
+                blob = acc.image.blob
+                new_acc.image.attach(
+                  io: blob.open,
+                  filename: blob.filename,
+                  content_type: blob.content_type
+                )
               end
             end
 
             if @event.hero_image.attached?
-              new_event.hero_image.attach(@event.hero_image.blob)
+              blob = @event.hero_image.blob
+              new_event.hero_image.attach(
+                io: blob.open,
+                filename: blob.filename,
+                content_type: blob.content_type
+              )
             end
           end
 
