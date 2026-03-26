@@ -8,6 +8,7 @@ Rails.application.routes.draw do
       end
       resources :sponsors, only: [:index]
       resources :competitors, only: [:index, :show]
+      resources :academies, only: [:index, :show]
       resources :videos, only: [:index, :show]
       resources :site_contents, only: [:index], path: 'site-contents'
       resources :site_images, only: [:index], path: 'site-images'
@@ -30,6 +31,7 @@ Rails.application.routes.draw do
             get :import_results_preview
             post :import_results
             post :retranslate
+            post :clone
           end
           resources :event_results, only: [:index, :create, :update, :destroy], path: 'results' do
             collection do
@@ -59,7 +61,16 @@ Rails.application.routes.draw do
             post :upload_photo
           end
         end
-        resources :site_contents, path: 'site-contents'
+        resources :academies, only: [:index, :show, :update, :destroy] do
+          member do
+            post :upload_logo
+          end
+        end
+        resources :site_contents, path: 'site-contents' do
+          member do
+            post :retranslate
+          end
+        end
         resources :site_images, path: 'site-images' do
           member do
             post :upload

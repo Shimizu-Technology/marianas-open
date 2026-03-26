@@ -12,6 +12,7 @@ import SEO from '../components/SEO';
 import { useEvents, useSponsors } from '../hooks/useApi';
 import { getEventHeroImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 import { useTranslatedField } from '../hooks/useTranslatedField';
+import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -57,6 +58,7 @@ export default function EventDetailPage() {
   const { events, loading } = useEvents();
 
   const { sponsors } = useSponsors();
+  const { images: siteImages } = useSiteImages();
 
   const { tf, tfa } = useTranslatedField();
 
@@ -203,7 +205,8 @@ export default function EventDetailPage() {
     ? `${eventName} — ${formatEventDate(mainEvent)} — ${eventVenueName}`
     : t('event.shareText');
 
-  const heroImageUrl = getEventHeroImage(mainEvent?.slug || 'marianas-open-2026', mainEvent?.hero_image_url ?? null);
+  const eventDefaultImage = getImageUrl(siteImages, 'event_default', '', 0) || null;
+  const heroImageUrl = getEventHeroImage(mainEvent?.slug || 'marianas-open-2026', mainEvent?.hero_image_url ?? null, eventDefaultImage);
   const canonicalPath = mainEvent?.slug
     ? `/events/${mainEvent.slug}`
     : slug
@@ -1063,7 +1066,11 @@ export default function EventDetailPage() {
 
       {/* Results Section — only for completed events */}
       {isCompleted && mainEvent && (
-        <EventResultsSection eventSlug={mainEvent.slug} />
+        <EventResultsSection
+          eventSlug={mainEvent.slug}
+          sourceUrls={mainEvent.asjjf_source_urls}
+          importedAt={mainEvent.results_imported_at}
+        />
       )}
 
       {/* Share */}

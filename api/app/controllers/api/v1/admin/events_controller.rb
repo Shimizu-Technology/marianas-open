@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_staff!
-        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :import_results_preview, :import_results, :retranslate]
+        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :import_results_preview, :import_results, :retranslate, :clone]
 
         def index
           org = Organization.first
@@ -91,6 +91,74 @@ module Api
           render json: { message: "Translation enqueued for event and child records", event: @event.reload.as_json }
         end
 
+        # POST /api/v1/admin/events/:id/clone
+        def clone
+          new_event = @event.dup
+          new_event.assign_attributes(
+            name: "#{@event.name} (Copy)",
+            slug: nil,
+            status: "draft",
+            date: nil,
+            end_date: nil,
+            is_main_event: false,
+            results_imported_at: nil,
+            asjjf_event_ids: [],
+            translations: {},
+            translation_status: "untranslated"
+          )
+          new_event.slug = generate_unique_slug(new_event.name)
+
+          acc_blobs = []
+
+          ActiveRecord::Base.transaction do
+            new_event.save!
+
+            @event.event_schedule_items.each do |item|
+              new_item = item.dup
+              new_item.event = new_event
+              new_item.save!
+            end
+
+            @event.prize_categories.each do |cat|
+              new_cat = cat.dup
+              new_cat.event = new_event
+              new_cat.save!
+            end
+
+            @event.event_accommodations.each do |acc|
+              new_acc = acc.dup
+              new_acc.event = new_event
+              new_acc.translations = {}
+              new_acc.translation_status = "untranslated"
+              new_acc.save!
+              acc_blobs << [new_acc, acc.image.blob] if acc.image.attached?
+            end
+          end
+
+          acc_blobs.each do |new_acc, blob|
+            new_acc.image.attach(
+              io: blob.open,
+              filename: blob.filename,
+              content_type: blob.content_type
+            )
+          end
+
+          if @event.hero_image.attached?
+            blob = @event.hero_image.blob
+            new_event.hero_image.attach(
+              io: blob.open,
+              filename: blob.filename,
+              content_type: blob.content_type
+            )
+          end
+
+          render json: { event: new_event.reload.as_json }, status: :created
+        rescue ActiveRecord::RecordInvalid => e
+          render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+        rescue ActiveRecord::RecordNotUnique
+          render json: { errors: ["An event with that slug already exists. Please try again."] }, status: :conflict
+        end
+
         private
 
         def set_event
@@ -125,6 +193,17 @@ module Api
           # Allow passing IDs in request body or use event's stored IDs
           ids = params[:asjjf_event_ids] || @event.asjjf_event_ids
           Array(ids).map(&:to_i).reject(&:zero?)
+        end
+
+        def generate_unique_slug(name)
+          base = name.to_s.parameterize
+          slug = base
+          counter = 1
+          while Event.exists?(slug: slug)
+            slug = "#{base}-#{counter}"
+            counter += 1
+          end
+          slug
         end
       end
     end

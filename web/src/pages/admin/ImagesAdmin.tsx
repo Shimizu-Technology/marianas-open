@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Eye, EyeOff, GripVertical, X, Save, Image as ImageIcon } from 'lucide-react';
 import { api } from '../../services/api';
@@ -6,11 +6,10 @@ import type { SiteImage } from '../../services/api';
 import ImageUpload from '../../components/ImageUpload';
 
 const PLACEMENTS = [
-  { value: 'hero', label: 'Hero Background', description: 'Main hero section background' },
-  { value: 'gallery', label: 'Gallery', description: 'Bento grid and gallery sections' },
-  { value: 'about', label: 'About', description: 'About page images' },
-  { value: 'event_default', label: 'Event Default', description: 'Default event hero image' },
-  { value: 'sponsor_default', label: 'Sponsor Default', description: 'Default sponsor logo' },
+  { value: 'hero', label: 'Hero Background', description: 'Homepage full-screen hero background image' },
+  { value: 'featured', label: 'Featured Backgrounds', description: 'Background images for homepage stats tiles and About page image break' },
+  { value: 'about', label: 'About Hero', description: 'About page hero image' },
+  { value: 'event_default', label: 'Event Default', description: 'Fallback hero for events without their own image' },
 ] as const;
 
 interface EditingSiteImage {
@@ -26,7 +25,7 @@ interface EditingSiteImage {
 const emptyForm: EditingSiteImage = {
   title: '',
   alt_text: '',
-  placement: 'gallery',
+  placement: 'featured',
   sort_order: 0,
   active: true,
   caption: '',
@@ -41,6 +40,19 @@ export default function ImagesAdmin() {
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>('all');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const successTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    return () => { clearTimeout(successTimerRef.current); };
+  }, []);
+
+  const showSuccess = (msg: string) => {
+    clearTimeout(successTimerRef.current);
+    setSuccess(msg);
+    successTimerRef.current = setTimeout(() => setSuccess(''), 3000);
+  };
 
   const fetchImages = useCallback(async () => {
     try {
@@ -57,9 +69,9 @@ export default function ImagesAdmin() {
 
   const handleSave = async () => {
     setSaving(true);
+    setError('');
     try {
       if (editing.id) {
-        // Update metadata
         await api.admin.updateSiteImage(editing.id, {
           title: editing.title,
           alt_text: editing.alt_text,
@@ -68,12 +80,10 @@ export default function ImagesAdmin() {
           active: editing.active,
           caption: editing.caption,
         });
-        // Upload new image if changed
         if (pendingFile) {
           await api.admin.uploadSiteImage(editing.id, pendingFile);
         }
       } else {
-        // Create new
         const formData = new FormData();
         formData.append('title', editing.title);
         formData.append('alt_text', editing.alt_text);
@@ -89,30 +99,35 @@ export default function ImagesAdmin() {
       setShowForm(false);
       setEditing(emptyForm);
       setPendingFile(null);
+      showSuccess(editing.id ? 'Image updated' : 'Image created');
       await fetchImages();
     } catch (err) {
-      console.error('Failed to save:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save image');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: number) => {
+    setError('');
     try {
       await api.admin.deleteSiteImage(id);
       setDeleteConfirm(null);
+      showSuccess('Image deleted');
       await fetchImages();
     } catch (err) {
-      console.error('Failed to delete:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete image');
+      setDeleteConfirm(null);
     }
   };
 
   const handleToggleActive = async (image: SiteImage) => {
+    setError('');
     try {
       await api.admin.updateSiteImage(image.id, { active: !image.active });
       await fetchImages();
     } catch (err) {
-      console.error('Failed to toggle:', err);
+      setError(err instanceof Error ? err.message : 'Failed to toggle image');
     }
   };
 
@@ -131,7 +146,7 @@ export default function ImagesAdmin() {
   };
 
   const openNew = () => {
-    setEditing({ ...emptyForm, placement: filter !== 'all' ? filter : 'gallery' });
+    setEditing({ ...emptyForm, placement: filter !== 'all' ? filter : 'featured' });
     setPendingFile(null);
     setShowForm(true);
   };
@@ -169,6 +184,19 @@ export default function ImagesAdmin() {
           Add Image
         </button>
       </div>
+
+      <AnimatePresence>
+        {success && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="px-4 py-2 bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
+          >{success}</motion.div>
+        )}
+        {error && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+          >{error}</motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Filter tabs */}
       <div className="flex gap-1 border-b border-white/5 pb-px">

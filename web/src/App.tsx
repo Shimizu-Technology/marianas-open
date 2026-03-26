@@ -8,6 +8,7 @@ import MobileLanguageFAB from './components/MobileLanguageFAB';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { PostHogPageView } from './providers/PostHogProvider';
+import { OrganizationProvider } from './contexts/OrganizationContext';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
@@ -17,6 +18,7 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 const RankingsPage = lazy(() => import('./pages/RankingsPage'));
 const CompetitorProfilePage = lazy(() => import('./pages/CompetitorProfilePage'));
 const CompetitorsPage = lazy(() => import('./pages/CompetitorsPage'));
+const TeamsPage = lazy(() => import('./pages/TeamsPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const RulesPage = lazy(() => import('./pages/RulesPage'));
 const PastEventsPage = lazy(() => import('./pages/PastEventsPage'));
@@ -33,6 +35,7 @@ const ImagesAdmin = lazy(() => import('./pages/admin/ImagesAdmin'));
 const SettingsAdmin = lazy(() => import('./pages/admin/SettingsAdmin'));
 const ContentAdmin = lazy(() => import('./pages/admin/ContentAdmin'));
 const CompetitorsAdmin = lazy(() => import('./pages/admin/CompetitorsAdmin'));
+const AcademiesAdmin = lazy(() => import('./pages/admin/AcademiesAdmin'));
 const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
 
 function ScrollToTop() {
@@ -63,6 +66,7 @@ function AnimatedRoutes() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/rankings" element={<RankingsPage />} />
             <Route path="/competitors" element={<CompetitorsPage />} />
+            <Route path="/teams" element={<TeamsPage />} />
             <Route path="/competitors/profile" element={<CompetitorProfilePage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/rules" element={<RulesPage />} />
@@ -100,6 +104,7 @@ export default function App() {
           <Route path="sponsors" element={<SponsorsAdmin />} />
           <Route path="videos" element={<VideosAdmin />} />
           <Route path="competitors" element={<CompetitorsAdmin />} />
+          <Route path="academies" element={<AcademiesAdmin />} />
           <Route path="images" element={<ImagesAdmin />} />
           <Route
             path="users"
@@ -117,15 +122,17 @@ export default function App() {
         <Route
           path="*"
           element={
-            <div className="min-h-screen bg-navy-900 text-text-primary">
-              <Header />
-              <LiveStreamBanner />
-              <main>
-                <AnimatedRoutes />
-              </main>
-              <Footer />
-              <MobileLanguageFAB />
-            </div>
+            <OrganizationProvider>
+              <div className="min-h-screen bg-navy-900 text-text-primary">
+                <Header />
+                <LiveStreamBanner />
+                <main>
+                  <AnimatedRoutes />
+                </main>
+                <Footer />
+                <MobileLanguageFAB />
+              </div>
+            </OrganizationProvider>
           }
         />
       </Routes>

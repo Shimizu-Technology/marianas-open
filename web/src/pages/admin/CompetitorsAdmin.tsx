@@ -1,8 +1,9 @@
-import { useEffect, useState, useCallback } from 'react'
-import { Users, Plus, Pencil, Trash2, X, Loader2, Save, Search } from 'lucide-react'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Users, Pencil, Trash2, X, Loader2, Save, Search, Medal, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Trophy } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
-import type { Competitor, CompetitorFormData } from '../../services/api'
+import type { Competitor, CompetitorFormData, CompetitorDetail, CompetitorProfileResult } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
 import { useEditingParam } from '../../hooks/useEditingParam'
 
@@ -23,13 +24,60 @@ const BELT_COLORS: Record<string, string> = {
 const emptyForm: CompetitorFormData = {
   first_name: '', last_name: '', nickname: '', country_code: '', belt_rank: '',
   weight_class: '', academy: '', bio: '', instagram_url: '', youtube_url: '',
-  wins: 0, losses: 0, draws: 0, gold_medals: 0, silver_medals: 0, bronze_medals: 0,
+  wins: 0, losses: 0, draws: 0,
+}
+
+const PAGE_SIZE = 50
+type SortField = 'name' | 'points' | 'events' | 'gold';
+
+function ResultsTable({ results }: { results: CompetitorProfileResult[] }) {
+  const navigate = useNavigate()
+  if (!results.length) return <p className="text-xs text-text-muted italic">No tournament results linked.</p>
+  return (
+    <div className="max-h-72 overflow-y-auto border border-white/5">
+      <table className="w-full text-xs">
+        <thead className="bg-surface sticky top-0 z-10">
+          <tr className="text-text-muted uppercase tracking-wider border-b border-white/5">
+            <th className="text-left px-3 py-2 font-medium">Event</th>
+            <th className="text-left px-3 py-2 font-medium">Division</th>
+            <th className="text-center px-3 py-2 font-medium">Place</th>
+            <th className="text-right px-3 py-2 font-medium">Points</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/5">
+          {results.map((r, i) => (
+            <tr key={i} className="hover:bg-white/[0.02]">
+              <td className="px-3 py-2">
+                <button
+                  onClick={() => navigate(`/admin/events/${r.event_id}/results`)}
+                  className="text-text-primary font-medium hover:text-gold transition-colors text-left"
+                >
+                  {r.event_name}
+                </button>
+              </td>
+              <td className="px-3 py-2 text-text-secondary truncate max-w-[200px]">{r.division}</td>
+              <td className="px-3 py-2 text-center">
+                <span className={`font-semibold ${r.placement === 1 ? 'text-yellow-400' : r.placement === 2 ? 'text-gray-300' : r.placement === 3 ? 'text-orange-400' : 'text-text-secondary'}`}>
+                  {r.placement === 1 ? '1st' : r.placement === 2 ? '2nd' : r.placement === 3 ? '3rd' : `${r.placement}th`}
+                </span>
+              </td>
+              <td className="px-3 py-2 text-right text-gold font-mono">+{r.points_earned}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
 }
 
 export default function CompetitorsAdmin() {
+  const navigate = useNavigate()
   const [competitors, setCompetitors] = useState<Competitor[]>([])
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useEditingParam()
+  const [editDetail, setEditDetail] = useState<CompetitorDetail | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
 
   const [form, setForm] = useState<CompetitorFormData>(emptyForm)
   const [saving, setSaving] = useState(false)
@@ -37,24 +85,45 @@ export default function CompetitorsAdmin() {
   const [success, setSuccess] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const [sortField, setSortField] = useState<SortField>('points')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [page, setPage] = useState(1)
+
+  const handleSearchChange = (val: string) => {
+    setSearchInput(val)
+    clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(() => setSearchQuery(val), 350)
+  }
 
   const load = useCallback(async () => {
     try {
-      const res = await api.admin.getCompetitors()
+      const params: Record<string, string> = {
+        page: String(page),
+        per_page: String(PAGE_SIZE),
+        sort_by: sortField,
+        sort_dir: sortDir,
+      }
+      if (searchQuery) params.search = searchQuery
+      const res = await api.admin.getCompetitors(params)
       setCompetitors(res.competitors)
+      setTotal(res.total)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [page, sortField, sortDir, searchQuery])
 
   useEffect(() => { load() }, [load])
 
+  // When editing changes, load the competitor detail (with results)
   useEffect(() => {
     if (editing === 'new') {
       setForm(emptyForm)
-    } else if (typeof editing === 'number' && competitors.length > 0) {
+      setEditDetail(null)
+    } else if (typeof editing === 'number') {
       const c = competitors.find(x => x.id === editing)
       if (c) {
         setForm({
@@ -63,9 +132,15 @@ export default function CompetitorsAdmin() {
           weight_class: c.weight_class || '', academy: c.academy || '', bio: c.bio || '',
           instagram_url: c.instagram_url || '', youtube_url: c.youtube_url || '',
           wins: c.wins, losses: c.losses, draws: c.draws,
-          gold_medals: c.gold_medals, silver_medals: c.silver_medals, bronze_medals: c.bronze_medals,
         })
       }
+      setDetailLoading(true)
+      api.admin.getCompetitor(editing)
+        .then(res => setEditDetail(res.competitor))
+        .catch(() => setEditDetail(null))
+        .finally(() => setDetailLoading(false))
+    } else {
+      setEditDetail(null)
     }
   }, [editing, competitors])
 
@@ -76,9 +151,7 @@ export default function CompetitorsAdmin() {
         const res = await api.admin.createCompetitor(form)
         setSuccess('Competitor created')
         await load()
-        if (res.competitor?.id) {
-          setEditing(res.competitor.id)
-        }
+        if (res.competitor?.id) setEditing(res.competitor.id)
       } else if (typeof editing === 'number') {
         await api.admin.updateCompetitor(editing, form)
         setSuccess('Competitor updated')
@@ -94,6 +167,7 @@ export default function CompetitorsAdmin() {
     try {
       await api.admin.deleteCompetitor(id)
       setDeleteConfirm(null); setSuccess('Competitor deleted'); await load()
+      if (editing === id) setEditing(null)
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) { setError(err instanceof Error ? err.message : 'Delete failed') }
   }
@@ -106,9 +180,19 @@ export default function CompetitorsAdmin() {
 
   const currentCompetitor = typeof editing === 'number' ? competitors.find(c => c.id === editing) : null
 
-  const filtered = searchQuery
-    ? competitors.filter(c => `${c.first_name} ${c.last_name} ${c.academy || ''}`.toLowerCase().includes(searchQuery.toLowerCase()))
-    : competitors
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortField(field); setSortDir('desc') }
+    setPage(1)
+  }
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return null
+    return sortDir === 'desc' ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />
+  }
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  useEffect(() => { setPage(1) }, [searchQuery])
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
@@ -120,16 +204,17 @@ export default function CompetitorsAdmin() {
         <div className="flex items-center gap-3">
           <Users className="w-6 h-6 text-gold" />
           <h1 className="font-heading text-2xl font-bold text-text-primary">Competitors</h1>
-          <span className="text-sm text-text-muted">({competitors.length})</span>
+          <span className="text-sm text-text-muted">({total})</span>
         </div>
-        {!editing && (
-          <button
-            onClick={() => { setForm(emptyForm); setEditing('new'); setError('') }}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
-          >
-            <Plus className="w-4 h-4" /> Add Competitor
-          </button>
-        )}
+      </div>
+
+      <div className="mb-4 p-4 bg-surface border border-white/5 text-xs text-text-secondary leading-relaxed">
+        <p>
+          <strong className="text-text-primary">Competitors are auto-populated from tournament results.</strong>{' '}
+          When event results are imported from ASJJF, competitor profiles are automatically created and linked.
+          Medals and points are computed from actual tournament placements. You can enrich profiles by adding
+          photos, bios, social links, and correcting name spellings.
+        </p>
       </div>
 
       <AnimatePresence>
@@ -149,13 +234,58 @@ export default function CompetitorsAdmin() {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-surface border border-white/5">
           <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
             <h2 className="font-heading text-sm font-semibold text-text-primary">
-              {editing === 'new' ? 'New Competitor' : 'Edit Competitor'}
+              {editing === 'new' ? 'Add Competitor' : 'Edit Competitor Profile'}
             </h2>
             <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
               <X className="w-4 h-4" />
             </button>
           </div>
+
+          {/* Computed stats (read-only) for existing competitors */}
+          {currentCompetitor && (currentCompetitor.total_points > 0 || currentCompetitor.results_count > 0) && (
+            <div className="px-5 py-3 bg-white/[0.02] border-b border-white/5">
+              <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Tournament Stats (computed from results)</p>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                <div className="text-center p-2 bg-white/[0.03] border border-white/5">
+                  <div className="text-sm font-bold text-gold font-mono">{currentCompetitor.total_points}</div>
+                  <div className="text-[10px] text-text-muted uppercase">Points</div>
+                </div>
+                <div className="text-center p-2 bg-white/[0.03] border border-white/5">
+                  <div className="text-sm font-bold text-yellow-400">{currentCompetitor.gold_medals}</div>
+                  <div className="text-[10px] text-text-muted uppercase">Gold</div>
+                </div>
+                <div className="text-center p-2 bg-white/[0.03] border border-white/5">
+                  <div className="text-sm font-bold text-gray-300">{currentCompetitor.silver_medals}</div>
+                  <div className="text-[10px] text-text-muted uppercase">Silver</div>
+                </div>
+                <div className="text-center p-2 bg-white/[0.03] border border-white/5">
+                  <div className="text-sm font-bold text-orange-400">{currentCompetitor.bronze_medals}</div>
+                  <div className="text-[10px] text-text-muted uppercase">Bronze</div>
+                </div>
+                <div className="text-center p-2 bg-white/[0.03] border border-white/5">
+                  <div className="text-sm font-bold text-text-primary">{currentCompetitor.events_competed}</div>
+                  <div className="text-[10px] text-text-muted uppercase">Events</div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="p-5 space-y-4">
+            {/* Tournament Results */}
+            {typeof editing === 'number' && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy className="w-4 h-4 text-gold" />
+                  <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">Tournament Results</label>
+                </div>
+                {detailLoading ? (
+                  <div className="flex items-center gap-2 py-4 text-text-muted text-xs"><Loader2 className="w-3 h-3 animate-spin" /> Loading results...</div>
+                ) : (
+                  <ResultsTable results={editDetail?.results || []} />
+                )}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">First Name *</label>
@@ -235,23 +365,6 @@ export default function CompetitorsAdmin() {
                   className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Gold Medals</label>
-                <input type="number" value={form.gold_medals} onChange={e => setForm(p => ({ ...p, gold_medals: parseInt(e.target.value, 10) || 0 }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Silver Medals</label>
-                <input type="number" value={form.silver_medals} onChange={e => setForm(p => ({ ...p, silver_medals: parseInt(e.target.value, 10) || 0 }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Bronze Medals</label>
-                <input type="number" value={form.bronze_medals} onChange={e => setForm(p => ({ ...p, bronze_medals: parseInt(e.target.value, 10) || 0 }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-              </div>
-            </div>
             <div>
               <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Bio</label>
               <textarea value={form.bio} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} rows={3}
@@ -277,19 +390,38 @@ export default function CompetitorsAdmin() {
           <div className="mb-4">
             <div className="relative max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-              <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              <input type="text" value={searchInput} onChange={e => handleSearchChange(e.target.value)}
                 placeholder="Search competitors..."
                 className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
             </div>
           </div>
 
-          <div className="bg-surface border border-white/5">
-            {filtered.length === 0 ? (
+          <div className="bg-surface border border-white/5 overflow-x-auto">
+            {/* Table header */}
+            <div className="px-5 py-2.5 border-b border-white/5 hidden sm:grid sm:grid-cols-[1fr_100px_60px_60px_60px_60px_60px] gap-2 text-[10px] text-text-muted uppercase tracking-wider">
+              <button onClick={() => toggleSort('name')} className="flex items-center gap-1 text-left hover:text-text-primary transition-colors">
+                Athlete <SortIcon field="name" />
+              </button>
+              <button onClick={() => toggleSort('points')} className="flex items-center gap-1 text-right hover:text-text-primary transition-colors">
+                Points <SortIcon field="points" />
+              </button>
+              <button onClick={() => toggleSort('gold')} className="flex items-center gap-1 text-center hover:text-text-primary transition-colors">
+                <Medal className="w-3 h-3 text-yellow-400" /> <SortIcon field="gold" />
+              </button>
+              <span className="text-center"><Medal className="w-3 h-3 text-gray-300 inline" /></span>
+              <span className="text-center"><Medal className="w-3 h-3 text-orange-400 inline" /></span>
+              <button onClick={() => toggleSort('events')} className="flex items-center gap-1 text-center hover:text-text-primary transition-colors">
+                Events <SortIcon field="events" />
+              </button>
+              <span></span>
+            </div>
+
+            {competitors.length === 0 ? (
               <div className="p-8 text-center text-text-muted text-sm">No competitors found.</div>
             ) : (
               <div className="divide-y divide-white/5">
-                {filtered.map(c => (
-                  <div key={c.id} className="px-5 py-3 flex items-center justify-between">
+                {competitors.map(c => (
+                  <div key={c.id} className="px-5 py-3 sm:grid sm:grid-cols-[1fr_100px_60px_60px_60px_60px_60px] gap-2 items-center">
                     <div className="flex items-center gap-3 min-w-0">
                       {c.photo_url ? (
                         <img src={c.photo_url} alt={c.full_name} className="w-8 h-8 object-cover rounded-full shrink-0" />
@@ -300,27 +432,41 @@ export default function CompetitorsAdmin() {
                       )}
                       <div className="min-w-0">
                         <div className="text-sm text-text-primary font-medium truncate">{c.first_name} {c.last_name}</div>
-                        <div className="text-xs text-text-muted flex items-center gap-2">
+                        <div className="text-xs text-text-muted flex items-center gap-1.5 truncate">
                           {c.belt_rank && <span className={BELT_COLORS[c.belt_rank]}>{c.belt_rank}</span>}
-                          {c.weight_class && <span>{c.weight_class}</span>}
-                          {c.academy && <span>· {c.academy}</span>}
+                          {c.academy && (
+                            c.academy_id ? (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); navigate(`/admin/academies?edit=${c.academy_id}`) }}
+                                className="truncate hover:text-gold transition-colors"
+                              >
+                                · {c.academy}
+                              </button>
+                            ) : (
+                              <span className="truncate">· {c.academy}</span>
+                            )
+                          )}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs text-text-muted font-mono hidden sm:block">{c.wins}W-{c.losses}L-{c.draws}D</span>
+                    <div className="text-sm font-mono text-gold font-semibold text-right hidden sm:block">{c.total_points || 0}</div>
+                    <div className="text-sm text-yellow-400 text-center hidden sm:block">{c.gold_medals || 0}</div>
+                    <div className="text-sm text-gray-300 text-center hidden sm:block">{c.silver_medals || 0}</div>
+                    <div className="text-sm text-orange-400 text-center hidden sm:block">{c.bronze_medals || 0}</div>
+                    <div className="text-sm text-text-secondary text-center hidden sm:block">{c.events_competed || 0}</div>
+
+                    {/* Mobile stats */}
+                    <div className="flex items-center gap-3 mt-1 sm:hidden text-xs text-text-muted">
+                      <span className="text-gold font-mono">{c.total_points || 0} pts</span>
+                      {(c.gold_medals || 0) > 0 && <span className="text-yellow-400">{c.gold_medals}G</span>}
+                      {(c.silver_medals || 0) > 0 && <span className="text-gray-300">{c.silver_medals}S</span>}
+                      {(c.bronze_medals || 0) > 0 && <span className="text-orange-400">{c.bronze_medals}B</span>}
+                      <span>{c.events_competed || 0} events</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 justify-end mt-1 sm:mt-0">
                       <button
-                        onClick={() => {
-                          setForm({
-                            first_name: c.first_name, last_name: c.last_name, nickname: c.nickname || '',
-                            country_code: c.country_code || '', belt_rank: c.belt_rank || '',
-                            weight_class: c.weight_class || '', academy: c.academy || '', bio: c.bio || '',
-                            instagram_url: c.instagram_url || '', youtube_url: c.youtube_url || '',
-                            wins: c.wins, losses: c.losses, draws: c.draws,
-                            gold_medals: c.gold_medals, silver_medals: c.silver_medals, bronze_medals: c.bronze_medals,
-                          })
-                          setEditing(c.id); setError('')
-                        }}
+                        onClick={() => { setEditing(c.id); setError('') }}
                         className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                       ><Pencil className="w-3.5 h-3.5" /></button>
                       <button onClick={() => setDeleteConfirm(c.id)}
@@ -329,6 +475,43 @@ export default function CompetitorsAdmin() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-xs text-text-muted">
+              Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total} competitors
+            </p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                  className="p-1.5 text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                  let pageNum: number
+                  if (totalPages <= 7) {
+                    pageNum = i + 1
+                  } else if (page <= 4) {
+                    pageNum = i + 1
+                  } else if (page >= totalPages - 3) {
+                    pageNum = totalPages - 6 + i
+                  } else {
+                    pageNum = page - 3 + i
+                  }
+                  return (
+                    <button key={pageNum} onClick={() => setPage(pageNum)}
+                      className={`w-7 h-7 text-xs transition-colors ${page === pageNum ? 'bg-gold/15 text-gold font-semibold' : 'text-text-muted hover:text-text-primary'}`}>
+                      {pageNum}
+                    </button>
+                  )
+                })}
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                  className="p-1.5 text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             )}
           </div>
@@ -342,7 +525,8 @@ export default function CompetitorsAdmin() {
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
               onClick={e => e.stopPropagation()} className="bg-surface border border-white/10 p-6 max-w-sm w-full mx-4">
               <h3 className="font-heading text-lg font-semibold text-text-primary mb-2">Delete Competitor</h3>
-              <p className="text-sm text-text-secondary mb-5">Are you sure? This action cannot be undone.</p>
+              <p className="text-sm text-text-secondary mb-2">This will unlink all event results from this competitor. The results will remain but won't be associated with a profile.</p>
+              <p className="text-sm text-text-secondary mb-5">The competitor will be re-created next time results are imported.</p>
               <div className="flex gap-3 justify-end">
                 <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">Cancel</button>
                 <button onClick={() => handleDelete(deleteConfirm)} className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">Delete</button>

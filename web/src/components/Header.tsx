@@ -3,11 +3,17 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Menu, X } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useOrg } from '../contexts/OrganizationContext';
+
+const LOGO_FALLBACK = '/images/logos/mo-logo-white.png';
 
 export default function Header() {
   const { t } = useTranslation();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const org = useOrg();
+
+  const logoSrc = org.logo_url || LOGO_FALLBACK;
 
   const links = [
     { to: '/', label: t('nav.home') },
@@ -17,6 +23,7 @@ export default function Header() {
     { to: '/rules', label: t('nav.rules') },
     { to: '/rankings', label: t('nav.rankings') },
     { to: '/competitors', label: t('nav.competitors') },
+    { to: '/teams', label: 'Teams' },
     { to: '/watch', label: t('nav.watch') },
   ];
 
@@ -26,10 +33,10 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0">
-            <img src="/images/logos/mo-logo-white.png" alt="Marianas Open" className="h-10 w-10 object-contain" />
+            <img src={logoSrc} alt={org.name} className="h-10 w-10 object-contain" />
             <div className="hidden sm:block">
               <span className="text-sm font-bold tracking-wider text-text-primary font-heading uppercase">
-                Marianas Open
+                {org.name}
               </span>
             </div>
           </Link>

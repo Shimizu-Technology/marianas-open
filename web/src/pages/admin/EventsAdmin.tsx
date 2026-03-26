@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw } from 'lucide-react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw, Copy } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -221,7 +221,7 @@ export default function EventsAdmin() {
           setForm(prev => ({ ...prev, translation_status: 'pending' }))
           setSuccess('Event saved — translating changes...')
           pollTranslationStatus(editing)
-        }
+      }
       }
       setPendingHeroImage(null)
       await loadEvents()
@@ -242,6 +242,19 @@ export default function EventsAdmin() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Delete failed')
+    }
+  }
+
+  const handleClone = async (id: number) => {
+    try {
+      const res = await api.admin.cloneEvent(id)
+      setSuccess(`Event cloned as "${res.event.name}"`)
+      await loadEvents()
+      setForm(eventToForm(res.event))
+      setEditing(res.event.id)
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Clone failed')
     }
   }
 
@@ -1344,6 +1357,13 @@ export default function EventsAdmin() {
                               <Trophy className="w-3.5 h-3.5" />
                             </Link>
                         <button
+                          onClick={() => handleClone(event.id)}
+                          className="p-1.5 text-text-muted hover:text-blue-400 transition-colors"
+                              title="Clone Event"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                        <button
                           onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
                           className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                               title="Edit"
@@ -1397,6 +1417,13 @@ export default function EventsAdmin() {
                         >
                           <Trophy className="w-3.5 h-3.5" />
                         </Link>
+                        <button
+                          onClick={() => handleClone(event.id)}
+                          className="p-1.5 text-text-muted hover:text-blue-400 transition-colors"
+                          title="Clone Event"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
                           className="p-1.5 text-text-muted hover:text-text-primary transition-colors"

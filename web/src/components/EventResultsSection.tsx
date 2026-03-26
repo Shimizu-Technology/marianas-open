@@ -268,7 +268,13 @@ function DivisionGroup({ division, isOpen, onToggle, index }: {
 }
 
 // --- Main Section ---
-export default function EventResultsSection({ eventSlug }: { eventSlug: string }) {
+interface EventResultsSectionProps {
+  eventSlug: string;
+  sourceUrls?: string[];
+  importedAt?: string | null;
+}
+
+export default function EventResultsSection({ eventSlug, sourceUrls, importedAt: _importedAt }: EventResultsSectionProps) {
   const { t } = useTranslation();
   const [results, setResults] = useState<EventResultDivision[]>([]);
   const [summary, setSummary] = useState<EventResultsSummary | null>(null);
@@ -481,6 +487,24 @@ export default function EventResultsSection({ eventSlug }: { eventSlug: string }
                 onToggle={() => toggleDivision(division.division)}
                 index={i}
               />
+            ))}
+          </div>
+        )}
+
+        {/* Data source attribution */}
+        {sourceUrls && sourceUrls.length > 0 && (
+          <div className="mt-8 flex items-center justify-center gap-2 text-xs text-text-muted">
+            <span>Results sourced from</span>
+            {sourceUrls.map((url, i) => (
+              <a
+                key={i}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gold/70 hover:text-gold underline transition-colors"
+              >
+                ASJJF.org{sourceUrls.length > 1 ? ` (${i + 1})` : ''}
+              </a>
             ))}
           </div>
         )}

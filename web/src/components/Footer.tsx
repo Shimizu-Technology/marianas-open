@@ -1,10 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Instagram, Facebook, Mail, Youtube } from 'lucide-react';
+import { Instagram, Facebook, Mail, Youtube, Phone, Globe } from 'lucide-react';
 import { YOUTUBE_CHANNEL_URL } from '../lib/seo';
+import { useOrg } from '../contexts/OrganizationContext';
+
+const LOGO_FALLBACK = '/images/logos/mo-logo-white.png';
 
 export default function Footer() {
   const { t } = useTranslation();
+  const org = useOrg();
+
+  const logoSrc = org.logo_url || LOGO_FALLBACK;
 
   return (
     <footer className="bg-surface border-t border-white/5">
@@ -13,9 +19,9 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img src="/images/logos/mo-logo-white.png" alt="Marianas Open" className="h-12 w-12 object-contain" />
+              <img src={logoSrc} alt={org.name} className="h-12 w-12 object-contain" />
               <span className="font-heading font-bold text-lg uppercase tracking-wider">
-                Marianas Open
+                {org.name}
               </span>
             </div>
             <p className="text-text-secondary text-sm max-w-xs">
@@ -29,22 +35,26 @@ export default function Footer() {
               {t('footer.followUs')}
             </h4>
             <div className="flex gap-4">
-              <a
-                href="https://instagram.com/themarianasopen"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-text-secondary hover:text-gold-500 transition-colors"
-              >
-                <Instagram size={20} />
-              </a>
-              <a
-                href="https://facebook.com/marianasopen"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-text-secondary hover:text-gold-500 transition-colors"
-              >
-                <Facebook size={20} />
-              </a>
+              {org.instagram_url && (
+                <a
+                  href={org.instagram_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-gold-500 transition-colors"
+                >
+                  <Instagram size={20} />
+                </a>
+              )}
+              {org.facebook_url && (
+                <a
+                  href={org.facebook_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-gold-500 transition-colors"
+                >
+                  <Facebook size={20} />
+                </a>
+              )}
               <a
                 href={YOUTUBE_CHANNEL_URL}
                 target="_blank"
@@ -53,6 +63,16 @@ export default function Footer() {
               >
                 <Youtube size={20} />
               </a>
+              {org.website_url && (
+                <a
+                  href={org.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-gold-500 transition-colors"
+                >
+                  <Globe size={20} />
+                </a>
+              )}
             </div>
           </div>
 
@@ -61,19 +81,29 @@ export default function Footer() {
             <h4 className="font-heading font-semibold text-sm uppercase tracking-wider text-gold-500">
               {t('footer.contact')}
             </h4>
-            <a
-              href="mailto:moguam@marianasopen.com"
-              className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
-            >
-              <Mail size={16} />
-              moguam@marianasopen.com
-            </a>
-            <p className="text-sm text-text-secondary">(671) 777-9044</p>
+            {org.contact_email && (
+              <a
+                href={`mailto:${org.contact_email}`}
+                className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+              >
+                <Mail size={16} />
+                {org.contact_email}
+              </a>
+            )}
+            {org.phone && (
+              <a
+                href={`tel:${org.phone.replace(/[^\d+]/g, '')}`}
+                className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+              >
+                <Phone size={16} />
+                {org.phone}
+              </a>
+            )}
           </div>
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-muted">
-          <p>&copy; 2026 Marianas Open. {t('footer.rights')}</p>
+          <p>&copy; {new Date().getFullYear()} {org.name}. {t('footer.rights')}</p>
           <div className="flex items-center gap-4">
             <Link to="/rules" className="hover:text-text-secondary transition-colors">
               {t('footer.rules')}

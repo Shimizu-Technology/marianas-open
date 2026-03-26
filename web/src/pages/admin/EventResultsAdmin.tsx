@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   Trophy, Plus, Pencil, Trash2, X, Loader2, Save,
   ArrowLeft, Download, Upload, AlertTriangle, CheckCircle,
-  ChevronDown, ChevronUp, Search,
+  ChevronDown, ChevronUp, Search, ExternalLink,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
@@ -54,6 +54,8 @@ export default function EventResultsAdmin() {
 
   const [event, setEvent] = useState<Event | null>(null)
   const [results, setResults] = useState<EventResult[]>([])
+  const [totalResults, setTotalResults] = useState(0)
+  const [resultsPage, setResultsPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -77,20 +79,25 @@ export default function EventResultsAdmin() {
 
   const loadData = useCallback(async () => {
     try {
+      const params: Record<string, string> = { page: String(resultsPage), per_page: '100' }
+      if (searchQuery) params.search = searchQuery
+      if (filterBelt) params.belt_rank = filterBelt
       const [eventRes, resultsRes] = await Promise.all([
         api.admin.getEvent(numericEventId),
-        api.admin.getEventResults(numericEventId),
+        api.admin.getEventResults(numericEventId, params),
       ])
       setEvent(eventRes.event)
-      setResults(resultsRes)
+      setResults(resultsRes.results)
+      setTotalResults(resultsRes.total)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load event data')
     } finally {
       setLoading(false)
     }
-  }, [numericEventId])
+  }, [numericEventId, resultsPage, searchQuery, filterBelt])
 
   useEffect(() => { loadData() }, [loadData])
+  useEffect(() => { setResultsPage(1) }, [searchQuery, filterBelt])
 
   const showSuccess = (msg: string) => {
     setSuccess(msg)
@@ -201,27 +208,16 @@ export default function EventResultsAdmin() {
     setCollapsedDivisions(prev => ({ ...prev, [key]: !prev[key] }))
   }
 
-  // Filter results
-  const filteredResults = results.filter(r => {
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase()
-      if (!r.competitor_name.toLowerCase().includes(q) && !(r.academy || '').toLowerCase().includes(q)) {
-        return false
-      }
-    }
-    if (filterBelt && r.belt_rank !== filterBelt) return false
-    return true
-  })
+  // Server-side filtering via loadData; results are already filtered
 
-  const grouped = groupByDivision(filteredResults)
+  const grouped = groupByDivision(results)
   const divisionKeys = Object.keys(grouped).sort()
 
-  // Stats
-  const totalResults = results.length
   const goldCount = results.filter(r => r.placement === 1).length
   const silverCount = results.filter(r => r.placement === 2).length
   const bronzeCount = results.filter(r => r.placement === 3).length
   const divisionCount = new Set(results.map(r => r.division)).size
+  const resultsTotalPages = Math.ceil(totalResults / 100)
 
   if (loading) {
     return (
@@ -309,6 +305,14 @@ export default function EventResultsAdmin() {
         <StatCard label="Gold" value={goldCount} color="text-yellow-400" />
         <StatCard label="Silver" value={silverCount} color="text-gray-300" />
         <StatCard label="Bronze" value={bronzeCount} color="text-amber-600" />
+      </div>
+
+      <div className="mb-4 p-4 bg-surface border border-white/5 text-xs text-text-secondary leading-relaxed">
+        <p>
+          <strong className="text-text-primary">Tournament results for this event.</strong>{' '}
+          Import results automatically from ASJJF.org using the import tool below, or add individual results manually.
+          Imported results automatically create and link competitor profiles, academy records, and update rankings.
+        </p>
       </div>
 
       {/* ASJJF Import Section */}
@@ -432,6 +436,41 @@ export default function EventResultsAdmin() {
         )}
       </div>
 
+      {/* Data Source Info */}
+      {event.asjjf_source_urls && event.asjjf_source_urls.length > 0 && (
+        <div className="mb-6 bg-surface border border-white/5 p-4">
+          <div className="flex items-start gap-2 mb-2">
+            <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
+            <div>
+              <span className="text-sm font-medium text-text-primary">Data Source</span>
+              <span className="text-xs text-text-muted ml-2">
+                {event.results_imported_at
+                  ? `Last imported: ${formatDate(event.results_imported_at)}`
+                  : 'Not yet imported'
+                }
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-text-secondary mb-2">
+            Results are imported from ASJJF.org. You can verify the data by visiting the source pages below:
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {event.asjjf_source_urls.map((url, i) => (
+              <a
+                key={i}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.03] border border-white/10 text-xs text-gold hover:bg-gold/10 hover:border-gold/30 transition-colors"
+              >
+                <ExternalLink className="w-3 h-3" />
+                ASJJF Source {event.asjjf_source_urls.length > 1 ? `#${i + 1}` : ''}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Edit/Create Form */}
       <AnimatePresence>
         {editing !== null && (
@@ -526,7 +565,7 @@ export default function EventResultsAdmin() {
           <p className="text-text-muted text-sm">No results yet for this event.</p>
           <p className="text-text-muted text-xs mt-1">Use the ASJJF Import above or add results manually.</p>
         </div>
-      ) : filteredResults.length === 0 ? (
+      ) : results.length === 0 && (searchQuery || filterBelt) ? (
         <div className="bg-surface border border-white/5 p-8 text-center text-text-muted text-sm">
           No results match your filters.
         </div>
@@ -567,8 +606,34 @@ export default function EventResultsAdmin() {
                               {PLACEMENT_LABELS[result.placement]?.label || `#${result.placement}`}
                             </span>
                           </td>
-                          <td className="px-4 py-2.5 text-text-primary font-medium">{result.competitor_name}</td>
-                          <td className="px-4 py-2.5 text-text-secondary hidden sm:table-cell">{result.academy || '—'}</td>
+                          <td className="px-4 py-2.5">
+                            {result.competitor_id ? (
+                              <button
+                                onClick={() => navigate(`/admin/competitors?edit=${result.competitor_id}`)}
+                                className="text-text-primary font-medium hover:text-gold transition-colors text-left"
+                              >
+                                {result.competitor_name}
+                              </button>
+                            ) : (
+                              <span className="text-text-primary font-medium">{result.competitor_name}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2.5 hidden sm:table-cell">
+                            {result.academy ? (
+                              result.linked_academy_id ? (
+                                <button
+                                  onClick={() => navigate(`/admin/academies?edit=${result.linked_academy_id}`)}
+                                  className="text-text-secondary hover:text-gold transition-colors text-left"
+                                >
+                                  {result.academy}
+                                </button>
+                              ) : (
+                                <span className="text-text-secondary">{result.academy}</span>
+                              )
+                            ) : (
+                              <span className="text-text-secondary">&mdash;</span>
+                            )}
+                          </td>
                           <td className="px-4 py-2.5 text-text-secondary hidden md:table-cell">{result.country_code || '—'}</td>
                           <td className="px-4 py-2.5 text-text-secondary capitalize hidden md:table-cell">{result.belt_rank || '—'}</td>
                           <td className="px-4 py-2.5">
@@ -589,6 +654,32 @@ export default function EventResultsAdmin() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {resultsTotalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-xs text-text-muted">
+            Showing {(resultsPage - 1) * 100 + 1}–{Math.min(resultsPage * 100, totalResults)} of {totalResults} results
+          </p>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setResultsPage(p => Math.max(1, p - 1))}
+              disabled={resultsPage === 1}
+              className="px-3 py-1.5 text-xs text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors"
+            >
+              Previous
+            </button>
+            <span className="text-xs text-text-muted">Page {resultsPage} of {resultsTotalPages}</span>
+            <button
+              onClick={() => setResultsPage(p => Math.min(resultsTotalPages, p + 1))}
+              disabled={resultsPage === resultsTotalPages}
+              className="px-3 py-1.5 text-xs text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 

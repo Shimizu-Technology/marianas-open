@@ -22,10 +22,10 @@ export default function AboutPage() {
   const { images: siteImages } = useSiteImages();
 
   const heroFallback = '/images/venue-crowd.webp';
-  const galleryFallback = '/images/action-match-2.webp';
+  const featuredFallback = '/images/action-match-2.webp';
 
-  const heroImage = getImageUrl(siteImages, 'hero', heroFallback);
-  const galleryImage = getImageUrl(siteImages, 'gallery', galleryFallback);
+  const heroImage = getImageUrl(siteImages, 'about', heroFallback);
+  const featuredImage = getImageUrl(siteImages, 'featured', featuredFallback);
 
   const stats = [
     { value: t('stats.competitors'), label: t('stats.competitorsLabel'), icon: Users },
@@ -127,8 +127,8 @@ export default function AboutPage() {
       {/* Image Break */}
       <section className="relative h-64 sm:h-80 overflow-hidden">
         <ImageWithShimmer
-          src={galleryImage}
-          fallbackSrc={galleryFallback}
+          src={featuredImage}
+          fallbackSrc={featuredFallback}
           alt=""
           className="w-full h-full object-cover"
         />

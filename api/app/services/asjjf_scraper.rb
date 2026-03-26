@@ -47,7 +47,14 @@ class AsjjfScraper
       end
 
       EventResult.insert_all(batch)
+      event.update_column(:results_imported_at, Time.current)
     end
+
+    link_stats = CompetitorLinker.link_event(event)
+    Rails.logger.info("[AsjjfScraper] Linked #{link_stats[:linked]} results, created #{link_stats[:created]} new competitors")
+
+    academy_stats = AcademyLinker.link_event(event)
+    Rails.logger.info("[AsjjfScraper] Linked #{academy_stats[:linked]} competitors to academies, created #{academy_stats[:created]} new academies")
 
     {
       imported: all_results.size,

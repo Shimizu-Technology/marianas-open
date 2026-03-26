@@ -145,6 +145,15 @@ export default function UsersAdmin() {
         )}
       </div>
 
+      <div className="mb-4 p-4 bg-surface border border-white/5 text-xs text-text-secondary leading-relaxed">
+        <p>
+          <strong className="text-text-primary">Manage admin and staff access.</strong>{' '}
+          <strong>Admins</strong> have full access to all settings and configurations.{' '}
+          <strong>Staff</strong> can manage events, content, and competitors but cannot manage users or organization settings.{' '}
+          Invited users receive an email to set up their account.
+        </p>
+      </div>
+
       <AnimatePresence>
         {success && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}

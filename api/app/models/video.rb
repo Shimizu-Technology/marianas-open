@@ -18,10 +18,16 @@ class Video < ApplicationRecord
 
   def self.parse_youtube_video_id(url)
     return '' if url.blank?
-    if url.match?(/youtu\.be\//)
-      url.split('/').last.to_s.split('?').first.to_s
-    elsif url.match?(/[?&]v=/)
-      url.match(/[?&]v=([^&]+)/).to_a[1].to_s
+
+    uri = URI.parse(url) rescue nil
+    return '' unless uri
+
+    if uri.host&.match?(/youtu\.be/)
+      uri.path.delete_prefix('/').split('/').first.to_s.split('?').first.to_s
+    elsif uri.path.match?(%r{^/(live|shorts|embed|v)/})
+      uri.path.split('/')[2].to_s.split('?').first.to_s
+    elsif (match = url.match(/[?&]v=([^&]+)/))
+      match[1].to_s
     else
       ''
     end

@@ -10,9 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_25_011923) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_26_051843) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "academies", force: :cascade do |t|
+    t.string "country_code", limit: 2
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "facebook_url"
+    t.string "instagram_url"
+    t.string "location"
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.datetime "updated_at", null: false
+    t.string "website_url"
+    t.index ["country_code"], name: "index_academies_on_country_code"
+    t.index ["slug"], name: "index_academies_on_slug", unique: true
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
@@ -44,6 +59,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_011923) do
 
   create_table "competitors", force: :cascade do |t|
     t.string "academy"
+    t.bigint "academy_id"
     t.string "belt_rank"
     t.text "bio"
     t.integer "bronze_medals", default: 0, null: false
@@ -61,6 +77,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_011923) do
     t.string "weight_class"
     t.integer "wins", default: 0, null: false
     t.string "youtube_url"
+    t.index ["academy_id"], name: "index_competitors_on_academy_id"
     t.index ["belt_rank"], name: "index_competitors_on_belt_rank"
     t.index ["country_code"], name: "index_competitors_on_country_code"
     t.index ["weight_class"], name: "index_competitors_on_weight_class"
@@ -166,6 +183,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_011923) do
     t.string "registration_url"
     t.string "registration_url_gi"
     t.string "registration_url_nogi"
+    t.datetime "results_imported_at"
     t.text "schedule_note"
     t.string "slug"
     t.string "status"
@@ -220,6 +238,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_011923) do
     t.string "label"
     t.string "section"
     t.integer "sort_order", default: 0
+    t.string "translation_status", default: "pending", null: false
     t.datetime "updated_at", null: false
     t.text "value_en"
     t.text "value_ja"
@@ -298,6 +317,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_011923) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "competitors", "academies"
   add_foreign_key "event_accommodations", "events"
   add_foreign_key "event_gallery_images", "events"
   add_foreign_key "event_results", "competitors"

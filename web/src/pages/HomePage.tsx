@@ -78,17 +78,18 @@ export default function HomePage() {
   const { images: siteImages } = useSiteImages();
   const { content: siteContent, t: sc, loading: siteContentLoading, hasCachedContent } = useSiteContent();
 
-  const heroImage = '/images/hero-podium.jpg';
-  const galleryFallbacks = [
+  const heroFallback = '/images/hero-podium.jpg';
+  const heroImage = getImageUrl(siteImages, 'hero', heroFallback);
+  const featuredFallbacks = [
     '/images/gallery/event-photo-4.jpg',
     '/images/gallery/event-photo-2.jpg',
     '/images/gallery/event-photo-3.jpg',
   ];
 
-  const galleryImages = [
-    getImageUrl(siteImages, 'gallery', galleryFallbacks[0], 0),
-    getImageUrl(siteImages, 'gallery', galleryFallbacks[1], 1),
-    getImageUrl(siteImages, 'gallery', galleryFallbacks[2], 2),
+  const featuredImages = [
+    getImageUrl(siteImages, 'featured', featuredFallbacks[0], 0),
+    getImageUrl(siteImages, 'featured', featuredFallbacks[1], 1),
+    getImageUrl(siteImages, 'featured', featuredFallbacks[2], 2),
   ];
 
   const stats = [
@@ -276,7 +277,7 @@ export default function HomePage() {
             <ScrollReveal className="lg:col-span-7" delay={0.2}>
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
-                  <ImageWithShimmer src={galleryImages[0]} fallbackSrc={galleryFallbacks[0]} alt="BJJ competition match" className="w-full h-full object-cover" />
+                  <ImageWithShimmer src={featuredImages[0]} fallbackSrc={featuredFallbacks[0]} alt="BJJ competition match" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
                     <div className="text-3xl font-heading font-black text-gold-500">{sc('economic_impact_value', t('home.economicImpactValue'))}</div>
@@ -284,7 +285,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
-                  <ImageWithShimmer src={galleryImages[1]} fallbackSrc={galleryFallbacks[1]} alt="Marianas Open venue" className="w-full h-full object-cover" />
+                  <ImageWithShimmer src={featuredImages[1]} fallbackSrc={featuredFallbacks[1]} alt="Marianas Open venue" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
                     <div className="text-3xl font-heading font-black text-text-primary">{sc('spectators_value', t('home.spectatorsValue'))}</div>
@@ -292,7 +293,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="relative col-span-2 overflow-hidden border border-white/5">
-                  <ImageWithShimmer src={galleryImages[2]} fallbackSrc={galleryFallbacks[2]} alt="Podium ceremony" className="w-full h-48 object-cover" />
+                  <ImageWithShimmer src={featuredImages[2]} fallbackSrc={featuredFallbacks[2]} alt="Podium ceremony" className="w-full h-48 object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-r from-navy-900/95 via-navy-900/70 to-transparent" />
                   <div className="absolute inset-0 p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-2">

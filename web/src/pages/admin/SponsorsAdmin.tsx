@@ -243,8 +243,8 @@ export default function SponsorsAdmin() {
     }
     if (typeof editing !== 'number') return
     try {
-      await api.admin.uploadSponsorLogo(editing, file)
-      await load()
+    await api.admin.uploadSponsorLogo(editing, file)
+    await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Logo upload failed')
     }
@@ -562,22 +562,22 @@ export default function SponsorsAdmin() {
         </motion.div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <div className="space-y-6">
-            {sponsorsByTier.length === 0 ? (
-              <div className="bg-surface border border-white/5 p-8 text-center text-text-muted text-sm">
-                No sponsors yet. Add your first sponsor.
-              </div>
-            ) : (
-              sponsorsByTier.map(({ tier, sponsors: tierSponsors }) => (
-                <div key={tier} className="bg-surface border border-white/5">
+        <div className="space-y-6">
+          {sponsorsByTier.length === 0 ? (
+            <div className="bg-surface border border-white/5 p-8 text-center text-text-muted text-sm">
+              No sponsors yet. Add your first sponsor.
+            </div>
+          ) : (
+            sponsorsByTier.map(({ tier, sponsors: tierSponsors }) => (
+              <div key={tier} className="bg-surface border border-white/5">
                   <div className="px-5 py-3 border-b border-white/5 flex items-center justify-between">
-                    <h3 className={`font-heading text-sm font-semibold uppercase tracking-wide ${TIER_COLORS[tier]}`}>
-                      {tier}
-                    </h3>
+                  <h3 className={`font-heading text-sm font-semibold uppercase tracking-wide ${TIER_COLORS[tier]}`}>
+                    {tier}
+                  </h3>
                     <span className="text-[10px] text-text-muted/40 hidden sm:inline">drag to reorder</span>
-                  </div>
+                </div>
                   <SortableContext items={tierSponsors.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                    <div>
+                        <div>
                       {tierSponsors.map((sponsor, idx) => (
                         <SortableSponsorRow
                           key={sponsor.id}
@@ -591,10 +591,10 @@ export default function SponsorsAdmin() {
                       ))}
                     </div>
                   </SortableContext>
-                </div>
-              ))
-            )}
-          </div>
+              </div>
+            ))
+          )}
+        </div>
         </DndContext>
       )}
 

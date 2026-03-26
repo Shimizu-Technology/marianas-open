@@ -16,6 +16,10 @@ class Event < ApplicationRecord
 
   image_url_for :hero_image
 
+  def asjjf_source_urls
+    (asjjf_event_ids || []).map { |id| "https://asjjf.org/main/eventResults/#{id}" }
+  end
+
   translatable_fields :name, :description, :tagline, :venue_name, :city, :country,
                       :schedule_note, :prize_title, :prize_description,
                       :travel_description, :visa_description
@@ -31,7 +35,7 @@ class Event < ApplicationRecord
 
   def as_json(options = {})
     super(options.merge(
-      methods: [:hero_image_url],
+      methods: [:hero_image_url, :asjjf_source_urls],
       include: {
         event_schedule_items: { except: [:created_at, :updated_at] },
         prize_categories: { except: [:created_at, :updated_at] },
