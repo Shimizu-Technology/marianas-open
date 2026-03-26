@@ -29,6 +29,8 @@ Rails.application.routes.draw do
         resources :events do
           member do
             post :upload_image
+            post :upload_poster
+            delete :remove_poster
             get :import_results_preview
             post :import_results
             post :retranslate
@@ -67,7 +69,12 @@ Rails.application.routes.draw do
             post :upload_logo
           end
         end
-        resources :announcements
+        resources :announcements do
+          member do
+            post :upload_image
+            delete :remove_image
+          end
+        end
         resources :site_contents, path: 'site-contents' do
           member do
             post :retranslate

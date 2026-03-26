@@ -273,7 +273,7 @@ export default function AcademiesAdmin() {
               <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Aliases (previous / alternate names)</label>
               <textarea
                 value={form.aliases.join('\n')}
-                onChange={e => setForm(p => ({ ...p, aliases: e.target.value.split('\n').map(s => s.trimStart()) }))}
+                onChange={e => setForm(p => ({ ...p, aliases: e.target.value.split('\n').map(s => s.trim()) }))}
                 rows={3}
                 placeholder="One name per line, e.g.&#10;Atos Jiu-Jitsu Guam&#10;Atos BJJ Guam"
                 className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none" />

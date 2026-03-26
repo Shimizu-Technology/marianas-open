@@ -2,6 +2,10 @@ class Event < ApplicationRecord
   include HasImageUrl
   include Translatable
 
+  STATUSES = %w[draft upcoming live completed cancelled].freeze
+
+  validates :status, inclusion: { in: STATUSES }, allow_nil: true
+
   belongs_to :organization
   has_many :event_schedule_items, dependent: :destroy
   has_many :prize_categories, dependent: :destroy
@@ -10,11 +14,13 @@ class Event < ApplicationRecord
   has_many :event_accommodations, dependent: :destroy
   has_many :event_gallery_images, dependent: :destroy
   has_one_attached :hero_image
+  has_one_attached :poster_image
 
   accepts_nested_attributes_for :event_schedule_items, allow_destroy: true
   accepts_nested_attributes_for :prize_categories, allow_destroy: true
 
   image_url_for :hero_image
+  image_url_for :poster_image
 
   def asjjf_source_urls
     (asjjf_event_ids || []).map { |id| "https://asjjf.org/main/eventResults/#{id}" }
@@ -35,7 +41,7 @@ class Event < ApplicationRecord
 
   def as_json(options = {})
     super(options.merge(
-      methods: [:hero_image_url, :asjjf_source_urls],
+      methods: [:hero_image_url, :poster_image_url, :asjjf_source_urls],
       include: {
         event_schedule_items: { except: [:created_at, :updated_at] },
         prize_categories: { except: [:created_at, :updated_at] },

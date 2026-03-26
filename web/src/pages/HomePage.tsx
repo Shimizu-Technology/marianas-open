@@ -110,7 +110,7 @@ export default function HomePage() {
         structuredData={[getWebsiteSchema(), getOrganizationSchema()]}
       />
       {/* Hero */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-16 pb-8 sm:pb-16">
         {/* Background image */}
         <div className="absolute inset-0">
           <ImageWithShimmer
@@ -158,16 +158,16 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
               >
-                <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-gold-500/30 rounded-full bg-gold-500/5">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 mb-4 sm:mb-8 border border-gold-500/30 rounded-full bg-gold-500/5">
                   <Star size={14} className="text-gold-500 fill-gold-500" />
-                  <span className="text-sm text-gold-400 font-medium tracking-wide">
+                  <span className="text-xs sm:text-sm text-gold-400 font-medium tracking-wide">
                     {sc('hero_badge', t('hero.asjjfBadge'))}
                   </span>
                 </div>
               </motion.div>
 
               <motion.p
-                className="text-text-secondary text-lg sm:text-xl tracking-[0.2em] uppercase font-heading mb-4"
+                className="text-text-secondary text-sm sm:text-xl tracking-[0.2em] uppercase font-heading mb-2 sm:mb-4"
                 initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 }}
@@ -176,7 +176,7 @@ export default function HomePage() {
               </motion.p>
 
               <motion.h1
-                className="text-5xl sm:text-7xl lg:text-8xl font-heading font-black uppercase tracking-tight leading-[0.9] mb-8"
+                className="text-5xl sm:text-7xl lg:text-8xl font-heading font-black uppercase tracking-tight leading-[0.9] mb-5 sm:mb-8"
                 initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
@@ -189,7 +189,7 @@ export default function HomePage() {
               </motion.h1>
 
               <motion.div
-                className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+                className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-16"
                 initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
@@ -198,14 +198,14 @@ export default function HomePage() {
                   href="https://asjjf.org"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 px-8 py-4 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-all duration-300"
+                  className="group inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-all duration-300"
                 >
                   {t('hero.cta')}
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </a>
                 <Link
                   to="/calendar"
-                  className="inline-flex items-center gap-2 px-8 py-4 border border-white/20 text-text-primary font-heading font-medium uppercase tracking-wider text-sm hover:bg-white/5 transition-all duration-300"
+                  className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 border border-white/20 text-text-primary font-heading font-medium uppercase tracking-wider text-sm hover:bg-white/5 transition-all duration-300"
                 >
                   {t('hero.learnMore')}
                 </Link>
@@ -221,7 +221,7 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.6 }}
           >
             {stats.map((stat) => (
-              <div key={stat.label} className="bg-navy-900/80 backdrop-blur-sm p-6 text-center">
+              <div key={stat.label} className="bg-navy-900/80 backdrop-blur-sm p-4 sm:p-6 text-center">
                 <stat.icon size={18} className="text-gold-500 mx-auto mb-2" />
                 <div className="text-2xl sm:text-3xl font-heading font-black text-text-primary">
                   {stat.value}
@@ -234,9 +234,9 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* Scroll indicator */}
+        {/* Scroll indicator — hidden on mobile to save space */}
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden sm:block"
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >

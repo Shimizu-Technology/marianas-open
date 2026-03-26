@@ -181,6 +181,7 @@ export interface Event {
   prize_description: string | null;
   status: string;
   hero_image_url: string | null;
+  poster_image_url: string | null;
   live_stream_url: string | null;
   live_stream_active: boolean;
   tagline: string | null;
@@ -471,6 +472,7 @@ export interface Announcement {
   starts_at: string | null;
   ends_at: string | null;
   sort_order: number;
+  image_url: string | null;
 }
 
 export interface AnnouncementFormData {
@@ -482,7 +484,6 @@ export interface AnnouncementFormData {
   active: boolean;
   starts_at: string;
   ends_at: string;
-  sort_order: number;
 }
 
 export interface SiteContentEntry {
@@ -695,6 +696,13 @@ export const api = {
       formData.append('image', file);
       return fetchApiUpload<{ event: Event }>(`/api/v1/admin/events/${id}/upload_image`, formData);
     },
+    uploadEventPoster: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return fetchApiUpload<{ event: Event }>(`/api/v1/admin/events/${id}/upload_poster`, formData);
+    },
+    removeEventPoster: (id: number) =>
+      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/remove_poster`, { method: 'DELETE' }, true),
 
     // Event Results
     getEventResults: (eventId: number, params?: Record<string, string>) => {
@@ -895,6 +903,13 @@ export const api = {
       }, true),
     deleteAnnouncement: (id: number) =>
       fetchApi<void>(`/api/v1/admin/announcements/${id}`, { method: 'DELETE' }, true),
+    uploadAnnouncementImage: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return fetchApiUpload<{ announcement: Announcement }>(`/api/v1/admin/announcements/${id}/upload_image`, formData);
+    },
+    removeAnnouncementImage: (id: number) =>
+      fetchApi<{ announcement: Announcement }>(`/api/v1/admin/announcements/${id}/remove_image`, { method: 'DELETE' }, true),
 
     // Organization
     getOrganization: () => fetchApi<Organization>('/api/v1/admin/organization', {}, true),

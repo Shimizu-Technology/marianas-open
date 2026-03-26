@@ -4,6 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Announcement, AnnouncementFormData } from '../../services/api'
 import { useEditingParam } from '../../hooks/useEditingParam'
+import ImageUpload from '../../components/ImageUpload'
+import { resolveMediaUrl } from '../../utils/images'
+
+function toLocalDatetimeValue(iso: string): string {
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 const TYPES = ['info', 'event', 'promo', 'urgent'] as const
 const TYPE_LABELS: Record<string, string> = { info: 'Info', event: 'Event', promo: 'Promo', urgent: 'Urgent' }
@@ -23,7 +32,6 @@ const emptyForm: AnnouncementFormData = {
   active: true,
   starts_at: '',
   ends_at: '',
-  sort_order: 0,
 }
 
 function getStatus(a: Announcement): { label: string; className: string } {
@@ -43,6 +51,7 @@ export default function AnnouncementsAdmin() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
+  const [pendingImage, setPendingImage] = useState<File | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -57,14 +66,10 @@ export default function AnnouncementsAdmin() {
 
   useEffect(() => { load() }, [load])
 
-  const nextSortOrder = useCallback(() => {
-    if (announcements.length === 0) return 1
-    return Math.max(...announcements.map(a => a.sort_order || 0)) + 1
-  }, [announcements])
-
   useEffect(() => {
+    setPendingImage(null)
     if (editing === 'new') {
-      setForm({ ...emptyForm, sort_order: nextSortOrder() })
+      setForm({ ...emptyForm })
     } else if (typeof editing === 'number' && announcements.length > 0) {
       const ann = announcements.find(a => a.id === editing)
       if (ann) {
@@ -75,26 +80,36 @@ export default function AnnouncementsAdmin() {
           link_text: ann.link_text || '',
           announcement_type: ann.announcement_type,
           active: ann.active,
-          starts_at: ann.starts_at ? ann.starts_at.slice(0, 16) : '',
-          ends_at: ann.ends_at ? ann.ends_at.slice(0, 16) : '',
-          sort_order: ann.sort_order,
+          starts_at: ann.starts_at ? toLocalDatetimeValue(ann.starts_at) : '',
+          ends_at: ann.ends_at ? toLocalDatetimeValue(ann.ends_at) : '',
         })
       }
     }
-  }, [editing, announcements, nextSortOrder])
+  }, [editing, announcements])
 
   const handleSave = async () => {
     setSaving(true)
     setError('')
     try {
-      const payload = { ...form }
+      const payload = {
+        ...form,
+        starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : '',
+        ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : '',
+      }
+      let savedId: number | null = null
       if (editing === 'new') {
         const res = await api.admin.createAnnouncement(payload)
-        if (res.announcement?.id) setEditing(res.announcement.id)
+        savedId = res.announcement?.id ?? null
+        if (savedId) setEditing(savedId)
         setSuccess('Announcement created')
       } else if (typeof editing === 'number') {
+        savedId = editing
         await api.admin.updateAnnouncement(editing, payload)
         setSuccess('Announcement updated')
+      }
+      if (pendingImage && savedId) {
+        await api.admin.uploadAnnouncementImage(savedId, pendingImage)
+        setPendingImage(null)
       }
       await load()
       setTimeout(() => setSuccess(''), 3000)
@@ -144,7 +159,7 @@ export default function AnnouncementsAdmin() {
         </div>
         {!editing && (
           <button
-            onClick={() => { setForm({ ...emptyForm, sort_order: nextSortOrder() }); setEditing('new'); setError('') }}
+            onClick={() => { setForm({ ...emptyForm }); setEditing('new'); setError('') }}
             className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -226,15 +241,6 @@ export default function AnnouncementsAdmin() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Sort Order</label>
-                <input
-                  type="number"
-                  value={form.sort_order}
-                  onChange={e => setForm(prev => ({ ...prev, sort_order: parseInt(e.target.value, 10) || 0 }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none"
-                />
-              </div>
-              <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Starts At</label>
                 <input
                   type="datetime-local"
@@ -253,6 +259,36 @@ export default function AnnouncementsAdmin() {
                 />
               </div>
             </div>
+
+            {typeof editing === 'number' ? (
+              <ImageUpload
+                currentUrl={resolveMediaUrl(announcements.find(a => a.id === editing)?.image_url)}
+                onUpload={async (file) => {
+                  await api.admin.uploadAnnouncementImage(editing, file)
+                  await load()
+                }}
+                label="Image (optional — adds a visual card to the announcement)"
+              />
+            ) : (
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide">
+                  Image (optional — adds a visual card to the announcement)
+                </label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={e => setPendingImage(e.target.files?.[0] || null)}
+                    className="w-full bg-white/3 border border-white/10 px-3 py-2 text-sm text-text-primary file:mr-3 file:border-0 file:bg-gold/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-gold"
+                  />
+                  {pendingImage && (
+                    <p className="text-xs text-text-muted mt-1">
+                      {pendingImage.name} — will be uploaded when you save
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center gap-3">
               <button
@@ -311,6 +347,13 @@ export default function AnnouncementsAdmin() {
                         <ToggleLeft className="w-5 h-5 text-text-muted" />
                       )}
                     </button>
+                    {ann.image_url && (
+                      <img
+                        src={resolveMediaUrl(ann.image_url) || ''}
+                        alt=""
+                        className="w-10 h-10 object-cover rounded shrink-0"
+                      />
+                    )}
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-text-primary font-medium truncate">{ann.title}</span>
@@ -336,9 +379,8 @@ export default function AnnouncementsAdmin() {
                           link_text: ann.link_text || '',
                           announcement_type: ann.announcement_type,
                           active: ann.active,
-                          starts_at: ann.starts_at ? ann.starts_at.slice(0, 16) : '',
-                          ends_at: ann.ends_at ? ann.ends_at.slice(0, 16) : '',
-                          sort_order: ann.sort_order,
+                          starts_at: ann.starts_at ? toLocalDatetimeValue(ann.starts_at) : '',
+                          ends_at: ann.ends_at ? toLocalDatetimeValue(ann.ends_at) : '',
                         })
                         setEditing(ann.id)
                         setError('')

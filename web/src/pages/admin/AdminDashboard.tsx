@@ -139,9 +139,11 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <span className={`text-xs px-2 py-0.5 self-start sm:self-auto ${
-                  event.status === 'published' ? 'bg-green-500/10 text-green-400' :
-                  event.status === 'draft' ? 'bg-white/5 text-text-muted' :
-                  'bg-gold/10 text-gold'
+                  event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
+                  event.status === 'live' ? 'bg-red-500/10 text-red-400 animate-pulse' :
+                  event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
+                  event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
+                  'bg-white/5 text-text-muted'
                 }`}>
                   {event.status}
                 </span>

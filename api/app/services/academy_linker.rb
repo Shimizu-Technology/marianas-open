@@ -51,7 +51,7 @@ class AcademyLinker
         end
       end
 
-      academy = Academy.find_by_name_or_alias(name).first
+      academy = Academy.matching_name_or_alias(name).first
       return academy if academy
 
       country = CompetitorLinker.normalize_country(country_code) if country_code.present?
@@ -61,7 +61,7 @@ class AcademyLinker
         country_code: country
       )
     rescue ActiveRecord::RecordNotUnique
-      Academy.find_by_name_or_alias(name).first!
+      Academy.matching_name_or_alias(name).first!
     end
 
     private

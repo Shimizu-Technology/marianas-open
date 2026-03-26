@@ -41,6 +41,7 @@ export default function Header() {
   ];
 
   return (
+    <>
     <header className="fixed top-0 left-0 right-0 z-50 bg-navy-900/80 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
@@ -98,9 +99,20 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Nav */}
-      {mobileOpen && (
-        <nav className="xl:hidden bg-navy-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-1">
+      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+    </header>
+
+    {/* Mobile Nav — rendered outside header to avoid z-index stacking issues */}
+    {mobileOpen && (
+      <div
+        className="fixed inset-0 top-16 z-50 xl:hidden"
+        onClick={() => setMobileOpen(false)}
+      >
+        <div className="absolute inset-0 bg-black/40" />
+        <nav
+          className="relative bg-navy-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-1"
+          onClick={e => e.stopPropagation()}
+        >
           {links.map((link) => (
             <Link
               key={link.to}
@@ -126,8 +138,8 @@ export default function Header() {
             </Link>
           </div>
         </nav>
-      )}
-      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
-    </header>
+      </div>
+    )}
+    </>
   );
 }

@@ -27,13 +27,15 @@ import { useEditingParam } from '../../hooks/useEditingParam'
 type SortField = 'name' | 'date' | 'location' | 'stars' | 'status'
 type SortDir = 'asc' | 'desc'
 
+const DEFAULT_LIVE_STREAM_URL = 'https://www.youtube.com/@themarianasopen/live';
+
 const emptyForm: EventFormData = {
   name: '', slug: '', description: '', date: '', end_date: '',
   venue_name: '', venue_address: '', city: '', country: '', country_code: '',
   asjjf_stars: 0, is_main_event: false, prize_pool: '', prize_title: '', prize_description: '',
   registration_url: '', registration_url_gi: '', registration_url_nogi: '',
   status: 'draft', latitude: '', longitude: '',
-  live_stream_url: '', live_stream_active: false,
+  live_stream_url: DEFAULT_LIVE_STREAM_URL, live_stream_active: false,
   tagline: '', schedule_note: '',
   asjjf_event_ids: [],
   venue_highlights: [],
@@ -61,7 +63,7 @@ function eventToForm(e: Event): EventFormData {
     registration_url_nogi: e.registration_url_nogi || '',
     status: e.status || 'draft',
     latitude: e.latitude?.toString() || '', longitude: e.longitude?.toString() || '',
-    live_stream_url: e.live_stream_url || '', live_stream_active: e.live_stream_active || false,
+    live_stream_url: e.live_stream_url || DEFAULT_LIVE_STREAM_URL, live_stream_active: e.live_stream_active || false,
     tagline: e.tagline || '',
     schedule_note: e.schedule_note || '',
     asjjf_event_ids: e.asjjf_event_ids || [],
@@ -96,6 +98,7 @@ export default function EventsAdmin() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
   const [pendingHeroImage, setPendingHeroImage] = useState<File | null>(null)
   const heroInputRef = useRef<HTMLInputElement>(null)
+  const posterInputRef = useRef<HTMLInputElement>(null)
 
   const pendingHeroPreviewUrl = useMemo(
     () => (pendingHeroImage ? URL.createObjectURL(pendingHeroImage) : null),
@@ -705,7 +708,7 @@ export default function EventsAdmin() {
                 options={[
                   { value: 'draft', label: 'Draft' },
                   { value: 'upcoming', label: 'Upcoming' },
-                  { value: 'published', label: 'Published' },
+                  { value: 'live', label: 'Live' },
                   { value: 'completed', label: 'Completed' },
                   { value: 'cancelled', label: 'Cancelled' },
                 ]}
@@ -773,7 +776,13 @@ export default function EventsAdmin() {
                     <input
                       type="checkbox"
                       checked={form.live_stream_active}
-                      onChange={e => updateForm('live_stream_active', e.target.checked)}
+                      onChange={e => {
+                        const checked = e.target.checked;
+                        updateForm('live_stream_active', checked);
+                        if (checked && !form.live_stream_url) {
+                          updateForm('live_stream_url', DEFAULT_LIVE_STREAM_URL);
+                        }
+                      }}
                       className="accent-gold"
                     />
                     <span>Stream is LIVE now</span>
@@ -1158,6 +1167,56 @@ export default function EventsAdmin() {
               )
             })()}
 
+            {/* Poster Image (for Calendar qualifying series) */}
+            {typeof editing === 'number' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                  <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">Poster Image</label>
+                  <input ref={posterInputRef} type="file" accept="image/*" onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file || typeof editing !== 'number') return
+                    try {
+                      await api.admin.uploadEventPoster(editing, file)
+                      await loadEvents()
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : 'Poster upload failed')
+                    }
+                  }} className="hidden" />
+                  <button
+                    type="button"
+                    onClick={() => posterInputRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-text-secondary rounded transition-colors"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    {currentEvent?.poster_image_url ? 'Change Poster' : 'Upload Poster'}
+                  </button>
+                  {currentEvent?.poster_image_url && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (typeof editing !== 'number') return
+                        try {
+                          await api.admin.removeEventPoster(editing)
+                          await loadEvents()
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : 'Failed to remove poster')
+                        }
+                      }}
+                      className="text-text-muted hover:text-red-400 transition-colors text-xs"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] text-text-muted">Promotional poster shown in the "Qualifying Series" section on the Calendar page.</p>
+                {currentEvent?.poster_image_url && (
+                  <div className="w-32 aspect-[3/4] border border-white/10 overflow-hidden">
+                    <img src={resolveMediaUrl(currentEvent.poster_image_url) || ''} alt="Poster" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Schedule Items */}
             <div className="border border-white/5">
               <button
@@ -1343,7 +1402,7 @@ export default function EventsAdmin() {
                     <td className="px-5 py-3">
                       <span className={`text-xs px-2 py-0.5 ${
                             event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
-                        event.status === 'published' ? 'bg-green-500/10 text-green-400' :
+                            event.status === 'live' ? 'bg-red-500/10 text-red-400 animate-pulse' :
                             event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
                             event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
                             'bg-white/5 text-text-muted'
@@ -1400,7 +1459,7 @@ export default function EventsAdmin() {
                       </div>
                       <span className={`text-xs px-2 py-0.5 shrink-0 ${
                         event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
-                        event.status === 'published' ? 'bg-green-500/10 text-green-400' :
+                        event.status === 'live' ? 'bg-red-500/10 text-red-400 animate-pulse' :
                         event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
                         event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
                         'bg-white/5 text-text-muted'

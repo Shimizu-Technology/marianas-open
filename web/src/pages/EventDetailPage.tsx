@@ -228,7 +228,9 @@ export default function EventDetailPage() {
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     eventStatus: mainEvent.status === 'completed'
       ? 'https://schema.org/EventCompleted'
-      : 'https://schema.org/EventScheduled',
+      : mainEvent.status === 'cancelled'
+        ? 'https://schema.org/EventCancelled'
+        : 'https://schema.org/EventScheduled',
     image: heroImageUrl ? [heroImageUrl] : undefined,
     location: {
       '@type': 'Place',

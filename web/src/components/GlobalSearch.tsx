@@ -94,7 +94,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
       navigate(`/teams/${(item as Academy).slug}`);
     } else if (type === 'event') {
       const ev = item as Event;
-      if (ev.status === 'upcoming' || ev.status === 'registration_open') {
+      if (ev.status === 'upcoming' || ev.status === 'live') {
         navigate(`/calendar`);
       } else {
         navigate(`/events/${ev.slug}`);

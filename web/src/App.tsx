@@ -130,8 +130,10 @@ export default function App() {
             <OrganizationProvider>
               <div className="min-h-screen bg-navy-900 text-text-primary">
                 <Header />
-                <LiveStreamBanner />
-                <AnnouncementBar />
+                <div className="fixed top-16 left-0 right-0 z-40 flex flex-col">
+                  <LiveStreamBanner />
+                  <AnnouncementBar />
+                </div>
                 <main>
                   <AnimatedRoutes />
                 </main>
