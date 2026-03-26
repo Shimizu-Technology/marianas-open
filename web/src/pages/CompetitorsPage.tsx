@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Instagram, Youtube, Trophy, Medal, ChevronDown, Loader2 } from 'lucide-react';
@@ -258,10 +258,23 @@ export default function CompetitorsPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [beltFilter, setBeltFilter] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [countries, setCountries] = useState<string[]>([]);
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const handleSearchChange = (val: string) => {
+    setSearchInput(val);
+    clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => setSearch(val), 350);
+  };
+
+  useEffect(() => {
+    return () => { clearTimeout(searchTimer.current); };
+  }, []);
 
   const fetchCompetitors = useCallback(async (p: number, append = false) => {
     const setter = p === 1 ? setLoading : setLoadingMore;
@@ -275,6 +288,7 @@ export default function CompetitorsPage() {
       setCompetitors(prev => append ? [...prev, ...data.competitors] : data.competitors);
       setTotal(data.total);
       setPage(p);
+      if (data.available_countries) setCountries(data.available_countries);
     } finally {
       setter(false);
     }
@@ -285,11 +299,6 @@ export default function CompetitorsPage() {
   }, [fetchCompetitors]);
 
   const hasMore = competitors.length < total;
-
-  const countries = useMemo(() =>
-    [...new Set(competitors.map(c => c.country_code).filter(Boolean) as string[])].sort(),
-    [competitors]
-  );
 
   const hasFilters = search || beltFilter || countryFilter;
 
@@ -333,7 +342,7 @@ export default function CompetitorsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                <input type="text" value={searchInput} onChange={e => handleSearchChange(e.target.value)}
                   placeholder={t('competitors.searchPlaceholder')}
                   className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
               </div>
@@ -353,7 +362,7 @@ export default function CompetitorsPage() {
             {hasFilters && (
               <div className="mt-3 flex items-center gap-2">
                 <span className="text-xs text-text-muted">{total} {t('competitors.results')}</span>
-                <button onClick={() => { setSearch(''); setBeltFilter(''); setCountryFilter(''); }}
+                <button onClick={() => { setSearchInput(''); setSearch(''); setBeltFilter(''); setCountryFilter(''); }}
                   className="text-xs text-gold hover:text-gold/80 transition-colors">
                   {t('competitors.clearFilters')}
                 </button>

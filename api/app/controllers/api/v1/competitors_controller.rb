@@ -31,7 +31,11 @@ module Api
 
         data = records.map { |c| serialize_record(c) }
 
-        render json: { competitors: data, total: total, page: page, per_page: PER_PAGE }
+        available_countries = Competitor.with_results
+          .where.not(country_code: [nil, ""])
+          .distinct.pluck(:country_code).sort
+
+        render json: { competitors: data, total: total, page: page, per_page: PER_PAGE, available_countries: available_countries }
       end
 
       def show

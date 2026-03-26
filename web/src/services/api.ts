@@ -393,6 +393,7 @@ export interface CompetitorsResponse {
   total: number;
   page: number;
   per_page: number;
+  available_countries?: string[];
 }
 
 export interface CompetitorDetail extends Competitor {
