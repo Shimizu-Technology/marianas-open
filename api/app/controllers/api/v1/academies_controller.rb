@@ -4,23 +4,34 @@ module Api
       PER_PAGE = 50
 
       def index
-        academies = Academy.with_competitors
+        scope = Academy.with_competitors
 
-        academies = academies.where(country_code: params[:country_code]) if params[:country_code].present?
-        academies = academies.search_by_name(params[:search]) if params[:search].present?
+        scope = scope.where(country_code: params[:country_code]) if params[:country_code].present?
+        scope = scope.search_by_name(params[:search]) if params[:search].present?
 
-        ids = academies.pluck(:id)
-        stats_map = bulk_compute_stats(ids)
-
-        sorted = academies.to_a
-          .map { |a| serialize_with_stats(a, stats_map[a.id]) }
-          .sort_by { |h| [-(h[:total_points] || 0), -(h[:gold] || 0)] }
+        total = scope.count
 
         page = (params[:page] || 1).to_i
-        total = sorted.size
-        paginated = sorted.slice((page - 1) * PER_PAGE, PER_PAGE) || []
 
-        render json: { academies: paginated, total: total, page: page, per_page: PER_PAGE }
+        records = scope
+          .joins(stats_join_sql)
+          .select(
+            "academies.*",
+            "COALESCE(stats.total_points, 0) as computed_total_points",
+            "COALESCE(stats.gold, 0) as computed_gold",
+            "COALESCE(stats.silver, 0) as computed_silver",
+            "COALESCE(stats.bronze, 0) as computed_bronze",
+            "COALESCE(stats.athletes, 0) as computed_athletes",
+            "COALESCE(stats.events_competed, 0) as computed_events_competed",
+            "COALESCE(stats.results_count, 0) as computed_results_count"
+          )
+          .order(Arel.sql("COALESCE(stats.total_points, 0) DESC, COALESCE(stats.gold, 0) DESC"))
+          .offset((page - 1) * PER_PAGE)
+          .limit(PER_PAGE)
+
+        data = records.map { |a| serialize_from_record(a) }
+
+        render json: { academies: data, total: total, page: page, per_page: PER_PAGE }
       end
 
       def show
@@ -43,6 +54,50 @@ module Api
       end
 
       private
+
+      def stats_join_sql
+        points = RankingCalculator.points_sql
+        <<~SQL
+          LEFT JOIN (
+            SELECT
+              competitors.academy_id,
+              COUNT(*) as results_count,
+              COUNT(DISTINCT event_results.competitor_id) as athletes,
+              COUNT(DISTINCT event_results.event_id) as events_competed,
+              COUNT(*) FILTER (WHERE event_results.placement = 1) as gold,
+              COUNT(*) FILTER (WHERE event_results.placement = 2) as silver,
+              COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze,
+              #{points} as total_points
+            FROM event_results
+            INNER JOIN competitors ON competitors.id = event_results.competitor_id
+            INNER JOIN events ON events.id = event_results.event_id
+            WHERE competitors.academy_id IS NOT NULL
+            GROUP BY competitors.academy_id
+          ) stats ON stats.academy_id = academies.id
+        SQL
+      end
+
+      def serialize_from_record(a)
+        {
+          id: a.id,
+          name: a.name,
+          slug: a.slug,
+          country_code: a.country_code,
+          location: a.location,
+          website_url: a.website_url,
+          instagram_url: a.instagram_url,
+          facebook_url: a.facebook_url,
+          description: a.description,
+          logo_url: a.logo_url,
+          total_points: a.computed_total_points.to_i,
+          gold: a.computed_gold.to_i,
+          silver: a.computed_silver.to_i,
+          bronze: a.computed_bronze.to_i,
+          athletes: a.computed_athletes.to_i,
+          events_competed: a.computed_events_competed.to_i,
+          results_count: a.computed_results_count.to_i
+        }
+      end
 
       def bulk_compute_stats(academy_ids)
         return {} if academy_ids.empty?

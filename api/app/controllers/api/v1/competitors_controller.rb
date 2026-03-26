@@ -3,25 +3,6 @@ module Api
     class CompetitorsController < ApplicationController
       PER_PAGE = 50
 
-      def stats_join_sql
-        points = RankingCalculator.points_sql
-        <<~SQL
-          LEFT JOIN (
-            SELECT
-              event_results.competitor_id,
-              COUNT(*) as results_count,
-              COUNT(DISTINCT event_results.event_id) as events_competed,
-              COUNT(*) FILTER (WHERE event_results.placement = 1) as gold,
-              COUNT(*) FILTER (WHERE event_results.placement = 2) as silver,
-              COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze,
-              #{points} as total_points
-            FROM event_results
-            INNER JOIN events ON events.id = event_results.event_id
-            GROUP BY event_results.competitor_id
-          ) stats ON stats.competitor_id = competitors.id
-        SQL
-      end
-
       def index
         scope = Competitor.with_results
 
@@ -92,6 +73,25 @@ module Api
       end
 
       private
+
+      def stats_join_sql
+        points = RankingCalculator.points_sql
+        <<~SQL
+          LEFT JOIN (
+            SELECT
+              event_results.competitor_id,
+              COUNT(*) as results_count,
+              COUNT(DISTINCT event_results.event_id) as events_competed,
+              COUNT(*) FILTER (WHERE event_results.placement = 1) as gold,
+              COUNT(*) FILTER (WHERE event_results.placement = 2) as silver,
+              COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze,
+              #{points} as total_points
+            FROM event_results
+            INNER JOIN events ON events.id = event_results.event_id
+            GROUP BY event_results.competitor_id
+          ) stats ON stats.competitor_id = competitors.id
+        SQL
+      end
 
       def serialize_record(c)
         {

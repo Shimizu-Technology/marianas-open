@@ -142,6 +142,8 @@ module Api
           render json: { event: new_event.reload.as_json }, status: :created
         rescue ActiveRecord::RecordInvalid => e
           render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+        rescue ActiveRecord::RecordNotUnique
+          render json: { errors: ["An event with that slug already exists. Please try again."] }, status: :conflict
         end
 
         private
