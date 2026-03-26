@@ -79,6 +79,13 @@ export default function Header() {
             >
               <Search className="w-5 h-5" />
             </button>
+            <Link
+              to="/admin"
+              className="hidden xl:flex text-text-muted hover:text-text-primary transition-colors p-2 rounded-lg hover:bg-white/5"
+              aria-label="Admin"
+            >
+              <Shield className="w-4 h-4" />
+            </Link>
             <LanguageSwitcher />
             <button
               className="xl:hidden text-text-primary p-2"
