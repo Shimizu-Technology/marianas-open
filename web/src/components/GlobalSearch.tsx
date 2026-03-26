@@ -26,10 +26,12 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
   const [results, setResults] = useState<SearchResults>({ competitors: [], academies: [], events: [] });
   const [loading, setLoading] = useState(false);
   const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const eventsFetched = useRef(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
   useEffect(() => {
-    if (open) {
+    if (open && !eventsFetched.current) {
+      eventsFetched.current = true;
       api.getEvents().then(setAllEvents).catch(() => {});
     }
   }, [open]);
@@ -94,10 +96,10 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
       navigate(`/teams/${(item as Academy).slug}`);
     } else if (type === 'event') {
       const ev = item as Event;
-      if (ev.status === 'upcoming' || ev.status === 'live') {
-        navigate(`/calendar`);
-      } else {
+      if (ev.slug) {
         navigate(`/events/${ev.slug}`);
+      } else {
+        navigate(`/calendar`);
       }
     }
   }, [navigate, onClose]);

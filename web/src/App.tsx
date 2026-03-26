@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, useCallback } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LiveStreamBanner from './components/LiveStreamBanner';
@@ -41,6 +41,39 @@ import CompetitorsAdmin from './pages/admin/CompetitorsAdmin';
 import AcademiesAdmin from './pages/admin/AcademiesAdmin';
 import AnnouncementsAdmin from './pages/admin/AnnouncementsAdmin';
 import EventResultsAdmin from './pages/admin/EventResultsAdmin';
+
+function BannerLayout({ children }: { children: React.ReactNode }) {
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const [bannerHeight, setBannerHeight] = useState(0);
+
+  const measure = useCallback(() => {
+    if (bannerRef.current) {
+      setBannerHeight(bannerRef.current.offsetHeight);
+    }
+  }, []);
+
+  useEffect(() => {
+    measure();
+    const observer = new MutationObserver(measure);
+    if (bannerRef.current) {
+      observer.observe(bannerRef.current, { childList: true, subtree: true, attributes: true });
+    }
+    window.addEventListener('resize', measure);
+    return () => { observer.disconnect(); window.removeEventListener('resize', measure); };
+  }, [measure]);
+
+  return (
+    <div className="min-h-screen bg-navy-900 text-text-primary">
+      <Header />
+      <div ref={bannerRef} className="fixed top-16 left-0 right-0 z-40 flex flex-col">
+        <LiveStreamBanner />
+        <AnnouncementBar />
+      </div>
+      {bannerHeight > 0 && <div style={{ height: bannerHeight }} />}
+      {children}
+    </div>
+  );
+}
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -128,18 +161,13 @@ export default function App() {
           path="*"
           element={
             <OrganizationProvider>
-              <div className="min-h-screen bg-navy-900 text-text-primary">
-                <Header />
-                <div className="fixed top-16 left-0 right-0 z-40 flex flex-col">
-                  <LiveStreamBanner />
-                  <AnnouncementBar />
-                </div>
+              <BannerLayout>
                 <main>
                   <AnimatedRoutes />
                 </main>
                 <Footer />
                 <MobileLanguageFAB />
-              </div>
+              </BannerLayout>
             </OrganizationProvider>
           }
         />
