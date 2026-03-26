@@ -53,6 +53,8 @@ class AcademyLinker
         name: name.strip.gsub(/\s+/, " "),
         country_code: country
       )
+    rescue ActiveRecord::RecordNotUnique
+      Academy.where("LOWER(TRIM(name)) = ?", normalized).first!
     end
 
     private

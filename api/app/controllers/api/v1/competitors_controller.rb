@@ -35,9 +35,7 @@ module Api
       end
 
       def show
-        competitor = Competitor.find(params[:id])
-
-        record = Competitor.where(id: competitor.id)
+        record = Competitor
           .joins(stats_join_sql)
           .select(
             "competitors.*",
@@ -47,9 +45,9 @@ module Api
             "COALESCE(stats.bronze, 0) as computed_bronze",
             "COALESCE(stats.events_competed, 0) as computed_events_competed",
             "COALESCE(stats.results_count, 0) as computed_results_count"
-          ).first
+          ).find(params[:id])
 
-        results = competitor.event_results
+        results = record.event_results
           .joins(:event)
           .select("event_results.*, events.name as event_name, events.slug as event_slug, events.date as event_date, events.asjjf_stars as event_stars")
           .order("events.date DESC")

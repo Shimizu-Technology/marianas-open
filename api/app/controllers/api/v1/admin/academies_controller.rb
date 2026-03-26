@@ -8,23 +8,31 @@ module Api
         before_action :set_academy, only: [:show, :update, :destroy, :upload_logo]
 
         def index
-          academies = Academy.order(:name)
-          ids = academies.pluck(:id)
-          stats_map = bulk_compute_stats(ids)
+          scope = Academy.all
+          scope = scope.search_by_name(params[:search]) if params[:search].present?
 
-          data = academies.map do |a|
-            s = stats_map[a.id] || empty_stats
-            a.as_json.merge(
-              "total_points" => s[:total_points],
-              "gold" => s[:gold],
-              "silver" => s[:silver],
-              "bronze" => s[:bronze],
-              "athletes" => s[:athletes],
-              "events_competed" => s[:events_competed]
+          total = scope.count
+          page = (params[:page] || 1).to_i
+          per_page = [(params[:per_page] || 50).to_i, 100].min
+
+          records = scope
+            .joins(stats_join_sql)
+            .select(
+              "academies.*",
+              "COALESCE(stats.total_points, 0) as computed_total_points",
+              "COALESCE(stats.gold, 0) as computed_gold",
+              "COALESCE(stats.silver, 0) as computed_silver",
+              "COALESCE(stats.bronze, 0) as computed_bronze",
+              "COALESCE(stats.athletes, 0) as computed_athletes",
+              "COALESCE(stats.events_competed, 0) as computed_events_competed"
             )
-          end
+            .order(Arel.sql("COALESCE(stats.total_points, 0) DESC, academies.name ASC"))
+            .offset((page - 1) * per_page)
+            .limit(per_page)
 
-          render json: { academies: data }
+          data = records.map { |a| serialize_for_list(a) }
+
+          render json: { academies: data, total: total, page: page, per_page: per_page }
         end
 
         def show
@@ -72,6 +80,27 @@ module Api
 
         private
 
+        def stats_join_sql
+          points = RankingCalculator.points_sql
+          <<~SQL
+            LEFT JOIN (
+              SELECT
+                competitors.academy_id,
+                COUNT(DISTINCT event_results.competitor_id) as athletes,
+                COUNT(DISTINCT event_results.event_id) as events_competed,
+                COUNT(*) FILTER (WHERE event_results.placement = 1) as gold,
+                COUNT(*) FILTER (WHERE event_results.placement = 2) as silver,
+                COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze,
+                #{points} as total_points
+              FROM event_results
+              INNER JOIN competitors ON competitors.id = event_results.competitor_id
+              INNER JOIN events ON events.id = event_results.event_id
+              WHERE competitors.academy_id IS NOT NULL
+              GROUP BY competitors.academy_id
+            ) stats ON stats.academy_id = academies.id
+          SQL
+        end
+
         def set_academy
           @academy = Academy.find(params[:id])
         rescue ActiveRecord::RecordNotFound
@@ -80,6 +109,27 @@ module Api
 
         def academy_params
           params.permit(:name, :country_code, :location, :website_url, :instagram_url, :facebook_url, :description)
+        end
+
+        def serialize_for_list(a)
+          {
+            id: a.id,
+            name: a.name,
+            slug: a.slug,
+            country_code: a.country_code,
+            location: a.location,
+            website_url: a.website_url,
+            instagram_url: a.instagram_url,
+            facebook_url: a.facebook_url,
+            description: a.description,
+            logo_url: a.logo_url,
+            total_points: a.computed_total_points.to_i,
+            gold: a.computed_gold.to_i,
+            silver: a.computed_silver.to_i,
+            bronze: a.computed_bronze.to_i,
+            athletes: a.computed_athletes.to_i,
+            events_competed: a.computed_events_competed.to_i
+          }
         end
 
         def bulk_compute_stats(academy_ids)

@@ -67,7 +67,7 @@ module Api
             }
           end
 
-          data = @competitor.as_json.merge(
+          data = @competitor.as_json(skip_stats: true).merge(
             "total_points" => stats[:total_points],
             "gold_medals" => stats[:gold],
             "silver_medals" => stats[:silver],

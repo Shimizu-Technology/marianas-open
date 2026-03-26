@@ -49,11 +49,14 @@ class Competitor < ApplicationRecord
   end
 
   def as_json(options = {})
-    stats = computed_stats
-    super(options.merge(
+    base = super(options.merge(
       methods: [:full_name, :photo_url],
       except: [:created_at, :updated_at]
-    )).merge(
+    ))
+    return base if options[:skip_stats]
+
+    stats = computed_stats
+    base.merge(
       "total_points" => stats[:total_points],
       "gold_medals" => stats[:gold],
       "silver_medals" => stats[:silver],
