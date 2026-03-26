@@ -20,7 +20,7 @@ module Api
           announcement = Announcement.new(announcement_params)
           Announcement.transaction do
             if announcement.save
-              deactivate_others(announcement) if announcement.active?
+              deactivate_others(announcement) if announcement.active? && live_now?(announcement)
               render json: { announcement: announcement.as_json }, status: :created
             else
               render json: { errors: announcement.errors.full_messages }, status: :unprocessable_entity
@@ -31,7 +31,7 @@ module Api
         def update
           Announcement.transaction do
             if @announcement.update(announcement_params)
-              deactivate_others(@announcement) if @announcement.active?
+              deactivate_others(@announcement) if @announcement.active? && live_now?(@announcement)
               render json: { announcement: @announcement.reload.as_json }
             else
               render json: { errors: @announcement.errors.full_messages }, status: :unprocessable_entity
@@ -68,6 +68,12 @@ module Api
 
         def announcement_params
           params.permit(:title, :body, :link_url, :link_text, :announcement_type, :active, :starts_at, :ends_at)
+        end
+
+        def live_now?(announcement)
+          now = Time.current
+          (announcement.starts_at.nil? || announcement.starts_at <= now) &&
+            (announcement.ends_at.nil? || announcement.ends_at >= now)
         end
 
         def deactivate_others(announcement)
