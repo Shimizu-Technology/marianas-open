@@ -51,7 +51,7 @@ class AcademyLinker
         end
       end
 
-      academy = Academy.where("LOWER(TRIM(name)) = ?", normalized).first
+      academy = Academy.matching_name_or_alias(name).first
       return academy if academy
 
       country = CompetitorLinker.normalize_country(country_code) if country_code.present?
@@ -61,7 +61,7 @@ class AcademyLinker
         country_code: country
       )
     rescue ActiveRecord::RecordNotUnique
-      Academy.where("LOWER(TRIM(name)) = ?", normalized).first!
+      Academy.matching_name_or_alias(name.strip.gsub(/\s+/, " ")).first!
     end
 
     private

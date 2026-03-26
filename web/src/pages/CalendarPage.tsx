@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Calendar, ArrowRight, ExternalLink, Trophy, Clock } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
@@ -12,40 +12,24 @@ import { useEvents } from '../hooks/useApi';
 import type { Event } from '../services/api';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { useTranslatedField } from '../hooks/useTranslatedField';
+import { resolveMediaUrl } from '../utils/images';
 
-// Event/venue names are treated as official proper nouns from organizer assets.
-// Dates remain locale-formatted via `formatEventDate`.
-const ROAD_TO_OPEN_POSTERS = [
-  {
-    src: '/images/poster-mp-nagoya.jpg',
-    title: 'Guam Marianas Pro Nagoya',
-    isoDate: '2026-03-14',
-    location: 'Aichi Budokan, Japan',
-    href: 'https://asjjf.org/main/eventInfo/1863',
-  },
-  {
-    src: '/images/poster-mp-korea.jpg',
-    title: 'Guam Marianas Pro Korea',
-    isoDate: '2026-06-06',
-    location: 'SETEC, Seoul, Korea',
-    href: 'https://asjjf.org/main/eventInfo/1909',
-  },
-  {
-    src: '/images/poster-copa.jpg',
-    title: 'Guam Copa de Marianas',
-    isoDate: '2026-01-31',
-    location: 'UOG Calvo Fieldhouse, Guam',
-    href: 'https://asjjf.org/main/eventInfo/1837',
-  },
-] as const;
+// Qualifying series posters are now driven by events with poster_image_url set.
 
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
   const { events, loading } = useEvents();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
 
-  const upcomingEvents = useMemo(() => events.filter(e => e.status !== 'completed'), [events]);
+  const upcomingEvents = useMemo(() => events.filter(e => e.status !== 'completed' && e.status !== 'cancelled'), [events]);
+  const cancelledEvents = useMemo(() => events.filter(e => e.status === 'cancelled'), [events]);
+  const posterEvents = useMemo(() =>
+    events
+      .filter(e => e.poster_image_url && !e.is_main_event)
+      .sort((a, b) => parseDateLocalSafe(a.date).getTime() - parseDateLocalSafe(b.date).getTime()),
+  [events]);
   const pastEvents = useMemo(() => events.filter(e => e.status === 'completed'), [events]);
   const pastEventsByYear = useMemo(() => {
     const grouped: Record<number, typeof pastEvents> = {};
@@ -171,84 +155,116 @@ export default function CalendarPage() {
               ))}
             </div>
           ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {upcomingEvents.map((event, i) => (
-              <ScrollReveal key={event.id} delay={i * 0.08}>
-                <EventCard event={event} formatDate={formatEventDate} t={t} />
-              </ScrollReveal>
-            ))}
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {upcomingEvents.map((event, i) => (
+                <ScrollReveal key={event.id} delay={i * 0.08}>
+                  <EventCard event={event} formatDate={formatEventDate} t={t} />
+                </ScrollReveal>
+              ))}
+            </div>
+            {cancelledEvents.length > 0 && (
+              <div>
+                <h3 className="text-sm font-heading font-semibold text-text-muted uppercase tracking-wider mb-3">Cancelled</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {cancelledEvents.map((event, i) => (
+                    <ScrollReveal key={event.id} delay={i * 0.08}>
+                      <EventCard event={event} formatDate={formatEventDate} t={t} />
+                    </ScrollReveal>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           )}
         </div>
       </section>
 
-      {/* Road to the Open — poster strip */}
-      <section className="py-20 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <ScrollReveal>
-            <div className="flex items-center gap-4 mb-10">
-              <img
-                src="/images/logos/road-to-open-logo-white.png"
-                alt="Road to the Open"
-                className="h-8 object-contain opacity-80"
-              />
-              <div className="flex-1 h-px bg-white/5" />
-              <p className="text-xs font-heading uppercase tracking-[0.25em] text-text-muted">
-                {t('calendar.roadToOpen', 'Qualifying Series')}
-              </p>
+      {/* Road to the Open — poster strip (driven by events with poster images) */}
+      {posterEvents.length > 0 && (
+        <section className="py-20 border-t border-white/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <ScrollReveal>
+              <div className="flex items-center gap-4 mb-10">
+                <img
+                  src="/images/logos/road-to-open-logo-white.png"
+                  alt="Road to the Open"
+                  className="h-8 object-contain opacity-80"
+                />
+                <div className="flex-1 h-px bg-white/5" />
+                <p className="text-xs font-heading uppercase tracking-[0.25em] text-text-muted">
+                  {t('calendar.roadToOpen', 'Qualifying Series')}
+                </p>
+              </div>
+            </ScrollReveal>
+
+            <div className={`grid grid-cols-1 gap-4 ${posterEvents.length === 1 ? 'sm:grid-cols-1 max-w-sm' : posterEvents.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
+              {posterEvents.map((event, i) => {
+                const posterDateLocal = parseDateLocalSafe(event.date);
+                const isPastPoster = posterDateLocal < todayLocal;
+                const posterSrc = resolveMediaUrl(event.poster_image_url);
+                const regUrl = event.registration_url_gi || event.registration_url_nogi || event.registration_url;
+
+                return (
+                  <ScrollReveal key={event.id} delay={i * 0.1}>
+                    <div
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => navigate(`/events/${event.slug}`)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/events/${event.slug}`); }}
+                      className={`group relative block overflow-hidden border transition-colors duration-300 cursor-pointer ${
+                        isPastPoster
+                          ? 'border-white/10 hover:border-white/20 opacity-80'
+                          : 'border-white/5 hover:border-gold-500/20'
+                      }`}
+                    >
+                      <div className="relative aspect-[3/4] overflow-hidden">
+                        {posterSrc && (
+                          <img
+                            src={posterSrc}
+                            alt={event.name}
+                            className={`w-full h-full object-cover transition-transform duration-500 ${isPastPoster ? 'grayscale-[20%]' : 'group-hover:scale-105'}`}
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-navy-900/95 via-navy-900/30 to-transparent" />
+                        {isPastPoster && (
+                          <div className="absolute top-3 right-3 px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/10 border border-white/20 text-text-secondary">
+                            {t('calendar.completed', 'Completed')}
+                          </div>
+                        )}
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-5">
+                        <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-text-primary mb-1">
+                          {event.name}
+                        </h3>
+                        <p className="text-xs text-text-muted flex items-center gap-1.5">
+                          <Calendar size={10} className="text-gold-500 shrink-0" />
+                          {formatEventDate(event.date, event.end_date)}
+                        </p>
+                        <p className="text-xs text-text-muted flex items-center gap-1.5 mt-0.5">
+                          <MapPin size={10} className="text-gold-500 shrink-0" />
+                          {event.venue_name || `${event.city}, ${event.country}`}
+                        </p>
+                        {regUrl && !isPastPoster && (
+                          <a
+                            href={regUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 mt-2 text-[10px] text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
+                          >
+                            Register <ExternalLink size={8} />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </ScrollReveal>
+                );
+              })}
             </div>
-          </ScrollReveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {ROAD_TO_OPEN_POSTERS.map((poster, i) => {
-              const posterDateLocal = parseDateLocalSafe(poster.isoDate);
-              const isPastPoster = posterDateLocal < todayLocal;
-
-              return (
-                <ScrollReveal key={poster.title} delay={i * 0.1}>
-                  <a
-                    href={poster.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`group relative block overflow-hidden border transition-colors duration-300 ${
-                      isPastPoster
-                        ? 'border-white/10 hover:border-white/20 opacity-80'
-                        : 'border-white/5 hover:border-gold-500/20'
-                    }`}
-                  >
-                    <div className="relative aspect-[3/4] overflow-hidden">
-                      <img
-                        src={poster.src}
-                        alt={poster.title}
-                        className={`w-full h-full object-cover transition-transform duration-500 ${isPastPoster ? 'grayscale-[20%]' : 'group-hover:scale-105'}`}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-navy-900/95 via-navy-900/30 to-transparent" />
-                      {isPastPoster && (
-                        <div className="absolute top-3 right-3 px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/10 border border-white/20 text-text-secondary">
-                          {t('calendar.completed', 'Completed')}
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-text-primary mb-1">
-                        {poster.title}
-                      </h3>
-                      <p className="text-xs text-text-muted flex items-center gap-1.5">
-                        <Calendar size={10} className="text-gold-500 shrink-0" />
-                        {formatEventDate(poster.isoDate)}
-                      </p>
-                      <p className="text-xs text-text-muted flex items-center gap-1.5 mt-0.5">
-                        <MapPin size={10} className="text-gold-500 shrink-0" />
-                        {poster.location}
-                      </p>
-                    </div>
-                  </a>
-                </ScrollReveal>
-              );
-            })}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }
@@ -260,13 +276,19 @@ function EventCard({ event, formatDate, t, isPast }: {
   isPast?: boolean;
 }) {
   const { tf } = useTranslatedField();
+  const isLive = event.status === 'live';
+  const isCancelled = event.status === 'cancelled';
   return (
     <Link
       to={`/events/${event.slug}`}
-      className={`group p-6 border transition-all duration-300 hover:border-gold-500/30 h-full flex flex-col ${
-        event.is_main_event && !isPast
-          ? 'bg-gradient-to-br from-gold-500/10 to-transparent border-gold-500/20'
-          : 'bg-navy-900 border-white/5'
+      className={`group p-6 border transition-all duration-300 h-full flex flex-col ${
+        isCancelled
+          ? 'bg-navy-900/50 border-red-500/10 opacity-60'
+          : isLive
+            ? 'bg-navy-900 border-red-500/30 hover:border-red-500/50 ring-1 ring-red-500/10'
+            : event.is_main_event && !isPast
+              ? 'bg-gradient-to-br from-gold-500/10 to-transparent border-gold-500/20 hover:border-gold-500/30'
+              : 'bg-navy-900 border-white/5 hover:border-gold-500/30'
       }`}
     >
       <div className="flex items-center justify-between mb-4">
@@ -274,7 +296,18 @@ function EventCard({ event, formatDate, t, isPast }: {
           {event.country_code}
         </span>
         <div className="flex items-center gap-2">
-          {isPast && (
+          {isLive && (
+            <span className="flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase bg-red-500/15 text-red-400 border border-red-500/30 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+              Live
+            </span>
+          )}
+          {isCancelled && (
+            <span className="px-2 py-0.5 text-[10px] font-bold uppercase bg-red-500/10 text-red-400/70 border border-red-500/15">
+              Cancelled
+            </span>
+          )}
+          {isPast && !isCancelled && (
             <span className="px-2 py-0.5 text-[10px] font-bold uppercase bg-white/5 text-text-muted border border-white/10">
               {t('calendar.completed', 'Completed')}
             </span>
@@ -288,6 +321,7 @@ function EventCard({ event, formatDate, t, isPast }: {
       </div>
 
       <h3 className={`font-heading font-bold text-lg mb-2 group-hover:text-gold-400 transition-colors ${
+        isCancelled ? 'text-text-muted line-through' :
         event.is_main_event && !isPast ? 'text-gold-500' : 'text-text-primary'
       }`}>
         {tf(event, 'name')}
@@ -304,7 +338,7 @@ function EventCard({ event, formatDate, t, isPast }: {
         </div>
       </div>
 
-      {!isPast && (
+      {!isPast && !isCancelled && (
         <div className="flex flex-col gap-2">
           {(event.registration_url_gi || event.registration_url_nogi) ? (
             <>
@@ -366,7 +400,7 @@ function EventCard({ event, formatDate, t, isPast }: {
         </div>
       )}
 
-      {isPast && (
+      {isPast && !isCancelled && (
         <div className="flex items-center gap-1 text-xs text-gold-500/70 group-hover:text-gold-400 transition-colors">
           <span className="font-heading uppercase tracking-wider">{t('pastEvents.viewDetails', 'View Details')}</span>
           <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />

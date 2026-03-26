@@ -116,7 +116,7 @@ module Api
         end
 
         def academy_params
-          params.permit(:name, :country_code, :location, :website_url, :instagram_url, :facebook_url, :description)
+          params.permit(:name, :country_code, :location, :website_url, :instagram_url, :facebook_url, :description, aliases: [])
         end
 
         def serialize_for_list(a)
@@ -130,6 +130,7 @@ module Api
             instagram_url: a.instagram_url,
             facebook_url: a.facebook_url,
             description: a.description,
+            aliases: a.aliases,
             logo_url: a.logo_url,
             total_points: a.computed_total_points.to_i,
             gold: a.computed_gold.to_i,

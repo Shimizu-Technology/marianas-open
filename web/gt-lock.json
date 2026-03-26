@@ -4,32 +4,32 @@
   "entries": [
     {
       "fileId": "b1791c7a47875ce85f2f1e57ef6c25a9b993660f9bcc840d8f21daac6161b5a0",
-      "versionId": "d4c914ba867179ae3ac6022831576c7ea42e37ad01fb4bb8b47ecc1c9a7c7481",
+      "versionId": "80e3d2f74f4d6b7aca608dc227d230b05ce5f9399b22bdb2880681f3812b57d5",
       "translations": {
+        "tl": {
+          "updatedAt": "2026-03-26T11:09:31.735Z",
+          "fileName": "src/locales/tl.json",
+          "postProcessHash": "45fbdd81fd2ee19682ba8860700b7438f32008f06601d9f6d09adddf2af0fbad"
+        },
         "ja": {
-          "updatedAt": "2026-03-23T06:41:57.920Z",
+          "updatedAt": "2026-03-26T11:09:31.736Z",
           "fileName": "src/locales/ja.json",
-          "postProcessHash": "09c1d1356a68dc4da9ab38ba938cf163f337a36f461af03740ac42fdfffd3bce"
+          "postProcessHash": "eaf5a9373e7d39c7a6e554f5353eb9bb867eaa5dbcbcb757bcb75111e1b7082f"
         },
         "ko": {
-          "updatedAt": "2026-03-23T06:41:57.920Z",
+          "updatedAt": "2026-03-26T11:09:31.736Z",
           "fileName": "src/locales/ko.json",
-          "postProcessHash": "e93bb44b0f8984d84e9fec886d912297278bc7909ff14899625784b82bf3ece8"
+          "postProcessHash": "2884947e56fb78eb4b8352a1767854eb780227f349f69bb3ba1a7297677da096"
         },
         "pt": {
-          "updatedAt": "2026-03-23T06:41:57.920Z",
+          "updatedAt": "2026-03-26T11:09:31.736Z",
           "fileName": "src/locales/pt.json",
-          "postProcessHash": "0c2c94da62eb20a471182ef574322cc3823274f5d4d57fdcbfe3beee50b79bdf"
+          "postProcessHash": "a479cf66f92dfdbf80f151b83675846636a69ad2370c2123ce3fd1e81835936f"
         },
         "zh": {
-          "updatedAt": "2026-03-23T06:41:57.921Z",
+          "updatedAt": "2026-03-26T11:09:31.737Z",
           "fileName": "src/locales/zh.json",
-          "postProcessHash": "9f081efb32a7a5989e6e1cbd469c867d56745a1912ac460b3c14d4b468fac44d"
-        },
-        "tl": {
-          "updatedAt": "2026-03-23T06:41:57.919Z",
-          "fileName": "src/locales/tl.json",
-          "postProcessHash": "ee85eec1f55a3bd496434645727167d4550eca1ff89aa4de07531f17be0b838f"
+          "postProcessHash": "3b4c2b4b94e4f3c2da48e32d0b7b47a81c8517914f31708df51b9baf3c5e7f2c"
         }
       },
       "fileName": "src/locales/en.json",

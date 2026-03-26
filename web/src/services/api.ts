@@ -181,6 +181,7 @@ export interface Event {
   prize_description: string | null;
   status: string;
   hero_image_url: string | null;
+  poster_image_url: string | null;
   live_stream_url: string | null;
   live_stream_active: boolean;
   tagline: string | null;
@@ -398,6 +399,7 @@ export interface CompetitorsResponse {
 
 export interface CompetitorDetail extends Competitor {
   results: CompetitorProfileResult[];
+  academy_slug: string | null;
 }
 
 export interface CompetitorFormData {
@@ -426,6 +428,7 @@ export interface Academy {
   instagram_url: string | null;
   facebook_url: string | null;
   description: string | null;
+  aliases: string[];
   logo_url: string | null;
   total_points: number;
   gold: number;
@@ -455,6 +458,32 @@ export interface AcademyFormData {
   instagram_url: string;
   facebook_url: string;
   description: string;
+  aliases: string[];
+}
+
+export interface Announcement {
+  id: number;
+  title: string;
+  body: string | null;
+  link_url: string | null;
+  link_text: string | null;
+  announcement_type: 'info' | 'event' | 'promo' | 'urgent';
+  active: boolean;
+  starts_at: string | null;
+  ends_at: string | null;
+  sort_order: number;
+  image_url: string | null;
+}
+
+export interface AnnouncementFormData {
+  title: string;
+  body: string;
+  link_url: string;
+  link_text: string;
+  announcement_type: string;
+  active: boolean;
+  starts_at: string;
+  ends_at: string;
 }
 
 export interface SiteContentEntry {
@@ -599,6 +628,7 @@ export const api = {
   getEventResultsSummary: (slug: string) =>
     fetchApi<EventResultsSummary>(`/api/v1/events/${slug}/results/summary`),
   getSponsors: () => fetchApi<Sponsor[]>('/api/v1/sponsors'),
+  getAnnouncements: () => fetchApi<{ announcements: Announcement[] }>('/api/v1/announcements'),
   getCompetitors: (params?: Record<string, string>) => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
     return fetchApi<CompetitorsResponse>(`/api/v1/competitors${query}`);
@@ -666,6 +696,13 @@ export const api = {
       formData.append('image', file);
       return fetchApiUpload<{ event: Event }>(`/api/v1/admin/events/${id}/upload_image`, formData);
     },
+    uploadEventPoster: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return fetchApiUpload<{ event: Event }>(`/api/v1/admin/events/${id}/upload_poster`, formData);
+    },
+    removeEventPoster: (id: number) =>
+      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/remove_poster`, { method: 'DELETE' }, true),
 
     // Event Results
     getEventResults: (eventId: number, params?: Record<string, string>) => {
@@ -851,6 +888,28 @@ export const api = {
       fetchApi<void>(`/api/v1/admin/site-contents/${id}`, { method: 'DELETE' }, true),
     retranslateSiteContent: (id: number) =>
       fetchApi<{ site_content: SiteContentEntry }>(`/api/v1/admin/site-contents/${id}/retranslate`, { method: 'POST' }, true),
+
+    // Announcements
+    getAnnouncements: () => fetchApi<{ announcements: Announcement[] }>('/api/v1/admin/announcements', {}, true),
+    createAnnouncement: (data: Partial<AnnouncementFormData>) =>
+      fetchApi<{ announcement: Announcement }>('/api/v1/admin/announcements', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    updateAnnouncement: (id: number, data: Partial<AnnouncementFormData>) =>
+      fetchApi<{ announcement: Announcement }>(`/api/v1/admin/announcements/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    deleteAnnouncement: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/announcements/${id}`, { method: 'DELETE' }, true),
+    uploadAnnouncementImage: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return fetchApiUpload<{ announcement: Announcement }>(`/api/v1/admin/announcements/${id}/upload_image`, formData);
+    },
+    removeAnnouncementImage: (id: number) =>
+      fetchApi<{ announcement: Announcement }>(`/api/v1/admin/announcements/${id}/remove_image`, { method: 'DELETE' }, true),
 
     // Organization
     getOrganization: () => fetchApi<Organization>('/api/v1/admin/organization', {}, true),

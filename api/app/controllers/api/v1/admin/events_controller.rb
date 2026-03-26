@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_staff!
-        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :import_results_preview, :import_results, :retranslate, :clone]
+        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :import_results_preview, :import_results, :retranslate, :clone]
 
         def index
           org = Organization.first
@@ -82,6 +82,20 @@ module Api
           end
 
           @event.hero_image.attach(params[:image])
+          render json: { event: @event.reload.as_json }
+        end
+
+        def upload_poster
+          unless params[:image].present?
+            return render json: { error: "No image provided" }, status: :unprocessable_entity
+          end
+
+          @event.poster_image.attach(params[:image])
+          render json: { event: @event.reload.as_json }
+        end
+
+        def remove_poster
+          @event.poster_image.purge if @event.poster_image.attached?
           render json: { event: @event.reload.as_json }
         end
 

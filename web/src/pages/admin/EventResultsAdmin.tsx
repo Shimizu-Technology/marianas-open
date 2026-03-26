@@ -253,7 +253,8 @@ export default function EventResultsAdmin() {
               {formatDate(event.date)} &middot; {event.city}, {event.country} &middot;
               <span className={`ml-1 px-1.5 py-0.5 text-[10px] ${
                 event.status === 'completed' ? 'bg-green-500/10 text-green-400' :
-                event.status === 'published' ? 'bg-blue-500/10 text-blue-400' :
+                event.status === 'live' ? 'bg-red-500/10 text-red-400' :
+                event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
                 'bg-white/5 text-text-muted'
               }`}>{event.status}</span>
             </p>

@@ -177,7 +177,7 @@ export default function VideosAdmin() {
 
       {editing !== null ? (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-surface border border-white/5">
-          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <div className="px-4 sm:px-5 py-4 border-b border-white/5 flex items-center justify-between">
             <h2 className="font-heading text-sm font-semibold text-text-primary">
               {editing === 'new' ? 'New Video' : 'Edit Video'}
             </h2>
@@ -185,7 +185,7 @@ export default function VideosAdmin() {
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="p-5 space-y-4">
+          <div className="p-4 sm:p-5 space-y-4">
             <div>
               <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Title</label>
               <input
@@ -349,8 +349,8 @@ export default function VideosAdmin() {
           ) : (
             <div className="divide-y divide-white/5">
               {videos.map(video => (
-                <div key={video.id} className="px-5 py-3 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div key={video.id} className="px-4 sm:px-5 py-3 flex items-start sm:items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
                     {video.youtube_video_id ? (
                       <img
                         src={`https://img.youtube.com/vi/${video.youtube_video_id}/default.jpg`}
@@ -367,15 +367,15 @@ export default function VideosAdmin() {
                         <span className="text-sm text-text-primary font-medium truncate">{video.title}</span>
                         {video.featured && <Star className="w-3 h-3 text-gold shrink-0 fill-gold" />}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-text-muted mt-0.5">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted mt-0.5">
                         {video.belt_rank && (
                           <span className={`px-1.5 py-0.5 text-[10px] font-bold uppercase ${BELT_COLORS[video.belt_rank] || ''}`}>
                             {video.belt_rank}
                           </span>
                         )}
-                        {video.event_name && <span>{video.event_name}</span>}
+                        {video.event_name && <span className="truncate max-w-[120px] sm:max-w-none">{video.event_name}</span>}
                         {video.competitor_1_name && video.competitor_2_name && (
-                          <span>{video.competitor_1_name} vs {video.competitor_2_name}</span>
+                          <span className="truncate max-w-[140px] sm:max-w-none">{video.competitor_1_name} vs {video.competitor_2_name}</span>
                         )}
                         <span className={video.status === 'draft' ? 'text-yellow-400' : 'text-green-400'}>
                           {video.status}

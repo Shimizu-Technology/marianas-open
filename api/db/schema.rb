@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_26_051843) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_26_080000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "academies", force: :cascade do |t|
+    t.jsonb "aliases", default: []
     t.string "country_code", limit: 2
     t.datetime "created_at", null: false
     t.text "description"
@@ -25,6 +26,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_051843) do
     t.string "slug", null: false
     t.datetime "updated_at", null: false
     t.string "website_url"
+    t.index ["aliases"], name: "index_academies_on_aliases", using: :gin
     t.index ["country_code"], name: "index_academies_on_country_code"
     t.index ["slug"], name: "index_academies_on_slug", unique: true
   end
@@ -55,6 +57,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_051843) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "announcements", force: :cascade do |t|
+    t.boolean "active", default: true
+    t.string "announcement_type", default: "info"
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.datetime "ends_at"
+    t.string "link_text"
+    t.string "link_url"
+    t.integer "sort_order", default: 0
+    t.datetime "starts_at"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "competitors", force: :cascade do |t|

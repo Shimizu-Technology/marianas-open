@@ -27,6 +27,8 @@ import { useEditingParam } from '../../hooks/useEditingParam'
 type SortField = 'name' | 'date' | 'location' | 'stars' | 'status'
 type SortDir = 'asc' | 'desc'
 
+const DEFAULT_LIVE_STREAM_URL = 'https://www.youtube.com/@themarianasopen/live';
+
 const emptyForm: EventFormData = {
   name: '', slug: '', description: '', date: '', end_date: '',
   venue_name: '', venue_address: '', city: '', country: '', country_code: '',
@@ -96,6 +98,7 @@ export default function EventsAdmin() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
   const [pendingHeroImage, setPendingHeroImage] = useState<File | null>(null)
   const heroInputRef = useRef<HTMLInputElement>(null)
+  const posterInputRef = useRef<HTMLInputElement>(null)
 
   const pendingHeroPreviewUrl = useMemo(
     () => (pendingHeroImage ? URL.createObjectURL(pendingHeroImage) : null),
@@ -641,11 +644,11 @@ export default function EventsAdmin() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-surface border border-white/5"
         >
-          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <div className="px-4 sm:px-5 py-4 border-b border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h2 className="font-heading text-sm font-semibold text-text-primary">
               {editing === 'new' ? 'New Event' : 'Edit Event'}
             </h2>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {typeof editing === 'number' && (
                 <>
                 <Link
@@ -686,7 +689,7 @@ export default function EventsAdmin() {
             </div>
           </div>
 
-          <div className="p-5 space-y-5">
+          <div className="p-4 sm:p-5 space-y-5">
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="Name" value={form.name} onChange={v => updateForm('name', v)} />
@@ -705,7 +708,7 @@ export default function EventsAdmin() {
                 options={[
                   { value: 'draft', label: 'Draft' },
                   { value: 'upcoming', label: 'Upcoming' },
-                  { value: 'published', label: 'Published' },
+                  { value: 'live', label: 'Live' },
                   { value: 'completed', label: 'Completed' },
                   { value: 'cancelled', label: 'Cancelled' },
                 ]}
@@ -773,7 +776,13 @@ export default function EventsAdmin() {
                     <input
                       type="checkbox"
                       checked={form.live_stream_active}
-                      onChange={e => updateForm('live_stream_active', e.target.checked)}
+                      onChange={e => {
+                        const checked = e.target.checked;
+                        updateForm('live_stream_active', checked);
+                        if (checked && !form.live_stream_url) {
+                          updateForm('live_stream_url', DEFAULT_LIVE_STREAM_URL);
+                        }
+                      }}
                       className="accent-gold"
                     />
                     <span>Stream is LIVE now</span>
@@ -1158,6 +1167,56 @@ export default function EventsAdmin() {
               )
             })()}
 
+            {/* Poster Image (for Calendar qualifying series) */}
+            {typeof editing === 'number' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                  <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">Poster Image</label>
+                  <input ref={posterInputRef} type="file" accept="image/*" onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file || typeof editing !== 'number') return
+                    try {
+                      await api.admin.uploadEventPoster(editing, file)
+                      await loadEvents()
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : 'Poster upload failed')
+                    }
+                  }} className="hidden" />
+                  <button
+                    type="button"
+                    onClick={() => posterInputRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-text-secondary rounded transition-colors"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    {currentEvent?.poster_image_url ? 'Change Poster' : 'Upload Poster'}
+                  </button>
+                  {currentEvent?.poster_image_url && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (typeof editing !== 'number') return
+                        try {
+                          await api.admin.removeEventPoster(editing)
+                          await loadEvents()
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : 'Failed to remove poster')
+                        }
+                      }}
+                      className="text-text-muted hover:text-red-400 transition-colors text-xs"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] text-text-muted">Promotional poster shown in the "Qualifying Series" section on the Calendar page.</p>
+                {currentEvent?.poster_image_url && (
+                  <div className="w-32 aspect-[3/4] border border-white/10 overflow-hidden">
+                    <img src={resolveMediaUrl(currentEvent.poster_image_url) || ''} alt="Poster" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Schedule Items */}
             <div className="border border-white/5">
               <button
@@ -1175,22 +1234,24 @@ export default function EventsAdmin() {
                 <div className="p-4 border-t border-white/5 space-y-3">
                   {form.event_schedule_items_attributes.map((item, idx) =>
                     item._destroy ? null : (
-                      <div key={idx} className="flex gap-3 items-start">
+                      <div key={idx} className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start">
                         <input
                           value={item.time}
                           onChange={e => updateScheduleItem(idx, 'time', e.target.value)}
                           placeholder="9:00 AM"
-                          className="w-44 shrink-0 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                          className="w-full sm:w-44 sm:shrink-0 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
                         />
-                        <input
-                          value={item.description}
-                          onChange={e => updateScheduleItem(idx, 'description', e.target.value)}
-                          placeholder="Description"
-                          className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <button onClick={() => removeScheduleItem(idx)} className="p-1.5 text-text-muted hover:text-red-400">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex gap-2 sm:gap-3 flex-1 items-start">
+                          <input
+                            value={item.description}
+                            onChange={e => updateScheduleItem(idx, 'description', e.target.value)}
+                            placeholder="Description"
+                            className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                          />
+                          <button onClick={() => removeScheduleItem(idx)} className="p-1.5 text-text-muted hover:text-red-400">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     )
                   )}
@@ -1221,22 +1282,24 @@ export default function EventsAdmin() {
                 <div className="p-4 border-t border-white/5 space-y-3">
                   {form.prize_categories_attributes.map((item, idx) =>
                     item._destroy ? null : (
-                      <div key={idx} className="flex gap-3 items-start">
+                      <div key={idx} className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start">
                         <input
                           value={item.name}
                           onChange={e => updatePrizeCategory(idx, 'name', e.target.value)}
                           placeholder="Category name"
                           className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
                         />
-                        <input
-                          value={item.amount}
-                          onChange={e => updatePrizeCategory(idx, 'amount', e.target.value)}
-                          placeholder="Amount (0 if non-cash)"
-                          className="w-28 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <button onClick={() => removePrizeCategory(idx)} className="p-1.5 text-text-muted hover:text-red-400">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex gap-2 sm:gap-3 items-start">
+                          <input
+                            value={item.amount}
+                            onChange={e => updatePrizeCategory(idx, 'amount', e.target.value)}
+                            placeholder="Amount (0 if non-cash)"
+                            className="w-full sm:w-28 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                          />
+                          <button onClick={() => removePrizeCategory(idx)} className="p-1.5 text-text-muted hover:text-red-400">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     )
                   )}
@@ -1251,11 +1314,11 @@ export default function EventsAdmin() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {saving ? 'Saving...' : 'Save'}
@@ -1339,7 +1402,7 @@ export default function EventsAdmin() {
                     <td className="px-5 py-3">
                       <span className={`text-xs px-2 py-0.5 ${
                             event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
-                        event.status === 'published' ? 'bg-green-500/10 text-green-400' :
+                            event.status === 'live' ? 'bg-red-500/10 text-red-400 animate-pulse' :
                             event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
                             event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
                             'bg-white/5 text-text-muted'
@@ -1396,7 +1459,7 @@ export default function EventsAdmin() {
                       </div>
                       <span className={`text-xs px-2 py-0.5 shrink-0 ${
                         event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
-                        event.status === 'published' ? 'bg-green-500/10 text-green-400' :
+                        event.status === 'live' ? 'bg-red-500/10 text-red-400 animate-pulse' :
                         event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
                         event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
                         'bg-white/5 text-text-muted'

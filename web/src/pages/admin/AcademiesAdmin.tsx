@@ -9,7 +9,7 @@ import { useEditingParam } from '../../hooks/useEditingParam'
 
 const emptyForm: AcademyFormData = {
   name: '', country_code: '', location: '', website_url: '',
-  instagram_url: '', facebook_url: '', description: '',
+  instagram_url: '', facebook_url: '', description: '', aliases: [],
 }
 
 const PAGE_SIZE = 50
@@ -75,7 +75,7 @@ export default function AcademiesAdmin() {
           name: a.name, country_code: a.country_code || '',
           location: a.location || '', website_url: a.website_url || '',
           instagram_url: a.instagram_url || '', facebook_url: a.facebook_url || '',
-          description: a.description || '',
+          description: a.description || '', aliases: a.aliases || [],
         })
       }
       setDetailLoading(true)
@@ -92,7 +92,8 @@ export default function AcademiesAdmin() {
     if (typeof editing !== 'number') return
     setSaving(true); setError('')
     try {
-      await api.admin.updateAcademy(editing, form)
+      const payload = { ...form, aliases: form.aliases.filter(s => s.trim() !== '') }
+      await api.admin.updateAcademy(editing, payload)
       setSuccess('Academy updated')
       await load()
       setTimeout(() => setSuccess(''), 3000)
@@ -159,7 +160,7 @@ export default function AcademiesAdmin() {
 
       {editing !== null && typeof editing === 'number' ? (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-surface border border-white/5">
-          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <div className="px-4 sm:px-5 py-4 border-b border-white/5 flex items-center justify-between">
             <h2 className="font-heading text-sm font-semibold text-text-primary">Edit Academy Profile</h2>
             <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
               <X className="w-4 h-4" />
@@ -167,7 +168,7 @@ export default function AcademiesAdmin() {
           </div>
 
           {currentAcademy && (currentAcademy.total_points > 0) && (
-            <div className="px-5 py-3 bg-white/[0.02] border-b border-white/5">
+            <div className="px-4 sm:px-5 py-3 bg-white/[0.02] border-b border-white/5">
               <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Team Stats (computed from results)</p>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 <div className="text-center p-2 bg-white/[0.03] border border-white/5">
@@ -194,7 +195,7 @@ export default function AcademiesAdmin() {
             </div>
           )}
 
-          <div className="p-5 space-y-4">
+          <div className="p-4 sm:p-5 space-y-4">
             {/* Athletes list */}
             {detailLoading ? (
               <div className="flex items-center gap-2 py-4 text-text-muted text-xs"><Loader2 className="w-3 h-3 animate-spin" /> Loading athletes...</div>
@@ -228,7 +229,7 @@ export default function AcademiesAdmin() {
                 <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                   className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Country Code</label>
                   <input value={form.country_code} onChange={e => setForm(p => ({ ...p, country_code: e.target.value.toUpperCase().slice(0, 2) }))}
@@ -243,7 +244,7 @@ export default function AcademiesAdmin() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Website</label>
                 <input value={form.website_url} onChange={e => setForm(p => ({ ...p, website_url: e.target.value }))}
@@ -268,6 +269,16 @@ export default function AcademiesAdmin() {
               <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3}
                 className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none resize-none" />
             </div>
+            <div>
+              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Aliases (previous / alternate names)</label>
+              <textarea
+                value={form.aliases.join('\n')}
+                onChange={e => setForm(p => ({ ...p, aliases: e.target.value.split('\n').map(s => s.trim()) }))}
+                rows={3}
+                placeholder="One name per line, e.g.&#10;Atos Jiu-Jitsu Guam&#10;Atos BJJ Guam"
+                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none" />
+              <p className="text-[10px] text-text-muted mt-1">When importing results, competitors from these names will be linked to this academy.</p>
+            </div>
 
             <ImageUpload currentUrl={currentAcademy?.logo_url || null} onUpload={handleLogoUpload} label="Logo" />
 
@@ -284,7 +295,7 @@ export default function AcademiesAdmin() {
       ) : (
         <>
           <div className="mb-4">
-            <div className="relative max-w-sm">
+            <div className="relative sm:max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input type="text" value={searchInput} onChange={e => handleSearchChange(e.target.value)}
                 placeholder="Search academies..."
@@ -358,7 +369,7 @@ export default function AcademiesAdmin() {
           </div>
 
           {/* Pagination */}
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <p className="text-xs text-text-muted">
               Showing {total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total} academies
             </p>

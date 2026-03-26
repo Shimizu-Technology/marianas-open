@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Instagram, Youtube, Trophy, Medal, ChevronDown, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Search, Trophy, Medal, ChevronDown, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
-import type { Competitor, CompetitorDetail } from '../services/api';
+import type { Competitor } from '../services/api';
 import ScrollReveal from '../components/ScrollReveal';
 import SEO from '../components/SEO';
 
@@ -53,201 +54,57 @@ function MedalRow({ gold, silver, bronze }: { gold: number; silver: number; bron
   );
 }
 
-function CompetitorCard({ competitor, onClick }: { competitor: Competitor; onClick: () => void }) {
+function CompetitorCard({ competitor }: { competitor: Competitor }) {
   return (
-    <motion.button
-      layout
-      onClick={onClick}
-      className="bg-surface border border-white/5 hover:border-gold/20 transition-all duration-300 group text-left w-full"
-      whileHover={{ y: -2 }}
-    >
-      <div className="aspect-[4/3] bg-white/[0.02] overflow-hidden relative">
-        {competitor.photo_url ? (
-          <img src={competitor.photo_url} alt={competitor.full_name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-4xl font-heading font-bold text-white/10">
-              {competitor.first_name[0]}{competitor.last_name[0]}
-            </span>
-          </div>
-        )}
-        {competitor.belt_rank && (
-          <div className="absolute top-3 right-3"><BeltBadge rank={competitor.belt_rank} /></div>
-        )}
-        {competitor.total_points > 0 && (
-          <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-2 py-1 text-xs font-mono text-gold font-semibold">
-            {competitor.total_points} pts
-          </div>
-        )}
-      </div>
-
-      <div className="p-4">
-        <div className="flex items-center gap-2 mb-1">
-          {competitor.country_code && <CountryFlag code={competitor.country_code} />}
-          <h3 className="text-sm font-semibold text-text-primary truncate">
-            {competitor.first_name} {competitor.last_name}
-          </h3>
-        </div>
-        {competitor.nickname && (
-          <p className="text-xs text-gold/70 mb-1">&quot;{competitor.nickname}&quot;</p>
-        )}
-        {competitor.academy && (
-          <p className="text-xs text-text-muted truncate mb-2">{competitor.academy}</p>
-        )}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-text-secondary">
-            {competitor.events_competed} event{competitor.events_competed !== 1 ? 's' : ''}
-          </span>
-          <MedalRow gold={competitor.gold_medals} silver={competitor.silver_medals} bronze={competitor.bronze_medals} />
-        </div>
-      </div>
-    </motion.button>
-  );
-}
-
-function CompetitorDetailModal({ competitorId, onClose }: { competitorId: number; onClose: () => void }) {
-  const { t } = useTranslation();
-  const [detail, setDetail] = useState<CompetitorDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(false);
-    api.getCompetitor(competitorId)
-      .then(setDetail)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, [competitorId]);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
+    <Link to={`/competitors/${competitor.id}`}>
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-        onClick={e => e.stopPropagation()}
-        className="bg-navy-900 border border-white/10 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        layout
+        className="bg-surface border border-white/5 hover:border-gold/20 transition-all duration-300 group text-left w-full"
+        whileHover={{ y: -2 }}
       >
-        {error ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-3">
-            <p className="text-sm text-red-400">Failed to load competitor details.</p>
-            <button onClick={onClose} className="text-sm text-text-muted hover:text-text-primary transition-colors">
-              Close
-            </button>
-          </div>
-        ) : loading || !detail ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="w-6 h-6 text-gold animate-spin" />
-          </div>
-        ) : (
-          <>
-            <div className="relative">
-              <div className="aspect-[3/1] bg-white/[0.02] overflow-hidden">
-                {detail.photo_url ? (
-                  <img src={detail.photo_url} alt={detail.full_name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/[0.03] to-transparent">
-                    <span className="text-6xl font-heading font-bold text-white/10">
-                      {detail.first_name[0]}{detail.last_name[0]}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <button onClick={onClose}
-                className="absolute top-3 right-3 p-2 bg-black/50 text-white hover:bg-black/70 transition-colors">
-                <X className="w-4 h-4" />
-              </button>
+        <div className="aspect-[4/3] bg-white/[0.02] overflow-hidden relative">
+          {competitor.photo_url ? (
+            <img src={competitor.photo_url} alt={competitor.full_name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-4xl font-heading font-bold text-white/10">
+                {competitor.first_name[0]}{competitor.last_name[0]}
+              </span>
             </div>
-
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    {detail.country_code && <CountryFlag code={detail.country_code} />}
-                    <h2 className="text-xl font-heading font-bold text-text-primary">
-                      {detail.first_name} {detail.last_name}
-                    </h2>
-                  </div>
-                  {detail.nickname && <p className="text-sm text-gold/80">&quot;{detail.nickname}&quot;</p>}
-                  {detail.academy && <p className="text-sm text-text-secondary mt-1">{detail.academy}</p>}
-                </div>
-                {detail.belt_rank && <BeltBadge rank={detail.belt_rank} />}
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-                <div className="bg-white/[0.03] border border-white/5 p-3 text-center">
-                  <div className="text-lg font-bold text-gold font-mono">{detail.total_points}</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wide">Points</div>
-                </div>
-                <div className="bg-white/[0.03] border border-white/5 p-3 text-center">
-                  <div className="text-lg font-bold text-yellow-400">{detail.gold_medals}</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wide">{t('competitors.gold')}</div>
-                </div>
-                <div className="bg-white/[0.03] border border-white/5 p-3 text-center">
-                  <div className="text-lg font-bold text-gray-300">{detail.silver_medals}</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wide">{t('competitors.silver')}</div>
-                </div>
-                <div className="bg-white/[0.03] border border-white/5 p-3 text-center">
-                  <div className="text-lg font-bold text-orange-400">{detail.bronze_medals}</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wide">{t('competitors.bronze')}</div>
-                </div>
-                <div className="bg-white/[0.03] border border-white/5 p-3 text-center">
-                  <div className="text-lg font-bold text-text-primary">{detail.events_competed}</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wide">Events</div>
-                </div>
-              </div>
-
-              {detail.bio && (
-                <p className="text-sm text-text-secondary leading-relaxed mb-6">{detail.bio}</p>
-              )}
-
-              {detail.results && detail.results.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-text-primary mb-3 uppercase tracking-wider">Tournament Results</h3>
-                  <div className="space-y-1 max-h-64 overflow-y-auto">
-                    {detail.results.map((r, i) => (
-                      <div key={i} className="flex items-center justify-between text-xs py-2 px-3 bg-white/[0.02] border border-white/5">
-                        <div className="flex-1 min-w-0">
-                          <span className="text-text-primary font-medium">{r.event_name}</span>
-                          <span className="text-text-muted ml-2">{r.division}</span>
-                        </div>
-                        <div className="flex items-center gap-3 ml-2 shrink-0">
-                          <span className={`font-semibold ${r.placement === 1 ? 'text-yellow-400' : r.placement === 2 ? 'text-gray-300' : 'text-orange-400'}`}>
-                            {r.placement === 1 ? '1st' : r.placement === 2 ? '2nd' : '3rd'}
-                          </span>
-                          <span className="text-gold/70 font-mono">+{r.points_earned}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {(detail.instagram_url || detail.youtube_url) && (
-                <div className="flex items-center gap-3 pt-4 border-t border-white/5">
-                  {detail.instagram_url && (
-                    <a href={detail.instagram_url} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-text-secondary hover:text-gold transition-colors">
-                      <Instagram className="w-4 h-4" /> Instagram
-                    </a>
-                  )}
-                  {detail.youtube_url && (
-                    <a href={detail.youtube_url} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-text-secondary hover:text-gold transition-colors">
-                      <Youtube className="w-4 h-4" /> YouTube
-                    </a>
-                  )}
-                </div>
-              )}
+          )}
+          {competitor.belt_rank && (
+            <div className="absolute top-3 right-3"><BeltBadge rank={competitor.belt_rank} /></div>
+          )}
+          {competitor.total_points > 0 && (
+            <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-2 py-1 text-xs font-mono text-gold font-semibold">
+              {competitor.total_points} pts
             </div>
-          </>
-        )}
+          )}
+        </div>
+
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-1">
+            {competitor.country_code && <CountryFlag code={competitor.country_code} />}
+            <h3 className="text-sm font-semibold text-text-primary truncate">
+              {competitor.first_name} {competitor.last_name}
+            </h3>
+          </div>
+          {competitor.nickname && (
+            <p className="text-xs text-gold/70 mb-1">&quot;{competitor.nickname}&quot;</p>
+          )}
+          {competitor.academy && (
+            <p className="text-xs text-text-muted truncate mb-2">{competitor.academy}</p>
+          )}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-text-secondary">
+              {competitor.events_competed} event{competitor.events_competed !== 1 ? 's' : ''}
+            </span>
+            <MedalRow gold={competitor.gold_medals} silver={competitor.silver_medals} bronze={competitor.bronze_medals} />
+          </div>
+        </div>
       </motion.div>
-    </motion.div>
+    </Link>
   );
 }
 
@@ -262,7 +119,6 @@ export default function CompetitorsPage() {
   const [search, setSearch] = useState('');
   const [beltFilter, setBeltFilter] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
-  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [countries, setCountries] = useState<string[]>([]);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -384,7 +240,7 @@ export default function CompetitorsPage() {
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {competitors.map((c, i) => (
                 <ScrollReveal key={c.id} delay={Math.min(i * 0.03, 0.3)}>
-                  <CompetitorCard competitor={c} onClick={() => setSelectedId(c.id)} />
+                  <CompetitorCard competitor={c} />
                 </ScrollReveal>
               ))}
             </motion.div>
@@ -408,10 +264,6 @@ export default function CompetitorsPage() {
           </>
         )}
       </div>
-
-      <AnimatePresence>
-        {selectedId && <CompetitorDetailModal competitorId={selectedId} onClose={() => setSelectedId(null)} />}
-      </AnimatePresence>
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, useCallback } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LiveStreamBanner from './components/LiveStreamBanner';
+import AnnouncementBar from './components/AnnouncementBar';
 import MobileLanguageFAB from './components/MobileLanguageFAB';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -16,7 +17,6 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const WatchPage = lazy(() => import('./pages/WatchPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const RankingsPage = lazy(() => import('./pages/RankingsPage'));
-const CompetitorProfilePage = lazy(() => import('./pages/CompetitorProfilePage'));
 const CompetitorsPage = lazy(() => import('./pages/CompetitorsPage'));
 const TeamsPage = lazy(() => import('./pages/TeamsPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
@@ -24,19 +24,56 @@ const RulesPage = lazy(() => import('./pages/RulesPage'));
 const PastEventsPage = lazy(() => import('./pages/PastEventsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-// Admin
-const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const EventsAdmin = lazy(() => import('./pages/admin/EventsAdmin'));
-const SponsorsAdmin = lazy(() => import('./pages/admin/SponsorsAdmin'));
-const VideosAdmin = lazy(() => import('./pages/admin/VideosAdmin'));
-const UsersAdmin = lazy(() => import('./pages/admin/UsersAdmin'));
-const ImagesAdmin = lazy(() => import('./pages/admin/ImagesAdmin'));
-const SettingsAdmin = lazy(() => import('./pages/admin/SettingsAdmin'));
-const ContentAdmin = lazy(() => import('./pages/admin/ContentAdmin'));
-const CompetitorsAdmin = lazy(() => import('./pages/admin/CompetitorsAdmin'));
-const AcademiesAdmin = lazy(() => import('./pages/admin/AcademiesAdmin'));
-const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
+import CompetitorProfilePage from './pages/CompetitorProfilePage';
+import AcademyPage from './pages/AcademyPage';
+
+// Admin — eagerly imported so page transitions are instant
+import AdminLayout from './layouts/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import EventsAdmin from './pages/admin/EventsAdmin';
+import SponsorsAdmin from './pages/admin/SponsorsAdmin';
+import VideosAdmin from './pages/admin/VideosAdmin';
+import UsersAdmin from './pages/admin/UsersAdmin';
+import ImagesAdmin from './pages/admin/ImagesAdmin';
+import SettingsAdmin from './pages/admin/SettingsAdmin';
+import ContentAdmin from './pages/admin/ContentAdmin';
+import CompetitorsAdmin from './pages/admin/CompetitorsAdmin';
+import AcademiesAdmin from './pages/admin/AcademiesAdmin';
+import AnnouncementsAdmin from './pages/admin/AnnouncementsAdmin';
+import EventResultsAdmin from './pages/admin/EventResultsAdmin';
+
+function BannerLayout({ children }: { children: React.ReactNode }) {
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const [bannerHeight, setBannerHeight] = useState(0);
+
+  const measure = useCallback(() => {
+    if (bannerRef.current) {
+      setBannerHeight(bannerRef.current.offsetHeight);
+    }
+  }, []);
+
+  useEffect(() => {
+    measure();
+    const observer = new MutationObserver(measure);
+    if (bannerRef.current) {
+      observer.observe(bannerRef.current, { childList: true, subtree: true, attributes: true });
+    }
+    window.addEventListener('resize', measure);
+    return () => { observer.disconnect(); window.removeEventListener('resize', measure); };
+  }, [measure]);
+
+  return (
+    <div className="min-h-screen bg-navy-900 text-text-primary">
+      <Header />
+      <div ref={bannerRef} className="fixed top-16 left-0 right-0 z-40 flex flex-col">
+        <LiveStreamBanner />
+        <AnnouncementBar />
+      </div>
+      {bannerHeight > 0 && <div style={{ height: bannerHeight }} />}
+      {children}
+    </div>
+  );
+}
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -66,8 +103,10 @@ function AnimatedRoutes() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/rankings" element={<RankingsPage />} />
             <Route path="/competitors" element={<CompetitorsPage />} />
-            <Route path="/teams" element={<TeamsPage />} />
             <Route path="/competitors/profile" element={<CompetitorProfilePage />} />
+            <Route path="/competitors/:id" element={<CompetitorProfilePage />} />
+            <Route path="/teams" element={<TeamsPage />} />
+            <Route path="/teams/:slug" element={<AcademyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/rules" element={<RulesPage />} />
             <Route path="/watch" element={<WatchPage />} />
@@ -92,9 +131,7 @@ export default function App() {
           path="/admin/*"
           element={
             <ProtectedRoute requiredRole="staff">
-              <Suspense fallback={<LoadingSpinner />}>
-                <AdminLayout />
-              </Suspense>
+              <AdminLayout />
             </ProtectedRoute>
           }
         >
@@ -114,6 +151,7 @@ export default function App() {
               </ProtectedRoute>
             )}
           />
+          <Route path="announcements" element={<AnnouncementsAdmin />} />
           <Route path="content" element={<ContentAdmin />} />
           <Route path="settings" element={<SettingsAdmin />} />
         </Route>
@@ -123,15 +161,13 @@ export default function App() {
           path="*"
           element={
             <OrganizationProvider>
-              <div className="min-h-screen bg-navy-900 text-text-primary">
-                <Header />
-                <LiveStreamBanner />
+              <BannerLayout>
                 <main>
                   <AnimatedRoutes />
                 </main>
                 <Footer />
                 <MobileLanguageFAB />
-              </div>
+              </BannerLayout>
             </OrganizationProvider>
           }
         />

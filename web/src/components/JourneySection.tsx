@@ -17,7 +17,7 @@ import { useTranslatedField } from '../hooks/useTranslatedField';
 import ScrollReveal from './ScrollReveal';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 
-type StopStatus = 'completed' | 'next' | 'upcoming';
+type StopStatus = 'completed' | 'live' | 'next' | 'upcoming' | 'cancelled';
 
 interface JourneyStop {
   event: Event;
@@ -25,6 +25,10 @@ interface JourneyStop {
 }
 
 function getStopStatus(event: Event): StopStatus {
+  if (event.status === 'cancelled') return 'cancelled';
+  if (event.status === 'live') return 'live';
+  if (event.status === 'completed') return 'completed';
+
   const now = new Date();
   const eventDate = parseDateLocalSafe(event.date);
   const endDate = event.end_date ? parseDateLocalSafe(event.end_date) : eventDate;
@@ -48,8 +52,12 @@ function StatusIcon({ status }: { status: StopStatus }) {
   switch (status) {
     case 'completed':
       return <CircleCheck size={16} className="text-green-400" />;
+    case 'live':
+      return <CircleDot size={16} className="text-red-400" />;
     case 'next':
       return <CircleDot size={16} className="text-gold-500" />;
+    case 'cancelled':
+      return <Circle size={16} className="text-red-400/50" />;
     case 'upcoming':
       return <Circle size={16} className="text-text-muted" />;
   }
@@ -74,14 +82,18 @@ function StatusBadge({
 
   const styles: Record<StopStatus, string> = {
     completed: 'bg-green-500/10 text-green-400 border-green-500/20',
+    live: 'bg-red-500/15 text-red-400 border-red-500/30 animate-pulse',
     next: 'bg-gold-500/10 text-gold-400 border-gold-500/20',
     upcoming: 'bg-white/5 text-text-muted border-white/10',
+    cancelled: 'bg-red-500/5 text-red-400/60 border-red-500/10 line-through',
   };
 
   const labels: Record<StopStatus, string> = {
     completed: t('journey.completed'),
+    live: 'LIVE',
     next: t('journey.next'),
     upcoming: t('journey.upcoming'),
+    cancelled: 'Cancelled',
   };
 
   return (
@@ -128,14 +140,18 @@ function MobileStop({
               ? 'bg-gold-500 border-gold-500 shadow-[0_0_12px_rgba(212,168,67,0.5)]'
               : status === 'completed'
                 ? 'bg-green-400 border-green-400'
-                : status === 'next'
-                  ? 'bg-gold-500 border-gold-500'
-                  : 'bg-navy-800 border-white/20'
+                : status === 'live'
+                  ? 'bg-red-400 border-red-400'
+                  : status === 'next'
+                    ? 'bg-gold-500 border-gold-500'
+                    : status === 'cancelled'
+                      ? 'bg-red-400/40 border-red-400/40'
+                      : 'bg-navy-800 border-white/20'
           }`}
         >
-          {status === 'next' && !isMain && (
+          {(status === 'next' || status === 'live') && !isMain && (
             <motion.div
-              className="absolute inset-0 w-4 h-4 rounded-full bg-gold-500/30"
+              className={`absolute inset-0 w-4 h-4 rounded-full ${status === 'live' ? 'bg-red-400/30' : 'bg-gold-500/30'}`}
               animate={{ scale: [1, 2, 1], opacity: [0.6, 0, 0.6] }}
               transition={{ repeat: Infinity, duration: 2 }}
             />
@@ -159,9 +175,13 @@ function MobileStop({
       <Link
         to={isMain ? '/event' : `/events/${event.slug}`}
         className={`group flex-1 mb-4 p-4 border transition-all duration-300 hover:border-gold-500/30 ${
-          isMain
-            ? 'bg-gradient-to-r from-gold-500/10 to-transparent border-gold-500/20'
-            : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
+          status === 'cancelled'
+            ? 'bg-navy-900/30 border-red-500/10 opacity-60'
+            : status === 'live'
+              ? 'bg-navy-900/50 border-red-500/20 hover:border-red-500/40'
+              : isMain
+                ? 'bg-gradient-to-r from-gold-500/10 to-transparent border-gold-500/20'
+                : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
         }`}
       >
         <div className="flex items-center justify-between mb-2">
@@ -171,6 +191,7 @@ function MobileStop({
 
         <h3
           className={`font-heading font-bold text-base mb-1 ${
+            status === 'cancelled' ? 'text-text-muted line-through' :
             isMain ? 'text-gold-500' : 'text-text-primary'
           }`}
         >
@@ -234,18 +255,22 @@ function DesktopStop({
               ? 'w-8 h-8 bg-gold-500 border-gold-500 shadow-[0_0_16px_rgba(212,168,67,0.5)]'
               : status === 'completed'
                 ? 'w-5 h-5 bg-green-400 border-green-400'
-                : status === 'next'
-                  ? 'w-5 h-5 bg-gold-500 border-gold-500'
-                  : 'w-5 h-5 bg-navy-800 border-white/20'
+                : status === 'live'
+                  ? 'w-5 h-5 bg-red-400 border-red-400'
+                  : status === 'next'
+                    ? 'w-5 h-5 bg-gold-500 border-gold-500'
+                    : status === 'cancelled'
+                      ? 'w-5 h-5 bg-red-400/40 border-red-400/40'
+                      : 'w-5 h-5 bg-navy-800 border-white/20'
           }`}
         >
           {isMain && (
             <Trophy size={14} className="absolute inset-0 m-auto text-navy-900" />
           )}
         </div>
-        {status === 'next' && (
+        {(status === 'next' || status === 'live') && (
           <motion.div
-            className={`absolute rounded-full bg-gold-500/30 ${isMain ? 'inset-0' : '-inset-1'}`}
+            className={`absolute rounded-full ${status === 'live' ? 'bg-red-400/30' : 'bg-gold-500/30'} ${isMain ? 'inset-0' : '-inset-1'}`}
             animate={{ scale: [1, 1.8, 1], opacity: [0.5, 0, 0.5] }}
             transition={{ repeat: Infinity, duration: 2 }}
           />
@@ -256,9 +281,13 @@ function DesktopStop({
       <Link
         to={isMain ? '/event' : `/events/${event.slug}`}
         className={`group w-full p-4 border text-center transition-all duration-300 hover:border-gold-500/30 ${
-          isMain
-            ? 'bg-gradient-to-b from-gold-500/10 to-transparent border-gold-500/20'
-            : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
+          status === 'cancelled'
+            ? 'bg-navy-900/30 border-red-500/10 opacity-60'
+            : status === 'live'
+              ? 'bg-navy-900/50 border-red-500/20 hover:border-red-500/40'
+              : isMain
+                ? 'bg-gradient-to-b from-gold-500/10 to-transparent border-gold-500/20'
+                : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
         }`}
       >
         <div className="flex justify-center mb-2">
@@ -267,6 +296,7 @@ function DesktopStop({
 
         <h3
           className={`font-heading font-bold text-sm mb-1 leading-tight ${
+            status === 'cancelled' ? 'text-text-muted line-through' :
             isMain ? 'text-gold-500 text-base' : 'text-text-primary'
           }`}
         >
@@ -319,6 +349,9 @@ export default function JourneySection({ events }: { events: Event[] }) {
       .sort((a, b) => parseDateLocalSafe(a.date).getTime() - parseDateLocalSafe(b.date).getTime())
       .map((event) => {
         let status = getStopStatus(event);
+        if (status === 'cancelled' || status === 'live') {
+          return { event, status };
+        }
         // Override: only the first non-completed event gets "next"
         if (status === 'next' || (status === 'upcoming' && !foundNext)) {
           if (!foundNext) {

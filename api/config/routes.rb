@@ -10,6 +10,7 @@ Rails.application.routes.draw do
       resources :competitors, only: [:index, :show]
       resources :academies, only: [:index, :show]
       resources :videos, only: [:index, :show]
+      resources :announcements, only: [:index]
       resources :site_contents, only: [:index], path: 'site-contents'
       resources :site_images, only: [:index], path: 'site-images'
       get 'rankings/competitor', to: 'rankings#competitor'
@@ -28,6 +29,8 @@ Rails.application.routes.draw do
         resources :events do
           member do
             post :upload_image
+            post :upload_poster
+            delete :remove_poster
             get :import_results_preview
             post :import_results
             post :retranslate
@@ -64,6 +67,12 @@ Rails.application.routes.draw do
         resources :academies, only: [:index, :show, :update, :destroy] do
           member do
             post :upload_logo
+          end
+        end
+        resources :announcements do
+          member do
+            post :upload_image
+            delete :remove_image
           end
         end
         resources :site_contents, path: 'site-contents' do

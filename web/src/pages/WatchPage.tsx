@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   Search, Play, Clock, Filter, ChevronDown, X, Youtube,
-  Camera, UserSearch, Sparkles, Bell,
+  Camera, UserSearch, Sparkles, Bell, ExternalLink,
 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
@@ -14,6 +14,19 @@ import { YOUTUBE_CHANNEL_URL } from '../lib/seo';
 import { api } from '../services/api';
 import type { Video } from '../services/api';
 import { useEvents } from '../hooks/useApi';
+
+const DEFAULT_LIVE_STREAM_URL = 'https://www.youtube.com/@themarianasopen/live';
+
+function extractYouTubeEmbedUrl(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0`;
+  }
+  return null;
+}
 
 const beltColors: Record<string, string> = {
   white: 'bg-white text-gray-900',
@@ -55,7 +68,8 @@ export default function WatchPage() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [expandedVideo, setExpandedVideo] = useState<number | null>(null);
   const { events } = useEvents();
-  const liveEvent = events.find(e => e.live_stream_active && e.live_stream_url);
+  const liveEvent = events.find(e => e.live_stream_active);
+  const liveStreamUrl = liveEvent?.live_stream_url || DEFAULT_LIVE_STREAM_URL;
 
   useEffect(() => {
     api.getVideos()
@@ -154,33 +168,74 @@ export default function WatchPage() {
 
       {/* Live Stream Section */}
       {liveEvent && (
-        <section className="py-8 sm:py-12 bg-linear-to-b from-red-900/20 to-transparent">
+        <section id="live" className="py-8 sm:py-12 scroll-mt-28">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <ScrollReveal>
-              <div className="border border-red-500/30 bg-red-500/5 p-6 sm:p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-                    <span className="text-xs font-heading font-bold uppercase tracking-wider text-red-400">
+              <div className="border border-white/10 bg-surface overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-navy-800/50">
+                  <div className="flex items-center gap-3">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                    </span>
+                    <span className="text-xs font-heading font-bold uppercase tracking-widest text-red-400">
                       Live Now
                     </span>
                   </div>
+                  <a
+                    href={liveStreamUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-text-muted hover:text-gold-400 transition-colors"
+                  >
+                    <Youtube size={14} />
+                    <span className="hidden sm:inline">Watch on YouTube</span>
+                    <ExternalLink size={10} />
+                  </a>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-heading font-black uppercase text-text-primary mb-2">
-                  {liveEvent.name}
-                </h2>
-                <p className="text-text-secondary text-sm mb-6">
-                  {liveEvent.venue_name} · {liveEvent.city}, {liveEvent.country}
-                </p>
-                <a
-                  href={liveEvent.live_stream_url!}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white font-heading font-bold uppercase tracking-wider text-sm hover:bg-red-500 transition-colors"
-                >
-                  <Play size={16} className="fill-current" />
-                  Watch Live Stream
-                </a>
+
+                {(() => {
+                  const embedUrl = extractYouTubeEmbedUrl(liveStreamUrl);
+                  if (embedUrl) {
+                    return (
+                      <div className="relative aspect-video bg-black">
+                        <iframe
+                          src={embedUrl}
+                          title={`Live Stream - ${liveEvent.name}`}
+                          className="absolute inset-0 w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        />
+                      </div>
+                    );
+                  }
+                  return (
+                    <a
+                      href={liveStreamUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block relative aspect-video bg-navy-800 group"
+                    >
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                        <div className="w-20 h-20 rounded-full bg-red-600/20 flex items-center justify-center group-hover:bg-red-600/30 group-hover:scale-110 transition-all duration-300">
+                          <Play size={36} className="text-red-400 ml-1 group-hover:text-red-300" />
+                        </div>
+                        <span className="text-sm text-text-muted group-hover:text-text-secondary transition-colors">
+                          Click to watch on YouTube
+                        </span>
+                      </div>
+                    </a>
+                  );
+                })()}
+
+                <div className="px-5 py-4">
+                  <h2 className="text-lg sm:text-xl font-heading font-bold uppercase text-text-primary mb-1">
+                    {liveEvent.name}
+                  </h2>
+                  <p className="text-text-muted text-sm">
+                    {liveEvent.venue_name} &middot; {liveEvent.city}, {liveEvent.country}
+                  </p>
+                </div>
               </div>
             </ScrollReveal>
           </div>

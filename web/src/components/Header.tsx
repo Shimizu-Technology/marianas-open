@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Shield, Search } from 'lucide-react';  
 import LanguageSwitcher from './LanguageSwitcher';
+import GlobalSearch from './GlobalSearch';
 import { useOrg } from '../contexts/OrganizationContext';
 
 const LOGO_FALLBACK = '/images/logos/mo-logo-white.png';
@@ -11,7 +12,19 @@ export default function Header() {
   const { t } = useTranslation();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const org = useOrg();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const logoSrc = org.logo_url || LOGO_FALLBACK;
 
@@ -28,6 +41,7 @@ export default function Header() {
   ];
 
   return (
+    <>
     <header className="fixed top-0 left-0 right-0 z-50 bg-navy-900/80 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
@@ -58,11 +72,24 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Language + Mobile Toggle */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="text-text-secondary hover:text-text-primary transition-colors p-2 rounded-lg hover:bg-white/5"
+              aria-label="Search"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+            <Link
+              to="/admin"
+              className="hidden xl:flex text-text-muted hover:text-text-primary transition-colors p-2 rounded-lg hover:bg-white/5"
+              aria-label="Admin"
+            >
+              <Shield className="w-4 h-4" />
+            </Link>
             <LanguageSwitcher />
             <button
-              className="xl:hidden text-text-primary p-1"
+              className="xl:hidden text-text-primary p-2"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label={t('nav.toggleMenu', 'Toggle menu')}
             >
@@ -72,9 +99,20 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Nav */}
-      {mobileOpen && (
-        <nav className="xl:hidden bg-navy-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-1">
+      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+    </header>
+
+    {/* Mobile Nav — rendered outside header to avoid z-index stacking issues */}
+    {mobileOpen && (
+      <div
+        className="fixed inset-0 top-16 z-50 xl:hidden"
+        onClick={() => setMobileOpen(false)}
+      >
+        <div className="absolute inset-0 bg-black/40" />
+        <nav
+          className="relative bg-navy-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-1"
+          onClick={e => e.stopPropagation()}
+        >
           {links.map((link) => (
             <Link
               key={link.to}
@@ -89,8 +127,19 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          <div className="border-t border-white/5 mt-2 pt-2">
+            <Link
+              to="/admin"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 py-3 px-4 rounded-md text-sm font-medium text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors"
+            >
+              <Shield className="w-4 h-4" />
+              Admin
+            </Link>
+          </div>
         </nav>
-      )}
-    </header>
+      </div>
+    )}
+    </>
   );
 }

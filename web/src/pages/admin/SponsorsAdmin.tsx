@@ -73,7 +73,7 @@ function SortableSponsorRow({ sponsor, idx, total, onMove, onEdit, onDelete }: S
         isDragging ? 'bg-gold/5 shadow-lg shadow-gold/10 ring-1 ring-gold/20' : 'bg-transparent'
       }`}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0">
         {/* Drag handle + mobile arrows */}
         <div className="flex flex-col items-center gap-0.5 mr-1">
           {/* Mobile: up arrow */}
@@ -109,14 +109,14 @@ function SortableSponsorRow({ sponsor, idx, total, onMove, onEdit, onDelete }: S
             <Handshake className="w-4 h-4 text-text-muted" />
           </div>
         )}
-        <div>
-          <div className="text-sm text-text-primary font-medium">{sponsor.name}</div>
+        <div className="min-w-0">
+          <div className="text-sm text-text-primary font-medium truncate">{sponsor.name}</div>
           {sponsor.website_url && (
-            <div className="text-xs text-text-muted">{sponsor.website_url}</div>
+            <div className="text-xs text-text-muted truncate">{sponsor.website_url}</div>
           )}
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={() => onEdit(sponsor)}
           className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
@@ -404,7 +404,7 @@ export default function SponsorsAdmin() {
 
       {editing !== null ? (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-surface border border-white/5">
-          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <div className="px-4 sm:px-5 py-4 border-b border-white/5 flex items-center justify-between">
             <h2 className="font-heading text-sm font-semibold text-text-primary">
               {editing === 'new' ? 'New Sponsor' : 'Edit Sponsor'}
             </h2>
@@ -412,7 +412,7 @@ export default function SponsorsAdmin() {
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="p-5 space-y-5">
+          <div className="p-4 sm:p-5 space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Name</label>
@@ -453,7 +453,7 @@ export default function SponsorsAdmin() {
             </div>
 
             {/* Compact logo upload + inline preview */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoFileChange} className="hidden" />
               <button
                 type="button"

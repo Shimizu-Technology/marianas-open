@@ -9,7 +9,18 @@ class Academy < ApplicationRecord
   before_validation :generate_slug, if: -> { slug.blank? }
 
   scope :search_by_name, ->(query) {
-    where("name ILIKE ?", "%#{query}%")
+    where(
+      "name ILIKE ? OR EXISTS (SELECT 1 FROM jsonb_array_elements_text(aliases) AS a WHERE a ILIKE ?)",
+      "%#{query}%", "%#{query}%"
+    )
+  }
+
+  scope :matching_name_or_alias, ->(name) {
+    stripped = name.strip
+    where(
+      "LOWER(name) = LOWER(?) OR EXISTS (SELECT 1 FROM jsonb_array_elements_text(aliases) AS a WHERE LOWER(a) = LOWER(?))",
+      stripped, stripped
+    )
   }
 
   scope :with_competitors, -> { where(id: Competitor.where.not(academy_id: nil).select(:academy_id).distinct) }

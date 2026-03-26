@@ -34,8 +34,8 @@ function ResultsTable({ results }: { results: CompetitorProfileResult[] }) {
   const navigate = useNavigate()
   if (!results.length) return <p className="text-xs text-text-muted italic">No tournament results linked.</p>
   return (
-    <div className="max-h-72 overflow-y-auto border border-white/5">
-      <table className="w-full text-xs">
+    <div className="max-h-72 overflow-auto border border-white/5">
+      <table className="w-full text-xs min-w-[480px]">
         <thead className="bg-surface sticky top-0 z-10">
           <tr className="text-text-muted uppercase tracking-wider border-b border-white/5">
             <th className="text-left px-3 py-2 font-medium">Event</th>
@@ -232,7 +232,7 @@ export default function CompetitorsAdmin() {
 
       {editing !== null ? (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-surface border border-white/5">
-          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <div className="px-4 sm:px-5 py-4 border-b border-white/5 flex items-center justify-between">
             <h2 className="font-heading text-sm font-semibold text-text-primary">
               {editing === 'new' ? 'Add Competitor' : 'Edit Competitor Profile'}
             </h2>
@@ -243,7 +243,7 @@ export default function CompetitorsAdmin() {
 
           {/* Computed stats (read-only) for existing competitors */}
           {currentCompetitor && (currentCompetitor.total_points > 0 || currentCompetitor.results_count > 0) && (
-            <div className="px-5 py-3 bg-white/[0.02] border-b border-white/5">
+            <div className="px-4 sm:px-5 py-3 bg-white/[0.02] border-b border-white/5">
               <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Tournament Stats (computed from results)</p>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 <div className="text-center p-2 bg-white/[0.03] border border-white/5">
@@ -270,7 +270,7 @@ export default function CompetitorsAdmin() {
             </div>
           )}
 
-          <div className="p-5 space-y-4">
+          <div className="p-4 sm:p-5 space-y-4">
             {/* Tournament Results */}
             {typeof editing === 'number' && (
               <div>
@@ -286,7 +286,7 @@ export default function CompetitorsAdmin() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">First Name *</label>
                 <input value={form.first_name} onChange={e => setForm(p => ({ ...p, first_name: e.target.value }))}
@@ -303,7 +303,7 @@ export default function CompetitorsAdmin() {
                   className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Belt Rank</label>
                 <select value={form.belt_rank} onChange={e => setForm(p => ({ ...p, belt_rank: e.target.value }))}
@@ -388,7 +388,7 @@ export default function CompetitorsAdmin() {
       ) : (
         <>
           <div className="mb-4">
-            <div className="relative max-w-sm">
+            <div className="relative sm:max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input type="text" value={searchInput} onChange={e => handleSearchChange(e.target.value)}
                 placeholder="Search competitors..."
@@ -480,7 +480,7 @@ export default function CompetitorsAdmin() {
           </div>
 
           {/* Pagination */}
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <p className="text-xs text-text-muted">
               Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total} competitors
             </p>

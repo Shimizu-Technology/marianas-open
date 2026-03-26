@@ -6,10 +6,10 @@ import type { SiteImage } from '../../services/api';
 import ImageUpload from '../../components/ImageUpload';
 
 const PLACEMENTS = [
-  { value: 'hero', label: 'Hero Background', description: 'Homepage full-screen hero background image' },
-  { value: 'featured', label: 'Featured Backgrounds', description: 'Background images for homepage stats tiles and About page image break' },
-  { value: 'about', label: 'About Hero', description: 'About page hero image' },
-  { value: 'event_default', label: 'Event Default', description: 'Fallback hero for events without their own image' },
+  { value: 'hero', label: 'Hero Background', description: 'Homepage full-screen hero background image', singleActive: true },
+  { value: 'featured', label: 'Featured Backgrounds', description: 'Background images for homepage stats tiles and About page image break', singleActive: false },
+  { value: 'about', label: 'About Hero', description: 'About page hero image', singleActive: true },
+  { value: 'event_default', label: 'Event Default', description: 'Fallback hero for events without their own image', singleActive: true },
 ] as const;
 
 interface EditingSiteImage {
@@ -235,11 +235,14 @@ export default function ImagesAdmin() {
           if (!imgs || imgs.length === 0) return null;
           return (
             <div key={p.value} className="space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <h2 className="text-sm font-heading font-semibold text-text-secondary uppercase tracking-wider">
                   {p.label}
                 </h2>
                 <span className="text-xs text-text-muted">— {p.description}</span>
+                {p.singleActive && (
+                  <span className="text-[10px] text-gold-400 bg-gold/5 px-2 py-0.5 border border-gold/10">1 active max</span>
+                )}
               </div>
               <ImageGrid
                 images={imgs}
@@ -341,6 +344,9 @@ export default function ImagesAdmin() {
                         <option key={p.value} value={p.value}>{p.label}</option>
                       ))}
                     </select>
+                    {PLACEMENTS.find(p => p.value === editing.placement)?.singleActive && editing.active && (
+                      <p className="text-[10px] text-gold-400 mt-1">Only one active image allowed — activating this will deactivate others in this placement.</p>
+                    )}
                   </div>
 
                   <div>
@@ -378,6 +384,12 @@ export default function ImagesAdmin() {
                       />
                       <span className="text-sm text-text-secondary">Active (visible on site)</span>
                     </label>
+                    {editing.active && ['hero', 'about', 'event_default'].includes(editing.placement) && (
+                      <p className="mt-2 text-xs text-amber-400/80 flex items-start gap-1.5">
+                        <span className="mt-0.5">⚠</span>
+                        <span>Only one <strong>{editing.placement}</strong> image can be active at a time. Activating this will automatically deactivate any other active {editing.placement} image.</span>
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -494,9 +506,13 @@ function ImageGrid({
                 <span className="text-xs text-text-muted tabular-nums">{image.sort_order}</span>
               </div>
             </div>
-            <p className="text-xs text-text-muted truncate">
-              {image.placement} {image.caption ? `· ${image.caption}` : ''}
-            </p>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs text-text-muted">{image.placement}</span>
+              {image.active && ['hero', 'about', 'event_default'].includes(image.placement) && (
+                <span className="text-[10px] font-semibold uppercase tracking-wider px-1 py-0.5 bg-gold/20 text-gold rounded-sm">active</span>
+              )}
+              {image.caption && <span className="text-xs text-text-muted truncate">· {image.caption}</span>}
+            </div>
           </div>
 
           {/* Actions overlay */}
