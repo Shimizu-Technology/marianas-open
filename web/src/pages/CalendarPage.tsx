@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Calendar, ArrowRight, ExternalLink, Trophy, Clock } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
@@ -18,6 +18,7 @@ import { resolveMediaUrl } from '../utils/images';
 
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
   const { events, loading } = useEvents();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
@@ -206,9 +207,12 @@ export default function CalendarPage() {
 
                 return (
                   <ScrollReveal key={event.id} delay={i * 0.1}>
-                    <Link
-                      to={`/events/${event.slug}`}
-                      className={`group relative block overflow-hidden border transition-colors duration-300 ${
+                    <div
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => navigate(`/events/${event.slug}`)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/events/${event.slug}`); }}
+                      className={`group relative block overflow-hidden border transition-colors duration-300 cursor-pointer ${
                         isPastPoster
                           ? 'border-white/10 hover:border-white/20 opacity-80'
                           : 'border-white/5 hover:border-gold-500/20'
@@ -253,7 +257,7 @@ export default function CalendarPage() {
                           </a>
                         )}
                       </div>
-                    </Link>
+                    </div>
                   </ScrollReveal>
                 );
               })}
