@@ -378,6 +378,12 @@ export default function ImagesAdmin() {
                       />
                       <span className="text-sm text-text-secondary">Active (visible on site)</span>
                     </label>
+                    {editing.active && ['hero', 'about', 'event_default'].includes(editing.placement) && (
+                      <p className="mt-2 text-xs text-amber-400/80 flex items-start gap-1.5">
+                        <span className="mt-0.5">⚠</span>
+                        <span>Only one <strong>{editing.placement}</strong> image can be active at a time. Activating this will automatically deactivate any other active {editing.placement} image.</span>
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -494,9 +500,13 @@ function ImageGrid({
                 <span className="text-xs text-text-muted tabular-nums">{image.sort_order}</span>
               </div>
             </div>
-            <p className="text-xs text-text-muted truncate">
-              {image.placement} {image.caption ? `· ${image.caption}` : ''}
-            </p>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs text-text-muted">{image.placement}</span>
+              {image.active && ['hero', 'about', 'event_default'].includes(image.placement) && (
+                <span className="text-[10px] font-semibold uppercase tracking-wider px-1 py-0.5 bg-gold/20 text-gold rounded-sm">active</span>
+              )}
+              {image.caption && <span className="text-xs text-text-muted truncate">· {image.caption}</span>}
+            </div>
           </div>
 
           {/* Actions overlay */}
