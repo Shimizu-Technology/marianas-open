@@ -15,6 +15,14 @@ module Api
           page = (params[:page] || 1).to_i
           per_page = [(params[:per_page] || 50).to_i, 200].min
 
+          dir = params[:sort_dir] == "asc" ? "ASC" : "DESC"
+          order_clause = case params[:sort_by]
+          when "name" then "academies.name #{dir}"
+          when "athletes" then "COALESCE(stats.athletes, 0) #{dir}, COALESCE(stats.total_points, 0) DESC"
+          when "gold" then "COALESCE(stats.gold, 0) #{dir}, COALESCE(stats.total_points, 0) DESC"
+          else "COALESCE(stats.total_points, 0) #{dir}, COALESCE(stats.gold, 0) DESC"
+          end
+
           records = scope
             .joins(stats_join_sql)
             .select(
@@ -26,7 +34,7 @@ module Api
               "COALESCE(stats.athletes, 0) as computed_athletes",
               "COALESCE(stats.events_competed, 0) as computed_events_competed"
             )
-            .order(Arel.sql("COALESCE(stats.total_points, 0) DESC, academies.name ASC"))
+            .order(Arel.sql(order_clause))
             .offset((page - 1) * per_page)
             .limit(per_page)
 

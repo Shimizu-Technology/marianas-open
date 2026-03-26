@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Building2, Pencil, X, Loader2, Save, Search, Medal, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -18,6 +18,7 @@ type SortField = 'name' | 'points' | 'athletes' | 'gold';
 export default function AcademiesAdmin() {
   const navigate = useNavigate()
   const [academies, setAcademies] = useState<Academy[]>([])
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useEditingParam()
   const [editDetail, setEditDetail] = useState<AcademyDetail | null>(null)
@@ -27,23 +28,44 @@ export default function AcademiesAdmin() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
   const [sortField, setSortField] = useState<SortField>('points')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [page, setPage] = useState(1)
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-  const load = useCallback(async () => {
+  const handleSearchChange = (val: string) => {
+    setSearchInput(val)
+    clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(() => { setSearch(val); setPage(1) }, 350)
+  }
+
+  useEffect(() => {
+    return () => { clearTimeout(searchTimer.current) }
+  }, [])
+
+  const load = useCallback(async (showSpinner = false) => {
+    if (showSpinner) setLoading(true)
     try {
-      const res = await api.admin.getAcademies({ per_page: '200' })
+      const params: Record<string, string> = {
+        page: String(page),
+        per_page: String(PAGE_SIZE),
+        sort_by: sortField,
+        sort_dir: sortDir,
+      }
+      if (search) params.search = search
+      const res = await api.admin.getAcademies(params)
       setAcademies(res.academies)
+      setTotal(res.total)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [page, sortField, sortDir, search])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load(academies.length === 0) }, [load])
 
   useEffect(() => {
     if (typeof editing === 'number') {
@@ -97,29 +119,7 @@ export default function AcademiesAdmin() {
     return sortDir === 'desc' ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />
   }
 
-  const filtered = useMemo(() => {
-    let list = [...academies]
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase()
-      list = list.filter(a => a.name.toLowerCase().includes(q))
-    }
-    list.sort((a, b) => {
-      let cmp = 0
-      switch (sortField) {
-        case 'name': cmp = a.name.localeCompare(b.name); break
-        case 'points': cmp = (a.total_points || 0) - (b.total_points || 0); break
-        case 'athletes': cmp = (a.athletes || 0) - (b.athletes || 0); break
-        case 'gold': cmp = (a.gold || 0) - (b.gold || 0); break
-      }
-      return sortDir === 'desc' ? -cmp : cmp
-    })
-    return list
-  }, [academies, searchQuery, sortField, sortDir])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-
-  useEffect(() => { setPage(1) }, [searchQuery])
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
@@ -131,7 +131,7 @@ export default function AcademiesAdmin() {
         <div className="flex items-center gap-3">
           <Building2 className="w-6 h-6 text-gold" />
           <h1 className="font-heading text-2xl font-bold text-text-primary">Academies</h1>
-          <span className="text-sm text-text-muted">({academies.length})</span>
+          <span className="text-sm text-text-muted">({total})</span>
         </div>
       </div>
 
@@ -286,7 +286,7 @@ export default function AcademiesAdmin() {
           <div className="mb-4">
             <div className="relative max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-              <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              <input type="text" value={searchInput} onChange={e => handleSearchChange(e.target.value)}
                 placeholder="Search academies..."
                 className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
             </div>
@@ -311,11 +311,11 @@ export default function AcademiesAdmin() {
               <span></span>
             </div>
 
-            {paginated.length === 0 ? (
+            {academies.length === 0 ? (
               <div className="p-8 text-center text-text-muted text-sm">No academies found.</div>
             ) : (
               <div className="divide-y divide-white/5">
-                {paginated.map(a => (
+                {academies.map(a => (
                   <div key={a.id} className="px-5 py-3 sm:grid sm:grid-cols-[1fr_100px_60px_60px_60px_80px_60px] gap-2 items-center">
                     <div className="flex items-center gap-3 min-w-0">
                       {a.logo_url ? (
@@ -360,7 +360,7 @@ export default function AcademiesAdmin() {
           {/* Pagination */}
           <div className="mt-3 flex items-center justify-between">
             <p className="text-xs text-text-muted">
-              Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length} academies
+              Showing {total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total} academies
             </p>
             {totalPages > 1 && (
               <div className="flex items-center gap-1">

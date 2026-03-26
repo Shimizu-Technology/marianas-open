@@ -29,7 +29,16 @@ class CompetitorLinker
     end
 
     def link_all
-      link_results(EventResult.where(competitor_id: nil))
+      total_created = 0
+      total_linked = 0
+
+      EventResult.where(competitor_id: nil).find_in_batches(batch_size: 1000) do |batch|
+        stats = link_results(EventResult.where(id: batch.map(&:id)))
+        total_created += stats[:created]
+        total_linked += stats[:linked]
+      end
+
+      { created: total_created, linked: total_linked }
     end
 
     def link_results(results)

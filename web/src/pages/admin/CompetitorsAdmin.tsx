@@ -57,8 +57,8 @@ function ResultsTable({ results }: { results: CompetitorProfileResult[] }) {
               </td>
               <td className="px-3 py-2 text-text-secondary truncate max-w-[200px]">{r.division}</td>
               <td className="px-3 py-2 text-center">
-                <span className={`font-semibold ${r.placement === 1 ? 'text-yellow-400' : r.placement === 2 ? 'text-gray-300' : 'text-orange-400'}`}>
-                  {r.placement === 1 ? '1st' : r.placement === 2 ? '2nd' : '3rd'}
+                <span className={`font-semibold ${r.placement === 1 ? 'text-yellow-400' : r.placement === 2 ? 'text-gray-300' : r.placement === 3 ? 'text-orange-400' : 'text-text-secondary'}`}>
+                  {r.placement === 1 ? '1st' : r.placement === 2 ? '2nd' : r.placement === 3 ? '3rd' : `${r.placement}th`}
                 </span>
               </td>
               <td className="px-3 py-2 text-right text-gold font-mono">+{r.points_earned}</td>
