@@ -641,11 +641,11 @@ export default function EventsAdmin() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-surface border border-white/5"
         >
-          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <div className="px-4 sm:px-5 py-4 border-b border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h2 className="font-heading text-sm font-semibold text-text-primary">
               {editing === 'new' ? 'New Event' : 'Edit Event'}
             </h2>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {typeof editing === 'number' && (
                 <>
                 <Link
@@ -686,7 +686,7 @@ export default function EventsAdmin() {
             </div>
           </div>
 
-          <div className="p-5 space-y-5">
+          <div className="p-4 sm:p-5 space-y-5">
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="Name" value={form.name} onChange={v => updateForm('name', v)} />
@@ -1175,22 +1175,24 @@ export default function EventsAdmin() {
                 <div className="p-4 border-t border-white/5 space-y-3">
                   {form.event_schedule_items_attributes.map((item, idx) =>
                     item._destroy ? null : (
-                      <div key={idx} className="flex gap-3 items-start">
+                      <div key={idx} className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start">
                         <input
                           value={item.time}
                           onChange={e => updateScheduleItem(idx, 'time', e.target.value)}
                           placeholder="9:00 AM"
-                          className="w-44 shrink-0 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                          className="w-full sm:w-44 sm:shrink-0 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
                         />
-                        <input
-                          value={item.description}
-                          onChange={e => updateScheduleItem(idx, 'description', e.target.value)}
-                          placeholder="Description"
-                          className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <button onClick={() => removeScheduleItem(idx)} className="p-1.5 text-text-muted hover:text-red-400">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex gap-2 sm:gap-3 flex-1 items-start">
+                          <input
+                            value={item.description}
+                            onChange={e => updateScheduleItem(idx, 'description', e.target.value)}
+                            placeholder="Description"
+                            className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                          />
+                          <button onClick={() => removeScheduleItem(idx)} className="p-1.5 text-text-muted hover:text-red-400">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     )
                   )}
@@ -1221,22 +1223,24 @@ export default function EventsAdmin() {
                 <div className="p-4 border-t border-white/5 space-y-3">
                   {form.prize_categories_attributes.map((item, idx) =>
                     item._destroy ? null : (
-                      <div key={idx} className="flex gap-3 items-start">
+                      <div key={idx} className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start">
                         <input
                           value={item.name}
                           onChange={e => updatePrizeCategory(idx, 'name', e.target.value)}
                           placeholder="Category name"
                           className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
                         />
-                        <input
-                          value={item.amount}
-                          onChange={e => updatePrizeCategory(idx, 'amount', e.target.value)}
-                          placeholder="Amount (0 if non-cash)"
-                          className="w-28 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <button onClick={() => removePrizeCategory(idx)} className="p-1.5 text-text-muted hover:text-red-400">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex gap-2 sm:gap-3 items-start">
+                          <input
+                            value={item.amount}
+                            onChange={e => updatePrizeCategory(idx, 'amount', e.target.value)}
+                            placeholder="Amount (0 if non-cash)"
+                            className="w-full sm:w-28 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                          />
+                          <button onClick={() => removePrizeCategory(idx)} className="p-1.5 text-text-muted hover:text-red-400">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     )
                   )}
@@ -1251,11 +1255,11 @@ export default function EventsAdmin() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {saving ? 'Saving...' : 'Save'}

@@ -69,7 +69,10 @@ module Api
           }
         end
 
-        render json: serialize_record(record).merge(results: result_data)
+        render json: serialize_record(record).merge(
+          results: result_data,
+          academy_slug: record.team&.slug
+        )
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Competitor not found" }, status: :not_found
       end

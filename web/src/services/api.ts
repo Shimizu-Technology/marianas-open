@@ -398,6 +398,7 @@ export interface CompetitorsResponse {
 
 export interface CompetitorDetail extends Competitor {
   results: CompetitorProfileResult[];
+  academy_slug: string | null;
 }
 
 export interface CompetitorFormData {
@@ -455,6 +456,31 @@ export interface AcademyFormData {
   instagram_url: string;
   facebook_url: string;
   description: string;
+}
+
+export interface Announcement {
+  id: number;
+  title: string;
+  body: string | null;
+  link_url: string | null;
+  link_text: string | null;
+  announcement_type: 'info' | 'event' | 'promo' | 'urgent';
+  active: boolean;
+  starts_at: string | null;
+  ends_at: string | null;
+  sort_order: number;
+}
+
+export interface AnnouncementFormData {
+  title: string;
+  body: string;
+  link_url: string;
+  link_text: string;
+  announcement_type: string;
+  active: boolean;
+  starts_at: string;
+  ends_at: string;
+  sort_order: number;
 }
 
 export interface SiteContentEntry {
@@ -599,6 +625,7 @@ export const api = {
   getEventResultsSummary: (slug: string) =>
     fetchApi<EventResultsSummary>(`/api/v1/events/${slug}/results/summary`),
   getSponsors: () => fetchApi<Sponsor[]>('/api/v1/sponsors'),
+  getAnnouncements: () => fetchApi<{ announcements: Announcement[] }>('/api/v1/announcements'),
   getCompetitors: (params?: Record<string, string>) => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
     return fetchApi<CompetitorsResponse>(`/api/v1/competitors${query}`);
@@ -851,6 +878,21 @@ export const api = {
       fetchApi<void>(`/api/v1/admin/site-contents/${id}`, { method: 'DELETE' }, true),
     retranslateSiteContent: (id: number) =>
       fetchApi<{ site_content: SiteContentEntry }>(`/api/v1/admin/site-contents/${id}/retranslate`, { method: 'POST' }, true),
+
+    // Announcements
+    getAnnouncements: () => fetchApi<{ announcements: Announcement[] }>('/api/v1/admin/announcements', {}, true),
+    createAnnouncement: (data: Partial<AnnouncementFormData>) =>
+      fetchApi<{ announcement: Announcement }>('/api/v1/admin/announcements', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    updateAnnouncement: (id: number, data: Partial<AnnouncementFormData>) =>
+      fetchApi<{ announcement: Announcement }>(`/api/v1/admin/announcements/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    deleteAnnouncement: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/announcements/${id}`, { method: 'DELETE' }, true),
 
     // Organization
     getOrganization: () => fetchApi<Organization>('/api/v1/admin/organization', {}, true),

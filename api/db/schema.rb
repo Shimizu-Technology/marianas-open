@@ -57,6 +57,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_051843) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "announcements", force: :cascade do |t|
+    t.boolean "active", default: true
+    t.string "announcement_type", default: "info"
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.datetime "ends_at"
+    t.string "link_text"
+    t.string "link_url"
+    t.integer "sort_order", default: 0
+    t.datetime "starts_at"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "competitors", force: :cascade do |t|
     t.string "academy"
     t.bigint "academy_id"

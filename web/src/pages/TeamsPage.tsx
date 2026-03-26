@@ -1,10 +1,28 @@
 import { useEffect, useState, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Building2, Medal, Loader2, ChevronDown } from 'lucide-react';
 import { api } from '../services/api';
 import type { Academy, AcademyDetail } from '../services/api';
 import ScrollReveal from '../components/ScrollReveal';
 import SEO from '../components/SEO';
+
+const BELT_STYLES: Record<string, { bg: string; text: string; ring: string }> = {
+  white:  { bg: 'bg-white/90',     text: 'text-gray-900', ring: 'ring-white/30' },
+  blue:   { bg: 'bg-blue-600',     text: 'text-white',    ring: 'ring-blue-500/30' },
+  purple: { bg: 'bg-purple-600',   text: 'text-white',    ring: 'ring-purple-500/30' },
+  brown:  { bg: 'bg-amber-800',    text: 'text-white',    ring: 'ring-amber-700/30' },
+  black:  { bg: 'bg-gray-900',     text: 'text-white',    ring: 'ring-gray-700/30' },
+};
+
+function BeltBadge({ rank }: { rank: string }) {
+  const s = BELT_STYLES[rank] || BELT_STYLES.white;
+  return (
+    <span className={`inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${s.bg} ${s.text} ring-1 ${s.ring}`}>
+      {rank}
+    </span>
+  );
+}
 
 function CountryFlag({ code }: { code: string }) {
   return (
@@ -146,11 +164,15 @@ function AcademyDetailModal({ slug, onClose }: { slug: string; onClose: () => vo
                 <h3 className="text-sm font-semibold text-text-primary mb-3 uppercase tracking-wider">Athletes</h3>
                 <div className="space-y-1 max-h-64 overflow-y-auto">
                   {detail.athletes.map(a => (
-                    <div key={a.id} className="flex items-center justify-between text-xs py-2 px-3 bg-white/[0.02] border border-white/5">
+                    <Link
+                      key={a.id}
+                      to={`/competitors?id=${a.id}`}
+                      className="flex items-center justify-between text-xs py-2 px-3 bg-white/[0.02] border border-white/5 hover:border-gold/20 hover:bg-white/[0.04] transition-all duration-200"
+                    >
                       <div className="flex items-center gap-2">
                         {a.country_code && <CountryFlag code={a.country_code} />}
                         <span className="text-text-primary font-medium">{a.full_name}</span>
-                        {a.belt_rank && <span className="text-text-muted capitalize">{a.belt_rank}</span>}
+                        {a.belt_rank && <BeltBadge rank={a.belt_rank} />}
                       </div>
                       <div className="flex items-center gap-2 text-text-muted">
                         <span className="text-gold font-mono">{a.total_points}pts</span>
@@ -158,7 +180,7 @@ function AcademyDetailModal({ slug, onClose }: { slug: string; onClose: () => vo
                         {a.silver > 0 && <span className="text-gray-300">{a.silver}S</span>}
                         {a.bronze > 0 && <span className="text-orange-400">{a.bronze}B</span>}
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -188,13 +210,24 @@ function AcademyDetailModal({ slug, onClose }: { slug: string; onClose: () => vo
 }
 
 export default function TeamsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [academies, setAcademies] = useState<Academy[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [search, setSearch] = useState('');
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [search, setSearch] = useState(() => searchParams.get('search') || '');
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(() => searchParams.get('academy') || null);
+
+  const openAcademy = (slug: string) => {
+    setSelectedSlug(slug);
+    setSearchParams(prev => { prev.set('academy', slug); return prev; }, { replace: true });
+  };
+
+  const closeAcademy = () => {
+    setSelectedSlug(null);
+    setSearchParams(prev => { prev.delete('academy'); return prev; }, { replace: true });
+  };
 
   const fetchAcademies = useCallback(async (p: number, append = false) => {
     const setter = p === 1 ? setLoading : setLoadingMore;
@@ -262,7 +295,7 @@ export default function TeamsPage() {
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {academies.map((a, i) => (
                 <ScrollReveal key={a.id} delay={Math.min(i * 0.03, 0.3)}>
-                  <AcademyCard academy={a} onClick={() => setSelectedSlug(a.slug)} />
+                  <AcademyCard academy={a} onClick={() => openAcademy(a.slug)} />
                 </ScrollReveal>
               ))}
             </motion.div>
@@ -288,7 +321,7 @@ export default function TeamsPage() {
       </div>
 
       <AnimatePresence>
-        {selectedSlug && <AcademyDetailModal slug={selectedSlug} onClose={() => setSelectedSlug(null)} />}
+        {selectedSlug && <AcademyDetailModal slug={selectedSlug} onClose={closeAcademy} />}
       </AnimatePresence>
     </div>
   );

@@ -1,14 +1,14 @@
 {
   "nav": {
     "home": "Home",
-    "events": "Events",
+    "events": "Mga Event",
     "calendar": "Pro Series",
     "watch": "Panoorin",
-    "about": "Tungkol",
-    "rankings": "Rankings",
-    "competitors": "Kalahok",
-    "pastEvents": "Nakaraan",
-    "rules": "Patakaran",
+    "about": "Tungkol Dito",
+    "rankings": "Mga Ranggo",
+    "competitors": "Mga Kalahok",
+    "pastEvents": "Mga Nagdaang Event",
+    "rules": "Mga Patakaran",
     "toggleMenu": "I-toggle ang menu"
   },
   "pastEvents": {
@@ -22,7 +22,7 @@
   },
   "hero": {
     "subtitle": "Nangungunang Jiu-Jitsu Event sa Guam",
-    "title": "Brazilian Jiu-Jitsu Championship",
+    "title": "Guam Marianas Open International Brazilian Jiu-Jitsu Championship",
     "cta": "Magparehistro Ngayon",
     "learnMore": "Tuklasin ang mga Event",
     "asjjfBadge": "ASJJF 5-Star na Event"
@@ -52,8 +52,8 @@
     "featuredDesc": "Ang Marianas Open ang pinakamalaki at pinakamatagal nang jiu-jitsu organization sa Marianas, na nagsasagawa ng mga torneo mula pa noong 2007. Layunin naming magbigay ng propesyonal at maayos na karanasan sa torneo para sa lahat ng atleta, coach, at manonood.",
     "viewCalendar": "Tingnan ang Buong Kalendaryo",
     "registerNow": "Magparehistro Ngayon",
-    "registerNowGi": "Mag-register Na (Gi)",
-    "registerNowNogi": "Mag-register Na (No-Gi)",
+    "registerNowGi": "Magparehistro Ngayon (Gi)",
+    "registerNowNogi": "Magparehistro Ngayon (No-Gi)",
     "since2007": "Mula pa noong 2007",
     "economicImpact": "Epekto sa Ekonomiya",
     "economicImpactValue": "$2M",
@@ -160,8 +160,8 @@
     "mapTitle": "Sundan ang Paglalakbay",
     "mapSubtitle": "Mula sa mga lokal na qualifier hanggang sa internasyonal na entablado — makipagkumpitensya sa buong Asya at makuha ang iyong puwesto sa Marianas Open.",
     "register": "Magparehistro",
-    "registerGi": "Mag-register (Gi)",
-    "registerNogi": "Mag-register (No-Gi)",
+    "registerGi": "Magparehistro (Gi)",
+    "registerNogi": "Magparehistro (No-Gi)",
     "details": "Detalye",
     "stars": "bituin",
     "legendProSeries": "Pro Series",

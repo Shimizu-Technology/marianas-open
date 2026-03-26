@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LiveStreamBanner from './components/LiveStreamBanner';
+import AnnouncementBar from './components/AnnouncementBar';
 import MobileLanguageFAB from './components/MobileLanguageFAB';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -24,19 +25,20 @@ const RulesPage = lazy(() => import('./pages/RulesPage'));
 const PastEventsPage = lazy(() => import('./pages/PastEventsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-// Admin
-const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const EventsAdmin = lazy(() => import('./pages/admin/EventsAdmin'));
-const SponsorsAdmin = lazy(() => import('./pages/admin/SponsorsAdmin'));
-const VideosAdmin = lazy(() => import('./pages/admin/VideosAdmin'));
-const UsersAdmin = lazy(() => import('./pages/admin/UsersAdmin'));
-const ImagesAdmin = lazy(() => import('./pages/admin/ImagesAdmin'));
-const SettingsAdmin = lazy(() => import('./pages/admin/SettingsAdmin'));
-const ContentAdmin = lazy(() => import('./pages/admin/ContentAdmin'));
-const CompetitorsAdmin = lazy(() => import('./pages/admin/CompetitorsAdmin'));
-const AcademiesAdmin = lazy(() => import('./pages/admin/AcademiesAdmin'));
-const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
+// Admin — eagerly imported so page transitions are instant
+import AdminLayout from './layouts/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import EventsAdmin from './pages/admin/EventsAdmin';
+import SponsorsAdmin from './pages/admin/SponsorsAdmin';
+import VideosAdmin from './pages/admin/VideosAdmin';
+import UsersAdmin from './pages/admin/UsersAdmin';
+import ImagesAdmin from './pages/admin/ImagesAdmin';
+import SettingsAdmin from './pages/admin/SettingsAdmin';
+import ContentAdmin from './pages/admin/ContentAdmin';
+import CompetitorsAdmin from './pages/admin/CompetitorsAdmin';
+import AcademiesAdmin from './pages/admin/AcademiesAdmin';
+import AnnouncementsAdmin from './pages/admin/AnnouncementsAdmin';
+import EventResultsAdmin from './pages/admin/EventResultsAdmin';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -92,9 +94,7 @@ export default function App() {
           path="/admin/*"
           element={
             <ProtectedRoute requiredRole="staff">
-              <Suspense fallback={<LoadingSpinner />}>
-                <AdminLayout />
-              </Suspense>
+              <AdminLayout />
             </ProtectedRoute>
           }
         >
@@ -114,6 +114,7 @@ export default function App() {
               </ProtectedRoute>
             )}
           />
+          <Route path="announcements" element={<AnnouncementsAdmin />} />
           <Route path="content" element={<ContentAdmin />} />
           <Route path="settings" element={<SettingsAdmin />} />
         </Route>
@@ -126,6 +127,7 @@ export default function App() {
               <div className="min-h-screen bg-navy-900 text-text-primary">
                 <Header />
                 <LiveStreamBanner />
+                <AnnouncementBar />
                 <main>
                   <AnimatedRoutes />
                 </main>

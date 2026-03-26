@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Shield, Search } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
+import GlobalSearch from './GlobalSearch';
 import { useOrg } from '../contexts/OrganizationContext';
 
 const LOGO_FALLBACK = '/images/logos/mo-logo-white.png';
@@ -11,7 +12,19 @@ export default function Header() {
   const { t } = useTranslation();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const org = useOrg();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const logoSrc = org.logo_url || LOGO_FALLBACK;
 
@@ -58,8 +71,18 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Language + Mobile Toggle */}
+          {/* Search + Language + Mobile Toggle */}
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors p-1.5 rounded-lg hover:bg-white/5"
+              aria-label="Search"
+            >
+              <Search className="w-5 h-5" />
+              <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono text-text-muted">
+                ⌘K
+              </kbd>
+            </button>
             <LanguageSwitcher />
             <button
               className="xl:hidden text-text-primary p-1"
@@ -89,8 +112,19 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          <div className="border-t border-white/5 mt-2 pt-2">
+            <Link
+              to="/admin"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 py-3 px-4 rounded-md text-sm font-medium text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors"
+            >
+              <Shield className="w-4 h-4" />
+              Admin
+            </Link>
+          </div>
         </nav>
       )}
+      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Instagram, Youtube, Trophy, Medal, ChevronDown, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
@@ -173,7 +174,14 @@ function CompetitorDetailModal({ competitorId, onClose }: { competitorId: number
                     </h2>
                   </div>
                   {detail.nickname && <p className="text-sm text-gold/80">&quot;{detail.nickname}&quot;</p>}
-                  {detail.academy && <p className="text-sm text-text-secondary mt-1">{detail.academy}</p>}
+                  {detail.academy && (
+                    <Link
+                      to={detail.academy_slug ? `/teams?academy=${detail.academy_slug}` : `/teams?search=${encodeURIComponent(detail.academy)}`}
+                      className="block text-sm text-text-secondary mt-1 hover:text-gold transition-colors duration-200"
+                    >
+                      {detail.academy}
+                    </Link>
+                  )}
                 </div>
                 {detail.belt_rank && <BeltBadge rank={detail.belt_rank} />}
               </div>
@@ -212,7 +220,12 @@ function CompetitorDetailModal({ competitorId, onClose }: { competitorId: number
                     {detail.results.map((r, i) => (
                       <div key={i} className="flex items-center justify-between text-xs py-2 px-3 bg-white/[0.02] border border-white/5">
                         <div className="flex-1 min-w-0">
-                          <span className="text-text-primary font-medium">{r.event_name}</span>
+                          <Link
+                            to={`/events/${r.event_slug}`}
+                            className="text-text-primary font-medium hover:text-gold transition-colors duration-200"
+                          >
+                            {r.event_name}
+                          </Link>
                           <span className="text-text-muted ml-2">{r.division}</span>
                         </div>
                         <div className="flex items-center gap-3 ml-2 shrink-0">
@@ -253,6 +266,7 @@ function CompetitorDetailModal({ competitorId, onClose }: { competitorId: number
 
 export default function CompetitorsPage() {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [competitors, setCompetitors] = useState<Competitor[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -262,9 +276,22 @@ export default function CompetitorsPage() {
   const [search, setSearch] = useState('');
   const [beltFilter, setBeltFilter] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(() => {
+    const idParam = searchParams.get('id');
+    return idParam ? Number(idParam) : null;
+  });
   const [countries, setCountries] = useState<string[]>([]);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const openCompetitor = (id: number) => {
+    setSelectedId(id);
+    setSearchParams(prev => { prev.set('id', String(id)); return prev; }, { replace: true });
+  };
+
+  const closeCompetitor = () => {
+    setSelectedId(null);
+    setSearchParams(prev => { prev.delete('id'); return prev; }, { replace: true });
+  };
 
   const handleSearchChange = (val: string) => {
     setSearchInput(val);
@@ -384,7 +411,7 @@ export default function CompetitorsPage() {
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {competitors.map((c, i) => (
                 <ScrollReveal key={c.id} delay={Math.min(i * 0.03, 0.3)}>
-                  <CompetitorCard competitor={c} onClick={() => setSelectedId(c.id)} />
+                  <CompetitorCard competitor={c} onClick={() => openCompetitor(c.id)} />
                 </ScrollReveal>
               ))}
             </motion.div>
@@ -410,7 +437,7 @@ export default function CompetitorsPage() {
       </div>
 
       <AnimatePresence>
-        {selectedId && <CompetitorDetailModal competitorId={selectedId} onClose={() => setSelectedId(null)} />}
+        {selectedId && <CompetitorDetailModal competitorId={selectedId} onClose={closeCompetitor} />}
       </AnimatePresence>
     </div>
   );

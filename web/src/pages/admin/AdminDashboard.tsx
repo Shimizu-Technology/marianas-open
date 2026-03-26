@@ -90,7 +90,7 @@ export default function AdminDashboard() {
           >
             <Link
               to={card.to}
-              className="block bg-surface border border-white/5 p-5 hover:border-white/10 transition-colors group"
+              className="block bg-surface border border-white/5 p-4 sm:p-5 hover:border-white/10 transition-colors group"
             >
               <div className="flex items-center justify-between mb-3">
                 <card.icon className="w-4 h-4 text-text-muted" />
@@ -107,14 +107,14 @@ export default function AdminDashboard() {
       <div className="flex flex-col sm:flex-row gap-3 mb-6 sm:mb-8">
         <Link
           to="/admin/events"
-          className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
+          className="flex items-center justify-center sm:justify-start gap-2 px-4 py-3 sm:py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Create Event
         </Link>
         <Link
           to="/admin/sponsors"
-          className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2.5 bg-white/5 text-text-secondary text-sm font-medium hover:bg-white/8 transition-colors"
+          className="flex items-center justify-center sm:justify-start gap-2 px-4 py-3 sm:py-2.5 bg-white/5 text-text-secondary text-sm font-medium hover:bg-white/8 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Sponsor
