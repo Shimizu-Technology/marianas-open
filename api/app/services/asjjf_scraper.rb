@@ -64,50 +64,67 @@ class AsjjfScraper
 
   private
 
+  CATEGORIES = [
+    { gender: "MALE",   age: "ADULT" },
+    { gender: "FEMALE", age: "ADULT" },
+    { gender: "MALE",   age: "KIDS" },
+    { gender: "FEMALE", age: "KIDS" },
+  ].freeze
+
   def self.fetch_and_parse(asjjf_event_ids)
     has_multiple_types = asjjf_event_ids.size > 1
     all_results = []
 
     asjjf_event_ids.each do |asjjf_id|
-      html = fetch_html(asjjf_id)
-      next unless html
+      type_prefix = detect_event_type(asjjf_id)
 
-      # Detect gi/nogi from event page title
-      is_nogi = html.include?("no-gi") || html.include?("No-Gi") || html.include?("(no-gi")
-      type_prefix = is_nogi ? "NOGI" : "GI"
+      CATEGORIES.each do |cat|
+        html = fetch_results_list(asjjf_id, gender: cat[:gender], age: cat[:age])
+        next unless html
 
-      raw_results = parse_html(html)
+        raw_results = parse_html(html)
 
-      raw_results.each do |r|
-        division = has_multiple_types ? "[#{type_prefix}] #{r[:division]}" : r[:division]
-        parsed = parse_division(division)
+        raw_results.each do |r|
+          division = has_multiple_types ? "[#{type_prefix}] #{r[:division]}" : r[:division]
+          parsed = parse_division(division)
 
-        all_results << {
-          division: division,
-          gender: parsed[:gender],
-          belt_rank: parsed[:belt_rank],
-          age_category: parsed[:age_category],
-          weight_class: parsed[:weight_class],
-          placement: r[:placement_num],
-          competitor_name: r[:name],
-          academy: r[:academy],
-          country_code: r[:country]
-        }
+          all_results << {
+            division: division,
+            gender: parsed[:gender],
+            belt_rank: parsed[:belt_rank],
+            age_category: parsed[:age_category],
+            weight_class: parsed[:weight_class],
+            placement: r[:placement_num],
+            competitor_name: r[:name],
+            academy: r[:academy],
+            country_code: r[:country]
+          }
+        end
+
+        sleep 0.5
       end
-
-      sleep 1 # rate limit
     end
 
     all_results
   end
 
-  def self.fetch_html(asjjf_id)
-    uri = URI("https://asjjf.org/main/eventResults/#{asjjf_id}")
+  def self.detect_event_type(asjjf_id)
+    html = fetch_html("https://asjjf.org/main/eventResults/#{asjjf_id}")
+    return "GI" unless html
+    (html.include?("no-gi") || html.include?("No-Gi") || html.include?("(no-gi")) ? "NOGI" : "GI"
+  end
+
+  def self.fetch_results_list(asjjf_id, gender:, age:)
+    fetch_html("https://asjjf.org/main/resultsList/#{asjjf_id}?gender=#{gender}&age=#{age}")
+  end
+
+  def self.fetch_html(url)
+    uri = URI(url)
     response = Net::HTTP.get_response(uri)
     return nil unless response.code == "200"
     response.body
   rescue StandardError => e
-    Rails.logger.error("ASJJF fetch failed for #{asjjf_id}: #{e.message}")
+    Rails.logger.error("ASJJF fetch failed for #{url}: #{e.message}")
     nil
   end
 
@@ -169,10 +186,8 @@ class AsjjfScraper
     gender = parts[0]&.downcase
     belt = parts[1]&.downcase
 
-    # Normalize belt — sometimes age category ends up here
-    valid_belts = %w[white blue purple brown black]
+    valid_belts = %w[white gray grey yellow orange green blue purple brown black]
     unless valid_belts.include?(belt)
-      # Try to find belt elsewhere in the string
       found = valid_belts.find { |b| clean.downcase.include?(b) }
       belt = found || belt
     end
@@ -182,15 +197,14 @@ class AsjjfScraper
                    when "juvenile" then "juvenile"
                    when "adult" then "adult"
                    when "master" then "master_#{parts[3]}"
+                   when "kid" then "kid_#{parts[3]}"
                    else "adult"
                    end
 
-    weight_start = if age_raw == "master"
-                     4
-                   elsif parts[3]&.match?(/^\d/)
-                     4
+    weight_start = case age_raw
+                   when "master", "kid" then 4
                    else
-                     3
+                     parts[3]&.match?(/^\d/) ? 4 : 3
                    end
     weight_raw = parts[weight_start..].join(" ").downcase
     weight_class = weight_raw.gsub(" ", "_")

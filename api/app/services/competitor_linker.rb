@@ -150,7 +150,7 @@ class CompetitorLinker
       if parts.size >= 2
         [parts[1].titleize, parts[0].titleize]
       else
-        [parts[0].titleize, ""]
+        [parts[0].titleize, parts[0].titleize]
       end
     end
 
