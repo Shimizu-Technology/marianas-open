@@ -427,6 +427,7 @@ export interface Academy {
   instagram_url: string | null;
   facebook_url: string | null;
   description: string | null;
+  aliases: string[];
   logo_url: string | null;
   total_points: number;
   gold: number;
@@ -456,6 +457,7 @@ export interface AcademyFormData {
   instagram_url: string;
   facebook_url: string;
   description: string;
+  aliases: string[];
 }
 
 export interface Announcement {

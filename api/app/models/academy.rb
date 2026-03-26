@@ -12,6 +12,10 @@ class Academy < ApplicationRecord
     where("name ILIKE ?", "%#{query}%")
   }
 
+  scope :find_by_name_or_alias, ->(name) {
+    where("LOWER(name) = LOWER(?) OR aliases @> ?", name.strip, [name.strip].to_json)
+  }
+
   scope :with_competitors, -> { where(id: Competitor.where.not(academy_id: nil).select(:academy_id).distinct) }
 
   def logo_url

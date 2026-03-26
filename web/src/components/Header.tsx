@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Menu, X, Shield, Search } from 'lucide-react';
+import { Menu, X, Shield, Search } from 'lucide-react';  
 import LanguageSwitcher from './LanguageSwitcher';
 import GlobalSearch from './GlobalSearch';
 import { useOrg } from '../contexts/OrganizationContext';
@@ -71,21 +71,17 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Search + Language + Mobile Toggle */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors p-1.5 rounded-lg hover:bg-white/5"
+              className="text-text-secondary hover:text-text-primary transition-colors p-2 rounded-lg hover:bg-white/5"
               aria-label="Search"
             >
               <Search className="w-5 h-5" />
-              <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono text-text-muted">
-                ⌘K
-              </kbd>
             </button>
             <LanguageSwitcher />
             <button
-              className="xl:hidden text-text-primary p-1"
+              className="xl:hidden text-text-primary p-2"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label={t('nav.toggleMenu', 'Toggle menu')}
             >

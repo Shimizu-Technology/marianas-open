@@ -9,7 +9,7 @@ import { useEditingParam } from '../../hooks/useEditingParam'
 
 const emptyForm: AcademyFormData = {
   name: '', country_code: '', location: '', website_url: '',
-  instagram_url: '', facebook_url: '', description: '',
+  instagram_url: '', facebook_url: '', description: '', aliases: [],
 }
 
 const PAGE_SIZE = 50
@@ -75,7 +75,7 @@ export default function AcademiesAdmin() {
           name: a.name, country_code: a.country_code || '',
           location: a.location || '', website_url: a.website_url || '',
           instagram_url: a.instagram_url || '', facebook_url: a.facebook_url || '',
-          description: a.description || '',
+          description: a.description || '', aliases: a.aliases || [],
         })
       }
       setDetailLoading(true)
@@ -92,7 +92,8 @@ export default function AcademiesAdmin() {
     if (typeof editing !== 'number') return
     setSaving(true); setError('')
     try {
-      await api.admin.updateAcademy(editing, form)
+      const payload = { ...form, aliases: form.aliases.filter(s => s.trim() !== '') }
+      await api.admin.updateAcademy(editing, payload)
       setSuccess('Academy updated')
       await load()
       setTimeout(() => setSuccess(''), 3000)
@@ -267,6 +268,16 @@ export default function AcademiesAdmin() {
               <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Description</label>
               <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3}
                 className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none resize-none" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Aliases (previous / alternate names)</label>
+              <textarea
+                value={form.aliases.join('\n')}
+                onChange={e => setForm(p => ({ ...p, aliases: e.target.value.split('\n').map(s => s.trimStart()) }))}
+                rows={3}
+                placeholder="One name per line, e.g.&#10;Atos Jiu-Jitsu Guam&#10;Atos BJJ Guam"
+                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none" />
+              <p className="text-[10px] text-text-muted mt-1">When importing results, competitors from these names will be linked to this academy.</p>
             </div>
 
             <ImageUpload currentUrl={currentAcademy?.logo_url || null} onUpload={handleLogoUpload} label="Logo" />

@@ -15,6 +15,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_051843) do
   enable_extension "pg_catalog.plpgsql"
 
   create_table "academies", force: :cascade do |t|
+    t.jsonb "aliases", default: []
     t.string "country_code", limit: 2
     t.datetime "created_at", null: false
     t.text "description"

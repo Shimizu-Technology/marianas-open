@@ -17,13 +17,15 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const WatchPage = lazy(() => import('./pages/WatchPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const RankingsPage = lazy(() => import('./pages/RankingsPage'));
-const CompetitorProfilePage = lazy(() => import('./pages/CompetitorProfilePage'));
 const CompetitorsPage = lazy(() => import('./pages/CompetitorsPage'));
 const TeamsPage = lazy(() => import('./pages/TeamsPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const RulesPage = lazy(() => import('./pages/RulesPage'));
 const PastEventsPage = lazy(() => import('./pages/PastEventsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+import CompetitorProfilePage from './pages/CompetitorProfilePage';
+import AcademyPage from './pages/AcademyPage';
 
 // Admin — eagerly imported so page transitions are instant
 import AdminLayout from './layouts/AdminLayout';
@@ -68,8 +70,10 @@ function AnimatedRoutes() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/rankings" element={<RankingsPage />} />
             <Route path="/competitors" element={<CompetitorsPage />} />
-            <Route path="/teams" element={<TeamsPage />} />
             <Route path="/competitors/profile" element={<CompetitorProfilePage />} />
+            <Route path="/competitors/:id" element={<CompetitorProfilePage />} />
+            <Route path="/teams" element={<TeamsPage />} />
+            <Route path="/teams/:slug" element={<AcademyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/rules" element={<RulesPage />} />
             <Route path="/watch" element={<WatchPage />} />

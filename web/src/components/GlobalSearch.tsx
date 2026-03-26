@@ -89,9 +89,9 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
   const navigateToResult = useCallback((type: string, item: Competitor | Academy | Event) => {
     onClose();
     if (type === 'competitor') {
-      navigate(`/competitors?search=${encodeURIComponent((item as Competitor).full_name)}`);
+      navigate(`/competitors/${(item as Competitor).id}`);
     } else if (type === 'academy') {
-      navigate(`/teams`);
+      navigate(`/teams/${(item as Academy).slug}`);
     } else if (type === 'event') {
       const ev = item as Event;
       if (ev.status === 'upcoming' || ev.status === 'registration_open') {
