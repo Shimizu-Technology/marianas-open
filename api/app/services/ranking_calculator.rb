@@ -25,11 +25,25 @@ class RankingCalculator
 
   # Returns individual competitor rankings.
   # Groups by competitor_id when available, falls back to name for unlinked results.
+  # Merges name-based groups into id-based groups to avoid split entries.
   def self.individual(options = {})
     results = base_query(options)
 
     grouped = results.group_by do |r|
       r.competitor_id.present? ? "id:#{r.competitor_id}" : "name:#{normalize_name(r.competitor_name)}"
+    end
+
+    id_name_map = {}
+    grouped.each do |key, records|
+      next unless key.start_with?("id:")
+      id_name_map[normalize_name(records.first.competitor_name)] = key
+    end
+
+    grouped.keys.select { |k| k.start_with?("name:") }.each do |name_key|
+      norm = name_key.delete_prefix("name:")
+      if (id_key = id_name_map[norm])
+        grouped[id_key].concat(grouped.delete(name_key))
+      end
     end
 
     rankings = grouped.map do |_key, records|
@@ -59,6 +73,8 @@ class RankingCalculator
 
   # Returns academy/team rankings.
   # Groups by academy_id when available, falls back to academy name string.
+  # Merges name-based groups into id-based groups to avoid split entries
+  # during the window between import and linking completion.
   def self.teams(options = {})
     results = base_query(options)
 
@@ -67,6 +83,19 @@ class RankingCalculator
         "id:#{r.competitor_academy_id}"
       else
         "name:#{normalize_name(r.academy.presence || 'Independent')}"
+      end
+    end
+
+    id_name_map = {}
+    grouped.each do |key, records|
+      next unless key.start_with?("id:")
+      id_name_map[normalize_name(records.first.academy.presence || "Independent")] = key
+    end
+
+    grouped.keys.select { |k| k.start_with?("name:") }.each do |name_key|
+      norm = name_key.delete_prefix("name:")
+      if (id_key = id_name_map[norm])
+        grouped[id_key].concat(grouped.delete(name_key))
       end
     end
 

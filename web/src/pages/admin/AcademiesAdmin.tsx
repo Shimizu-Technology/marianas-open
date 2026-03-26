@@ -34,7 +34,7 @@ export default function AcademiesAdmin() {
 
   const load = useCallback(async () => {
     try {
-      const res = await api.admin.getAcademies()
+      const res = await api.admin.getAcademies({ per_page: '200' })
       setAcademies(res.academies)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load')

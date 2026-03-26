@@ -98,7 +98,6 @@ module Api
         end
 
         def destroy
-          @competitor.event_results.update_all(competitor_id: nil)
           @competitor.destroy
           head :no_content
         end
