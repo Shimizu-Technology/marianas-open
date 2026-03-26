@@ -18,20 +18,24 @@ module Api
 
         def create
           announcement = Announcement.new(announcement_params)
-          if announcement.save
-            deactivate_others(announcement) if announcement.active?
-            render json: { announcement: announcement.as_json }, status: :created
-          else
-            render json: { errors: announcement.errors.full_messages }, status: :unprocessable_entity
+          Announcement.transaction do
+            if announcement.save
+              deactivate_others(announcement) if announcement.active?
+              render json: { announcement: announcement.as_json }, status: :created
+            else
+              render json: { errors: announcement.errors.full_messages }, status: :unprocessable_entity
+            end
           end
         end
 
         def update
-          if @announcement.update(announcement_params)
-            deactivate_others(@announcement) if @announcement.active?
-            render json: { announcement: @announcement.reload.as_json }
-          else
-            render json: { errors: @announcement.errors.full_messages }, status: :unprocessable_entity
+          Announcement.transaction do
+            if @announcement.update(announcement_params)
+              deactivate_others(@announcement) if @announcement.active?
+              render json: { announcement: @announcement.reload.as_json }
+            else
+              render json: { errors: @announcement.errors.full_messages }, status: :unprocessable_entity
+            end
           end
         end
 
