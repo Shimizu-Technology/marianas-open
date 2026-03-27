@@ -2,8 +2,6 @@
 .netlify/
 # Raw photography source assets (large zips — not tracked in git)
 assets/
-web/public/robots.txt
-web/public/sitemap.xml
 # Reference projects (not part of this repo)
 campaign-tracker/
 .DS_Store

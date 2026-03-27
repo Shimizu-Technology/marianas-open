@@ -1,0 +1,25 @@
+# Marianas Open
+# https://marianasopen.com
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://marianasopen.com/sitemap.xml
+
+# Disallow private/admin areas
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/
+
+# Allow public pages explicitly
+Allow: /
+Allow: /about
+Allow: /calendar
+Allow: /rankings
+Allow: /competitors
+Allow: /teams
+Allow: /watch
+Allow: /events/
+Allow: /rules
+Allow: /terms
