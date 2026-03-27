@@ -8,6 +8,7 @@ import SocialShare from '../components/SocialShare';
 import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SEO from '../components/SEO';
+import { getBreadcrumbSchema } from '../lib/seo';
 import { useEvents } from '../hooks/useApi';
 import type { Event } from '../services/api';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
@@ -95,6 +96,9 @@ export default function CalendarPage() {
             url: 'https://marianasopen.com/calendar',
             description: 'Upcoming and past Marianas Open events, qualifiers, and championships.',
           },
+          getBreadcrumbSchema([
+            { name: 'Event Calendar', url: 'https://marianasopen.com/calendar' },
+          ]),
         ]}
       />
       {/* Hero */}

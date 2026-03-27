@@ -59,3 +59,86 @@ export function getOrganizationSchema() {
     sameAs: SOCIAL_LINKS,
   };
 }
+
+type BreadcrumbItem = {
+  name: string;
+  url?: string;
+};
+
+/**
+ * Generate a BreadcrumbList schema for rich Google search results.
+ * Pass items from root → current page. Home is always prepended automatically.
+ */
+export function getBreadcrumbSchema(items: BreadcrumbItem[]) {
+  const allItems = [{ name: 'Home', url: SITE_URL }, ...items];
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: allItems.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url ?? undefined,
+    })),
+  };
+}
+
+/**
+ * FAQ schema for pages with Q&A sections — helps Google show FAQ rich results.
+ */
+export function getFaqSchema(faqs: { question: string; answer: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
+/**
+ * SportsEvent schema for individual BJJ tournament events.
+ * Use on EventDetailPage in addition to the existing event schema.
+ */
+export function getSportsEventSchema(params: {
+  name: string;
+  description?: string;
+  startDate: string;
+  endDate?: string;
+  location?: string;
+  url?: string;
+  image?: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: params.name,
+    description: params.description,
+    startDate: params.startDate,
+    endDate: params.endDate,
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    sport: 'Brazilian Jiu-Jitsu',
+    location: {
+      '@type': 'Place',
+      name: params.location ?? 'Guam',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Guam',
+        addressCountry: 'GU',
+      },
+    },
+    organizer: {
+      '@type': 'SportsOrganization',
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    url: params.url ?? SITE_URL,
+    image: params.image ? toAbsoluteUrl(params.image) : DEFAULT_OG_IMAGE,
+  };
+}

@@ -5,7 +5,7 @@ import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import SEO from '../components/SEO';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
-import { getOrganizationSchema } from '../lib/seo';
+import { getOrganizationSchema, getBreadcrumbSchema, getFaqSchema } from '../lib/seo';
 
 const timeline = [
   { year: '2007', key: 'timeline2007' },
@@ -41,7 +41,32 @@ export default function AboutPage() {
         description="Learn the story of Marianas Open, the international Brazilian Jiu-Jitsu championship built in Guam and connected to competitors across Asia-Pacific."
         path="/about"
         image={heroImage}
-        structuredData={[getOrganizationSchema()]}
+        structuredData={[
+          getOrganizationSchema(),
+          getBreadcrumbSchema([{ name: 'About', url: 'https://marianasopen.com/about' }]),
+          getFaqSchema([
+            {
+              question: 'What is the Marianas Open?',
+              answer: 'The Marianas Open is an international Brazilian Jiu-Jitsu championship held in Guam, featuring competitors from across Asia-Pacific, Japan, Korea, Philippines, and beyond. It is sanctioned by the Asian Sport Jiu-Jitsu Federation (ASJJF).',
+            },
+            {
+              question: 'When is the next Marianas Open tournament?',
+              answer: 'The Marianas Open grand championship is held annually. Qualifier events (Marianas Pro Series) run throughout the year. Check the Event Calendar at marianasopen.com/calendar for upcoming dates.',
+            },
+            {
+              question: 'Where is the Marianas Open held?',
+              answer: 'The Marianas Open is held in Guam, a US territory in the Pacific. The grand championship venue is the Guam Civic Center.',
+            },
+            {
+              question: 'How do I register for a Marianas Open event?',
+              answer: 'Registration is available through the ASJJF website. Links to each event registration are posted on the event detail pages at marianasopen.com/calendar.',
+            },
+            {
+              question: 'What divisions are offered at the Marianas Open?',
+              answer: 'The Marianas Open offers Gi and No-Gi divisions across all belts (white through black), age groups (kids, juvenile, adult, masters), and weight classes following ASJJF rules.',
+            },
+          ]),
+        ]}
       />
       {/* Hero */}
       <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden">

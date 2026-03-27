@@ -2,10 +2,51 @@
 <html lang="en" translate="no" class="notranslate">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- Favicons & Touch Icons -->
     <link rel="icon" type="image/png" href="/images/logos/mo-logo-white.png" />
-    <link rel="apple-touch-icon" href="/images/logos/mo-logo-white.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/images/pwa/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/images/pwa/icon-512.png" />
+
+    <!-- Viewport -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google" content="notranslate" />
+
+    <!-- PWA / App experience -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Marianas Open" />
+    <meta name="application-name" content="Marianas Open" />
+    <meta name="theme-color" content="#07111f" />
+    <meta name="msapplication-TileColor" content="#07111f" />
+    <meta name="msapplication-TileImage" content="/images/pwa/icon-192.png" />
+
+    <!-- Default SEO (react-helmet-async overrides per-page) -->
+    <meta name="description" content="Guam's premier international Brazilian Jiu-Jitsu championship featuring qualifier events across Asia-Pacific and the Marianas Open grand championship." />
+    <meta name="keywords" content="Marianas Open, BJJ Guam, Brazilian Jiu-Jitsu tournament, Guam BJJ, ASJJF, jiu-jitsu competition, grappling event, Guam sports" />
+    <meta name="author" content="Marianas Open" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Default OG tags (overridden per-page) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://marianasopen.com/" />
+    <meta property="og:title" content="Marianas Open | International Brazilian Jiu-Jitsu Championship" />
+    <meta property="og:description" content="Guam's premier international Brazilian Jiu-Jitsu championship featuring qualifier events across Asia-Pacific and the Marianas Open grand championship." />
+    <meta property="og:image" content="https://marianasopen.com/images/hero-podium.jpg" />
+    <meta property="og:site_name" content="Marianas Open" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card defaults -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Marianas Open | International Brazilian Jiu-Jitsu Championship" />
+    <meta name="twitter:description" content="Guam's premier international Brazilian Jiu-Jitsu championship." />
+    <meta name="twitter:image" content="https://marianasopen.com/images/hero-podium.jpg" />
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://marianas-open-api.onrender.com" />
+    <link rel="preconnect" href="https://clerk.marianasopen.com" crossorigin />
+
     <title>Marianas Open | International Brazilian Jiu-Jitsu Championship</title>
   </head>
   <body>

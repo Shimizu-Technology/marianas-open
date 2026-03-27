@@ -5,6 +5,7 @@ import { motion, MotionConfig } from 'framer-motion';
 import { Trophy, Users, Globe, Star, Medal, ChevronDown, Filter } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SEO from '../components/SEO';
+import { getBreadcrumbSchema } from '../lib/seo';
 import { api } from '../services/api';
 import type { RankingEntry } from '../services/api';
 
@@ -128,6 +129,9 @@ export default function RankingsPage() {
               url: 'https://marianasopen.com/rankings',
               description: 'Athlete, academy, and country rankings for Marianas Open competition.',
             },
+            getBreadcrumbSchema([
+              { name: 'Rankings', url: 'https://marianasopen.com/rankings' },
+            ]),
           ]}
         />
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
