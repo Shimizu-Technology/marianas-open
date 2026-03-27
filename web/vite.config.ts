@@ -104,6 +104,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'google-translate-cache',
+              cacheableResponse: { statuses: [0, 200] },
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
@@ -116,6 +117,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'cloudinary-images',
+              cacheableResponse: { statuses: [0, 200] },
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
