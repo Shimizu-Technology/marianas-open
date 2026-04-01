@@ -208,6 +208,12 @@ export default function ImpactAdmin() {
     return () => clearTimeout(t)
   }, [success])
 
+  useEffect(() => {
+    if (!error) return
+    const t = setTimeout(() => setError(''), 5000)
+    return () => clearTimeout(t)
+  }, [error])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -288,6 +294,17 @@ export default function ImpactAdmin() {
             className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-lg text-sm"
           >
             {success}
+          </motion.div>
+        )}
+        {error && !editing && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm flex items-center justify-between"
+          >
+            {error}
+            <button onClick={() => setError('')} className="text-red-400/60 hover:text-red-400 ml-3 shrink-0">
+              <X className="w-4 h-4" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

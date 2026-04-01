@@ -90,7 +90,7 @@ export default function Header() {
     {
       label: t('nav.events'),
       children: [
-        { to: '/calendar', label: t('nav.events') },
+        { to: '/calendar', label: 'Calendar' },
         { to: '/events/past', label: t('nav.pastEvents') },
       ],
     },
