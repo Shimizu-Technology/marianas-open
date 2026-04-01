@@ -62,7 +62,6 @@ export default function ImpactAdmin() {
   const [tab, setTab] = useState<Tab>('metrics')
   const [metrics, setMetrics] = useState<ImpactMetric[]>([])
   const [funds, setFunds] = useState<FundAllocation[]>([])
-  const [totalAmount, setTotalAmount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<number | 'new' | null>(null)
   const [metricForm, setMetricForm] = useState<ImpactMetricFormData>(emptyMetricForm)
@@ -83,7 +82,6 @@ export default function ImpactAdmin() {
     try {
       const res = await api.admin.getFundAllocations()
       setFunds(res.fund_allocations)
-      setTotalAmount(res.total_amount)
     } catch { /* noop */ }
   }, [])
 

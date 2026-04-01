@@ -22,7 +22,7 @@ function isDropdown(item: NavItem): item is NavDropdown {
 function DesktopDropdown({ item, pathname }: { item: NavDropdown; pathname: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const timeout = useRef<ReturnType<typeof setTimeout>>();
+  const timeout = useRef<ReturnType<typeof setTimeout>>(undefined);
   const isActive = item.children.some(c => pathname === c.to);
 
   const enter = () => { clearTimeout(timeout.current); setOpen(true); };

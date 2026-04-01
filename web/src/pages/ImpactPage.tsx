@@ -139,9 +139,25 @@ export default function ImpactPage() {
 
   if (!data || (data.impact_metrics.length === 0 && data.fund_allocations.length === 0)) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-text-muted">
-        <p>Impact data coming soon.</p>
-      </div>
+      <>
+        <SEO
+          title="Impact & Transparency"
+          description="See how the Marianas Open impacts tourism, competition, and the community."
+          path="/impact"
+        />
+        <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
+          <div className="p-4 rounded-2xl bg-gold/5 mb-5">
+            <TrendingUp className="w-10 h-10 text-gold/40" />
+          </div>
+          <h1 className="font-heading text-xl sm:text-2xl font-bold text-text-primary mb-2">
+            Impact Report Coming Soon
+          </h1>
+          <p className="text-sm text-text-muted max-w-md">
+            We're compiling data on how the Marianas Open impacts tourism, competition,
+            and economic growth for our island community. Check back soon.
+          </p>
+        </div>
+      </>
     )
   }
 
