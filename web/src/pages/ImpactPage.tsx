@@ -125,7 +125,7 @@ export default function ImpactPage() {
   useEffect(() => {
     api.getImpactData()
       .then(setData)
-      .catch(() => {})
+      .catch((err) => console.warn('[ImpactPage] Failed to load impact data:', err))
       .finally(() => setLoading(false))
   }, [])
 
@@ -152,7 +152,6 @@ export default function ImpactPage() {
   }, {})
 
   const highlightMetrics = data.impact_metrics.filter(m => m.highlight)
-  const regularMetrics = data.impact_metrics.filter(m => !m.highlight)
   const categoryOrder = ['tourism', 'competition', 'economic', 'community']
 
   return (

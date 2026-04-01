@@ -8,10 +8,9 @@ module Api
 
         def index
           allocations = FundAllocation.order(:sort_order, :created_at)
-          total = FundAllocation.active.sum(:amount)
           render json: {
             fund_allocations: allocations.as_json,
-            total_amount: total
+            total_amount: allocations.sum(:amount)
           }
         end
 

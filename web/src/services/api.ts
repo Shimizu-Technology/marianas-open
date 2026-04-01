@@ -590,7 +590,7 @@ export interface ImpactMetricFormData {
 export interface FundAllocation {
   id: number;
   category: string;
-  amount: number;
+  amount: string | number;
   description: string | null;
   color: string | null;
   sort_order: number;
@@ -601,7 +601,7 @@ export interface FundAllocation {
 
 export interface FundAllocationFormData {
   category: string;
-  amount: number;
+  amount: string | number;
   description: string;
   color: string;
   sort_order: number;
