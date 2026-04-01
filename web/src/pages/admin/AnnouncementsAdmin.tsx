@@ -126,6 +126,7 @@ export default function AnnouncementsAdmin() {
     setDeleteConfirm(null)
     if (editing === id) setEditing(null)
     setSuccess('Announcement deleted')
+    setTimeout(() => setSuccess(''), 3000)
     try {
       await api.admin.deleteAnnouncement(id)
     } catch (err) {
