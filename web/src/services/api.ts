@@ -608,10 +608,38 @@ export interface FundAllocationFormData {
   active: boolean;
 }
 
+export interface ImpactROI {
+  economic_impact: string | number;
+  economic_impact_label: string;
+  investment_label: string;
+  investment_total: string | number;
+  roi_multiplier: string | number;
+  roi_description: string | null;
+  year_label: string | null;
+}
+
+export interface ImpactConfiguration {
+  id: number;
+  economic_impact: string | number;
+  economic_impact_label: string;
+  investment_label: string;
+  roi_description: string | null;
+  year_label: string | null;
+}
+
+export interface ImpactConfigurationFormData {
+  economic_impact: string | number;
+  economic_impact_label: string;
+  investment_label: string;
+  roi_description: string;
+  year_label: string;
+}
+
 export interface ImpactData {
   impact_metrics: ImpactMetric[];
   fund_allocations: (FundAllocation & { percentage: number })[];
   total_amount: number;
+  roi: ImpactROI;
 }
 
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
@@ -1003,6 +1031,15 @@ export const api = {
       fetchApi<void>('/api/v1/admin/fund-allocations/reorder', {
         method: 'POST',
         body: JSON.stringify({ ids }),
+      }, true),
+
+    // Impact Configuration (ROI)
+    getImpactConfiguration: () =>
+      fetchApi<{ impact_configuration: ImpactConfiguration }>('/api/v1/admin/impact-configuration', {}, true),
+    updateImpactConfiguration: (data: ImpactConfigurationFormData) =>
+      fetchApi<{ impact_configuration: ImpactConfiguration }>('/api/v1/admin/impact-configuration', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
       }, true),
 
     // Organization

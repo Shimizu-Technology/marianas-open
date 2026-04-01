@@ -387,19 +387,19 @@ export default function EventDetailPage() {
                 {scheduleItems.length > 0 ? (
                   <>
                     <p className="text-text-secondary text-sm mb-6">{scheduleDescription}</p>
-                    <div className="space-y-0">
-                    {scheduleItems.map((item, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-4 py-3 border-b border-white/5 last:border-0"
-                      >
-                        <span className="text-gold-500 font-heading font-bold text-sm w-24 shrink-0">
-                          {item.time}
-                        </span>
-                        <span className="text-text-primary text-sm">{item.event}</span>
-                      </div>
-                    ))}
+                <div className="space-y-0">
+                  {scheduleItems.map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-4 py-3 border-b border-white/5 last:border-0"
+                    >
+                      <span className="text-gold-500 font-heading font-bold text-sm w-24 shrink-0">
+                        {item.time}
+                      </span>
+                      <span className="text-text-primary text-sm">{item.event}</span>
                     </div>
+                  ))}
+                </div>
                   </>
                 ) : (
                   <div className="border border-dashed border-white/10 px-4 py-5 text-sm text-text-muted">
@@ -431,7 +431,7 @@ export default function EventDetailPage() {
                 ) : (
                   <>
                     {prizePoolDisplay && <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>}
-                    <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
+                <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
                   </>
                 )}
                 <div className="space-y-3 text-sm max-h-64 overflow-y-auto pr-2">
@@ -495,10 +495,10 @@ export default function EventDetailPage() {
                   <div className={`grid grid-cols-1 gap-4 mb-4 ${displayVenueHighlights.length > 1 ? 'sm:grid-cols-2' : ''}`}>
                     {displayVenueHighlights.map((highlight, idx) => (
                       <div key={`${highlight.title}-${idx}`} className="bg-navy-900 border border-white/5 p-4 text-center">
-                        <Users size={20} className="text-gold-500 mx-auto mb-2" />
+                    <Users size={20} className="text-gold-500 mx-auto mb-2" />
                         <div className="text-sm text-text-primary font-medium">{highlight.title}</div>
                         <div className="text-sm text-text-secondary">{highlight.description}</div>
-                      </div>
+                  </div>
                     ))}
                   </div>
                 )}
@@ -774,19 +774,19 @@ export default function EventDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
             <div className="bg-surface border border-white/5 p-8">
-              <h3 className="font-heading font-bold text-xl uppercase tracking-wider mb-8">
-                {t('event.howToRegister')}
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                <h3 className="font-heading font-bold text-xl uppercase tracking-wider mb-8">
+                  {t('event.howToRegister')}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                 {displayRegistrationSteps.map((s) => (
-                  <div key={s.step} className="relative">
-                    <div className="flex items-start gap-4">
-                      <div className="shrink-0 w-14 h-14 flex items-center justify-center bg-gold-500/10 border border-gold-500/20">
-                        <span className="text-gold-500 font-heading font-black text-xl">{s.step}</span>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="font-heading font-bold text-sm uppercase tracking-wider">{s.title}</h4>
-                        <p className="text-text-secondary text-sm leading-relaxed">{s.desc}</p>
+                    <div key={s.step} className="relative">
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 w-14 h-14 flex items-center justify-center bg-gold-500/10 border border-gold-500/20">
+                          <span className="text-gold-500 font-heading font-black text-xl">{s.step}</span>
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="font-heading font-bold text-sm uppercase tracking-wider">{s.title}</h4>
+                          <p className="text-text-secondary text-sm leading-relaxed">{s.desc}</p>
                         {s.url && (
                           <a
                             href={s.url}
@@ -799,10 +799,10 @@ export default function EventDetailPage() {
                           </a>
                         )}
                       </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
               <div className="mt-8 flex flex-wrap gap-3">
                 {(mainEvent?.registration_url_gi || mainEvent?.registration_url_nogi) ? (
                   <>
@@ -924,7 +924,7 @@ export default function EventDetailPage() {
                 </ScrollReveal>
               )}
             </div>
-          </div>
+                </div>
         </section>
       )}
 
@@ -992,8 +992,8 @@ export default function EventDetailPage() {
                 </ScrollReveal>
               )}
             </div>
-          </div>
-        </section>
+        </div>
+      </section>
       )}
 
       {/* Photo Gallery Strip — only when gallery images exist */}

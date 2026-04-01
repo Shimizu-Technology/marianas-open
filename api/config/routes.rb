@@ -86,6 +86,7 @@ Rails.application.routes.draw do
             post :reorder
           end
         end
+        resource :impact_configuration, path: 'impact-configuration', only: [:show, :update]
         resources :site_contents, path: 'site-contents' do
           member do
             post :retranslate

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
-import type { ImpactMetric, ImpactMetricFormData, FundAllocation, FundAllocationFormData } from '../../services/api'
+import type { ImpactMetric, ImpactMetricFormData, FundAllocation, FundAllocationFormData, ImpactConfiguration, ImpactConfigurationFormData } from '../../services/api'
 
 const CATEGORIES = [
   { value: 'tourism', label: 'Tourism', color: 'text-blue-400 bg-blue-500/10' },
@@ -56,7 +56,7 @@ const emptyFundForm: FundAllocationFormData = {
   sort_order: 0, active: true,
 }
 
-type Tab = 'metrics' | 'funds'
+type Tab = 'metrics' | 'funds' | 'roi'
 
 export default function ImpactAdmin() {
   const [tab, setTab] = useState<Tab>('metrics')
@@ -66,6 +66,11 @@ export default function ImpactAdmin() {
   const [editing, setEditing] = useState<number | 'new' | null>(null)
   const [metricForm, setMetricForm] = useState<ImpactMetricFormData>(emptyMetricForm)
   const [fundForm, setFundForm] = useState<FundAllocationFormData>(emptyFundForm)
+  const [roiConfig, setRoiConfig] = useState<ImpactConfiguration | null>(null)
+  const [roiForm, setRoiForm] = useState<ImpactConfigurationFormData>({
+    economic_impact: 0, economic_impact_label: 'Economic Impact',
+    investment_label: 'Total Investment', roi_description: '', year_label: '',
+  })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -85,10 +90,25 @@ export default function ImpactAdmin() {
     } catch { /* noop */ }
   }, [])
 
+  const loadRoiConfig = useCallback(async () => {
+    try {
+      const res = await api.admin.getImpactConfiguration()
+      const c = res.impact_configuration
+      setRoiConfig(c)
+      setRoiForm({
+        economic_impact: c.economic_impact,
+        economic_impact_label: c.economic_impact_label || 'Economic Impact',
+        investment_label: c.investment_label || 'Total Investment',
+        roi_description: c.roi_description || '',
+        year_label: c.year_label || '',
+      })
+    } catch { /* noop */ }
+  }, [])
+
   useEffect(() => {
     setLoading(true)
-    Promise.all([loadMetrics(), loadFunds()]).finally(() => setLoading(false))
-  }, [loadMetrics, loadFunds])
+    Promise.all([loadMetrics(), loadFunds(), loadRoiConfig()]).finally(() => setLoading(false))
+  }, [loadMetrics, loadFunds, loadRoiConfig])
 
   useEffect(() => {
     if (editing === null) return
@@ -202,6 +222,20 @@ export default function ImpactAdmin() {
     }
   }
 
+  const handleSaveRoi = async () => {
+    setSaving(true)
+    setError('')
+    try {
+      const res = await api.admin.updateImpactConfiguration(roiForm)
+      setRoiConfig(res.impact_configuration)
+      setSuccess('ROI settings saved')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save ROI settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   useEffect(() => {
     if (!success) return
     const t = setTimeout(() => setSuccess(''), 3000)
@@ -239,13 +273,15 @@ export default function ImpactAdmin() {
             <p className="text-sm text-text-muted">Manage tourism data, competition stats, and fund allocation for sponsors</p>
           </div>
         </div>
-        <button
-          onClick={() => { setEditing('new'); setError('') }}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold rounded-lg hover:bg-gold/20 transition-colors text-sm font-medium"
-        >
-          <Plus className="w-4 h-4" />
-          Add {tab === 'metrics' ? 'Metric' : 'Fund Item'}
-        </button>
+        {tab !== 'roi' && (
+          <button
+            onClick={() => { setEditing('new'); setError('') }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold rounded-lg hover:bg-gold/20 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Add {tab === 'metrics' ? 'Metric' : 'Fund Item'}
+          </button>
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -283,6 +319,12 @@ export default function ImpactAdmin() {
           className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${tab === 'funds' ? 'bg-gold/10 text-gold' : 'text-text-muted hover:text-text-secondary'}`}
         >
           Fund Allocation ({funds.length})
+        </button>
+        <button
+          onClick={() => { setTab('roi'); setEditing(null) }}
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${tab === 'roi' ? 'bg-gold/10 text-gold' : 'text-text-muted hover:text-text-secondary'}`}
+        >
+          ROI Settings
         </button>
       </div>
 
@@ -459,6 +501,135 @@ export default function ImpactAdmin() {
               </motion.div>
             ))
           )}
+        </div>
+      )}
+
+      {/* ROI Tab */}
+      {tab === 'roi' && (
+        <div className="space-y-6">
+          {/* Live Preview */}
+          {(() => {
+            const investment = activeFundTotal
+            const impact = Number(roiForm.economic_impact) || 0
+            const multiplier = investment > 0 && impact > 0 ? (impact / investment).toFixed(1) : '0.0'
+            return (
+              <div className="bg-surface border border-gold/20 rounded-xl p-6">
+                <div className="text-xs text-text-muted mb-4 font-medium uppercase tracking-wider">Live Preview — How It Will Look on the Public Page</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-white/[0.02] rounded-lg border border-white/5">
+                    <div className="text-xs text-text-muted mb-1">{roiForm.investment_label || 'Total Investment'}</div>
+                    <div className="text-2xl font-bold text-text-primary">
+                      ${investment.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-text-muted mt-1">From fund allocations</div>
+                  </div>
+                  <div className="text-center p-4 bg-white/[0.02] rounded-lg border border-white/5">
+                    <div className="text-xs text-text-muted mb-1">{roiForm.economic_impact_label || 'Economic Impact'}</div>
+                    <div className="text-2xl font-bold text-green-400">
+                      ${impact.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-text-muted mt-1">Admin-configured value</div>
+                  </div>
+                  <div className="text-center p-4 bg-gold/5 rounded-lg border border-gold/20">
+                    <div className="text-xs text-text-muted mb-1">Return on Investment</div>
+                    <div className="text-3xl font-bold text-gold">
+                      {multiplier}x
+                    </div>
+                    <div className="text-xs text-text-muted mt-1">
+                      {roiForm.year_label || 'Current'}
+                    </div>
+                  </div>
+                </div>
+                {roiForm.roi_description && (
+                  <div className="mt-4 text-sm text-text-secondary italic border-t border-white/5 pt-4">
+                    "{roiForm.roi_description}"
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* Configuration Form */}
+          <div className="bg-surface border border-white/5 rounded-xl p-6 space-y-5">
+            <h3 className="font-heading font-bold text-text-primary flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-gold" />
+              ROI Configuration
+            </h3>
+            <p className="text-sm text-text-muted">
+              The Total Investment is automatically calculated from your active Fund Allocations (currently ${activeFundTotal.toLocaleString()}).
+              Set the Economic Impact value below, and the ROI multiplier will be computed automatically.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Economic Impact ($) *</label>
+                <input
+                  type="number"
+                  value={roiForm.economic_impact || ''}
+                  onChange={e => setRoiForm(p => ({ ...p, economic_impact: parseFloat(e.target.value) || 0 }))}
+                  placeholder="e.g., 500000"
+                  min="0"
+                  step="0.01"
+                  className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                />
+                <p className="text-xs text-text-muted mt-1">Total economic impact generated by the event</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Year / Event Label</label>
+                <input
+                  value={roiForm.year_label}
+                  onChange={e => setRoiForm(p => ({ ...p, year_label: e.target.value }))}
+                  placeholder="e.g., 2026 Marianas Open"
+                  className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                />
+                <p className="text-xs text-text-muted mt-1">Displayed under the ROI multiplier</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Investment Label</label>
+                <input
+                  value={roiForm.investment_label}
+                  onChange={e => setRoiForm(p => ({ ...p, investment_label: e.target.value }))}
+                  placeholder="Total Investment"
+                  className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Economic Impact Label</label>
+                <input
+                  value={roiForm.economic_impact_label}
+                  onChange={e => setRoiForm(p => ({ ...p, economic_impact_label: e.target.value }))}
+                  placeholder="Economic Impact"
+                  className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1">ROI Description / Note</label>
+              <textarea
+                value={roiForm.roi_description}
+                onChange={e => setRoiForm(p => ({ ...p, roi_description: e.target.value }))}
+                placeholder="e.g., Based on estimated visitor spending, hotel bookings, and local business revenue generated during the tournament weekend."
+                rows={3}
+                className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
+              />
+              <p className="text-xs text-text-muted mt-1">Optional context shown beneath the ROI card for transparency</p>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={handleSaveRoi}
+                disabled={saving}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold rounded-lg hover:bg-gold/20 transition-colors text-sm font-medium disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {saving ? 'Saving…' : 'Save ROI Settings'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

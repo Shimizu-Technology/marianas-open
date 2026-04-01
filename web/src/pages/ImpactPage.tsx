@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { api } from '../services/api'
-import type { ImpactData, ImpactMetric } from '../services/api'
+import type { ImpactData, ImpactMetric, ImpactROI } from '../services/api'
 import SEO from '../components/SEO'
 import ScrollReveal from '../components/ScrollReveal'
 
@@ -68,6 +68,105 @@ function MetricCard({ metric, index }: { metric: ImpactMetric; index: number }) 
         )}
       </div>
     </motion.div>
+  )
+}
+
+function ROICard({ roi }: { roi: ImpactROI }) {
+  const shouldReduceMotion = useReducedMotion()
+  const impact = Number(roi.economic_impact) || 0
+  const investment = Number(roi.investment_total) || 0
+  const multiplier = Number(roi.roi_multiplier) || 0
+
+  if (impact <= 0) return null
+
+  return (
+    <section className="py-6 sm:py-8">
+      <ScrollReveal>
+        <div className="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/5 via-surface to-surface">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gold/3 rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gold/3 rounded-full -translate-x-1/3 translate-y-1/3 pointer-events-none" />
+
+          <div className="relative p-6 sm:p-8">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="p-2 rounded-lg bg-gold/10">
+                <TrendingUp className="w-5 h-5 text-gold" />
+              </div>
+              <div>
+                <h2 className="font-heading text-lg sm:text-xl font-bold text-text-primary">Return on Investment</h2>
+                {roi.year_label && (
+                  <p className="text-xs text-text-muted">{roi.year_label}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+              {/* Investment */}
+              <motion.div
+                initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
+                whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="text-center sm:text-left p-4 rounded-xl bg-white/[0.02] border border-white/5"
+              >
+                <div className="text-xs text-text-muted font-medium uppercase tracking-wider mb-2">
+                  {roi.investment_label || 'Total Investment'}
+                </div>
+                <div className="font-heading text-2xl sm:text-3xl font-bold text-text-primary">
+                  ${investment.toLocaleString()}
+                </div>
+                <div className="text-xs text-text-muted mt-1">Event costs &amp; operations</div>
+              </motion.div>
+
+              {/* Economic Impact */}
+              <motion.div
+                initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
+                whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-center sm:text-left p-4 rounded-xl bg-white/[0.02] border border-white/5"
+              >
+                <div className="text-xs text-text-muted font-medium uppercase tracking-wider mb-2">
+                  {roi.economic_impact_label || 'Economic Impact'}
+                </div>
+                <div className="font-heading text-2xl sm:text-3xl font-bold text-green-400">
+                  ${impact.toLocaleString()}
+                </div>
+                <div className="text-xs text-text-muted mt-1">Generated for the community</div>
+              </motion.div>
+
+              {/* ROI Multiplier */}
+              <motion.div
+                initial={shouldReduceMotion ? {} : { opacity: 0, scale: 0.9 }}
+                whileInView={shouldReduceMotion ? {} : { opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-center p-4 rounded-xl bg-gold/5 border border-gold/20"
+              >
+                <div className="text-xs text-gold/70 font-medium uppercase tracking-wider mb-2">
+                  ROI Multiplier
+                </div>
+                <div className="font-heading text-4xl sm:text-5xl font-bold text-gold">
+                  {multiplier}x
+                </div>
+                <div className="text-xs text-gold/60 mt-1">Return per dollar invested</div>
+              </motion.div>
+            </div>
+
+            {roi.roi_description && (
+              <motion.p
+                initial={shouldReduceMotion ? {} : { opacity: 0 }}
+                whileInView={shouldReduceMotion ? {} : { opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="mt-6 text-sm text-text-secondary italic border-t border-white/5 pt-4"
+              >
+                {roi.roi_description}
+              </motion.p>
+            )}
+          </div>
+        </div>
+      </ScrollReveal>
+    </section>
   )
 }
 
@@ -196,6 +295,9 @@ export default function ImpactPage() {
             </p>
           </ScrollReveal>
         </section>
+
+        {/* ROI Card — prominent at the top */}
+        {data.roi && <ROICard roi={data.roi} />}
 
         {/* All metrics — single unified grid */}
         {allMetrics.length > 0 && (

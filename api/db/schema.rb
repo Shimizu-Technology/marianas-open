@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_27_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_27_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -228,6 +228,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_000001) do
     t.integer "sort_order", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["active", "sort_order"], name: "index_fund_allocations_on_active_and_sort_order"
+  end
+
+  create_table "impact_configurations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.decimal "economic_impact", precision: 14, scale: 2, default: "0.0", null: false
+    t.string "economic_impact_label", default: "Economic Impact"
+    t.string "investment_label", default: "Total Investment"
+    t.text "roi_description"
+    t.datetime "updated_at", null: false
+    t.string "year_label"
   end
 
   create_table "impact_metrics", force: :cascade do |t|
