@@ -109,26 +109,26 @@ export default function ImagesAdmin() {
   };
 
   const handleDelete = async (id: number) => {
-    setError('');
+    const prev = images;
+    setImages(imgs => imgs.filter(x => x.id !== id));
+    setDeleteConfirm(null);
+    showSuccess('Image deleted');
     try {
       await api.admin.deleteSiteImage(id);
-      setDeleteConfirm(null);
-      showSuccess('Image deleted');
-      await fetchImages();
     } catch (err) {
+      setImages(prev);
       setError(err instanceof Error ? err.message : 'Failed to delete image');
-      setDeleteConfirm(null);
     }
   };
 
-  const handleToggleActive = async (image: SiteImage) => {
+  const handleToggleActive = (image: SiteImage) => {
     setError('');
-    try {
-      await api.admin.updateSiteImage(image.id, { active: !image.active });
-      await fetchImages();
-    } catch (err) {
+    const prev = images;
+    setImages(imgs => imgs.map(x => x.id === image.id ? { ...x, active: !x.active } : x));
+    api.admin.updateSiteImage(image.id, { active: !image.active }).catch((err) => {
+      setImages(prev);
       setError(err instanceof Error ? err.message : 'Failed to toggle image');
-    }
+    });
   };
 
   const openEdit = (image: SiteImage) => {

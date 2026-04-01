@@ -121,13 +121,14 @@ export default function ImpactAdmin() {
     setError('')
     try {
       if (editing === 'new') {
-        await api.admin.createImpactMetric(metricForm)
+        const res = await api.admin.createImpactMetric(metricForm)
+        setMetrics(prev => [...prev, res.impact_metric])
         setSuccess('Metric created')
       } else if (typeof editing === 'number') {
-        await api.admin.updateImpactMetric(editing, metricForm)
+        const res = await api.admin.updateImpactMetric(editing, metricForm)
+        setMetrics(prev => prev.map(m => m.id === editing ? res.impact_metric : m))
         setSuccess('Metric updated')
       }
-      await loadMetrics()
       setEditing(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save')
@@ -141,13 +142,14 @@ export default function ImpactAdmin() {
     setError('')
     try {
       if (editing === 'new') {
-        await api.admin.createFundAllocation(fundForm)
+        const res = await api.admin.createFundAllocation(fundForm)
+        setFunds(prev => [...prev, res.fund_allocation])
         setSuccess('Fund allocation created')
       } else if (typeof editing === 'number') {
-        await api.admin.updateFundAllocation(editing, fundForm)
+        const res = await api.admin.updateFundAllocation(editing, fundForm)
+        setFunds(prev => prev.map(f => f.id === editing ? res.fund_allocation : f))
         setSuccess('Fund allocation updated')
       }
-      await loadFunds()
       setEditing(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save')
@@ -157,31 +159,47 @@ export default function ImpactAdmin() {
   }
 
   const handleDelete = async (id: number) => {
-    try {
-      if (tab === 'metrics') {
-        await api.admin.deleteImpactMetric(id)
-        await loadMetrics()
-      } else {
-        await api.admin.deleteFundAllocation(id)
-        await loadFunds()
-      }
+    if (tab === 'metrics') {
+      const prev = metrics
+      setMetrics(m => m.filter(x => x.id !== id))
       setDeleteConfirm(null)
       setSuccess('Deleted successfully')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete')
+      try {
+        await api.admin.deleteImpactMetric(id)
+      } catch (err) {
+        setMetrics(prev)
+        setError(err instanceof Error ? err.message : 'Failed to delete')
+      }
+    } else {
+      const prev = funds
+      setFunds(f => f.filter(x => x.id !== id))
+      setDeleteConfirm(null)
+      setSuccess('Deleted successfully')
+      try {
+        await api.admin.deleteFundAllocation(id)
+      } catch (err) {
+        setFunds(prev)
+        setError(err instanceof Error ? err.message : 'Failed to delete')
+      }
     }
   }
 
-  const handleToggleActive = async (item: ImpactMetric | FundAllocation) => {
-    try {
-      if (tab === 'metrics') {
-        await api.admin.updateImpactMetric(item.id, { active: !item.active })
-        await loadMetrics()
-      } else {
-        await api.admin.updateFundAllocation(item.id, { active: !item.active })
-        await loadFunds()
-      }
-    } catch { /* noop */ }
+  const handleToggleActive = (item: ImpactMetric | FundAllocation) => {
+    if (tab === 'metrics') {
+      const prev = metrics
+      setMetrics(m => m.map(x => x.id === item.id ? { ...x, active: !x.active } : x))
+      api.admin.updateImpactMetric(item.id, { active: !item.active }).catch(() => {
+        setMetrics(prev)
+        setError('Failed to update')
+      })
+    } else {
+      const prev = funds
+      setFunds(f => f.map(x => x.id === item.id ? { ...x, active: !x.active } : x))
+      api.admin.updateFundAllocation(item.id, { active: !item.active }).catch(() => {
+        setFunds(prev)
+        setError('Failed to update')
+      })
+    }
   }
 
   useEffect(() => {
