@@ -595,7 +595,7 @@ export interface FundAllocation {
   color: string | null;
   sort_order: number;
   active: boolean;
-  percentage?: number;
+  percentage?: string | number;
   created_at: string;
 }
 

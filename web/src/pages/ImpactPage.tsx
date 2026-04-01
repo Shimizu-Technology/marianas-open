@@ -275,7 +275,7 @@ export default function ImpactPage() {
                                 className="h-full rounded-full"
                                 style={{ backgroundColor: a.color || '#3b82f6' }}
                                 initial={{ width: 0 }}
-                                whileInView={{ width: `${a.percentage}%` }}
+                                whileInView={{ width: `${Number(a.percentage)}%` }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8, delay: i * 0.1 }}
                               />
@@ -285,7 +285,7 @@ export default function ImpactPage() {
                             {a.description && (
                               <span className="text-xs text-text-muted truncate">{a.description}</span>
                             )}
-                            <span className="text-xs text-text-muted shrink-0 ml-2">{a.percentage?.toFixed(1)}%</span>
+                            <span className="text-xs text-text-muted shrink-0 ml-2">{Number(a.percentage ?? 0).toFixed(1)}%</span>
                           </div>
                         </div>
                       </div>
