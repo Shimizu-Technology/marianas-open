@@ -507,42 +507,61 @@ export default function ImpactAdmin() {
       {/* ROI Tab */}
       {tab === 'roi' && (
         <div className="space-y-6">
+          {/* Quick Guide */}
+          <div className="bg-blue-500/5 border border-blue-500/15 rounded-xl p-5">
+            <h3 className="font-heading font-bold text-blue-400 text-sm mb-2 flex items-center gap-2">
+              <span className="text-lg">💡</span> How This Works
+            </h3>
+            <ol className="text-sm text-text-secondary space-y-1.5 list-decimal list-inside">
+              <li><span className="text-text-primary font-medium">Total Investment</span> is automatically calculated from your Fund Allocation tab (currently <span className="text-gold font-semibold">${activeFundTotal.toLocaleString()}</span>)</li>
+              <li><span className="text-text-primary font-medium">Economic Impact</span> is the total dollar value the event generates for the community — enter it below</li>
+              <li>The <span className="text-gold font-semibold">ROI multiplier</span> is computed automatically (Economic Impact ÷ Total Investment)</li>
+            </ol>
+            <p className="text-xs text-text-muted mt-3">This will be displayed publicly on the Impact page so sponsors like GVB can see the return.</p>
+          </div>
+
           {/* Live Preview */}
           {(() => {
             const investment = activeFundTotal
             const impact = Number(roiForm.economic_impact) || 0
-            const multiplier = investment > 0 && impact > 0 ? (impact / investment).toFixed(1) : '0.0'
+            const multiplier = investment > 0 && impact > 0 ? (impact / investment).toFixed(1) : null
+            const isConfigured = impact > 0
             return (
-              <div className="bg-surface border border-gold/20 rounded-xl p-6">
-                <div className="text-xs text-text-muted mb-4 font-medium uppercase tracking-wider">Live Preview — How It Will Look on the Public Page</div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-white/[0.02] rounded-lg border border-white/5">
-                    <div className="text-xs text-text-muted mb-1">{roiForm.investment_label || 'Total Investment'}</div>
-                    <div className="text-2xl font-bold text-text-primary">
-                      ${investment.toLocaleString()}
-                    </div>
-                    <div className="text-xs text-text-muted mt-1">From fund allocations</div>
-                  </div>
-                  <div className="text-center p-4 bg-white/[0.02] rounded-lg border border-white/5">
-                    <div className="text-xs text-text-muted mb-1">{roiForm.economic_impact_label || 'Economic Impact'}</div>
-                    <div className="text-2xl font-bold text-green-400">
-                      ${impact.toLocaleString()}
-                    </div>
-                    <div className="text-xs text-text-muted mt-1">Admin-configured value</div>
-                  </div>
-                  <div className="text-center p-4 bg-gold/5 rounded-lg border border-gold/20">
-                    <div className="text-xs text-text-muted mb-1">Return on Investment</div>
-                    <div className="text-3xl font-bold text-gold">
-                      {multiplier}x
-                    </div>
-                    <div className="text-xs text-text-muted mt-1">
-                      {roiForm.year_label || 'Current'}
-                    </div>
-                  </div>
+              <div className={`rounded-xl p-6 ${isConfigured ? 'bg-surface border border-gold/20' : 'bg-surface border border-white/5 border-dashed'}`}>
+                <div className="text-xs text-text-muted mb-4 font-medium uppercase tracking-wider flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${isConfigured ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`} />
+                  {isConfigured ? 'Live Preview — This Is What Sponsors Will See' : 'Preview — Enter an Economic Impact Below to See the ROI'}
                 </div>
-                {roiForm.roi_description && (
-                  <div className="mt-4 text-sm text-text-secondary italic border-t border-white/5 pt-4">
-                    "{roiForm.roi_description}"
+                {isConfigured ? (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="text-center p-4 bg-white/[0.02] rounded-lg border border-white/5">
+                        <div className="text-xs text-text-muted mb-1">{roiForm.investment_label || 'Total Investment'}</div>
+                        <div className="text-2xl font-bold text-text-primary">${investment.toLocaleString()}</div>
+                        <div className="text-xs text-text-muted mt-1">From Fund Allocation tab</div>
+                      </div>
+                      <div className="text-center p-4 bg-white/[0.02] rounded-lg border border-white/5">
+                        <div className="text-xs text-text-muted mb-1">{roiForm.economic_impact_label || 'Economic Impact'}</div>
+                        <div className="text-2xl font-bold text-green-400">${impact.toLocaleString()}</div>
+                        <div className="text-xs text-text-muted mt-1">Your entered value</div>
+                      </div>
+                      <div className="text-center p-4 bg-gold/5 rounded-lg border border-gold/20">
+                        <div className="text-xs text-text-muted mb-1">Return on Investment</div>
+                        <div className="text-3xl font-bold text-gold">{multiplier}x</div>
+                        <div className="text-xs text-text-muted mt-1">{roiForm.year_label || 'Current'}</div>
+                      </div>
+                    </div>
+                    {roiForm.roi_description && (
+                      <div className="mt-4 text-sm text-text-secondary italic border-t border-white/5 pt-4">
+                        &ldquo;{roiForm.roi_description}&rdquo;
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-6 text-text-muted">
+                    <TrendingUp className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">Enter the Economic Impact amount below to see the ROI calculation</p>
+                    <p className="text-xs mt-1">The ROI card won't appear on the public page until you set this value</p>
                   </div>
                 )}
               </div>
@@ -553,27 +572,28 @@ export default function ImpactAdmin() {
           <div className="bg-surface border border-white/5 rounded-xl p-6 space-y-5">
             <h3 className="font-heading font-bold text-text-primary flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-gold" />
-              ROI Configuration
+              ROI Settings
             </h3>
-            <p className="text-sm text-text-muted">
-              The Total Investment is automatically calculated from your active Fund Allocations (currently ${activeFundTotal.toLocaleString()}).
-              Set the Economic Impact value below, and the ROI multiplier will be computed automatically.
-            </p>
 
+            {/* Primary field — Economic Impact */}
+            <div className="bg-gold/5 border border-gold/15 rounded-lg p-4">
+              <label className="block text-sm font-semibold text-gold mb-1">
+                Economic Impact ($) *
+              </label>
+              <p className="text-xs text-text-muted mb-2">How much total revenue did the event generate for the island? (visitor spending, hotel bookings, restaurant revenue, etc.)</p>
+              <input
+                type="number"
+                value={Number(roiForm.economic_impact) > 0 ? roiForm.economic_impact : ''}
+                onChange={e => setRoiForm(p => ({ ...p, economic_impact: parseFloat(e.target.value) || 0 }))}
+                placeholder="e.g., 500000"
+                min="0"
+                step="1"
+                className="w-full px-3 py-2.5 bg-white/[0.03] border border-gold/20 rounded-lg text-text-primary text-lg font-semibold placeholder:text-text-muted placeholder:font-normal focus:border-gold/40 focus:outline-none"
+              />
+            </div>
+
+            {/* Secondary fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1">Economic Impact ($) *</label>
-                <input
-                  type="number"
-                  value={roiForm.economic_impact || ''}
-                  onChange={e => setRoiForm(p => ({ ...p, economic_impact: parseFloat(e.target.value) || 0 }))}
-                  placeholder="e.g., 500000"
-                  min="0"
-                  step="0.01"
-                  className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                />
-                <p className="text-xs text-text-muted mt-1">Total economic impact generated by the event</p>
-              </div>
               <div>
                 <label className="block text-sm font-medium text-text-secondary mb-1">Year / Event Label</label>
                 <input
@@ -582,44 +602,55 @@ export default function ImpactAdmin() {
                   placeholder="e.g., 2026 Marianas Open"
                   className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
                 />
-                <p className="text-xs text-text-muted mt-1">Displayed under the ROI multiplier</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1">Investment Label</label>
-                <input
-                  value={roiForm.investment_label}
-                  onChange={e => setRoiForm(p => ({ ...p, investment_label: e.target.value }))}
-                  placeholder="Total Investment"
-                  className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                />
+                <p className="text-xs text-text-muted mt-1">Shows under the ROI number on the public page</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1">Economic Impact Label</label>
-                <input
-                  value={roiForm.economic_impact_label}
-                  onChange={e => setRoiForm(p => ({ ...p, economic_impact_label: e.target.value }))}
-                  placeholder="Economic Impact"
-                  className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                <label className="block text-sm font-medium text-text-secondary mb-1">Transparency Note</label>
+                <textarea
+                  value={roiForm.roi_description}
+                  onChange={e => setRoiForm(p => ({ ...p, roi_description: e.target.value }))}
+                  placeholder="e.g., Based on estimated visitor spending, hotel bookings, and local business revenue during tournament weekend."
+                  rows={2}
+                  className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
                 />
+                <p className="text-xs text-text-muted mt-1">Shown publicly — explains how the numbers were calculated</p>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1">ROI Description / Note</label>
-              <textarea
-                value={roiForm.roi_description}
-                onChange={e => setRoiForm(p => ({ ...p, roi_description: e.target.value }))}
-                placeholder="e.g., Based on estimated visitor spending, hotel bookings, and local business revenue generated during the tournament weekend."
-                rows={3}
-                className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
-              />
-              <p className="text-xs text-text-muted mt-1">Optional context shown beneath the ROI card for transparency</p>
-            </div>
+            {/* Advanced — collapsed by default */}
+            <details className="group">
+              <summary className="text-xs font-medium text-text-muted cursor-pointer hover:text-text-secondary transition-colors select-none flex items-center gap-1.5">
+                <span className="transition-transform group-open:rotate-90">▸</span>
+                Advanced: Customize Labels
+              </summary>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 pl-4 border-l-2 border-white/5">
+                <div>
+                  <label className="block text-xs font-medium text-text-muted mb-1">Investment Column Label</label>
+                  <input
+                    value={roiForm.investment_label}
+                    onChange={e => setRoiForm(p => ({ ...p, investment_label: e.target.value }))}
+                    placeholder="Total Investment"
+                    className="w-full px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-muted mb-1">Economic Impact Column Label</label>
+                  <input
+                    value={roiForm.economic_impact_label}
+                    onChange={e => setRoiForm(p => ({ ...p, economic_impact_label: e.target.value }))}
+                    placeholder="Economic Impact"
+                    className="w-full px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </details>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex items-center justify-between pt-2 border-t border-white/5">
+              <p className="text-xs text-text-muted">
+                {Number(roiForm.economic_impact) > 0
+                  ? '✓ ROI card will be visible on the public Impact page'
+                  : 'ROI card is hidden until you enter an Economic Impact value'}
+              </p>
               <button
                 onClick={handleSaveRoi}
                 disabled={saving}
