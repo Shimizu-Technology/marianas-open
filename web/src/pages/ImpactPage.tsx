@@ -16,57 +16,57 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  tourism: 'Tourism Impact',
-  competition: 'Competition Stats',
-  economic: 'Economic Impact',
-  community: 'Community Impact',
+  tourism: 'Tourism',
+  competition: 'Competition',
+  economic: 'Economic',
+  community: 'Community',
+}
+
+const CATEGORY_COLORS: Record<string, string> = {
+  tourism: 'text-blue-400 bg-blue-500/10',
+  competition: 'text-gold bg-gold/10',
+  economic: 'text-green-400 bg-green-500/10',
+  community: 'text-purple-400 bg-purple-500/10',
 }
 
 function MetricCard({ metric, index }: { metric: ImpactMetric; index: number }) {
   const shouldReduceMotion = useReducedMotion()
   const Icon = ICON_MAP[metric.icon || 'globe'] || Globe
-
-  if (metric.highlight) {
-    return (
-      <motion.div
-        initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
-        whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: index * 0.08 }}
-        className="text-center"
-      >
-        <div className="inline-flex p-2.5 rounded-lg bg-gold/15 text-gold mb-2">
-          <Icon className="w-5 h-5" />
-        </div>
-        <div className="font-heading text-3xl sm:text-4xl font-bold text-gold">{metric.value}</div>
-        <div className="text-sm text-gold/70 font-medium mt-1">{metric.label}</div>
-        {metric.description && (
-          <div className="text-xs text-text-muted mt-1">{metric.description}</div>
-        )}
-      </motion.div>
-    )
-  }
+  const catColor = CATEGORY_COLORS[metric.category] || 'text-text-muted bg-white/5'
 
   return (
     <motion.div
-      initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+      initial={shouldReduceMotion ? {} : { opacity: 0, y: 16 }}
       whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay: index * 0.06 }}
-      className="bg-surface border border-white/5 rounded-lg p-4 hover:border-white/10 transition-colors"
+      className={`rounded-xl border transition-all duration-300 h-full ${
+        metric.highlight
+          ? 'bg-gradient-to-br from-gold/8 via-surface to-surface border-gold/20 hover:border-gold/40'
+          : 'bg-surface border-white/5 hover:border-white/10'
+      }`}
     >
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-white/5 text-text-secondary shrink-0">
-          <Icon className="w-4 h-4" />
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className={`p-2 rounded-lg ${metric.highlight ? 'bg-gold/15 text-gold' : 'bg-white/5 text-text-secondary'}`}>
+            <Icon className="w-4 h-4" />
+          </div>
+          <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${catColor}`}>
+            {CATEGORY_LABELS[metric.category] || metric.category}
+          </span>
         </div>
-        <div className="min-w-0">
-          <div className="font-heading text-xl font-bold text-text-primary leading-tight">{metric.value}</div>
-          <div className="text-xs text-text-muted">{metric.label}</div>
+        <div className={`font-heading font-bold leading-tight ${
+          metric.highlight ? 'text-3xl text-gold' : 'text-2xl text-text-primary'
+        }`}>
+          {metric.value}
         </div>
+        <div className={`text-sm mt-1 ${metric.highlight ? 'text-gold/70 font-medium' : 'text-text-muted'}`}>
+          {metric.label}
+        </div>
+        {metric.description && (
+          <div className="text-xs text-text-muted mt-2 leading-relaxed">{metric.description}</div>
+        )}
       </div>
-      {metric.description && (
-        <div className="text-xs text-text-muted mt-2 leading-relaxed pl-11">{metric.description}</div>
-      )}
     </motion.div>
   )
 }
@@ -145,16 +145,16 @@ export default function ImpactPage() {
     )
   }
 
-  const highlightMetrics = data.impact_metrics.filter(m => m.highlight)
-  const regularMetrics = data.impact_metrics.filter(m => !m.highlight)
+  const allMetrics = data.impact_metrics
+  const count = allMetrics.length
 
-  const metricsByCategory = regularMetrics.reduce<Record<string, ImpactMetric[]>>((acc, m) => {
-    if (!acc[m.category]) acc[m.category] = []
-    acc[m.category].push(m)
-    return acc
-  }, {})
-  const categoryOrder = ['tourism', 'competition', 'economic', 'community']
-  const populatedCategories = categoryOrder.filter(c => metricsByCategory[c]?.length)
+  // Choose grid columns based on how many metrics exist so it always looks full
+  let gridCols = 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4'
+  if (count === 1) gridCols = 'grid-cols-1 max-w-sm mx-auto'
+  else if (count === 2) gridCols = 'grid-cols-2 max-w-2xl mx-auto'
+  else if (count === 3) gridCols = 'grid-cols-1 sm:grid-cols-3 max-w-4xl mx-auto'
+  else if (count === 4) gridCols = 'grid-cols-2 lg:grid-cols-4'
+  else if (count >= 5 && count <= 6) gridCols = 'grid-cols-2 sm:grid-cols-3'
 
   return (
     <>
@@ -165,8 +165,8 @@ export default function ImpactPage() {
       />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        {/* Hero — compact */}
-        <section className="pt-24 pb-8 sm:pt-28 sm:pb-10 text-center">
+        {/* Hero */}
+        <section className="pt-24 pb-6 sm:pt-28 sm:pb-8 text-center">
           <ScrollReveal>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold text-xs font-medium mb-4">
               <TrendingUp className="w-3.5 h-3.5" />
@@ -181,45 +181,22 @@ export default function ImpactPage() {
           </ScrollReveal>
         </section>
 
-        {/* Highlight stats — big numbers in a row */}
-        {highlightMetrics.length > 0 && (
-          <section className="pb-8 sm:pb-10">
-            <div className={`grid gap-6 ${highlightMetrics.length === 1 ? 'grid-cols-1 max-w-xs mx-auto' : highlightMetrics.length === 2 ? 'grid-cols-2' : highlightMetrics.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
-              {highlightMetrics.map((m, i) => (
+        {/* All metrics — single unified grid */}
+        {allMetrics.length > 0 && (
+          <section className="py-6 sm:py-8">
+            <div className={`grid gap-3 sm:gap-4 ${gridCols}`}>
+              {allMetrics.map((m, i) => (
                 <MetricCard key={m.id} metric={m} index={i} />
               ))}
             </div>
           </section>
         )}
 
-        {/* All regular metrics in a dense grid, grouped by category */}
-        {populatedCategories.length > 0 && (
-          <section className="pb-8 sm:pb-12">
-            {populatedCategories.map((cat) => {
-              const catMetrics = metricsByCategory[cat]
-              return (
-                <div key={cat} className="mb-6 last:mb-0">
-                  <ScrollReveal>
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
-                      {CATEGORY_LABELS[cat]}
-                    </h3>
-                  </ScrollReveal>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {catMetrics.map((m, i) => (
-                      <MetricCard key={m.id} metric={m} index={i} />
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-          </section>
-        )}
-
-        {/* Fund Allocation — compact layout */}
+        {/* Fund Allocation */}
         {data.fund_allocations.length > 0 && (
-          <section className="py-8 sm:py-12 border-t border-white/5">
+          <section className="py-6 sm:py-10 border-t border-white/5">
             <ScrollReveal>
-              <div className="flex items-center gap-2 mb-6">
+              <div className="flex items-center gap-2 mb-5">
                 <DollarSign className="w-4 h-4 text-green-400" />
                 <h2 className="font-heading text-lg sm:text-xl font-bold text-text-primary">
                   Fund Allocation
@@ -265,8 +242,8 @@ export default function ImpactPage() {
           </section>
         )}
 
-        {/* Sponsor CTA — compact */}
-        <section className="py-8 sm:py-12">
+        {/* Sponsor CTA */}
+        <section className="py-6 sm:py-10">
           <ScrollReveal>
             <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gold/10 via-surface to-surface border border-gold/20 p-6 sm:p-8 text-center">
               <div className="absolute top-0 left-0 w-32 h-32 bg-gold/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
