@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       resources :site_images, only: [:index], path: 'site-images'
       get 'rankings/competitor', to: 'rankings#competitor'
       resources :rankings, only: [:index]
+      get 'impact', to: 'impact#index'
 
       # Auth
       get :me, to: "users#me"
@@ -73,6 +74,16 @@ Rails.application.routes.draw do
           member do
             post :upload_image
             delete :remove_image
+          end
+        end
+        resources :impact_metrics, path: 'impact-metrics' do
+          collection do
+            post :reorder
+          end
+        end
+        resources :fund_allocations, path: 'fund-allocations' do
+          collection do
+            post :reorder
           end
         end
         resources :site_contents, path: 'site-contents' do

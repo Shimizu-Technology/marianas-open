@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_26_080000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_27_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -216,6 +216,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_080000) do
     t.jsonb "visa_items", default: [], null: false
     t.index ["organization_id"], name: "index_events_on_organization_id"
     t.index ["translation_status"], name: "index_events_on_translation_status"
+  end
+
+  create_table "fund_allocations", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.decimal "amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.string "category", null: false
+    t.string "color"
+    t.datetime "created_at", null: false
+    t.string "description"
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["active", "sort_order"], name: "index_fund_allocations_on_active_and_sort_order"
+  end
+
+  create_table "impact_metrics", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "category", default: "tourism", null: false
+    t.datetime "created_at", null: false
+    t.string "description"
+    t.boolean "highlight", default: false, null: false
+    t.string "icon"
+    t.string "label", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.string "value", null: false
+    t.index ["active", "sort_order"], name: "index_impact_metrics_on_active_and_sort_order"
+    t.index ["category"], name: "index_impact_metrics_on_category"
   end
 
   create_table "organizations", force: :cascade do |t|

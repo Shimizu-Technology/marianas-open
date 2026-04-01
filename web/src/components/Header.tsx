@@ -37,6 +37,7 @@ export default function Header() {
     { to: '/rankings', label: t('nav.rankings') },
     { to: '/competitors', label: t('nav.competitors') },
     { to: '/teams', label: 'Teams' },
+    { to: '/impact', label: 'Impact' },
     { to: '/watch', label: t('nav.watch') },
   ];
 

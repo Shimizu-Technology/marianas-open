@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { CalendarDays, Handshake, Settings, Users, LayoutDashboard, ArrowLeft, Play, Image, FileText, Swords, Menu, X, Building2, Megaphone } from 'lucide-react'
+import { CalendarDays, Handshake, Settings, Users, LayoutDashboard, ArrowLeft, Play, Image, FileText, Swords, Menu, X, Building2, Megaphone, BarChart3 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { api } from '../services/api'
 
@@ -14,6 +14,7 @@ const navItems = [
   { to: '/admin/images', icon: Image, label: 'Images' },
   { to: '/admin/content', icon: FileText, label: 'Content' },
   { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
+  { to: '/admin/impact', icon: BarChart3, label: 'Impact' },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ]

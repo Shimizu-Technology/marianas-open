@@ -563,6 +563,57 @@ export interface EventResultsSummary {
   top_academies: { name: string; gold: number; silver: number; bronze: number; total: number }[];
 }
 
+export interface ImpactMetric {
+  id: number;
+  label: string;
+  value: string;
+  description: string | null;
+  category: string;
+  icon: string | null;
+  sort_order: number;
+  active: boolean;
+  highlight: boolean;
+  created_at: string;
+}
+
+export interface ImpactMetricFormData {
+  label: string;
+  value: string;
+  description: string;
+  category: string;
+  icon: string;
+  sort_order: number;
+  active: boolean;
+  highlight: boolean;
+}
+
+export interface FundAllocation {
+  id: number;
+  category: string;
+  amount: number;
+  description: string | null;
+  color: string | null;
+  sort_order: number;
+  active: boolean;
+  percentage?: number;
+  created_at: string;
+}
+
+export interface FundAllocationFormData {
+  category: string;
+  amount: number;
+  description: string;
+  color: string;
+  sort_order: number;
+  active: boolean;
+}
+
+export interface ImpactData {
+  impact_metrics: ImpactMetric[];
+  fund_allocations: (FundAllocation & { percentage: number })[];
+  total_amount: number;
+}
+
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -648,6 +699,7 @@ export const api = {
     const query = placement ? `?placement=${encodeURIComponent(placement)}` : '';
     return fetchApi<{ site_images: SiteImage[] }>(`/api/v1/site-images${query}`);
   },
+  getImpactData: () => fetchApi<ImpactData>('/api/v1/impact'),
 
   // Auth
   getCurrentUser: () => {
@@ -910,6 +962,48 @@ export const api = {
     },
     removeAnnouncementImage: (id: number) =>
       fetchApi<{ announcement: Announcement }>(`/api/v1/admin/announcements/${id}/remove_image`, { method: 'DELETE' }, true),
+
+    // Impact Metrics
+    getImpactMetrics: () =>
+      fetchApi<{ impact_metrics: ImpactMetric[] }>('/api/v1/admin/impact-metrics', {}, true),
+    createImpactMetric: (data: Partial<ImpactMetricFormData>) =>
+      fetchApi<{ impact_metric: ImpactMetric }>('/api/v1/admin/impact-metrics', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    updateImpactMetric: (id: number, data: Partial<ImpactMetricFormData>) =>
+      fetchApi<{ impact_metric: ImpactMetric }>(`/api/v1/admin/impact-metrics/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    deleteImpactMetric: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/impact-metrics/${id}`, { method: 'DELETE' }, true),
+    reorderImpactMetrics: (ids: number[]) =>
+      fetchApi<void>('/api/v1/admin/impact-metrics/reorder', {
+        method: 'POST',
+        body: JSON.stringify({ ids }),
+      }, true),
+
+    // Fund Allocations
+    getFundAllocations: () =>
+      fetchApi<{ fund_allocations: FundAllocation[]; total_amount: number }>('/api/v1/admin/fund-allocations', {}, true),
+    createFundAllocation: (data: Partial<FundAllocationFormData>) =>
+      fetchApi<{ fund_allocation: FundAllocation }>('/api/v1/admin/fund-allocations', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    updateFundAllocation: (id: number, data: Partial<FundAllocationFormData>) =>
+      fetchApi<{ fund_allocation: FundAllocation }>(`/api/v1/admin/fund-allocations/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    deleteFundAllocation: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/fund-allocations/${id}`, { method: 'DELETE' }, true),
+    reorderFundAllocations: (ids: number[]) =>
+      fetchApi<void>('/api/v1/admin/fund-allocations/reorder', {
+        method: 'POST',
+        body: JSON.stringify({ ids }),
+      }, true),
 
     // Organization
     getOrganization: () => fetchApi<Organization>('/api/v1/admin/organization', {}, true),
