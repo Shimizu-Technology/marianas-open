@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_27_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_27_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -236,8 +236,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_100000) do
     t.string "economic_impact_label", default: "Economic Impact"
     t.string "investment_label", default: "Total Investment"
     t.text "roi_description"
+    t.integer "singleton_guard", default: 0, null: false
     t.datetime "updated_at", null: false
     t.string "year_label"
+    t.index ["singleton_guard"], name: "index_impact_configurations_on_singleton_guard", unique: true
   end
 
   create_table "impact_metrics", force: :cascade do |t|

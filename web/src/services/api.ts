@@ -637,7 +637,7 @@ export interface ImpactConfigurationFormData {
 
 export interface ImpactData {
   impact_metrics: ImpactMetric[];
-  fund_allocations: (FundAllocation & { percentage: number })[];
+  fund_allocations: (FundAllocation & { percentage: string | number })[];
   total_amount: number;
   roi: ImpactROI;
 }

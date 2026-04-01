@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
-import type { ImpactMetric, ImpactMetricFormData, FundAllocation, FundAllocationFormData, ImpactConfiguration, ImpactConfigurationFormData } from '../../services/api'
+import type { ImpactMetric, ImpactMetricFormData, FundAllocation, FundAllocationFormData, ImpactConfigurationFormData } from '../../services/api'
 
 const CATEGORIES = [
   { value: 'tourism', label: 'Tourism', color: 'text-blue-400 bg-blue-500/10' },
@@ -66,7 +66,6 @@ export default function ImpactAdmin() {
   const [editing, setEditing] = useState<number | 'new' | null>(null)
   const [metricForm, setMetricForm] = useState<ImpactMetricFormData>(emptyMetricForm)
   const [fundForm, setFundForm] = useState<FundAllocationFormData>(emptyFundForm)
-  const [roiConfig, setRoiConfig] = useState<ImpactConfiguration | null>(null)
   const [roiForm, setRoiForm] = useState<ImpactConfigurationFormData>({
     economic_impact: 0, economic_impact_label: 'Economic Impact',
     investment_label: 'Total Investment', roi_description: '', year_label: '',
@@ -80,21 +79,24 @@ export default function ImpactAdmin() {
     try {
       const res = await api.admin.getImpactMetrics()
       setMetrics(res.impact_metrics)
-    } catch { /* noop */ }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load metrics')
+    }
   }, [])
 
   const loadFunds = useCallback(async () => {
     try {
       const res = await api.admin.getFundAllocations()
       setFunds(res.fund_allocations)
-    } catch { /* noop */ }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load fund allocations')
+    }
   }, [])
 
   const loadRoiConfig = useCallback(async () => {
     try {
       const res = await api.admin.getImpactConfiguration()
       const c = res.impact_configuration
-      setRoiConfig(c)
       setRoiForm({
         economic_impact: c.economic_impact,
         economic_impact_label: c.economic_impact_label || 'Economic Impact',
@@ -102,7 +104,9 @@ export default function ImpactAdmin() {
         roi_description: c.roi_description || '',
         year_label: c.year_label || '',
       })
-    } catch { /* noop */ }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load ROI settings')
+    }
   }, [])
 
   useEffect(() => {
@@ -226,8 +230,7 @@ export default function ImpactAdmin() {
     setSaving(true)
     setError('')
     try {
-      const res = await api.admin.updateImpactConfiguration(roiForm)
-      setRoiConfig(res.impact_configuration)
+      await api.admin.updateImpactConfiguration(roiForm)
       setSuccess('ROI settings saved')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save ROI settings')
