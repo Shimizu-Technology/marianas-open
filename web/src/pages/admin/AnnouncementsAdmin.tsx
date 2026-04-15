@@ -121,25 +121,27 @@ export default function AnnouncementsAdmin() {
   }
 
   const handleDelete = async (id: number) => {
+    const prev = announcements
+    setAnnouncements(a => a.filter(x => x.id !== id))
+    setDeleteConfirm(null)
+    if (editing === id) setEditing(null)
+    setSuccess('Announcement deleted')
+    setTimeout(() => setSuccess(''), 3000)
     try {
       await api.admin.deleteAnnouncement(id)
-      setDeleteConfirm(null)
-      if (editing === id) setEditing(null)
-      setSuccess('Announcement deleted')
-      await load()
-      setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
+      setAnnouncements(prev)
       setError(err instanceof Error ? err.message : 'Delete failed')
     }
   }
 
-  const handleToggleActive = async (ann: Announcement) => {
-    try {
-      await api.admin.updateAnnouncement(ann.id, { active: !ann.active })
-      await load()
-    } catch (err) {
+  const handleToggleActive = (ann: Announcement) => {
+    const prev = announcements
+    setAnnouncements(a => a.map(x => x.id === ann.id ? { ...x, active: !x.active } : x))
+    api.admin.updateAnnouncement(ann.id, { active: !ann.active }).catch((err) => {
+      setAnnouncements(prev)
       setError(err instanceof Error ? err.message : 'Toggle failed')
-    }
+    })
   }
 
   if (loading) {
