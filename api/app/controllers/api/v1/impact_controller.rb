@@ -24,6 +24,11 @@ module Api
           }
         }
       end
+
+      def status
+        has_data = ImpactMetric.active.exists? || FundAllocation.active.exists?
+        render json: { visible: has_data }
+      end
     end
   end
 end

@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       get 'rankings/competitor', to: 'rankings#competitor'
       resources :rankings, only: [:index]
       get 'impact', to: 'impact#index'
+      get 'impact/status', to: 'impact#status'
 
       # Auth
       get :me, to: "users#me"

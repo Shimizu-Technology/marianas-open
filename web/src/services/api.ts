@@ -728,6 +728,7 @@ export const api = {
     return fetchApi<{ site_images: SiteImage[] }>(`/api/v1/site-images${query}`);
   },
   getImpactData: () => fetchApi<ImpactData>('/api/v1/impact'),
+  getImpactStatus: () => fetchApi<{ visible: boolean }>('/api/v1/impact/status'),
 
   // Auth
   getCurrentUser: () => {

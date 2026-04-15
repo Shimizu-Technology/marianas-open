@@ -5,6 +5,7 @@ import { Menu, X, Shield, Search, ChevronDown } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import GlobalSearch from './GlobalSearch';
 import { useOrg } from '../contexts/OrganizationContext';
+import { api } from '../services/api';
 
 const LOGO_FALLBACK = '/images/logos/mo-logo-white.png';
 
@@ -71,6 +72,13 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const org = useOrg();
+  const [impactVisible, setImpactVisible] = useState(false);
+
+  useEffect(() => {
+    api.getImpactStatus()
+      .then(res => setImpactVisible(res.visible))
+      .catch(() => setImpactVisible(false));
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -104,7 +112,7 @@ export default function Header() {
         { to: '/teams', label: 'Teams' },
       ],
     },
-    { to: '/impact', label: 'Impact' },
+    ...(impactVisible ? [{ to: '/impact', label: 'Impact' }] : []),
     { to: '/watch', label: t('nav.watch') },
   ];
 
@@ -135,7 +143,7 @@ export default function Header() {
       heading: null,
       links: [
         { to: '/rules', label: t('nav.rules') },
-        { to: '/impact', label: 'Impact' },
+        ...(impactVisible ? [{ to: '/impact', label: 'Impact' }] : []),
         { to: '/watch', label: t('nav.watch') },
       ],
     },
