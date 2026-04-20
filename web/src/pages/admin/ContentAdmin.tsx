@@ -10,9 +10,15 @@ const LANGUAGES = [
   { code: 'ko', label: '한국어' },
   { code: 'tl', label: 'Filipino' },
   { code: 'zh', label: '简体中文' },
-  { code: 'zh_hant', label: '繁體中文' },
+  { code: 'zh-Hant', label: '繁體中文' },
   { code: 'pt', label: 'Português' },
 ] as const;
+
+type AdminLocaleCode = (typeof LANGUAGES)[number]['code'];
+
+function siteContentFieldForLocale(code: AdminLocaleCode): keyof SiteContentEntry {
+  return `value_${code.replaceAll('-', '_').toLowerCase()}` as keyof SiteContentEntry;
+}
 
 const SECTION_LABELS: Record<string, string> = {
   hero: 'Hero Section',
@@ -170,7 +176,7 @@ function SectionGroup({
                           Edit these only if you want to override the auto-translation.
                         </p>
                         {LANGUAGES.map((lang) => {
-                          const field = `value_${lang.code}` as keyof SiteContentEntry;
+                          const field = siteContentFieldForLocale(lang.code);
                           return (
                             <div key={lang.code}>
                               <label className="block text-xs text-text-muted mb-1 uppercase tracking-wider">
