@@ -52,23 +52,36 @@ namespace :translations do
       exit 1
     end
 
+    failures = []
+    translate_record = lambda do |label, record|
+      print "#{label}... "
+      TranslateRecordJob.perform_now(record.class.name, record.id, "changed_fields" => nil, "cascade" => false)
+      puts record.reload.translation_status
+    rescue => e
+      failures << "#{label}: #{e.message}"
+      puts "FAILED: #{e.message}"
+    end
+
     SiteContent.where.not(value_en: [nil, ""]).find_each do |content|
       print "SiteContent #{content.key}... "
       TranslateSiteContentJob.perform_now(content.id)
       puts content.reload.translation_status
     rescue => e
+      failures << "SiteContent #{content.key}: #{e.message}"
       puts "FAILED: #{e.message}"
     end
 
     Event.find_each do |event|
-      print "Event #{event.name}... "
-      TranslateRecordJob.perform_now(event.class.name, event.id, "changed_fields" => nil, "cascade" => false)
-      event.event_schedule_items.find_each { |item| TranslateRecordJob.perform_now(item.class.name, item.id, "changed_fields" => nil, "cascade" => false) }
-      event.prize_categories.find_each { |category| TranslateRecordJob.perform_now(category.class.name, category.id, "changed_fields" => nil, "cascade" => false) }
-      event.event_accommodations.find_each { |accommodation| TranslateRecordJob.perform_now(accommodation.class.name, accommodation.id, "changed_fields" => nil, "cascade" => false) }
-      puts event.reload.translation_status
-    rescue => e
-      puts "FAILED: #{e.message}"
+      translate_record.call("Event #{event.name}", event)
+      event.event_schedule_items.find_each { |item| translate_record.call("ScheduleItem #{item.id} (#{event.name})", item) }
+      event.prize_categories.find_each { |category| translate_record.call("PrizeCategory #{category.id} (#{event.name})", category) }
+      event.event_accommodations.find_each { |accommodation| translate_record.call("Accommodation #{accommodation.id} (#{event.name})", accommodation) }
+    end
+
+    if failures.any?
+      puts "\nTranslation refresh completed with #{failures.count} failure(s):"
+      failures.each { |failure| puts "- #{failure}" }
+      exit 1
     end
 
     puts "Done! Event, child record, and site content translations were refreshed inline."
