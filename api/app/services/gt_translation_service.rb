@@ -1,7 +1,7 @@
 class GtTranslationService
   BASE_URL = "https://runtime2.gtx.dev".freeze
   API_VERSION = "2026-03-06.v1".freeze
-  TARGET_LOCALES = %w[ja ko zh tl pt].freeze
+  TARGET_LOCALES = %w[ja ko zh zh-Hant tl pt].freeze
 
   class TranslationError < StandardError; end
 

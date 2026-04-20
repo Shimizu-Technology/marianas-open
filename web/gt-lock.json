@@ -7,29 +7,34 @@
       "versionId": "80e3d2f74f4d6b7aca608dc227d230b05ce5f9399b22bdb2880681f3812b57d5",
       "translations": {
         "tl": {
-          "updatedAt": "2026-03-26T11:09:31.735Z",
+          "updatedAt": "2026-04-20T00:24:46.311Z",
           "fileName": "src/locales/tl.json",
           "postProcessHash": "45fbdd81fd2ee19682ba8860700b7438f32008f06601d9f6d09adddf2af0fbad"
         },
         "ja": {
-          "updatedAt": "2026-03-26T11:09:31.736Z",
+          "updatedAt": "2026-04-20T00:24:46.313Z",
           "fileName": "src/locales/ja.json",
           "postProcessHash": "eaf5a9373e7d39c7a6e554f5353eb9bb867eaa5dbcbcb757bcb75111e1b7082f"
         },
         "ko": {
-          "updatedAt": "2026-03-26T11:09:31.736Z",
+          "updatedAt": "2026-04-20T00:24:46.314Z",
           "fileName": "src/locales/ko.json",
           "postProcessHash": "2884947e56fb78eb4b8352a1767854eb780227f349f69bb3ba1a7297677da096"
         },
         "pt": {
-          "updatedAt": "2026-03-26T11:09:31.736Z",
+          "updatedAt": "2026-04-20T00:24:46.312Z",
           "fileName": "src/locales/pt.json",
           "postProcessHash": "a479cf66f92dfdbf80f151b83675846636a69ad2370c2123ce3fd1e81835936f"
         },
         "zh": {
-          "updatedAt": "2026-03-26T11:09:31.737Z",
+          "updatedAt": "2026-04-20T00:24:46.312Z",
           "fileName": "src/locales/zh.json",
           "postProcessHash": "3b4c2b4b94e4f3c2da48e32d0b7b47a81c8517914f31708df51b9baf3c5e7f2c"
+        },
+        "zh-Hant": {
+          "updatedAt": "2026-04-20T00:24:46.314Z",
+          "fileName": "src/locales/zh-Hant.json",
+          "postProcessHash": "3576563ed3ba5d5b53ea619f41322c1802ca9b8011695192cc7751811101f657"
         }
       },
       "fileName": "src/locales/en.json",

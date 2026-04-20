@@ -11,6 +11,7 @@ module Api
             ko: c.value_ko,
             tl: c.value_tl,
             zh: c.value_zh,
+            "zh-Hant": c.value_zh_hant,
             pt: c.value_pt
           }
         end

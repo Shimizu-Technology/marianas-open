@@ -8,7 +8,8 @@ class SiteContent < ApplicationRecord
   after_commit :enqueue_translation, on: [:create, :update], if: :english_value_changed?
 
   def value_for(lang = 'en')
-    send("value_#{lang}") || value_en
+    column_locale = lang.to_s.tr("-", "_").downcase
+    send("value_#{column_locale}") || value_en
   rescue NoMethodError
     value_en
   end

@@ -44,6 +44,49 @@ namespace :translations do
     puts "Done! Translated #{total} events."
   end
 
+  desc "Force translate all events, child records, and site content"
+  task refresh_all: :environment do
+    service = GtTranslationService.new
+    unless service.configured?
+      puts "GT API not configured. Set GT_API_KEY and GT_PROJECT_ID in your .env"
+      exit 1
+    end
+
+    failures = []
+    translate_record = lambda do |label, record|
+      print "#{label}... "
+      TranslateRecordJob.perform_now(record.class.name, record.id, "changed_fields" => nil, "cascade" => false)
+      puts record.reload.translation_status
+    rescue => e
+      failures << "#{label}: #{e.message}"
+      puts "FAILED: #{e.message}"
+    end
+
+    SiteContent.where.not(value_en: [nil, ""]).find_each do |content|
+      print "SiteContent #{content.key}... "
+      TranslateSiteContentJob.perform_now(content.id)
+      puts content.reload.translation_status
+    rescue => e
+      failures << "SiteContent #{content.key}: #{e.message}"
+      puts "FAILED: #{e.message}"
+    end
+
+    Event.find_each do |event|
+      translate_record.call("Event #{event.name}", event)
+      event.event_schedule_items.find_each { |item| translate_record.call("ScheduleItem #{item.id} (#{event.name})", item) }
+      event.prize_categories.find_each { |category| translate_record.call("PrizeCategory #{category.id} (#{event.name})", category) }
+      event.event_accommodations.find_each { |accommodation| translate_record.call("Accommodation #{accommodation.id} (#{event.name})", accommodation) }
+    end
+
+    if failures.any?
+      puts "\nTranslation refresh completed with #{failures.count} failure(s):"
+      failures.each { |failure| puts "- #{failure}" }
+      exit 1
+    end
+
+    puts "Done! Event, child record, and site content translations were refreshed inline."
+  end
+
   desc "Show translation status for all events"
   task status: :environment do
     Event.order(:date).each do |event|
