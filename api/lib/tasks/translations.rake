@@ -44,6 +44,36 @@ namespace :translations do
     puts "Done! Translated #{total} events."
   end
 
+  desc "Force translate all events, child records, and site content"
+  task refresh_all: :environment do
+    service = GtTranslationService.new
+    unless service.configured?
+      puts "GT API not configured. Set GT_API_KEY and GT_PROJECT_ID in your .env"
+      exit 1
+    end
+
+    SiteContent.where.not(value_en: [nil, ""]).find_each do |content|
+      print "SiteContent #{content.key}... "
+      TranslateSiteContentJob.perform_now(content.id)
+      puts content.reload.translation_status
+    rescue => e
+      puts "FAILED: #{e.message}"
+    end
+
+    Event.find_each do |event|
+      print "Event #{event.name}... "
+      TranslateRecordJob.perform_now(event.class.name, event.id, "changed_fields" => nil, "cascade" => false)
+      event.event_schedule_items.find_each { |item| TranslateRecordJob.perform_now(item.class.name, item.id, "changed_fields" => nil, "cascade" => false) }
+      event.prize_categories.find_each { |category| TranslateRecordJob.perform_now(category.class.name, category.id, "changed_fields" => nil, "cascade" => false) }
+      event.event_accommodations.find_each { |accommodation| TranslateRecordJob.perform_now(accommodation.class.name, accommodation.id, "changed_fields" => nil, "cascade" => false) }
+      puts event.reload.translation_status
+    rescue => e
+      puts "FAILED: #{e.message}"
+    end
+
+    puts "Done! Event, child record, and site content translations were refreshed inline."
+  end
+
   desc "Show translation status for all events"
   task status: :environment do
     Event.order(:date).each do |event|

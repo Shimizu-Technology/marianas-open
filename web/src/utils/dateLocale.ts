@@ -3,6 +3,7 @@ export function getDateLocale(lang: string) {
     ja: 'ja-JP',
     ko: 'ko-KR',
     zh: 'zh-CN',
+    'zh-Hant': 'zh-TW',
     tl: 'fil-PH',
     pt: 'pt-BR',
   };

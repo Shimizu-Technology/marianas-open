@@ -22,6 +22,7 @@ class TranslateSiteContentJob < ApplicationJob
     attrs[:value_ja] = locale_map["ja"] if locale_map["ja"].present?
     attrs[:value_ko] = locale_map["ko"] if locale_map["ko"].present?
     attrs[:value_zh] = locale_map["zh"] if locale_map["zh"].present?
+    attrs[:value_zh_hant] = locale_map["zh-Hant"] if locale_map["zh-Hant"].present?
     attrs[:value_tl] = locale_map["tl"] if locale_map["tl"].present?
     attrs[:value_pt] = locale_map["pt"] if locale_map["pt"].present?
 

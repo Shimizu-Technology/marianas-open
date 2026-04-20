@@ -34,6 +34,8 @@ function getHtmlLang(language: string) {
       return 'tl';
     case 'zh':
       return 'zh-CN';
+    case 'zh-Hant':
+      return 'zh-Hant';
     case 'pt':
       return 'pt-BR';
     default:

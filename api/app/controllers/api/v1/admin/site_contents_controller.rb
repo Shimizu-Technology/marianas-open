@@ -54,7 +54,7 @@ module Api
         end
 
         def site_content_params
-          params.permit(:key, :content_type, :value_en, :value_ja, :value_ko, :value_tl, :value_zh, :value_pt, :section, :label, :sort_order)
+          params.permit(:key, :content_type, :value_en, :value_ja, :value_ko, :value_tl, :value_zh, :value_zh_hant, :value_pt, :section, :label, :sort_order)
         end
 
         def serialize(c)
@@ -67,6 +67,7 @@ module Api
             value_ko: c.value_ko,
             value_tl: c.value_tl,
             value_zh: c.value_zh,
+            value_zh_hant: c.value_zh_hant,
             value_pt: c.value_pt,
             section: c.section,
             label: c.label,

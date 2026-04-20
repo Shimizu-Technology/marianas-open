@@ -113,6 +113,27 @@ export function FlagCN({ className = 'w-6 h-[18px]' }: FlagProps) {
   );
 }
 
+export function FlagTW({ className = 'w-6 h-[18px]' }: FlagProps) {
+  return (
+    <svg viewBox="0 0 24 18" className={className} aria-hidden="true">
+      <rect width="24" height="18" fill="#FE0000" rx="2" />
+      <rect width="12" height="9" fill="#000095" rx="1" />
+      <circle cx="6" cy="4.5" r="2.6" fill="#fff" />
+      <circle cx="6" cy="4.5" r="1.2" fill="#000095" />
+      <g stroke="#fff" strokeWidth="0.5" strokeLinecap="round">
+        <line x1="6" y1="1" x2="6" y2="2.1" />
+        <line x1="6" y1="6.9" x2="6" y2="8" />
+        <line x1="2.5" y1="4.5" x2="3.6" y2="4.5" />
+        <line x1="8.4" y1="4.5" x2="9.5" y2="4.5" />
+        <line x1="3.5" y1="2" x2="4.3" y2="2.8" />
+        <line x1="7.7" y1="6.2" x2="8.5" y2="7" />
+        <line x1="8.5" y1="2" x2="7.7" y2="2.8" />
+        <line x1="4.3" y1="6.2" x2="3.5" y2="7" />
+      </g>
+    </svg>
+  );
+}
+
 export function FlagBR({ className = 'w-6 h-[18px]' }: FlagProps) {
   return (
     <svg viewBox="0 0 24 18" className={className} aria-hidden="true">
@@ -131,5 +152,6 @@ export const flagComponents: Record<string, React.ComponentType<FlagProps>> = {
   ko: FlagKR,
   tl: FlagPH,
   zh: FlagCN,
+  'zh-Hant': FlagTW,
   pt: FlagBR,
 };

@@ -6,6 +6,7 @@ import ja from './locales/ja.json';
 import ko from './locales/ko.json';
 import tl from './locales/tl.json';
 import zh from './locales/zh.json';
+import zhHant from './locales/zh-Hant.json';
 import pt from './locales/pt.json';
 
 i18n
@@ -18,9 +19,10 @@ i18n
       ko: { translation: ko },
       tl: { translation: tl },
       zh: { translation: zh },
+      'zh-Hant': { translation: zhHant },
       pt: { translation: pt },
     },
-    supportedLngs: ['en', 'ja', 'ko', 'tl', 'zh', 'pt'],
+    supportedLngs: ['en', 'ja', 'ko', 'tl', 'zh', 'zh-Hant', 'pt'],
     fallbackLng: 'en',
     detection: {
       order: ['localStorage'],

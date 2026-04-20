@@ -9,7 +9,8 @@ const LANGUAGES = [
   { code: 'ja', label: '日本語' },
   { code: 'ko', label: '한국어' },
   { code: 'tl', label: 'Filipino' },
-  { code: 'zh', label: '中文' },
+  { code: 'zh', label: '简体中文' },
+  { code: 'zh_hant', label: '繁體中文' },
   { code: 'pt', label: 'Português' },
 ] as const;
 

@@ -37,7 +37,7 @@ export function getWebsiteSchema() {
     '@type': 'WebSite',
     name: SITE_NAME,
     url: SITE_URL,
-    inLanguage: ['en', 'ja', 'ko', 'tl', 'zh', 'pt'],
+    inLanguage: ['en', 'ja', 'ko', 'tl', 'zh', 'zh-Hant', 'pt'],
   };
 }
 

@@ -495,6 +495,7 @@ export interface SiteContentEntry {
   value_ko: string | null;
   value_tl: string | null;
   value_zh: string | null;
+  value_zh_hant: string | null;
   value_pt: string | null;
   section: string;
   label: string;
@@ -502,7 +503,7 @@ export interface SiteContentEntry {
   translation_status: 'translated' | 'pending' | 'failed';
 }
 
-export type SiteContentMap = Record<string, { en: string | null; ja: string | null; ko: string | null; tl: string | null; zh: string | null; pt: string | null }>;
+export type SiteContentMap = Record<string, { en: string | null; ja: string | null; ko: string | null; tl: string | null; zh: string | null; 'zh-Hant': string | null; pt: string | null }>;
 export type SiteContentGrouped = Record<string, SiteContentEntry[]>;
 
 export interface EventResult {
