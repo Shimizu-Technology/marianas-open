@@ -4,7 +4,7 @@ module Api
       PER_PAGE = 50
 
       def index
-        scope = Competitor.with_results
+        scope = Competitor.joins(event_results: :event).merge(Event.publicly_visible).distinct
 
         scope = scope.where(belt_rank: params[:belt_rank]) if params[:belt_rank].present?
         scope = scope.where(country_code: params[:country_code]) if params[:country_code].present?
@@ -31,7 +31,7 @@ module Api
 
         data = records.map { |c| serialize_record(c) }
 
-        available_countries = Competitor.with_results
+        available_countries = Competitor.joins(event_results: :event).merge(Event.publicly_visible).distinct
           .where.not(country_code: [nil, ""])
           .distinct.pluck(:country_code).sort
 
@@ -53,6 +53,7 @@ module Api
 
         results = record.event_results
           .joins(:event)
+          .merge(Event.publicly_visible)
           .select("event_results.*, events.name as event_name, events.slug as event_slug, events.date as event_date, events.asjjf_stars as event_stars")
           .order("events.date DESC")
 
@@ -92,7 +93,7 @@ module Api
               COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze,
               #{points} as total_points
             FROM event_results
-            INNER JOIN events ON events.id = event_results.event_id
+            WHERE event_results.event_id IN (#{Event.publicly_visible_ids_sql})
             GROUP BY event_results.competitor_id
           ) stats ON stats.competitor_id = competitors.id
         SQL

@@ -39,6 +39,7 @@ module Api
 
         results = EventResult
           .joins(:event)
+          .merge(Event.publicly_visible)
           .select(
             "event_results.*, events.asjjf_stars as event_stars, " \
             "events.name as event_name, events.slug as event_slug, events.date as event_date"

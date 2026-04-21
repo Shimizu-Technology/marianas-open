@@ -3,6 +3,7 @@ class Event < ApplicationRecord
   include Translatable
 
   STATUSES = %w[draft upcoming live completed cancelled].freeze
+  PUBLIC_STATUSES = %w[upcoming live completed cancelled].freeze
 
   validates :status, inclusion: { in: STATUSES }, allow_nil: true
 
@@ -21,6 +22,12 @@ class Event < ApplicationRecord
 
   image_url_for :hero_image
   image_url_for :poster_image
+
+  scope :publicly_visible, -> { where(status: PUBLIC_STATUSES) }
+
+  def self.publicly_visible_ids_sql
+    publicly_visible.select(:id).to_sql
+  end
 
   def asjjf_source_urls
     (asjjf_event_ids || []).map { |id| "https://asjjf.org/main/eventResults/#{id}" }

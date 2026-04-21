@@ -12,7 +12,7 @@ module Api
       end
 
       def show
-        video = Video.find(params[:id])
+        video = Video.published.find(params[:id])
         render json: video
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Video not found" }, status: :not_found

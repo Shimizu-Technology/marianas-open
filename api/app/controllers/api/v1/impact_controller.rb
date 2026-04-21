@@ -5,7 +5,7 @@ module Api
         metrics = ImpactMetric.active
         allocations = FundAllocation.active
         total = allocations.sum(:amount)
-        config = ImpactConfiguration.current
+        config = ImpactConfiguration.first
 
         render json: {
           impact_metrics: metrics.as_json,
@@ -14,13 +14,13 @@ module Api
           },
           total_amount: total,
           roi: {
-            economic_impact: config.economic_impact,
-            economic_impact_label: config.economic_impact_label,
-            investment_label: config.investment_label,
+            economic_impact: config&.economic_impact || 0,
+            economic_impact_label: config&.economic_impact_label || "Economic Impact",
+            investment_label: config&.investment_label || "Total Investment",
             investment_total: total,
-            roi_multiplier: config.roi_multiplier(total),
-            roi_description: config.roi_description,
-            year_label: config.year_label
+            roi_multiplier: config ? config.roi_multiplier(total) : 0,
+            roi_description: config&.roi_description || "",
+            year_label: config&.year_label || ""
           }
         }
       end
