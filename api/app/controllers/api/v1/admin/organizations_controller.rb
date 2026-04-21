@@ -4,7 +4,7 @@ module Api
       class OrganizationsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action :require_admin!
         before_action :set_organization
 
         def show

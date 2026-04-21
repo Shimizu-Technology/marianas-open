@@ -41,7 +41,7 @@ export default function AdminLayout() {
 
   const visibleNavItems = isAdmin
     ? navItems
-    : navItems.filter(item => item.to !== '/admin/users')
+    : navItems.filter(item => item.to !== '/admin/users' && item.to !== '/admin/settings')
 
   return (
     <div className="min-h-screen bg-navy-900 lg:flex">

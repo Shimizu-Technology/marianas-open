@@ -157,7 +157,14 @@ export default function App() {
           <Route path="announcements" element={<AnnouncementsAdmin />} />
           <Route path="impact" element={<ImpactAdmin />} />
           <Route path="content" element={<ContentAdmin />} />
-          <Route path="settings" element={<SettingsAdmin />} />
+          <Route
+            path="settings"
+            element={(
+              <ProtectedRoute requiredRole="admin">
+                <SettingsAdmin />
+              </ProtectedRoute>
+            )}
+          />
         </Route>
 
         {/* Public routes with Header/Footer */}

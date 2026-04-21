@@ -4,7 +4,7 @@ module Api
       PER_PAGE = 50
 
       def index
-        scope = Academy.with_competitors
+        scope = Academy.joins(competitors: { event_results: :event }).merge(Event.publicly_visible).distinct
 
         scope = scope.where(country_code: params[:country_code]) if params[:country_code].present?
         scope = scope.search_by_name(params[:search]) if params[:search].present?
@@ -72,6 +72,7 @@ module Api
             INNER JOIN competitors ON competitors.id = event_results.competitor_id
             INNER JOIN events ON events.id = event_results.event_id
             WHERE competitors.academy_id IS NOT NULL
+              AND events.status IN (#{Event.public_statuses_sql})
             GROUP BY competitors.academy_id
           ) stats ON stats.academy_id = academies.id
         SQL
@@ -106,6 +107,7 @@ module Api
         rows = EventResult
           .joins(competitor: :team)
           .joins(:event)
+          .merge(Event.publicly_visible)
           .where(competitors: { academy_id: academy_ids })
           .group("competitors.academy_id")
           .select(
@@ -134,6 +136,7 @@ module Api
         rows = EventResult
           .where(competitor_id: competitor_ids)
           .joins(:event)
+          .merge(Event.publicly_visible)
           .group(:competitor_id)
           .select(
             "competitor_id",

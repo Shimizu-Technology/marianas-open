@@ -157,6 +157,7 @@ class RankingCalculator
     def base_query(options)
       scope = EventResult
         .joins(:event)
+        .merge(Event.publicly_visible)
         .left_joins(:competitor)
         .select(
           "event_results.*, events.asjjf_stars as event_stars, events.id as event_id, " \
