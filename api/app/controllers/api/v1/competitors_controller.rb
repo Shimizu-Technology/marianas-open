@@ -93,8 +93,7 @@ module Api
               COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze,
               #{points} as total_points
             FROM event_results
-            INNER JOIN events ON events.id = event_results.event_id
-            WHERE events.status IN (#{Event.public_statuses_sql})
+            WHERE event_results.event_id IN (#{Event.publicly_visible_ids_sql})
             GROUP BY event_results.competitor_id
           ) stats ON stats.competitor_id = competitors.id
         SQL

@@ -25,8 +25,8 @@ class Event < ApplicationRecord
 
   scope :publicly_visible, -> { where(status: PUBLIC_STATUSES) }
 
-  def self.public_statuses_sql
-    PUBLIC_STATUSES.map { |status| connection.quote(status) }.join(", ")
+  def self.publicly_visible_ids_sql
+    publicly_visible.select(:id).to_sql
   end
 
   def asjjf_source_urls

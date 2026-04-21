@@ -70,9 +70,8 @@ module Api
               #{points} as total_points
             FROM event_results
             INNER JOIN competitors ON competitors.id = event_results.competitor_id
-            INNER JOIN events ON events.id = event_results.event_id
             WHERE competitors.academy_id IS NOT NULL
-              AND events.status IN (#{Event.public_statuses_sql})
+              AND event_results.event_id IN (#{Event.publicly_visible_ids_sql})
             GROUP BY competitors.academy_id
           ) stats ON stats.academy_id = academies.id
         SQL

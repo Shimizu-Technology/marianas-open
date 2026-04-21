@@ -19,8 +19,8 @@ module Api
             investment_label: config&.investment_label || "Total Investment",
             investment_total: total,
             roi_multiplier: config ? config.roi_multiplier(total) : 0,
-            roi_description: config&.roi_description,
-            year_label: config&.year_label
+            roi_description: config&.roi_description || "",
+            year_label: config&.year_label || ""
           }
         }
       end
