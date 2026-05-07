@@ -4,6 +4,8 @@ module Api
       class EventGalleryImagesController < ApplicationController
         include ClerkAuthenticatable
 
+        UploadAlreadyUsed = Class.new(StandardError)
+
         before_action :require_staff!
         before_action :set_event
         before_action :set_gallery_image, only: [:update, :destroy, :upload]
@@ -83,25 +85,31 @@ module Api
 
         def complete_direct_upload
           blob = ActiveStorage::Blob.find_signed!(params.require(:signed_id))
-          batch = find_batch
-          gallery_image = @event.event_gallery_images.build(gallery_image_params)
-          gallery_image.event_gallery_upload_batch = batch
-          gallery_image.status = "uploaded"
-          gallery_image.original_filename = blob.filename.to_s
-          gallery_image.content_type = blob.content_type
-          gallery_image.byte_size = blob.byte_size
-          gallery_image.title = gallery_image.title.presence || blob.filename.base
-          gallery_image.alt_text = gallery_image.alt_text.presence || gallery_image.title
-          gallery_image.image.attach(blob)
+          blob.with_lock do
+            raise UploadAlreadyUsed if ActiveStorage::Attachment.exists?(blob_id: blob.id)
 
-          if gallery_image.save
-            batch&.refresh_counts!
-            render json: { gallery_image: gallery_image.as_json }, status: :created
-          else
-            render json: { errors: gallery_image.errors.full_messages }, status: :unprocessable_entity
+            batch = find_batch
+            gallery_image = @event.event_gallery_images.build(gallery_image_params)
+            gallery_image.event_gallery_upload_batch = batch
+            gallery_image.status = "uploaded"
+            gallery_image.original_filename = blob.filename.to_s
+            gallery_image.content_type = blob.content_type
+            gallery_image.byte_size = blob.byte_size
+            gallery_image.title = gallery_image.title.presence || blob.filename.base
+            gallery_image.alt_text = gallery_image.alt_text.presence || gallery_image.title
+            gallery_image.image.attach(blob)
+
+            if gallery_image.save
+              batch&.refresh_counts!
+              render json: { gallery_image: gallery_image.as_json }, status: :created
+            else
+              render json: { errors: gallery_image.errors.full_messages }, status: :unprocessable_entity
+            end
           end
         rescue ActiveSupport::MessageVerifier::InvalidSignature, ActiveRecord::RecordNotFound
           render json: { error: "Uploaded image could not be found" }, status: :unprocessable_entity
+        rescue UploadAlreadyUsed
+          render json: { error: "This upload has already been used" }, status: :unprocessable_entity
         end
 
         def bulk_update
