@@ -120,8 +120,9 @@ module Api
           ids = Array(params[:ids]).map(&:to_i).reject(&:zero?)
           return render json: { error: "No gallery images selected" }, status: :unprocessable_entity if ids.empty?
 
-          attrs = params.permit(:active, :status).to_h
-          attrs.delete("status") unless attrs["status"].in?(EventGalleryImage::STATUSES)
+          attrs = params.permit(:active).to_h
+          return render json: { error: "No supported updates provided" }, status: :unprocessable_entity if attrs.empty?
+
           updated = @event.event_gallery_images.where(id: ids).update_all(attrs.merge(updated_at: Time.current))
           render json: { updated: updated }
         end

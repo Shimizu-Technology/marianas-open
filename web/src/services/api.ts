@@ -936,7 +936,7 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(data),
       }, true),
-    bulkUpdateEventGalleryImages: (eventId: number, ids: number[], data: { active?: boolean; status?: EventGalleryImage['status'] }) =>
+    bulkUpdateEventGalleryImages: (eventId: number, ids: number[], data: { active?: boolean }) =>
       fetchApi<{ updated: number }>(`/api/v1/admin/events/${eventId}/gallery-images/bulk_update`, {
         method: 'PATCH',
         body: JSON.stringify({ ids, ...data }),

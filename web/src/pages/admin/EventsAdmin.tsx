@@ -1751,6 +1751,8 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
   )
 }
 
+const GALLERY_ADMIN_PER_PAGE = 100
+
 function EventGallerySection({ eventId, eventName }: { eventId: number; eventName: string }) {
   const [galleryImages, setGalleryImages] = useState<EventGalleryImage[]>([])
   const [loading, setLoading] = useState(true)
@@ -1778,7 +1780,14 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
 
   const load = useCallback(async () => {
     try {
-      const res = await api.admin.getEventGalleryImages(eventId, { page, per_page: 100 })
+      const res = await api.admin.getEventGalleryImages(eventId, { page, per_page: GALLERY_ADMIN_PER_PAGE })
+      const lastPage = Math.max(1, Math.ceil(res.total / GALLERY_ADMIN_PER_PAGE))
+      if (page > lastPage) {
+        setGalleryImages([])
+        setTotal(res.total)
+        setPage(lastPage)
+        return
+      }
       setGalleryImages(res.gallery_images)
       setTotal(res.total)
     } catch (err) {
@@ -2107,8 +2116,8 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
           {total > 100 && (
             <div className="p-4 flex items-center justify-center gap-2 border-t border-white/5">
               <button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="px-3 py-1.5 text-xs text-text-secondary bg-white/5 disabled:opacity-40">Previous</button>
-              <span className="text-xs text-text-muted">Page {page} of {Math.ceil(total / 100)}</span>
-              <button disabled={page >= Math.ceil(total / 100)} onClick={() => setPage(p => p + 1)} className="px-3 py-1.5 text-xs text-text-secondary bg-white/5 disabled:opacity-40">Next</button>
+              <span className="text-xs text-text-muted">Page {page} of {Math.ceil(total / GALLERY_ADMIN_PER_PAGE)}</span>
+              <button disabled={page >= Math.ceil(total / GALLERY_ADMIN_PER_PAGE)} onClick={() => setPage(p => p + 1)} className="px-3 py-1.5 text-xs text-text-secondary bg-white/5 disabled:opacity-40">Next</button>
             </div>
           )}
         </div>
