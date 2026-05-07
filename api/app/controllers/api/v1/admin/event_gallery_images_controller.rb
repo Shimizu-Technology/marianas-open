@@ -56,8 +56,11 @@ module Api
           @gallery_image.image.attach(params[:image])
           apply_blob_metadata(@gallery_image)
           @gallery_image.status = "uploaded"
-          @gallery_image.save!
-          render json: { gallery_image: @gallery_image.reload.as_json }
+          if @gallery_image.save
+            render json: { gallery_image: @gallery_image.reload.as_json }
+          else
+            render json: { errors: @gallery_image.errors.full_messages }, status: :unprocessable_entity
+          end
         end
 
         def prepare_direct_upload
