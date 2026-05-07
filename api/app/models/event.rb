@@ -35,11 +35,19 @@ class Event < ApplicationRecord
   end
 
   def gallery_images_count
-    event_gallery_images.active.ready.count
+    if event_gallery_images.loaded?
+      public_gallery_images.size
+    else
+      event_gallery_images.active.ready.count
+    end
   end
 
   def gallery_preview_images
-    event_gallery_images.active.ready.sorted.with_attached_image.limit(8)
+    if event_gallery_images.loaded?
+      public_gallery_images.first(8)
+    else
+      event_gallery_images.active.ready.sorted.with_attached_image.limit(8)
+    end
   end
 
   translatable_fields :name, :description, :tagline, :venue_name, :city, :country,
@@ -65,5 +73,13 @@ class Event < ApplicationRecord
       },
       except: [:created_at, :updated_at]
     )).merge("event_gallery_images" => gallery_preview_images.as_json)
+  end
+
+  private
+
+  def public_gallery_images
+    event_gallery_images
+      .select { |image| image.active && image.status == "ready" }
+      .sort_by { |image| [image.sort_order || 0, image.id || 0] }
   end
 end
