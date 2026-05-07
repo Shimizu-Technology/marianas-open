@@ -12,6 +12,8 @@ class EventGalleryUploadBatch < ApplicationRecord
 
   def refresh_counts!
     with_lock do
+      return if status == "cancelled"
+
       images = event_gallery_images
       uploaded = images.where(status: %w[uploaded processing ready]).count
       failed = images.where(status: "failed").count
