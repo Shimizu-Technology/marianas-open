@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import SparkMD5 from 'spark-md5';
 import { CheckCircle2, Loader2, UploadCloud, XCircle } from 'lucide-react';
@@ -83,10 +83,26 @@ function titleFromFilename(fileName: string) {
 
 export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<GalleryUploadTask[]>([]);
+  const tasksRef = useRef<GalleryUploadTask[]>([]);
   const fileMapRef = useRef(new Map<string, File>());
   const metaMapRef = useRef(new Map<string, { active: boolean; caption: string; sortOrder: number }>());
   const runningRef = useRef(0);
   const processQueueRef = useRef<() => void>(() => undefined);
+
+  useEffect(() => {
+    tasksRef.current = tasks;
+  }, [tasks]);
+
+  useEffect(() => {
+    const files = fileMapRef.current;
+    const metas = metaMapRef.current;
+
+    return () => {
+      tasksRef.current.forEach(task => URL.revokeObjectURL(task.previewUrl));
+      files.clear();
+      metas.clear();
+    };
+  }, []);
 
   const updateTask = useCallback((id: string, updates: Partial<GalleryUploadTask>) => {
     setTasks(current => current.map(task => task.id === id ? { ...task, ...updates } : task));

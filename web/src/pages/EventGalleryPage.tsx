@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, Image as ImageIcon, MapPin, X } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -84,12 +84,29 @@ export default function EventGalleryPage() {
     }
   };
 
-  const moveLightbox = (direction: -1 | 1) => {
+  const moveLightbox = useCallback((direction: -1 | 1) => {
     setActiveIndex(current => {
       if (current === null) return current;
       return Math.min(images.length - 1, Math.max(0, current + direction));
     });
-  };
+  }, [images.length]);
+
+  useEffect(() => {
+    if (activeIndex === null) return undefined;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveIndex(null);
+      } else if (event.key === 'ArrowLeft') {
+        moveLightbox(-1);
+      } else if (event.key === 'ArrowRight') {
+        moveLightbox(1);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeIndex, moveLightbox]);
 
   if (loading) {
     return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;

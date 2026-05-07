@@ -118,17 +118,17 @@ module Api
           ids = Array(params[:ids]).map(&:to_i).reject(&:zero?)
           return render json: { error: "No gallery images selected" }, status: :unprocessable_entity if ids.empty?
 
-          images = @event.event_gallery_images.where(id: ids)
+          images = @event.event_gallery_images.with_attached_image.where(id: ids)
           count = images.count
           images.find_each do |image|
-            image.image.purge if image.image.attached?
+            image.image.purge_later if image.image.attached?
             image.destroy
           end
           render json: { deleted: count }
         end
 
         def destroy
-          @gallery_image.image.purge if @gallery_image.image.attached?
+          @gallery_image.image.purge_later if @gallery_image.image.attached?
           @gallery_image.destroy
           head :no_content
         end
