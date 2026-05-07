@@ -183,17 +183,15 @@ export default function EventGalleryPage() {
             <div className="py-24 text-center text-text-muted">No photos have been published yet.</div>
           ) : (
             <>
-              <div className="columns-2 gap-3 sm:columns-3 sm:gap-4 xl:columns-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
                 {images.map((image, index) => {
                   const src = resolveMediaUrl(image.thumbnail_url || image.image_url);
                   const fallbackSrc = resolveMediaUrl(image.image_url) || undefined;
-                  const aspectRatio = image.width && image.height ? `${image.width} / ${image.height}` : '3 / 2';
                   return (
                     <button
                       key={image.id}
                       onClick={() => setActiveIndex(index)}
-                      className="group relative mb-3 block w-full break-inside-avoid overflow-hidden border border-white/5 bg-white/[0.02] text-left sm:mb-4"
-                      style={{ aspectRatio }}
+                      className="group relative aspect-[4/3] overflow-hidden border border-white/5 bg-white/[0.02] text-left"
                     >
                       {src && (
                         <ImageWithShimmer

@@ -11,21 +11,23 @@ class EventGalleryUploadBatch < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
 
   def refresh_counts!
-    images = event_gallery_images
-    uploaded = images.where(status: %w[uploaded processing ready]).count
-    failed = images.where(status: "failed").count
-    next_status = if total_files.positive? && uploaded + failed >= total_files
-      failed.positive? ? "failed" : "completed"
-    else
-      "uploading"
-    end
+    with_lock do
+      images = event_gallery_images
+      uploaded = images.where(status: %w[uploaded processing ready]).count
+      failed = images.where(status: "failed").count
+      next_status = if total_files.positive? && uploaded + failed >= total_files
+        failed.positive? ? "failed" : "completed"
+      else
+        "uploading"
+      end
 
-    update!(
-      uploaded_files: uploaded,
-      failed_files: failed,
-      status: next_status,
-      completed_at: next_status == "uploading" ? nil : Time.current
-    )
+      update!(
+        uploaded_files: uploaded,
+        failed_files: failed,
+        status: next_status,
+        completed_at: next_status == "uploading" ? nil : Time.current
+      )
+    end
   end
 
   def as_json(options = {})

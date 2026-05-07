@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone } from 'lucide-react';
+import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
 import ImageWithShimmer from '../components/ImageWithShimmer';
@@ -357,6 +357,18 @@ export default function EventDetailPage() {
               </div>
               )}
             </div>
+            {mainEvent && galleryImagesCount > 0 && (
+              <Link
+                to={`/events/${mainEvent.slug}/gallery`}
+                className="mt-8 inline-flex items-center gap-2 border border-gold-500/30 bg-gold-500/10 px-5 py-3 text-sm font-heading font-semibold uppercase tracking-wider text-gold-300 transition-colors hover:border-gold-400/60 hover:bg-gold-500/15 hover:text-gold-200"
+              >
+                <ImageIcon size={16} />
+                View Photo Gallery
+                <span className="text-text-muted normal-case tracking-normal">
+                  {galleryImagesCount} photo{galleryImagesCount === 1 ? '' : 's'}
+                </span>
+              </Link>
+            )}
           </motion.div>
         </div>
       </section>
