@@ -14,6 +14,7 @@ class Event < ApplicationRecord
   has_many :event_results, dependent: :destroy
   has_many :event_accommodations, dependent: :destroy
   has_many :event_gallery_images, dependent: :destroy
+  has_many :event_gallery_upload_batches, dependent: :destroy
   has_one_attached :hero_image
   has_one_attached :poster_image
 
@@ -33,6 +34,14 @@ class Event < ApplicationRecord
     (asjjf_event_ids || []).map { |id| "https://asjjf.org/main/eventResults/#{id}" }
   end
 
+  def gallery_images_count
+    event_gallery_images.active.ready.count
+  end
+
+  def gallery_preview_images
+    event_gallery_images.active.ready.sorted.with_attached_image.limit(8)
+  end
+
   translatable_fields :name, :description, :tagline, :venue_name, :city, :country,
                       :schedule_note, :prize_title, :prize_description,
                       :travel_description, :visa_description
@@ -48,14 +57,13 @@ class Event < ApplicationRecord
 
   def as_json(options = {})
     super(options.merge(
-      methods: [:hero_image_url, :poster_image_url, :asjjf_source_urls],
+      methods: [:hero_image_url, :poster_image_url, :asjjf_source_urls, :gallery_images_count],
       include: {
         event_schedule_items: { except: [:created_at, :updated_at] },
         prize_categories: { except: [:created_at, :updated_at] },
-        event_accommodations: { except: [:created_at, :updated_at] },
-        event_gallery_images: { methods: [:image_url], except: [:created_at, :updated_at] }
+        event_accommodations: { except: [:created_at, :updated_at] }
       },
       except: [:created_at, :updated_at]
-    ))
+    )).merge("event_gallery_images" => gallery_preview_images.as_json)
   end
 end
