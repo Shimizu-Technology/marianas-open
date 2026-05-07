@@ -2,6 +2,9 @@ class ProcessEventGalleryImageJob < ApplicationJob
   queue_as :default
 
   discard_on ActiveJob::DeserializationError
+  retry_on StandardError, LoadError, wait: :polynomially_longer, attempts: 3 do |job, error|
+    job.mark_failed(error)
+  end
 
   def perform(event_gallery_image_id)
     gallery_image = EventGalleryImage.find_by(id: event_gallery_image_id)
@@ -26,9 +29,12 @@ class ProcessEventGalleryImageJob < ApplicationJob
       processing_error: nil
     )
     gallery_image.event_gallery_upload_batch&.refresh_counts!
-  rescue StandardError, LoadError => e
-    gallery_image&.update_columns(status: "failed", processing_error: e.message)
+  end
+
+  def mark_failed(error)
+    gallery_image = EventGalleryImage.find_by(id: arguments.first)
+    gallery_image&.update_columns(status: "failed", processing_error: error.message)
     gallery_image&.event_gallery_upload_batch&.refresh_counts!
-    Rails.logger.error("[ProcessEventGalleryImageJob] Failed EventGalleryImage##{event_gallery_image_id}: #{e.class} #{e.message}")
+    Rails.logger.error("[ProcessEventGalleryImageJob] Failed EventGalleryImage##{arguments.first}: #{error.class} #{error.message}")
   end
 end
