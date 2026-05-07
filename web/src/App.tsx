@@ -13,6 +13,7 @@ import { OrganizationProvider } from './contexts/OrganizationContext';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
+const EventGalleryPage = lazy(() => import('./pages/EventGalleryPage'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const WatchPage = lazy(() => import('./pages/WatchPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -114,6 +115,7 @@ function AnimatedRoutes() {
             <Route path="/watch" element={<WatchPage />} />
             <Route path="/events/past" element={<PastEventsPage />} />
             <Route path="/impact" element={<ImpactPage />} />
+            <Route path="/events/:slug/gallery" element={<EventGalleryPage />} />
             <Route path="/events/:slug" element={<EventDetailPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

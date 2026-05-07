@@ -5,6 +5,7 @@ Rails.application.routes.draw do
       resources :events, only: [:index, :show], param: :slug do
         resources :event_results, only: [:index], path: 'results'
         get 'results/summary', to: 'event_results#summary'
+        get 'gallery', to: 'event_gallery_images#index'
       end
       resources :sponsors, only: [:index]
       resources :competitors, only: [:index, :show]
@@ -50,10 +51,17 @@ Rails.application.routes.draw do
             end
           end
           resources :event_gallery_images, only: [:index, :create, :update, :destroy], path: 'gallery-images' do
+            collection do
+              post :prepare_direct_upload
+              post :complete_direct_upload
+              patch :bulk_update
+              delete :bulk_destroy
+            end
             member do
               post :upload
             end
           end
+          resources :event_gallery_upload_batches, only: [:index, :show, :create, :update, :destroy], path: 'gallery-upload-batches'
         end
         resources :videos
         resources :sponsors do

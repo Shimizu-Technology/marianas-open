@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { CalendarDays, Handshake, Settings, Users, LayoutDashboard, ArrowLeft, Play, Image, FileText, Swords, Menu, X, Building2, Megaphone, BarChart3 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { api } from '../services/api'
+import { GalleryUploadProvider, GalleryUploadStatusPanel } from '../contexts/GalleryUploadContext'
 
 const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
@@ -44,6 +45,7 @@ export default function AdminLayout() {
     : navItems.filter(item => item.to !== '/admin/users' && item.to !== '/admin/settings')
 
   return (
+    <GalleryUploadProvider>
     <div className="min-h-screen bg-navy-900 lg:flex">
       <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between border-b border-white/5 bg-surface/95 backdrop-blur px-4 py-3">
         <div>
@@ -128,6 +130,8 @@ export default function AdminLayout() {
           <Outlet />
         </motion.div>
       </main>
+      <GalleryUploadStatusPanel />
     </div>
+    </GalleryUploadProvider>
   )
 }

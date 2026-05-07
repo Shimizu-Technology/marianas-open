@@ -100,12 +100,23 @@ export interface PrizeCategory {
 export interface EventGalleryImage {
   id: number;
   event_id: number;
+  event_gallery_upload_batch_id?: number | null;
   title: string | null;
   alt_text: string | null;
   caption: string | null;
   sort_order: number;
   active: boolean;
+  status: 'pending' | 'uploaded' | 'processing' | 'ready' | 'failed';
   image_url: string | null;
+  thumbnail_url: string | null;
+  large_url: string | null;
+  original_filename: string | null;
+  content_type: string | null;
+  byte_size: number | null;
+  width: number | null;
+  height: number | null;
+  processed_at: string | null;
+  processing_error: string | null;
 }
 
 export interface EventGalleryImageFormData {
@@ -114,6 +125,35 @@ export interface EventGalleryImageFormData {
   caption: string;
   sort_order: number;
   active: boolean;
+}
+
+export interface EventGalleryUploadBatch {
+  id: number;
+  event_id: number;
+  status: 'uploading' | 'completed' | 'failed' | 'cancelled';
+  title: string | null;
+  total_files: number;
+  uploaded_files: number;
+  failed_files: number;
+  total_bytes: number;
+  completed_at: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface GalleryImagesResponse {
+  gallery_images: EventGalleryImage[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export interface DirectUploadPreparation {
+  signed_id: string;
+  direct_upload: {
+    url: string;
+    headers: Record<string, string>;
+  };
 }
 
 export interface EventVenueHighlight {
@@ -201,6 +241,7 @@ export interface Event {
   prize_categories: PrizeCategory[];
   event_accommodations: EventAccommodation[];
   event_gallery_images: EventGalleryImage[];
+  gallery_images_count: number;
   translations?: TranslationsBlob;
   translation_status?: TranslationStatus;
 }
@@ -701,6 +742,10 @@ export const api = {
   getOrganization: () => fetchApi<Organization>('/api/v1/organization'),
   getEvents: () => fetchApi<Event[]>('/api/v1/events'),
   getEvent: (slug: string) => fetchApi<Event>(`/api/v1/events/${slug}`),
+  getEventGallery: (slug: string, params?: Record<string, string | number>) => {
+    const query = params ? '?' + new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString() : '';
+    return fetchApi<GalleryImagesResponse>(`/api/v1/events/${slug}/gallery${query}`);
+  },
   getEventResults: (slug: string, params?: Record<string, string>) => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
     return fetchApi<EventResultDivision[]>(`/api/v1/events/${slug}/results${query}`);
@@ -841,8 +886,10 @@ export const api = {
     },
 
     // Event Gallery Images
-    getEventGalleryImages: (eventId: number) =>
-      fetchApi<{ gallery_images: EventGalleryImage[] }>(`/api/v1/admin/events/${eventId}/gallery-images`, {}, true),
+    getEventGalleryImages: (eventId: number, params?: Record<string, string | number>) => {
+      const query = params ? '?' + new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString() : '';
+      return fetchApi<GalleryImagesResponse>(`/api/v1/admin/events/${eventId}/gallery-images${query}`, {}, true);
+    },
     createEventGalleryImage: (eventId: number, data: FormData) =>
       fetchApiUpload<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images`, data),
     updateEventGalleryImage: (eventId: number, id: number, data: Partial<EventGalleryImageFormData>) =>
@@ -857,6 +904,48 @@ export const api = {
     },
     deleteEventGalleryImage: (eventId: number, id: number) =>
       fetchApi<void>(`/api/v1/admin/events/${eventId}/gallery-images/${id}`, { method: 'DELETE' }, true),
+    createGalleryUploadBatch: (eventId: number, data: Partial<EventGalleryUploadBatch>) =>
+      fetchApi<{ batch: EventGalleryUploadBatch }>(`/api/v1/admin/events/${eventId}/gallery-upload-batches`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    getGalleryUploadBatches: (eventId: number) =>
+      fetchApi<{ batches: EventGalleryUploadBatch[] }>(`/api/v1/admin/events/${eventId}/gallery-upload-batches`, {}, true),
+    getGalleryUploadBatch: (eventId: number, batchId: number) =>
+      fetchApi<{ batch: EventGalleryUploadBatch }>(`/api/v1/admin/events/${eventId}/gallery-upload-batches/${batchId}`, {}, true),
+    updateGalleryUploadBatch: (eventId: number, batchId: number, data: Partial<EventGalleryUploadBatch>) =>
+      fetchApi<{ batch: EventGalleryUploadBatch }>(`/api/v1/admin/events/${eventId}/gallery-upload-batches/${batchId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+    prepareEventGalleryDirectUpload: (eventId: number, data: {
+      filename: string;
+      byte_size: number;
+      checksum: string;
+      content_type: string;
+    }) =>
+      fetchApi<DirectUploadPreparation>(`/api/v1/admin/events/${eventId}/gallery-images/prepare_direct_upload`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    completeEventGalleryDirectUpload: (eventId: number, data: Partial<EventGalleryImageFormData> & {
+      signed_id: string;
+      batch_id?: number;
+    }) =>
+      fetchApi<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images/complete_direct_upload`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    bulkUpdateEventGalleryImages: (eventId: number, ids: number[], data: { active?: boolean }) =>
+      fetchApi<{ updated: number }>(`/api/v1/admin/events/${eventId}/gallery-images/bulk_update`, {
+        method: 'PATCH',
+        body: JSON.stringify({ ids, ...data }),
+      }, true),
+    bulkDeleteEventGalleryImages: (eventId: number, ids: number[]) =>
+      fetchApi<{ deleted: number }>(`/api/v1/admin/events/${eventId}/gallery-images/bulk_destroy`, {
+        method: 'DELETE',
+        body: JSON.stringify({ ids }),
+      }, true),
 
     // Sponsors
     getSponsors: () => fetchApi<{ sponsors: Sponsor[] }>('/api/v1/admin/sponsors', {}, true),

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_20_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_07_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -126,15 +126,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_20_000000) do
   create_table "event_gallery_images", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.string "alt_text"
+    t.bigint "byte_size"
     t.string "caption"
+    t.string "content_type"
     t.datetime "created_at", null: false
+    t.bigint "event_gallery_upload_batch_id"
     t.bigint "event_id", null: false
+    t.integer "height"
+    t.string "original_filename"
+    t.datetime "processed_at"
+    t.text "processing_error"
     t.integer "sort_order", default: 0, null: false
+    t.string "status", default: "ready", null: false
     t.string "title"
     t.datetime "updated_at", null: false
+    t.integer "width"
+    t.index ["event_gallery_upload_batch_id"], name: "index_event_gallery_images_on_upload_batch_id"
     t.index ["event_id", "active"], name: "index_event_gallery_images_on_event_id_and_active"
     t.index ["event_id", "sort_order"], name: "index_event_gallery_images_on_event_id_and_sort_order"
+    t.index ["event_id", "status"], name: "index_event_gallery_images_on_event_id_and_status"
     t.index ["event_id"], name: "index_event_gallery_images_on_event_id"
+  end
+
+  create_table "event_gallery_upload_batches", force: :cascade do |t|
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.bigint "event_id", null: false
+    t.integer "failed_files", default: 0, null: false
+    t.text "notes"
+    t.string "status", default: "uploading", null: false
+    t.string "title"
+    t.bigint "total_bytes", default: 0, null: false
+    t.integer "total_files", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.integer "uploaded_files", default: 0, null: false
+    t.index ["event_id", "created_at"], name: "index_event_gallery_upload_batches_on_event_id_and_created_at"
+    t.index ["event_id"], name: "index_event_gallery_upload_batches_on_event_id"
+    t.index ["status"], name: "index_event_gallery_upload_batches_on_status"
   end
 
   create_table "event_results", force: :cascade do |t|
@@ -375,7 +403,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_20_000000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "competitors", "academies"
   add_foreign_key "event_accommodations", "events"
+  add_foreign_key "event_gallery_images", "event_gallery_upload_batches"
   add_foreign_key "event_gallery_images", "events"
+  add_foreign_key "event_gallery_upload_batches", "events"
   add_foreign_key "event_results", "competitors"
   add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"

@@ -1,7 +1,7 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone } from 'lucide-react';
+import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
 import ImageWithShimmer from '../components/ImageWithShimmer';
@@ -183,10 +183,11 @@ export default function EventDetailPage() {
     .filter(image => image.active && resolveMediaUrl(image.image_url))
     .sort((a, b) => a.sort_order - b.sort_order)
     .map(image => ({
-      src: resolveMediaUrl(image.image_url) || '',
+      src: resolveMediaUrl(image.thumbnail_url || image.image_url) || '',
       alt: image.alt_text || image.title || t('event.galleryMatch'),
       caption: image.caption || image.title || '',
     }));
+  const galleryImagesCount = mainEvent?.gallery_images_count ?? galleryImages.length;
 
   const formatEventDate = (event: typeof mainEvent) => {
     if (!event?.date) return t('event.date');
@@ -356,6 +357,18 @@ export default function EventDetailPage() {
               </div>
               )}
             </div>
+            {mainEvent && galleryImagesCount > 0 && (
+              <Link
+                to={`/events/${mainEvent.slug}/gallery`}
+                className="mt-8 inline-flex items-center gap-2 border border-gold-500/30 bg-gold-500/10 px-5 py-3 text-sm font-heading font-semibold uppercase tracking-wider text-gold-300 transition-colors hover:border-gold-400/60 hover:bg-gold-500/15 hover:text-gold-200"
+              >
+                <ImageIcon size={16} />
+                View Photo Gallery
+                <span className="text-text-muted normal-case tracking-normal">
+                  {galleryImagesCount} photo{galleryImagesCount === 1 ? '' : 's'}
+                </span>
+              </Link>
+            )}
           </motion.div>
         </div>
       </section>
@@ -1000,6 +1013,23 @@ export default function EventDetailPage() {
       {galleryImages.length > 0 && (
       <section className="py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-heading font-semibold uppercase tracking-[0.24em] text-gold-400">
+                Photo Gallery
+              </p>
+              {galleryImagesCount > galleryImages.length && (
+                <p className="mt-1 text-xs text-text-muted">
+                  Showing {galleryImages.length} of {galleryImagesCount} photos
+                </p>
+              )}
+            </div>
+            {mainEvent && (
+              <Link to={`/events/${mainEvent.slug}/gallery`} className="inline-flex items-center gap-2 text-xs text-gold-400 hover:text-gold-300">
+                View all photos <ExternalLink size={12} />
+              </Link>
+            )}
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {galleryImages.map((img, i) => (
               <ScrollReveal key={i} delay={i * 0.08}>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 interface ImageWithShimmerProps {
@@ -6,19 +6,55 @@ interface ImageWithShimmerProps {
   alt: string;
   className?: string;
   fallbackSrc?: string;
+  loading?: 'eager' | 'lazy';
+  decoding?: 'async' | 'auto' | 'sync';
+  sizes?: string;
 }
 
-export default function ImageWithShimmer({ src, alt, className = '', fallbackSrc }: ImageWithShimmerProps) {
+export default function ImageWithShimmer({
+  src,
+  alt,
+  className = '',
+  fallbackSrc,
+  loading,
+  decoding,
+  sizes,
+}: ImageWithShimmerProps) {
+  return (
+    <ImageWithShimmerInner
+      key={`${src}|${fallbackSrc || ''}`}
+      src={src}
+      alt={alt}
+      className={className}
+      fallbackSrc={fallbackSrc}
+      loading={loading}
+      decoding={decoding}
+      sizes={sizes}
+    />
+  );
+}
+
+function ImageWithShimmerInner({
+  src,
+  alt,
+  className = '',
+  fallbackSrc,
+  loading,
+  decoding,
+  sizes,
+}: ImageWithShimmerProps) {
   const [loaded, setLoaded] = useState(false);
   const [currentSrc, setCurrentSrc] = useState(src);
   const [didFallback, setDidFallback] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    setCurrentSrc(src);
-    setLoaded(false);
-    setDidFallback(false);
-  }, [src, fallbackSrc]);
+  const setImageRef = useCallback((image: HTMLImageElement | null) => {
+    imageRef.current = image;
+    if (image?.complete && image.naturalWidth > 0) {
+      setLoaded(true);
+    }
+  }, []);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
@@ -28,8 +64,12 @@ export default function ImageWithShimmer({ src, alt, className = '', fallbackSrc
       )}
 
       <motion.img
+        ref={setImageRef}
         src={currentSrc}
         alt={alt}
+        loading={loading}
+        decoding={decoding}
+        sizes={sizes}
         className={className}
         onLoad={() => setLoaded(true)}
         onError={() => {
