@@ -1789,6 +1789,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   }, [eventId, page])
 
   useEffect(() => { load() }, [load])
+  useEffect(() => { setSelectedIds([]) }, [eventId, page])
   useEffect(() => { if (completedForEvent > 0) void load() }, [completedForEvent, load])
 
   const resetForm = () => {
@@ -1851,16 +1852,21 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
     }
 
     setError('')
-    setSuccess(`Queued ${files.length} image${files.length === 1 ? '' : 's'} for upload`)
-    await startUpload({
-      eventId,
-      eventName,
-      files,
-      active: uploadActive,
-      caption: uploadCaption,
-      startSortOrder: total,
-    })
-    if (fileInputRef.current) fileInputRef.current.value = ''
+    setSuccess('')
+    try {
+      await startUpload({
+        eventId,
+        eventName,
+        files,
+        active: uploadActive,
+        caption: uploadCaption,
+        startSortOrder: total,
+      })
+      setSuccess(`Queued ${files.length} image${files.length === 1 ? '' : 's'} for upload`)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to queue gallery uploads')
+    }
   }
 
   const toggleSelected = (id: number) => {

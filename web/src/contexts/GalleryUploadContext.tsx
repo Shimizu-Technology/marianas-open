@@ -89,6 +89,12 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   const runningRef = useRef(0);
   const processQueueRef = useRef<() => void>(() => undefined);
 
+  const setTasksSynced = useCallback((updater: (current: GalleryUploadTask[]) => GalleryUploadTask[]) => {
+    const next = updater(tasksRef.current);
+    tasksRef.current = next;
+    setTasks(next);
+  }, []);
+
   useEffect(() => {
     tasksRef.current = tasks;
   }, [tasks]);
@@ -105,16 +111,15 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateTask = useCallback((id: string, updates: Partial<GalleryUploadTask>) => {
-    setTasks(current => current.map(task => task.id === id ? { ...task, ...updates } : task));
-  }, []);
+    setTasksSynced(current => current.map(task => task.id === id ? { ...task, ...updates } : task));
+  }, [setTasksSynced]);
 
   const processTask = useCallback(async (task: GalleryUploadTask) => {
-    const file = fileMapRef.current.get(task.id);
-    const meta = metaMapRef.current.get(task.id);
-    if (!file || !meta) return;
-
     try {
-      updateTask(task.id, { status: 'hashing', progress: 2, error: undefined });
+      const file = fileMapRef.current.get(task.id);
+      const meta = metaMapRef.current.get(task.id);
+      if (!file || !meta) throw new Error('Upload task is missing its file data');
+
       const md5 = await checksum(file);
 
       const prepared = await api.admin.prepareEventGalleryDirectUpload(task.eventId, {
@@ -154,15 +159,26 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   }, [updateTask]);
 
   const processQueue = useCallback(() => {
-    setTasks(current => {
-      const next = current.filter(task => task.status === 'queued').slice(0, Math.max(0, CONCURRENCY - runningRef.current));
-      next.forEach(task => {
-        runningRef.current += 1;
-        void processTask(task);
-      });
-      return current;
+    const available = Math.max(0, CONCURRENCY - runningRef.current);
+    if (available === 0) return;
+
+    const next = tasksRef.current
+      .filter(task => task.status === 'queued')
+      .slice(0, available);
+    if (next.length === 0) return;
+
+    const claimedIds = new Set(next.map(task => task.id));
+    runningRef.current += next.length;
+    setTasksSynced(current => current.map(task => (
+      claimedIds.has(task.id)
+        ? { ...task, status: 'hashing', progress: 2, error: undefined }
+        : task
+    )));
+
+    next.forEach(task => {
+      void processTask({ ...task, status: 'hashing', progress: 2, error: undefined });
     });
-  }, [processTask]);
+  }, [processTask, setTasksSynced]);
   processQueueRef.current = processQueue;
 
   const startUpload = useCallback(async ({ eventId, eventName, files, active, caption, startSortOrder }: StartUploadOptions) => {
@@ -178,7 +194,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
 
     const createdAt = Date.now();
     const newTasks = imageFiles.map((file, index) => {
-      const id = `${createdAt}-${index}-${file.name}`;
+      const id = `${batch.id}-${createdAt}-${index}-${crypto.randomUUID()}`;
       fileMapRef.current.set(id, file);
       metaMapRef.current.set(id, { active, caption, sortOrder: startSortOrder + index });
       return {
@@ -194,17 +210,17 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       };
     });
 
-    setTasks(current => [...newTasks, ...current]);
+    setTasksSynced(current => [...newTasks, ...current]);
     window.setTimeout(processQueue, 0);
-  }, [processQueue]);
+  }, [processQueue, setTasksSynced]);
 
   const retryFailed = useCallback(() => {
-    setTasks(current => current.map(task => task.status === 'failed' ? { ...task, status: 'queued', progress: 0, error: undefined } : task));
+    setTasksSynced(current => current.map(task => task.status === 'failed' ? { ...task, status: 'queued', progress: 0, error: undefined } : task));
     window.setTimeout(processQueue, 0);
-  }, [processQueue]);
+  }, [processQueue, setTasksSynced]);
 
   const clearCompleted = useCallback(() => {
-    setTasks(current => {
+    setTasksSynced(current => {
       current.filter(task => task.status === 'complete').forEach(task => {
         URL.revokeObjectURL(task.previewUrl);
         fileMapRef.current.delete(task.id);
@@ -212,7 +228,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       });
       return current.filter(task => task.status !== 'complete');
     });
-  }, []);
+  }, [setTasksSynced]);
 
   const value = useMemo(() => {
     const activeCount = tasks.filter(task => ['queued', 'hashing', 'uploading', 'saving'].includes(task.status)).length;
