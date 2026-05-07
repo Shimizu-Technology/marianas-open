@@ -62,13 +62,17 @@ module Api
 
         def prepare_direct_upload
           content_type = params[:content_type].to_s
-          unless content_type.start_with?("image/")
+          unless content_type.in?(EventGalleryImage::ALLOWED_CONTENT_TYPES)
             return render json: { error: "Only image uploads are supported" }, status: :unprocessable_entity
+          end
+          byte_size = params.require(:byte_size).to_i
+          if byte_size <= 0 || byte_size > EventGalleryImage::MAX_BYTE_SIZE
+            return render json: { error: "Images must be smaller than #{EventGalleryImage::MAX_BYTE_SIZE / 1.megabyte} MB" }, status: :unprocessable_entity
           end
 
           blob = ActiveStorage::Blob.create_before_direct_upload!(
             filename: params.require(:filename),
-            byte_size: params.require(:byte_size).to_i,
+            byte_size: byte_size,
             checksum: params.require(:checksum),
             content_type: content_type,
             metadata: { event_id: @event.id }

@@ -2,6 +2,15 @@ class EventGalleryImage < ApplicationRecord
   include HasImageUrl
 
   STATUSES = %w[pending uploaded processing ready failed].freeze
+  ALLOWED_CONTENT_TYPES = %w[
+    image/jpeg
+    image/png
+    image/webp
+    image/gif
+    image/heic
+    image/heif
+  ].freeze
+  MAX_BYTE_SIZE = ENV.fetch("EVENT_GALLERY_IMAGE_MAX_BYTES", 50.megabytes).to_i
 
   belongs_to :event
   belongs_to :event_gallery_upload_batch, optional: true
@@ -12,6 +21,7 @@ class EventGalleryImage < ApplicationRecord
   validates :sort_order, numericality: { greater_than_or_equal_to: 0 }
   validates :status, inclusion: { in: STATUSES }
   validate :image_presence
+  validate :image_type_and_size
 
   scope :active, -> { where(active: true) }
   scope :ready, -> { where(status: "ready") }
@@ -46,6 +56,18 @@ class EventGalleryImage < ApplicationRecord
 
   def image_presence
     errors.add(:image, "must be attached") unless image.attached?
+  end
+
+  def image_type_and_size
+    return unless image.attached?
+
+    blob = image.blob
+    unless blob.content_type.in?(ALLOWED_CONTENT_TYPES)
+      errors.add(:image, "must be a JPEG, PNG, WebP, GIF, HEIC, or HEIF file")
+    end
+    if blob.byte_size.to_i > MAX_BYTE_SIZE
+      errors.add(:image, "must be smaller than #{MAX_BYTE_SIZE / 1.megabyte} MB")
+    end
   end
 
   def variant_url(transformations)

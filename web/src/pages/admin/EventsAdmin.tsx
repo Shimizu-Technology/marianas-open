@@ -23,7 +23,7 @@ import ImageUpload from '../../components/ImageUpload'
 import { resolveMediaUrl } from '../../utils/images'
 import { formatDate } from '../../utils/dates'
 import { useEditingParam } from '../../hooks/useEditingParam'
-import { useGalleryUploads } from '../../contexts/GalleryUploadContext'
+import { GALLERY_IMAGE_ACCEPT, GALLERY_IMAGE_MAX_BYTES, isSupportedGalleryImage, useGalleryUploads } from '../../contexts/GalleryUploadContext'
 
 type SortField = 'name' | 'date' | 'location' | 'stars' | 'status'
 type SortDir = 'asc' | 'desc'
@@ -1851,13 +1851,18 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   }
 
   const handleFiles = async (fileList: FileList | File[]) => {
-    const files = Array.from(fileList).filter(file => file.type.startsWith('image/'))
+    const selectedFiles = Array.from(fileList)
+    const files = selectedFiles.filter(isSupportedGalleryImage)
     if (files.length === 0) {
-      setError('Choose image files to upload')
+      setError(`Choose JPEG, PNG, WebP, GIF, HEIC, or HEIF images under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
       return
     }
+    if (files.length < selectedFiles.length) {
+      setError(`Skipped ${selectedFiles.length - files.length} unsupported or oversized file${selectedFiles.length - files.length === 1 ? '' : 's'}`)
+    } else {
+      setError('')
+    }
 
-    setError('')
     setSuccess('')
     try {
       await startUpload({
@@ -1967,7 +1972,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept={GALLERY_IMAGE_ACCEPT}
             multiple
             onChange={e => { if (e.target.files) void handleFiles(e.target.files) }}
             className="hidden"
@@ -2064,8 +2069,17 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
                   </label>
                   <input
                     type="file"
-                    accept="image/*"
-                    onChange={e => setPendingFile(e.target.files?.[0] || null)}
+                    accept={GALLERY_IMAGE_ACCEPT}
+                    onChange={e => {
+                      const file = e.target.files?.[0] || null
+                      if (file && !isSupportedGalleryImage(file)) {
+                        setError(`Choose a supported image under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
+                        setPendingFile(null)
+                        e.target.value = ''
+                        return
+                      }
+                      setPendingFile(file)
+                    }}
                     className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary file:mr-3 file:border-0 file:bg-gold/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-gold"
                   />
                   {pendingFile && (
