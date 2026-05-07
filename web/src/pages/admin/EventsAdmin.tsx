@@ -1790,7 +1790,13 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
 
   useEffect(() => { load() }, [load])
   useEffect(() => { setSelectedIds([]) }, [eventId, page])
-  useEffect(() => { if (completedForEvent > 0) void load() }, [completedForEvent, load])
+  useEffect(() => {
+    if (completedForEvent === 0) return undefined
+    const refreshTimer = window.setTimeout(() => {
+      void load()
+    }, 750)
+    return () => window.clearTimeout(refreshTimer)
+  }, [completedForEvent, load])
 
   const resetForm = () => {
     setForm({

@@ -27,28 +27,41 @@ export default function EventGalleryPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState('');
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    Promise.all([
-      api.getEvent(slug),
-      api.getEventGallery(slug, { page: 1, per_page: PER_PAGE }),
-    ])
-      .then(([eventData, galleryData]) => {
+
+    const loadInitialGallery = async () => {
+      try {
+        setError('');
+        const eventData = await api.getEvent(slug);
         if (cancelled) return;
         setEvent(eventData);
-        setImages(galleryData.gallery_images);
-        setTotal(galleryData.total);
-        setPage(1);
-      })
-      .catch(() => {
+
+        try {
+          const galleryData = await api.getEventGallery(slug, { page: 1, per_page: PER_PAGE });
+          if (cancelled) return;
+          setImages(galleryData.gallery_images);
+          setTotal(galleryData.total);
+          setPage(1);
+        } catch {
+          if (cancelled) return;
+          setImages([]);
+          setTotal(0);
+          setPage(1);
+          setError('Photos could not be loaded. Please try again.');
+        }
+      } catch {
         if (!cancelled) setEvent(null);
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    };
+
+    void loadInitialGallery();
 
     return () => {
       cancelled = true;
@@ -74,11 +87,14 @@ export default function EventGalleryPage() {
     if (!canLoadMore || loadingMore) return;
     setLoadingMore(true);
     try {
+      setError('');
       const nextPage = page + 1;
       const res = await api.getEventGallery(slug, { page: nextPage, per_page: PER_PAGE });
       setImages(current => [...current, ...res.gallery_images]);
       setTotal(res.total);
       setPage(nextPage);
+    } catch {
+      setError('More photos could not be loaded. Please try again.');
     } finally {
       setLoadingMore(false);
     }
@@ -143,7 +159,7 @@ export default function EventGalleryPage() {
               <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-gold-500/20 bg-gold-500/5 text-gold-400 text-xs font-heading uppercase tracking-wider mb-5">
                 <ImageIcon size={13} /> Official Gallery
               </div>
-              <h1 className="font-heading text-4xl sm:text-6xl font-black uppercase leading-none text-text-primary">
+              <h1 className="max-w-6xl break-words font-heading text-4xl sm:text-6xl font-black uppercase leading-none text-text-primary">
                 {event.name}
               </h1>
               <div className="mt-5 flex flex-wrap gap-4 text-sm text-text-secondary">
@@ -158,23 +174,35 @@ export default function EventGalleryPage() {
 
       <section className="py-8 sm:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          {error && (
+            <div className="mb-5 border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {error}
+            </div>
+          )}
           {images.length === 0 ? (
             <div className="py-24 text-center text-text-muted">No photos have been published yet.</div>
           ) : (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+              <div className="columns-2 gap-3 sm:columns-3 sm:gap-4 xl:columns-4">
                 {images.map((image, index) => {
                   const src = resolveMediaUrl(image.thumbnail_url || image.image_url);
+                  const fallbackSrc = resolveMediaUrl(image.image_url) || undefined;
+                  const aspectRatio = image.width && image.height ? `${image.width} / ${image.height}` : '3 / 2';
                   return (
                     <button
                       key={image.id}
                       onClick={() => setActiveIndex(index)}
-                      className="group relative aspect-[3/2] overflow-hidden border border-white/5 bg-white/[0.02] text-left"
+                      className="group relative mb-3 block w-full break-inside-avoid overflow-hidden border border-white/5 bg-white/[0.02] text-left sm:mb-4"
+                      style={{ aspectRatio }}
                     >
                       {src && (
                         <ImageWithShimmer
                           src={src}
+                          fallbackSrc={fallbackSrc}
                           alt={image.alt_text || image.title || event.name}
+                          loading={index < 8 ? 'eager' : 'lazy'}
+                          decoding="async"
+                          sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 50vw"
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       )}
@@ -206,15 +234,15 @@ export default function EventGalleryPage() {
       </section>
 
       {activeImage && activeSrc && (
-        <div className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center px-4 py-12 sm:p-6">
           <button onClick={() => setActiveIndex(null)} className="absolute top-4 right-4 p-2 text-white/70 hover:text-white" aria-label="Close gallery image">
             <X size={24} />
           </button>
-          <button disabled={activeIndex === 0} onClick={() => moveLightbox(-1)} className="absolute left-3 sm:left-6 p-2 text-white/70 hover:text-white disabled:opacity-20" aria-label="Previous image">
+          <button disabled={activeIndex === 0} onClick={() => moveLightbox(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:left-6" aria-label="Previous image">
             <ChevronLeft size={32} />
           </button>
-          <img src={activeSrc} alt={activeImage.alt_text || activeImage.title || event.name} className="max-h-[82vh] max-w-[92vw] object-contain" />
-          <button disabled={activeIndex === images.length - 1} onClick={() => moveLightbox(1)} className="absolute right-3 sm:right-6 p-2 text-white/70 hover:text-white disabled:opacity-20" aria-label="Next image">
+          <img src={activeSrc} alt={activeImage.alt_text || activeImage.title || event.name} className="max-h-[78vh] max-w-[92vw] object-contain sm:max-h-[84vh]" />
+          <button disabled={activeIndex === images.length - 1} onClick={() => moveLightbox(1)} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:right-6" aria-label="Next image">
             <ChevronRight size={32} />
           </button>
           {(activeImage.caption || activeImage.title) && (
