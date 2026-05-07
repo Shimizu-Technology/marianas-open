@@ -51,17 +51,10 @@ class EventGalleryImage < ApplicationRecord
   def variant_url(transformations)
     return nil unless image.attached?
 
-    variant = image.variant(transformations)
-    if Rails.configuration.active_storage.service == :amazon
-      bucket = ENV["AWS_S3_BUCKET"]
-      region = ENV.fetch("AWS_REGION", "ap-southeast-2")
-      return nil if bucket.blank?
-
-      processed = variant.processed
-      "https://#{bucket}.s3.#{region}.amazonaws.com/#{processed.key}"
-    else
-      Rails.application.routes.url_helpers.url_for(variant)
-    end
+    Rails.application.routes.url_helpers.rails_representation_path(
+      image.variant(transformations),
+      only_path: true
+    )
   rescue StandardError, LoadError
     image_url
   end

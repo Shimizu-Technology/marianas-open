@@ -1869,16 +1869,26 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
 
   const handleBulkActive = async (active: boolean) => {
     if (selectedIds.length === 0) return
-    await api.admin.bulkUpdateEventGalleryImages(eventId, selectedIds, { active })
-    setSelectedIds([])
-    await load()
+    setError('')
+    try {
+      await api.admin.bulkUpdateEventGalleryImages(eventId, selectedIds, { active })
+      setSelectedIds([])
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bulk update failed')
+    }
   }
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return
-    await api.admin.bulkDeleteEventGalleryImages(eventId, selectedIds)
-    setSelectedIds([])
-    await load()
+    setError('')
+    try {
+      await api.admin.bulkDeleteEventGalleryImages(eventId, selectedIds)
+      setSelectedIds([])
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bulk delete failed')
+    }
   }
 
   const handleDelete = async (id: number) => {
