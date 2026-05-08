@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion, MotionConfig } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -30,11 +30,12 @@ function getStopStatus(event: Event): StopStatus {
   if (event.status === 'completed') return 'completed';
 
   const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const eventDate = parseDateLocalSafe(event.date);
   const endDate = event.end_date ? parseDateLocalSafe(event.end_date) : eventDate;
 
-  if (endDate < now) return 'completed';
-  if (eventDate <= now && endDate >= now) return 'next';
+  if (endDate < today) return 'completed';
+  if (eventDate <= today && endDate >= today) return 'next';
   return 'upcoming';
 }
 
@@ -229,11 +230,13 @@ function DesktopStop({
   index,
   t,
   lang,
+  itemRef,
 }: {
   stop: JourneyStop;
   index: number;
   t: (key: string) => string;
   lang: string;
+  itemRef?: (node: HTMLDivElement | null) => void;
 }) {
   const { event, status } = stop;
   const isMain = event.is_main_event;
@@ -241,6 +244,7 @@ function DesktopStop({
 
   return (
     <motion.div
+      ref={itemRef}
       className={`relative flex flex-col items-center shrink-0 ${isMain ? 'w-52' : 'w-44'}`}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -333,37 +337,64 @@ function DesktopStop({
 export default function JourneySection({ events }: { events: Event[] }) {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
+  const desktopScrollerRef = useRef<HTMLDivElement | null>(null);
+  const desktopStopRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const journeyStops = useMemo<JourneyStop[]>(() => {
     const cutoffStart = new Date('2025-01-01');
     const cutoffEnd = new Date('2027-01-01');
 
-    // Find the next upcoming event to mark as "next"
-    let foundNext = false;
-
-    return events
+    const stops = events
       .filter((e) => {
         const d = parseDateLocalSafe(e.date);
         return d >= cutoffStart && d < cutoffEnd;
       })
       .sort((a, b) => parseDateLocalSafe(a.date).getTime() - parseDateLocalSafe(b.date).getTime())
-      .map((event) => {
-        let status = getStopStatus(event);
-        if (status === 'cancelled' || status === 'live') {
-          return { event, status };
-        }
-        // Override: only the first non-completed event gets "next"
-        if (status === 'next' || (status === 'upcoming' && !foundNext)) {
-          if (!foundNext) {
-            foundNext = true;
-            status = 'next';
-          } else {
-            status = 'upcoming';
-          }
-        }
-        return { event, status };
-      });
+      .map((event) => ({
+        event,
+        status: getStopStatus(event),
+      }));
+
+    const nextIndex = stops.findIndex((stop) => stop.status === 'next' || stop.status === 'upcoming');
+
+    return stops.map((stop, index) => {
+      if (stop.status !== 'next' && stop.status !== 'upcoming') {
+        return stop;
+      }
+
+      return {
+        ...stop,
+        status: index === nextIndex ? 'next' : 'upcoming',
+      };
+    });
   }, [events]);
+
+  const activeStopIndex = useMemo(() => {
+    const liveIndex = journeyStops.findIndex((stop) => stop.status === 'live');
+    if (liveIndex >= 0) return liveIndex;
+
+    const nextIndex = journeyStops.findIndex((stop) => stop.status === 'next');
+    if (nextIndex >= 0) return nextIndex;
+
+    const upcomingIndex = journeyStops.findIndex((stop) => stop.status === 'upcoming');
+    if (upcomingIndex >= 0) return upcomingIndex;
+
+    return Math.max(0, journeyStops.length - 1);
+  }, [journeyStops]);
+
+  useEffect(() => {
+    const scroller = desktopScrollerRef.current;
+    const activeStop = desktopStopRefs.current[activeStopIndex];
+    if (!scroller || !activeStop || window.innerWidth < 1024) return;
+
+    const centeredLeft =
+      activeStop.offsetLeft - (scroller.clientWidth - activeStop.clientWidth) / 2;
+
+    scroller.scrollTo({
+      left: Math.max(0, centeredLeft),
+      behavior: shouldReduceMotion ? 'auto' : 'smooth',
+    });
+  }, [activeStopIndex, journeyStops.length, shouldReduceMotion]);
 
   if (journeyStops.length === 0) return null;
 
@@ -404,7 +435,7 @@ export default function JourneySection({ events }: { events: Event[] }) {
 
           {/* Desktop: horizontal journey (scrollable when content exceeds width) */}
           <div className="hidden lg:block">
-            <div className="overflow-x-auto overflow-y-hidden pb-2">
+            <div ref={desktopScrollerRef} className="overflow-x-auto overflow-y-hidden pb-2">
               <div className="relative min-w-max px-1">
                 {/* Connection line */}
                 <motion.div
@@ -443,6 +474,9 @@ export default function JourneySection({ events }: { events: Event[] }) {
                       index={i}
                       t={t}
                       lang={i18n.language}
+                      itemRef={(node) => {
+                        desktopStopRefs.current[i] = node;
+                      }}
                     />
                   ))}
                 </div>

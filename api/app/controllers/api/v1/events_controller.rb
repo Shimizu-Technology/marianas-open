@@ -1,6 +1,8 @@
 module Api
   module V1
     class EventsController < ApplicationController
+      before_action :complete_past_events, only: [:index, :show]
+
       def index
         events = Event.publicly_visible
                       .includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } }, { event_gallery_images: { image_attachment: :blob } })
@@ -15,6 +17,12 @@ module Api
         render json: event
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Event not found" }, status: :not_found
+      end
+
+      private
+
+      def complete_past_events
+        Event.complete_past_events!
       end
     end
   end
