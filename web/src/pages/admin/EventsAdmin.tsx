@@ -21,7 +21,7 @@ import type {
   EventVisaItem,
 } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
-import { resolveMediaUrl } from '../../utils/images'
+import { isBrowserPreviewableImage, resolveMediaUrl } from '../../utils/images'
 import { formatDate } from '../../utils/dates'
 import { useEditingParam } from '../../hooks/useEditingParam'
 import { GALLERY_IMAGE_ACCEPT, GALLERY_IMAGE_MAX_BYTES, isSupportedGalleryImage, useGalleryUploads } from '../../contexts/GalleryUploadContext'
@@ -2133,9 +2133,9 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
           {galleryImages.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border-b border-white/5">
               {galleryImages.map(image => {
-                const isBrowserPreviewable = !image.content_type || !['image/heic', 'image/heif'].includes(image.content_type)
-                const previewUrl = image.status === 'ready'
-                  ? resolveMediaUrl(image.thumbnail_url || image.image_url)
+                const isBrowserPreviewable = isBrowserPreviewableImage(image.content_type)
+                const previewUrl = image.thumbnail_url
+                  ? resolveMediaUrl(image.thumbnail_url)
                   : isBrowserPreviewable
                     ? resolveMediaUrl(image.image_url)
                     : null

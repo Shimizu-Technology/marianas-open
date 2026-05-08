@@ -5,7 +5,7 @@ module Api
         event = Event.publicly_visible.find_by!(slug: params[:event_slug])
         per_page = [[params.fetch(:per_page, 48).to_i, 1].max, 96].min
         page = [params.fetch(:page, 1).to_i, 1].max
-        scope = event.event_gallery_images.active.ready.with_attached_image.sorted
+        scope = event.event_gallery_images.active.ready.with_image_variant_records.sorted
         total = scope.count
         images = scope.offset((page - 1) * per_page).limit(per_page)
 
