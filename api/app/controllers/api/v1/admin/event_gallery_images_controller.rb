@@ -29,28 +29,17 @@ module Api
 
         def create
           batch = find_batch
-          saved_image = nil
-          errors = nil
+          gallery_image = @event.event_gallery_images.build(gallery_image_params)
+          gallery_image.event_gallery_upload_batch = batch
+          gallery_image.image.attach(params[:image]) if params[:image].present?
+          apply_blob_metadata(gallery_image)
+          gallery_image.status = "uploaded" if gallery_image.image.attached?
 
-          lock_batch(batch) do
-            gallery_image = @event.event_gallery_images.build(gallery_image_params)
-            gallery_image.event_gallery_upload_batch = batch
-            gallery_image.image.attach(params[:image]) if params[:image].present?
-            apply_blob_metadata(gallery_image)
-            gallery_image.status = "uploaded" if gallery_image.image.attached?
-
-            if gallery_image.save
-              batch&.refresh_counts!
-              saved_image = gallery_image
-            else
-              errors = gallery_image.errors.full_messages
-            end
-          end
-
-          if saved_image
-            render json: { gallery_image: saved_image.as_json }, status: :created
+          if gallery_image.save
+            refresh_batch_counts(batch)
+            render json: { gallery_image: gallery_image.as_json }, status: :created
           else
-            render json: { errors: errors }, status: :unprocessable_entity
+            render json: { errors: gallery_image.errors.full_messages }, status: :unprocessable_entity
           end
         rescue ActiveRecord::RecordNotFound
           render json: { error: "Upload batch not found" }, status: :unprocessable_entity
@@ -112,30 +101,28 @@ module Api
           saved_image = nil
           errors = nil
 
-          lock_batch(batch) do
-            blob.with_lock do
-              raise UploadAlreadyUsed if ActiveStorage::Attachment.exists?(blob_id: blob.id)
+          blob.with_lock do
+            raise UploadAlreadyUsed if ActiveStorage::Attachment.exists?(blob_id: blob.id)
 
-              gallery_image = @event.event_gallery_images.build(gallery_image_params)
-              gallery_image.event_gallery_upload_batch = batch
-              gallery_image.status = "uploaded"
-              gallery_image.original_filename = blob.filename.to_s
-              gallery_image.content_type = blob.content_type
-              gallery_image.byte_size = blob.byte_size
-              gallery_image.title = gallery_image.title.presence || blob.filename.base
-              gallery_image.alt_text = gallery_image.alt_text.presence || gallery_image.title
-              gallery_image.image.attach(blob)
+            gallery_image = @event.event_gallery_images.build(gallery_image_params)
+            gallery_image.event_gallery_upload_batch = batch
+            gallery_image.status = "uploaded"
+            gallery_image.original_filename = blob.filename.to_s
+            gallery_image.content_type = blob.content_type
+            gallery_image.byte_size = blob.byte_size
+            gallery_image.title = gallery_image.title.presence || blob.filename.base
+            gallery_image.alt_text = gallery_image.alt_text.presence || gallery_image.title
+            gallery_image.image.attach(blob)
 
-              if gallery_image.save
-                batch&.refresh_counts!
-                saved_image = gallery_image
-              else
-                errors = gallery_image.errors.full_messages
-              end
+            if gallery_image.save
+              saved_image = gallery_image
+            else
+              errors = gallery_image.errors.full_messages
             end
           end
 
           if saved_image
+            refresh_batch_counts(batch)
             render json: { gallery_image: saved_image.as_json }, status: :created
           else
             render json: { errors: errors }, status: :unprocessable_entity
@@ -211,10 +198,10 @@ module Api
           @event.event_gallery_upload_batches.find(params[:batch_id])
         end
 
-        def lock_batch(batch, &block)
-          return yield unless batch
+        def refresh_batch_counts(batch)
+          return unless batch
 
-          batch.with_lock(&block)
+          RefreshEventGalleryUploadBatchJob.perform_later(batch.id)
         end
       end
     end

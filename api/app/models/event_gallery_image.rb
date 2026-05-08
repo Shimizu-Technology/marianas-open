@@ -71,7 +71,7 @@ class EventGalleryImage < ApplicationRecord
   end
 
   def variant_url(transformations)
-    return nil unless image.attached?
+    return nil unless image.attached? && status == "ready"
 
     Rails.application.routes.url_helpers.rails_representation_path(
       image.variant(transformations),
