@@ -7,26 +7,24 @@ class EventGalleryImage < ApplicationRecord
     image/png
     image/webp
     image/gif
-    image/heic
-    image/heif
   ].freeze
   MAX_BYTE_SIZE = ENV.fetch("EVENT_GALLERY_IMAGE_MAX_BYTES", 50.megabytes).to_i
   THUMBNAIL_TRANSFORMATIONS = {
-    resize_to_fill: [600, 400],
+    resize_to_fill: [ 600, 400 ],
     format: :jpg,
-    saver: { quality: 82 }
+    quality: 82
   }.freeze
   LARGE_TRANSFORMATIONS = {
-    resize_to_limit: [1800, 1800],
+    resize_to_limit: [ 1800, 1800 ],
     format: :jpg,
-    saver: { quality: 86 }
+    quality: 86
   }.freeze
 
   belongs_to :event
   belongs_to :event_gallery_upload_batch, optional: true
   has_one_attached :image
 
-  after_commit :enqueue_processing, on: [:create, :update], if: :should_enqueue_processing?
+  after_commit :enqueue_processing, on: [ :create, :update ], if: :should_enqueue_processing?
 
   validates :sort_order, numericality: { greater_than_or_equal_to: 0 }
   validates :status, inclusion: { in: STATUSES }
@@ -49,8 +47,8 @@ class EventGalleryImage < ApplicationRecord
 
   def as_json(options = {})
     super(options.merge(
-      methods: [:image_url, :thumbnail_url, :large_url],
-      except: [:created_at, :updated_at]
+      methods: [ :image_url, :thumbnail_url, :large_url ],
+      except: [ :created_at, :updated_at ]
     ))
   end
 
@@ -73,7 +71,7 @@ class EventGalleryImage < ApplicationRecord
 
     blob = image.blob
     unless blob.content_type.in?(ALLOWED_CONTENT_TYPES)
-      errors.add(:image, "must be a JPEG, PNG, WebP, GIF, HEIC, or HEIF file")
+      errors.add(:image, "must be a JPEG, PNG, WebP, or GIF file")
     end
     if blob.byte_size.to_i > MAX_BYTE_SIZE
       errors.add(:image, "must be smaller than #{MAX_BYTE_SIZE / 1.megabyte} MB")

@@ -44,7 +44,7 @@ interface GalleryUploadContextValue {
 const GalleryUploadContext = createContext<GalleryUploadContextValue | null>(null);
 const CONCURRENCY = 4;
 export const GALLERY_IMAGE_MAX_BYTES = 50 * 1024 * 1024;
-export const GALLERY_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
+export const GALLERY_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 export const GALLERY_IMAGE_ACCEPT = GALLERY_IMAGE_TYPES.join(',');
 
 export function isSupportedGalleryImage(file: File) {

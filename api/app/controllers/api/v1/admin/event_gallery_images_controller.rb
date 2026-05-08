@@ -8,11 +8,11 @@ module Api
 
         before_action :require_staff!
         before_action :set_event
-        before_action :set_gallery_image, only: [:update, :destroy, :upload]
+        before_action :set_gallery_image, only: [ :update, :destroy, :upload ]
 
         def index
-          per_page = [[params.fetch(:per_page, 100).to_i, 1].max, 200].min
-          page = [params.fetch(:page, 1).to_i, 1].max
+          per_page = [ [ params.fetch(:per_page, 100).to_i, 1 ].max, 200 ].min
+          page = [ params.fetch(:page, 1).to_i, 1 ].max
           scope = @event.event_gallery_images.with_attached_image.sorted
           scope = scope.where(event_gallery_upload_batch_id: params[:batch_id]) if params[:batch_id].present?
           scope = scope.where(status: params[:status]) if params[:status].present?
@@ -71,7 +71,7 @@ module Api
         def prepare_direct_upload
           content_type = params[:content_type].to_s
           unless content_type.in?(EventGalleryImage::ALLOWED_CONTENT_TYPES)
-            return render json: { error: "Only image uploads are supported" }, status: :unprocessable_entity
+            return render json: { error: "Choose JPEG, PNG, WebP, or GIF images" }, status: :unprocessable_entity
           end
           byte_size = params.require(:byte_size).to_i
           if byte_size <= 0 || byte_size > EventGalleryImage::MAX_BYTE_SIZE

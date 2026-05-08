@@ -1,14 +1,28 @@
 class ProcessEventGalleryImageJob < ApplicationJob
+  AttachmentNotReady = Class.new(StandardError)
+
   queue_as :default
 
   discard_on ActiveJob::DeserializationError
+  retry_on ActiveRecord::PreparedStatementCacheExpired, wait: 3.seconds, attempts: 5 do |job, error|
+    job.mark_failed(error)
+  end
+  retry_on AttachmentNotReady, wait: 5.seconds, attempts: 5 do |job, error|
+    job.mark_failed(error)
+  end
   retry_on StandardError, LoadError, wait: :polynomially_longer, attempts: 3 do |job, error|
     job.mark_failed(error)
   end
 
   def perform(event_gallery_image_id)
     gallery_image = EventGalleryImage.find_by(id: event_gallery_image_id)
-    return unless gallery_image&.image&.attached?
+    return unless gallery_image
+
+    unless gallery_image.image.attached?
+      raise AttachmentNotReady, "Image attachment was not ready for processing" if gallery_image.status.in?(%w[uploaded processing])
+
+      return
+    end
 
     processing_token = nil
 
