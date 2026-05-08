@@ -15,6 +15,7 @@ class EventGalleryImageUploadPolicy
     image/png
     image/webp
     image/gif
+    image/avif
   ].freeze
 
   EXTENSION_CONTENT_TYPES = {

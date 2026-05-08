@@ -71,7 +71,7 @@ export function isSupportedGalleryImage(file: File) {
 function isBrowserPreviewableGalleryFile(file: File | undefined) {
   if (!file) return true;
   const fileName = file.name.toLowerCase();
-  if (['.heic', '.heif', '.avif', '.tif', '.tiff'].some(extension => fileName.endsWith(extension))) return false;
+  if (['.heic', '.heif', '.tif', '.tiff'].some(extension => fileName.endsWith(extension))) return false;
   return isBrowserPreviewableImage(file.type);
 }
 
