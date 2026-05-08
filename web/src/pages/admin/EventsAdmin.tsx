@@ -1908,21 +1908,45 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return
     setError('')
+    const idsToDelete = selectedIds
+    const previousImages = galleryImages
+    const previousTotal = total
+
+    setGalleryImages(current => current.filter(image => !idsToDelete.includes(image.id)))
+    setTotal(current => Math.max(0, current - idsToDelete.length))
+    setSelectedIds([])
     try {
-      await api.admin.bulkDeleteEventGalleryImages(eventId, selectedIds)
-      setSelectedIds([])
+      await api.admin.bulkDeleteEventGalleryImages(eventId, idsToDelete)
       await load()
     } catch (err) {
+      setGalleryImages(previousImages)
+      setTotal(previousTotal)
+      setSelectedIds(idsToDelete)
       setError(err instanceof Error ? err.message : 'Bulk delete failed')
     }
   }
 
   const handleDelete = async (id: number) => {
     setError('')
+    const previousImages = galleryImages
+    const previousTotal = total
+    const previousSelectedIds = selectedIds
+
+    setGalleryImages(current => current.filter(image => image.id !== id))
+    setTotal(current => Math.max(0, current - 1))
+    setSelectedIds(current => current.filter(selectedId => selectedId !== id))
+    if (editing === id) {
+      setEditing(null)
+      setPendingFile(null)
+    }
+
     try {
       await api.admin.deleteEventGalleryImage(eventId, id)
       await load()
     } catch (err) {
+      setGalleryImages(previousImages)
+      setTotal(previousTotal)
+      setSelectedIds(previousSelectedIds)
       setError(err instanceof Error ? err.message : 'Failed to delete gallery image')
     }
   }
