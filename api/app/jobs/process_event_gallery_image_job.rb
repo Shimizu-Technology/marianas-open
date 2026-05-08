@@ -10,20 +10,21 @@ class ProcessEventGalleryImageJob < ApplicationJob
     gallery_image = EventGalleryImage.find_by(id: event_gallery_image_id)
     return unless gallery_image&.image&.attached?
 
-    processing_token = SecureRandom.uuid
-    @processing_token = processing_token
+    processing_token = nil
 
     gallery_image.with_lock do
       gallery_image.reload
       return if gallery_image.status == "ready"
       return unless gallery_image.image.attached?
 
+      processing_token = SecureRandom.uuid
       gallery_image.update_columns(
         status: "processing",
         processing_token: processing_token,
         processing_started_at: Time.current,
         updated_at: Time.current
       )
+      @processing_token = processing_token
     end
 
     blob = gallery_image.image.blob
@@ -63,11 +64,12 @@ class ProcessEventGalleryImageJob < ApplicationJob
       processing_started_at: nil,
       updated_at: Time.current
     )
-    return if updated.zero?
 
     gallery_image = EventGalleryImage.find_by(id: arguments.first)
-    refresh_batch_counts(gallery_image)
     Rails.logger.error("[ProcessEventGalleryImageJob] Failed EventGalleryImage##{arguments.first}: #{error.class} #{error.message}")
+    return if updated.zero?
+
+    refresh_batch_counts(gallery_image)
   end
 
   private
