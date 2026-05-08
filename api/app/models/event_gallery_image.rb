@@ -129,7 +129,7 @@ class EventGalleryImage < ApplicationRecord
   end
 
   def variant_record_exists?(transformations)
-    variation_digest = ActiveStorage::Variation.wrap(transformations).digest
+    variation_digest = image.variant(transformations).variation.digest
     variant_records = image.blob.variant_records
     if variant_records.loaded?
       variant_records.any? { |record| record.variation_digest == variation_digest }
