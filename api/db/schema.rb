@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_08_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_08_001000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -136,6 +136,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_000000) do
     t.string "original_filename"
     t.datetime "processed_at"
     t.text "processing_error"
+    t.datetime "processing_started_at"
+    t.string "processing_token"
     t.integer "sort_order", default: 0, null: false
     t.string "status", default: "ready", null: false
     t.string "title"
@@ -146,6 +148,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_000000) do
     t.index ["event_id", "sort_order"], name: "index_event_gallery_images_on_event_id_and_sort_order"
     t.index ["event_id", "status"], name: "index_event_gallery_images_on_event_id_and_status"
     t.index ["event_id"], name: "index_event_gallery_images_on_event_id"
+    t.index ["processing_token"], name: "index_event_gallery_images_on_processing_token"
+    t.index ["status", "processing_started_at"], name: "index_event_gallery_images_on_status_and_processing_started_at"
   end
 
   create_table "event_gallery_upload_batches", force: :cascade do |t|
