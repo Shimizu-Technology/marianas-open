@@ -39,6 +39,7 @@ gem 'aws-sdk-s3', require: false
 # CORS
 gem 'rack-cors'
 gem "image_processing", "~> 1.2"
+gem "solid_queue"
 
 # Auth
 gem 'jwt'

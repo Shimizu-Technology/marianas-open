@@ -64,4 +64,8 @@ Rails.application.configure do
 
   # Active Storage
   config.active_storage.service = :amazon
+
+  # Keep image processing, mail, and other background work out of the Puma
+  # request process. Render should run a separate worker with `bundle exec bin/jobs`.
+  config.active_job.queue_adapter = :solid_queue
 end
