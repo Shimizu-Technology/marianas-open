@@ -11,6 +11,16 @@ class EventGalleryImage < ApplicationRecord
     image/heif
   ].freeze
   MAX_BYTE_SIZE = ENV.fetch("EVENT_GALLERY_IMAGE_MAX_BYTES", 50.megabytes).to_i
+  THUMBNAIL_TRANSFORMATIONS = {
+    resize_to_fill: [600, 400],
+    format: :jpg,
+    saver: { quality: 82 }
+  }.freeze
+  LARGE_TRANSFORMATIONS = {
+    resize_to_limit: [1800, 1800],
+    format: :jpg,
+    saver: { quality: 86 }
+  }.freeze
 
   belongs_to :event
   belongs_to :event_gallery_upload_batch, optional: true
@@ -30,11 +40,11 @@ class EventGalleryImage < ApplicationRecord
   image_url_for :image
 
   def thumbnail_url
-    variant_url(resize_to_fill: [600, 400])
+    variant_url(THUMBNAIL_TRANSFORMATIONS)
   end
 
   def large_url
-    variant_url(resize_to_limit: [1800, 1800])
+    variant_url(LARGE_TRANSFORMATIONS)
   end
 
   def as_json(options = {})
