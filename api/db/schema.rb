@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_08_002000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_08_003000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -128,6 +128,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_002000) do
     t.string "alt_text"
     t.bigint "byte_size"
     t.string "caption"
+    t.string "category"
     t.string "content_type"
     t.datetime "created_at", null: false
     t.bigint "event_gallery_upload_batch_id"
@@ -146,6 +147,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_002000) do
     t.integer "width"
     t.index ["event_gallery_upload_batch_id"], name: "index_event_gallery_images_on_upload_batch_id"
     t.index ["event_id", "active"], name: "index_event_gallery_images_on_event_id_and_active"
+    t.index ["event_id", "category", "sort_order"], name: "index_event_gallery_images_on_event_category_sort"
     t.index ["event_id", "sort_order"], name: "index_event_gallery_images_on_event_id_and_sort_order"
     t.index ["event_id", "status"], name: "index_event_gallery_images_on_event_id_and_status"
     t.index ["event_id"], name: "index_event_gallery_images_on_event_id"

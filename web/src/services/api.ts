@@ -104,6 +104,7 @@ export interface EventGalleryImage {
   title: string | null;
   alt_text: string | null;
   caption: string | null;
+  category: string | null;
   sort_order: number;
   active: boolean;
   status: 'pending' | 'uploaded' | 'processing' | 'ready' | 'failed';
@@ -123,8 +124,14 @@ export interface EventGalleryImageFormData {
   title: string;
   alt_text: string;
   caption: string;
+  category: string;
   sort_order: number;
   active: boolean;
+}
+
+export interface EventGalleryCategory {
+  name: string;
+  count: number;
 }
 
 export interface EventGalleryUploadBatch {
@@ -143,6 +150,7 @@ export interface EventGalleryUploadBatch {
 
 export interface GalleryImagesResponse {
   gallery_images: EventGalleryImage[];
+  categories: EventGalleryCategory[];
   total: number;
   page: number;
   per_page: number;
@@ -936,7 +944,7 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(data),
       }, true),
-    bulkUpdateEventGalleryImages: (eventId: number, ids: number[], data: { active?: boolean }) =>
+    bulkUpdateEventGalleryImages: (eventId: number, ids: number[], data: { active?: boolean; category?: string }) =>
       fetchApi<{ updated: number }>(`/api/v1/admin/events/${eventId}/gallery-images/bulk_update`, {
         method: 'PATCH',
         body: JSON.stringify({ ids, ...data }),

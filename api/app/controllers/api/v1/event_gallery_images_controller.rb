@@ -6,17 +6,30 @@ module Api
         per_page = [[params.fetch(:per_page, 48).to_i, 1].max, 96].min
         page = [params.fetch(:page, 1).to_i, 1].max
         scope = event.event_gallery_images.active.ready.with_image_variant_records.sorted
+        scope = scope.categorized_as(params[:category]) if params[:category].present?
         total = scope.count
         images = scope.offset((page - 1) * per_page).limit(per_page)
 
         render json: {
           gallery_images: images.as_json,
+          categories: gallery_categories(event, public_only: true),
           total: total,
           page: page,
           per_page: per_page
         }
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Event not found" }, status: :not_found
+      end
+
+      private
+
+      def gallery_categories(event, public_only:)
+        scope = event.event_gallery_images
+        scope = scope.active.ready if public_only
+        counts = scope.where.not(category: [ nil, "" ]).group(:category).count
+        EventGalleryImage.category_options_for(event, public_only: public_only).map do |category|
+          { name: category, count: counts[category].to_i }
+        end
       end
     end
   end
