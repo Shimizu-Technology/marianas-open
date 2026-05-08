@@ -1946,7 +1946,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return
     setError('')
-    const idsToDelete = selectedIds
+    const idsToDelete = [...selectedIds]
     const previousImages = galleryImages
     const previousTotal = total
 
@@ -1955,12 +1955,18 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
     setSelectedIds([])
     try {
       await api.admin.bulkDeleteEventGalleryImages(eventId, idsToDelete)
-      await load()
     } catch (err) {
       setGalleryImages(previousImages)
       setTotal(previousTotal)
       setSelectedIds(idsToDelete)
       setError(err instanceof Error ? err.message : 'Bulk delete failed')
+      return
+    }
+
+    try {
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? `Deleted, but failed to refresh gallery: ${err.message}` : 'Deleted, but failed to refresh gallery')
     }
   }
 
@@ -1982,7 +1988,6 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
 
     try {
       await api.admin.deleteEventGalleryImage(eventId, id)
-      await load()
     } catch (err) {
       setGalleryImages(previousImages)
       setTotal(previousTotal)
@@ -1990,6 +1995,13 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
       setEditing(previousEditing)
       setPendingFile(previousPendingFile)
       setError(err instanceof Error ? err.message : 'Failed to delete gallery image')
+      return
+    }
+
+    try {
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? `Deleted, but failed to refresh gallery: ${err.message}` : 'Deleted, but failed to refresh gallery')
     }
   }
 

@@ -142,9 +142,9 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       if (!file || !meta) throw new Error('Upload task is missing its file data');
 
       if (directStorageUnavailableRef.current) {
-        updateTask(task.id, { status: 'saving', progress: 10 });
+        updateTask(task.id, { status: 'saving', progress: 10, error: undefined });
         const completed = await uploadThroughServer(task, file, meta);
-        updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image });
+        updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image, error: undefined });
         return;
       }
 
@@ -171,11 +171,11 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
           error: storageError instanceof Error ? `${storageError.message}; retrying through server` : 'Storage upload failed; retrying through server',
         });
         completed = await uploadThroughServer(task, file, meta);
-        updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image });
+        updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image, error: undefined });
         return;
       }
 
-      updateTask(task.id, { status: 'saving', progress: 90 });
+      updateTask(task.id, { status: 'saving', progress: 90, error: undefined });
       completed = await api.admin.completeEventGalleryDirectUpload(task.eventId, {
         signed_id: prepared.signed_id,
         batch_id: task.batchId,
@@ -185,7 +185,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         sort_order: meta.sortOrder,
         active: meta.active,
       });
-      updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image });
+      updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image, error: undefined });
     } catch (error) {
       updateTask(task.id, {
         status: 'failed',
