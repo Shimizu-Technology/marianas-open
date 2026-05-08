@@ -42,6 +42,7 @@ class ProcessEventGalleryImageJob < ApplicationJob
     end
 
     blob = gallery_image.image.blob
+    EventGalleryImageUploadPolicy.normalize_blob!(blob)
     blob.analyze unless blob.analyzed?
 
     gallery_image.image.variant(EventGalleryImage::THUMBNAIL_TRANSFORMATIONS).processed

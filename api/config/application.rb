@@ -41,6 +41,6 @@ module Api
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    config.active_storage.variant_processor = :mini_magick
+    config.active_storage.variant_processor = :vips
   end
 end

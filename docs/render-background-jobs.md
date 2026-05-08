@@ -22,3 +22,15 @@ Use the same root directory and environment variables as the API service, includ
 `DATABASE_URL`, `RAILS_MASTER_KEY`, and the AWS S3 variables. Leave `JOB_THREADS`
 and `JOB_CONCURRENCY` unset at first so gallery image processing runs one job at a
 time. Increase them only after uploads are stable on the chosen instance size.
+
+## Native image support
+
+Gallery uploads normalize source images, including HEIC/HEIF, into browser-safe
+JPEG variants in the background worker. The API and worker services both need the
+native packages listed in `api/Aptfile` so Rails can use libvips with libheif.
+
+After native packages are installed, verify the image stack with:
+
+```sh
+bundle exec rake image_processing:verify
+```

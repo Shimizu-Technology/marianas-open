@@ -24,7 +24,7 @@ import ImageUpload from '../../components/ImageUpload'
 import { isBrowserPreviewableImage, resolveMediaUrl } from '../../utils/images'
 import { formatDate } from '../../utils/dates'
 import { useEditingParam } from '../../hooks/useEditingParam'
-import { GALLERY_IMAGE_ACCEPT, GALLERY_IMAGE_MAX_BYTES, isSupportedGalleryImage, useGalleryUploads } from '../../contexts/GalleryUploadContext'
+import { GALLERY_IMAGE_ACCEPT, GALLERY_IMAGE_MAX_BYTES, GALLERY_IMAGE_TYPE_LABEL, isSupportedGalleryImage, useGalleryUploads } from '../../contexts/GalleryUploadContext'
 
 type SortField = 'name' | 'date' | 'location' | 'stars' | 'status'
 type SortDir = 'asc' | 'desc'
@@ -1870,7 +1870,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
     const selectedFiles = Array.from(fileList)
     const files = selectedFiles.filter(isSupportedGalleryImage)
     if (files.length === 0) {
-      setError(`Choose JPEG, PNG, WebP, or GIF images under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
+      setError(`Choose ${GALLERY_IMAGE_TYPE_LABEL} images under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
       return
     }
     if (files.length < selectedFiles.length) {
@@ -2211,7 +2211,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
                     onChange={e => {
                       const file = e.target.files?.[0] || null
                       if (file && !isSupportedGalleryImage(file)) {
-                        setError(`Choose a JPEG, PNG, WebP, or GIF image under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
+                        setError(`Choose a ${GALLERY_IMAGE_TYPE_LABEL} image under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
                         setPendingFile(null)
                         e.target.value = ''
                         return

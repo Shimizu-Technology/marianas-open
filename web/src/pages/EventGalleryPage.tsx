@@ -8,7 +8,9 @@ import { api } from '../services/api';
 import type { Event, EventGalleryImage } from '../services/api';
 import { isBrowserPreviewableImage, resolveMediaUrl } from '../utils/images';
 
-const PER_PAGE = 48;
+const PER_PAGE = 30;
+const EAGER_IMAGE_COUNT = 6;
+const HIGH_PRIORITY_IMAGE_COUNT = 3;
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return '';
@@ -204,10 +206,14 @@ export default function EventGalleryPage() {
                           src={src}
                           fallbackSrc={fallbackSrc}
                           alt={image.alt_text || image.title || event.name}
-                          loading={index < 8 ? 'eager' : 'lazy'}
+                          loading={index < EAGER_IMAGE_COUNT ? 'eager' : 'lazy'}
                           decoding="async"
-                          sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 50vw"
+                          fetchPriority={index < HIGH_PRIORITY_IMAGE_COUNT ? 'high' : 'auto'}
+                          sizes="(min-width: 1280px) 296px, (min-width: 640px) 33vw, 50vw"
+                          lazyRootMargin="1200px 0px"
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          placeholderClassName="flex items-center justify-center"
+                          placeholderContent={<ImageIcon className="w-6 h-6 text-gold-400/25" aria-hidden="true" />}
                         />
                       )}
                       {(image.caption || image.title) && (
