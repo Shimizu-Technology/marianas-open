@@ -79,7 +79,7 @@ function uploadToStorage(url: string, headers: Record<string, string>, file: Fil
       if (xhr.status >= 200 && xhr.status < 300) resolve();
       else reject(new Error(`Storage upload failed (${xhr.status})`));
     };
-    xhr.onerror = () => reject(new Error('Storage upload failed'));
+    xhr.onerror = () => reject(new Error('Storage upload failed before reaching the bucket'));
     xhr.send(file);
   });
 }
@@ -88,12 +88,26 @@ function titleFromFilename(fileName: string) {
   return fileName.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
 }
 
+async function uploadThroughServer(task: GalleryUploadTask, file: File, meta: { active: boolean; caption: string; sortOrder: number }) {
+  const title = titleFromFilename(file.name);
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('batch_id', String(task.batchId));
+  formData.append('title', title);
+  formData.append('alt_text', title);
+  formData.append('caption', meta.caption);
+  formData.append('sort_order', String(meta.sortOrder));
+  formData.append('active', String(meta.active));
+  return api.admin.createEventGalleryImage(task.eventId, formData);
+}
+
 export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<GalleryUploadTask[]>([]);
   const tasksRef = useRef<GalleryUploadTask[]>([]);
   const fileMapRef = useRef(new Map<string, File>());
   const metaMapRef = useRef(new Map<string, { active: boolean; caption: string; sortOrder: number }>());
   const runningRef = useRef(0);
+  const directStorageUnavailableRef = useRef(false);
   const processQueueRef = useRef<() => void>(() => undefined);
 
   const setTasksSynced = useCallback((updater: (current: GalleryUploadTask[]) => GalleryUploadTask[]) => {
@@ -127,6 +141,13 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       const meta = metaMapRef.current.get(task.id);
       if (!file || !meta) throw new Error('Upload task is missing its file data');
 
+      if (directStorageUnavailableRef.current) {
+        updateTask(task.id, { status: 'saving', progress: 10, error: undefined });
+        const completed = await uploadThroughServer(task, file, meta);
+        updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image, error: undefined });
+        return;
+      }
+
       const md5 = await checksum(file);
 
       const prepared = await api.admin.prepareEventGalleryDirectUpload(task.eventId, {
@@ -136,13 +157,26 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         content_type: file.type || 'application/octet-stream',
       });
 
+      let completed: { gallery_image: EventGalleryImage };
       updateTask(task.id, { status: 'uploading', progress: 10 });
-      await uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, file, (progress) => {
-        updateTask(task.id, { progress: Math.max(10, Math.round(10 + progress * 75)) });
-      });
+      try {
+        await uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, file, (progress) => {
+          updateTask(task.id, { progress: Math.max(10, Math.round(10 + progress * 75)) });
+        });
+      } catch (storageError) {
+        directStorageUnavailableRef.current = true;
+        updateTask(task.id, {
+          status: 'saving',
+          progress: 85,
+          error: storageError instanceof Error ? `${storageError.message}; retrying through server` : 'Storage upload failed; retrying through server',
+        });
+        completed = await uploadThroughServer(task, file, meta);
+        updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image, error: undefined });
+        return;
+      }
 
-      updateTask(task.id, { status: 'saving', progress: 90 });
-      const completed = await api.admin.completeEventGalleryDirectUpload(task.eventId, {
+      updateTask(task.id, { status: 'saving', progress: 90, error: undefined });
+      completed = await api.admin.completeEventGalleryDirectUpload(task.eventId, {
         signed_id: prepared.signed_id,
         batch_id: task.batchId,
         title: titleFromFilename(file.name),
@@ -151,8 +185,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         sort_order: meta.sortOrder,
         active: meta.active,
       });
-
-      updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image });
+      updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image, error: undefined });
     } catch (error) {
       updateTask(task.id, {
         status: 'failed',

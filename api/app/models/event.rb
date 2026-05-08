@@ -4,6 +4,7 @@ class Event < ApplicationRecord
 
   STATUSES = %w[draft upcoming live completed cancelled].freeze
   PUBLIC_STATUSES = %w[upcoming live completed cancelled].freeze
+  AUTO_COMPLETABLE_STATUSES = %w[upcoming live].freeze
 
   validates :status, inclusion: { in: STATUSES }, allow_nil: true
 
@@ -25,6 +26,22 @@ class Event < ApplicationRecord
   image_url_for :poster_image
 
   scope :publicly_visible, -> { where(status: PUBLIC_STATUSES) }
+
+  def self.complete_past_events!(today: Date.current)
+    where(status: AUTO_COMPLETABLE_STATUSES)
+      .where.not(date: nil)
+      .where("COALESCE(end_date, date) < ?", today)
+      .update_all(status: "completed", updated_at: Time.current)
+  end
+
+  def complete_if_past!(today: Date.current)
+    return false unless status.in?(AUTO_COMPLETABLE_STATUSES)
+    return false unless date.present?
+    return false unless (end_date || date) < today
+
+    update_columns(status: "completed", updated_at: Time.current)
+    true
+  end
 
   def self.publicly_visible_ids_sql
     publicly_visible.select(:id).to_sql
