@@ -28,17 +28,29 @@ module Api
         end
 
         def create
-          gallery_image = @event.event_gallery_images.build(gallery_image_params)
-          gallery_image.event_gallery_upload_batch = find_batch if params[:batch_id].present?
-          gallery_image.image.attach(params[:image]) if params[:image].present?
-          apply_blob_metadata(gallery_image)
-          gallery_image.status = "uploaded" if gallery_image.image.attached?
+          batch = find_batch
+          saved_image = nil
+          errors = nil
 
-          if gallery_image.save
-            gallery_image.event_gallery_upload_batch&.refresh_counts!
-            render json: { gallery_image: gallery_image.as_json }, status: :created
+          lock_batch(batch) do
+            gallery_image = @event.event_gallery_images.build(gallery_image_params)
+            gallery_image.event_gallery_upload_batch = batch
+            gallery_image.image.attach(params[:image]) if params[:image].present?
+            apply_blob_metadata(gallery_image)
+            gallery_image.status = "uploaded" if gallery_image.image.attached?
+
+            if gallery_image.save
+              batch&.refresh_counts!
+              saved_image = gallery_image
+            else
+              errors = gallery_image.errors.full_messages
+            end
+          end
+
+          if saved_image
+            render json: { gallery_image: saved_image.as_json }, status: :created
           else
-            render json: { errors: gallery_image.errors.full_messages }, status: :unprocessable_entity
+            render json: { errors: errors }, status: :unprocessable_entity
           end
         rescue ActiveRecord::RecordNotFound
           render json: { error: "Upload batch not found" }, status: :unprocessable_entity
@@ -96,26 +108,37 @@ module Api
 
         def complete_direct_upload
           blob = ActiveStorage::Blob.find_signed!(params.require(:signed_id))
-          blob.with_lock do
-            raise UploadAlreadyUsed if ActiveStorage::Attachment.exists?(blob_id: blob.id)
+          batch = find_batch
+          saved_image = nil
+          errors = nil
 
-            batch = find_batch
-            gallery_image = @event.event_gallery_images.build(gallery_image_params)
-            gallery_image.event_gallery_upload_batch = batch
-            gallery_image.status = "uploaded"
-            gallery_image.original_filename = blob.filename.to_s
-            gallery_image.content_type = blob.content_type
-            gallery_image.byte_size = blob.byte_size
-            gallery_image.title = gallery_image.title.presence || blob.filename.base
-            gallery_image.alt_text = gallery_image.alt_text.presence || gallery_image.title
-            gallery_image.image.attach(blob)
+          lock_batch(batch) do
+            blob.with_lock do
+              raise UploadAlreadyUsed if ActiveStorage::Attachment.exists?(blob_id: blob.id)
 
-            if gallery_image.save
-              batch&.refresh_counts!
-              render json: { gallery_image: gallery_image.as_json }, status: :created
-            else
-              render json: { errors: gallery_image.errors.full_messages }, status: :unprocessable_entity
+              gallery_image = @event.event_gallery_images.build(gallery_image_params)
+              gallery_image.event_gallery_upload_batch = batch
+              gallery_image.status = "uploaded"
+              gallery_image.original_filename = blob.filename.to_s
+              gallery_image.content_type = blob.content_type
+              gallery_image.byte_size = blob.byte_size
+              gallery_image.title = gallery_image.title.presence || blob.filename.base
+              gallery_image.alt_text = gallery_image.alt_text.presence || gallery_image.title
+              gallery_image.image.attach(blob)
+
+              if gallery_image.save
+                batch&.refresh_counts!
+                saved_image = gallery_image
+              else
+                errors = gallery_image.errors.full_messages
+              end
             end
+          end
+
+          if saved_image
+            render json: { gallery_image: saved_image.as_json }, status: :created
+          else
+            render json: { errors: errors }, status: :unprocessable_entity
           end
         rescue ActiveSupport::MessageVerifier::InvalidSignature, ActiveRecord::RecordNotFound
           render json: { error: "Uploaded image could not be found" }, status: :unprocessable_entity
@@ -186,6 +209,12 @@ module Api
           return nil if params[:batch_id].blank?
 
           @event.event_gallery_upload_batches.find(params[:batch_id])
+        end
+
+        def lock_batch(batch, &block)
+          return yield unless batch
+
+          batch.with_lock(&block)
         end
       end
     end
