@@ -1870,7 +1870,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
     const selectedFiles = Array.from(fileList)
     const files = selectedFiles.filter(isSupportedGalleryImage)
     if (files.length === 0) {
-      setError(`Choose JPEG, PNG, WebP, GIF, HEIC, or HEIF images under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
+      setError(`Choose JPEG, PNG, WebP, or GIF images under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
       return
     }
     if (files.length < selectedFiles.length) {
@@ -2211,7 +2211,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
                     onChange={e => {
                       const file = e.target.files?.[0] || null
                       if (file && !isSupportedGalleryImage(file)) {
-                        setError(`Choose a supported image under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
+                        setError(`Choose a JPEG, PNG, WebP, or GIF image under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
                         setPendingFile(null)
                         e.target.value = ''
                         return

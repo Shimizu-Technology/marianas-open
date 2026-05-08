@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_08_001000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_08_002000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -136,6 +136,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_001000) do
     t.string "original_filename"
     t.datetime "processed_at"
     t.text "processing_error"
+    t.integer "processing_requeue_count", default: 0, null: false
     t.datetime "processing_started_at"
     t.string "processing_token"
     t.integer "sort_order", default: 0, null: false
