@@ -5,7 +5,9 @@ class RequeueStaleEventGalleryImagesJob < ApplicationJob
 
   def perform
     uploaded_stale = EventGalleryImage.where(status: "uploaded", updated_at: ...STALE_AFTER.ago)
-    processing_stale = EventGalleryImage.where(status: "processing", processing_started_at: ...STALE_AFTER.ago)
+    processing_stale = EventGalleryImage
+      .where(status: "processing")
+      .where("processing_started_at IS NULL OR processing_started_at < ?", STALE_AFTER.ago)
     scope = uploaded_stale.or(processing_stale).with_attached_image
 
     scope.find_each do |gallery_image|
@@ -35,7 +37,7 @@ class RequeueStaleEventGalleryImagesJob < ApplicationJob
     when "uploaded"
       gallery_image.updated_at < STALE_AFTER.ago
     when "processing"
-      gallery_image.processing_started_at.present? && gallery_image.processing_started_at < STALE_AFTER.ago
+      gallery_image.processing_started_at.nil? || gallery_image.processing_started_at < STALE_AFTER.ago
     else
       false
     end
