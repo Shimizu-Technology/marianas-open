@@ -2132,41 +2132,53 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
           )}
           {galleryImages.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border-b border-white/5">
-              {galleryImages.map(image => (
-                <div key={image.id} className="border border-white/5 bg-white/[0.01]">
-                  <div className="aspect-[16/9] bg-white/[0.02] overflow-hidden">
-                    {resolveMediaUrl(image.thumbnail_url || image.image_url) ? (
-                      <img
-                        src={resolveMediaUrl(image.thumbnail_url || image.image_url) || undefined}
-                        alt={image.alt_text || image.title || 'Gallery image'}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6 text-text-muted/40" />
+              {galleryImages.map(image => {
+                const isBrowserPreviewable = !image.content_type || !['image/heic', 'image/heif'].includes(image.content_type)
+                const previewUrl = image.status === 'ready'
+                  ? resolveMediaUrl(image.thumbnail_url || image.image_url)
+                  : isBrowserPreviewable
+                    ? resolveMediaUrl(image.image_url)
+                    : null
+
+                return (
+                  <div key={image.id} className="border border-white/5 bg-white/[0.01]">
+                    <div className="aspect-[16/9] bg-white/[0.02] overflow-hidden">
+                      {previewUrl ? (
+                        <img
+                          src={previewUrl}
+                          alt={image.alt_text || image.title || 'Gallery image'}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                          <ImageIcon className="w-6 h-6 text-text-muted/40" />
+                          {image.status !== 'ready' && (
+                            <span className="text-xs text-text-muted">Processing preview</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3 flex items-start justify-between gap-3">
+                      <button onClick={() => toggleSelected(image.id)} className="mt-0.5 text-text-muted hover:text-gold" aria-label={selectedIds.includes(image.id) ? 'Deselect image' : 'Select image'}>
+                        {selectedIds.includes(image.id) ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm text-text-primary font-medium truncate">{image.title || 'Untitled image'}</div>
+                        <div className="text-xs text-text-muted truncate">
+                          Sort #{image.sort_order} · {image.status}{image.caption ? ` · ${image.caption}` : ''}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  <div className="p-3 flex items-start justify-between gap-3">
-                    <button onClick={() => toggleSelected(image.id)} className="mt-0.5 text-text-muted hover:text-gold" aria-label={selectedIds.includes(image.id) ? 'Deselect image' : 'Select image'}>
-                      {selectedIds.includes(image.id) ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-                    </button>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm text-text-primary font-medium truncate">{image.title || 'Untitled image'}</div>
-                      <div className="text-xs text-text-muted truncate">
-                        Sort #{image.sort_order} · {image.status}{image.caption ? ` · ${image.caption}` : ''}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`text-xs px-1.5 py-0.5 ${image.active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-text-muted'}`}>
+                          {image.active ? 'Active' : 'Hidden'}
+                        </span>
+                        <button onClick={() => editGalleryImage(image)} className="p-1 text-text-muted hover:text-text-primary"><Pencil className="w-3 h-3" /></button>
+                        <button onClick={() => requestDelete(image)} className="p-1 text-text-muted hover:text-red-400" aria-label="Delete gallery image"><Trash2 className="w-3 h-3" /></button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-xs px-1.5 py-0.5 ${image.active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-text-muted'}`}>
-                        {image.active ? 'Active' : 'Hidden'}
-                      </span>
-                      <button onClick={() => editGalleryImage(image)} className="p-1 text-text-muted hover:text-text-primary"><Pencil className="w-3 h-3" /></button>
-                      <button onClick={() => requestDelete(image)} className="p-1 text-text-muted hover:text-red-400" aria-label="Delete gallery image"><Trash2 className="w-3 h-3" /></button>
-                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
 
