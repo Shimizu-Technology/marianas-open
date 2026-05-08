@@ -29,15 +29,19 @@ module Api
 
         def create
           gallery_image = @event.event_gallery_images.build(gallery_image_params)
+          gallery_image.event_gallery_upload_batch = find_batch if params[:batch_id].present?
           gallery_image.image.attach(params[:image]) if params[:image].present?
           apply_blob_metadata(gallery_image)
           gallery_image.status = "uploaded" if gallery_image.image.attached?
 
           if gallery_image.save
+            gallery_image.event_gallery_upload_batch&.refresh_counts!
             render json: { gallery_image: gallery_image.as_json }, status: :created
           else
             render json: { errors: gallery_image.errors.full_messages }, status: :unprocessable_entity
           end
+        rescue ActiveRecord::RecordNotFound
+          render json: { error: "Upload batch not found" }, status: :unprocessable_entity
         end
 
         def update
