@@ -201,20 +201,7 @@ module Api
         def refresh_batch_counts(batch)
           return unless batch
 
-          attempts = 0
-
-          begin
-            batch.refresh_counts!
-          rescue ActiveRecord::Deadlocked
-            attempts += 1
-            if attempts >= 3
-              Rails.logger.warn("Skipped gallery upload batch count refresh after repeated deadlocks for batch #{batch.id}")
-              return
-            end
-
-            sleep(0.05 * attempts)
-            retry
-          end
+          RefreshEventGalleryUploadBatchJob.perform_later(batch.id)
         end
       end
     end

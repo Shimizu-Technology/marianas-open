@@ -28,13 +28,21 @@ class ProcessEventGalleryImageJob < ApplicationJob
       processed_at: Time.current,
       processing_error: nil
     )
-    gallery_image.event_gallery_upload_batch&.refresh_counts!
+    refresh_batch_counts(gallery_image)
   end
 
   def mark_failed(error)
     gallery_image = EventGalleryImage.find_by(id: arguments.first)
     gallery_image&.update_columns(status: "failed", processing_error: error.message)
-    gallery_image&.event_gallery_upload_batch&.refresh_counts!
+    refresh_batch_counts(gallery_image)
     Rails.logger.error("[ProcessEventGalleryImageJob] Failed EventGalleryImage##{arguments.first}: #{error.class} #{error.message}")
+  end
+
+  private
+
+  def refresh_batch_counts(gallery_image)
+    return unless gallery_image&.event_gallery_upload_batch_id
+
+    RefreshEventGalleryUploadBatchJob.perform_later(gallery_image.event_gallery_upload_batch_id)
   end
 end
