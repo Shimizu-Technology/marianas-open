@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_staff!
-        before_action :complete_past_events, only: [:index, :show]
+        before_action :complete_past_events, only: [:index]
         before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :import_results_preview, :import_results, :retranslate, :clone]
 
         def index
@@ -16,6 +16,7 @@ module Api
         end
 
         def show
+          @event.complete_if_past!
           render json: { event: @event.as_json }
         end
 

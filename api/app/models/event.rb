@@ -34,6 +34,15 @@ class Event < ApplicationRecord
       .update_all(status: "completed", updated_at: Time.current)
   end
 
+  def complete_if_past!(today: Date.current)
+    return false unless status.in?(AUTO_COMPLETABLE_STATUSES)
+    return false unless date.present?
+    return false unless (end_date || date) < today
+
+    update_columns(status: "completed", updated_at: Time.current)
+    true
+  end
+
   def self.publicly_visible_ids_sql
     publicly_visible.select(:id).to_sql
   end

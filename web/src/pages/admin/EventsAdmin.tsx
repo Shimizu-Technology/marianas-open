@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import type { DragEvent } from 'react'
 import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw, Copy, UploadCloud, CheckSquare, Square, EyeOff } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
@@ -1777,6 +1778,8 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { tasks, startUpload } = useGalleryUploads()
   const completedForEvent = tasks.filter(task => task.eventId === eventId && task.status === 'complete').length
+  const visibleImageIds = useMemo(() => galleryImages.map(image => image.id), [galleryImages])
+  const allVisibleSelected = visibleImageIds.length > 0 && visibleImageIds.every(id => selectedIds.includes(id))
 
   const load = useCallback(async () => {
     try {
@@ -1893,6 +1896,41 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
     setSelectedIds(current => current.includes(id) ? current.filter(x => x !== id) : [...current, id])
   }
 
+  const toggleVisibleSelection = () => {
+    setSelectedIds(current => {
+      if (allVisibleSelected) {
+        return current.filter(id => !visibleImageIds.includes(id))
+      }
+      return Array.from(new Set([...current, ...visibleImageIds]))
+    })
+  }
+
+  const dragHasFiles = (event: DragEvent<HTMLDivElement>) => Array.from(event.dataTransfer.types).includes('Files')
+
+  const handleGalleryDragEnter = (event: DragEvent<HTMLDivElement>) => {
+    if (!dragHasFiles(event)) return
+    event.preventDefault()
+    setDragActive(true)
+  }
+
+  const handleGalleryDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (!dragHasFiles(event)) return
+    event.preventDefault()
+    setDragActive(true)
+  }
+
+  const handleGalleryDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) return
+    setDragActive(false)
+  }
+
+  const handleGalleryDrop = (event: DragEvent<HTMLDivElement>) => {
+    if (!dragHasFiles(event)) return
+    event.preventDefault()
+    setDragActive(false)
+    void handleFiles(event.dataTransfer.files)
+  }
+
   const handleBulkActive = async (active: boolean) => {
     if (selectedIds.length === 0) return
     setError('')
@@ -1931,6 +1969,8 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
     const previousImages = galleryImages
     const previousTotal = total
     const previousSelectedIds = selectedIds
+    const previousEditing = editing
+    const previousPendingFile = pendingFile
 
     setGalleryImages(current => current.filter(image => image.id !== id))
     setTotal(current => Math.max(0, current - 1))
@@ -1947,17 +1987,40 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
       setGalleryImages(previousImages)
       setTotal(previousTotal)
       setSelectedIds(previousSelectedIds)
+      setEditing(previousEditing)
+      setPendingFile(previousPendingFile)
       setError(err instanceof Error ? err.message : 'Failed to delete gallery image')
     }
   }
 
   return (
-    <div className="border border-white/5">
+    <div
+      className={`relative border transition-colors ${dragActive ? 'border-gold/60 bg-gold/5' : 'border-white/5'}`}
+      onDragEnter={handleGalleryDragEnter}
+      onDragOver={handleGalleryDragOver}
+      onDragLeave={handleGalleryDragLeave}
+      onDrop={handleGalleryDrop}
+    >
+      {dragActive && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center border-2 border-dashed border-gold/70 bg-navy-950/70">
+          <div className="bg-navy-900 border border-gold/30 px-5 py-3 text-sm font-medium text-gold">
+            Drop photos to upload
+          </div>
+        </div>
+      )}
       <div className="px-4 py-3 flex items-center justify-between">
-        <span className="flex items-center gap-2 text-sm font-medium text-text-primary">
-          <ImageIcon className="w-4 h-4 text-text-muted" />
-          Event Gallery ({total})
-        </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="flex items-center gap-2 text-sm font-medium text-text-primary">
+            <ImageIcon className="w-4 h-4 text-text-muted" />
+            Event Gallery ({total})
+          </span>
+          {galleryImages.length > 0 && (
+            <button onClick={toggleVisibleSelection} className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-gold">
+              {allVisibleSelected ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
+              {allVisibleSelected ? 'Clear visible' : 'Select all visible'}
+            </button>
+          )}
+        </div>
         {editing === null && (
           <button
             onClick={() => {
@@ -1980,14 +2043,6 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
 
       <div className="mx-4 mb-4 grid gap-3 lg:grid-cols-[1fr_280px]">
         <div
-          onDragEnter={(e) => { e.preventDefault(); setDragActive(true) }}
-          onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
-          onDragLeave={(e) => { e.preventDefault(); setDragActive(false) }}
-          onDrop={(e) => {
-            e.preventDefault()
-            setDragActive(false)
-            void handleFiles(e.dataTransfer.files)
-          }}
           className={`border border-dashed p-5 transition-colors ${dragActive ? 'border-gold bg-gold/10' : 'border-white/10 bg-white/[0.02]'}`}
         >
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
