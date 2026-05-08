@@ -11,28 +11,32 @@ class EventGalleryUploadBatch < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
 
   def refresh_counts!
-    with_lock do
-      return if status == "cancelled"
-
-      images = event_gallery_images
-      uploaded = images.where(status: %w[uploaded processing ready]).count
-      failed = images.where(status: "failed").count
-      next_status = if total_files.positive? && uploaded + failed >= total_files
-        failed.positive? ? "failed" : "completed"
-      else
-        "uploading"
-      end
-
-      update!(
-        uploaded_files: uploaded,
-        failed_files: failed,
-        status: next_status,
-        completed_at: next_status == "uploading" ? nil : Time.current
-      )
-    end
+    with_lock { refresh_counts_without_lock! }
   end
 
   def as_json(options = {})
     super(options.merge(except: [:updated_at]))
+  end
+
+  private
+
+  def refresh_counts_without_lock!
+    return if status == "cancelled"
+
+    images = event_gallery_images
+    uploaded = images.where(status: %w[uploaded processing ready]).count
+    failed = images.where(status: "failed").count
+    next_status = if total_files.positive? && uploaded + failed >= total_files
+      failed.positive? ? "failed" : "completed"
+    else
+      "uploading"
+    end
+
+    update!(
+      uploaded_files: uploaded,
+      failed_files: failed,
+      status: next_status,
+      completed_at: next_status == "uploading" ? nil : Time.current
+    )
   end
 end

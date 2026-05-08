@@ -1753,6 +1753,9 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
 }
 
 const GALLERY_ADMIN_PER_PAGE = 100
+type GalleryDeleteConfirm =
+  | { type: 'single'; id: number; title: string }
+  | { type: 'bulk'; ids: number[] }
 
 function EventGallerySection({ eventId, eventName }: { eventId: number; eventName: string }) {
   const [galleryImages, setGalleryImages] = useState<EventGalleryImage[]>([])
@@ -1764,6 +1767,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   const [dragActive, setDragActive] = useState(false)
   const [uploadCaption, setUploadCaption] = useState('')
   const [uploadActive, setUploadActive] = useState(true)
+  const [galleryDeleteConfirm, setGalleryDeleteConfirm] = useState<GalleryDeleteConfirm | null>(null)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [form, setForm] = useState<EventGalleryImageFormData>({
@@ -1943,10 +1947,31 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
     }
   }
 
-  const handleBulkDelete = async () => {
+  const requestBulkDelete = () => {
     if (selectedIds.length === 0) return
+    setGalleryDeleteConfirm({ type: 'bulk', ids: [...selectedIds] })
+  }
+
+  const requestDelete = (image: EventGalleryImage) => {
+    setGalleryDeleteConfirm({ type: 'single', id: image.id, title: image.title || image.original_filename || 'Untitled image' })
+  }
+
+  const handleConfirmGalleryDelete = () => {
+    const pendingDelete = galleryDeleteConfirm
+    if (!pendingDelete) return
+
+    setGalleryDeleteConfirm(null)
+    if (pendingDelete.type === 'bulk') {
+      void handleBulkDelete(pendingDelete.ids)
+      return
+    }
+
+    void handleDelete(pendingDelete.id)
+  }
+
+  const handleBulkDelete = async (idsToDelete: number[]) => {
+    if (idsToDelete.length === 0) return
     setError('')
-    const idsToDelete = [...selectedIds]
     const previousImages = galleryImages
     const previousTotal = total
 
@@ -2006,6 +2031,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   }
 
   return (
+    <>
     <div
       className={`relative border transition-colors ${dragActive ? 'border-gold/60 bg-gold/5' : 'border-white/5'}`}
       onDragEnter={handleGalleryDragEnter}
@@ -2100,7 +2126,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
               <div className="flex items-center gap-2">
                 <button onClick={() => void handleBulkActive(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-green-400 bg-green-500/10 hover:bg-green-500/15"><Eye className="w-3 h-3" /> Show</button>
                 <button onClick={() => void handleBulkActive(false)} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-muted bg-white/5 hover:text-text-primary"><EyeOff className="w-3 h-3" /> Hide</button>
-                <button onClick={() => void handleBulkDelete()} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 bg-red-500/10 hover:bg-red-500/15"><Trash2 className="w-3 h-3" /> Delete</button>
+                <button onClick={requestBulkDelete} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 bg-red-500/10 hover:bg-red-500/15"><Trash2 className="w-3 h-3" /> Delete</button>
               </div>
             </div>
           )}
@@ -2136,7 +2162,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
                         {image.active ? 'Active' : 'Hidden'}
                       </span>
                       <button onClick={() => editGalleryImage(image)} className="p-1 text-text-muted hover:text-text-primary"><Pencil className="w-3 h-3" /></button>
-                      <button onClick={() => handleDelete(image.id)} className="p-1 text-text-muted hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+                      <button onClick={() => requestDelete(image)} className="p-1 text-text-muted hover:text-red-400" aria-label="Delete gallery image"><Trash2 className="w-3 h-3" /></button>
                     </div>
                   </div>
                 </div>
@@ -2214,6 +2240,46 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
         </div>
       )}
     </div>
+    <AnimatePresence>
+      {galleryDeleteConfirm && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setGalleryDeleteConfirm(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.96, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.96, opacity: 0 }}
+            className="w-full max-w-sm border border-white/10 bg-navy-900 p-5 shadow-xl"
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center bg-red-500/10 text-red-400">
+              <Trash2 className="h-5 w-5" />
+            </div>
+            <h3 className="text-center text-lg font-semibold text-text-primary">
+              {galleryDeleteConfirm.type === 'bulk' ? `Delete ${galleryDeleteConfirm.ids.length} photos?` : 'Delete this photo?'}
+            </h3>
+            <p className="mt-2 text-center text-sm text-text-secondary">
+              {galleryDeleteConfirm.type === 'bulk'
+                ? 'These gallery photos will be removed from the event and public gallery.'
+                : `"${galleryDeleteConfirm.title}" will be removed from the event and public gallery.`}
+            </p>
+            <div className="mt-5 flex justify-center gap-3">
+              <button onClick={() => setGalleryDeleteConfirm(null)} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">
+                Cancel
+              </button>
+              <button onClick={handleConfirmGalleryDelete} className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20">
+                Delete
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   )
 }
 
