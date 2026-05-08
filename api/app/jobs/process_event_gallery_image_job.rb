@@ -28,7 +28,7 @@ class ProcessEventGalleryImageJob < ApplicationJob
 
     gallery_image.with_lock do
       gallery_image.reload
-      return if gallery_image.status == "ready"
+      return if gallery_image.status == "ready" && gallery_image.variants_processed?
       return unless gallery_image.image.attached?
 
       processing_token = SecureRandom.uuid

@@ -63,7 +63,7 @@ class Event < ApplicationRecord
     if event_gallery_images.loaded?
       public_gallery_images.first(8)
     else
-      event_gallery_images.active.ready.sorted.with_attached_image.limit(8)
+      event_gallery_images.active.ready.sorted.with_image_variant_records.limit(8)
     end
   end
 

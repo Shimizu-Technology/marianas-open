@@ -6,7 +6,7 @@ import ImageWithShimmer from '../components/ImageWithShimmer';
 import SEO from '../components/SEO';
 import { api } from '../services/api';
 import type { Event, EventGalleryImage } from '../services/api';
-import { resolveMediaUrl } from '../utils/images';
+import { isBrowserPreviewableImage, resolveMediaUrl } from '../utils/images';
 
 const PER_PAGE = 48;
 
@@ -70,7 +70,9 @@ export default function EventGalleryPage() {
 
   const canLoadMore = images.length < total;
   const activeImage = activeIndex === null ? null : images[activeIndex];
-  const activeSrc = activeImage ? resolveMediaUrl(activeImage.large_url || activeImage.image_url) : null;
+  const activeSrc = activeImage
+    ? resolveMediaUrl(activeImage.large_url || (isBrowserPreviewableImage(activeImage.content_type) ? activeImage.image_url : null))
+    : null;
 
   const structuredData = useMemo(() => {
     if (!event) return undefined;
@@ -79,7 +81,10 @@ export default function EventGalleryPage() {
       '@type': 'ImageGallery',
       name: `${event.name} Photo Gallery`,
       about: event.name,
-      image: images.slice(0, 12).map(image => resolveMediaUrl(image.thumbnail_url || image.image_url)).filter(Boolean),
+      image: images.slice(0, 12).map(image => {
+        const src = image.thumbnail_url || (isBrowserPreviewableImage(image.content_type) ? image.image_url : null);
+        return resolveMediaUrl(src);
+      }).filter(Boolean),
     };
   }, [event, images]);
 
@@ -145,7 +150,7 @@ export default function EventGalleryPage() {
         title={`${event.name} Photos`}
         description={`Official photo gallery from ${event.name}.`}
         path={`/events/${event.slug}/gallery`}
-        image={resolveMediaUrl(images[0]?.thumbnail_url || images[0]?.image_url) || event.hero_image_url || undefined}
+        image={resolveMediaUrl(images[0]?.thumbnail_url || (isBrowserPreviewableImage(images[0]?.content_type) ? images[0]?.image_url : null)) || event.hero_image_url || undefined}
         structuredData={structuredData ? [structuredData] : undefined}
       />
 
@@ -185,8 +190,9 @@ export default function EventGalleryPage() {
             <>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
                 {images.map((image, index) => {
-                  const src = resolveMediaUrl(image.thumbnail_url || image.image_url);
-                  const fallbackSrc = resolveMediaUrl(image.image_url) || undefined;
+                  const canUseOriginal = isBrowserPreviewableImage(image.content_type);
+                  const src = resolveMediaUrl(image.thumbnail_url || (canUseOriginal ? image.image_url : null));
+                  const fallbackSrc = canUseOriginal ? resolveMediaUrl(image.image_url) || undefined : undefined;
                   return (
                     <button
                       key={image.id}

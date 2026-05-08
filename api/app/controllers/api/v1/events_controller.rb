@@ -5,14 +5,14 @@ module Api
 
       def index
         events = Event.publicly_visible
-                      .includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } }, { event_gallery_images: { image_attachment: :blob } })
+                      .includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } }, { event_gallery_images: { image_attachment: { blob: :variant_records } } })
                       .order(:date)
         render json: events
       end
 
       def show
         event = Event.publicly_visible
-                     .includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } }, { event_gallery_images: { image_attachment: :blob } })
+                     .includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } }, { event_gallery_images: { image_attachment: { blob: :variant_records } } })
                      .find_by!(slug: params[:slug])
         event.complete_if_past!
         render json: event

@@ -31,6 +31,12 @@ export function resolveMediaUrl(url: string | null | undefined): string | null {
   return url;
 }
 
+export function isBrowserPreviewableImage(contentType: string | null | undefined): boolean {
+  if (!contentType) return true;
+
+  return !['image/heic', 'image/heif'].includes(contentType.toLowerCase());
+}
+
 const GENERIC_HERO = '/images/venue-crowd.webp';
 
 /** Get hero image for an event — uses API URL if available, falls back to optional default, then generic */

@@ -13,7 +13,7 @@ module Api
         def index
           per_page = [ [ params.fetch(:per_page, 100).to_i, 1 ].max, 200 ].min
           page = [ params.fetch(:page, 1).to_i, 1 ].max
-          scope = @event.event_gallery_images.with_attached_image.sorted
+          scope = @event.event_gallery_images.with_image_variant_records.sorted
           scope = scope.where(event_gallery_upload_batch_id: params[:batch_id]) if params[:batch_id].present?
           scope = scope.where(status: params[:status]) if params[:status].present?
           total = scope.count

@@ -34,6 +34,7 @@ class EventGalleryImage < ApplicationRecord
   scope :active, -> { where(active: true) }
   scope :ready, -> { where(status: "ready") }
   scope :sorted, -> { order(:sort_order, :id) }
+  scope :with_image_variant_records, -> { includes(image_attachment: { blob: :variant_records }) }
 
   image_url_for :image
 
@@ -43,6 +44,18 @@ class EventGalleryImage < ApplicationRecord
 
   def large_url
     variant_url(LARGE_TRANSFORMATIONS)
+  end
+
+  def thumbnail_processed?
+    variant_processed?(THUMBNAIL_TRANSFORMATIONS)
+  end
+
+  def large_processed?
+    variant_processed?(LARGE_TRANSFORMATIONS)
+  end
+
+  def variants_processed?
+    thumbnail_processed? && large_processed?
   end
 
   def as_json(options = {})
@@ -80,12 +93,27 @@ class EventGalleryImage < ApplicationRecord
 
   def variant_url(transformations)
     return nil unless image.attached? && status == "ready"
+    return nil unless variant_processed?(transformations)
 
     Rails.application.routes.url_helpers.rails_representation_path(
       image.variant(transformations),
       only_path: true
     )
   rescue StandardError, LoadError
-    image_url
+    nil
+  end
+
+  def variant_processed?(transformations)
+    return false unless image.attached?
+
+    variation_digest = ActiveStorage::Variation.wrap(transformations).digest
+    variant_records = image.blob.variant_records
+    if variant_records.loaded?
+      variant_records.any? { |record| record.variation_digest == variation_digest }
+    else
+      variant_records.exists?(variation_digest: variation_digest)
+    end
+  rescue StandardError, LoadError
+    false
   end
 end

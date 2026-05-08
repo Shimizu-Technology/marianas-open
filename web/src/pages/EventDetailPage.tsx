@@ -10,7 +10,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import EventResultsSection from '../components/EventResultsSection';
 import SEO from '../components/SEO';
 import { useEvents, useSponsors } from '../hooks/useApi';
-import { getEventHeroImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
+import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 
@@ -180,10 +180,14 @@ export default function EventDetailPage() {
       : [];
 
   const galleryImages = (mainEvent?.event_gallery_images ?? [])
-    .filter(image => image.active && resolveMediaUrl(image.image_url))
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .map(image => ({
-      src: resolveMediaUrl(image.thumbnail_url || image.image_url) || '',
+    .map(image => {
+      const src = image.thumbnail_url || (isBrowserPreviewableImage(image.content_type) ? image.image_url : null);
+      return { image, src: resolveMediaUrl(src) };
+    })
+    .filter(({ image, src }) => image.active && src)
+    .sort((a, b) => a.image.sort_order - b.image.sort_order)
+    .map(({ image, src }) => ({
+      src: src || '',
       alt: image.alt_text || image.title || t('event.galleryMatch'),
       caption: image.caption || image.title || '',
     }));
