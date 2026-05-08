@@ -9,10 +9,20 @@ class EventGalleryImage < ApplicationRecord
     format: :jpg,
     saver: { quality: 82, strip: true }
   }.freeze
+  LEGACY_THUMBNAIL_TRANSFORMATIONS = {
+    resize_to_fill: [ 600, 400 ],
+    format: :jpg,
+    quality: 82
+  }.freeze
   LARGE_TRANSFORMATIONS = {
     resize_to_limit: [ 1800, 1800 ],
     format: :jpg,
     saver: { quality: 86, strip: true }
+  }.freeze
+  LEGACY_LARGE_TRANSFORMATIONS = {
+    resize_to_limit: [ 1800, 1800 ],
+    format: :jpg,
+    quality: 86
   }.freeze
 
   belongs_to :event
@@ -34,19 +44,19 @@ class EventGalleryImage < ApplicationRecord
   image_url_for :image
 
   def thumbnail_url
-    variant_url(THUMBNAIL_TRANSFORMATIONS)
+    variant_url(THUMBNAIL_TRANSFORMATIONS, legacy_transformations: LEGACY_THUMBNAIL_TRANSFORMATIONS)
   end
 
   def large_url
-    variant_url(LARGE_TRANSFORMATIONS)
+    variant_url(LARGE_TRANSFORMATIONS, legacy_transformations: LEGACY_LARGE_TRANSFORMATIONS)
   end
 
   def thumbnail_processed?
-    variant_processed?(THUMBNAIL_TRANSFORMATIONS)
+    variant_processed?(THUMBNAIL_TRANSFORMATIONS) || variant_processed?(LEGACY_THUMBNAIL_TRANSFORMATIONS)
   end
 
   def large_processed?
-    variant_processed?(LARGE_TRANSFORMATIONS)
+    variant_processed?(LARGE_TRANSFORMATIONS) || variant_processed?(LEGACY_LARGE_TRANSFORMATIONS)
   end
 
   def variants_processed?
@@ -90,12 +100,13 @@ class EventGalleryImage < ApplicationRecord
     end
   end
 
-  def variant_url(transformations)
+  def variant_url(transformations, legacy_transformations: nil)
     return nil unless image.attached? && status == "ready"
-    return nil unless variant_processed?(transformations)
+    transformations_for_url = processed_transformations(transformations, legacy_transformations)
+    return nil unless transformations_for_url
 
     Rails.application.routes.url_helpers.rails_representation_path(
-      image.variant(transformations),
+      image.variant(transformations_for_url),
       only_path: true
     )
   rescue StandardError, LoadError
@@ -105,6 +116,19 @@ class EventGalleryImage < ApplicationRecord
   def variant_processed?(transformations)
     return false unless image.attached?
 
+    variant_record_exists?(transformations)
+  rescue StandardError, LoadError
+    false
+  end
+
+  def processed_transformations(transformations, legacy_transformations)
+    return transformations if variant_record_exists?(transformations)
+    return legacy_transformations if legacy_transformations && variant_record_exists?(legacy_transformations)
+
+    nil
+  end
+
+  def variant_record_exists?(transformations)
     variation_digest = ActiveStorage::Variation.wrap(transformations).digest
     variant_records = image.blob.variant_records
     if variant_records.loaded?
@@ -112,7 +136,5 @@ class EventGalleryImage < ApplicationRecord
     else
       variant_records.exists?(variation_digest: variation_digest)
     end
-  rescue StandardError, LoadError
-    false
   end
 end

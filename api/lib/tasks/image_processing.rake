@@ -13,7 +13,7 @@ namespace :image_processing do
       heifload
     ]
 
-    missing = required_operations.reject { |operation| Vips.type_find("VipsOperation", operation).present? }
+    missing = required_operations.reject { |operation| Vips.type_find("VipsOperation", operation).nonzero? }
     if missing.any?
       abort "Missing libvips image operations: #{missing.join(", ")}"
     end
