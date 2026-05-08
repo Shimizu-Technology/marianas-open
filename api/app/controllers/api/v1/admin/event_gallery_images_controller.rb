@@ -69,9 +69,13 @@ module Api
         end
 
         def prepare_direct_upload
-          content_type = params[:content_type].to_s
+          filename = params.require(:filename).to_s
+          content_type = EventGalleryImageUploadPolicy.normalize(
+            filename: filename,
+            content_type: params[:content_type].to_s
+          )
           unless content_type.in?(EventGalleryImage::ALLOWED_CONTENT_TYPES)
-            return render json: { error: "Choose JPEG, PNG, WebP, or GIF images" }, status: :unprocessable_entity
+            return render json: { error: EventGalleryImageUploadPolicy.choose_error }, status: :unprocessable_entity
           end
           byte_size = params.require(:byte_size).to_i
           if byte_size <= 0 || byte_size > EventGalleryImage::MAX_BYTE_SIZE
@@ -79,7 +83,7 @@ module Api
           end
 
           blob = ActiveStorage::Blob.create_before_direct_upload!(
-            filename: params.require(:filename),
+            filename: filename,
             byte_size: byte_size,
             checksum: params.require(:checksum),
             content_type: content_type,
@@ -103,6 +107,7 @@ module Api
 
           blob.with_lock do
             raise UploadAlreadyUsed if ActiveStorage::Attachment.exists?(blob_id: blob.id)
+            EventGalleryImageUploadPolicy.normalize_blob!(blob)
 
             gallery_image = @event.event_gallery_images.build(gallery_image_params)
             gallery_image.event_gallery_upload_batch = batch
@@ -185,6 +190,7 @@ module Api
           return unless gallery_image.image.attached?
 
           blob = gallery_image.image.blob
+          EventGalleryImageUploadPolicy.normalize_blob!(blob)
           gallery_image.original_filename = blob.filename.to_s
           gallery_image.content_type = blob.content_type
           gallery_image.byte_size = blob.byte_size

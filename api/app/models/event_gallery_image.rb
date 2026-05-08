@@ -2,22 +2,17 @@ class EventGalleryImage < ApplicationRecord
   include HasImageUrl
 
   STATUSES = %w[pending uploaded processing ready failed].freeze
-  ALLOWED_CONTENT_TYPES = %w[
-    image/jpeg
-    image/png
-    image/webp
-    image/gif
-  ].freeze
+  ALLOWED_CONTENT_TYPES = EventGalleryImageUploadPolicy.accepted_content_types.freeze
   MAX_BYTE_SIZE = ENV.fetch("EVENT_GALLERY_IMAGE_MAX_BYTES", 50.megabytes).to_i
   THUMBNAIL_TRANSFORMATIONS = {
     resize_to_fill: [ 600, 400 ],
     format: :jpg,
-    quality: 82
+    saver: { quality: 82, strip: true }
   }.freeze
   LARGE_TRANSFORMATIONS = {
     resize_to_limit: [ 1800, 1800 ],
     format: :jpg,
-    quality: 86
+    saver: { quality: 86, strip: true }
   }.freeze
 
   belongs_to :event
@@ -83,8 +78,12 @@ class EventGalleryImage < ApplicationRecord
     return unless image.attached?
 
     blob = image.blob
-    unless blob.content_type.in?(ALLOWED_CONTENT_TYPES)
-      errors.add(:image, "must be a JPEG, PNG, WebP, or GIF file")
+    normalized_content_type = EventGalleryImageUploadPolicy.normalize(
+      filename: blob.filename.to_s,
+      content_type: blob.content_type
+    )
+    unless normalized_content_type.in?(ALLOWED_CONTENT_TYPES)
+      errors.add(:image, EventGalleryImageUploadPolicy.validation_error)
     end
     if blob.byte_size.to_i > MAX_BYTE_SIZE
       errors.add(:image, "must be smaller than #{MAX_BYTE_SIZE / 1.megabyte} MB")

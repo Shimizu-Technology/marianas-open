@@ -5,6 +5,7 @@ import SparkMD5 from 'spark-md5';
 import { CheckCircle2, Loader2, UploadCloud, XCircle } from 'lucide-react';
 import { api } from '../services/api';
 import type { EventGalleryImage } from '../services/api';
+import { isBrowserPreviewableImage } from '../utils/images';
 
 type UploadStatus = 'queued' | 'hashing' | 'uploading' | 'saving' | 'complete' | 'failed';
 
@@ -16,6 +17,7 @@ export interface GalleryUploadTask {
   fileName: string;
   fileSize: number;
   previewUrl: string;
+  browserPreviewable: boolean;
   progress: number;
   status: UploadStatus;
   error?: string;
@@ -44,11 +46,33 @@ interface GalleryUploadContextValue {
 const GalleryUploadContext = createContext<GalleryUploadContextValue | null>(null);
 const CONCURRENCY = 4;
 export const GALLERY_IMAGE_MAX_BYTES = 50 * 1024 * 1024;
-export const GALLERY_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-export const GALLERY_IMAGE_ACCEPT = GALLERY_IMAGE_TYPES.join(',');
+export const GALLERY_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/heic',
+  'image/heif',
+  'image/avif',
+  'image/tiff',
+];
+export const GALLERY_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.heic', '.heif', '.avif', '.tif', '.tiff'];
+export const GALLERY_IMAGE_ACCEPT = [...GALLERY_IMAGE_TYPES, ...GALLERY_IMAGE_EXTENSIONS].join(',');
+export const GALLERY_IMAGE_TYPE_LABEL = 'JPEG, PNG, WebP, GIF, HEIC, HEIF, AVIF, or TIFF';
 
 export function isSupportedGalleryImage(file: File) {
-  return GALLERY_IMAGE_TYPES.includes(file.type) && file.size > 0 && file.size <= GALLERY_IMAGE_MAX_BYTES;
+  const fileType = file.type.toLowerCase();
+  const fileName = file.name.toLowerCase();
+  const hasSupportedType = fileType ? GALLERY_IMAGE_TYPES.includes(fileType) : false;
+  const hasSupportedExtension = GALLERY_IMAGE_EXTENSIONS.some(extension => fileName.endsWith(extension));
+  return (hasSupportedType || hasSupportedExtension) && file.size > 0 && file.size <= GALLERY_IMAGE_MAX_BYTES;
+}
+
+function isBrowserPreviewableGalleryFile(file: File | undefined) {
+  if (!file) return true;
+  const fileName = file.name.toLowerCase();
+  if (['.heic', '.heif', '.avif', '.tif', '.tiff'].some(extension => fileName.endsWith(extension))) return false;
+  return isBrowserPreviewableImage(file.type);
 }
 
 function checksum(file: File) {
@@ -245,6 +269,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         fileName: file.name,
         fileSize: file.size,
         previewUrl: URL.createObjectURL(file),
+        browserPreviewable: isBrowserPreviewableGalleryFile(file),
         progress: 0,
         status: 'queued' as UploadStatus,
       };
@@ -320,7 +345,13 @@ export function GalleryUploadStatusPanel() {
       <div className="max-h-64 overflow-auto">
         {tasks.slice(0, 8).map(task => (
           <div key={task.id} className="flex items-center gap-3 p-3 border-b border-white/5">
-            <img src={task.previewUrl} alt="" className="w-10 h-10 object-cover bg-white/5" />
+            {task.browserPreviewable ? (
+              <img src={task.previewUrl} alt="" className="w-10 h-10 object-cover bg-white/5" />
+            ) : (
+              <div className="w-10 h-10 flex items-center justify-center bg-white/5 text-text-muted">
+                <UploadCloud className="w-4 h-4" />
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <div className="truncate text-xs text-text-primary">{task.fileName}</div>
               <div className="mt-1 h-1 bg-white/5 overflow-hidden">

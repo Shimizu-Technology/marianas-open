@@ -34,7 +34,7 @@ export function resolveMediaUrl(url: string | null | undefined): string | null {
 export function isBrowserPreviewableImage(contentType: string | null | undefined): boolean {
   if (!contentType) return true;
 
-  return !['image/heic', 'image/heif'].includes(contentType.toLowerCase());
+  return ['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(contentType.toLowerCase());
 }
 
 const GENERIC_HERO = '/images/venue-crowd.webp';
