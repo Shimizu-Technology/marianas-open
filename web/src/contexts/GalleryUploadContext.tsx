@@ -30,6 +30,7 @@ interface StartUploadOptions {
   files: File[];
   active: boolean;
   caption: string;
+  category: string;
   startSortOrder: number;
 }
 
@@ -112,7 +113,7 @@ function titleFromFilename(fileName: string) {
   return fileName.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
 }
 
-async function uploadThroughServer(task: GalleryUploadTask, file: File, meta: { active: boolean; caption: string; sortOrder: number }) {
+async function uploadThroughServer(task: GalleryUploadTask, file: File, meta: { active: boolean; caption: string; category: string; sortOrder: number }) {
   const title = titleFromFilename(file.name);
   const formData = new FormData();
   formData.append('image', file);
@@ -120,6 +121,7 @@ async function uploadThroughServer(task: GalleryUploadTask, file: File, meta: { 
   formData.append('title', title);
   formData.append('alt_text', title);
   formData.append('caption', meta.caption);
+  formData.append('category', meta.category);
   formData.append('sort_order', String(meta.sortOrder));
   formData.append('active', String(meta.active));
   return api.admin.createEventGalleryImage(task.eventId, formData);
@@ -129,7 +131,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<GalleryUploadTask[]>([]);
   const tasksRef = useRef<GalleryUploadTask[]>([]);
   const fileMapRef = useRef(new Map<string, File>());
-  const metaMapRef = useRef(new Map<string, { active: boolean; caption: string; sortOrder: number }>());
+  const metaMapRef = useRef(new Map<string, { active: boolean; caption: string; category: string; sortOrder: number }>());
   const runningRef = useRef(0);
   const directStorageUnavailableRef = useRef(false);
   const processQueueRef = useRef<() => void>(() => undefined);
@@ -206,6 +208,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         title: titleFromFilename(file.name),
         alt_text: titleFromFilename(file.name),
         caption: meta.caption,
+        category: meta.category,
         sort_order: meta.sortOrder,
         active: meta.active,
       });
@@ -245,7 +248,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   }, [processTask, setTasksSynced]);
   processQueueRef.current = processQueue;
 
-  const startUpload = useCallback(async ({ eventId, eventName, files, active, caption, startSortOrder }: StartUploadOptions) => {
+  const startUpload = useCallback(async ({ eventId, eventName, files, active, caption, category, startSortOrder }: StartUploadOptions) => {
     const imageFiles = files.filter(isSupportedGalleryImage);
     if (imageFiles.length === 0) return;
 
@@ -260,7 +263,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
     const newTasks = imageFiles.map((file, index) => {
       const id = `${batch.id}-${createdAt}-${index}-${crypto.randomUUID()}`;
       fileMapRef.current.set(id, file);
-      metaMapRef.current.set(id, { active, caption, sortOrder: startSortOrder + index });
+      metaMapRef.current.set(id, { active, caption, category, sortOrder: startSortOrder + index });
       return {
         id,
         eventId,

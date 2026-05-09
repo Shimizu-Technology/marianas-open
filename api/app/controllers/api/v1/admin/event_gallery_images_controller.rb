@@ -16,11 +16,13 @@ module Api
           scope = @event.event_gallery_images.with_image_variant_records.sorted
           scope = scope.where(event_gallery_upload_batch_id: params[:batch_id]) if params[:batch_id].present?
           scope = scope.where(status: params[:status]) if params[:status].present?
+          scope = scope.categorized_as(params[:category]) if params[:category].present?
           total = scope.count
           gallery_images = scope.offset((page - 1) * per_page).limit(per_page)
 
           render json: {
             gallery_images: gallery_images.as_json,
+            categories: gallery_categories,
             total: total,
             page: page,
             per_page: per_page
@@ -142,8 +144,12 @@ module Api
           ids = Array(params[:ids]).map(&:to_i).reject(&:zero?)
           return render json: { error: "No gallery images selected" }, status: :unprocessable_entity if ids.empty?
 
-          attrs = params.permit(:active).to_h
+          attrs = params.permit(:active, :category).to_h.with_indifferent_access
+          attrs[:category] = attrs[:category].to_s.squish.presence if attrs.key?(:category)
           return render json: { error: "No supported updates provided" }, status: :unprocessable_entity if attrs.empty?
+          if attrs[:category].to_s.length > EventGalleryImage::CATEGORY_MAX_LENGTH
+            return render json: { error: "Category must be #{EventGalleryImage::CATEGORY_MAX_LENGTH} characters or fewer" }, status: :unprocessable_entity
+          end
 
           updated = @event.event_gallery_images.where(id: ids).update_all(attrs.merge(updated_at: Time.current))
           render json: { updated: updated }
@@ -183,7 +189,16 @@ module Api
         end
 
         def gallery_image_params
-          params.permit(:title, :alt_text, :caption, :sort_order, :active)
+          permitted = params.permit(:title, :alt_text, :caption, :category, :sort_order, :active)
+          permitted[:category] = permitted[:category].to_s.squish.presence if permitted.key?(:category)
+          permitted
+        end
+
+        def gallery_categories
+          counts = @event.event_gallery_images.where.not(category: [ nil, "" ]).group(:category).count
+          EventGalleryImage.category_options_for(@event).map do |category|
+            { name: category, count: counts[category].to_i }
+          end
         end
 
         def apply_blob_metadata(gallery_image)

@@ -25,6 +25,8 @@ export default function EventGalleryPage() {
   const { slug = '' } = useParams();
   const [event, setEvent] = useState<Event | null>(null);
   const [images, setImages] = useState<EventGalleryImage[]>([]);
+  const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
+  const [activeCategory, setActiveCategory] = useState('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -47,11 +49,15 @@ export default function EventGalleryPage() {
           const galleryData = await api.getEventGallery(slug, { page: 1, per_page: PER_PAGE });
           if (cancelled) return;
           setImages(galleryData.gallery_images);
+          setCategories(galleryData.categories || []);
+          setActiveCategory('');
           setTotal(galleryData.total);
           setPage(1);
         } catch {
           if (cancelled) return;
           setImages([]);
+          setCategories([]);
+          setActiveCategory('');
           setTotal(0);
           setPage(1);
           setError('Photos could not be loaded. Please try again.');
@@ -71,6 +77,7 @@ export default function EventGalleryPage() {
   }, [slug]);
 
   const canLoadMore = images.length < total;
+  const visibleCategories = categories.filter(category => category.count > 0);
   const activeImage = activeIndex === null ? null : images[activeIndex];
   const activeSrc = activeImage
     ? resolveMediaUrl(activeImage.large_url || (isBrowserPreviewableImage(activeImage.content_type) ? activeImage.image_url : null))
@@ -96,12 +103,38 @@ export default function EventGalleryPage() {
     try {
       setError('');
       const nextPage = page + 1;
-      const res = await api.getEventGallery(slug, { page: nextPage, per_page: PER_PAGE });
+      const params: Record<string, string | number> = { page: nextPage, per_page: PER_PAGE };
+      if (activeCategory) params.category = activeCategory;
+      const res = await api.getEventGallery(slug, params);
       setImages(current => [...current, ...res.gallery_images]);
+      setCategories(res.categories || []);
       setTotal(res.total);
       setPage(nextPage);
     } catch {
       setError('More photos could not be loaded. Please try again.');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const loadCategory = async (category: string) => {
+    if (category === activeCategory || loadingMore) return;
+    const previousCategory = activeCategory;
+    setActiveCategory(category);
+    setLoadingMore(true);
+    setActiveIndex(null);
+    try {
+      setError('');
+      const params: Record<string, string | number> = { page: 1, per_page: PER_PAGE };
+      if (category) params.category = category;
+      const res = await api.getEventGallery(slug, params);
+      setImages(res.gallery_images);
+      setCategories(res.categories || []);
+      setTotal(res.total);
+      setPage(1);
+    } catch {
+      setActiveCategory(previousCategory);
+      setError('Photos could not be loaded. Please try again.');
     } finally {
       setLoadingMore(false);
     }
@@ -184,6 +217,35 @@ export default function EventGalleryPage() {
           {error && (
             <div className="mb-5 border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
               {error}
+            </div>
+          )}
+          {visibleCategories.length > 0 && (
+            <div className="mb-6 space-y-3">
+              <div className="flex items-center justify-between gap-4 text-xs text-text-muted">
+                <span>{activeCategory || 'All photos'}</span>
+                <span>{total} photo{total === 1 ? '' : 's'}</span>
+              </div>
+              <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+                <button
+                  onClick={() => void loadCategory('')}
+                  aria-pressed={activeCategory === ''}
+                  disabled={loadingMore}
+                  className={`shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-heading uppercase tracking-wider transition-colors disabled:opacity-60 ${activeCategory === '' ? 'border-gold bg-gold text-navy-950' : 'border-white/10 text-text-secondary hover:border-gold/40 hover:text-gold'}`}
+                >
+                  All
+                </button>
+                {visibleCategories.map(category => (
+                  <button
+                    key={category.name}
+                    onClick={() => void loadCategory(category.name)}
+                    aria-pressed={activeCategory === category.name}
+                    disabled={loadingMore}
+                    className={`shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-heading uppercase tracking-wider transition-colors disabled:opacity-60 ${activeCategory === category.name ? 'border-gold bg-gold text-navy-950' : 'border-white/10 text-text-secondary hover:border-gold/40 hover:text-gold'}`}
+                  >
+                    {category.name} <span className="opacity-70">({category.count})</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
           {images.length === 0 ? (

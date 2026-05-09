@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import type { DragEvent } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw, Copy, UploadCloud, CheckSquare, Square, EyeOff } from 'lucide-react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw, Copy, UploadCloud, CheckSquare, Square, EyeOff, Tags } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -30,6 +30,7 @@ type SortField = 'name' | 'date' | 'location' | 'stars' | 'status'
 type SortDir = 'asc' | 'desc'
 
 const DEFAULT_LIVE_STREAM_URL = 'https://www.youtube.com/@themarianasopen/live';
+const GALLERY_CATEGORY_ALL = '__all__';
 
 const emptyForm: EventFormData = {
   name: '', slug: '', description: '', date: '', end_date: '',
@@ -1766,7 +1767,11 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   const [selectedIds, setSelectedIds] = useState<number[]>([])
   const [dragActive, setDragActive] = useState(false)
   const [uploadCaption, setUploadCaption] = useState('')
+  const [uploadCategory, setUploadCategory] = useState('')
   const [uploadActive, setUploadActive] = useState(true)
+  const [categoryFilter, setCategoryFilter] = useState(GALLERY_CATEGORY_ALL)
+  const [bulkCategory, setBulkCategory] = useState('')
+  const [categoryOptions, setCategoryOptions] = useState<{ name: string; count: number }[]>([])
   const [galleryDeleteConfirm, setGalleryDeleteConfirm] = useState<GalleryDeleteConfirm | null>(null)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
@@ -1774,6 +1779,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
     title: '',
     alt_text: '',
     caption: '',
+    category: '',
     sort_order: 0,
     active: true,
   })
@@ -1784,10 +1790,16 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   const completedForEvent = tasks.filter(task => task.eventId === eventId && task.status === 'complete').length
   const visibleImageIds = useMemo(() => galleryImages.map(image => image.id), [galleryImages])
   const allVisibleSelected = visibleImageIds.length > 0 && visibleImageIds.every(id => selectedIds.includes(id))
+  const editingImage = typeof editing === 'number' ? galleryImages.find(image => image.id === editing) || null : null
+  const totalPages = Math.max(1, Math.ceil(total / GALLERY_ADMIN_PER_PAGE))
+  const pageStart = total === 0 ? 0 : (page - 1) * GALLERY_ADMIN_PER_PAGE + 1
+  const pageEnd = Math.min(total, page * GALLERY_ADMIN_PER_PAGE)
 
   const load = useCallback(async () => {
     try {
-      const res = await api.admin.getEventGalleryImages(eventId, { page, per_page: GALLERY_ADMIN_PER_PAGE })
+      const params: Record<string, string | number> = { page, per_page: GALLERY_ADMIN_PER_PAGE }
+      if (categoryFilter !== GALLERY_CATEGORY_ALL) params.category = categoryFilter
+      const res = await api.admin.getEventGalleryImages(eventId, params)
       const lastPage = Math.max(1, Math.ceil(res.total / GALLERY_ADMIN_PER_PAGE))
       if (page > lastPage) {
         setGalleryImages([])
@@ -1796,16 +1808,17 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
         return
       }
       setGalleryImages(res.gallery_images)
+      setCategoryOptions(res.categories || [])
       setTotal(res.total)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load gallery')
     } finally {
       setLoading(false)
     }
-  }, [eventId, page])
+  }, [eventId, page, categoryFilter])
 
   useEffect(() => { load() }, [load])
-  useEffect(() => { setSelectedIds([]) }, [eventId, page])
+  useEffect(() => { setSelectedIds([]) }, [eventId, page, categoryFilter])
   useEffect(() => {
     if (completedForEvent === 0) return undefined
     const refreshTimer = window.setTimeout(() => {
@@ -1819,6 +1832,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
       title: '',
       alt_text: '',
       caption: '',
+      category: uploadCategory,
       sort_order: galleryImages.length,
       active: true,
     })
@@ -1830,11 +1844,18 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
       title: image.title || '',
       alt_text: image.alt_text || '',
       caption: image.caption || '',
+      category: image.category || '',
       sort_order: image.sort_order,
       active: image.active,
     })
     setPendingFile(null)
     setEditing(image.id)
+  }
+
+  const closeEditor = () => {
+    if (saving) return
+    setEditing(null)
+    setPendingFile(null)
   }
 
   const handleSave = async () => {
@@ -1846,6 +1867,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
         formData.append('title', form.title)
         formData.append('alt_text', form.alt_text)
         formData.append('caption', form.caption)
+        formData.append('category', form.category)
         formData.append('sort_order', String(form.sort_order))
         formData.append('active', String(form.active))
         formData.append('image', pendingFile)
@@ -1887,6 +1909,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
         files,
         active: uploadActive,
         caption: uploadCaption,
+        category: uploadCategory,
         startSortOrder: total,
       })
       setSuccess(`Queued ${files.length} image${files.length === 1 ? '' : 's'} for upload`)
@@ -1944,6 +1967,19 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Bulk update failed')
+    }
+  }
+
+  const handleBulkCategory = async (category = bulkCategory) => {
+    if (selectedIds.length === 0) return
+    setError('')
+    try {
+      await api.admin.bulkUpdateEventGalleryImages(eventId, selectedIds, { category })
+      setSelectedIds([])
+      setBulkCategory('')
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bulk category update failed')
     }
   }
 
@@ -2052,9 +2088,23 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
             <ImageIcon className="w-4 h-4 text-text-muted" />
             Event Gallery ({total})
           </span>
+          <select
+            value={categoryFilter}
+            onChange={e => {
+              setCategoryFilter(e.target.value)
+              setPage(1)
+            }}
+            className="bg-white/[0.03] border border-white/10 px-2 py-1 text-xs text-text-secondary focus:border-gold/40 focus:outline-none"
+            aria-label="Filter gallery by category"
+          >
+            <option value={GALLERY_CATEGORY_ALL}>All categories</option>
+            {categoryOptions.filter(category => category.count > 0).map(category => (
+              <option key={category.name} value={category.name}>{category.name} ({category.count})</option>
+            ))}
+          </select>
           {galleryImages.length > 0 && (
-            <button onClick={toggleVisibleSelection} className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-gold">
-              {allVisibleSelected ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
+            <button onClick={toggleVisibleSelection} className={`inline-flex items-center gap-1.5 border px-2 py-1 text-xs transition-colors ${allVisibleSelected ? 'border-gold/40 bg-gold/10 text-gold' : 'border-white/10 text-text-muted hover:border-gold/30 hover:text-gold'}`}>
+              {allVisibleSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
               {allVisibleSelected ? 'Clear visible' : 'Select all visible'}
             </button>
           )}
@@ -2113,17 +2163,65 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
             <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Default Caption</label>
             <input value={uploadCaption} onChange={e => setUploadCaption(e.target.value)} placeholder="Optional shared caption" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
           </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Category</label>
+            <input
+              value={uploadCategory}
+              onChange={e => setUploadCategory(e.target.value)}
+              list={`gallery-category-options-${eventId}`}
+              placeholder="One category per photo"
+              className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+            />
+            <p className="mt-1 text-[11px] text-text-muted">Changing this later moves photos to the new category.</p>
+          </div>
         </div>
       </div>
+      <datalist id={`gallery-category-options-${eventId}`}>
+        {categoryOptions.map(category => <option key={category.name} value={category.name} />)}
+      </datalist>
 
       {loading ? (
         <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-text-muted" /></div>
       ) : (
         <div className="border-t border-white/5">
+          {galleryImages.length > 0 && (
+            <div className="flex flex-col gap-2 border-b border-white/5 bg-white/[0.015] px-4 py-3 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
+              <span>
+                Showing {pageStart}-{pageEnd} of {total}
+                {categoryFilter !== GALLERY_CATEGORY_ALL ? ' in this category' : ''}
+              </span>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="border border-white/10 px-3 py-1.5 text-text-secondary hover:border-gold/30 hover:text-gold disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:text-text-secondary">Previous</button>
+                  <span>Page {page} of {totalPages}</span>
+                  <button disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))} className="border border-white/10 px-3 py-1.5 text-text-secondary hover:border-gold/30 hover:text-gold disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:text-text-secondary">Next</button>
+                </div>
+              )}
+            </div>
+          )}
           {selectedIds.length > 0 && (
             <div className="p-3 border-b border-white/5 bg-white/[0.02] flex flex-wrap items-center justify-between gap-3">
               <div className="text-xs text-text-secondary">{selectedIds.length} selected</div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <input
+                    value={bulkCategory}
+                    onChange={e => setBulkCategory(e.target.value)}
+                    list={`gallery-category-options-${eventId}`}
+                    placeholder="Move to category"
+                    className="w-36 bg-white/[0.03] border border-white/10 px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                  />
+                  <button
+                    onClick={() => void handleBulkCategory()}
+                    disabled={!bulkCategory.trim()}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-gold bg-gold/10 hover:bg-gold/15 disabled:opacity-40"
+                  >
+                    <Tags className="w-3 h-3" /> Move
+                  </button>
+                  <button onClick={() => void handleBulkCategory('')} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-muted bg-white/5 hover:text-text-primary">
+                    <X className="w-3 h-3" /> Clear
+                  </button>
+                </div>
                 <button onClick={() => void handleBulkActive(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-green-400 bg-green-500/10 hover:bg-green-500/15"><Eye className="w-3 h-3" /> Show</button>
                 <button onClick={() => void handleBulkActive(false)} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-muted bg-white/5 hover:text-text-primary"><EyeOff className="w-3 h-3" /> Hide</button>
                 <button onClick={requestBulkDelete} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 bg-red-500/10 hover:bg-red-500/15"><Trash2 className="w-3 h-3" /> Delete</button>
@@ -2141,7 +2239,14 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
                     : null
 
                 return (
-                  <div key={image.id} className="border border-white/5 bg-white/[0.01]">
+                  <div key={image.id} className={`relative border bg-white/[0.01] transition-colors ${selectedIds.includes(image.id) ? 'border-gold/70 bg-gold/[0.04]' : 'border-white/5'}`}>
+                    <button
+                      onClick={() => toggleSelected(image.id)}
+                      className={`absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center border shadow-lg transition-colors ${selectedIds.includes(image.id) ? 'border-gold bg-gold text-navy-950' : 'border-white/30 bg-navy-950/80 text-white/70 hover:border-gold/70 hover:text-gold'}`}
+                      aria-label={selectedIds.includes(image.id) ? 'Deselect image' : 'Select image'}
+                    >
+                      {selectedIds.includes(image.id) ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+                    </button>
                     <div className="aspect-[16/9] bg-white/[0.02] overflow-hidden">
                       {previewUrl ? (
                         <img
@@ -2159,13 +2264,10 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
                       )}
                     </div>
                     <div className="p-3 flex items-start justify-between gap-3">
-                      <button onClick={() => toggleSelected(image.id)} className="mt-0.5 text-text-muted hover:text-gold" aria-label={selectedIds.includes(image.id) ? 'Deselect image' : 'Select image'}>
-                        {selectedIds.includes(image.id) ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-                      </button>
                       <div className="min-w-0 flex-1">
                         <div className="text-sm text-text-primary font-medium truncate">{image.title || 'Untitled image'}</div>
                         <div className="text-xs text-text-muted truncate">
-                          Sort #{image.sort_order} · {image.status}{image.caption ? ` · ${image.caption}` : ''}
+                          Sort #{image.sort_order} · {image.status}{image.category ? ` · ${image.category}` : ''}{image.caption ? ` · ${image.caption}` : ''}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -2182,76 +2284,136 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
             </div>
           )}
 
-          {editing !== null && (
-            <div className="p-4 space-y-3 bg-white/[0.01]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Title</label>
-                  <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Alt Text</label>
-                  <input value={form.alt_text} onChange={e => setForm(p => ({ ...p, alt_text: e.target.value }))} placeholder="Describe the image" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Caption</label>
-                  <input value={form.caption} onChange={e => setForm(p => ({ ...p, caption: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Sort Order</label>
-                  <input type="number" value={form.sort_order} onChange={e => setForm(p => ({ ...p, sort_order: parseInt(e.target.value, 10) || 0 }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">
-                    {editing === 'new' ? 'Image File *' : 'Replace Image'}
-                  </label>
-                  <input
-                    type="file"
-                    accept={GALLERY_IMAGE_ACCEPT}
-                    onChange={e => {
-                      const file = e.target.files?.[0] || null
-                      if (file && !isSupportedGalleryImage(file)) {
-                        setError(`Choose a ${GALLERY_IMAGE_TYPE_LABEL} image under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
-                        setPendingFile(null)
-                        e.target.value = ''
-                        return
-                      }
-                      setPendingFile(file)
-                    }}
-                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary file:mr-3 file:border-0 file:bg-gold/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-gold"
-                  />
-                  {pendingFile && (
-                    <div className="mt-1 text-xs text-text-muted">{pendingFile.name}</div>
-                  )}
-                </div>
-              </div>
-              <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
-                <input type="checkbox" checked={form.active} onChange={e => setForm(p => ({ ...p, active: e.target.checked }))} className="accent-gold" />
-                Active (visible on public site)
-              </label>
-              <div className="flex gap-2">
-                <button onClick={handleSave} disabled={saving || (editing === 'new' && !pendingFile)} className="flex items-center gap-1.5 px-4 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 disabled:opacity-50">
-                  {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                  {saving ? 'Saving...' : 'Save'}
-                </button>
-                <button onClick={() => { setEditing(null); setPendingFile(null) }} className="px-4 py-1.5 text-text-muted text-xs hover:text-text-primary">Cancel</button>
-              </div>
-            </div>
-          )}
-
           {galleryImages.length === 0 && editing === null && (
             <div className="p-4 text-center text-text-muted text-xs">No gallery images yet.</div>
           )}
-          {total > 100 && (
+          {totalPages > 1 && (
             <div className="p-4 flex items-center justify-center gap-2 border-t border-white/5">
               <button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="px-3 py-1.5 text-xs text-text-secondary bg-white/5 disabled:opacity-40">Previous</button>
-              <span className="text-xs text-text-muted">Page {page} of {Math.ceil(total / GALLERY_ADMIN_PER_PAGE)}</span>
-              <button disabled={page >= Math.ceil(total / GALLERY_ADMIN_PER_PAGE)} onClick={() => setPage(p => p + 1)} className="px-3 py-1.5 text-xs text-text-secondary bg-white/5 disabled:opacity-40">Next</button>
+              <span className="text-xs text-text-muted">Page {page} of {totalPages}</span>
+              <button disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-xs text-text-secondary bg-white/5 disabled:opacity-40">Next</button>
             </div>
           )}
         </div>
       )}
     </div>
+    <AnimatePresence>
+      {editing !== null && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-4"
+          onClick={closeEditor}
+        >
+          <motion.div
+            initial={{ y: 24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 24, opacity: 0 }}
+            className="flex max-h-[92vh] w-full flex-col border border-white/10 bg-navy-900 shadow-xl sm:max-w-3xl"
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3">
+              <div className="min-w-0">
+                <h3 className="truncate text-sm font-semibold text-text-primary">
+                  {editing === 'new' ? 'Add gallery photo' : 'Edit gallery photo'}
+                </h3>
+                {editingImage && (
+                  <p className="mt-0.5 truncate text-xs text-text-muted">
+                    {editingImage.original_filename || editingImage.title || `Photo #${editingImage.id}`}
+                  </p>
+                )}
+              </div>
+              <button onClick={closeEditor} className="shrink-0 p-1.5 text-text-muted hover:text-text-primary" aria-label="Close editor">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="overflow-y-auto p-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-[240px_1fr]">
+                <div className="space-y-3">
+                  <div className="aspect-[4/3] overflow-hidden border border-white/10 bg-white/[0.02]">
+                    {editingImage && (editingImage.thumbnail_url || (isBrowserPreviewableImage(editingImage.content_type) && editingImage.image_url)) ? (
+                      <img
+                        src={resolveMediaUrl(editingImage.thumbnail_url || editingImage.image_url) || undefined}
+                        alt={editingImage.alt_text || editingImage.title || 'Gallery image'}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full flex-col items-center justify-center gap-2 text-text-muted">
+                        <ImageIcon className="h-7 w-7 opacity-40" />
+                        <span className="text-xs">{editing === 'new' ? 'New photo' : 'Preview unavailable'}</span>
+                      </div>
+                    )}
+                  </div>
+                  <label className="flex items-center gap-2 text-sm text-text-secondary">
+                    <input type="checkbox" checked={form.active} onChange={e => setForm(p => ({ ...p, active: e.target.checked }))} className="accent-gold" />
+                    Active
+                  </label>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Title</label>
+                    <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Alt Text</label>
+                    <input value={form.alt_text} onChange={e => setForm(p => ({ ...p, alt_text: e.target.value }))} placeholder="Describe the image" className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Caption</label>
+                    <input value={form.caption} onChange={e => setForm(p => ({ ...p, caption: e.target.value }))} className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Category</label>
+                    <input
+                      value={form.category}
+                      onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+                      list={`gallery-category-options-${eventId}`}
+                      placeholder="Optional album/category"
+                      className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Sort Order</label>
+                    <input type="number" value={form.sort_order} onChange={e => setForm(p => ({ ...p, sort_order: parseInt(e.target.value, 10) || 0 }))} className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">
+                      {editing === 'new' ? 'Image File *' : 'Replace Image'}
+                    </label>
+                    <input
+                      type="file"
+                      accept={GALLERY_IMAGE_ACCEPT}
+                      onChange={e => {
+                        const file = e.target.files?.[0] || null
+                        if (file && !isSupportedGalleryImage(file)) {
+                          setError(`Choose a ${GALLERY_IMAGE_TYPE_LABEL} image under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
+                          setPendingFile(null)
+                          e.target.value = ''
+                          return
+                        }
+                        setPendingFile(file)
+                      }}
+                      className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary file:mr-3 file:border-0 file:bg-gold/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-gold"
+                    />
+                    {pendingFile && <div className="mt-1 text-xs text-text-muted">{pendingFile.name}</div>}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2 border-t border-white/10 px-4 py-3">
+              <button onClick={closeEditor} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">
+                Cancel
+              </button>
+              <button onClick={handleSave} disabled={saving || (editing === 'new' && !pendingFile)} className="inline-flex items-center gap-1.5 bg-gold/10 px-4 py-2 text-sm font-medium text-gold hover:bg-gold/15 disabled:opacity-50">
+                {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
     <AnimatePresence>
       {galleryDeleteConfirm && (
         <motion.div

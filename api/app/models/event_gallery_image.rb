@@ -2,6 +2,18 @@ class EventGalleryImage < ApplicationRecord
   include HasImageUrl
 
   STATUSES = %w[pending uploaded processing ready failed].freeze
+  CATEGORY_MAX_LENGTH = 80
+  PRESET_CATEGORIES = [
+    "Podium Day 1",
+    "Podium Day 2",
+    "Tournament Day 1",
+    "Tournament Day 2",
+    "Venue",
+    "Athletes",
+    "Opening Ceremony",
+    "Sponsors",
+    "Other"
+  ].freeze
   ALLOWED_CONTENT_TYPES = EventGalleryImageUploadPolicy.accepted_content_types.freeze
   MAX_BYTE_SIZE = ENV.fetch("EVENT_GALLERY_IMAGE_MAX_BYTES", 50.megabytes).to_i
   THUMBNAIL_TRANSFORMATIONS = {
@@ -29,10 +41,12 @@ class EventGalleryImage < ApplicationRecord
   belongs_to :event_gallery_upload_batch, optional: true
   has_one_attached :image
 
+  before_validation :normalize_category
   after_commit :enqueue_processing, on: [ :create, :update ], if: :should_enqueue_processing?
 
   validates :sort_order, numericality: { greater_than_or_equal_to: 0 }
   validates :status, inclusion: { in: STATUSES }
+  validates :category, length: { maximum: CATEGORY_MAX_LENGTH }, allow_blank: true
   validate :image_presence
   validate :image_type_and_size
 
@@ -40,6 +54,7 @@ class EventGalleryImage < ApplicationRecord
   scope :ready, -> { where(status: "ready") }
   scope :sorted, -> { order(:sort_order, :id) }
   scope :with_image_variant_records, -> { includes(image_attachment: { blob: :variant_records }) }
+  scope :categorized_as, ->(category) { where(category: category.to_s.squish) }
 
   image_url_for :image
 
@@ -63,6 +78,13 @@ class EventGalleryImage < ApplicationRecord
     thumbnail_processed? && large_processed?
   end
 
+  def self.category_options_for(event, public_only: false)
+    scope = event.event_gallery_images
+    scope = scope.active.ready if public_only
+    custom_categories = scope.where.not(category: [ nil, "" ]).distinct.order(:category).pluck(:category)
+    (PRESET_CATEGORIES + custom_categories).uniq
+  end
+
   def as_json(options = {})
     super(options.merge(
       methods: [ :image_url, :thumbnail_url, :large_url ],
@@ -71,6 +93,10 @@ class EventGalleryImage < ApplicationRecord
   end
 
   private
+
+  def normalize_category
+    self.category = category.to_s.squish.presence
+  end
 
   def should_enqueue_processing?
     image.attached? && status.in?(%w[pending uploaded processing]) && previous_changes.key?("status")
