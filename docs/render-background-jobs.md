@@ -10,7 +10,7 @@ should run them from the same database-backed queue.
 - Do not set `SOLID_QUEUE_IN_PUMA` to a truthy value (`true`, `1`, or `yes`).
 - Set the build command to install dependencies only, for example `bundle install`
   or `./bin/render-build.sh`.
-- Set the Pre-Deploy command to `bundle exec rails db:migrate`.
+- Set the Pre-Deploy command to `./bin/render-predeploy.sh`.
 - Keep the web service as the only Render service that runs migrations.
 
 ## Worker service
