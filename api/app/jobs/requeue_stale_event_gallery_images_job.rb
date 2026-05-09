@@ -6,22 +6,21 @@ class RequeueStaleEventGalleryImagesJob < ApplicationJob
   RETRYABLE_FAILURE_MESSAGES = [
     "cached plan must not change result type",
     "Image attachment was not ready for processing",
-    "The provided transformation method is not supported: saver."
+    "The provided transformation method is not supported: saver.",
+    "VipsOperation: class \"quality\" not found"
   ].freeze
 
   def perform
-    uploaded_stale = EventGalleryImage.where(status: "uploaded", updated_at: ...STALE_AFTER.ago)
+    uploaded_stale = EventGalleryImage.where(status: "uploaded", updated_at: (...STALE_AFTER.ago))
     processing_stale = EventGalleryImage
       .where(status: "processing")
       .where("processing_started_at IS NULL OR processing_started_at < ?", STALE_AFTER.ago)
     failed_retryable = EventGalleryImage
       .where(status: "failed")
-      .where(updated_at: ...STALE_AFTER.ago)
+      .where(updated_at: (...STALE_AFTER.ago))
       .where("processing_requeue_count < ?", MAX_FAILED_REQUEUE_ATTEMPTS)
       .where(retryable_failure_clause)
-    scope = uploaded_stale.or(processing_stale).or(failed_retryable).with_attached_image
-
-    scope.find_each do |gallery_image|
+    uploaded_stale.or(processing_stale).or(failed_retryable).with_attached_image.find_each do |gallery_image|
       next unless gallery_image.image.attached?
 
       gallery_image.with_lock do
@@ -32,6 +31,26 @@ class RequeueStaleEventGalleryImagesJob < ApplicationJob
         gallery_image.update_columns(
           status: "uploaded",
           processing_requeue_count: next_requeue_count(gallery_image),
+          processing_error: nil,
+          processing_token: nil,
+          processing_started_at: nil,
+          updated_at: Time.current
+        )
+        ProcessEventGalleryImageJob.perform_later(gallery_image.id)
+      end
+    end
+
+    EventGalleryImage.ready.with_image_variant_records.find_each do |gallery_image|
+      next unless gallery_image.image.attached?
+      next if gallery_image.variants_processed?
+
+      gallery_image.with_lock do
+        gallery_image.reload
+        next unless gallery_image.image.attached?
+        next if gallery_image.variants_processed?
+
+        gallery_image.update_columns(
+          status: "uploaded",
           processing_error: nil,
           processing_token: nil,
           processing_started_at: nil,

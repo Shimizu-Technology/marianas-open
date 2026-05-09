@@ -6,10 +6,10 @@ import ImageWithShimmer from '../components/ImageWithShimmer';
 import SEO from '../components/SEO';
 import { api } from '../services/api';
 import type { Event, EventGalleryImage } from '../services/api';
-import { isBrowserPreviewableImage, resolveMediaUrl } from '../utils/images';
+import { resolveMediaUrl } from '../utils/images';
 
-const PER_PAGE = 30;
-const EAGER_IMAGE_COUNT = 6;
+const PER_PAGE = 24;
+const EAGER_IMAGE_COUNT = 4;
 const HIGH_PRIORITY_IMAGE_COUNT = 3;
 
 function formatDate(dateStr?: string) {
@@ -80,7 +80,7 @@ export default function EventGalleryPage() {
   const visibleCategories = categories.filter(category => category.count > 0);
   const activeImage = activeIndex === null ? null : images[activeIndex];
   const activeSrc = activeImage
-    ? resolveMediaUrl(activeImage.large_url || (isBrowserPreviewableImage(activeImage.content_type) ? activeImage.image_url : null))
+    ? resolveMediaUrl(activeImage.large_url || activeImage.thumbnail_url)
     : null;
 
   const structuredData = useMemo(() => {
@@ -91,7 +91,7 @@ export default function EventGalleryPage() {
       name: `${event.name} Photo Gallery`,
       about: event.name,
       image: images.slice(0, 12).map(image => {
-        const src = image.thumbnail_url || (isBrowserPreviewableImage(image.content_type) ? image.image_url : null);
+        const src = image.thumbnail_url;
         return resolveMediaUrl(src);
       }).filter(Boolean),
     };
@@ -185,7 +185,7 @@ export default function EventGalleryPage() {
         title={`${event.name} Photos`}
         description={`Official photo gallery from ${event.name}.`}
         path={`/events/${event.slug}/gallery`}
-        image={resolveMediaUrl(images[0]?.thumbnail_url || (isBrowserPreviewableImage(images[0]?.content_type) ? images[0]?.image_url : null)) || event.hero_image_url || undefined}
+        image={resolveMediaUrl(images[0]?.thumbnail_url) || event.hero_image_url || undefined}
         structuredData={structuredData ? [structuredData] : undefined}
       />
 
@@ -254,19 +254,20 @@ export default function EventGalleryPage() {
             <>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
                 {images.map((image, index) => {
-                  const canUseOriginal = isBrowserPreviewableImage(image.content_type);
-                  const src = resolveMediaUrl(image.thumbnail_url || (canUseOriginal ? image.image_url : null));
-                  const fallbackSrc = canUseOriginal ? resolveMediaUrl(image.image_url) || undefined : undefined;
+                  const src = resolveMediaUrl(image.thumbnail_url);
+                  const canOpen = Boolean(resolveMediaUrl(image.large_url || image.thumbnail_url));
                   return (
                     <button
                       key={image.id}
-                      onClick={() => setActiveIndex(index)}
-                      className="group relative aspect-[4/3] overflow-hidden border border-white/5 bg-white/[0.02] text-left"
+                      onClick={() => {
+                        if (canOpen) setActiveIndex(index);
+                      }}
+                      disabled={!canOpen}
+                      className="group relative aspect-[4/3] overflow-hidden border border-white/5 bg-white/[0.02] text-left disabled:cursor-default"
                     >
-                      {src && (
+                      {src ? (
                         <ImageWithShimmer
                           src={src}
-                          fallbackSrc={fallbackSrc}
                           alt={image.alt_text || image.title || event.name}
                           loading={index < EAGER_IMAGE_COUNT ? 'eager' : 'lazy'}
                           decoding="async"
@@ -277,6 +278,10 @@ export default function EventGalleryPage() {
                           placeholderClassName="flex items-center justify-center"
                           placeholderContent={<ImageIcon className="w-6 h-6 text-gold-400/25" aria-hidden="true" />}
                         />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-navy-900">
+                          <ImageIcon className="w-6 h-6 text-gold-400/25" aria-hidden="true" />
+                        </div>
                       )}
                       {(image.caption || image.title) && (
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950/95 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -305,7 +310,7 @@ export default function EventGalleryPage() {
         </div>
       </section>
 
-      {activeImage && activeSrc && (
+      {activeImage && (
         <div className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center px-4 py-12 sm:p-6">
           <button onClick={() => setActiveIndex(null)} className="absolute top-4 right-4 p-2 text-white/70 hover:text-white" aria-label="Close gallery image">
             <X size={24} />
@@ -313,7 +318,23 @@ export default function EventGalleryPage() {
           <button disabled={activeIndex === 0} onClick={() => moveLightbox(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:left-6" aria-label="Previous image">
             <ChevronLeft size={32} />
           </button>
-          <img src={activeSrc} alt={activeImage.alt_text || activeImage.title || event.name} className="max-h-[78vh] max-w-[92vw] object-contain sm:max-h-[84vh]" />
+          {activeSrc ? (
+            <ImageWithShimmer
+              src={activeSrc}
+              alt={activeImage.alt_text || activeImage.title || event.name}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className="max-h-[78vh] max-w-[92vw] object-contain sm:max-h-[84vh]"
+              placeholderClassName="flex items-center justify-center"
+              placeholderContent={<ImageIcon className="w-8 h-8 text-gold-400/25" aria-hidden="true" />}
+            />
+          ) : (
+            <div className="flex h-64 w-full max-w-lg flex-col items-center justify-center gap-3 border border-white/10 bg-navy-900 text-text-muted">
+              <ImageIcon className="h-8 w-8 text-gold-400/30" />
+              <span className="text-sm">Photo preview is processing.</span>
+            </div>
+          )}
           <button disabled={activeIndex === images.length - 1} onClick={() => moveLightbox(1)} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:right-6" aria-label="Next image">
             <ChevronRight size={32} />
           </button>
