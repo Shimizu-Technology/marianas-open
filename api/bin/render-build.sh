@@ -2,4 +2,6 @@
 set -o errexit
 
 bundle install
-bundle exec rake db:migrate
+
+# Run database migrations from the Render web service Pre-Deploy command only.
+# Builds can run for both web and worker services, so migrations do not belong here.
