@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_08_003000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_09_080000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -144,6 +144,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_003000) do
     t.string "status", default: "ready", null: false
     t.string "title"
     t.datetime "updated_at", null: false
+    t.integer "vips_variant_repair_attempts", default: 0, null: false
+    t.datetime "vips_variants_repaired_at"
     t.integer "width"
     t.index ["event_gallery_upload_batch_id"], name: "index_event_gallery_images_on_upload_batch_id"
     t.index ["event_id", "active"], name: "index_event_gallery_images_on_event_id_and_active"
@@ -153,6 +155,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_003000) do
     t.index ["event_id"], name: "index_event_gallery_images_on_event_id"
     t.index ["processing_token"], name: "index_event_gallery_images_on_processing_token"
     t.index ["status", "processing_started_at"], name: "index_event_gallery_images_on_status_and_processing_started_at"
+    t.index ["status", "vips_variants_repaired_at", "vips_variant_repair_attempts"], name: "index_event_gallery_images_on_vips_variant_repair"
   end
 
   create_table "event_gallery_upload_batches", force: :cascade do |t|

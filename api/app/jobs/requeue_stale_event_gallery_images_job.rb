@@ -3,6 +3,8 @@ class RequeueStaleEventGalleryImagesJob < ApplicationJob
 
   STALE_AFTER = 10.minutes
   MAX_FAILED_REQUEUE_ATTEMPTS = 3
+  MAX_READY_VARIANT_REPAIR_ATTEMPTS = 3
+  READY_VARIANT_REPAIR_BATCH_SIZE = ENV.fetch("EVENT_GALLERY_VARIANT_REPAIR_BATCH_SIZE", 200).to_i
   RETRYABLE_FAILURE_MESSAGES = [
     "cached plan must not change result type",
     "Image attachment was not ready for processing",
@@ -40,17 +42,45 @@ class RequeueStaleEventGalleryImagesJob < ApplicationJob
       end
     end
 
-    EventGalleryImage.ready.with_image_variant_records.find_each do |gallery_image|
+    repair_ready_images_missing_vips_variants
+  end
+
+  private
+
+  def repair_ready_images_missing_vips_variants
+    EventGalleryImage
+      .ready
+      .where(vips_variants_repaired_at: nil)
+      .where("vips_variant_repair_attempts <= ?", MAX_READY_VARIANT_REPAIR_ATTEMPTS)
+      .with_image_variant_records
+      .limit(READY_VARIANT_REPAIR_BATCH_SIZE)
+      .each do |gallery_image|
       next unless gallery_image.image.attached?
-      next if gallery_image.variants_processed?
 
       gallery_image.with_lock do
         gallery_image.reload
         next unless gallery_image.image.attached?
-        next if gallery_image.variants_processed?
+
+        if gallery_image.variants_processed?
+          gallery_image.update_columns(vips_variants_repaired_at: Time.current)
+          next
+        end
+
+        if gallery_image.vips_variant_repair_attempts.to_i >= MAX_READY_VARIANT_REPAIR_ATTEMPTS
+          gallery_image.update_columns(
+            status: "failed",
+            processing_error: "Current vips variants could not be repaired after #{MAX_READY_VARIANT_REPAIR_ATTEMPTS} attempts",
+            processing_token: nil,
+            processing_started_at: nil,
+            vips_variants_repaired_at: Time.current,
+            updated_at: Time.current
+          )
+          next
+        end
 
         gallery_image.update_columns(
           status: "uploaded",
+          vips_variant_repair_attempts: gallery_image.vips_variant_repair_attempts.to_i + 1,
           processing_error: nil,
           processing_token: nil,
           processing_started_at: nil,
@@ -60,8 +90,6 @@ class RequeueStaleEventGalleryImagesJob < ApplicationJob
       end
     end
   end
-
-  private
 
   def stale?(gallery_image)
     case gallery_image.status

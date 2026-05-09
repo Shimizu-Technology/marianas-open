@@ -61,6 +61,8 @@ class ProcessEventGalleryImageJob < ApplicationJob
         processing_error: nil,
         processing_token: nil,
         processing_started_at: nil,
+        vips_variants_repaired_at: Time.current,
+        vips_variant_repair_attempts: 0,
         updated_at: Time.current
       )
     return if updated.zero?
