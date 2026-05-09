@@ -1754,7 +1754,8 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
   )
 }
 
-const GALLERY_ADMIN_PER_PAGE = 72
+const GALLERY_ADMIN_PER_PAGE = 48
+const GALLERY_ADMIN_EAGER_IMAGE_COUNT = 8
 type GalleryDeleteConfirm =
   | { type: 'single'; id: number; title: string }
   | { type: 'bulk'; ids: number[] }
@@ -2231,7 +2232,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
           )}
           {galleryImages.length > 0 && (
             <div className="grid grid-cols-1 gap-3 border-b border-white/5 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-              {galleryImages.map(image => {
+              {galleryImages.map((image, index) => {
                 const previewUrl = resolveMediaUrl(image.thumbnail_url)
 
                 return (
@@ -2248,8 +2249,9 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
                         <ImageWithShimmer
                           src={previewUrl}
                           alt={image.alt_text || image.title || 'Gallery image'}
-                          loading="lazy"
+                          loading={index < GALLERY_ADMIN_EAGER_IMAGE_COUNT ? 'eager' : 'lazy'}
                           decoding="async"
+                          fetchPriority={index < GALLERY_ADMIN_EAGER_IMAGE_COUNT ? 'high' : 'auto'}
                           sizes="(min-width: 1536px) 23vw, (min-width: 1280px) 31vw, (min-width: 640px) 48vw, 100vw"
                           lazyRootMargin="900px 0px"
                           className="w-full h-full object-cover"

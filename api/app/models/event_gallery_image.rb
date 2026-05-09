@@ -120,8 +120,12 @@ class EventGalleryImage < ApplicationRecord
     return nil unless image.attached? && status == "ready"
     return nil unless variant_record_exists?(transformations)
 
+    variant = image.variant(transformations)
+    public_url = public_variant_url(variant)
+    return public_url if public_url.present?
+
     Rails.application.routes.url_helpers.rails_representation_path(
-      image.variant(transformations),
+      variant,
       only_path: true
     )
   rescue StandardError, LoadError
@@ -144,5 +148,32 @@ class EventGalleryImage < ApplicationRecord
     else
       variant_records.exists?(variation_digest: variation_digest)
     end
+  end
+
+  def public_variant_url(variant)
+    host = variant_public_host
+    return nil if host.blank?
+
+    "#{host.chomp("/")}/#{variant_storage_key(variant)}"
+  end
+
+  def variant_public_host
+    ENV["ACTIVE_STORAGE_PUBLIC_HOST"].presence ||
+      ENV["AWS_S3_PUBLIC_HOST"].presence ||
+      s3_public_host
+  end
+
+  def s3_public_host
+    return nil unless Rails.configuration.active_storage.service == :amazon
+
+    bucket = ENV["AWS_S3_BUCKET"]
+    return nil if bucket.blank?
+
+    region = ENV.fetch("AWS_REGION", "ap-southeast-2")
+    "https://#{bucket}.s3.#{region}.amazonaws.com"
+  end
+
+  def variant_storage_key(variant)
+    "variants/#{image.blob.key}/#{OpenSSL::Digest::SHA256.hexdigest(variant.variation.key)}"
   end
 end
