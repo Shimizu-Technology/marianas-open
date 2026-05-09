@@ -11,6 +11,7 @@ import { resolveMediaUrl } from '../utils/images';
 const PER_PAGE = 24;
 const EAGER_IMAGE_COUNT = 4;
 const HIGH_PRIORITY_IMAGE_COUNT = 3;
+const LARGE_PRELOAD_COUNT = 8;
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return '';
@@ -19,6 +20,27 @@ function formatDate(dateStr?: string) {
     day: 'numeric',
     year: 'numeric',
   });
+}
+
+function isGeneratedImageName(value: string | null | undefined) {
+  if (!value) return false;
+  const trimmed = value.trim();
+  return /^([a-f0-9]{6,}|[0-9_-]*\d{4,}[0-9_-]*)$/i.test(trimmed);
+}
+
+function getPublicImageLabel(image: EventGalleryImage) {
+  const caption = image.caption?.trim();
+  if (caption) return caption;
+
+  const title = image.title?.trim();
+  return title && !isGeneratedImageName(title) ? title : '';
+}
+
+function preloadImage(url: string | null | undefined) {
+  if (!url) return;
+  const image = new Image();
+  image.decoding = 'async';
+  image.src = url;
 }
 
 export default function EventGalleryPage() {
@@ -84,6 +106,7 @@ export default function EventGalleryPage() {
   const activeSrc = activeImage
     ? resolveMediaUrl(activeImage.large_url || activeImage.thumbnail_url)
     : null;
+  const activeLabel = activeImage ? getPublicImageLabel(activeImage) : '';
 
   const structuredData = useMemo(() => {
     if (!event) return undefined;
@@ -148,6 +171,30 @@ export default function EventGalleryPage() {
       return Math.min(images.length - 1, Math.max(0, current + direction));
     });
   }, [images.length]);
+
+  const openLightbox = (index: number) => {
+    setActiveIndex(index);
+
+    const image = images[index];
+    if (!image) return;
+    preloadImage(resolveMediaUrl(image.large_url || image.thumbnail_url));
+  };
+
+  useEffect(() => {
+    images.slice(0, LARGE_PRELOAD_COUNT).forEach(image => {
+      preloadImage(resolveMediaUrl(image.large_url || image.thumbnail_url));
+    });
+  }, [images]);
+
+  useEffect(() => {
+    if (activeIndex === null) return;
+
+    [activeIndex - 1, activeIndex + 1].forEach(preloadIndex => {
+      const image = images[preloadIndex];
+      if (!image) return;
+      preloadImage(resolveMediaUrl(image.large_url || image.thumbnail_url));
+    });
+  }, [activeIndex, images]);
 
   useEffect(() => {
     if (activeIndex === null) return undefined;
@@ -258,11 +305,14 @@ export default function EventGalleryPage() {
                 {images.map((image, index) => {
                   const src = resolveMediaUrl(image.thumbnail_url);
                   const canOpen = Boolean(resolveMediaUrl(image.large_url || image.thumbnail_url));
+                  const label = getPublicImageLabel(image);
                   return (
                     <button
                       key={image.id}
+                      onMouseEnter={() => preloadImage(resolveMediaUrl(image.large_url || image.thumbnail_url))}
+                      onFocus={() => preloadImage(resolveMediaUrl(image.large_url || image.thumbnail_url))}
                       onClick={() => {
-                        if (canOpen) setActiveIndex(index);
+                        if (canOpen) openLightbox(index);
                       }}
                       disabled={!canOpen}
                       className="group relative aspect-[4/3] overflow-hidden border border-white/5 bg-white/[0.02] text-left disabled:cursor-default"
@@ -285,9 +335,9 @@ export default function EventGalleryPage() {
                           <ImageIcon className="w-6 h-6 text-gold-400/25" aria-hidden="true" />
                         </div>
                       )}
-                      {(image.caption || image.title) && (
+                      {label && (
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950/95 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="text-xs text-text-secondary truncate">{image.caption || image.title}</div>
+                          <div className="text-xs text-text-secondary truncate">{label}</div>
                         </div>
                       )}
                     </button>
@@ -313,38 +363,38 @@ export default function EventGalleryPage() {
       </section>
 
       {activeImage && (
-        <div className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center px-4 py-12 sm:p-6">
-          <button onClick={() => setActiveIndex(null)} className="absolute top-4 right-4 p-2 text-white/70 hover:text-white" aria-label="Close gallery image">
+        <div className="fixed inset-0 z-[80] bg-black/95 p-4 sm:p-6">
+          <button onClick={() => setActiveIndex(null)} className="absolute right-3 top-3 z-20 p-2 text-white/70 hover:text-white sm:right-4 sm:top-4" aria-label="Close gallery image">
             <X size={24} />
           </button>
-          <button disabled={activeIndex === 0} onClick={() => moveLightbox(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:left-6" aria-label="Previous image">
+          <button disabled={activeIndex === 0} onClick={() => moveLightbox(-1)} className="absolute left-2 top-1/2 z-20 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:left-6" aria-label="Previous image">
             <ChevronLeft size={32} />
           </button>
-          {activeSrc ? (
-            <ImageWithShimmer
-              src={activeSrc}
-              alt={activeImage.alt_text || activeImage.title || event.name}
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-              className="max-h-[78vh] max-w-[92vw] object-contain sm:max-h-[84vh]"
-              placeholderClassName="flex items-center justify-center"
-              placeholderContent={<ImageIcon className="w-8 h-8 text-gold-400/25" aria-hidden="true" />}
-            />
-          ) : (
-            <div className="flex h-64 w-full max-w-lg flex-col items-center justify-center gap-3 border border-white/10 bg-navy-900 text-text-muted">
-              <ImageIcon className="h-8 w-8 text-gold-400/30" />
-              <span className="text-sm">Photo preview is processing.</span>
-            </div>
-          )}
-          <button disabled={activeIndex === images.length - 1} onClick={() => moveLightbox(1)} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:right-6" aria-label="Next image">
+          <div className="mx-auto flex h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-7xl flex-col items-center justify-center gap-3 sm:h-[calc(100dvh-3rem)] sm:w-[calc(100vw-3rem)]">
+            {activeSrc ? (
+              <img
+                src={activeSrc}
+                alt={activeImage.alt_text || activeImage.title || event.name}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+                className="block min-h-0 max-h-full max-w-full flex-1 object-contain"
+              />
+            ) : (
+              <div className="flex min-h-0 w-full max-w-lg flex-1 flex-col items-center justify-center gap-3 border border-white/10 bg-navy-900 text-text-muted">
+                <ImageIcon className="h-8 w-8 text-gold-400/30" />
+                <span className="text-sm">Photo preview is processing.</span>
+              </div>
+            )}
+            {activeLabel && (
+              <div className="shrink-0 px-4 text-center text-sm text-white/80">
+                {activeLabel}
+              </div>
+            )}
+          </div>
+          <button disabled={activeIndex === images.length - 1} onClick={() => moveLightbox(1)} className="absolute right-2 top-1/2 z-20 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:right-6" aria-label="Next image">
             <ChevronRight size={32} />
           </button>
-          {(activeImage.caption || activeImage.title) && (
-            <div className="absolute inset-x-0 bottom-0 p-5 text-center text-sm text-white/80 bg-gradient-to-t from-black/70 to-transparent">
-              {activeImage.caption || activeImage.title}
-            </div>
-          )}
         </div>
       )}
     </div>
