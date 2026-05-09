@@ -41,20 +41,22 @@ export default function EventGalleryPage() {
     const loadInitialGallery = async () => {
       try {
         setError('');
-        const eventData = await api.getEvent(slug);
+        const [eventResult, galleryResult] = await Promise.allSettled([
+          api.getEvent(slug),
+          api.getEventGallery(slug, { page: 1, per_page: PER_PAGE }),
+        ]);
+        if (eventResult.status === 'rejected') throw eventResult.reason;
         if (cancelled) return;
-        setEvent(eventData);
+        setEvent(eventResult.value);
 
-        try {
-          const galleryData = await api.getEventGallery(slug, { page: 1, per_page: PER_PAGE });
-          if (cancelled) return;
+        if (galleryResult.status === 'fulfilled') {
+          const galleryData = galleryResult.value;
           setImages(galleryData.gallery_images);
           setCategories(galleryData.categories || []);
           setActiveCategory('');
           setTotal(galleryData.total);
           setPage(1);
-        } catch {
-          if (cancelled) return;
+        } else {
           setImages([]);
           setCategories([]);
           setActiveCategory('');
