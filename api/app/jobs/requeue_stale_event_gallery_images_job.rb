@@ -59,6 +59,7 @@ class RequeueStaleEventGalleryImagesJob < ApplicationJob
 
       gallery_image.with_lock do
         gallery_image.reload
+        next unless gallery_image.status == "ready"
         next unless gallery_image.image.attached?
 
         if gallery_image.variants_processed?
