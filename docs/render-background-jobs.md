@@ -8,7 +8,10 @@ should run them from the same database-backed queue.
 
 - Keep the existing web start command.
 - Do not set `SOLID_QUEUE_IN_PUMA` to a truthy value (`true`, `1`, or `yes`).
-- Run migrations during deploy so the `solid_queue_*` tables exist.
+- Set the build command to install dependencies only, for example `bundle install`
+  or `./bin/render-build.sh`.
+- Set the Pre-Deploy command to `bundle exec rails db:migrate`.
+- Keep the web service as the only Render service that runs migrations.
 
 ## Worker service
 
@@ -22,6 +25,11 @@ Use the same root directory and environment variables as the API service, includ
 `DATABASE_URL`, `RAILS_MASTER_KEY`, and the AWS S3 variables. Leave `JOB_THREADS`
 and `JOB_CONCURRENCY` unset at first so gallery image processing runs one job at a
 time. Increase them only after uploads are stable on the chosen instance size.
+
+Do not configure a worker Pre-Deploy command for migrations. The worker build and
+the web deploy can overlap, and Rails will abort with
+`ActiveRecord::ConcurrentMigrationError` if two deploy processes try to migrate at
+the same time.
 
 ## Native image support
 
