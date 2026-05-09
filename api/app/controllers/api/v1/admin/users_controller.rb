@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_admin!
-        before_action :set_user, only: [:show, :update, :destroy, :resend_invitation]
+        before_action :set_user, only: [ :show, :update, :destroy, :resend_invitation ]
 
         # GET /api/v1/admin/users
         def index
@@ -147,9 +147,7 @@ module Api
         end
 
         def build_redirect_url
-          allowed = ENV.fetch("ALLOWED_ORIGINS", "http://localhost:5173")
-          origin = allowed.split(",").first.strip
-          "#{origin}/admin"
+          FrontendUrl.admin
         end
 
         def user_json(user)
