@@ -21,7 +21,8 @@ import type {
   EventVisaItem,
 } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
-import { isBrowserPreviewableImage, resolveMediaUrl } from '../../utils/images'
+import ImageWithShimmer from '../../components/ImageWithShimmer'
+import { resolveMediaUrl } from '../../utils/images'
 import { formatDate } from '../../utils/dates'
 import { useEditingParam } from '../../hooks/useEditingParam'
 import { GALLERY_IMAGE_ACCEPT, GALLERY_IMAGE_MAX_BYTES, GALLERY_IMAGE_TYPE_LABEL, isSupportedGalleryImage, useGalleryUploads } from '../../contexts/GalleryUploadContext'
@@ -1753,7 +1754,7 @@ function AccommodationsSection({ eventId }: { eventId: number }) {
   )
 }
 
-const GALLERY_ADMIN_PER_PAGE = 100
+const GALLERY_ADMIN_PER_PAGE = 72
 type GalleryDeleteConfirm =
   | { type: 'single'; id: number; title: string }
   | { type: 'bulk'; ids: number[] }
@@ -2229,14 +2230,9 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
             </div>
           )}
           {galleryImages.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border-b border-white/5">
+            <div className="grid grid-cols-1 gap-3 border-b border-white/5 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {galleryImages.map(image => {
-                const isBrowserPreviewable = isBrowserPreviewableImage(image.content_type)
-                const previewUrl = image.thumbnail_url
-                  ? resolveMediaUrl(image.thumbnail_url)
-                  : isBrowserPreviewable
-                    ? resolveMediaUrl(image.image_url)
-                    : null
+                const previewUrl = resolveMediaUrl(image.thumbnail_url)
 
                 return (
                   <div key={image.id} className={`relative border bg-white/[0.01] transition-colors ${selectedIds.includes(image.id) ? 'border-gold/70 bg-gold/[0.04]' : 'border-white/5'}`}>
@@ -2249,10 +2245,16 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
                     </button>
                     <div className="aspect-[16/9] bg-white/[0.02] overflow-hidden">
                       {previewUrl ? (
-                        <img
+                        <ImageWithShimmer
                           src={previewUrl}
                           alt={image.alt_text || image.title || 'Gallery image'}
+                          loading="lazy"
+                          decoding="async"
+                          sizes="(min-width: 1536px) 23vw, (min-width: 1280px) 31vw, (min-width: 640px) 48vw, 100vw"
+                          lazyRootMargin="900px 0px"
                           className="w-full h-full object-cover"
+                          placeholderClassName="flex items-center justify-center"
+                          placeholderContent={<ImageIcon className="w-6 h-6 text-text-muted/40" />}
                         />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center gap-2">
@@ -2332,11 +2334,15 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
               <div className="grid grid-cols-1 gap-4 md:grid-cols-[240px_1fr]">
                 <div className="space-y-3">
                   <div className="aspect-[4/3] overflow-hidden border border-white/10 bg-white/[0.02]">
-                    {editingImage && (editingImage.thumbnail_url || (isBrowserPreviewableImage(editingImage.content_type) && editingImage.image_url)) ? (
-                      <img
-                        src={resolveMediaUrl(editingImage.thumbnail_url || editingImage.image_url) || undefined}
+                    {editingImage && editingImage.thumbnail_url ? (
+                      <ImageWithShimmer
+                        src={resolveMediaUrl(editingImage.thumbnail_url) || ''}
                         alt={editingImage.alt_text || editingImage.title || 'Gallery image'}
+                        loading="eager"
+                        decoding="async"
                         className="h-full w-full object-cover"
+                        placeholderClassName="flex items-center justify-center"
+                        placeholderContent={<ImageIcon className="h-7 w-7 text-text-muted/40" />}
                       />
                     ) : (
                       <div className="flex h-full flex-col items-center justify-center gap-2 text-text-muted">
