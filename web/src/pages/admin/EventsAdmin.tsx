@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef, useId } from 'react'
 import type { DragEvent } from 'react'
 import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw, Copy, UploadCloud, CheckSquare, Square, EyeOff, Tags } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -1792,6 +1792,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const uploadCategoryTouchedRef = useRef(false)
   const { tasks, startUpload } = useGalleryUploads()
   const completedForEvent = tasks.filter(task => task.eventId === eventId && task.status === 'complete').length
   const visibleImageIds = useMemo(() => galleryImages.map(image => image.id), [galleryImages])
@@ -1830,7 +1831,11 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   useEffect(() => { load() }, [load])
   useEffect(() => { setSelectedIds([]) }, [eventId, page, categoryFilter])
   useEffect(() => {
-    if (categoryFilter === GALLERY_CATEGORY_ALL) return
+    uploadCategoryTouchedRef.current = false
+    setUploadCategory('')
+  }, [eventId])
+  useEffect(() => {
+    if (categoryFilter === GALLERY_CATEGORY_ALL || uploadCategoryTouchedRef.current) return
     setUploadCategory(categoryFilter === GALLERY_CATEGORY_UNCATEGORIZED ? '' : categoryFilter)
   }, [categoryFilter])
   useEffect(() => {
@@ -2195,7 +2200,10 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
           <GalleryCategoryPicker
             label="Album / Category"
             value={uploadCategory}
-            onChange={setUploadCategory}
+            onChange={category => {
+              uploadCategoryTouchedRef.current = true
+              setUploadCategory(category)
+            }}
             categoryOptions={categoryOptions}
             emptyLabel="Upload without an album"
             helpText="Every photo in this upload will be assigned to this album/category. You can move them later."
@@ -2503,6 +2511,10 @@ function GalleryCategoryPicker({
   compact?: boolean
 }) {
   const [creating, setCreating] = useState(false)
+  const pickerId = useId()
+  const selectId = `${pickerId}-select`
+  const customInputId = `${pickerId}-custom`
+  const helpId = helpText ? `${pickerId}-help` : undefined
   const knownNames = useMemo(() => new Set(categoryOptions.map(category => category.name)), [categoryOptions])
   const trimmedValue = value.trim()
   const isKnownValue = trimmedValue === '' || knownNames.has(trimmedValue)
@@ -2518,10 +2530,11 @@ function GalleryCategoryPicker({
 
   return (
     <div>
-      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">
+      <label htmlFor={selectId} className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">
         {label}
       </label>
       <select
+        id={selectId}
         value={selectValue}
         onChange={event => {
           const nextValue = event.target.value
@@ -2533,6 +2546,7 @@ function GalleryCategoryPicker({
           setCreating(false)
           onChange(nextValue)
         }}
+        aria-describedby={helpId}
         className={inputClass}
       >
         <option value="">{emptyLabel}</option>
@@ -2545,9 +2559,12 @@ function GalleryCategoryPicker({
       </select>
       {showingCustomInput && (
         <input
+          id={customInputId}
           value={value}
           onChange={event => onChange(event.target.value)}
           maxLength={80}
+          aria-label={`Custom ${label}`}
+          aria-describedby={helpId}
           placeholder="e.g. Taiwan Podium"
           className={`${inputClass} mt-2`}
         />
@@ -2557,7 +2574,7 @@ function GalleryCategoryPicker({
           New album/category will be created when photos are saved or uploaded.
         </p>
       )}
-      {helpText && <p className="mt-1 text-[11px] text-text-muted">{helpText}</p>}
+      {helpText && <p id={helpId} className="mt-1 text-[11px] text-text-muted">{helpText}</p>}
     </div>
   )
 }

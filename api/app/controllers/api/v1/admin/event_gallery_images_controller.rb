@@ -203,14 +203,19 @@ module Api
         end
 
         def gallery_categories
-          counts = @event.event_gallery_images.where.not(category: [ nil, "" ]).group(:category).count
-          EventGalleryImage.category_options_for(@event).map do |category|
+          counts = category_counts
+          custom_categories = counts.keys.compact.map { |category| category.to_s.squish }.reject(&:blank?).sort
+          (EventGalleryImage::PRESET_CATEGORIES + custom_categories).uniq.map do |category|
             { name: category, count: counts[category].to_i }
           end
         end
 
         def uncategorized_count
-          @event.event_gallery_images.where(category: [ nil, "" ]).count
+          category_counts[nil].to_i + category_counts[""].to_i
+        end
+
+        def category_counts
+          @category_counts ||= @event.event_gallery_images.group(:category).count
         end
 
         def apply_blob_metadata(gallery_image)
