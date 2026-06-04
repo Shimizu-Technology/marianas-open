@@ -134,7 +134,8 @@ export default function EventsAdmin() {
   useEffect(() => { loadEvents() }, [loadEvents])
 
   useEffect(() => {
-    return () => { pollingGenRef.current++ }
+    const ref = pollingGenRef
+    return () => { ref.current++ }
   }, [editing])
 
   useEffect(() => {

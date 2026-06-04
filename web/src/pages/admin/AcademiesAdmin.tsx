@@ -65,7 +65,12 @@ export default function AcademiesAdmin() {
     }
   }, [page, sortField, sortDir, search])
 
-  useEffect(() => { load(academies.length === 0) }, [load])
+  const hasLoadedRef = useRef(false)
+
+  useEffect(() => {
+    load(!hasLoadedRef.current)
+    hasLoadedRef.current = true
+  }, [load])
 
   useEffect(() => {
     if (typeof editing === 'number') {

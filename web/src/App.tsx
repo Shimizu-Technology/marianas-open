@@ -29,21 +29,21 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 import CompetitorProfilePage from './pages/CompetitorProfilePage';
 import AcademyPage from './pages/AcademyPage';
 
-// Admin — eagerly imported so page transitions are instant
-import AdminLayout from './layouts/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import EventsAdmin from './pages/admin/EventsAdmin';
-import SponsorsAdmin from './pages/admin/SponsorsAdmin';
-import VideosAdmin from './pages/admin/VideosAdmin';
-import UsersAdmin from './pages/admin/UsersAdmin';
-import ImagesAdmin from './pages/admin/ImagesAdmin';
-import SettingsAdmin from './pages/admin/SettingsAdmin';
-import ContentAdmin from './pages/admin/ContentAdmin';
-import CompetitorsAdmin from './pages/admin/CompetitorsAdmin';
-import AcademiesAdmin from './pages/admin/AcademiesAdmin';
-import AnnouncementsAdmin from './pages/admin/AnnouncementsAdmin';
-import ImpactAdmin from './pages/admin/ImpactAdmin';
-import EventResultsAdmin from './pages/admin/EventResultsAdmin';
+// Admin — lazy-loaded so public visitors do not download the CMS bundle.
+const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const EventsAdmin = lazy(() => import('./pages/admin/EventsAdmin'));
+const SponsorsAdmin = lazy(() => import('./pages/admin/SponsorsAdmin'));
+const VideosAdmin = lazy(() => import('./pages/admin/VideosAdmin'));
+const UsersAdmin = lazy(() => import('./pages/admin/UsersAdmin'));
+const ImagesAdmin = lazy(() => import('./pages/admin/ImagesAdmin'));
+const SettingsAdmin = lazy(() => import('./pages/admin/SettingsAdmin'));
+const ContentAdmin = lazy(() => import('./pages/admin/ContentAdmin'));
+const CompetitorsAdmin = lazy(() => import('./pages/admin/CompetitorsAdmin'));
+const AcademiesAdmin = lazy(() => import('./pages/admin/AcademiesAdmin'));
+const AnnouncementsAdmin = lazy(() => import('./pages/admin/AnnouncementsAdmin'));
+const ImpactAdmin = lazy(() => import('./pages/admin/ImpactAdmin'));
+const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
 
 function BannerLayout({ children }: { children: React.ReactNode }) {
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -135,9 +135,11 @@ export default function App() {
         <Route
           path="/admin/*"
           element={
-            <ProtectedRoute requiredRole="staff">
-              <AdminLayout />
-            </ProtectedRoute>
+            <Suspense fallback={<LoadingSpinner />}>
+              <ProtectedRoute requiredRole="staff">
+                <AdminLayout />
+              </ProtectedRoute>
+            </Suspense>
           }
         >
           <Route index element={<AdminDashboard />} />

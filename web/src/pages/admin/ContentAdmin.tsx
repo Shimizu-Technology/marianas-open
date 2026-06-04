@@ -261,7 +261,8 @@ export default function ContentAdmin() {
   const pollingRef = useRef(0);
 
   useEffect(() => {
-    return () => { pollingRef.current++; };
+    const ref = pollingRef;
+    return () => { ref.current++; };
   }, []);
 
   const pollForPendingTranslations = useCallback(async () => {
