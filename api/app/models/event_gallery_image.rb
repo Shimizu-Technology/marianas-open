@@ -4,6 +4,7 @@ class EventGalleryImage < ApplicationRecord
   STATUSES = %w[pending uploaded processing ready failed].freeze
   CATEGORY_MAX_LENGTH = 80
   PRESET_CATEGORIES = [
+    "Podium",
     "Podium Day 1",
     "Podium Day 2",
     "Tournament Day 1",

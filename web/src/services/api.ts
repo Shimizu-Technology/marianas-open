@@ -151,6 +151,7 @@ export interface EventGalleryUploadBatch {
 export interface GalleryImagesResponse {
   gallery_images: EventGalleryImage[];
   categories: EventGalleryCategory[];
+  uncategorized_count?: number;
   total: number;
   page: number;
   per_page: number;
