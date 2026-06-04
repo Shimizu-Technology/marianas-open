@@ -1,6 +1,7 @@
 class ClerkAuth
   JWKS_CACHE_KEY = "clerk_jwks"
   JWKS_CACHE_TTL = 1.hour
+  TOKEN_CLOCK_SKEW_LEEWAY_SECONDS = 30
 
   class << self
     def verify(token)
@@ -20,11 +21,14 @@ class ClerkAuth
       jwks = fetch_jwks
       return nil if jwks.nil?
 
+      # This leeway is clock-skew tolerance for all JWT time claims, including
+      # exp/nbf/iat. Tokens that expired within this small window are accepted
+      # so legitimate users are not rejected when server/client clocks differ.
       decode_options = {
         algorithms: [ "RS256" ],
         jwks: jwks,
         verify_iat: true,
-        leeway: 30
+        leeway: TOKEN_CLOCK_SKEW_LEEWAY_SECONDS
       }
       if expected_issuer.present?
         decode_options[:iss] = expected_issuer

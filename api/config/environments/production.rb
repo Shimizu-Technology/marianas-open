@@ -54,11 +54,21 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks when the
-  # deployment provides ALLOWED_HOSTS (comma-separated hostnames). This avoids
-  # accidentally breaking existing deployments that have not set the variable.
+  # deployment provides ALLOWED_HOSTS (comma-separated hostnames). This remains
+  # opt-in to avoid breaking existing deployments that have not set the variable,
+  # but logs loudly so operators know host authorization is inactive.
   allowed_hosts = ENV.fetch("ALLOWED_HOSTS", "").split(",").map(&:strip).reject(&:blank?)
-  config.hosts.concat(allowed_hosts) if allowed_hosts.any?
-  config.host_authorization = { exclude: ->(request) { request.path == "/health" } }
+  if allowed_hosts.any?
+    config.hosts.concat(allowed_hosts)
+    config.host_authorization = { exclude: ->(request) { request.path == "/health" } }
+  else
+    config.after_initialize do
+      Rails.logger.warn(
+        "ALLOWED_HOSTS is not set; Rails host authorization is inactive in production. " \
+          "Set ALLOWED_HOSTS to a comma-separated list of API hostnames to enable DNS rebinding protection."
+      )
+    end
+  end
 
   # Active Storage
   config.active_storage.service = :amazon
