@@ -1,6 +1,7 @@
 class ClerkAuth
   JWKS_CACHE_KEY = "clerk_jwks"
   JWKS_CACHE_TTL = 1.hour
+  TOKEN_CLOCK_SKEW_LEEWAY_SECONDS = 30
 
   class << self
     def verify(token)
@@ -20,10 +21,25 @@ class ClerkAuth
       jwks = fetch_jwks
       return nil if jwks.nil?
 
-      decoded = JWT.decode(token, nil, true, {
-        algorithms: ["RS256"],
-        jwks: jwks
-      })
+      # This leeway is clock-skew tolerance for all JWT time claims, including
+      # exp/nbf/iat. Tokens that expired within this small window are accepted
+      # so legitimate users are not rejected when server/client clocks differ.
+      decode_options = {
+        algorithms: [ "RS256" ],
+        jwks: jwks,
+        verify_iat: true,
+        leeway: TOKEN_CLOCK_SKEW_LEEWAY_SECONDS
+      }
+      if expected_issuer.present?
+        decode_options[:iss] = expected_issuer
+        decode_options[:verify_iss] = true
+      end
+      if expected_audience.present?
+        decode_options[:aud] = expected_audience
+        decode_options[:verify_aud] = true
+      end
+
+      decoded = JWT.decode(token, nil, true, decode_options)
 
       decoded.first
     rescue JWT::DecodeError => e
@@ -64,6 +80,18 @@ class ClerkAuth
 
       Rails.logger.warn("CLERK_JWKS_URL not configured")
       nil
+    end
+
+    def expected_issuer
+      ENV.fetch("CLERK_ISSUER", nil).presence
+    end
+
+    def expected_audience
+      raw = ENV.fetch("CLERK_AUDIENCE", nil).presence
+      return nil unless raw
+
+      values = raw.split(",").map(&:strip).reject(&:blank?)
+      values.one? ? values.first : values
     end
 
     def handle_test_token(token)

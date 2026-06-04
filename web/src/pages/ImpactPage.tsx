@@ -179,16 +179,22 @@ function DonutChart({ allocations }: { allocations: ImpactData['fund_allocations
   const strokeWidth = 28
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
-  let cumulative = 0
+  const segments = allocations.reduce<Array<{ allocation: ImpactData['fund_allocations'][number]; pct: number; cumulative: number }>>(
+    (acc, allocation) => {
+      const previous = acc[acc.length - 1]
+      const cumulative = previous ? previous.cumulative + previous.pct : 0
+      acc.push({ allocation, pct: Number(allocation.amount) / total, cumulative })
+      return acc
+    },
+    []
+  )
 
   return (
     <div className="flex flex-col items-center">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
-        {allocations.map((a, i) => {
-          const pct = Number(a.amount) / total
+        {segments.map(({ allocation: a, pct, cumulative }, i) => {
           const dashArray = circumference * pct
           const dashOffset = circumference * cumulative
-          cumulative += pct
           return (
             <motion.circle
               key={a.id}
