@@ -32,6 +32,8 @@ type SortDir = 'asc' | 'desc'
 
 const DEFAULT_LIVE_STREAM_URL = 'https://www.youtube.com/@themarianasopen/live';
 const GALLERY_CATEGORY_ALL = '__all__';
+const GALLERY_CATEGORY_UNCATEGORIZED = '__uncategorized__';
+const GALLERY_CATEGORY_CREATE = '__create_category__';
 
 const emptyForm: EventFormData = {
   name: '', slug: '', description: '', date: '', end_date: '',
@@ -1775,6 +1777,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   const [categoryFilter, setCategoryFilter] = useState(GALLERY_CATEGORY_ALL)
   const [bulkCategory, setBulkCategory] = useState('')
   const [categoryOptions, setCategoryOptions] = useState<{ name: string; count: number }[]>([])
+  const [uncategorizedCount, setUncategorizedCount] = useState(0)
   const [galleryDeleteConfirm, setGalleryDeleteConfirm] = useState<GalleryDeleteConfirm | null>(null)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
@@ -1797,6 +1800,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
   const totalPages = Math.max(1, Math.ceil(total / GALLERY_ADMIN_PER_PAGE))
   const pageStart = total === 0 ? 0 : (page - 1) * GALLERY_ADMIN_PER_PAGE + 1
   const pageEnd = Math.min(total, page * GALLERY_ADMIN_PER_PAGE)
+  const activeCategoryLabel = categoryFilter === GALLERY_CATEGORY_UNCATEGORIZED ? 'Uncategorized' : categoryFilter
 
   const load = useCallback(async () => {
     try {
@@ -1806,12 +1810,15 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
       const lastPage = Math.max(1, Math.ceil(res.total / GALLERY_ADMIN_PER_PAGE))
       if (page > lastPage) {
         setGalleryImages([])
+        setCategoryOptions(res.categories || [])
+        setUncategorizedCount(res.uncategorized_count || 0)
         setTotal(res.total)
         setPage(lastPage)
         return
       }
       setGalleryImages(res.gallery_images)
       setCategoryOptions(res.categories || [])
+      setUncategorizedCount(res.uncategorized_count || 0)
       setTotal(res.total)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load gallery')
@@ -1822,6 +1829,10 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
 
   useEffect(() => { load() }, [load])
   useEffect(() => { setSelectedIds([]) }, [eventId, page, categoryFilter])
+  useEffect(() => {
+    if (categoryFilter === GALLERY_CATEGORY_ALL) return
+    setUploadCategory(categoryFilter === GALLERY_CATEGORY_UNCATEGORIZED ? '' : categoryFilter)
+  }, [categoryFilter])
   useEffect(() => {
     if (completedForEvent === 0) return undefined
     const refreshTimer = window.setTimeout(() => {
@@ -2098,9 +2109,10 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
               setPage(1)
             }}
             className="bg-white/[0.03] border border-white/10 px-2 py-1 text-xs text-text-secondary focus:border-gold/40 focus:outline-none"
-            aria-label="Filter gallery by category"
+            aria-label="Filter gallery by album or category"
           >
-            <option value={GALLERY_CATEGORY_ALL}>All categories</option>
+            <option value={GALLERY_CATEGORY_ALL}>All albums/categories</option>
+            {uncategorizedCount > 0 && <option value={GALLERY_CATEGORY_UNCATEGORIZED}>Uncategorized ({uncategorizedCount})</option>}
             {categoryOptions.filter(category => category.count > 0).map(category => (
               <option key={category.name} value={category.name}>{category.name} ({category.count})</option>
             ))}
@@ -2131,6 +2143,20 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
       {success && (
         <div className="mx-4 mb-2 text-sm text-green-400 bg-green-500/10 border border-green-500/20 px-3 py-2">{success}</div>
       )}
+      {uncategorizedCount > 0 && (
+        <div className="mx-4 mb-3 flex flex-col gap-2 border border-gold/15 bg-gold/[0.04] px-3 py-2 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between">
+          <span>{uncategorizedCount} photo{uncategorizedCount === 1 ? '' : 's'} do not have an album/category yet.</span>
+          <button
+            onClick={() => {
+              setCategoryFilter(GALLERY_CATEGORY_UNCATEGORIZED)
+              setPage(1)
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-gold hover:text-gold-400"
+          >
+            <Tags className="w-3 h-3" /> Review uncategorized
+          </button>
+        </div>
+      )}
 
       <div className="mx-4 mb-4 grid gap-3 lg:grid-cols-[1fr_280px]">
         <div
@@ -2142,7 +2168,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium text-text-primary">Bulk upload tournament photos</div>
-              <div className="text-xs text-text-muted mt-1">Drop a folder selection or choose many images. Uploads continue while you move around admin.</div>
+              <div className="text-xs text-text-muted mt-1">Pick an album/category, then drop a folder selection or choose many images. Uploads continue while you move around admin.</div>
             </div>
             <button onClick={() => fileInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gold text-navy-900 text-xs font-heading font-semibold uppercase tracking-wider hover:bg-gold-400">
               <Upload className="w-3.5 h-3.5" /> Choose Photos
@@ -2166,23 +2192,16 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
             <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Default Caption</label>
             <input value={uploadCaption} onChange={e => setUploadCaption(e.target.value)} placeholder="Optional shared caption" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
           </div>
-          <div>
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Category</label>
-            <input
-              value={uploadCategory}
-              onChange={e => setUploadCategory(e.target.value)}
-              list={`gallery-category-options-${eventId}`}
-              placeholder="One category per photo"
-              className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-            />
-            <p className="mt-1 text-[11px] text-text-muted">Changing this later moves photos to the new category.</p>
-          </div>
+          <GalleryCategoryPicker
+            label="Album / Category"
+            value={uploadCategory}
+            onChange={setUploadCategory}
+            categoryOptions={categoryOptions}
+            emptyLabel="Upload without an album"
+            helpText="Every photo in this upload will be assigned to this album/category. You can move them later."
+          />
         </div>
       </div>
-      <datalist id={`gallery-category-options-${eventId}`}>
-        {categoryOptions.map(category => <option key={category.name} value={category.name} />)}
-      </datalist>
-
       {loading ? (
         <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-text-muted" /></div>
       ) : (
@@ -2191,7 +2210,7 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
             <div className="flex flex-col gap-2 border-b border-white/5 bg-white/[0.015] px-4 py-3 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
               <span>
                 Showing {pageStart}-{pageEnd} of {total}
-                {categoryFilter !== GALLERY_CATEGORY_ALL ? ' in this category' : ''}
+                {categoryFilter !== GALLERY_CATEGORY_ALL ? ` in ${activeCategoryLabel}` : ''}
               </span>
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
@@ -2206,23 +2225,24 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
             <div className="p-3 border-b border-white/5 bg-white/[0.02] flex flex-wrap items-center justify-between gap-3">
               <div className="text-xs text-text-secondary">{selectedIds.length} selected</div>
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center gap-1.5">
-                  <input
+                <div className="grid w-full gap-2 sm:w-auto sm:min-w-72 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+                  <GalleryCategoryPicker
+                    label="Move selected to"
                     value={bulkCategory}
-                    onChange={e => setBulkCategory(e.target.value)}
-                    list={`gallery-category-options-${eventId}`}
-                    placeholder="Move to category"
-                    className="w-36 bg-white/[0.03] border border-white/10 px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                    onChange={setBulkCategory}
+                    categoryOptions={categoryOptions}
+                    emptyLabel="Choose album/category"
+                    compact
                   />
                   <button
                     onClick={() => void handleBulkCategory()}
                     disabled={!bulkCategory.trim()}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-gold bg-gold/10 hover:bg-gold/15 disabled:opacity-40"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gold bg-gold/10 hover:bg-gold/15 disabled:opacity-40"
                   >
                     <Tags className="w-3 h-3" /> Move
                   </button>
-                  <button onClick={() => void handleBulkCategory('')} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-muted bg-white/5 hover:text-text-primary">
-                    <X className="w-3 h-3" /> Clear
+                  <button onClick={() => void handleBulkCategory('')} className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-text-muted bg-white/5 hover:text-text-primary">
+                    <X className="w-3 h-3" /> Clear album
                   </button>
                 </div>
                 <button onClick={() => void handleBulkActive(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-green-400 bg-green-500/10 hover:bg-green-500/15"><Eye className="w-3 h-3" /> Show</button>
@@ -2290,7 +2310,9 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
           )}
 
           {galleryImages.length === 0 && editing === null && (
-            <div className="p-4 text-center text-text-muted text-xs">No gallery images yet.</div>
+            <div className="p-4 text-center text-text-muted text-xs">
+              {categoryFilter === GALLERY_CATEGORY_ALL ? 'No gallery images yet.' : `No photos in ${activeCategoryLabel}.`}
+            </div>
           )}
           {totalPages > 1 && (
             <div className="p-4 flex items-center justify-center gap-2 border-t border-white/5">
@@ -2372,16 +2394,13 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
                     <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Caption</label>
                     <input value={form.caption} onChange={e => setForm(p => ({ ...p, caption: e.target.value }))} className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Category</label>
-                    <input
-                      value={form.category}
-                      onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
-                      list={`gallery-category-options-${eventId}`}
-                      placeholder="Optional album/category"
-                      className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                    />
-                  </div>
+                  <GalleryCategoryPicker
+                    label="Album / Category"
+                    value={form.category}
+                    onChange={category => setForm(p => ({ ...p, category }))}
+                    categoryOptions={categoryOptions}
+                    emptyLabel="No album / category"
+                  />
                   <div>
                     <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Sort Order</label>
                     <input type="number" value={form.sort_order} onChange={e => setForm(p => ({ ...p, sort_order: parseInt(e.target.value, 10) || 0 }))} className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
@@ -2463,6 +2482,83 @@ function EventGallerySection({ eventId, eventName }: { eventId: number; eventNam
       )}
     </AnimatePresence>
     </>
+  )
+}
+
+function GalleryCategoryPicker({
+  label,
+  value,
+  onChange,
+  categoryOptions,
+  emptyLabel = 'No album / category',
+  helpText,
+  compact = false,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  categoryOptions: { name: string; count: number }[]
+  emptyLabel?: string
+  helpText?: string
+  compact?: boolean
+}) {
+  const [creating, setCreating] = useState(false)
+  const knownNames = useMemo(() => new Set(categoryOptions.map(category => category.name)), [categoryOptions])
+  const trimmedValue = value.trim()
+  const isKnownValue = trimmedValue === '' || knownNames.has(trimmedValue)
+  const showingCustomInput = creating || !isKnownValue
+  const selectValue = showingCustomInput ? GALLERY_CATEGORY_CREATE : trimmedValue
+  const inputClass = compact
+    ? 'w-full bg-white/[0.03] border border-white/10 px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none'
+    : 'w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none'
+
+  useEffect(() => {
+    if (trimmedValue && knownNames.has(trimmedValue)) setCreating(false)
+  }, [knownNames, trimmedValue])
+
+  return (
+    <div>
+      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">
+        {label}
+      </label>
+      <select
+        value={selectValue}
+        onChange={event => {
+          const nextValue = event.target.value
+          if (nextValue === GALLERY_CATEGORY_CREATE) {
+            setCreating(true)
+            if (isKnownValue) onChange('')
+            return
+          }
+          setCreating(false)
+          onChange(nextValue)
+        }}
+        className={inputClass}
+      >
+        <option value="">{emptyLabel}</option>
+        {categoryOptions.map(category => (
+          <option key={category.name} value={category.name}>
+            {category.name}{category.count > 0 ? ` (${category.count})` : ' — default'}
+          </option>
+        ))}
+        <option value={GALLERY_CATEGORY_CREATE}>Create new album/category...</option>
+      </select>
+      {showingCustomInput && (
+        <input
+          value={value}
+          onChange={event => onChange(event.target.value)}
+          maxLength={80}
+          placeholder="e.g. Taiwan Podium"
+          className={`${inputClass} mt-2`}
+        />
+      )}
+      {showingCustomInput && trimmedValue && (
+        <p className="mt-1 text-[11px] text-gold-400/80">
+          New album/category will be created when photos are saved or uploaded.
+        </p>
+      )}
+      {helpText && <p className="mt-1 text-[11px] text-text-muted">{helpText}</p>}
+    </div>
   )
 }
 

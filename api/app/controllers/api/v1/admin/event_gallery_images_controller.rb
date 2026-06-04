@@ -5,6 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         UploadAlreadyUsed = Class.new(StandardError)
+        UNCATEGORIZED_FILTER = "__uncategorized__".freeze
 
         before_action :require_staff!
         before_action :set_event
@@ -16,13 +17,20 @@ module Api
           scope = @event.event_gallery_images.with_image_variant_records.sorted
           scope = scope.where(event_gallery_upload_batch_id: params[:batch_id]) if params[:batch_id].present?
           scope = scope.where(status: params[:status]) if params[:status].present?
-          scope = scope.categorized_as(params[:category]) if params[:category].present?
+          if params[:category].present?
+            scope = if params[:category] == UNCATEGORIZED_FILTER
+              scope.where(category: [ nil, "" ])
+            else
+              scope.categorized_as(params[:category])
+            end
+          end
           total = scope.count
           gallery_images = scope.offset((page - 1) * per_page).limit(per_page)
 
           render json: {
             gallery_images: gallery_images.as_json,
             categories: gallery_categories,
+            uncategorized_count: uncategorized_count,
             total: total,
             page: page,
             per_page: per_page
@@ -199,6 +207,10 @@ module Api
           EventGalleryImage.category_options_for(@event).map do |category|
             { name: category, count: counts[category].to_i }
           end
+        end
+
+        def uncategorized_count
+          @event.event_gallery_images.where(category: [ nil, "" ]).count
         end
 
         def apply_blob_metadata(gallery_image)
