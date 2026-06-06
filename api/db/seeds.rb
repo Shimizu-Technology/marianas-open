@@ -274,16 +274,8 @@ end
   puts "Created #{schedule_items.length} schedule items for #{event.name}"
 end
 
-# Prize categories
-[
-  { name: "Black Belt Open Class (M)", amount: 10000, sort_order: 1 },
-  { name: "Black Belt Open Class (F)", amount: 10000, sort_order: 2 },
-  { name: "Black Belt Weight Divisions", amount: 15000, sort_order: 3 },
-  { name: "Brown Belt Weight Divisions", amount: 5000, sort_order: 4 },
-  { name: "Team Trophy", amount: 5000, sort_order: 5 },
-  { name: "Kids Grand Champion (per division)", amount: 500, sort_order: 6 },
-].each { |item| main_event.prize_categories.create!(item) }
-puts "Created prize categories for main event"
+# Main event prize breakdown is intentionally not seeded yet.
+# The organizer has only confirmed the total prize pool; allocations will be added once official.
 
 # Trip package prizes for Pro events
 {
