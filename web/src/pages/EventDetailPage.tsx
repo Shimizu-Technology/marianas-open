@@ -115,6 +115,7 @@ export default function EventDetailPage() {
         })
     : [];
 
+  const hasPrizeBreakdown = prizeBreakdown.length > 0;
   const prizePoolDisplay = mainEvent?.prize_pool ? `$${Number(mainEvent.prize_pool).toLocaleString()}` : null;
 
   const activeAccommodations = (mainEvent?.event_accommodations ?? [])
@@ -434,31 +435,33 @@ export default function EventDetailPage() {
                 {hasCashPrizes ? (
                   <>
                     {prizePoolDisplay && <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>}
-                    <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
+                    <div className={`text-sm text-text-muted uppercase tracking-wider ${hasPrizeBreakdown ? 'mb-6' : ''}`}>{t('event.totalPrizePool')}</div>
                   </>
                 ) : hasTripPackages ? (
                   <>
                     <div className="text-2xl sm:text-3xl font-heading font-black text-gold-500 mb-2">
                       {eventPrizeTitle?.trim() || t('event.winYourWay', 'Win Your Way to Guam!')}
                     </div>
-                    <div className="text-sm text-text-secondary mb-6">
+                    <div className={`text-sm text-text-secondary ${hasPrizeBreakdown ? 'mb-6' : ''}`}>
                       {eventPrizeDescription?.trim() || t('event.tripPackageDesc', `Compete for a trip package to the Marianas Open International Championship — ${prizePoolDisplay || '$50,000'} cash prize pool!`)}
                     </div>
                   </>
                 ) : (
                   <>
                     {prizePoolDisplay && <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>}
-                <div className="text-sm text-text-muted uppercase tracking-wider mb-6">{t('event.totalPrizePool')}</div>
+                    <div className={`text-sm text-text-muted uppercase tracking-wider ${hasPrizeBreakdown ? 'mb-6' : ''}`}>{t('event.totalPrizePool')}</div>
                   </>
                 )}
-                <div className="space-y-3 text-sm max-h-64 overflow-y-auto pr-2">
-                  {prizeBreakdown.map((item, i) => (
-                    <div key={i} className="flex justify-between gap-2 text-text-secondary">
-                      <span className="shrink">{item.division}</span>
-                      {item.prize && <span className="text-gold-400 font-semibold shrink-0">{item.prize}</span>}
-                    </div>
-                  ))}
-                </div>
+                {hasPrizeBreakdown && (
+                  <div className="space-y-3 text-sm max-h-64 overflow-y-auto pr-2">
+                    {prizeBreakdown.map((item, i) => (
+                      <div key={i} className="flex justify-between gap-2 text-text-secondary">
+                        <span className="shrink">{item.division}</span>
+                        {item.prize && <span className="text-gold-400 font-semibold shrink-0">{item.prize}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </ScrollReveal>
             )}
