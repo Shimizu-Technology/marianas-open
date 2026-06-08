@@ -16,6 +16,20 @@ import { resolveMediaUrl } from '../utils/images';
 
 // Qualifying series posters are now driven by events with poster_image_url set.
 
+function getRegistrationLinks(event: Event) {
+  const gi = event.registration_url_gi?.trim() || '';
+  const nogi = event.registration_url_nogi?.trim() || '';
+  const legacy = event.registration_url?.trim() || '';
+
+  return {
+    gi,
+    nogi,
+    legacy,
+    hasDirect: !!(gi || nogi),
+    hasAny: !!(gi || nogi || legacy),
+  };
+}
+
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -203,7 +217,7 @@ export default function CalendarPage() {
                 const posterDateLocal = parseDateLocalSafe(event.date);
                 const isPastPoster = posterDateLocal < todayLocal;
                 const posterSrc = resolveMediaUrl(event.poster_image_url);
-                const regUrl = event.registration_url_gi || event.registration_url_nogi || event.registration_url;
+                const registrationLinks = getRegistrationLinks(event);
 
                 return (
                   <ScrollReveal key={event.id} delay={i * 0.1}>
@@ -245,16 +259,45 @@ export default function CalendarPage() {
                           <MapPin size={10} className="text-gold-500 shrink-0" />
                           {event.venue_name || `${event.city}, ${event.country}`}
                         </p>
-                        {regUrl && !isPastPoster && (
-                          <a
-                            href={regUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1 mt-2 text-[10px] text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
-                          >
-                            Register <ExternalLink size={8} />
-                          </a>
+                        {registrationLinks.hasAny && !isPastPoster && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {registrationLinks.hasDirect ? (
+                              <>
+                                {registrationLinks.gi && (
+                                  <a
+                                    href={registrationLinks.gi}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="inline-flex items-center gap-1 text-[10px] text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
+                                  >
+                                    Gi <ExternalLink size={8} />
+                                  </a>
+                                )}
+                                {registrationLinks.nogi && (
+                                  <a
+                                    href={registrationLinks.nogi}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="inline-flex items-center gap-1 text-[10px] text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
+                                  >
+                                    No-Gi <ExternalLink size={8} />
+                                  </a>
+                                )}
+                              </>
+                            ) : (
+                              <a
+                                href={registrationLinks.legacy}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1 text-[10px] text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
+                              >
+                                Register <ExternalLink size={8} />
+                              </a>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -278,6 +321,7 @@ function EventCard({ event, formatDate, t, isPast }: {
   const { tf } = useTranslatedField();
   const isLive = event.status === 'live';
   const isCancelled = event.status === 'cancelled';
+  const registrationLinks = getRegistrationLinks(event);
   return (
     <Link
       to={`/events/${event.slug}`}
@@ -340,56 +384,58 @@ function EventCard({ event, formatDate, t, isPast }: {
 
       {!isPast && !isCancelled && (
         <div className="flex flex-col gap-2">
-          {(event.registration_url_gi || event.registration_url_nogi) ? (
-            <>
-              {event.registration_url_gi && (
-                <a
-                  href={event.registration_url_gi}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
-                    event.is_main_event
-                      ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
-                      : 'bg-navy-700 text-text-primary hover:bg-navy-600'
-                  }`}
-                >
-                  {t('calendar.registerGi', 'Register (Gi)')}
-                  <ExternalLink size={12} />
-                </a>
-              )}
-              {event.registration_url_nogi && (
-                <a
-                  href={event.registration_url_nogi}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
-                    event.is_main_event
-                      ? 'bg-gold-500/80 text-navy-900 hover:bg-gold-400'
-                      : 'bg-navy-800 text-text-primary hover:bg-navy-700'
-                  }`}
-                >
-                  {t('calendar.registerNogi', 'Register (No-Gi)')}
-                  <ExternalLink size={12} />
-                </a>
-              )}
-            </>
-          ) : (
-            <a
-              href={event.registration_url || 'https://asjjf.org'}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
-                event.is_main_event
-                  ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
-                  : 'bg-navy-700 text-text-primary hover:bg-navy-600'
-              }`}
-            >
-              {t('calendar.register')}
-              <ExternalLink size={12} />
-            </a>
+          {registrationLinks.hasAny && (
+            registrationLinks.hasDirect ? (
+              <>
+                {registrationLinks.gi && (
+                  <a
+                    href={registrationLinks.gi}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
+                      event.is_main_event
+                        ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
+                        : 'bg-navy-700 text-text-primary hover:bg-navy-600'
+                    }`}
+                  >
+                    {t('calendar.registerGi', 'Register (Gi)')}
+                    <ExternalLink size={12} />
+                  </a>
+                )}
+                {registrationLinks.nogi && (
+                  <a
+                    href={registrationLinks.nogi}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
+                      event.is_main_event
+                        ? 'bg-gold-500/80 text-navy-900 hover:bg-gold-400'
+                        : 'bg-navy-800 text-text-primary hover:bg-navy-700'
+                    }`}
+                  >
+                    {t('calendar.registerNogi', 'Register (No-Gi)')}
+                    <ExternalLink size={12} />
+                  </a>
+                )}
+              </>
+            ) : (
+              <a
+                href={registrationLinks.legacy}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-heading font-bold uppercase tracking-wider transition-colors ${
+                  event.is_main_event
+                    ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
+                    : 'bg-navy-700 text-text-primary hover:bg-navy-600'
+                }`}
+              >
+                {t('calendar.register')}
+                <ExternalLink size={12} />
+              </a>
+            )
           )}
           <span
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gold-500/30 text-gold-500 text-sm font-heading font-bold uppercase tracking-wider hover:bg-gold-500/10 transition-colors"
