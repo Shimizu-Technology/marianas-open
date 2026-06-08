@@ -17,6 +17,7 @@ import type { Event } from '../services/api';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import ScrollReveal from './ScrollReveal';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
+import { getRegistrationLinks } from '../utils/registrationLinks';
 
 type StopStatus = 'completed' | 'live' | 'next' | 'upcoming' | 'cancelled';
 
@@ -105,20 +106,6 @@ function StatusBadge({
       {labels[status]}
     </span>
   );
-}
-
-function getRegistrationLinks(event: Event) {
-  const gi = event.registration_url_gi?.trim() || '';
-  const nogi = event.registration_url_nogi?.trim() || '';
-  const legacy = event.registration_url?.trim() || '';
-
-  return {
-    gi,
-    nogi,
-    legacy,
-    hasDirect: !!(gi || nogi),
-    hasAny: !!(gi || nogi || legacy),
-  };
 }
 
 function JourneyRegistrationLinks({

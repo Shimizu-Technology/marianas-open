@@ -13,6 +13,7 @@ import { useEvents, useSponsors } from '../hooks/useApi';
 import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
+import { getRegistrationLinks } from '../utils/registrationLinks';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -165,11 +166,7 @@ export default function EventDetailPage() {
         linkLabel: step.link_label || '',
       }))
     : [];
-  const registrationUrlGi = mainEvent?.registration_url_gi?.trim() || '';
-  const registrationUrlNogi = mainEvent?.registration_url_nogi?.trim() || '';
-  const registrationUrlLegacy = mainEvent?.registration_url?.trim() || '';
-  const hasDirectRegistrationUrls = !!(registrationUrlGi || registrationUrlNogi);
-  const hasAnyRegistrationUrl = hasDirectRegistrationUrls || !!registrationUrlLegacy;
+  const registrationLinks = getRegistrationLinks(mainEvent);
   const travelDescription = eventTravelDescription || '';
   const displayTravelItems = travelItems;
   const visaDescription = eventVisaDescription || '';
@@ -794,7 +791,7 @@ export default function EventDetailPage() {
       )}
 
       {/* How to Register — only if steps or URL configured */}
-      {(displayRegistrationSteps.length > 0 || hasAnyRegistrationUrl) && (
+      {(displayRegistrationSteps.length > 0 || registrationLinks.hasAny) && (
       <section className="py-16 sm:py-20 bg-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
@@ -830,13 +827,13 @@ export default function EventDetailPage() {
                     ))}
                   </div>
                 )}
-                {hasAnyRegistrationUrl && (
+                {registrationLinks.hasAny && (
                   <div className={`${displayRegistrationSteps.length > 0 ? 'mt-8' : ''} flex flex-wrap gap-3`}>
-                    {hasDirectRegistrationUrls ? (
+                    {registrationLinks.hasDirect ? (
                       <>
-                        {registrationUrlGi && (
+                        {registrationLinks.gi && (
                           <a
-                            href={registrationUrlGi}
+                            href={registrationLinks.gi}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
@@ -845,9 +842,9 @@ export default function EventDetailPage() {
                             <ExternalLink size={14} />
                           </a>
                         )}
-                        {registrationUrlNogi && (
+                        {registrationLinks.nogi && (
                           <a
-                            href={registrationUrlNogi}
+                            href={registrationLinks.nogi}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 px-6 py-3 border border-gold-500 text-gold-500 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-500/10 transition-colors"
@@ -859,7 +856,7 @@ export default function EventDetailPage() {
                       </>
                     ) : (
                       <a
-                        href={registrationUrlLegacy}
+                        href={registrationLinks.legacy}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"

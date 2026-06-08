@@ -10,6 +10,8 @@ class UseDirectAsjjfRegistrationLinksFor2026Events < ActiveRecord::Migration[8.1
     "marianas-open-2026" => [ nil, "https://asjjf.org/main/eventNotice/2062", "https://asjjf.org/main/eventNotice/2063" ]
   }.freeze
 
+  # Snapshot of production registration values before this migration.
+  # Marianas Open already had separate Gi/No-Gi eventInfo URLs in production.
   PREVIOUS_REGISTRATION_URLS = {
     "copa-de-marianas-2026" => [ nil, "https://asjjf.org/main/eventInfo/1837", "https://asjjf.org/main/eventInfo/1838" ],
     "marianas-pro-nagoya-2026" => [ "https://asjjf.org/main/eventInfo/1863", nil, nil ],
