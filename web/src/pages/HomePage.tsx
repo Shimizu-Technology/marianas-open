@@ -194,15 +194,13 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
-                <a
-                  href="https://asjjf.org"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  to="/event"
                   className="group inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-all duration-300"
                 >
                   {t('hero.cta')}
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </a>
+                </Link>
                 <Link
                   to="/calendar"
                   className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 border border-white/20 text-text-primary font-heading font-medium uppercase tracking-wider text-sm hover:bg-white/5 transition-all duration-300"

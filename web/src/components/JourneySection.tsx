@@ -7,6 +7,7 @@ import {
   MapPin,
   Calendar,
   Trophy,
+  ExternalLink,
   ChevronRight,
   CircleCheck,
   CircleDot,
@@ -16,6 +17,7 @@ import type { Event } from '../services/api';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import ScrollReveal from './ScrollReveal';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
+import { getRegistrationLinks } from '../utils/registrationLinks';
 
 type StopStatus = 'completed' | 'live' | 'next' | 'upcoming' | 'cancelled';
 
@@ -106,6 +108,73 @@ function StatusBadge({
   );
 }
 
+function JourneyRegistrationLinks({
+  event,
+  status,
+  isMainEvent,
+  t,
+}: {
+  event: Event;
+  status: StopStatus;
+  isMainEvent: boolean;
+  t: (key: string) => string;
+}) {
+  if (status === 'completed' || status === 'cancelled') return null;
+
+  const links = getRegistrationLinks(event);
+  if (!links.hasAny) return null;
+
+  const primaryClass = isMainEvent
+    ? 'bg-gold-500 text-navy-900 hover:bg-gold-400'
+    : 'bg-navy-700 text-text-primary hover:bg-navy-600';
+  const secondaryClass = isMainEvent
+    ? 'bg-gold-500/80 text-navy-900 hover:bg-gold-400'
+    : 'bg-navy-800 text-text-primary hover:bg-navy-700';
+
+  const buttonClass = 'inline-flex items-center justify-center gap-1 px-2.5 py-2 text-[10px] font-heading font-bold uppercase tracking-wider transition-colors';
+
+  return (
+    <div className="mt-3 grid grid-cols-1 gap-2 border-t border-white/5 pt-3">
+      {links.hasDirect ? (
+        <>
+          {links.gi && (
+            <a
+              href={links.gi}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${buttonClass} ${primaryClass}`}
+            >
+              {t('calendar.registerGi')}
+              <ExternalLink size={10} />
+            </a>
+          )}
+          {links.nogi && (
+            <a
+              href={links.nogi}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${buttonClass} ${secondaryClass}`}
+            >
+              {t('calendar.registerNogi')}
+              <ExternalLink size={10} />
+            </a>
+          )}
+        </>
+      ) : (
+        <a
+          href={links.legacy}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${buttonClass} ${primaryClass}`}
+        >
+          {t('calendar.register')}
+          <ExternalLink size={10} />
+        </a>
+      )}
+    </div>
+  );
+}
+
 /* ─── Mobile: vertical timeline card ─── */
 function MobileStop({
   stop,
@@ -173,8 +242,7 @@ function MobileStop({
       </div>
 
       {/* Card */}
-      <Link
-        to={isMain ? '/event' : `/events/${event.slug}`}
+      <div
         className={`group flex-1 mb-4 p-4 border transition-all duration-300 hover:border-gold-500/30 ${
           status === 'cancelled'
             ? 'bg-navy-900/30 border-red-500/10 opacity-60'
@@ -185,41 +253,44 @@ function MobileStop({
                 : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
         }`}
       >
-        <div className="flex items-center justify-between mb-2">
-          <StatusBadge status={status} isMainEvent={isMain} t={t} />
-          <StarRating count={event.asjjf_stars} />
-        </div>
+        <Link to={isMain ? '/event' : `/events/${event.slug}`} className="block">
+          <div className="flex items-center justify-between mb-2">
+            <StatusBadge status={status} isMainEvent={isMain} t={t} />
+            <StarRating count={event.asjjf_stars} />
+          </div>
 
-        <h3
-          className={`font-heading font-bold text-base mb-1 ${
-            status === 'cancelled' ? 'text-text-muted line-through' :
-            isMain ? 'text-gold-500' : 'text-text-primary'
-          }`}
-        >
-          {isMain && <Trophy size={14} className="inline mr-1.5 -mt-0.5" />}
-          {tf(event, 'name')}
-        </h3>
+          <h3
+            className={`font-heading font-bold text-base mb-1 ${
+              status === 'cancelled' ? 'text-text-muted line-through' :
+              isMain ? 'text-gold-500' : 'text-text-primary'
+            }`}
+          >
+            {isMain && <Trophy size={14} className="inline mr-1.5 -mt-0.5" />}
+            {tf(event, 'name')}
+          </h3>
 
-        <div className="flex items-center gap-3 text-xs text-text-secondary">
-          <span className="flex items-center gap-1">
-            <MapPin size={11} />
-            {tf(event, 'city')}, {tf(event, 'country')}
-          </span>
-          <span className="flex items-center gap-1">
-            <Calendar size={11} />
-            {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(lang), {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </span>
-        </div>
+          <div className="flex items-center gap-3 text-xs text-text-secondary">
+            <span className="flex items-center gap-1">
+              <MapPin size={11} />
+              {tf(event, 'city')}, {tf(event, 'country')}
+            </span>
+            <span className="flex items-center gap-1">
+              <Calendar size={11} />
+              {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(lang), {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+            </span>
+          </div>
 
-        <div className="flex items-center gap-1 mt-2 text-xs text-text-muted group-hover:text-gold-500 transition-colors">
-          {t('journey.viewEvent')}
-          <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-        </div>
-      </Link>
+          <div className="flex items-center gap-1 mt-2 text-xs text-text-muted group-hover:text-gold-500 transition-colors">
+            {t('journey.viewEvent')}
+            <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </Link>
+        <JourneyRegistrationLinks event={event} status={status} isMainEvent={isMain} t={t} />
+      </div>
     </motion.div>
   );
 }
@@ -282,8 +353,7 @@ function DesktopStop({
       </div>
 
       {/* Card */}
-      <Link
-        to={isMain ? '/event' : `/events/${event.slug}`}
+      <div
         className={`group w-full p-4 border text-center transition-all duration-300 hover:border-gold-500/30 ${
           status === 'cancelled'
             ? 'bg-navy-900/30 border-red-500/10 opacity-60'
@@ -294,41 +364,44 @@ function DesktopStop({
                 : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
         }`}
       >
-        <div className="flex justify-center mb-2">
-          <StatusBadge status={status} isMainEvent={isMain} t={t} />
-        </div>
+        <Link to={isMain ? '/event' : `/events/${event.slug}`} className="block">
+          <div className="flex justify-center mb-2">
+            <StatusBadge status={status} isMainEvent={isMain} t={t} />
+          </div>
 
-        <h3
-          className={`font-heading font-bold text-sm mb-1 leading-tight ${
-            status === 'cancelled' ? 'text-text-muted line-through' :
-            isMain ? 'text-gold-500 text-base' : 'text-text-primary'
-          }`}
-        >
-          {tf(event, 'name')}
-        </h3>
+          <h3
+            className={`font-heading font-bold text-sm mb-1 leading-tight ${
+              status === 'cancelled' ? 'text-text-muted line-through' :
+              isMain ? 'text-gold-500 text-base' : 'text-text-primary'
+            }`}
+          >
+            {tf(event, 'name')}
+          </h3>
 
-        <div className="flex items-center justify-center gap-1 text-[11px] text-text-secondary mb-1">
-          <MapPin size={10} />
-          {tf(event, 'city')}, {tf(event, 'country')}
-        </div>
+          <div className="flex items-center justify-center gap-1 text-[11px] text-text-secondary mb-1">
+            <MapPin size={10} />
+            {tf(event, 'city')}, {tf(event, 'country')}
+          </div>
 
-        <div className="text-[11px] text-text-muted mb-2">
-          {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(lang), {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          })}
-        </div>
+          <div className="text-[11px] text-text-muted mb-2">
+            {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(lang), {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </div>
 
-        <div className="flex justify-center mb-2">
-          <StarRating count={event.asjjf_stars} />
-        </div>
+          <div className="flex justify-center mb-2">
+            <StarRating count={event.asjjf_stars} />
+          </div>
 
-        <div className="flex items-center justify-center gap-1 text-[11px] text-text-muted group-hover:text-gold-500 transition-colors">
-          <StatusIcon status={status} />
-          <ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
-        </div>
-      </Link>
+          <div className="flex items-center justify-center gap-1 text-[11px] text-text-muted group-hover:text-gold-500 transition-colors">
+            <StatusIcon status={status} />
+            <ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </Link>
+        <JourneyRegistrationLinks event={event} status={status} isMainEvent={isMain} t={t} />
+      </div>
     </motion.div>
   );
 }

@@ -13,6 +13,7 @@ import { useEvents, useSponsors } from '../hooks/useApi';
 import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
+import { getRegistrationLinks } from '../utils/registrationLinks';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -165,6 +166,10 @@ export default function EventDetailPage() {
         linkLabel: step.link_label || '',
       }))
     : [];
+  const registrationLinks = getRegistrationLinks(mainEvent);
+  const isRegistrationClosed = mainEvent?.status === 'completed' || mainEvent?.status === 'cancelled';
+  const canShowRegistrationActions = !isRegistrationClosed && registrationLinks.hasAny;
+  const canShowRegistrationSection = !isRegistrationClosed && (displayRegistrationSteps.length > 0 || registrationLinks.hasAny);
   const travelDescription = eventTravelDescription || '';
   const displayTravelItems = travelItems;
   const visaDescription = eventVisaDescription || '';
@@ -362,6 +367,47 @@ export default function EventDetailPage() {
               </div>
               )}
             </div>
+
+            {canShowRegistrationActions && (
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                {registrationLinks.hasDirect ? (
+                  <>
+                    {registrationLinks.gi && (
+                      <a
+                        href={registrationLinks.gi}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-12 items-center justify-center gap-2 bg-gold-500 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-navy-900 shadow-[0_0_40px_rgba(226,178,68,0.16)] transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                      >
+                        {t('home.registerNowGi', 'Register Now (Gi)')}
+                        <ExternalLink size={14} />
+                      </a>
+                    )}
+                    {registrationLinks.nogi && (
+                      <a
+                        href={registrationLinks.nogi}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-12 items-center justify-center gap-2 border border-gold-500/70 bg-navy-900/50 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-gold-300 backdrop-blur-sm transition-colors hover:bg-gold-500/10 hover:text-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                      >
+                        {t('home.registerNowNogi', 'Register Now (No-Gi)')}
+                        <ExternalLink size={14} />
+                      </a>
+                    )}
+                  </>
+                ) : (
+                  <a
+                    href={registrationLinks.legacy}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 bg-gold-500 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-navy-900 shadow-[0_0_40px_rgba(226,178,68,0.16)] transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                  >
+                    {t('home.registerNow')}
+                    <ExternalLink size={14} />
+                  </a>
+                )}
+              </div>
+            )}
             {mainEvent && galleryImagesCount > 0 && (
               <Link
                 to={`/events/${mainEvent.slug}/gallery`}
@@ -789,7 +835,7 @@ export default function EventDetailPage() {
       )}
 
       {/* How to Register — only if steps or URL configured */}
-      {(displayRegistrationSteps.length > 0 || mainEvent?.registration_url) && (
+      {canShowRegistrationSection && (
       <section className="py-16 sm:py-20 bg-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
@@ -797,70 +843,74 @@ export default function EventDetailPage() {
                 <h3 className="font-heading font-bold text-xl uppercase tracking-wider mb-8">
                   {t('event.howToRegister')}
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                {displayRegistrationSteps.map((s) => (
-                    <div key={s.step} className="relative">
-                      <div className="flex items-start gap-4">
-                        <div className="shrink-0 w-14 h-14 flex items-center justify-center bg-gold-500/10 border border-gold-500/20">
-                          <span className="text-gold-500 font-heading font-black text-xl">{s.step}</span>
+                {displayRegistrationSteps.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                    {displayRegistrationSteps.map((s) => (
+                      <div key={s.step} className="relative">
+                        <div className="flex items-start gap-4">
+                          <div className="shrink-0 w-14 h-14 flex items-center justify-center bg-gold-500/10 border border-gold-500/20">
+                            <span className="text-gold-500 font-heading font-black text-xl">{s.step}</span>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="font-heading font-bold text-sm uppercase tracking-wider">{s.title}</h4>
+                            <p className="text-text-secondary text-sm leading-relaxed">{s.desc}</p>
+                            {s.url && (
+                              <a
+                                href={s.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-gold-400 hover:text-gold-300 transition-colors"
+                              >
+                                {s.linkLabel || t('event.learnMoreLink', 'Learn more')}
+                                <ExternalLink size={12} />
+                              </a>
+                            )}
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <h4 className="font-heading font-bold text-sm uppercase tracking-wider">{s.title}</h4>
-                          <p className="text-text-secondary text-sm leading-relaxed">{s.desc}</p>
-                        {s.url && (
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {canShowRegistrationActions && (
+                  <div className={`${displayRegistrationSteps.length > 0 ? 'mt-8' : ''} flex flex-wrap gap-3`}>
+                    {registrationLinks.hasDirect ? (
+                      <>
+                        {registrationLinks.gi && (
                           <a
-                            href={s.url}
+                            href={registrationLinks.gi}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-gold-400 hover:text-gold-300 transition-colors"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
                           >
-                            {s.linkLabel || t('event.learnMoreLink', 'Learn more')}
-                            <ExternalLink size={12} />
+                            {t('home.registerNowGi', 'Register Now (Gi)')}
+                            <ExternalLink size={14} />
                           </a>
                         )}
-                      </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              <div className="mt-8 flex flex-wrap gap-3">
-                {(mainEvent?.registration_url_gi || mainEvent?.registration_url_nogi) ? (
-                  <>
-                    {mainEvent?.registration_url_gi && (
+                        {registrationLinks.nogi && (
+                          <a
+                            href={registrationLinks.nogi}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-6 py-3 border border-gold-500 text-gold-500 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-500/10 transition-colors"
+                          >
+                            {t('home.registerNowNogi', 'Register Now (No-Gi)')}
+                            <ExternalLink size={14} />
+                          </a>
+                        )}
+                      </>
+                    ) : (
                       <a
-                        href={mainEvent.registration_url_gi}
+                        href={registrationLinks.legacy}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
                       >
-                        {t('home.registerNowGi', 'Register Now (Gi)')}
+                        {t('home.registerNow')}
                         <ExternalLink size={14} />
                       </a>
                     )}
-                    {mainEvent?.registration_url_nogi && (
-                      <a
-                        href={mainEvent.registration_url_nogi}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-6 py-3 border border-gold-500 text-gold-500 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-500/10 transition-colors"
-                      >
-                        {t('home.registerNowNogi', 'Register Now (No-Gi)')}
-                        <ExternalLink size={14} />
-                      </a>
-                    )}
-                  </>
-                ) : (
-                  <a
-                    href={mainEvent?.registration_url || 'https://asjjf.org'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
-                  >
-                    {t('home.registerNow')}
-                    <ExternalLink size={14} />
-                  </a>
+                  </div>
                 )}
-              </div>
             </div>
           </ScrollReveal>
         </div>
