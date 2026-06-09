@@ -27,6 +27,7 @@ import { api } from '../services/api'
 import { GalleryUploadProvider, GalleryUploadStatusPanel } from '../contexts/GalleryUploadContext'
 
 const sidebarStorageKey = 'marianas-open-admin-sidebar-collapsed'
+const mobileAdminNavId = 'mobile-admin-nav'
 
 type NavItem = {
   to: string
@@ -140,6 +141,10 @@ function AdminNavLink({ item, collapsed, onNavigate }: { item: NavItem; collapse
 
   const hideTooltip = () => setTooltipVisible(false)
 
+  useEffect(() => {
+    setTooltipVisible(false)
+  }, [collapsed])
+
   return (
     <>
       <NavLink
@@ -196,6 +201,10 @@ function UtilityLink({
 
   const hideTooltip = () => setTooltipVisible(false)
 
+  useEffect(() => {
+    setTooltipVisible(false)
+  }, [collapsed])
+
   return (
     <>
       <Link
@@ -245,6 +254,10 @@ function SidebarContent({
     .filter((section) => section.items.length > 0)
 
   const collapseLabel = collapsed ? 'Expand sidebar' : 'Collapse sidebar'
+
+  useEffect(() => {
+    setCollapseTooltipVisible(false)
+  }, [collapsed])
 
   return (
     <nav className="flex h-full flex-col" aria-label="Admin navigation">
@@ -397,6 +410,7 @@ export default function AdminLayout() {
             className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
             aria-label="Open admin navigation"
             aria-expanded={mobileNavOpen}
+            aria-controls={mobileAdminNavId}
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -417,6 +431,7 @@ export default function AdminLayout() {
         )}
 
         <aside
+          id={mobileAdminNavId}
           className={`fixed inset-y-0 left-0 z-[60] flex w-72 max-w-[86vw] transform flex-col border-r border-white/10 bg-surface shadow-2xl shadow-black/40 transition-transform duration-200 ease-out lg:hidden ${
             mobileNavOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
