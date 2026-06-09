@@ -167,6 +167,9 @@ export default function EventDetailPage() {
       }))
     : [];
   const registrationLinks = getRegistrationLinks(mainEvent);
+  const isRegistrationClosed = mainEvent?.status === 'completed' || mainEvent?.status === 'cancelled';
+  const canShowRegistrationActions = !isRegistrationClosed && registrationLinks.hasAny;
+  const canShowRegistrationSection = !isRegistrationClosed && (displayRegistrationSteps.length > 0 || registrationLinks.hasAny);
   const travelDescription = eventTravelDescription || '';
   const displayTravelItems = travelItems;
   const visaDescription = eventVisaDescription || '';
@@ -364,6 +367,47 @@ export default function EventDetailPage() {
               </div>
               )}
             </div>
+
+            {canShowRegistrationActions && (
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                {registrationLinks.hasDirect ? (
+                  <>
+                    {registrationLinks.gi && (
+                      <a
+                        href={registrationLinks.gi}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-12 items-center justify-center gap-2 bg-gold-500 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-navy-900 shadow-[0_0_40px_rgba(226,178,68,0.16)] transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                      >
+                        {t('home.registerNowGi', 'Register Now (Gi)')}
+                        <ExternalLink size={14} />
+                      </a>
+                    )}
+                    {registrationLinks.nogi && (
+                      <a
+                        href={registrationLinks.nogi}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-12 items-center justify-center gap-2 border border-gold-500/70 bg-navy-900/50 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-gold-300 backdrop-blur-sm transition-colors hover:bg-gold-500/10 hover:text-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                      >
+                        {t('home.registerNowNogi', 'Register Now (No-Gi)')}
+                        <ExternalLink size={14} />
+                      </a>
+                    )}
+                  </>
+                ) : (
+                  <a
+                    href={registrationLinks.legacy}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 bg-gold-500 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-navy-900 shadow-[0_0_40px_rgba(226,178,68,0.16)] transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                  >
+                    {t('home.registerNow')}
+                    <ExternalLink size={14} />
+                  </a>
+                )}
+              </div>
+            )}
             {mainEvent && galleryImagesCount > 0 && (
               <Link
                 to={`/events/${mainEvent.slug}/gallery`}
@@ -791,7 +835,7 @@ export default function EventDetailPage() {
       )}
 
       {/* How to Register — only if steps or URL configured */}
-      {(displayRegistrationSteps.length > 0 || registrationLinks.hasAny) && (
+      {canShowRegistrationSection && (
       <section className="py-16 sm:py-20 bg-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
@@ -827,7 +871,7 @@ export default function EventDetailPage() {
                     ))}
                   </div>
                 )}
-                {registrationLinks.hasAny && (
+                {canShowRegistrationActions && (
                   <div className={`${displayRegistrationSteps.length > 0 ? 'mt-8' : ''} flex flex-wrap gap-3`}>
                     {registrationLinks.hasDirect ? (
                       <>
