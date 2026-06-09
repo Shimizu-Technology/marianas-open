@@ -353,6 +353,8 @@ export default function AdminLayout() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [desktopCollapsed, setDesktopCollapsed] = useState(readSidebarPreference)
+  const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null)
+  const mobileCloseButtonRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -384,7 +386,11 @@ export default function AdminLayout() {
     if (!mobileNavOpen || typeof document === 'undefined') return
 
     const previousOverflow = document.body.style.overflow
+    const mobileMenuButton = mobileMenuButtonRef.current
     document.body.style.overflow = 'hidden'
+    const focusTimer = window.setTimeout(() => {
+      mobileCloseButtonRef.current?.focus()
+    }, 0)
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setMobileNavOpen(false)
@@ -393,8 +399,14 @@ export default function AdminLayout() {
     window.addEventListener('keydown', handleKeyDown)
 
     return () => {
+      window.clearTimeout(focusTimer)
       document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', handleKeyDown)
+
+      const mobileNav = document.getElementById(mobileAdminNavId)
+      if (document.activeElement instanceof HTMLElement && mobileNav?.contains(document.activeElement)) {
+        mobileMenuButton?.focus()
+      }
     }
   }, [mobileNavOpen])
 
@@ -405,6 +417,7 @@ export default function AdminLayout() {
       <div className="min-h-screen bg-navy-900 text-text-primary">
         <header className="sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-surface/95 px-4 py-3 backdrop-blur lg:hidden">
           <button
+            ref={mobileMenuButtonRef}
             type="button"
             onClick={() => setMobileNavOpen(true)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
@@ -442,6 +455,7 @@ export default function AdminLayout() {
           inert={!mobileNavOpen}
         >
           <button
+            ref={mobileCloseButtonRef}
             type="button"
             onClick={closeMobileNav}
             className="absolute right-3 top-4 inline-flex h-9 w-9 items-center justify-center rounded-xl text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
