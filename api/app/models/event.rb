@@ -5,6 +5,9 @@ class Event < ApplicationRecord
   STATUSES = %w[draft upcoming live completed cancelled].freeze
   PUBLIC_STATUSES = %w[upcoming live completed cancelled].freeze
   AUTO_COMPLETABLE_STATUSES = %w[upcoming live].freeze
+  ASJJF_REGISTRATION_URL_FIELDS = %i[registration_url registration_url_gi registration_url_nogi].freeze
+
+  before_validation :normalize_asjjf_registration_urls
 
   validates :status, inclusion: { in: STATUSES }, allow_nil: true
 
@@ -45,6 +48,12 @@ class Event < ApplicationRecord
 
   def self.publicly_visible_ids_sql
     publicly_visible.select(:id).to_sql
+  end
+
+  def self.asjjf_event_info_url(url)
+    return url if url.blank?
+
+    url.to_s.strip.gsub(%r{/main/eventNotice/(?=\d)}i, "/main/eventInfo/")
   end
 
   def asjjf_source_urls
@@ -93,6 +102,15 @@ class Event < ApplicationRecord
   end
 
   private
+
+  def normalize_asjjf_registration_urls
+    ASJJF_REGISTRATION_URL_FIELDS.each do |field|
+      value = public_send(field)
+      next if value.blank?
+
+      public_send("#{field}=", self.class.asjjf_event_info_url(value))
+    end
+  end
 
   def public_gallery_images
     event_gallery_images
