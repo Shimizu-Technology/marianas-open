@@ -6,7 +6,8 @@ import { api } from '../services/api';
 import type { EventGalleryImage } from '../services/api';
 import { isBrowserPreviewableImage } from '../utils/images';
 
-type UploadStatus = 'queued' | 'hashing' | 'uploading' | 'saving' | 'complete' | 'failed';
+type UploadStatus = 'queued' | 'hashing' | 'preparing' | 'uploading' | 'saving' | 'complete' | 'failed';
+type UploadMode = 'direct' | 'server';
 
 export interface GalleryUploadTask {
   id: string;
@@ -19,6 +20,13 @@ export interface GalleryUploadTask {
   browserPreviewable: boolean;
   progress: number;
   status: UploadStatus;
+  bytesUploaded: number;
+  createdAt: number;
+  startedAt?: number;
+  uploadStartedAt?: number;
+  completedAt?: number;
+  uploadMode?: UploadMode;
+  fallbackReason?: string;
   error?: string;
   galleryImage?: EventGalleryImage;
 }
@@ -38,6 +46,9 @@ interface GalleryUploadContextValue {
   activeCount: number;
   failedCount: number;
   completedCount: number;
+  concurrency: number;
+  directStorageUnavailable: boolean;
+  directStorageError?: string;
   startUpload: (options: StartUploadOptions) => Promise<void>;
   retryFailed: () => void;
   clearCompleted: () => void;
@@ -45,6 +56,7 @@ interface GalleryUploadContextValue {
 
 const GalleryUploadContext = createContext<GalleryUploadContextValue | null>(null);
 const CONCURRENCY = 4;
+const ACTIVE_STATUSES: UploadStatus[] = ['queued', 'hashing', 'preparing', 'uploading', 'saving'];
 export const GALLERY_IMAGE_MAX_BYTES = 50 * 1024 * 1024;
 export const GALLERY_IMAGE_TYPES = [
   'image/jpeg',
@@ -112,7 +124,54 @@ function titleFromFilename(fileName: string) {
   return fileName.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
 }
 
-async function uploadThroughServer(task: GalleryUploadTask, file: File, meta: { active: boolean; caption: string; category: string; sortOrder: number }) {
+function formatBytes(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  const value = bytes / Math.pow(1024, exponent);
+  const precision = value >= 100 || exponent === 0 ? 0 : value >= 10 ? 1 : 2;
+  return `${value.toFixed(precision)} ${units[exponent]}`;
+}
+
+function formatDuration(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return '—';
+  const rounded = Math.max(1, Math.round(seconds));
+  if (rounded < 60) return `${rounded}s`;
+  const minutes = Math.floor(rounded / 60);
+  const remainingSeconds = rounded % 60;
+  if (minutes < 60) return `${minutes}m ${remainingSeconds}s`;
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return `${hours}h ${remainingMinutes}m`;
+}
+
+function statusLabel(task: GalleryUploadTask) {
+  switch (task.status) {
+    case 'queued':
+      return 'Queued';
+    case 'hashing':
+      return 'Hashing checksum';
+    case 'preparing':
+      return 'Preparing direct upload';
+    case 'uploading':
+      return task.uploadMode === 'server' ? 'Uploading through API' : 'Uploading direct to S3';
+    case 'saving':
+      return 'Saving gallery record';
+    case 'complete':
+      return 'Complete';
+    case 'failed':
+      return 'Failed';
+    default:
+      return task.status;
+  }
+}
+
+async function uploadThroughServer(
+  task: GalleryUploadTask,
+  file: File,
+  meta: { active: boolean; caption: string; category: string; sortOrder: number },
+  onProgress?: (progress: number) => void
+) {
   const title = titleFromFilename(file.name);
   const formData = new FormData();
   formData.append('image', file);
@@ -123,16 +182,18 @@ async function uploadThroughServer(task: GalleryUploadTask, file: File, meta: { 
   formData.append('category', meta.category);
   formData.append('sort_order', String(meta.sortOrder));
   formData.append('active', String(meta.active));
-  return api.admin.createEventGalleryImage(task.eventId, formData);
+  return api.admin.createEventGalleryImage(task.eventId, formData, onProgress);
 }
 
 export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<GalleryUploadTask[]>([]);
+  const [directStorageError, setDirectStorageError] = useState<string | undefined>(undefined);
   const tasksRef = useRef<GalleryUploadTask[]>([]);
   const fileMapRef = useRef(new Map<string, File>());
   const metaMapRef = useRef(new Map<string, { active: boolean; caption: string; category: string; sortOrder: number }>());
   const runningRef = useRef(0);
   const directStorageUnavailableRef = useRef(false);
+  const directStorageErrorRef = useRef<string | undefined>(undefined);
   const processQueueRef = useRef<() => void>(() => undefined);
 
   const setTasksSynced = useCallback((updater: (current: GalleryUploadTask[]) => GalleryUploadTask[]) => {
@@ -160,6 +221,20 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
     setTasksSynced(current => current.map(task => task.id === id ? { ...task, ...updates } : task));
   }, [setTasksSynced]);
 
+  const markDirectStorageUnavailable = useCallback((reason: string) => {
+    directStorageUnavailableRef.current = true;
+    directStorageErrorRef.current = reason;
+    setDirectStorageError(reason);
+  }, []);
+
+  const updateUploadProgress = useCallback((task: GalleryUploadTask, progress: number, progressStart: number, progressSpan: number) => {
+    const normalizedProgress = Math.max(0, Math.min(1, progress));
+    updateTask(task.id, {
+      bytesUploaded: Math.round(task.fileSize * normalizedProgress),
+      progress: Math.max(progressStart, Math.round(progressStart + normalizedProgress * progressSpan)),
+    });
+  }, [updateTask]);
+
   const processTask = useCallback(async (task: GalleryUploadTask) => {
     try {
       const file = fileMapRef.current.get(task.id);
@@ -167,14 +242,32 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       if (!file || !meta) throw new Error('Upload task is missing its file data');
 
       if (directStorageUnavailableRef.current) {
-        updateTask(task.id, { status: 'saving', progress: 10, error: undefined });
-        const completed = await uploadThroughServer(task, file, meta);
-        updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image, error: undefined });
+        const fallbackReason = directStorageErrorRef.current;
+        updateTask(task.id, {
+          status: 'uploading',
+          uploadMode: 'server',
+          progress: 1,
+          bytesUploaded: 0,
+          uploadStartedAt: Date.now(),
+          fallbackReason,
+          error: undefined,
+        });
+        const completed = await uploadThroughServer(task, file, meta, progress => updateUploadProgress(task, progress, 1, 84));
+        updateTask(task.id, {
+          status: 'complete',
+          progress: 100,
+          bytesUploaded: task.fileSize,
+          completedAt: Date.now(),
+          galleryImage: completed.gallery_image,
+          error: undefined,
+        });
         return;
       }
 
+      updateTask(task.id, { status: 'hashing', progress: 3, bytesUploaded: 0, error: undefined });
       const md5 = await checksum(file);
 
+      updateTask(task.id, { status: 'preparing', uploadMode: 'direct', progress: 6 });
       const prepared = await api.admin.prepareEventGalleryDirectUpload(task.eventId, {
         filename: file.name,
         byte_size: file.size,
@@ -183,24 +276,34 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       });
 
       let completed: { gallery_image: EventGalleryImage };
-      updateTask(task.id, { status: 'uploading', progress: 10 });
+      updateTask(task.id, { status: 'uploading', uploadMode: 'direct', progress: 10, bytesUploaded: 0, uploadStartedAt: Date.now() });
       try {
-        await uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, file, (progress) => {
-          updateTask(task.id, { progress: Math.max(10, Math.round(10 + progress * 75)) });
-        });
+        await uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, file, progress => updateUploadProgress(task, progress, 10, 75));
       } catch (storageError) {
-        directStorageUnavailableRef.current = true;
+        const fallbackReason = storageError instanceof Error ? storageError.message : 'Storage upload failed';
+        markDirectStorageUnavailable(fallbackReason);
         updateTask(task.id, {
-          status: 'saving',
-          progress: 85,
-          error: storageError instanceof Error ? `${storageError.message}; retrying through server` : 'Storage upload failed; retrying through server',
+          status: 'uploading',
+          uploadMode: 'server',
+          progress: 1,
+          bytesUploaded: 0,
+          uploadStartedAt: Date.now(),
+          fallbackReason,
+          error: undefined,
         });
-        completed = await uploadThroughServer(task, file, meta);
-        updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image, error: undefined });
+        completed = await uploadThroughServer(task, file, meta, progress => updateUploadProgress(task, progress, 1, 84));
+        updateTask(task.id, {
+          status: 'complete',
+          progress: 100,
+          bytesUploaded: task.fileSize,
+          completedAt: Date.now(),
+          galleryImage: completed.gallery_image,
+          error: undefined,
+        });
         return;
       }
 
-      updateTask(task.id, { status: 'saving', progress: 90, error: undefined });
+      updateTask(task.id, { status: 'saving', progress: 90, bytesUploaded: task.fileSize, error: undefined });
       completed = await api.admin.completeEventGalleryDirectUpload(task.eventId, {
         signed_id: prepared.signed_id,
         batch_id: task.batchId,
@@ -211,18 +314,26 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         sort_order: meta.sortOrder,
         active: meta.active,
       });
-      updateTask(task.id, { status: 'complete', progress: 100, galleryImage: completed.gallery_image, error: undefined });
+      updateTask(task.id, {
+        status: 'complete',
+        progress: 100,
+        bytesUploaded: task.fileSize,
+        completedAt: Date.now(),
+        galleryImage: completed.gallery_image,
+        error: undefined,
+      });
     } catch (error) {
       updateTask(task.id, {
         status: 'failed',
         progress: 0,
+        bytesUploaded: 0,
         error: error instanceof Error ? error.message : 'Upload failed',
       });
     } finally {
       runningRef.current -= 1;
       processQueueRef.current();
     }
-  }, [updateTask]);
+  }, [markDirectStorageUnavailable, updateTask, updateUploadProgress]);
 
   const processQueue = useCallback(() => {
     const available = Math.max(0, CONCURRENCY - runningRef.current);
@@ -234,15 +345,27 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
     if (next.length === 0) return;
 
     const claimedIds = new Set(next.map(task => task.id));
+    const startedAt = Date.now();
     runningRef.current += next.length;
     setTasksSynced(current => current.map(task => (
       claimedIds.has(task.id)
-        ? { ...task, status: 'hashing', progress: 2, error: undefined }
+        ? {
+            ...task,
+            status: 'hashing',
+            progress: 2,
+            bytesUploaded: 0,
+            startedAt,
+            completedAt: undefined,
+            uploadMode: undefined,
+            uploadStartedAt: undefined,
+            fallbackReason: undefined,
+            error: undefined,
+          }
         : task
     )));
 
     next.forEach(task => {
-      void processTask({ ...task, status: 'hashing', progress: 2, error: undefined });
+      void processTask({ ...task, status: 'hashing', progress: 2, bytesUploaded: 0, startedAt });
     });
   }, [processTask, setTasksSynced]);
   processQueueRef.current = processQueue;
@@ -273,6 +396,8 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         previewUrl: URL.createObjectURL(file),
         browserPreviewable: isBrowserPreviewableGalleryFile(file),
         progress: 0,
+        bytesUploaded: 0,
+        createdAt,
         status: 'queued' as UploadStatus,
       };
     });
@@ -282,7 +407,20 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   }, [processQueue, setTasksSynced]);
 
   const retryFailed = useCallback(() => {
-    setTasksSynced(current => current.map(task => task.status === 'failed' ? { ...task, status: 'queued', progress: 0, error: undefined } : task));
+    setTasksSynced(current => current.map(task => task.status === 'failed'
+      ? {
+          ...task,
+          status: 'queued',
+          progress: 0,
+          bytesUploaded: 0,
+          uploadMode: undefined,
+          uploadStartedAt: undefined,
+          startedAt: undefined,
+          completedAt: undefined,
+          fallbackReason: undefined,
+          error: undefined,
+        }
+      : task));
     window.setTimeout(processQueue, 0);
   }, [processQueue, setTasksSynced]);
 
@@ -298,11 +436,22 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   }, [setTasksSynced]);
 
   const value = useMemo(() => {
-    const activeCount = tasks.filter(task => ['queued', 'hashing', 'uploading', 'saving'].includes(task.status)).length;
+    const activeCount = tasks.filter(task => ACTIVE_STATUSES.includes(task.status)).length;
     const failedCount = tasks.filter(task => task.status === 'failed').length;
     const completedCount = tasks.filter(task => task.status === 'complete').length;
-    return { tasks, activeCount, failedCount, completedCount, startUpload, retryFailed, clearCompleted };
-  }, [tasks, startUpload, retryFailed, clearCompleted]);
+    return {
+      tasks,
+      activeCount,
+      failedCount,
+      completedCount,
+      concurrency: CONCURRENCY,
+      directStorageUnavailable: directStorageUnavailableRef.current,
+      directStorageError,
+      startUpload,
+      retryFailed,
+      clearCompleted,
+    };
+  }, [tasks, directStorageError, startUpload, retryFailed, clearCompleted]);
 
   return (
     <GalleryUploadContext.Provider value={value}>
@@ -317,16 +466,63 @@ export function useGalleryUploads() {
   return context;
 }
 
+function taskSortRank(task: GalleryUploadTask) {
+  if (task.status === 'uploading') return 0;
+  if (task.status === 'saving') return 1;
+  if (task.status === 'hashing' || task.status === 'preparing') return 2;
+  if (task.status === 'queued') return 3;
+  if (task.status === 'failed') return 4;
+  return 5;
+}
+
 export function GalleryUploadStatusPanel() {
-  const { tasks, activeCount, failedCount, completedCount, retryFailed, clearCompleted } = useGalleryUploads();
+  const { tasks, activeCount, failedCount, completedCount, retryFailed, clearCompleted, concurrency, directStorageUnavailable, directStorageError } = useGalleryUploads();
+  const [now, setNow] = useState(0);
+
+  useEffect(() => {
+    if (activeCount === 0) return undefined;
+    const updateNow = () => setNow(Date.now());
+    updateNow();
+    const interval = window.setInterval(updateNow, 1000);
+    return () => window.clearInterval(interval);
+  }, [activeCount]);
+
   if (tasks.length === 0) return null;
 
-  const overall = tasks.length > 0
-    ? Math.round(tasks.reduce((sum, task) => sum + task.progress, 0) / tasks.length)
-    : 0;
+  const activeBatchIds = new Set(tasks.filter(task => ACTIVE_STATUSES.includes(task.status)).map(task => task.batchId));
+  const metricTasks = activeBatchIds.size > 0 ? tasks.filter(task => activeBatchIds.has(task.batchId)) : tasks;
+  const metricCompletedCount = metricTasks.filter(task => task.status === 'complete').length;
+  const totalBytes = metricTasks.reduce((sum, task) => sum + task.fileSize, 0);
+  const uploadedBytes = Math.min(totalBytes, metricTasks.reduce((sum, task) => {
+    if (task.status === 'complete') return sum + task.fileSize;
+    return sum + Math.min(task.fileSize, task.bytesUploaded || 0);
+  }, 0));
+  const rawOverall = totalBytes > 0 ? Math.round((uploadedBytes / totalBytes) * 100) : Math.round(metricTasks.reduce((sum, task) => sum + task.progress, 0) / metricTasks.length);
+  const overall = activeCount > 0 && metricCompletedCount < metricTasks.length ? Math.min(99, rawOverall) : rawOverall;
+  const firstStartedAt = metricTasks.reduce<number | null>((earliest, task) => {
+    const timestamp = task.startedAt || task.createdAt;
+    if (!timestamp) return earliest;
+    return earliest === null ? timestamp : Math.min(earliest, timestamp);
+  }, null);
+  const currentTimestamp = now || firstStartedAt || 0;
+  const elapsedSeconds = firstStartedAt && currentTimestamp > firstStartedAt ? Math.max(1, (currentTimestamp - firstStartedAt) / 1000) : 0;
+  const averageBytesPerSecond = elapsedSeconds > 0 ? uploadedBytes / elapsedSeconds : 0;
+  const remainingBytes = Math.max(0, totalBytes - uploadedBytes);
+  const etaSeconds = averageBytesPerSecond > 0 && remainingBytes > 0 ? remainingBytes / averageBytesPerSecond : 0;
+  const activeTasks = tasks.filter(task => ACTIVE_STATUSES.includes(task.status));
+  const modeLabel = directStorageUnavailable
+    ? 'Server fallback'
+    : activeTasks.some(task => task.uploadMode === 'server')
+      ? 'Mixed mode'
+      : activeTasks.some(task => task.uploadMode === 'direct')
+        ? 'Direct S3'
+        : 'Preparing';
+  const visibleTasks = [...tasks]
+    .sort((a, b) => taskSortRank(a) - taskSortRank(b) || (a.startedAt || a.createdAt) - (b.startedAt || b.createdAt))
+    .slice(0, 8);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-[min(420px,calc(100vw-2rem))] border border-white/10 bg-surface shadow-2xl">
+    <div className="fixed bottom-4 right-4 z-50 w-[min(460px,calc(100vw-2rem))] border border-white/10 bg-surface shadow-2xl">
       <div className="p-3 border-b border-white/5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm font-medium text-text-primary">
@@ -338,33 +534,68 @@ export function GalleryUploadStatusPanel() {
         <div className="mt-2 h-1.5 bg-white/5 overflow-hidden">
           <div className="h-full bg-gold transition-all" style={{ width: `${overall}%` }} />
         </div>
-        <div className="mt-2 flex items-center gap-3 text-xs text-text-muted">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
           <span>{activeCount} active</span>
           <span>{completedCount} complete</span>
           <span>{failedCount} failed</span>
+          <span>{concurrency} at a time</span>
         </div>
-      </div>
-      <div className="max-h-64 overflow-auto">
-        {tasks.slice(0, 8).map(task => (
-          <div key={task.id} className="flex items-center gap-3 p-3 border-b border-white/5">
-            {task.browserPreviewable ? (
-              <img src={task.previewUrl} alt="" className="w-10 h-10 object-cover bg-white/5" />
-            ) : (
-              <div className="w-10 h-10 flex items-center justify-center bg-white/5 text-text-muted">
-                <UploadCloud className="w-4 h-4" />
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-xs text-text-primary">{task.fileName}</div>
-              <div className="mt-1 h-1 bg-white/5 overflow-hidden">
-                <div className={`h-full ${task.status === 'failed' ? 'bg-red-400' : 'bg-gold'}`} style={{ width: `${task.progress}%` }} />
-              </div>
-              {task.error && <div className="mt-1 truncate text-[11px] text-red-400">{task.error}</div>}
-            </div>
-            {task.status === 'complete' && <CheckCircle2 className="w-4 h-4 text-green-400" />}
-            {task.status === 'failed' && <XCircle className="w-4 h-4 text-red-400" />}
+        <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-text-muted sm:grid-cols-4">
+          <div className="border border-white/5 bg-white/[0.02] px-2 py-1.5">
+            <div className="uppercase tracking-wide text-text-muted/80">Transferred</div>
+            <div className="mt-0.5 text-text-primary">{formatBytes(uploadedBytes)} / {formatBytes(totalBytes)}</div>
           </div>
-        ))}
+          <div className="border border-white/5 bg-white/[0.02] px-2 py-1.5">
+            <div className="uppercase tracking-wide text-text-muted/80">Average</div>
+            <div className="mt-0.5 text-text-primary">{averageBytesPerSecond > 0 ? `${formatBytes(averageBytesPerSecond)}/s` : '—'}</div>
+          </div>
+          <div className="border border-white/5 bg-white/[0.02] px-2 py-1.5">
+            <div className="uppercase tracking-wide text-text-muted/80">ETA</div>
+            <div className="mt-0.5 text-text-primary">{etaSeconds > 0 ? formatDuration(etaSeconds) : '—'}</div>
+          </div>
+          <div className="border border-white/5 bg-white/[0.02] px-2 py-1.5">
+            <div className="uppercase tracking-wide text-text-muted/80">Mode</div>
+            <div className={directStorageUnavailable ? 'mt-0.5 text-amber-300' : 'mt-0.5 text-text-primary'}>{modeLabel}</div>
+          </div>
+        </div>
+        {directStorageUnavailable && (
+          <div className="mt-2 border border-amber-400/20 bg-amber-400/10 px-2.5 py-2 text-[11px] leading-4 text-amber-200">
+            Direct S3 upload failed{directStorageError ? `: ${directStorageError}` : ''}. Remaining files are uploading through the API, which is usually slower.
+          </div>
+        )}
+      </div>
+      <div className="max-h-72 overflow-auto">
+        {visibleTasks.map(task => {
+          const transferredForTask = task.status === 'complete' ? task.fileSize : Math.min(task.fileSize, task.bytesUploaded || 0);
+          return (
+            <div key={task.id} className="flex items-center gap-3 p-3 border-b border-white/5">
+              {task.browserPreviewable ? (
+                <img src={task.previewUrl} alt="" className="w-10 h-10 object-cover bg-white/5" />
+              ) : (
+                <div className="w-10 h-10 flex items-center justify-center bg-white/5 text-text-muted">
+                  <UploadCloud className="w-4 h-4" />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-xs text-text-primary">{task.fileName}</div>
+                <div className="mt-1 h-1 bg-white/5 overflow-hidden">
+                  <div className={`h-full ${task.status === 'failed' ? 'bg-red-400' : 'bg-gold'}`} style={{ width: `${task.progress}%` }} />
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-text-muted">
+                  <span>{statusLabel(task)}</span>
+                  <span>{formatBytes(transferredForTask)} / {formatBytes(task.fileSize)}</span>
+                  {task.uploadMode && <span>{task.uploadMode === 'direct' ? 'Direct S3' : 'API fallback'}</span>}
+                </div>
+                {task.fallbackReason && task.status !== 'failed' && (
+                  <div className="mt-1 truncate text-[11px] text-amber-300">Direct S3 failed: {task.fallbackReason}; using API fallback</div>
+                )}
+                {task.error && <div className="mt-1 truncate text-[11px] text-red-400">{task.error}</div>}
+              </div>
+              {task.status === 'complete' && <CheckCircle2 className="w-4 h-4 text-green-400" />}
+              {task.status === 'failed' && <XCircle className="w-4 h-4 text-red-400" />}
+            </div>
+          );
+        })}
       </div>
       {(failedCount > 0 || completedCount > 0) && (
         <div className="flex items-center justify-end gap-2 p-3">

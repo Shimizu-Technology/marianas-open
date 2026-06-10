@@ -745,6 +745,47 @@ async function fetchApiUpload<T>(endpoint: string, formData: FormData): Promise<
   return response.json();
 }
 
+async function fetchApiUploadWithProgress<T>(endpoint: string, formData: FormData, onProgress: (progress: number) => void): Promise<T> {
+  const headers: Record<string, string> = {};
+
+  if (getAuthToken) {
+    const token = await getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_URL}${endpoint}`);
+    Object.entries(headers).forEach(([key, value]) => xhr.setRequestHeader(key, value));
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total);
+    };
+    xhr.onload = () => {
+      const parseBody = () => {
+        if (!xhr.responseText) return undefined;
+        try {
+          return JSON.parse(xhr.responseText) as unknown;
+        } catch {
+          return undefined;
+        }
+      };
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(parseBody() as T);
+        return;
+      }
+
+      const body = parseBody() as Record<string, unknown> | undefined;
+      const message = body?.error || body?.errors || `Upload error: ${xhr.status}`;
+      reject(new Error(typeof message === 'string' ? message : JSON.stringify(message)));
+    };
+    xhr.onerror = () => reject(new Error('Upload error: network request failed'));
+    xhr.send(formData);
+  });
+}
+
 export const api = {
   // Public
   getSiteContents: () => fetchApi<SiteContentMap>('/api/v1/site-contents'),
@@ -899,8 +940,10 @@ export const api = {
       const query = params ? '?' + new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString() : '';
       return fetchApi<GalleryImagesResponse>(`/api/v1/admin/events/${eventId}/gallery-images${query}`, {}, true);
     },
-    createEventGalleryImage: (eventId: number, data: FormData) =>
-      fetchApiUpload<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images`, data),
+    createEventGalleryImage: (eventId: number, data: FormData, onProgress?: (progress: number) => void) =>
+      onProgress
+        ? fetchApiUploadWithProgress<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images`, data, onProgress)
+        : fetchApiUpload<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images`, data),
     updateEventGalleryImage: (eventId: number, id: number, data: Partial<EventGalleryImageFormData>) =>
       fetchApi<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images/${id}`, {
         method: 'PATCH',
