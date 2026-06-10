@@ -187,6 +187,7 @@ async function uploadThroughServer(
 
 export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<GalleryUploadTask[]>([]);
+  const [directStorageUnavailable, setDirectStorageUnavailable] = useState(false);
   const [directStorageError, setDirectStorageError] = useState<string | undefined>(undefined);
   const tasksRef = useRef<GalleryUploadTask[]>([]);
   const fileMapRef = useRef(new Map<string, File>());
@@ -224,6 +225,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   const markDirectStorageUnavailable = useCallback((reason: string) => {
     directStorageUnavailableRef.current = true;
     directStorageErrorRef.current = reason;
+    setDirectStorageUnavailable(true);
     setDirectStorageError(reason);
   }, []);
 
@@ -445,13 +447,13 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       failedCount,
       completedCount,
       concurrency: CONCURRENCY,
-      directStorageUnavailable: directStorageUnavailableRef.current,
+      directStorageUnavailable,
       directStorageError,
       startUpload,
       retryFailed,
       clearCompleted,
     };
-  }, [tasks, directStorageError, startUpload, retryFailed, clearCompleted]);
+  }, [tasks, directStorageUnavailable, directStorageError, startUpload, retryFailed, clearCompleted]);
 
   return (
     <GalleryUploadContext.Provider value={value}>
@@ -499,13 +501,13 @@ export function GalleryUploadStatusPanel() {
   }, 0));
   const rawOverall = totalBytes > 0 ? Math.round((uploadedBytes / totalBytes) * 100) : Math.round(metricTasks.reduce((sum, task) => sum + task.progress, 0) / metricTasks.length);
   const overall = activeCount > 0 && metricCompletedCount < metricTasks.length ? Math.min(99, rawOverall) : rawOverall;
-  const firstStartedAt = metricTasks.reduce<number | null>((earliest, task) => {
-    const timestamp = task.startedAt || task.createdAt;
+  const firstUploadStartedAt = metricTasks.reduce<number | null>((earliest, task) => {
+    const timestamp = task.uploadStartedAt;
     if (!timestamp) return earliest;
     return earliest === null ? timestamp : Math.min(earliest, timestamp);
   }, null);
-  const currentTimestamp = now || firstStartedAt || 0;
-  const elapsedSeconds = firstStartedAt && currentTimestamp > firstStartedAt ? Math.max(1, (currentTimestamp - firstStartedAt) / 1000) : 0;
+  const currentTimestamp = now || firstUploadStartedAt || 0;
+  const elapsedSeconds = firstUploadStartedAt && currentTimestamp > firstUploadStartedAt ? Math.max(1, (currentTimestamp - firstUploadStartedAt) / 1000) : 0;
   const averageBytesPerSecond = elapsedSeconds > 0 ? uploadedBytes / elapsedSeconds : 0;
   const remainingBytes = Math.max(0, totalBytes - uploadedBytes);
   const etaSeconds = averageBytesPerSecond > 0 && remainingBytes > 0 ? remainingBytes / averageBytesPerSecond : 0;
