@@ -621,6 +621,28 @@ function taskSortRank(task: GalleryUploadTask) {
   return 5;
 }
 
+function taskOptimizedSize(task: GalleryUploadTask) {
+  const originalSize = task.originalFileSize || task.fileSize;
+  if (task.optimizedFileSize) return task.optimizedFileSize;
+  if (task.fileSize < originalSize) return task.fileSize;
+  return undefined;
+}
+
+function taskCanBeOptimized(task: GalleryUploadTask) {
+  const fileName = task.fileName.toLowerCase();
+  return (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) && (task.originalFileSize || task.fileSize) > OPTIMIZATION_SIZE_THRESHOLD_BYTES;
+}
+
+function estimatedUploadSize(task: GalleryUploadTask, averageOptimizedRatio: number) {
+  const originalSize = task.originalFileSize || task.fileSize;
+  const optimizedSize = taskOptimizedSize(task);
+  if (optimizedSize) return optimizedSize;
+  if (averageOptimizedRatio > 0 && taskCanBeOptimized(task)) {
+    return Math.max(1, Math.min(task.fileSize, Math.round(originalSize * averageOptimizedRatio)));
+  }
+  return task.fileSize;
+}
+
 export function GalleryUploadStatusPanel() {
   const { tasks, activeCount, failedCount, completedCount, retryFailed, clearCompleted, concurrency, directStorageUnavailable, directStorageError } = useGalleryUploads();
   const [now, setNow] = useState(0);
@@ -638,9 +660,15 @@ export function GalleryUploadStatusPanel() {
   const activeBatchIds = new Set(tasks.filter(task => ACTIVE_STATUSES.includes(task.status)).map(task => task.batchId));
   const metricTasks = activeBatchIds.size > 0 ? tasks.filter(task => activeBatchIds.has(task.batchId)) : tasks;
   const metricCompletedCount = metricTasks.filter(task => task.status === 'complete').length;
-  const totalBytes = metricTasks.reduce((sum, task) => sum + task.fileSize, 0);
-  const originalTotalBytes = metricTasks.reduce((sum, task) => sum + (task.originalFileSize || task.fileSize), 0);
-  const optimizedSavedBytes = Math.max(0, originalTotalBytes - totalBytes);
+  const optimizedSizes = metricTasks.map(taskOptimizedSize).filter((size): size is number => size !== undefined);
+  const optimizedOriginalBytes = metricTasks.reduce((sum, task) => taskOptimizedSize(task) ? sum + (task.originalFileSize || task.fileSize) : sum, 0);
+  const optimizedBytes = optimizedSizes.reduce((sum, size) => sum + size, 0);
+  const averageOptimizedRatio = optimizedOriginalBytes > 0 ? optimizedBytes / optimizedOriginalBytes : 0;
+  const totalBytes = metricTasks.reduce((sum, task) => sum + estimatedUploadSize(task, averageOptimizedRatio), 0);
+  const optimizedSavedBytes = metricTasks.reduce((sum, task) => {
+    const optimizedSize = taskOptimizedSize(task);
+    return optimizedSize ? sum + Math.max(0, (task.originalFileSize || task.fileSize) - optimizedSize) : sum;
+  }, 0);
   const uploadedBytes = Math.min(totalBytes, metricTasks.reduce((sum, task) => {
     if (task.status === 'complete') return sum + task.fileSize;
     return sum + Math.min(task.fileSize, task.bytesUploaded || 0);
