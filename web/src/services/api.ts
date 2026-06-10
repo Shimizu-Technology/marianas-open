@@ -774,6 +774,12 @@ function parseXhrBody(xhr: XMLHttpRequest) {
 }
 
 async function fetchApiUploadWithProgress<T>(endpoint: string, formData: FormData, onProgress: (progress: number) => void): Promise<T> {
+  let highestProgress = 0;
+  const reportProgress = (progress: number) => {
+    highestProgress = Math.max(highestProgress, progress);
+    onProgress(highestProgress);
+  };
+
   const send = async (skipCache = false) => {
     const headers = await authHeaders(true, skipCache);
 
@@ -782,7 +788,7 @@ async function fetchApiUploadWithProgress<T>(endpoint: string, formData: FormDat
       xhr.open('POST', `${API_URL}${endpoint}`);
       Object.entries(headers).forEach(([key, value]) => xhr.setRequestHeader(key, value));
       xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) onProgress(event.loaded / event.total);
+        if (event.lengthComputable) reportProgress(event.loaded / event.total);
       };
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {

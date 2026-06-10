@@ -283,6 +283,8 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   const directStorageUnavailableRef = useRef(false);
   const directStorageErrorRef = useRef<string | undefined>(undefined);
   const processQueueRef = useRef<() => void>(() => undefined);
+  const batchTotalUpdateTimersRef = useRef(new Map<number, number>());
+  const lastBatchTotalBytesRef = useRef(new Map<number, number>());
 
   const setTasksSynced = useCallback((updater: (current: GalleryUploadTask[]) => GalleryUploadTask[]) => {
     const next = updater(tasksRef.current);
@@ -297,9 +299,14 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const files = fileMapRef.current;
     const metas = metaMapRef.current;
+    const batchTotalTimers = batchTotalUpdateTimersRef.current;
+    const lastBatchTotalBytes = lastBatchTotalBytesRef.current;
 
     return () => {
       tasksRef.current.forEach(task => URL.revokeObjectURL(task.previewUrl));
+      batchTotalTimers.forEach(timer => window.clearTimeout(timer));
+      batchTotalTimers.clear();
+      lastBatchTotalBytes.clear();
       files.clear();
       metas.clear();
     };
@@ -314,6 +321,28 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
     directStorageErrorRef.current = reason;
     setDirectStorageUnavailable(true);
     setDirectStorageError(reason);
+  }, []);
+
+  const scheduleBatchTotalBytesUpdate = useCallback((eventId: number, batchId: number) => {
+    const existingTimer = batchTotalUpdateTimersRef.current.get(batchId);
+    if (existingTimer) window.clearTimeout(existingTimer);
+
+    const timer = window.setTimeout(async () => {
+      batchTotalUpdateTimersRef.current.delete(batchId);
+      const totalBytes = tasksRef.current
+        .filter(task => task.batchId === batchId)
+        .reduce((sum, task) => sum + task.fileSize, 0);
+      if (totalBytes <= 0 || lastBatchTotalBytesRef.current.get(batchId) === totalBytes) return;
+
+      lastBatchTotalBytesRef.current.set(batchId, totalBytes);
+      try {
+        await api.admin.updateGalleryUploadBatch(eventId, batchId, { total_bytes: totalBytes });
+      } catch (error) {
+        console.warn('[GalleryUpload] Failed to update optimized batch byte total', error);
+      }
+    }, 1000);
+
+    batchTotalUpdateTimersRef.current.set(batchId, timer);
   }, []);
 
   const updateUploadProgress = useCallback((taskId: string, fileSize: number, progress: number, progressStart: number, progressSpan: number) => {
@@ -346,6 +375,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         optimizationError: optimized.error,
         progress: 18,
       });
+      if (optimizedFileSize) scheduleBatchTotalBytesUpdate(task.eventId, task.batchId);
 
       if (directStorageUnavailableRef.current) {
         const fallbackReason = directStorageErrorRef.current;
@@ -442,7 +472,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       runningRef.current -= 1;
       processQueueRef.current();
     }
-  }, [markDirectStorageUnavailable, updateTask, updateUploadProgress]);
+  }, [markDirectStorageUnavailable, scheduleBatchTotalBytesUpdate, updateTask, updateUploadProgress]);
 
   const processQueue = useCallback(() => {
     const available = Math.max(0, CONCURRENCY - runningRef.current);
@@ -490,6 +520,8 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       total_files: imageFiles.length,
       total_bytes: totalBytes,
     });
+
+    lastBatchTotalBytesRef.current.set(batch.id, totalBytes);
 
     const createdAt = Date.now();
     const newTasks = imageFiles.map((file, index) => {
