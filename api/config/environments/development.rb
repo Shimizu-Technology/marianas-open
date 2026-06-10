@@ -54,7 +54,16 @@ Rails.application.configure do
   # config.generators.apply_rubocop_autocorrect_after_generate!
 
   # Active Storage
-  config.active_storage.service = :local
+  # Use disk by default for everyday local development, but allow a production-like
+  # local run to exercise the same direct-to-S3 path as production:
+  #   ACTIVE_STORAGE_SERVICE=amazon
+  config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "local").to_sym
+
+  # Active Job
+  # Production uses Solid Queue. Keep async as the lightweight default, and let
+  # the production-like local runner opt into Solid Queue + a separate worker:
+  #   ACTIVE_JOB_QUEUE_ADAPTER=solid_queue
+  config.active_job.queue_adapter = ENV.fetch("ACTIVE_JOB_QUEUE_ADAPTER", "async").to_sym
 
   # Default URL options
   Rails.application.routes.default_url_options[:host] = 'localhost'
