@@ -12,10 +12,14 @@ export interface RegistrationLinks {
   hasAny: boolean;
 }
 
+export function normalizeAsjjfRegistrationUrl(url: string | null | undefined): string {
+  return url?.trim().replace(/\/main\/eventNotice\/(?=\d)/ig, '/main/eventInfo/') || '';
+}
+
 export function getRegistrationLinks(event: RegistrationUrlFields | null | undefined): RegistrationLinks {
-  const gi = event?.registration_url_gi?.trim() || '';
-  const nogi = event?.registration_url_nogi?.trim() || '';
-  const legacy = event?.registration_url?.trim() || '';
+  const gi = normalizeAsjjfRegistrationUrl(event?.registration_url_gi);
+  const nogi = normalizeAsjjfRegistrationUrl(event?.registration_url_nogi);
+  const legacy = normalizeAsjjfRegistrationUrl(event?.registration_url);
 
   return {
     gi,

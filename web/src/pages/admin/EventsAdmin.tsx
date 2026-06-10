@@ -724,9 +724,9 @@ export default function EventsAdmin() {
               <Field label="Prize Pool" value={form.prize_pool} onChange={v => updateForm('prize_pool', v)} placeholder="$10,000" />
               <Field label="Prize Card Title" value={form.prize_title} onChange={v => updateForm('prize_title', v)} placeholder="e.g. Win Your Way to Guam!" />
               <Field label="Prize Card Description" value={form.prize_description} onChange={v => updateForm('prize_description', v)} placeholder="e.g. Compete for a trip package to..." />
-              <Field label="ASJJF Direct Registration URL (Gi)" value={form.registration_url_gi} onChange={v => updateForm('registration_url_gi', v)} placeholder="https://asjjf.org/main/eventNotice/..." />
-              <Field label="ASJJF Direct Registration URL (No-Gi)" value={form.registration_url_nogi} onChange={v => updateForm('registration_url_nogi', v)} placeholder="https://asjjf.org/main/eventNotice/..." />
-              <Field label="ASJJF Registration URL (Legacy)" value={form.registration_url} onChange={v => updateForm('registration_url', v)} placeholder="https://asjjf.org/events/..." />
+              <Field label="ASJJF Event Info URL (Gi)" value={form.registration_url_gi} onChange={v => updateForm('registration_url_gi', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
+              <Field label="ASJJF Event Info URL (No-Gi)" value={form.registration_url_nogi} onChange={v => updateForm('registration_url_nogi', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
+              <Field label="ASJJF Event Info URL (Legacy)" value={form.registration_url} onChange={v => updateForm('registration_url', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
               <div>
                 <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">ASJJF Event IDs (for results import)</label>
                 <input
