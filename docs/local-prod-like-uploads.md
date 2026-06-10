@@ -86,12 +86,17 @@ If you change `WEB_PORT`, add that origin to the S3 bucket CORS too.
 1. Open `http://localhost:5173/admin/events`.
 2. Edit an event and upload a small batch of gallery images.
 3. In the floating panel, confirm:
-   - Mode shows `Direct S3`.
+   - Mode shows `Direct S3`. If it shows `Direct local`, Rails is still using disk storage and the test is not production-like.
    - transferred bytes increase during upload.
    - average speed and ETA populate after upload starts.
    - files move from hashing/preparing/uploading/saving to complete.
 4. Watch the worker logs for image processing.
 5. If the panel shows `Server fallback`, direct S3 is not working locally. Check S3 CORS first.
+
+You can also verify from Rails logs:
+
+- production-like: `S3 Storage` and jobs from Solid Queue
+- regular local dev: `Disk Storage` and `Async(default)`
 
 ## Reading bottlenecks
 

@@ -8,6 +8,7 @@ import { isBrowserPreviewableImage } from '../utils/images';
 
 type UploadStatus = 'queued' | 'hashing' | 'preparing' | 'uploading' | 'saving' | 'complete' | 'failed';
 type UploadMode = 'direct' | 'server';
+type DirectUploadTarget = 's3' | 'local' | 'storage';
 
 export interface GalleryUploadTask {
   id: string;
@@ -26,6 +27,7 @@ export interface GalleryUploadTask {
   uploadStartedAt?: number;
   completedAt?: number;
   uploadMode?: UploadMode;
+  directUploadTarget?: DirectUploadTarget;
   fallbackReason?: string;
   error?: string;
   galleryImage?: EventGalleryImage;
@@ -56,6 +58,7 @@ interface GalleryUploadContextValue {
 
 const GalleryUploadContext = createContext<GalleryUploadContextValue | null>(null);
 const CONCURRENCY = 4;
+const COMPLETE_UPLOAD_TIMEOUT_MS = 60_000;
 const ACTIVE_STATUSES: UploadStatus[] = ['queued', 'hashing', 'preparing', 'uploading', 'saving'];
 export const GALLERY_IMAGE_MAX_BYTES = 50 * 1024 * 1024;
 export const GALLERY_IMAGE_TYPES = [
@@ -100,6 +103,33 @@ function checksum(file: File) {
     };
     reader.onerror = () => reject(new Error('Could not read image data'));
     reader.readAsArrayBuffer(file);
+  });
+}
+
+function directUploadTargetFromUrl(url: string): DirectUploadTarget {
+  try {
+    const host = new URL(url, window.location.href).hostname.toLowerCase();
+    if (host.includes('amazonaws.com') || host.includes('.s3.')) return 's3';
+    if (host === window.location.hostname || host === 'localhost' || host === '127.0.0.1' || host === '::1') return 'local';
+  } catch {
+    // Fall through to the generic label.
+  }
+  return 'storage';
+}
+
+function directUploadLabel(task: Pick<GalleryUploadTask, 'directUploadTarget'>) {
+  if (task.directUploadTarget === 's3') return 'Direct S3';
+  if (task.directUploadTarget === 'local') return 'Direct local';
+  return 'Direct storage';
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string) {
+  let timeoutId: number | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timeoutId) window.clearTimeout(timeoutId);
   });
 }
 
@@ -154,7 +184,7 @@ function statusLabel(task: GalleryUploadTask) {
     case 'preparing':
       return 'Preparing direct upload';
     case 'uploading':
-      return task.uploadMode === 'server' ? 'Uploading through API' : 'Uploading direct to S3';
+      return task.uploadMode === 'server' ? 'Uploading through API' : `Uploading ${directUploadLabel(task).toLowerCase()}`;
     case 'saving':
       return 'Saving gallery record';
     case 'complete':
@@ -248,6 +278,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         updateTask(task.id, {
           status: 'uploading',
           uploadMode: 'server',
+          directUploadTarget: undefined,
           progress: 1,
           bytesUploaded: 0,
           uploadStartedAt: Date.now(),
@@ -269,7 +300,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       updateTask(task.id, { status: 'hashing', progress: 3, bytesUploaded: 0, error: undefined });
       const md5 = await checksum(file);
 
-      updateTask(task.id, { status: 'preparing', uploadMode: 'direct', progress: 6 });
+      updateTask(task.id, { status: 'preparing', uploadMode: 'direct', directUploadTarget: undefined, progress: 6 });
       const prepared = await api.admin.prepareEventGalleryDirectUpload(task.eventId, {
         filename: file.name,
         byte_size: file.size,
@@ -278,7 +309,8 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       });
 
       let completed: { gallery_image: EventGalleryImage };
-      updateTask(task.id, { status: 'uploading', uploadMode: 'direct', progress: 10, bytesUploaded: 0, uploadStartedAt: Date.now() });
+      const directUploadTarget = directUploadTargetFromUrl(prepared.direct_upload.url);
+      updateTask(task.id, { status: 'uploading', uploadMode: 'direct', directUploadTarget, progress: 10, bytesUploaded: 0, uploadStartedAt: Date.now() });
       try {
         await uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, file, progress => updateUploadProgress(task, progress, 10, 75));
       } catch (storageError) {
@@ -287,6 +319,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         updateTask(task.id, {
           status: 'uploading',
           uploadMode: 'server',
+          directUploadTarget: undefined,
           progress: 1,
           bytesUploaded: 0,
           uploadStartedAt: Date.now(),
@@ -306,7 +339,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       }
 
       updateTask(task.id, { status: 'saving', progress: 90, bytesUploaded: task.fileSize, error: undefined });
-      completed = await api.admin.completeEventGalleryDirectUpload(task.eventId, {
+      completed = await withTimeout(api.admin.completeEventGalleryDirectUpload(task.eventId, {
         signed_id: prepared.signed_id,
         batch_id: task.batchId,
         title: titleFromFilename(file.name),
@@ -315,7 +348,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         category: meta.category,
         sort_order: meta.sortOrder,
         active: meta.active,
-      });
+      }), COMPLETE_UPLOAD_TIMEOUT_MS, 'Saving gallery record timed out. Retry to confirm the uploaded file.');
       updateTask(task.id, {
         status: 'complete',
         progress: 100,
@@ -359,6 +392,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
             startedAt,
             completedAt: undefined,
             uploadMode: undefined,
+            directUploadTarget: undefined,
             uploadStartedAt: undefined,
             fallbackReason: undefined,
             error: undefined,
@@ -416,6 +450,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
           progress: 0,
           bytesUploaded: 0,
           uploadMode: undefined,
+          directUploadTarget: undefined,
           uploadStartedAt: undefined,
           startedAt: undefined,
           completedAt: undefined,
@@ -512,13 +547,18 @@ export function GalleryUploadStatusPanel() {
   const remainingBytes = Math.max(0, totalBytes - uploadedBytes);
   const etaSeconds = averageBytesPerSecond > 0 && remainingBytes > 0 ? remainingBytes / averageBytesPerSecond : 0;
   const activeTasks = tasks.filter(task => ACTIVE_STATUSES.includes(task.status));
+  const directTasks = activeTasks.filter(task => task.uploadMode === 'direct');
   const modeLabel = directStorageUnavailable
     ? 'Server fallback'
     : activeTasks.some(task => task.uploadMode === 'server')
       ? 'Mixed mode'
-      : activeTasks.some(task => task.uploadMode === 'direct')
+      : directTasks.some(task => task.directUploadTarget === 's3')
         ? 'Direct S3'
-        : 'Preparing';
+        : directTasks.some(task => task.directUploadTarget === 'local')
+          ? 'Direct local'
+          : directTasks.length > 0
+            ? 'Direct storage'
+            : 'Preparing';
   const visibleTasks = [...tasks]
     .sort((a, b) => taskSortRank(a) - taskSortRank(b) || (a.startedAt || a.createdAt) - (b.startedAt || b.createdAt))
     .slice(0, 8);
@@ -562,7 +602,7 @@ export function GalleryUploadStatusPanel() {
         </div>
         {directStorageUnavailable && (
           <div className="mt-2 border border-amber-400/20 bg-amber-400/10 px-2.5 py-2 text-[11px] leading-4 text-amber-200">
-            Direct S3 upload failed{directStorageError ? `: ${directStorageError}` : ''}. Remaining files are uploading through the API, which is usually slower.
+            Direct storage upload failed{directStorageError ? `: ${directStorageError}` : ''}. Remaining files are uploading through the API, which is usually slower.
           </div>
         )}
       </div>
@@ -586,10 +626,10 @@ export function GalleryUploadStatusPanel() {
                 <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-text-muted">
                   <span>{statusLabel(task)}</span>
                   <span>{formatBytes(transferredForTask)} / {formatBytes(task.fileSize)}</span>
-                  {task.uploadMode && <span>{task.uploadMode === 'direct' ? 'Direct S3' : 'API fallback'}</span>}
+                  {task.uploadMode && <span>{task.uploadMode === 'direct' ? directUploadLabel(task) : 'API fallback'}</span>}
                 </div>
                 {task.fallbackReason && task.status !== 'failed' && (
-                  <div className="mt-1 truncate text-[11px] text-amber-300">Direct S3 failed: {task.fallbackReason}; using API fallback</div>
+                  <div className="mt-1 truncate text-[11px] text-amber-300">Direct storage failed: {task.fallbackReason}; using API fallback</div>
                 )}
                 {task.error && <div className="mt-1 truncate text-[11px] text-red-400">{task.error}</div>}
               </div>

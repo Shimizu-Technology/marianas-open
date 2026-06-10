@@ -113,9 +113,16 @@ module Api
           blob = ActiveStorage::Blob.find_signed!(params.require(:signed_id))
           batch = find_batch
           saved_image = nil
+          saved_existing = false
           errors = nil
 
           blob.with_lock do
+            if (existing_image = attached_gallery_image_for(blob))
+              saved_image = existing_image
+              saved_existing = true
+              next
+            end
+
             raise UploadAlreadyUsed if ActiveStorage::Attachment.exists?(blob_id: blob.id)
             EventGalleryImageUploadPolicy.normalize_blob!(blob)
 
@@ -137,8 +144,8 @@ module Api
           end
 
           if saved_image
-            refresh_batch_counts(batch)
-            render json: { gallery_image: saved_image.as_json }, status: :created
+            refresh_batch_counts(saved_image.event_gallery_upload_batch || batch)
+            render json: { gallery_image: saved_image.as_json }, status: saved_existing ? :ok : :created
           else
             render json: { errors: errors }, status: :unprocessable_entity
           end
@@ -234,6 +241,20 @@ module Api
           return nil if params[:batch_id].blank?
 
           @event.event_gallery_upload_batches.find(params[:batch_id])
+        end
+
+        def attached_gallery_image_for(blob)
+          attachment = ActiveStorage::Attachment.includes(:record).find_by(
+            blob_id: blob.id,
+            name: "image",
+            record_type: "EventGalleryImage"
+          )
+          return nil unless attachment
+
+          gallery_image = attachment.record
+          raise UploadAlreadyUsed unless gallery_image&.event_id == @event.id
+
+          gallery_image
         end
 
         def refresh_batch_counts(batch)

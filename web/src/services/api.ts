@@ -54,9 +54,13 @@ export interface RankingsResponse {
 }
 
 // Auth token getter
-let getAuthToken: (() => Promise<string | null>) | null = null;
+interface AuthTokenOptions {
+  skipCache?: boolean;
+}
 
-export function setAuthTokenGetter(getter: () => Promise<string | null>) {
+let getAuthToken: ((options?: AuthTokenOptions) => Promise<string | null>) | null = null;
+
+export function setAuthTokenGetter(getter: (options?: AuthTokenOptions) => Promise<string | null>) {
   getAuthToken = getter;
 }
 
@@ -693,28 +697,46 @@ export interface ImpactData {
   roi: ImpactROI;
 }
 
-async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
-  };
+async function authHeaders(requireAuth: boolean, skipCache = false) {
+  const headers: Record<string, string> = {};
 
   if (requireAuth && getAuthToken) {
-    const token = await getAuthToken();
+    const token = await getAuthToken({ skipCache });
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
+  return headers;
+}
+
+async function parseApiError(response: Response, fallback: string) {
+  const body = await response.json().catch(() => ({}));
+  const message = (body as Record<string, unknown>).error || (body as Record<string, unknown>).errors || fallback;
+  return new Error(typeof message === 'string' ? message : JSON.stringify(message));
+}
+
+async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
+  const buildHeaders = async (skipCache = false) => ({
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+    ...(await authHeaders(requireAuth, skipCache)),
   });
 
+  let response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: await buildHeaders(),
+  });
+
+  if (response.status === 401 && requireAuth && getAuthToken) {
+    response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers: await buildHeaders(true),
+    });
+  }
+
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    const message = (body as Record<string, unknown>).error || (body as Record<string, unknown>).errors || `API error: ${response.status}`;
-    throw new Error(typeof message === 'string' ? message : JSON.stringify(message));
+    throw await parseApiError(response, `API error: ${response.status}`);
   }
 
   if (response.status === 204) return undefined as T;
@@ -722,24 +744,17 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireA
 }
 
 async function fetchApiUpload<T>(endpoint: string, formData: FormData): Promise<T> {
-  const headers: Record<string, string> = {};
-
-  if (getAuthToken) {
-    const token = await getAuthToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-  }
-
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const send = async (skipCache = false) => fetch(`${API_URL}${endpoint}`, {
     method: 'POST',
-    headers,
+    headers: await authHeaders(true, skipCache),
     body: formData,
   });
 
+  let response = await send();
+  if (response.status === 401 && getAuthToken) response = await send(true);
+
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error((body as Record<string, unknown>).error as string || `Upload error: ${response.status}`);
+    throw await parseApiError(response, `Upload error: ${response.status}`);
   }
 
   return response.json();
