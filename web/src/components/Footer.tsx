@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Mail, Youtube, Phone, Globe } from 'lucide-react';
 import { YOUTUBE_CHANNEL_URL } from '../lib/seo';
 import { useOrg } from '../contexts/OrganizationContext';
+import { resolveMediaUrl } from '../utils/images';
 
 const LOGO_FALLBACK = '/images/logos/mo-logo-white.png';
 
@@ -10,7 +11,7 @@ export default function Footer() {
   const { t } = useTranslation();
   const org = useOrg();
 
-  const logoSrc = org.logo_url || LOGO_FALLBACK;
+  const logoSrc = resolveMediaUrl(org.logo_url) || LOGO_FALLBACK;
 
   return (
     <footer className="bg-surface border-t border-white/5">

@@ -6,6 +6,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import GlobalSearch from './GlobalSearch';
 import { useOrg } from '../contexts/OrganizationContext';
 import { api } from '../services/api';
+import { resolveMediaUrl } from '../utils/images';
 
 const LOGO_FALLBACK = '/images/logos/mo-logo-white.png';
 
@@ -91,7 +92,7 @@ export default function Header() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const logoSrc = org.logo_url || LOGO_FALLBACK;
+  const logoSrc = resolveMediaUrl(org.logo_url) || LOGO_FALLBACK;
 
   const navItems: NavItem[] = [
     { to: '/', label: t('nav.home') },

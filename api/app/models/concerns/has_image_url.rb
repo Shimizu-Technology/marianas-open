@@ -8,9 +8,9 @@ module HasImageUrl
           attachment = send(attachment_name)
           return nil unless attachment.attached?
 
-          if Rails.configuration.active_storage.service == :amazon
-            bucket = ENV['AWS_S3_BUCKET']
-            region = ENV.fetch('AWS_REGION', 'ap-southeast-2')
+          if attachment.blob.service_name == "amazon" && ENV["AWS_S3_BUCKET"].present?
+            bucket = ENV["AWS_S3_BUCKET"]
+            region = ENV.fetch("AWS_REGION", "ap-southeast-2")
             "https://#{bucket}.s3.#{region}.amazonaws.com/#{attachment.key}"
           else
             Rails.application.routes.url_helpers.url_for(attachment)
