@@ -2,6 +2,7 @@ class ProcessEventGalleryImageJob < ApplicationJob
   AttachmentNotReady = Class.new(StandardError)
 
   queue_as :default
+  queue_with_priority -10
 
   discard_on ActiveJob::DeserializationError
   retry_on ActiveRecord::PreparedStatementCacheExpired, wait: 3.seconds, attempts: 5 do |job, error|
