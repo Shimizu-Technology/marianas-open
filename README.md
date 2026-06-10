@@ -19,6 +19,7 @@ This repo contains all planning, research, documentation, and eventually the POC
 | [POC-SPEC.md](./docs/POC-SPEC.md) | POC specification — pages, design direction, tech stack, build plan |
 | [COMPETITIVE-ANALYSIS.md](./docs/COMPETITIVE-ANALYSIS.md) | Deep dive into FloGrappling, Smoothcomp, UFC Fight Pass, and others |
 | [QUESTIONS.md](./docs/QUESTIONS.md) | Open questions for the meeting with Steve |
+| [local-prod-like-uploads.md](./docs/local-prod-like-uploads.md) | Production-like local S3/Solid Queue gallery upload testing |
 
 ## Project Structure
 

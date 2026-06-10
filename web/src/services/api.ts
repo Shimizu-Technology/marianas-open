@@ -54,9 +54,13 @@ export interface RankingsResponse {
 }
 
 // Auth token getter
-let getAuthToken: (() => Promise<string | null>) | null = null;
+interface AuthTokenOptions {
+  skipCache?: boolean;
+}
 
-export function setAuthTokenGetter(getter: () => Promise<string | null>) {
+let getAuthToken: ((options?: AuthTokenOptions) => Promise<string | null>) | null = null;
+
+export function setAuthTokenGetter(getter: (options?: AuthTokenOptions) => Promise<string | null>) {
   getAuthToken = getter;
 }
 
@@ -693,28 +697,46 @@ export interface ImpactData {
   roi: ImpactROI;
 }
 
-async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
-  };
+async function authHeaders(requireAuth: boolean, skipCache = false) {
+  const headers: Record<string, string> = {};
 
   if (requireAuth && getAuthToken) {
-    const token = await getAuthToken();
+    const token = await getAuthToken({ skipCache });
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
+  return headers;
+}
+
+async function parseApiError(response: Response, fallback: string) {
+  const body = await response.json().catch(() => ({}));
+  const message = (body as Record<string, unknown>).error || (body as Record<string, unknown>).errors || fallback;
+  return new Error(typeof message === 'string' ? message : JSON.stringify(message));
+}
+
+async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
+  const buildHeaders = async (skipCache = false) => ({
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+    ...(await authHeaders(requireAuth, skipCache)),
   });
 
+  let response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: await buildHeaders(),
+  });
+
+  if (response.status === 401 && requireAuth && getAuthToken) {
+    response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers: await buildHeaders(true),
+    });
+  }
+
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    const message = (body as Record<string, unknown>).error || (body as Record<string, unknown>).errors || `API error: ${response.status}`;
-    throw new Error(typeof message === 'string' ? message : JSON.stringify(message));
+    throw await parseApiError(response, `API error: ${response.status}`);
   }
 
   if (response.status === 204) return undefined as T;
@@ -722,6 +744,23 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireA
 }
 
 async function fetchApiUpload<T>(endpoint: string, formData: FormData): Promise<T> {
+  const send = async (skipCache = false) => fetch(`${API_URL}${endpoint}`, {
+    method: 'POST',
+    headers: await authHeaders(true, skipCache),
+    body: formData,
+  });
+
+  let response = await send();
+  if (response.status === 401 && getAuthToken) response = await send(true);
+
+  if (!response.ok) {
+    throw await parseApiError(response, `Upload error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function fetchApiUploadWithProgress<T>(endpoint: string, formData: FormData, onProgress: (progress: number) => void): Promise<T> {
   const headers: Record<string, string> = {};
 
   if (getAuthToken) {
@@ -731,18 +770,35 @@ async function fetchApiUpload<T>(endpoint: string, formData: FormData): Promise<
     }
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    method: 'POST',
-    headers,
-    body: formData,
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_URL}${endpoint}`);
+    Object.entries(headers).forEach(([key, value]) => xhr.setRequestHeader(key, value));
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total);
+    };
+    xhr.onload = () => {
+      const parseBody = () => {
+        if (!xhr.responseText) return undefined;
+        try {
+          return JSON.parse(xhr.responseText) as unknown;
+        } catch {
+          return undefined;
+        }
+      };
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(parseBody() as T);
+        return;
+      }
+
+      const body = parseBody() as Record<string, unknown> | undefined;
+      const message = body?.error || body?.errors || `Upload error: ${xhr.status}`;
+      reject(new Error(typeof message === 'string' ? message : JSON.stringify(message)));
+    };
+    xhr.onerror = () => reject(new Error('Upload error: network request failed'));
+    xhr.send(formData);
   });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error((body as Record<string, unknown>).error as string || `Upload error: ${response.status}`);
-  }
-
-  return response.json();
 }
 
 export const api = {
@@ -899,8 +955,10 @@ export const api = {
       const query = params ? '?' + new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString() : '';
       return fetchApi<GalleryImagesResponse>(`/api/v1/admin/events/${eventId}/gallery-images${query}`, {}, true);
     },
-    createEventGalleryImage: (eventId: number, data: FormData) =>
-      fetchApiUpload<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images`, data),
+    createEventGalleryImage: (eventId: number, data: FormData, onProgress?: (progress: number) => void) =>
+      onProgress
+        ? fetchApiUploadWithProgress<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images`, data, onProgress)
+        : fetchApiUpload<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images`, data),
     updateEventGalleryImage: (eventId: number, id: number, data: Partial<EventGalleryImageFormData>) =>
       fetchApi<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images/${id}`, {
         method: 'PATCH',

@@ -25,9 +25,9 @@ function ClerkAuthProvider({ children }: { children: ReactNode }) {
   const { getToken, isLoaded, isSignedIn, userId } = useAuth()
 
   useEffect(() => {
-    setAuthTokenGetter(async () => {
+    setAuthTokenGetter(async (options) => {
       try {
-        return await getToken()
+        return await getToken({ skipCache: options?.skipCache })
       } catch {
         return null
       }
