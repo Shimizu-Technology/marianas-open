@@ -13,7 +13,7 @@ export interface RegistrationLinks {
 }
 
 export function normalizeAsjjfRegistrationUrl(url: string | null | undefined): string {
-  return url?.trim().replace(/\/main\/eventNotice\/(?=\d)/i, '/main/eventInfo/') || '';
+  return url?.trim().replace(/\/main\/eventNotice\/(?=\d)/ig, '/main/eventInfo/') || '';
 }
 
 export function getRegistrationLinks(event: RegistrationUrlFields | null | undefined): RegistrationLinks {
