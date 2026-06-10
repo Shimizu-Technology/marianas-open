@@ -112,6 +112,7 @@ module Api
         def complete_direct_upload
           blob = ActiveStorage::Blob.find_signed!(params.require(:signed_id))
           batch = find_batch
+          attrs = gallery_image_params
           saved_image = nil
           saved_existing = false
           errors = nil
@@ -123,10 +124,16 @@ module Api
               next
             end
 
+            if (existing_image = duplicate_gallery_image_for(blob, batch, attrs))
+              saved_image = existing_image
+              saved_existing = true
+              next
+            end
+
             raise UploadAlreadyUsed if ActiveStorage::Attachment.exists?(blob_id: blob.id)
             EventGalleryImageUploadPolicy.normalize_blob!(blob)
 
-            gallery_image = @event.event_gallery_images.build(gallery_image_params)
+            gallery_image = @event.event_gallery_images.build(attrs)
             gallery_image.event_gallery_upload_batch = batch
             gallery_image.status = "uploaded"
             gallery_image.original_filename = blob.filename.to_s
@@ -255,6 +262,21 @@ module Api
           raise UploadAlreadyUsed unless gallery_image&.event_id == @event.id
 
           gallery_image
+        end
+
+        def duplicate_gallery_image_for(blob, batch, attrs)
+          return nil unless batch && attrs[:sort_order].present?
+
+          batch.event_gallery_images
+            .where.not(status: "failed")
+            .where(
+              event_id: @event.id,
+              original_filename: blob.filename.to_s,
+              byte_size: blob.byte_size,
+              sort_order: attrs[:sort_order]
+            )
+            .order(:id)
+            .first
         end
 
         def refresh_batch_counts(batch)
