@@ -1,7 +1,13 @@
 class ProcessEventGalleryImageJob < ApplicationJob
   AttachmentNotReady = Class.new(StandardError)
 
+  RECENT_UPLOAD_PRIORITY_WINDOW = 2.hours
+
   queue_as :default
+  queue_with_priority do
+    gallery_image = EventGalleryImage.select(:created_at).find_by(id: arguments.first)
+    gallery_image&.created_at && gallery_image.created_at > RECENT_UPLOAD_PRIORITY_WINDOW.ago ? -20 : 20
+  end
 
   discard_on ActiveJob::DeserializationError
   retry_on ActiveRecord::PreparedStatementCacheExpired, wait: 3.seconds, attempts: 5 do |job, error|

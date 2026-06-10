@@ -8,6 +8,7 @@ Use this when testing the event gallery upload flow before merging upload-relate
 - Active Job adapter: `solid_queue`
 - Background processing: separate `bin/jobs` worker process
 - Upload concurrency: unchanged frontend behavior
+- Browser JPEG optimization before checksum/direct upload
 
 ## Prerequisites
 
@@ -89,7 +90,8 @@ If you change `WEB_PORT`, add that origin to the S3 bucket CORS too.
    - Mode shows `Direct S3`. If it shows `Direct local`, Rails is still using disk storage and the test is not production-like.
    - transferred bytes increase during upload.
    - average speed and ETA populate after upload starts.
-   - files move from hashing/preparing/uploading/saving to complete.
+   - JPEG rows move through optimizing/hashing/preparing/uploading/saving to complete.
+   - large JPEG rows show original → optimized size savings.
 4. Watch the worker logs for image processing.
 5. If the panel shows `Server fallback`, direct S3 is not working locally. Check S3 CORS first.
 
@@ -100,7 +102,8 @@ You can also verify from Rails logs:
 
 ## Reading bottlenecks
 
-- `Direct S3` + low average speed: likely bandwidth or original file size.
+- `Direct S3` + low average speed after optimization: likely bandwidth.
 - `Server fallback`: direct upload/CORS/S3 config problem.
 - Upload completes fast but images stay processing: Solid Queue/libvips/variant processing bottleneck.
+- Long optimizing before bytes move: browser CPU/image compression work.
 - Long hashing/preparing before bytes move: client checksum or presign latency.

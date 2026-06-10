@@ -112,35 +112,46 @@ module Api
         def complete_direct_upload
           blob = ActiveStorage::Blob.find_signed!(params.require(:signed_id))
           batch = find_batch
+          attrs = gallery_image_params
           saved_image = nil
           saved_existing = false
           errors = nil
 
-          blob.with_lock do
-            if (existing_image = attached_gallery_image_for(blob))
-              saved_image = existing_image
-              saved_existing = true
-              next
+          completion = lambda do
+            blob.with_lock do
+              if (existing_image = attached_gallery_image_for(blob))
+                saved_image = existing_image
+                saved_existing = true
+              elsif (existing_image = duplicate_gallery_image_for(batch, attrs))
+                saved_image = existing_image
+                saved_existing = true
+              else
+                raise UploadAlreadyUsed if ActiveStorage::Attachment.exists?(blob_id: blob.id)
+                EventGalleryImageUploadPolicy.normalize_blob!(blob)
+
+                gallery_image = @event.event_gallery_images.build(attrs)
+                gallery_image.event_gallery_upload_batch = batch
+                gallery_image.status = "uploaded"
+                gallery_image.original_filename = blob.filename.to_s
+                gallery_image.content_type = blob.content_type
+                gallery_image.byte_size = blob.byte_size
+                gallery_image.title = gallery_image.title.presence || blob.filename.base
+                gallery_image.alt_text = gallery_image.alt_text.presence || gallery_image.title
+                gallery_image.image.attach(blob)
+
+                if gallery_image.save
+                  saved_image = gallery_image
+                else
+                  errors = gallery_image.errors.full_messages
+                end
+              end
             end
+          end
 
-            raise UploadAlreadyUsed if ActiveStorage::Attachment.exists?(blob_id: blob.id)
-            EventGalleryImageUploadPolicy.normalize_blob!(blob)
-
-            gallery_image = @event.event_gallery_images.build(gallery_image_params)
-            gallery_image.event_gallery_upload_batch = batch
-            gallery_image.status = "uploaded"
-            gallery_image.original_filename = blob.filename.to_s
-            gallery_image.content_type = blob.content_type
-            gallery_image.byte_size = blob.byte_size
-            gallery_image.title = gallery_image.title.presence || blob.filename.base
-            gallery_image.alt_text = gallery_image.alt_text.presence || gallery_image.title
-            gallery_image.image.attach(blob)
-
-            if gallery_image.save
-              saved_image = gallery_image
-            else
-              errors = gallery_image.errors.full_messages
-            end
+          if batch
+            batch.with_lock { completion.call }
+          else
+            completion.call
           end
 
           if saved_image
@@ -255,6 +266,16 @@ module Api
           raise UploadAlreadyUsed unless gallery_image&.event_id == @event.id
 
           gallery_image
+        end
+
+        def duplicate_gallery_image_for(batch, attrs)
+          return nil unless batch && attrs[:sort_order].present?
+
+          batch.event_gallery_images
+            .where.not(status: "failed")
+            .where(event_id: @event.id, sort_order: attrs[:sort_order])
+            .order(:id)
+            .first
         end
 
         def refresh_batch_counts(batch)

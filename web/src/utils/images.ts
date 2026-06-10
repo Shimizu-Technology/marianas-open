@@ -55,6 +55,10 @@ export function getOrgBanner(apiUrl: string | null): string {
 }
 
 const SPONSOR_LOGO_MAP: Record<string, string> = {
+  'gvb': '/images/logos/sponsors/gvb-logo-white.png',
+  'gvb (guam visitors bureau)': '/images/logos/sponsors/gvb-logo-white.png',
+  'guam visitors bureau': '/images/logos/sponsors/gvb-logo-white.png',
+  'asjjf': '/images/logos/asjjf-logo.png',
   'triple j': '/images/logos/sponsors/triple-j-logo.png',
   'pacific points': '/images/logos/sponsors/pacific-points-logo.png',
   "foody's": '/images/logos/sponsors/foodys-logo.png',
