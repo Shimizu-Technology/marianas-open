@@ -15,9 +15,9 @@ class UseAsjjfEventInfoRegistrationLinks < ActiveRecord::Migration[8.1]
     REGISTRATION_COLUMNS.each do |column|
       execute <<~SQL.squish
         UPDATE events
-        SET #{column} = REPLACE(#{column}, #{connection.quote(from)}, #{connection.quote(to)}),
+        SET #{column} = regexp_replace(#{column}, #{connection.quote(from)}, #{connection.quote(to)}, 'ig'),
             updated_at = CURRENT_TIMESTAMP
-        WHERE #{column} LIKE #{connection.quote("%#{from}%")};
+        WHERE #{column} ILIKE #{connection.quote("%#{from}%")};
       SQL
     end
   end
