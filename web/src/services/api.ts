@@ -760,45 +760,55 @@ async function fetchApiUpload<T>(endpoint: string, formData: FormData): Promise<
   return response.json();
 }
 
-async function fetchApiUploadWithProgress<T>(endpoint: string, formData: FormData, onProgress: (progress: number) => void): Promise<T> {
-  const headers: Record<string, string> = {};
+interface XhrStatusError extends Error {
+  status?: number;
+}
 
-  if (getAuthToken) {
-    const token = await getAuthToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
+function parseXhrBody(xhr: XMLHttpRequest) {
+  if (!xhr.responseText) return undefined;
+  try {
+    return JSON.parse(xhr.responseText) as unknown;
+  } catch {
+    return undefined;
   }
+}
 
-  return new Promise<T>((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${API_URL}${endpoint}`);
-    Object.entries(headers).forEach(([key, value]) => xhr.setRequestHeader(key, value));
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) onProgress(event.loaded / event.total);
-    };
-    xhr.onload = () => {
-      const parseBody = () => {
-        if (!xhr.responseText) return undefined;
-        try {
-          return JSON.parse(xhr.responseText) as unknown;
-        } catch {
-          return undefined;
-        }
+async function fetchApiUploadWithProgress<T>(endpoint: string, formData: FormData, onProgress: (progress: number) => void): Promise<T> {
+  const send = async (skipCache = false) => {
+    const headers = await authHeaders(true, skipCache);
+
+    return new Promise<T>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${API_URL}${endpoint}`);
+      Object.entries(headers).forEach(([key, value]) => xhr.setRequestHeader(key, value));
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) onProgress(event.loaded / event.total);
       };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(parseXhrBody(xhr) as T);
+          return;
+        }
 
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(parseBody() as T);
-        return;
-      }
+        const body = parseXhrBody(xhr) as Record<string, unknown> | undefined;
+        const message = body?.error || body?.errors || `Upload error: ${xhr.status}`;
+        const error = new Error(typeof message === 'string' ? message : JSON.stringify(message)) as XhrStatusError;
+        error.status = xhr.status;
+        reject(error);
+      };
+      xhr.onerror = () => reject(new Error('Upload error: network request failed'));
+      xhr.send(formData);
+    });
+  };
 
-      const body = parseBody() as Record<string, unknown> | undefined;
-      const message = body?.error || body?.errors || `Upload error: ${xhr.status}`;
-      reject(new Error(typeof message === 'string' ? message : JSON.stringify(message)));
-    };
-    xhr.onerror = () => reject(new Error('Upload error: network request failed'));
-    xhr.send(formData);
-  });
+  try {
+    return await send();
+  } catch (error) {
+    if ((error as XhrStatusError).status === 401 && getAuthToken) {
+      return send(true);
+    }
+    throw error;
+  }
 }
 
 export const api = {

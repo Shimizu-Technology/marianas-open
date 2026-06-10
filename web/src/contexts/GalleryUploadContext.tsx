@@ -1,12 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import SparkMD5 from 'spark-md5';
+import imageCompression from 'browser-image-compression';
+import imageCompressionWorkerUrl from 'browser-image-compression/dist/browser-image-compression.js?url';
 import { CheckCircle2, Loader2, UploadCloud, XCircle } from 'lucide-react';
 import { api } from '../services/api';
 import type { EventGalleryImage } from '../services/api';
 import { isBrowserPreviewableImage } from '../utils/images';
 
-type UploadStatus = 'queued' | 'hashing' | 'preparing' | 'uploading' | 'saving' | 'complete' | 'failed';
+type UploadStatus = 'queued' | 'optimizing' | 'hashing' | 'preparing' | 'uploading' | 'saving' | 'complete' | 'failed';
 type UploadMode = 'direct' | 'server';
 type DirectUploadTarget = 's3' | 'local' | 'storage';
 
@@ -17,6 +19,9 @@ export interface GalleryUploadTask {
   batchId: number;
   fileName: string;
   fileSize: number;
+  originalFileSize: number;
+  optimizedFileSize?: number;
+  optimizationError?: string;
   previewUrl: string;
   browserPreviewable: boolean;
   progress: number;
@@ -59,7 +64,11 @@ interface GalleryUploadContextValue {
 const GalleryUploadContext = createContext<GalleryUploadContextValue | null>(null);
 const CONCURRENCY = 4;
 const COMPLETE_UPLOAD_TIMEOUT_MS = 60_000;
-const ACTIVE_STATUSES: UploadStatus[] = ['queued', 'hashing', 'preparing', 'uploading', 'saving'];
+const OPTIMIZATION_MAX_SIZE_MB = 3.5;
+const OPTIMIZATION_MAX_DIMENSION = 2880;
+const OPTIMIZATION_INITIAL_QUALITY = 0.86;
+const OPTIMIZATION_SIZE_THRESHOLD_BYTES = 4 * 1024 * 1024;
+const ACTIVE_STATUSES: UploadStatus[] = ['queued', 'optimizing', 'hashing', 'preparing', 'uploading', 'saving'];
 export const GALLERY_IMAGE_MAX_BYTES = 50 * 1024 * 1024;
 export const GALLERY_IMAGE_TYPES = [
   'image/jpeg',
@@ -104,6 +113,52 @@ function checksum(file: File) {
     reader.onerror = () => reject(new Error('Could not read image data'));
     reader.readAsArrayBuffer(file);
   });
+}
+
+function isJpegGalleryFile(file: File) {
+  const fileType = file.type.toLowerCase();
+  const fileName = file.name.toLowerCase();
+  return fileType === 'image/jpeg' || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg');
+}
+
+function shouldOptimizeGalleryFile(file: File, originalFileSize: number) {
+  if (!isJpegGalleryFile(file)) return false;
+  if (file.size < originalFileSize) return false;
+  return file.size > OPTIMIZATION_SIZE_THRESHOLD_BYTES;
+}
+
+async function optimizeGalleryFile(file: File, originalFileSize: number, onProgress: (progress: number) => void) {
+  if (!shouldOptimizeGalleryFile(file, originalFileSize)) {
+    return { file, optimized: file.size < originalFileSize, error: undefined as string | undefined };
+  }
+
+  try {
+    const compressed = await imageCompression(file, {
+      maxSizeMB: OPTIMIZATION_MAX_SIZE_MB,
+      maxWidthOrHeight: OPTIMIZATION_MAX_DIMENSION,
+      initialQuality: OPTIMIZATION_INITIAL_QUALITY,
+      fileType: 'image/jpeg',
+      useWebWorker: true,
+      libURL: imageCompressionWorkerUrl,
+      onProgress: (progress: number) => onProgress(Math.max(0, Math.min(1, progress / 100))),
+    });
+    const optimizedFile = new File([compressed], file.name, {
+      type: compressed.type || 'image/jpeg',
+      lastModified: file.lastModified,
+    });
+
+    if (optimizedFile.size >= file.size * 0.95) {
+      return { file, optimized: false, error: undefined as string | undefined };
+    }
+
+    return { file: optimizedFile, optimized: true, error: undefined as string | undefined };
+  } catch (error) {
+    return {
+      file,
+      optimized: false,
+      error: error instanceof Error ? error.message : 'Image optimization failed',
+    };
+  }
 }
 
 function directUploadTargetFromUrl(url: string): DirectUploadTarget {
@@ -179,6 +234,8 @@ function statusLabel(task: GalleryUploadTask) {
   switch (task.status) {
     case 'queued':
       return 'Queued';
+    case 'optimizing':
+      return 'Optimizing for web';
     case 'hashing':
       return 'Hashing checksum';
     case 'preparing':
@@ -259,10 +316,10 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
     setDirectStorageError(reason);
   }, []);
 
-  const updateUploadProgress = useCallback((task: GalleryUploadTask, progress: number, progressStart: number, progressSpan: number) => {
+  const updateUploadProgress = useCallback((taskId: string, fileSize: number, progress: number, progressStart: number, progressSpan: number) => {
     const normalizedProgress = Math.max(0, Math.min(1, progress));
-    updateTask(task.id, {
-      bytesUploaded: Math.round(task.fileSize * normalizedProgress),
+    updateTask(taskId, {
+      bytesUploaded: Math.round(fileSize * normalizedProgress),
       progress: Math.max(progressStart, Math.round(progressStart + normalizedProgress * progressSpan)),
     });
   }, [updateTask]);
@@ -273,23 +330,40 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       const meta = metaMapRef.current.get(task.id);
       if (!file || !meta) throw new Error('Upload task is missing its file data');
 
+      const originalFileSize = task.originalFileSize || file.size;
+      let uploadFile = file;
+
+      updateTask(task.id, { status: 'optimizing', progress: 2, bytesUploaded: 0, optimizationError: undefined, error: undefined });
+      const optimized = await optimizeGalleryFile(file, originalFileSize, progress => {
+        updateTask(task.id, { progress: Math.max(2, Math.round(2 + progress * 16)) });
+      });
+      uploadFile = optimized.file;
+      fileMapRef.current.set(task.id, uploadFile);
+      const optimizedFileSize = uploadFile.size < originalFileSize ? uploadFile.size : undefined;
+      updateTask(task.id, {
+        fileSize: uploadFile.size,
+        optimizedFileSize,
+        optimizationError: optimized.error,
+        progress: 18,
+      });
+
       if (directStorageUnavailableRef.current) {
         const fallbackReason = directStorageErrorRef.current;
         updateTask(task.id, {
           status: 'uploading',
           uploadMode: 'server',
           directUploadTarget: undefined,
-          progress: 1,
+          progress: 20,
           bytesUploaded: 0,
           uploadStartedAt: Date.now(),
           fallbackReason,
           error: undefined,
         });
-        const completed = await uploadThroughServer(task, file, meta, progress => updateUploadProgress(task, progress, 1, 84));
+        const completed = await uploadThroughServer(task, uploadFile, meta, progress => updateUploadProgress(task.id, uploadFile.size, progress, 20, 65));
         updateTask(task.id, {
           status: 'complete',
           progress: 100,
-          bytesUploaded: task.fileSize,
+          bytesUploaded: uploadFile.size,
           completedAt: Date.now(),
           galleryImage: completed.gallery_image,
           error: undefined,
@@ -297,22 +371,22 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      updateTask(task.id, { status: 'hashing', progress: 3, bytesUploaded: 0, error: undefined });
-      const md5 = await checksum(file);
+      updateTask(task.id, { status: 'hashing', progress: 20, bytesUploaded: 0, error: undefined });
+      const md5 = await checksum(uploadFile);
 
-      updateTask(task.id, { status: 'preparing', uploadMode: 'direct', directUploadTarget: undefined, progress: 6 });
+      updateTask(task.id, { status: 'preparing', uploadMode: 'direct', directUploadTarget: undefined, progress: 24 });
       const prepared = await api.admin.prepareEventGalleryDirectUpload(task.eventId, {
-        filename: file.name,
-        byte_size: file.size,
+        filename: uploadFile.name,
+        byte_size: uploadFile.size,
         checksum: md5,
-        content_type: file.type || 'application/octet-stream',
+        content_type: uploadFile.type || 'application/octet-stream',
       });
 
       let completed: { gallery_image: EventGalleryImage };
       const directUploadTarget = directUploadTargetFromUrl(prepared.direct_upload.url);
-      updateTask(task.id, { status: 'uploading', uploadMode: 'direct', directUploadTarget, progress: 10, bytesUploaded: 0, uploadStartedAt: Date.now() });
+      updateTask(task.id, { status: 'uploading', uploadMode: 'direct', directUploadTarget, progress: 30, bytesUploaded: 0, uploadStartedAt: Date.now() });
       try {
-        await uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, file, progress => updateUploadProgress(task, progress, 10, 75));
+        await uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, uploadFile, progress => updateUploadProgress(task.id, uploadFile.size, progress, 30, 55));
       } catch (storageError) {
         const fallbackReason = storageError instanceof Error ? storageError.message : 'Storage upload failed';
         markDirectStorageUnavailable(fallbackReason);
@@ -320,17 +394,17 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
           status: 'uploading',
           uploadMode: 'server',
           directUploadTarget: undefined,
-          progress: 1,
+          progress: 20,
           bytesUploaded: 0,
           uploadStartedAt: Date.now(),
           fallbackReason,
           error: undefined,
         });
-        completed = await uploadThroughServer(task, file, meta, progress => updateUploadProgress(task, progress, 1, 84));
+        completed = await uploadThroughServer(task, uploadFile, meta, progress => updateUploadProgress(task.id, uploadFile.size, progress, 20, 65));
         updateTask(task.id, {
           status: 'complete',
           progress: 100,
-          bytesUploaded: task.fileSize,
+          bytesUploaded: uploadFile.size,
           completedAt: Date.now(),
           galleryImage: completed.gallery_image,
           error: undefined,
@@ -338,12 +412,12 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      updateTask(task.id, { status: 'saving', progress: 90, bytesUploaded: task.fileSize, error: undefined });
+      updateTask(task.id, { status: 'saving', progress: 90, bytesUploaded: uploadFile.size, error: undefined });
       completed = await withTimeout(api.admin.completeEventGalleryDirectUpload(task.eventId, {
         signed_id: prepared.signed_id,
         batch_id: task.batchId,
-        title: titleFromFilename(file.name),
-        alt_text: titleFromFilename(file.name),
+        title: titleFromFilename(uploadFile.name),
+        alt_text: titleFromFilename(uploadFile.name),
         caption: meta.caption,
         category: meta.category,
         sort_order: meta.sortOrder,
@@ -352,7 +426,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       updateTask(task.id, {
         status: 'complete',
         progress: 100,
-        bytesUploaded: task.fileSize,
+        bytesUploaded: uploadFile.size,
         completedAt: Date.now(),
         galleryImage: completed.gallery_image,
         error: undefined,
@@ -386,7 +460,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       claimedIds.has(task.id)
         ? {
             ...task,
-            status: 'hashing',
+            status: 'optimizing',
             progress: 2,
             bytesUploaded: 0,
             startedAt,
@@ -401,7 +475,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
     )));
 
     next.forEach(task => {
-      void processTask({ ...task, status: 'hashing', progress: 2, bytesUploaded: 0, startedAt });
+      void processTask({ ...task, status: 'optimizing', progress: 2, bytesUploaded: 0, startedAt });
     });
   }, [processTask, setTasksSynced]);
   processQueueRef.current = processQueue;
@@ -429,6 +503,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         batchId: batch.id,
         fileName: file.name,
         fileSize: file.size,
+        originalFileSize: file.size,
         previewUrl: URL.createObjectURL(file),
         browserPreviewable: isBrowserPreviewableGalleryFile(file),
         progress: 0,
@@ -451,6 +526,8 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
           bytesUploaded: 0,
           uploadMode: undefined,
           directUploadTarget: undefined,
+          optimizedFileSize: task.fileSize < task.originalFileSize ? task.fileSize : undefined,
+          optimizationError: undefined,
           uploadStartedAt: undefined,
           startedAt: undefined,
           completedAt: undefined,
@@ -506,7 +583,7 @@ export function useGalleryUploads() {
 function taskSortRank(task: GalleryUploadTask) {
   if (task.status === 'uploading') return 0;
   if (task.status === 'saving') return 1;
-  if (task.status === 'hashing' || task.status === 'preparing') return 2;
+  if (task.status === 'optimizing' || task.status === 'hashing' || task.status === 'preparing') return 2;
   if (task.status === 'queued') return 3;
   if (task.status === 'failed') return 4;
   return 5;
@@ -530,6 +607,8 @@ export function GalleryUploadStatusPanel() {
   const metricTasks = activeBatchIds.size > 0 ? tasks.filter(task => activeBatchIds.has(task.batchId)) : tasks;
   const metricCompletedCount = metricTasks.filter(task => task.status === 'complete').length;
   const totalBytes = metricTasks.reduce((sum, task) => sum + task.fileSize, 0);
+  const originalTotalBytes = metricTasks.reduce((sum, task) => sum + (task.originalFileSize || task.fileSize), 0);
+  const optimizedSavedBytes = Math.max(0, originalTotalBytes - totalBytes);
   const uploadedBytes = Math.min(totalBytes, metricTasks.reduce((sum, task) => {
     if (task.status === 'complete') return sum + task.fileSize;
     return sum + Math.min(task.fileSize, task.bytesUploaded || 0);
@@ -581,6 +660,7 @@ export function GalleryUploadStatusPanel() {
           <span>{completedCount} complete</span>
           <span>{failedCount} failed</span>
           <span>{concurrency} at a time</span>
+          {optimizedSavedBytes > 0 && <span>{formatBytes(optimizedSavedBytes)} saved</span>}
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-text-muted sm:grid-cols-4">
           <div className="border border-white/5 bg-white/[0.02] px-2 py-1.5">
@@ -627,10 +707,12 @@ export function GalleryUploadStatusPanel() {
                   <span>{statusLabel(task)}</span>
                   <span>{formatBytes(transferredForTask)} / {formatBytes(task.fileSize)}</span>
                   {task.uploadMode && <span>{task.uploadMode === 'direct' ? directUploadLabel(task) : 'API fallback'}</span>}
+                  {task.optimizedFileSize && <span>{formatBytes(task.originalFileSize)} → {formatBytes(task.optimizedFileSize)}</span>}
                 </div>
                 {task.fallbackReason && task.status !== 'failed' && (
                   <div className="mt-1 truncate text-[11px] text-amber-300">Direct storage failed: {task.fallbackReason}; using API fallback</div>
                 )}
+                {task.optimizationError && <div className="mt-1 truncate text-[11px] text-amber-300">Optimization skipped: {task.optimizationError}; uploading original</div>}
                 {task.error && <div className="mt-1 truncate text-[11px] text-red-400">{task.error}</div>}
               </div>
               {task.status === 'complete' && <CheckCircle2 className="w-4 h-4 text-green-400" />}
