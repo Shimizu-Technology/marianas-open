@@ -367,6 +367,7 @@ end
 [
   { name: "ASJJF", tier: "partner", sort_order: 1, website_url: "https://asjjf.org" },
   { name: "GVB (Guam Visitors Bureau)", tier: "presenting", sort_order: 1, website_url: "https://www.visitguam.com" },
+  { name: "Ready H2GO",     tier: "presenting", sort_order: 2 },
   { name: "Triple J",       tier: "official", sort_order: 2 },
   { name: "Pacific Points",  tier: "official", sort_order: 3 },
   { name: "Foody's",         tier: "official", sort_order: 4 },
@@ -381,6 +382,8 @@ end
   { name: "ITE",             tier: "official", sort_order: 13, website_url: "https://shop.ite.net" },
   { name: "Hertz & Dollar",  tier: "official", sort_order: 14, website_url: "https://www.hertz.com/us/en/location/guam/guam/gumt50" },
   { name: "Stroll Guam",     tier: "official", sort_order: 15, website_url: "https://stroll.international" },
+  { name: "Boss 104",        tier: "official", sort_order: 16 },
+  { name: "Sticky Fingers",  tier: "official", sort_order: 17 },
 ].each do |data|
   sponsor = org.sponsors.create!(data)
   puts "Created sponsor: #{sponsor.name}"
