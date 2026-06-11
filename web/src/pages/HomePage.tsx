@@ -17,6 +17,11 @@ function normalizeSponsorKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+function isGvbSponsor(name: string) {
+  const key = normalizeSponsorKey(name);
+  return key.includes('gvb') || key.includes('guamvisitorsbureau');
+}
+
 const ORG_PARTNERS = [
   {
     key: 'asjjf',
@@ -67,6 +72,8 @@ const OFFICIAL_SPONSORS_STATIC = [
   { name: 'ITE', url: 'https://shop.ite.net' },
   { name: 'Hertz & Dollar', url: 'https://www.hertz.com/us/en/location/guam/guam/gumt50' },
   { name: 'Stroll Guam', url: 'https://stroll.international' },
+  { name: 'Boss 104' },
+  { name: 'Sticky Fingers' },
 ] as const;
 
 
@@ -385,7 +392,10 @@ export default function HomePage() {
                 {t('home.presentingPartner')}
               </p>
               {(() => {
-                const gvbSponsor = sponsors.find(s => normalizeSponsorKey(s.name).includes('gvb'));
+                const gvbSponsor = sponsors.find(s => isGvbSponsor(s.name));
+                const secondaryPresentingSponsors = sponsors
+                  .filter(s => s.tier === 'presenting' && !isGvbSponsor(s.name))
+                  .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
                 const gvbLogo = resolveMediaUrl(gvbSponsor?.logo_url) || '/images/logos/sponsors/gvb-logo-white.png';
                 const gvbUrl = gvbSponsor?.website_url || 'https://www.visitguam.com';
                 return (
@@ -405,6 +415,40 @@ export default function HomePage() {
                     <p className="text-text-secondary text-sm sm:text-base leading-relaxed italic max-w-xl mx-auto">
                       &ldquo;{t('home.gvbQuote')}&rdquo;
                     </p>
+
+                    {secondaryPresentingSponsors.length > 0 && (
+                      <div className="mt-12 pt-10 border-t border-white/5 space-y-10">
+                        {secondaryPresentingSponsors.map((sponsor) => {
+                          const href = normalizeExternalUrl(sponsor.website_url);
+                          const logoSrc = getSponsorLogo(sponsor.name, sponsor.logo_url);
+                          const inner = logoSrc ? (
+                            <img
+                              src={logoSrc}
+                              alt={sponsor.name}
+                              className="h-32 sm:h-36 md:h-40 object-contain mx-auto"
+                            />
+                          ) : (
+                            <span className="font-heading text-2xl sm:text-3xl font-black uppercase tracking-wide text-text-primary">
+                              {sponsor.name}
+                            </span>
+                          );
+
+                          return href ? (
+                            <a
+                              key={sponsor.id}
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block hover:opacity-80 transition-opacity"
+                            >
+                              {inner}
+                            </a>
+                          ) : (
+                            <div key={sponsor.id}>{inner}</div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 );
               })()}
@@ -420,7 +464,7 @@ export default function HomePage() {
               <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl mx-auto">
                 {(() => {
                   const officialFromApi = sponsors.filter(
-                    s => s.tier === 'official' && !normalizeSponsorKey(s.name).includes('gvb')
+                    s => s.tier === 'official' && !isGvbSponsor(s.name)
                   );
                   const items = officialFromApi.length > 0
                     ? officialFromApi.map(s => ({
