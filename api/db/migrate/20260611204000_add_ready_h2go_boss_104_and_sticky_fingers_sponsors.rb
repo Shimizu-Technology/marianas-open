@@ -1,4 +1,6 @@
 class AddReadyH2goBoss104AndStickyFingersSponsors < ActiveRecord::Migration[8.1]
+  SPONSOR_NAMES = ["Ready H2GO", "Boss 104", "Sticky Fingers"].freeze
+
   def up
     org = Organization.first
     return unless org
@@ -9,14 +11,20 @@ class AddReadyH2goBoss104AndStickyFingersSponsors < ActiveRecord::Migration[8.1]
   end
 
   def down
-    Sponsor.where(name: ["Ready H2GO", "Boss 104", "Sticky Fingers"]).destroy_all
+    org = Organization.first
+    return unless org
+
+    org.sponsors.where(name: SPONSOR_NAMES).destroy_all
   end
 
   private
 
   def upsert_sponsor(org, name:, tier:, sort_order:, website_url: nil)
-    sponsor = Sponsor.find_or_initialize_by(name: name, organization_id: org.id)
-    sponsor.assign_attributes(tier: tier, sort_order: sort_order, website_url: website_url)
+    sponsor = org.sponsors.find_or_initialize_by(name: name)
+    attrs = { tier: tier, sort_order: sort_order }
+    attrs[:website_url] = website_url unless website_url.nil?
+
+    sponsor.assign_attributes(attrs)
     sponsor.save!
   end
 end
