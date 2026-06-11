@@ -425,7 +425,7 @@ export default function HomePage() {
                             <img
                               src={logoSrc}
                               alt={sponsor.name}
-                              className="h-20 sm:h-24 object-contain mx-auto"
+                              className="h-32 sm:h-36 md:h-40 object-contain mx-auto"
                             />
                           ) : (
                             <span className="font-heading text-2xl sm:text-3xl font-black uppercase tracking-wide text-text-primary">
