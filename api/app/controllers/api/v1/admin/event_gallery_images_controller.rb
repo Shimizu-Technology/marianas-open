@@ -177,11 +177,17 @@ module Api
             return render json: { error: "Category must be #{EventGalleryImage::CATEGORY_MAX_LENGTH} characters or fewer" }, status: :unprocessable_entity
           end
 
-          updated = 0
-          @event.event_gallery_images.where(id: ids).find_each do |image|
-            updated += 1 if image.update(attrs)
+          images = @event.event_gallery_images.where(id: ids).to_a
+          EventGalleryImage.transaction do
+            images.each { |image| image.update!(attrs) }
           end
-          render json: { updated: updated }
+          render json: { updated: images.size }
+        rescue ActiveRecord::RecordInvalid => e
+          render json: {
+            updated: 0,
+            image_id: e.record.id,
+            errors: e.record.errors.full_messages
+          }, status: :unprocessable_entity
         end
 
         def bulk_destroy

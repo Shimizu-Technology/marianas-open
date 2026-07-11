@@ -9,7 +9,8 @@ module Api
         before_action :set_season, only: [ :show, :update, :destroy, :activate, :rollover ]
 
         def index
-          render json: { seasons: Season.ordered.as_json }
+          seasons = Season.ordered.includes(events: [ :source_event, { hero_image_attachment: :blob } ])
+          render json: { seasons: seasons.as_json }
         end
 
         def show

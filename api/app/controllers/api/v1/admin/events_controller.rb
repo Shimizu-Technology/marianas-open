@@ -12,7 +12,15 @@ module Api
         def index
           org = Organization.first
           return render json: { error: "No organization configured" }, status: :unprocessable_entity unless org
-          events = org.events.includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } }).order(date: :desc)
+          events = org.events.includes(
+            :season,
+            :source_event,
+            :event_schedule_items,
+            :prize_categories,
+            { hero_image_attachment: :blob },
+            { poster_image_attachment: :blob },
+            { event_accommodations: { image_attachment: :blob } }
+          ).order(date: :desc)
           render json: { events: events.as_json }
         end
 
