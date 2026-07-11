@@ -1,4 +1,5 @@
 require "test_helper"
+require "stringio"
 
 class EventRolloverServiceTest < ActiveSupport::TestCase
   setup do
@@ -21,7 +22,7 @@ class EventRolloverServiceTest < ActiveSupport::TestCase
       asjjf_event_ids: [ 1900 ]
     )
     @source.event_schedule_items.create!(time: "9:00 AM", description: "Competition")
-    @source.event_accommodations.create!(hotel_name: "Partner Hotel", check_in_date: Date.new(2026, 10, 15), booking_code: "OLD2026")
+    @accommodation = @source.event_accommodations.create!(hotel_name: "Partner Hotel", check_in_date: Date.new(2026, 10, 15), booking_code: "OLD2026")
   end
 
   test "rollover preserves reusable content and resets stale operational data" do
@@ -38,5 +39,27 @@ class EventRolloverServiceTest < ActiveSupport::TestCase
     assert_equal [ "Competition" ], copy.event_schedule_items.pluck(:description)
     assert_nil copy.event_accommodations.first.check_in_date
     assert_nil copy.event_accommodations.first.booking_code
+  end
+
+  test "duplicates attachment storage before opening the rollover transaction" do
+    @source.hero_image.attach(io: StringIO.new("hero image"), filename: "hero.jpg", content_type: "image/jpeg")
+    @accommodation.image.attach(io: StringIO.new("hotel image"), filename: "hotel.jpg", content_type: "image/jpeg")
+    baseline_transactions = ActiveRecord::Base.connection.open_transactions
+    upload_transaction_depths = []
+    subscriber = ActiveSupport::Notifications.subscribe("service_upload.active_storage") do
+      upload_transaction_depths << ActiveRecord::Base.connection.open_transactions
+    end
+
+    copy = EventRolloverService.call(source_event: @source, target_season: @target_season)
+
+    assert_equal [ baseline_transactions, baseline_transactions ], upload_transaction_depths
+    assert copy.hero_image.attached?
+    assert copy.event_accommodations.first.image.attached?
+    assert_not_equal @source.hero_image.blob_id, copy.hero_image.blob_id
+    assert_not_equal @accommodation.image.blob_id, copy.event_accommodations.first.image.blob_id
+    assert_equal "hero image", copy.hero_image.download
+    assert_equal "hotel image", copy.event_accommodations.first.image.download
+  ensure
+    ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
   end
 end

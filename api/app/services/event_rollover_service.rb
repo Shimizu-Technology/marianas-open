@@ -1,4 +1,6 @@
 class EventRolloverService
+  PreparedAttachments = Struct.new(:hero, :accommodations, keyword_init: true)
+
   RESET_ATTRIBUTES = {
     status: "draft",
     date: nil,
@@ -15,17 +17,61 @@ class EventRolloverService
     translation_status: "untranslated"
   }.freeze
 
-  def self.call(source_event:, target_season: nil, target_year: nil, copy_hero: true, copy_accommodations: true)
-    new(source_event:, target_season:, target_year:, copy_hero:, copy_accommodations:).call
+  def self.call(source_event:, target_season: nil, target_year: nil, copy_hero: true, copy_accommodations: true, prepared_attachments: nil)
+    owns_prepared_attachments = prepared_attachments.nil?
+    prepared_attachments ||= prepare_attachments(source_event:, copy_hero:, copy_accommodations:)
+
+    service = new(
+      source_event:,
+      target_season:,
+      target_year:,
+      copy_hero:,
+      copy_accommodations:,
+      prepared_attachments:
+    )
+    service.call
+  rescue StandardError
+    purge_prepared_attachments(prepared_attachments) if owns_prepared_attachments && !service&.committed?
+    raise
   end
 
-  def initialize(source_event:, target_season:, target_year:, copy_hero:, copy_accommodations:)
+  def self.prepare_attachments(source_event:, copy_hero: true, copy_accommodations: true)
+    prepared = PreparedAttachments.new(hero: nil, accommodations: {})
+    prepared.hero = duplicate_blob(source_event.hero_image.blob) if copy_hero && source_event.hero_image.attached?
+
+    if copy_accommodations
+      source_event.event_accommodations.each do |accommodation|
+        next unless accommodation.image.attached?
+
+        prepared.accommodations[accommodation.id] = duplicate_blob(accommodation.image.blob)
+      end
+    end
+
+    prepared
+  rescue StandardError
+    purge_prepared_attachments(prepared)
+    raise
+  end
+
+  def self.purge_prepared_attachments(prepared)
+    return unless prepared
+
+    [ prepared.hero, *prepared.accommodations.values ].compact.each(&:purge)
+  end
+
+  def initialize(source_event:, target_season:, target_year:, copy_hero:, copy_accommodations:, prepared_attachments:)
     @source_event = source_event
     @target_season = target_season
     @target_year = target_year || target_season&.year
     @copy_hero = copy_hero
     @copy_accommodations = copy_accommodations
+    @prepared_attachments = prepared_attachments
+    @committed = false
   end
+
+  attr_reader :committed
+
+  alias_method :committed?, :committed
 
   def call
     new_event = source_event.dup
@@ -35,24 +81,21 @@ class EventRolloverService
     new_event.name = rollover_text(source_event.name) || "#{source_event.name} (Copy)"
     new_event.slug = unique_slug(new_event.name)
 
-    attachment_copies = []
-
     ActiveRecord::Base.transaction do
       new_event.save!
+      new_event.hero_image.attach(prepared_attachments.hero) if prepared_attachments.hero
       copy_schedule(new_event)
       copy_prizes(new_event)
-      attachment_copies.concat(copy_accommodations(new_event)) if @copy_accommodations
+      copy_accommodations(new_event) if @copy_accommodations
     end
-
-    attachment_copies.each { |record, blob| copy_attachment(record.image, blob) }
-    copy_attachment(new_event.hero_image, source_event.hero_image.blob) if @copy_hero && source_event.hero_image.attached?
+    @committed = true
 
     new_event.reload
   end
 
   private
 
-  attr_reader :source_event, :target_season, :target_year
+  attr_reader :source_event, :target_season, :target_year, :prepared_attachments
 
   def rollover_text(value)
     return value if value.blank? || target_year.blank?
@@ -82,7 +125,7 @@ class EventRolloverService
   end
 
   def copy_accommodations(new_event)
-    source_event.event_accommodations.map do |accommodation|
+    source_event.event_accommodations.each do |accommodation|
       copy = accommodation.dup
       copy.assign_attributes(
         event: new_event,
@@ -94,12 +137,9 @@ class EventRolloverService
         translation_status: "untranslated"
       )
       copy.save!
-      [ copy, accommodation.image.blob ] if accommodation.image.attached?
-    end.compact
-  end
-
-  def copy_attachment(attachment, blob)
-    attachment.attach(io: blob.open, filename: blob.filename, content_type: blob.content_type)
+      prepared_blob = prepared_attachments.accommodations[accommodation.id]
+      copy.image.attach(prepared_blob) if prepared_blob
+    end
   end
 
   def unique_slug(name)
@@ -112,4 +152,18 @@ class EventRolloverService
     end
     slug
   end
+
+  def self.duplicate_blob(source_blob)
+    source_blob.open do |io|
+      ActiveStorage::Blob.create_and_upload!(
+        io:,
+        filename: source_blob.filename,
+        content_type: source_blob.content_type,
+        metadata: source_blob.metadata,
+        service_name: source_blob.service_name,
+        identify: false
+      )
+    end
+  end
+  private_class_method :duplicate_blob
 end

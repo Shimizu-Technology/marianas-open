@@ -25,12 +25,23 @@ class SeasonRolloverService
       ends_on: Date.new(target_year, 12, 31)
     )
 
+    event_plans = []
+    source_season.events.order(:date, :id).each do |event|
+      prepared_attachments = EventRolloverService.prepare_attachments(source_event: event)
+      event_plans << [ event, prepared_attachments ]
+    end
+
     events = []
     event_map = {}
+    rollover_committed = false
     ActiveRecord::Base.transaction do
       target_season.save!
-      source_season.events.order(:date, :id).each do |event|
-        copy = EventRolloverService.call(source_event: event, target_season: target_season)
+      event_plans.each do |event, prepared_attachments|
+        copy = EventRolloverService.call(
+          source_event: event,
+          target_season: target_season,
+          prepared_attachments: prepared_attachments
+        )
         events << copy
         event_map[event.id] = copy
       end
@@ -42,8 +53,16 @@ class SeasonRolloverService
         changes: { source_season_id: source_season.id, event_ids: events.map(&:id) }
       )
     end
+    rollover_committed = true
 
     { season: target_season.reload, events: events }
+  rescue StandardError
+    unless rollover_committed
+      event_plans&.each do |_event, prepared_attachments|
+        EventRolloverService.purge_prepared_attachments(prepared_attachments)
+      end
+    end
+    raise
   end
 
   private
