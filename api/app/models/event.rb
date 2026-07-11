@@ -50,7 +50,7 @@ class Event < ApplicationRecord
     checks = [
       readiness_check("name", "Event name", name.present?),
       readiness_check("slug", "Public URL", slug.present?),
-      readiness_check("season", "Season", season.present?),
+      readiness_check("season", "Season", season_id.present?),
       readiness_check("date", "Event date", date.present?),
       readiness_check("venue", "Venue", venue_name.present?),
       readiness_check("location", "City and country", city.present? && country.present?),

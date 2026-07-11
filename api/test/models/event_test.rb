@@ -44,4 +44,17 @@ class EventTest < ActiveSupport::TestCase
 
     assert_equal @season, Season.current_season
   end
+
+  test "readiness checks season presence without loading the association" do
+    event = @organization.events.create!(
+      name: "Efficient Event",
+      slug: "efficient-event",
+      season: @season
+    )
+    event = Event.find(event.id)
+
+    assert_not event.association(:season).loaded?
+    assert event.readiness[:checks].find { |check| check[:key] == "season" }[:complete]
+    assert_not event.association(:season).loaded?
+  end
 end
