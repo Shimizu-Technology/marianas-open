@@ -60,4 +60,17 @@ class SeasonRolloverServiceTest < ActiveSupport::TestCase
     assert_equal original_blob_count, ActiveStorage::Blob.count
     assert_not Season.exists?(year: 2027)
   end
+
+  test "keeps a committed rollover when audit logging fails" do
+    original_record = AuditLog.method(:record!)
+    AuditLog.define_singleton_method(:record!) { |**| raise "audit database unavailable" }
+
+    result = SeasonRolloverService.call(source_season: @source_season, target_year: 2027)
+
+    assert_equal 2027, result[:season].year
+    assert Season.exists?(year: 2027)
+    assert_equal 1, result[:events].size
+  ensure
+    AuditLog.define_singleton_method(:record!, original_record) if original_record
+  end
 end

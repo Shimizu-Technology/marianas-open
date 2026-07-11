@@ -54,14 +54,9 @@ class SeasonRolloverService
         event_map[event.id] = copy
       end
       copy_sponsor_placements(target_season, event_map, sponsor_placement_plans) if copy_sponsors
-      AuditLog.record!(
-        actor: actor,
-        action: "rollover",
-        auditable: target_season,
-        changes: { source_season_id: source_season.id, event_ids: events.map(&:id) }
-      )
     end
     rollover_committed = true
+    record_rollover_audit(target_season, events)
 
     { season: target_season.reload, events: events }
   rescue StandardError
@@ -79,6 +74,17 @@ class SeasonRolloverService
   private
 
   attr_reader :source_season, :target_year, :actor, :copy_sponsors
+
+  def record_rollover_audit(target_season, events)
+    AuditLog.record!(
+      actor: actor,
+      action: "rollover",
+      auditable: target_season,
+      changes: { source_season_id: source_season.id, event_ids: events.map(&:id) }
+    )
+  rescue StandardError => e
+    Rails.logger.error("Unable to write rollover audit log: #{e.class}: #{e.message}")
+  end
 
   def copy_sponsor_placements(target_season, event_map, sponsor_placement_plans)
     return unless @copy_sponsors
