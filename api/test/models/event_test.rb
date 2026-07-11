@@ -37,4 +37,11 @@ class EventTest < ActiveSupport::TestCase
     assert_not second.valid?
     assert_includes second.errors[:is_main_event], "is already assigned to another event in this season"
   end
+
+  test "current season fallback never selects a future draft" do
+    @season.update!(status: "active", current: false)
+    Season.create!(year: 2028, name: "Future Draft", status: "draft")
+
+    assert_equal @season, Season.current_season
+  end
 end

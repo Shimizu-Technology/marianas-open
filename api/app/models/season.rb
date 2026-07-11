@@ -12,15 +12,21 @@ class Season < ApplicationRecord
   scope :ordered, -> { order(year: :desc) }
 
   def self.current_season
-    find_by(current: true) || ordered.first
+    find_by(current: true) || where(status: "active").ordered.first
   end
 
   before_save :demote_other_current_seasons, if: :current?
 
   def as_json(options = {})
+    event_records = events.to_a
+    ActiveRecord::Associations::Preloader.new(
+      records: event_records,
+      associations: { hero_image_attachment: :blob }
+    ).call
+
     super(options.merge(except: [ :created_at, :updated_at ])).merge(
-      "events_count" => events.size,
-      "ready_events_count" => events.count(&:publishable?)
+      "events_count" => event_records.size,
+      "ready_events_count" => event_records.count(&:publishable?)
     )
   end
 
