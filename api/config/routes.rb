@@ -8,6 +8,7 @@ Rails.application.routes.draw do
         get 'gallery', to: 'event_gallery_images#index'
       end
       resources :sponsors, only: [:index]
+      resources :sponsor_placements, only: [:index], path: 'sponsor-placements'
       resources :competitors, only: [:index, :show]
       resources :academies, only: [:index, :show]
       resources :videos, only: [:index, :show]
@@ -24,6 +25,18 @@ Rails.application.routes.draw do
 
       # Admin
       namespace :admin do
+        resources :seasons do
+          member do
+            post :activate
+            post :rollover
+          end
+        end
+        resources :audit_logs, only: [:index], path: 'audit-logs'
+        resources :sponsor_placements, path: 'sponsor-placements' do
+          member do
+            post :upload_media
+          end
+        end
         resources :users do
           member do
             post :resend_invitation
@@ -38,6 +51,8 @@ Rails.application.routes.draw do
             post :import_results
             post :retranslate
             post :clone
+            post :publish
+            post :unpublish
           end
           resources :event_results, only: [:index, :create, :update, :destroy], path: 'results' do
             collection do

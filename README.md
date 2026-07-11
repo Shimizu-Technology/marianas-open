@@ -1,44 +1,41 @@
-# Marianas Open — Platform Project
+# Marianas Open platform
 
-**Client:** Marianas Open / Fury Promotions, LLC
-**Contact:** Steve Shimizu (President & Founder)
-**Status:** Planning & Research Phase
+The official digital platform for the Marianas Open and its international jiu-jitsu circuit. It combines a public event, media, rankings, results, travel, sponsor, and impact experience with an invite-only tournament administration console.
 
----
+The product exists to help Marianas Open grow beyond a once-a-year event website: athletes can discover and follow the circuit, while the operating team can manage yearly seasons, events, results, galleries, livestreams, content, sponsors, and user access without requiring a developer for routine changes.
 
-## What Is This Repo?
+## Architecture
 
-This repo contains all planning, research, documentation, and eventually the POC for a potential platform build for the **Marianas Open** — Guam's premiere international jiu-jitsu tournament organization.
+- `web/` — React 19, TypeScript, Vite, Tailwind, Clerk, PostHog, and multilingual public/admin interfaces.
+- `api/` — Rails 8 API, PostgreSQL, Active Storage, background jobs, ASJJF result importing, and role-based administration.
+- `docs/` — Product research, requirements, competitive context, runbooks, and operational documentation.
 
-## Documents
+The frontend is configured for Netlify and the API for a managed Rails/PostgreSQL environment. Public visitors do not download the admin application bundle.
 
-| Document | Description |
-|----------|-------------|
-| [PRD.md](./docs/PRD.md) | Product Requirements Document — research, opportunities, POC plan |
-| [RESEARCH.md](./docs/RESEARCH.md) | Deep research on the Marianas Open, competitive landscape, tech analysis |
-| [POC-SPEC.md](./docs/POC-SPEC.md) | POC specification — pages, design direction, tech stack, build plan |
-| [COMPETITIVE-ANALYSIS.md](./docs/COMPETITIVE-ANALYSIS.md) | Deep dive into FloGrappling, Smoothcomp, UFC Fight Pass, and others |
-| [QUESTIONS.md](./docs/QUESTIONS.md) | Open questions for the meeting with Steve |
-| [local-prod-like-uploads.md](./docs/local-prod-like-uploads.md) | Production-like local S3/Solid Queue gallery upload testing |
+## Local development
 
-## Project Structure
-
-```
-marianas-open/
-├── docs/           # Planning & documentation
-│   ├── PRD.md      # Product Requirements Document
-│   ├── RESEARCH.md # Research & competitive analysis
-│   └── QUESTIONS.md# Questions for Steve
-├── poc/            # POC code (when we start building)
-└── README.md
+```bash
+cd api
+bundle install
+bin/rails db:prepare
+bin/rails server
 ```
 
-## Timeline
+In another terminal:
 
-- **Research & Planning:** Feb 13, 2026
-- **Meeting with Steve:** Week of Feb 17, 2026
-- **POC Build:** After meeting (scope TBD)
+```bash
+cd web
+npm install
+npm run dev
+```
 
----
+Copy environment values from `web/.env.example`; the primary integration variables are `VITE_API_URL`, the Clerk keys, PostgreSQL, Active Storage, and optional translation/analytics services.
 
-*Shimizu Technology — Building for the Marianas*
+## Verification
+
+```bash
+cd api && bin/rails test
+cd web && npm run lint && npm run build
+```
+
+See [Admin operations](./docs/ADMIN-OPERATIONS.md) for yearly rollover and publishing, [Authentication](./docs/AUTH-SYSTEM.md) for roles, and [PRD](./docs/PRD.md) for the original product rationale.

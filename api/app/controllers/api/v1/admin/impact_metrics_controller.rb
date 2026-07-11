@@ -3,7 +3,7 @@ module Api
     module Admin
       class ImpactMetricsController < ApplicationController
         include ClerkAuthenticatable
-        before_action :require_staff!
+        before_action :require_admin_access!
         before_action :set_metric, only: [:show, :update, :destroy]
 
         def index

@@ -6,8 +6,10 @@ import {
   BarChart3,
   Building2,
   CalendarDays,
+  CalendarRange,
   FileText,
   Handshake,
+  PanelsTopLeft,
   Image,
   LayoutDashboard,
   Megaphone,
@@ -53,9 +55,11 @@ const navSections: NavSection[] = [
     label: 'Tournament',
     items: [
       { to: '/admin/events', icon: CalendarDays, label: 'Events & Results' },
+      { to: '/admin/seasons', icon: CalendarRange, label: 'Seasons & Rollover' },
       { to: '/admin/competitors', icon: Swords, label: 'Competitors' },
       { to: '/admin/academies', icon: Building2, label: 'Academies' },
       { to: '/admin/sponsors', icon: Handshake, label: 'Sponsors' },
+      { to: '/admin/sponsor-placements', icon: PanelsTopLeft, label: 'Sponsor Placements' },
     ],
   },
   {
@@ -351,6 +355,7 @@ function SidebarContent({
 
 export default function AdminLayout() {
   const [isAdmin, setIsAdmin] = useState(false)
+  const [isViewer, setIsViewer] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [desktopCollapsed, setDesktopCollapsed] = useState(readSidebarPreference)
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -361,7 +366,10 @@ export default function AdminLayout() {
 
     api.getCurrentUser()
       .then(({ user }) => {
-        if (!cancelled) setIsAdmin(user.is_admin)
+        if (!cancelled) {
+          setIsAdmin(user.is_admin)
+          setIsViewer(user.role === 'viewer')
+        }
       })
       .catch(() => {
         if (!cancelled) setIsAdmin(false)
@@ -481,6 +489,11 @@ export default function AdminLayout() {
 
         <div className={`min-h-screen transition-[padding] duration-200 ease-out ${desktopCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
           <main className="min-w-0">
+            {isViewer && (
+              <div className="border-b border-blue-400/20 bg-blue-400/10 px-4 py-2 text-center text-xs font-medium text-blue-300">
+                Read-only viewer access — changes and uploads are disabled by the server.
+              </div>
+            )}
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}

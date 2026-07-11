@@ -3,10 +3,11 @@ module Api
     module Admin
       class EventsController < ApplicationController
         include ClerkAuthenticatable
+        include AdminAuditable
 
-        before_action :require_staff!
+        before_action :require_admin_access!
         before_action :complete_past_events, only: [:index]
-        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :import_results_preview, :import_results, :retranslate, :clone]
+        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :import_results_preview, :import_results, :retranslate, :clone, :publish, :unpublish]
 
         def index
           org = Organization.first
@@ -25,7 +26,10 @@ module Api
           return render json: { error: "No organization found" }, status: :unprocessable_entity unless org
 
           event = org.events.build(event_params)
+          event.slug = generate_unique_slug(event.name) if event.slug.blank?
+          event.season ||= Season.current_season
           if event.save
+            record_admin_action!("create", event, changes: event.previous_changes)
             render json: { event: event.as_json }, status: :created
           else
             render json: { errors: event.errors.full_messages }, status: :unprocessable_entity
@@ -33,7 +37,14 @@ module Api
         end
 
         def update
-          if @event.update(event_params)
+          previous = @event.attributes
+          @event.assign_attributes(event_params)
+          if previous["status"] == "draft" && @event.status.in?(%w[upcoming live]) && !@event.publishable?
+            return render json: { errors: ["Complete all required readiness checks before publishing."], readiness: @event.readiness }, status: :unprocessable_entity
+          end
+
+          if @event.save
+            record_admin_action!("update", @event, changes: audited_changes(previous, @event.attributes))
             render json: { event: @event.reload.as_json }
           else
             render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
@@ -41,7 +52,8 @@ module Api
         end
 
         def destroy
-          @event.destroy
+          @event.destroy!
+          record_admin_action!("destroy", @event)
           head :no_content
         end
 
@@ -69,6 +81,7 @@ module Api
           return render json: { error: "No ASJJF event IDs configured. Set asjjf_event_ids on this event first." }, status: :unprocessable_entity if ids.empty?
 
           result = AsjjfScraper.import!(event: @event, asjjf_event_ids: ids)
+          record_admin_action!("import_results", @event, metadata: { imported: result[:imported], asjjf_event_ids: ids })
           render json: {
             message: "Successfully imported #{result[:imported]} results",
             imported: result[:imported],
@@ -84,6 +97,7 @@ module Api
           end
 
           @event.hero_image.attach(params[:image])
+          record_admin_action!("upload_hero_image", @event, metadata: { filename: params[:image].original_filename })
           render json: { event: @event.reload.as_json }
         end
 
@@ -93,86 +107,62 @@ module Api
           end
 
           @event.poster_image.attach(params[:image])
+          record_admin_action!("upload_poster", @event, metadata: { filename: params[:image].original_filename })
           render json: { event: @event.reload.as_json }
         end
 
         def remove_poster
           @event.poster_image.purge if @event.poster_image.attached?
+          record_admin_action!("remove_poster", @event)
           render json: { event: @event.reload.as_json }
         end
 
         # POST /api/v1/admin/events/:id/retranslate
         def retranslate
           @event.retranslate!
+          record_admin_action!("retranslate", @event)
           render json: { message: "Translation enqueued for event and child records", event: @event.reload.as_json }
         end
 
         # POST /api/v1/admin/events/:id/clone
         def clone
-          new_event = @event.dup
-          new_event.assign_attributes(
-            name: "#{@event.name} (Copy)",
-            slug: nil,
-            status: "draft",
-            date: nil,
-            end_date: nil,
-            is_main_event: false,
-            results_imported_at: nil,
-            asjjf_event_ids: [],
-            translations: {},
-            translation_status: "untranslated"
+          target_season = Season.find_by(id: params[:season_id])
+          new_event = EventRolloverService.call(
+            source_event: @event,
+            target_season: target_season,
+            target_year: params[:target_year],
+            copy_hero: params.fetch(:copy_hero, true),
+            copy_accommodations: params.fetch(:copy_accommodations, true)
           )
-          new_event.slug = generate_unique_slug(new_event.name)
-
-          acc_blobs = []
-
-          ActiveRecord::Base.transaction do
-            new_event.save!
-
-            @event.event_schedule_items.each do |item|
-              new_item = item.dup
-              new_item.event = new_event
-              new_item.save!
-            end
-
-            @event.prize_categories.each do |cat|
-              new_cat = cat.dup
-              new_cat.event = new_event
-              new_cat.save!
-            end
-
-            @event.event_accommodations.each do |acc|
-              new_acc = acc.dup
-              new_acc.event = new_event
-              new_acc.translations = {}
-              new_acc.translation_status = "untranslated"
-              new_acc.save!
-              acc_blobs << [new_acc, acc.image.blob] if acc.image.attached?
-            end
-          end
-
-          acc_blobs.each do |new_acc, blob|
-            new_acc.image.attach(
-              io: blob.open,
-              filename: blob.filename,
-              content_type: blob.content_type
-            )
-          end
-
-          if @event.hero_image.attached?
-            blob = @event.hero_image.blob
-            new_event.hero_image.attach(
-              io: blob.open,
-              filename: blob.filename,
-              content_type: blob.content_type
-            )
-          end
+          record_admin_action!("clone", new_event, metadata: { source_event_id: @event.id })
 
           render json: { event: new_event.reload.as_json }, status: :created
         rescue ActiveRecord::RecordInvalid => e
           render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
         rescue ActiveRecord::RecordNotUnique
           render json: { errors: ["An event with that slug already exists. Please try again."] }, status: :conflict
+        end
+
+        def publish
+          @event.assign_attributes(event_params.except(:status)) if event_params.present?
+          readiness = @event.readiness
+          unless readiness[:publishable]
+            return render json: { errors: ["Complete all required readiness checks before publishing."], readiness: readiness }, status: :unprocessable_entity
+          end
+
+          @event.status = params[:publish_status].presence_in(%w[upcoming live]) || "upcoming"
+          @event.save!
+          record_admin_action!("publish", @event, changes: @event.previous_changes)
+          render json: { event: @event.reload.as_json }
+        rescue ActiveRecord::RecordInvalid => e
+          render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+        end
+
+        def unpublish
+          previous_status = @event.status
+          @event.update!(status: "draft", live_stream_active: false)
+          record_admin_action!("unpublish", @event, changes: { status: [previous_status, "draft"] })
+          render json: { event: @event.reload.as_json }
         end
 
         private
@@ -189,7 +179,7 @@ module Api
 
         def event_params
           params.permit(
-            :name, :slug, :description, :date, :end_date,
+            :name, :slug, :description, :date, :end_date, :season_id,
             :venue_name, :venue_address, :city, :country, :country_code,
             :asjjf_stars, :is_main_event, :prize_pool, :registration_url,
             :registration_url_gi, :registration_url_nogi,
@@ -224,6 +214,13 @@ module Api
             counter += 1
           end
           slug
+        end
+
+        def audited_changes(before, after)
+          before.each_with_object({}) do |(key, old_value), changes|
+            new_value = after[key]
+            changes[key] = [old_value, new_value] if old_value != new_value
+          end.except("updated_at")
         end
       end
     end

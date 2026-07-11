@@ -4,7 +4,7 @@ module Api
       class EventGalleryUploadBatchesController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action :require_admin_access!
         before_action :set_event
         before_action :set_batch, only: [:show, :update, :destroy]
 
