@@ -31,6 +31,14 @@ class SeasonRolloverService
       event_plans << [ event, prepared_attachments ]
     end
 
+    sponsor_placement_plans = []
+    if copy_sponsors
+      source_season.sponsor_placements.find_each do |placement|
+        prepared_media = BlobCopyService.call(placement.media.blob) if placement.media.attached?
+        sponsor_placement_plans << [ placement, prepared_media ]
+      end
+    end
+
     events = []
     event_map = {}
     rollover_committed = false
@@ -45,7 +53,7 @@ class SeasonRolloverService
         events << copy
         event_map[event.id] = copy
       end
-      copy_sponsor_placements(target_season, event_map) if copy_sponsors
+      copy_sponsor_placements(target_season, event_map, sponsor_placement_plans) if copy_sponsors
       AuditLog.record!(
         actor: actor,
         action: "rollover",
@@ -61,6 +69,9 @@ class SeasonRolloverService
       event_plans&.each do |_event, prepared_attachments|
         EventRolloverService.purge_prepared_attachments(prepared_attachments)
       end
+      sponsor_placement_plans&.each do |_placement, prepared_media|
+        prepared_media&.purge
+      end
     end
     raise
   end
@@ -69,10 +80,10 @@ class SeasonRolloverService
 
   attr_reader :source_season, :target_year, :actor, :copy_sponsors
 
-  def copy_sponsor_placements(target_season, event_map)
+  def copy_sponsor_placements(target_season, event_map, sponsor_placement_plans)
     return unless @copy_sponsors
 
-    source_season.sponsor_placements.find_each do |placement|
+    sponsor_placement_plans.each do |placement, prepared_media|
       copy = placement.dup
       copy.assign_attributes(
         season: target_season,
@@ -84,7 +95,7 @@ class SeasonRolloverService
         clicks_count: 0
       )
       copy.save!
-      copy.media.attach(placement.media.blob) if placement.media.attached?
+      copy.media.attach(prepared_media) if prepared_media
     end
   end
 end

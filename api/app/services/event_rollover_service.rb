@@ -37,13 +37,13 @@ class EventRolloverService
 
   def self.prepare_attachments(source_event:, copy_hero: true, copy_accommodations: true)
     prepared = PreparedAttachments.new(hero: nil, accommodations: {})
-    prepared.hero = duplicate_blob(source_event.hero_image.blob) if copy_hero && source_event.hero_image.attached?
+    prepared.hero = BlobCopyService.call(source_event.hero_image.blob) if copy_hero && source_event.hero_image.attached?
 
     if copy_accommodations
       source_event.event_accommodations.each do |accommodation|
         next unless accommodation.image.attached?
 
-        prepared.accommodations[accommodation.id] = duplicate_blob(accommodation.image.blob)
+        prepared.accommodations[accommodation.id] = BlobCopyService.call(accommodation.image.blob)
       end
     end
 
@@ -152,18 +152,4 @@ class EventRolloverService
     end
     slug
   end
-
-  def self.duplicate_blob(source_blob)
-    source_blob.open do |io|
-      ActiveStorage::Blob.create_and_upload!(
-        io:,
-        filename: source_blob.filename,
-        content_type: source_blob.content_type,
-        metadata: source_blob.metadata,
-        service_name: source_blob.service_name,
-        identify: false
-      )
-    end
-  end
-  private_class_method :duplicate_blob
 end
