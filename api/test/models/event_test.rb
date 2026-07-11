@@ -57,4 +57,26 @@ class EventTest < ActiveSupport::TestCase
     assert event.readiness[:checks].find { |check| check[:key] == "season" }[:complete]
     assert_not event.association(:season).loaded?
   end
+
+  test "season serialization preloads rollover source events" do
+    source_season = Season.create!(year: 2026, name: "2026 Marianas Open Circuit")
+    source = @organization.events.create!(
+      name: "Marianas Open 2026",
+      slug: "marianas-open-2026",
+      season: source_season,
+      date: Date.new(2026, 10, 17)
+    )
+    @organization.events.create!(
+      name: "Marianas Open 2027",
+      slug: "marianas-open-2027",
+      season: @season,
+      source_event: source
+    )
+    season = Season.find(@season.id)
+
+    season.as_json
+
+    assert season.events.all? { |event| event.association(:source_event).loaded? }
+    assert season.events.all? { |event| event.association(:season).loaded? }
+  end
 end

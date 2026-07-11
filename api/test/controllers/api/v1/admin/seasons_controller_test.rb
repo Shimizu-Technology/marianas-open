@@ -34,6 +34,21 @@ class Api::V1::Admin::SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert response.parsed_body["errors"].present?
   end
 
+  test "show returns compact event summaries" do
+    organization = Organization.create!(name: "Marianas Open", slug: "marianas-open")
+    season = Season.create!(year: 2027, name: "2027 Marianas Open Circuit")
+    event = organization.events.create!(name: "Marianas Open 2027", slug: "marianas-open-2027", season: season)
+
+    with_verified_user do
+      get api_v1_admin_season_path(season), headers: authorization_header
+    end
+
+    assert_response :ok
+    summary = response.parsed_body.dig("season", "events").sole
+    assert_equal event.id, summary["id"]
+    assert_equal %w[date id name slug status], summary.keys.sort
+  end
+
   private
 
   def authorization_header

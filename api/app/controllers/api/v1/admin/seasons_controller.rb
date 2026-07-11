@@ -14,7 +14,11 @@ module Api
         end
 
         def show
-          render json: { season: @season.as_json(include: { events: { only: [ :id, :name, :slug, :status, :date ] } }) }
+          season = @season.as_json
+          season["events"] = @season.events.map do |event|
+            event.attributes.slice("id", "name", "slug", "status", "date")
+          end
+          render json: { season: season }
         end
 
         def create

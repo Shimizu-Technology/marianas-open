@@ -16,7 +16,7 @@ class Event < ApplicationRecord
   validate :main_event_belongs_to_season
 
   belongs_to :organization
-  belongs_to :season, optional: true
+  belongs_to :season, optional: true, inverse_of: :events
   belongs_to :source_event, class_name: "Event", optional: true
   has_many :rolled_over_events, class_name: "Event", foreign_key: :source_event_id, dependent: :nullify
   has_many :event_schedule_items, dependent: :destroy

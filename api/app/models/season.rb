@@ -1,7 +1,7 @@
 class Season < ApplicationRecord
   STATUSES = %w[draft active archived].freeze
 
-  has_many :events, dependent: :restrict_with_error
+  has_many :events, dependent: :restrict_with_error, inverse_of: :season
   has_many :sponsor_placements, dependent: :destroy
 
   validates :year, presence: true, uniqueness: true, numericality: { only_integer: true, greater_than: 2000, less_than: 2200 }
@@ -21,7 +21,7 @@ class Season < ApplicationRecord
     event_records = events.to_a
     ActiveRecord::Associations::Preloader.new(
       records: event_records,
-      associations: { hero_image_attachment: :blob }
+      associations: [ :source_event, { hero_image_attachment: :blob } ]
     ).call
 
     super(options.merge(except: [ :created_at, :updated_at ])).merge(
