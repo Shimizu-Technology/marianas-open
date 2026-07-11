@@ -1,3 +1,5 @@
+require "uri"
+
 class SponsorPlacement < ApplicationRecord
   PLACEMENT_TYPES = %w[featured_bar homepage_hero event_hero livestream results gallery].freeze
   MEDIA_KINDS = %w[logo image video].freeze
@@ -14,6 +16,7 @@ class SponsorPlacement < ApplicationRecord
   validates :sort_order, numericality: { only_integer: true }
   validate :end_is_after_start
   validate :event_matches_season
+  validate :cta_url_is_safe
   validate :media_is_safe
 
   scope :active_now, -> {
@@ -57,6 +60,17 @@ class SponsorPlacement < ApplicationRecord
     return if event.blank? || season.blank? || event.season_id == season_id
 
     errors.add(:event, "must belong to the selected season")
+  end
+
+  def cta_url_is_safe
+    return if cta_url.blank?
+
+    uri = URI.parse(cta_url)
+    return if uri.scheme&.downcase.in?(%w[http https]) && uri.host.present?
+
+    errors.add(:cta_url, "must be a valid HTTP or HTTPS URL")
+  rescue URI::InvalidURIError
+    errors.add(:cta_url, "must be a valid HTTP or HTTPS URL")
   end
 
   def media_is_safe
