@@ -58,11 +58,14 @@ module Api
         end
 
         def destroy
-          return render json: { errors: [ "A season with events cannot be deleted." ] }, status: :unprocessable_entity if @season.events.exists?
-
-          @season.destroy!
-          record_admin_action!("destroy", @season)
-          head :no_content
+          if @season.destroy
+            record_admin_action!("destroy", @season)
+            head :no_content
+          else
+            render json: { errors: @season.errors.full_messages }, status: :unprocessable_entity
+          end
+        rescue ActiveRecord::InvalidForeignKey
+          render json: { errors: [ "A season with events cannot be deleted." ] }, status: :unprocessable_entity
         end
 
         private
