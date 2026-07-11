@@ -9,7 +9,7 @@ module Api
         before_action :set_placement, only: [ :show, :update, :destroy, :upload_media ]
 
         def index
-          placements = SponsorPlacement.includes(:sponsor, :season, :event).ordered
+          placements = SponsorPlacement.with_display_assets.ordered
           render json: { sponsor_placements: placements.as_json }
         end
 

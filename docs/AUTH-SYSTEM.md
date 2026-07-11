@@ -30,6 +30,8 @@ The Marianas Open platform uses **Clerk** for authentication and a **whitelist/i
 | `staff` | Limited admin | Access admin panel, manage content (no user management) |
 | `viewer` | Read-only admin | View admin dashboard and data |
 
+Viewer access excludes user management, organization settings, and audit history because those surfaces contain access-control or operator-identifying information.
+
 Role is stored in the `users.role` column (default: `viewer`).
 
 ## Whitelist / Invite-Only Model

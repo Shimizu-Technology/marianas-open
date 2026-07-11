@@ -23,6 +23,14 @@ class SponsorPlacement < ApplicationRecord
       .where("ends_at IS NULL OR ends_at >= ?", now)
   }
   scope :ordered, -> { order(:sort_order, :id) }
+  scope :with_display_assets, -> {
+    includes(
+      :season,
+      :event,
+      { media_attachment: :blob },
+      sponsor: { logo_attachment: :blob }
+    )
+  }
 
   def media_url
     return unless media.attached?

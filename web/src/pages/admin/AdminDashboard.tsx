@@ -19,18 +19,20 @@ export default function AdminDashboard() {
   const [recentEvents, setRecentEvents] = useState<Event[]>([])
   const [currentSeason, setCurrentSeason] = useState<Season | null>(null)
   const [activity, setActivity] = useState<AuditLog[]>([])
+  const [canViewAudit, setCanViewAudit] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
-        const [eventsRes, sponsorsRes, meRes, seasonsRes, auditRes] = await Promise.all([
+        const meRes = await api.getCurrentUser()
+        const [eventsRes, sponsorsRes, seasonsRes] = await Promise.all([
           api.admin.getEvents(),
           api.admin.getSponsors(),
-          api.getCurrentUser(),
           api.admin.getSeasons(),
-          api.admin.getAuditLogs(8),
         ])
+        const canReadAudit = meRes.user.is_staff
+        const auditRes = canReadAudit ? await api.admin.getAuditLogs(8) : { audit_logs: [] }
 
         let totalUsers: number | null = null
         if (meRes.user.is_admin) {
@@ -54,6 +56,7 @@ export default function AdminDashboard() {
         setRecentEvents(events.slice(0, 5))
         setCurrentSeason(seasonsRes.seasons.find((season) => season.current) || seasonsRes.seasons[0] || null)
         setActivity(auditRes.audit_logs)
+        setCanViewAudit(canReadAudit)
       } catch (err) {
         console.error('Failed to load dashboard:', err)
       } finally {
@@ -171,7 +174,7 @@ export default function AdminDashboard() {
 
       <div className="mt-6 bg-surface border border-white/5">
         <div className="flex items-center gap-2 border-b border-white/5 px-5 py-4"><Activity className="h-4 w-4 text-text-muted" /><h2 className="font-heading text-sm font-semibold text-text-primary">Recent admin activity</h2></div>
-        {activity.length === 0 ? <div className="p-6 text-sm text-text-muted">Activity will appear here after the next admin change.</div> : <div className="divide-y divide-white/5">{activity.map((log) => <div key={log.id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm"><div><span className="font-medium text-text-primary">{log.actor?.first_name || log.actor?.email || 'System'}</span><span className="text-text-muted"> {log.action.replaceAll('_', ' ')} </span><span className="text-text-secondary">{log.auditable_label}</span></div><time className="shrink-0 text-xs text-text-muted">{new Date(log.created_at).toLocaleString()}</time></div>)}</div>}
+        {!canViewAudit ? <div className="p-6 text-sm text-text-muted">Activity history is available to staff and administrators.</div> : activity.length === 0 ? <div className="p-6 text-sm text-text-muted">Activity will appear here after the next admin change.</div> : <div className="divide-y divide-white/5">{activity.map((log) => <div key={log.id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm"><div><span className="font-medium text-text-primary">{log.actor?.first_name || log.actor?.email || 'System'}</span><span className="text-text-muted"> {log.action.replaceAll('_', ' ')} </span><span className="text-text-secondary">{log.auditable_label}</span></div><time className="shrink-0 text-xs text-text-muted">{new Date(log.created_at).toLocaleString()}</time></div>)}</div>}
       </div>
     </div>
   )

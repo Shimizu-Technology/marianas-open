@@ -4,7 +4,7 @@ module Api
       class AuditLogsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_admin_access!
+        before_action :require_staff!
 
         def index
           logs = AuditLog.includes(:actor).recent.limit(params.fetch(:limit, 50).to_i.clamp(1, 100))

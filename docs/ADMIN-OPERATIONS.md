@@ -6,7 +6,7 @@ This runbook is for the tournament team managing the circuit from `/admin`. Rout
 
 - **Admin:** all content and operations plus user access and organization settings.
 - **Staff:** all tournament, content, media, sponsor, and results operations.
-- **Viewer:** can inspect the same operational data but all writes and uploads are rejected by the API.
+- **Viewer:** can inspect content and tournament data but all writes, uploads, user management, settings, and audit history are restricted.
 
 Important changes are written to the dashboard activity feed with the person, action, record, and time.
 

@@ -2,7 +2,7 @@ module Api
   module V1
     class SponsorPlacementsController < ApplicationController
       def index
-        placements = SponsorPlacement.active_now.ordered.includes(:sponsor)
+        placements = SponsorPlacement.active_now.with_display_assets.ordered
         placements = placements.where(placement_type: params[:placement_type]) if params[:placement_type].present?
         placements = if params[:season_id].present?
           placements.where(season_id: params[:season_id])
