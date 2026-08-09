@@ -4,7 +4,7 @@ module Api
       class AnnouncementsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action :require_admin_access!
         before_action :set_announcement, only: [:show, :update, :destroy, :upload_image, :remove_image]
 
         def index

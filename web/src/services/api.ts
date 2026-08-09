@@ -210,8 +210,38 @@ export interface EventVisaItem {
   description: string;
 }
 
+export interface ReadinessCheck {
+  key: string;
+  label: string;
+  complete: boolean;
+  blocking: boolean;
+}
+
+export interface EventReadiness {
+  publishable: boolean;
+  completed: number;
+  total: number;
+  checks: ReadinessCheck[];
+}
+
+export interface Season {
+  id: number;
+  year: number;
+  name: string;
+  description: string | null;
+  status: 'draft' | 'active' | 'archived';
+  current: boolean;
+  starts_on: string | null;
+  ends_on: string | null;
+  events_count: number;
+  ready_events_count: number;
+}
+
 export interface Event {
   id: number;
+  season_id: number | null;
+  source_event_id: number | null;
+  season: Pick<Season, 'id' | 'year' | 'name' | 'status' | 'current'> | null;
   name: string;
   slug: string;
   description: string;
@@ -257,6 +287,7 @@ export interface Event {
   gallery_images_count: number;
   translations?: TranslationsBlob;
   translation_status?: TranslationStatus;
+  readiness: EventReadiness;
 }
 
 export interface EventAccommodation {
@@ -303,6 +334,37 @@ export interface Sponsor {
   website_url: string | null;
   sort_order: number;
   logo_url: string | null;
+}
+
+export interface SponsorPlacement {
+  id: number;
+  sponsor_id: number;
+  season_id: number | null;
+  event_id: number | null;
+  placement_type: 'featured_bar' | 'homepage_hero' | 'event_hero' | 'livestream' | 'results' | 'gallery';
+  media_kind: 'logo' | 'image' | 'video';
+  headline: string | null;
+  body: string | null;
+  cta_label: string | null;
+  cta_url: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  active: boolean;
+  sort_order: number;
+  media_url: string | null;
+  sponsor: Sponsor;
+}
+
+export interface AuditLog {
+  id: number;
+  action: string;
+  auditable_type: string;
+  auditable_id: number | null;
+  auditable_label: string;
+  changes: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  actor: Pick<UserProfile, 'id' | 'email' | 'first_name' | 'last_name'> | null;
 }
 
 export interface UserProfile {
@@ -371,6 +433,7 @@ export interface SiteImage {
 }
 
 export interface EventFormData {
+  season_id: number | null;
   name: string;
   slug: string;
   description: string;
@@ -834,6 +897,10 @@ export const api = {
   getEventResultsSummary: (slug: string) =>
     fetchApi<EventResultsSummary>(`/api/v1/events/${slug}/results/summary`),
   getSponsors: () => fetchApi<Sponsor[]>('/api/v1/sponsors'),
+  getSponsorPlacements: (params?: Record<string, string | number>) => {
+    const query = params ? '?' + new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString() : '';
+    return fetchApi<{ sponsor_placements: SponsorPlacement[] }>(`/api/v1/sponsor-placements${query}`);
+  },
   getAnnouncements: () => fetchApi<{ announcements: Announcement[] }>('/api/v1/announcements'),
   getCompetitors: (params?: Record<string, string>) => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
@@ -899,6 +966,43 @@ export const api = {
       fetchApi<void>(`/api/v1/admin/events/${id}`, { method: 'DELETE' }, true),
     cloneEvent: (id: number) =>
       fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/clone`, { method: 'POST' }, true),
+    cloneEventToSeason: (id: number, data: { season_id?: number; target_year?: number }) =>
+      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/clone`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, true),
+    publishEvent: (id: number, publishStatus: 'upcoming' | 'live' = 'upcoming') =>
+      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/publish`, {
+        method: 'POST',
+        body: JSON.stringify({ publish_status: publishStatus }),
+      }, true),
+    unpublishEvent: (id: number) =>
+      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/unpublish`, { method: 'POST' }, true),
+    getSeasons: () => fetchApi<{ seasons: Season[] }>('/api/v1/admin/seasons', {}, true),
+    createSeason: (data: Partial<Season>) => fetchApi<{ season: Season }>('/api/v1/admin/seasons', {
+      method: 'POST', body: JSON.stringify(data),
+    }, true),
+    updateSeason: (id: number, data: Partial<Season>) => fetchApi<{ season: Season }>(`/api/v1/admin/seasons/${id}`, {
+      method: 'PATCH', body: JSON.stringify(data),
+    }, true),
+    activateSeason: (id: number) => fetchApi<{ season: Season }>(`/api/v1/admin/seasons/${id}/activate`, { method: 'POST' }, true),
+    rolloverSeason: (id: number, targetYear: number, copySponsors = true) => fetchApi<{ season: Season; events: Event[] }>(`/api/v1/admin/seasons/${id}/rollover`, {
+      method: 'POST', body: JSON.stringify({ target_year: targetYear, copy_sponsors: copySponsors }),
+    }, true),
+    getSponsorPlacements: () => fetchApi<{ sponsor_placements: SponsorPlacement[] }>('/api/v1/admin/sponsor-placements', {}, true),
+    createSponsorPlacement: (data: Partial<SponsorPlacement>) => fetchApi<{ sponsor_placement: SponsorPlacement }>('/api/v1/admin/sponsor-placements', {
+      method: 'POST', body: JSON.stringify(data),
+    }, true),
+    updateSponsorPlacement: (id: number, data: Partial<SponsorPlacement>) => fetchApi<{ sponsor_placement: SponsorPlacement }>(`/api/v1/admin/sponsor-placements/${id}`, {
+      method: 'PATCH', body: JSON.stringify(data),
+    }, true),
+    deleteSponsorPlacement: (id: number) => fetchApi<void>(`/api/v1/admin/sponsor-placements/${id}`, { method: 'DELETE' }, true),
+    uploadSponsorPlacementMedia: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('media', file);
+      return fetchApiUpload<{ sponsor_placement: SponsorPlacement }>(`/api/v1/admin/sponsor-placements/${id}/upload_media`, formData);
+    },
+    getAuditLogs: (limit = 25) => fetchApi<{ audit_logs: AuditLog[] }>(`/api/v1/admin/audit-logs?limit=${limit}`, {}, true),
     uploadEventImage: (id: number, file: File) => {
       const formData = new FormData();
       formData.append('image', file);

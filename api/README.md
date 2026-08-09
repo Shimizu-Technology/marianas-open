@@ -1,24 +1,23 @@
-# README
+# Marianas Open API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Rails 8 JSON API for the public platform and invite-only administration console.
 
-Things you may want to cover:
+## Setup
 
-* Ruby version
+```bash
+bundle install
+bin/rails db:prepare
+bin/rails server
+```
 
-* System dependencies
+Ruby `3.3.7` is declared in `.ruby-version`. PostgreSQL and an Active Storage service are required. Clerk protects admin endpoints; public event, sponsor, ranking, video, and content endpoints remain unauthenticated.
 
-* Configuration
+## Test and safety checks
 
-* Database creation
+```bash
+bin/rails test
+bin/rails zeitwerk:check
+bundle exec brakeman -q --no-pager
+```
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Database migrations create seasons, safe event lineage, sponsor placements, publishing constraints, and audit logs. Deployments must run `bin/rails db:migrate` before serving the new admin console.

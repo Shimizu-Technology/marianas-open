@@ -30,6 +30,8 @@ The Marianas Open platform uses **Clerk** for authentication and a **whitelist/i
 | `staff` | Limited admin | Access admin panel, manage content (no user management) |
 | `viewer` | Read-only admin | View admin dashboard and data |
 
+Viewer access excludes user management, organization settings, and audit history because those surfaces contain access-control or operator-identifying information.
+
 Role is stored in the `users.role` column (default: `viewer`).
 
 ## Whitelist / Invite-Only Model
@@ -62,6 +64,7 @@ Included in admin controllers. Key methods:
 - `authenticate_user!` — Extracts JWT from `Authorization: Bearer <token>`, verifies via JWKS, finds/creates user
 - `require_admin!` — Calls `authenticate_user!` + checks `user.admin?`
 - `require_staff!` — Calls `authenticate_user!` + checks `user.staff?`
+- `require_admin_access!` — Allows staff writes and read-only `GET` access for viewers
 - `find_or_create_user` — Matches by `clerk_id` first, then by email (for first-time invited users). Returns `nil` for unknown users.
 
 ### `ClerkAuth` Service (`app/services/clerk_auth.rb`)

@@ -9,9 +9,16 @@ class Event < ApplicationRecord
 
   before_validation :normalize_asjjf_registration_urls
 
-  validates :status, inclusion: { in: STATUSES }, allow_nil: true
+  validates :name, :slug, presence: true
+  validates :slug, uniqueness: true
+  validates :status, inclusion: { in: STATUSES }
+  validates :date, :venue_name, :city, :country, presence: true, if: :publicly_visible?
+  validate :main_event_belongs_to_season
 
   belongs_to :organization
+  belongs_to :season, optional: true, inverse_of: :events
+  belongs_to :source_event, class_name: "Event", optional: true
+  has_many :rolled_over_events, class_name: "Event", foreign_key: :source_event_id, dependent: :nullify
   has_many :event_schedule_items, dependent: :destroy
   has_many :prize_categories, dependent: :destroy
   has_many :videos, dependent: :nullify
@@ -19,6 +26,7 @@ class Event < ApplicationRecord
   has_many :event_accommodations, dependent: :destroy
   has_many :event_gallery_images, dependent: :destroy
   has_many :event_gallery_upload_batches, dependent: :destroy
+  has_many :sponsor_placements, dependent: :destroy
   has_one_attached :hero_image
   has_one_attached :poster_image
 
@@ -29,6 +37,46 @@ class Event < ApplicationRecord
   image_url_for :poster_image
 
   scope :publicly_visible, -> { where(status: PUBLIC_STATUSES) }
+
+  def publicly_visible?
+    status.in?(PUBLIC_STATUSES)
+  end
+
+  def publishable?
+    readiness[:publishable]
+  end
+
+  def readiness
+    checks = [
+      readiness_check("name", "Event name", name.present?),
+      readiness_check("slug", "Public URL", slug.present?),
+      readiness_check("season", "Season", season_id.present?),
+      readiness_check("date", "Event date", date.present?),
+      readiness_check("venue", "Venue", venue_name.present?),
+      readiness_check("location", "City and country", city.present? && country.present?),
+      readiness_check("registration", "Registration link", registration_urls_present?),
+      readiness_check("hero_image", "Hero image", hero_image.attached?, blocking: false),
+      readiness_check("description", "Description", description.present?, blocking: false)
+    ]
+
+    if source_event&.date&.year && season&.year
+      old_year = source_event.date.year.to_s
+      checks << readiness_check(
+        "stale_year",
+        "No references to #{old_year}",
+        !rollover_content.include?(old_year),
+        blocking: false
+      )
+    end
+
+    blocking = checks.select { |check| check[:blocking] && !check[:complete] }
+    {
+      publishable: blocking.empty?,
+      completed: checks.count { |check| check[:complete] },
+      total: checks.length,
+      checks: checks
+    }
+  end
 
   def self.complete_past_events!(today: Date.current)
     where(status: AUTO_COMPLETABLE_STATUSES)
@@ -90,7 +138,9 @@ class Event < ApplicationRecord
   translation_context "Marianas Open jiu-jitsu tournament events. Translate naturally for the target audience."
 
   def as_json(options = {})
-    super(options.merge(
+    serialization_options = options.dup
+    include_admin_metadata = serialization_options.delete(:include_admin_metadata) != false
+    payload = super(serialization_options.merge(
       methods: [:hero_image_url, :poster_image_url, :asjjf_source_urls, :gallery_images_count],
       include: {
         event_schedule_items: { except: [:created_at, :updated_at] },
@@ -99,6 +149,13 @@ class Event < ApplicationRecord
       },
       except: [:created_at, :updated_at]
     )).merge("event_gallery_images" => gallery_preview_images.as_json)
+
+    return payload unless include_admin_metadata
+
+    payload.merge(
+      "season" => season_summary,
+      "readiness" => readiness
+    )
   end
 
   private
@@ -110,6 +167,62 @@ class Event < ApplicationRecord
 
       public_send("#{field}=", self.class.asjjf_event_info_url(value))
     end
+  end
+
+  def main_event_belongs_to_season
+    return unless is_main_event?
+    if season.blank?
+      errors.add(:season, "is required for the main event")
+      return
+    end
+    if Event.where(season_id: season_id, is_main_event: true).where.not(id: id).exists?
+      errors.add(:is_main_event, "is already assigned to another event in this season")
+    end
+  end
+
+  def registration_urls_present?
+    ASJJF_REGISTRATION_URL_FIELDS.any? { |field| public_send(field).present? }
+  end
+
+  def readiness_check(key, label, complete, blocking: true)
+    { key: key, label: label, complete: complete, blocking: blocking }
+  end
+
+  def rollover_content
+    rollover_values = [
+      name,
+      description,
+      tagline,
+      schedule_note,
+      travel_description,
+      visa_description,
+      registration_steps,
+      registration_fee_sections,
+      registration_info_items,
+      travel_items,
+      visa_items
+    ]
+
+    textual_rollover_values(rollover_values).join(" ")
+  end
+
+  def textual_rollover_values(value)
+    case value
+    when String
+      [ value ]
+    when Array
+      value.flat_map { |entry| textual_rollover_values(entry) }
+    when Hash
+      value.values.flat_map { |entry| textual_rollover_values(entry) }
+    else
+      []
+    end
+  end
+
+  def season_summary
+    return unless season
+
+    season.attributes.slice("id", "year", "name", "status", "current")
   end
 
   def public_gallery_images

@@ -4,7 +4,7 @@ module Api
       class SponsorsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action :require_admin_access!
         before_action :set_sponsor, only: [:show, :update, :destroy, :upload_logo]
 
         def show

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, Handshake, Users, Plus, ArrowRight, Loader2 } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, Handshake, Users, Plus, ArrowRight, Loader2, CircleAlert, CalendarRange, Activity } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { api } from '../../services/api'
-import type { Event } from '../../services/api'
+import type { AuditLog, Event, Season } from '../../services/api'
 import { formatDate } from '../../utils/dates'
 
 interface Stats {
@@ -11,21 +11,28 @@ interface Stats {
   upcomingEvents: number
   totalSponsors: number
   totalUsers: number | null
+  draftsNeedingWork: number
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats>({ totalEvents: 0, upcomingEvents: 0, totalSponsors: 0, totalUsers: null })
+  const [stats, setStats] = useState<Stats>({ totalEvents: 0, upcomingEvents: 0, totalSponsors: 0, totalUsers: null, draftsNeedingWork: 0 })
   const [recentEvents, setRecentEvents] = useState<Event[]>([])
+  const [currentSeason, setCurrentSeason] = useState<Season | null>(null)
+  const [activity, setActivity] = useState<AuditLog[]>([])
+  const [canViewAudit, setCanViewAudit] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
-        const [eventsRes, sponsorsRes, meRes] = await Promise.all([
+        const meRes = await api.getCurrentUser()
+        const [eventsRes, sponsorsRes, seasonsRes] = await Promise.all([
           api.admin.getEvents(),
           api.admin.getSponsors(),
-          api.getCurrentUser(),
+          api.admin.getSeasons(),
         ])
+        const canReadAudit = meRes.user.is_staff
+        const auditRes = canReadAudit ? await api.admin.getAuditLogs(8) : { audit_logs: [] }
 
         let totalUsers: number | null = null
         if (meRes.user.is_admin) {
@@ -41,11 +48,15 @@ export default function AdminDashboard() {
         const now = new Date().toISOString().split('T')[0]
         setStats({
           totalEvents: events.length,
-          upcomingEvents: events.filter((e: Event) => e.date >= now).length,
+          upcomingEvents: events.filter((e: Event) => Boolean(e.date && e.date >= now)).length,
           totalSponsors: sponsorsRes.sponsors.length,
           totalUsers,
+          draftsNeedingWork: events.filter((e: Event) => e.status === 'draft' && !e.readiness?.publishable).length,
         })
         setRecentEvents(events.slice(0, 5))
+        setCurrentSeason(seasonsRes.seasons.find((season) => season.current) || seasonsRes.seasons[0] || null)
+        setActivity(auditRes.audit_logs)
+        setCanViewAudit(canReadAudit)
       } catch (err) {
         console.error('Failed to load dashboard:', err)
       } finally {
@@ -59,6 +70,7 @@ export default function AdminDashboard() {
     { label: 'Total Events', value: stats.totalEvents, icon: CalendarDays, to: '/admin/events' },
     { label: 'Upcoming', value: stats.upcomingEvents, icon: CalendarDays, to: '/admin/events' },
     { label: 'Sponsors', value: stats.totalSponsors, icon: Handshake, to: '/admin/sponsors' },
+    { label: 'Drafts needing work', value: stats.draftsNeedingWork, icon: CircleAlert, to: '/admin/events' },
     ...(stats.totalUsers !== null
       ? [{ label: 'Users', value: stats.totalUsers, icon: Users, to: '/admin/users' }]
       : []),
@@ -119,7 +131,14 @@ export default function AdminDashboard() {
           <Plus className="w-4 h-4" />
           Add Sponsor
         </Link>
+        <Link to="/admin/seasons" className="flex items-center justify-center sm:justify-start gap-2 px-4 py-3 sm:py-2.5 bg-white/5 text-text-secondary text-sm font-medium hover:bg-white/8 transition-colors"><CalendarRange className="w-4 h-4" />Prepare next season</Link>
       </div>
+
+      {currentSeason && (
+        <div className="mb-6 border border-gold/20 bg-gold/[0.06] p-4 sm:mb-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-gold">Current season</div><div className="mt-1 font-heading text-lg font-bold">{currentSeason.name}</div><div className="mt-1 text-xs text-text-muted">{currentSeason.ready_events_count} of {currentSeason.events_count} events pass publishing readiness</div></div><Link to="/admin/seasons" className="text-sm font-medium text-gold hover:text-gold/80">Manage season →</Link></div>
+        </div>
+      )}
 
       {/* Recent Events */}
       <div className="bg-surface border border-white/5">
@@ -151,6 +170,11 @@ export default function AdminDashboard() {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="mt-6 bg-surface border border-white/5">
+        <div className="flex items-center gap-2 border-b border-white/5 px-5 py-4"><Activity className="h-4 w-4 text-text-muted" /><h2 className="font-heading text-sm font-semibold text-text-primary">Recent admin activity</h2></div>
+        {!canViewAudit ? <div className="p-6 text-sm text-text-muted">Activity history is available to staff and administrators.</div> : activity.length === 0 ? <div className="p-6 text-sm text-text-muted">Activity will appear here after the next admin change.</div> : <div className="divide-y divide-white/5">{activity.map((log) => <div key={log.id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm"><div><span className="font-medium text-text-primary">{log.actor?.first_name || log.actor?.email || 'System'}</span><span className="text-text-muted"> {log.action.replaceAll('_', ' ')} </span><span className="text-text-secondary">{log.auditable_label}</span></div><time className="shrink-0 text-xs text-text-muted">{new Date(log.created_at).toLocaleString()}</time></div>)}</div>}
       </div>
     </div>
   )

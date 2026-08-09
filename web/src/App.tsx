@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import LiveStreamBanner from './components/LiveStreamBanner';
 import AnnouncementBar from './components/AnnouncementBar';
+import SponsorPlacementBar from './components/SponsorPlacementBar';
 import MobileLanguageFAB from './components/MobileLanguageFAB';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -44,6 +45,8 @@ const AcademiesAdmin = lazy(() => import('./pages/admin/AcademiesAdmin'));
 const AnnouncementsAdmin = lazy(() => import('./pages/admin/AnnouncementsAdmin'));
 const ImpactAdmin = lazy(() => import('./pages/admin/ImpactAdmin'));
 const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
+const SeasonsAdmin = lazy(() => import('./pages/admin/SeasonsAdmin'));
+const SponsorPlacementsAdmin = lazy(() => import('./pages/admin/SponsorPlacementsAdmin'));
 
 function BannerLayout({ children }: { children: React.ReactNode }) {
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -71,6 +74,7 @@ function BannerLayout({ children }: { children: React.ReactNode }) {
       <div ref={bannerRef} className="fixed top-16 left-0 right-0 z-40 flex flex-col">
         <LiveStreamBanner />
         <AnnouncementBar />
+        <SponsorPlacementBar />
       </div>
       {bannerHeight > 0 && <div style={{ height: bannerHeight }} />}
       {children}
@@ -136,7 +140,7 @@ export default function App() {
           path="/admin/*"
           element={
             <Suspense fallback={<LoadingSpinner />}>
-              <ProtectedRoute requiredRole="staff">
+              <ProtectedRoute requiredRole="viewer">
                 <AdminLayout />
               </ProtectedRoute>
             </Suspense>
@@ -144,8 +148,10 @@ export default function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="events" element={<EventsAdmin />} />
+          <Route path="seasons" element={<SeasonsAdmin />} />
           <Route path="events/:eventId/results" element={<EventResultsAdmin />} />
           <Route path="sponsors" element={<SponsorsAdmin />} />
+          <Route path="sponsor-placements" element={<SponsorPlacementsAdmin />} />
           <Route path="videos" element={<VideosAdmin />} />
           <Route path="competitors" element={<CompetitorsAdmin />} />
           <Route path="academies" element={<AcademiesAdmin />} />

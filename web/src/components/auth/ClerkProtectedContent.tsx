@@ -7,7 +7,7 @@ import { ShieldX } from 'lucide-react'
 
 interface ClerkProtectedContentProps {
   children: React.ReactNode
-  requiredRole?: 'admin' | 'staff'
+  requiredRole?: 'admin' | 'staff' | 'viewer'
 }
 
 type AuthStatus = 'loading' | 'checking' | 'authorized' | 'unauthorized' | 'access_denied'
@@ -52,6 +52,7 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
             const hasAccess =
               requiredRole === 'staff' ? user.is_staff :
               requiredRole === 'admin' ? user.is_admin :
+              requiredRole === 'viewer' ? ['admin', 'staff', 'viewer'].includes(user.role) :
               false
 
             if (!hasAccess) {

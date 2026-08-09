@@ -4,7 +4,7 @@ module Api
       class AcademiesController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action :require_admin_access!
         before_action :set_academy, only: [:show, :update, :destroy, :upload_logo]
 
         def index

@@ -1,0 +1,88 @@
+require "test_helper"
+require "stringio"
+
+class EventRolloverServiceTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
+  setup do
+    organization = Organization.create!(name: "Marianas Open", slug: "marianas-open")
+    source_season = Season.create!(year: 2026, name: "2026 Marianas Open Circuit")
+    @target_season = Season.create!(year: 2027, name: "2027 Marianas Open Circuit")
+    @source = organization.events.create!(
+      name: "Marianas Open 2026",
+      slug: "marianas-open-2026",
+      season: source_season,
+      status: "upcoming",
+      date: Date.new(2026, 10, 17),
+      is_main_event: true,
+      venue_name: "Field House",
+      city: "Mangilao",
+      country: "Guam",
+      registration_url: "https://asjjf.org/main/eventInfo/1900",
+      live_stream_url: "https://youtube.test/live",
+      live_stream_active: true,
+      asjjf_event_ids: [ 1900 ]
+    )
+    @source.event_schedule_items.create!(time: "9:00 AM", description: "Competition")
+    @accommodation = @source.event_accommodations.create!(hotel_name: "Partner Hotel", check_in_date: Date.new(2026, 10, 15), booking_code: "OLD2026")
+  end
+
+  test "rollover preserves reusable content and resets stale operational data" do
+    copy = EventRolloverService.call(source_event: @source, target_season: @target_season)
+
+    assert_equal "Marianas Open 2027", copy.name
+    assert_equal "draft", copy.status
+    assert_equal @source, copy.source_event
+    assert_nil copy.date
+    assert_nil copy.registration_url
+    assert_nil copy.live_stream_url
+    assert_not copy.live_stream_active
+    assert_empty copy.asjjf_event_ids
+    assert_equal [ "Competition" ], copy.event_schedule_items.pluck(:description)
+    assert_nil copy.event_accommodations.first.check_in_date
+    assert_nil copy.event_accommodations.first.booking_code
+  end
+
+  test "rollover does not translate copied drafts before admin review" do
+    @source.prize_categories.create!(name: "Open weight", amount: "$1,000")
+    original_key = ENV["GT_API_KEY"]
+    original_project = ENV["GT_PROJECT_ID"]
+    ENV["GT_API_KEY"] = "test-key"
+    ENV["GT_PROJECT_ID"] = "test-project"
+    clear_enqueued_jobs
+
+    assert_no_enqueued_jobs only: TranslateRecordJob do
+      copy = EventRolloverService.call(source_event: @source, target_season: @target_season)
+
+      assert_equal "untranslated", copy.translation_status
+      assert_equal [ "untranslated" ], copy.event_schedule_items.pluck(:translation_status).uniq
+      assert_equal [ "untranslated" ], copy.prize_categories.pluck(:translation_status).uniq
+      assert_equal [ "untranslated" ], copy.event_accommodations.pluck(:translation_status).uniq
+    end
+  ensure
+    ENV["GT_API_KEY"] = original_key
+    ENV["GT_PROJECT_ID"] = original_project
+  end
+
+  test "duplicates attachment storage before opening the rollover transaction" do
+    @source.hero_image.attach(io: StringIO.new("hero image"), filename: "hero.jpg", content_type: "image/jpeg")
+    @accommodation.image.attach(io: StringIO.new("hotel image"), filename: "hotel.jpg", content_type: "image/jpeg")
+    baseline_transactions = ActiveRecord::Base.connection.open_transactions
+    upload_transaction_depths = []
+    subscriber = ActiveSupport::Notifications.subscribe("service_upload.active_storage") do
+      upload_transaction_depths << ActiveRecord::Base.connection.open_transactions
+    end
+
+    copy = EventRolloverService.call(source_event: @source, target_season: @target_season)
+
+    assert_equal [ baseline_transactions, baseline_transactions ], upload_transaction_depths
+    assert copy.hero_image.attached?
+    assert copy.event_accommodations.first.image.attached?
+    assert_not_equal @source.hero_image.blob_id, copy.hero_image.blob_id
+    assert_not_equal @accommodation.image.blob_id, copy.event_accommodations.first.image.blob_id
+    assert_equal "hero image", copy.hero_image.download
+    assert_equal "hotel image", copy.event_accommodations.first.image.download
+  ensure
+    ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+  end
+end

@@ -7,7 +7,7 @@ module Api
         UploadAlreadyUsed = Class.new(StandardError)
         UNCATEGORIZED_FILTER = "__uncategorized__".freeze
 
-        before_action :require_staff!
+        before_action :require_admin_access!
         before_action :set_event
         before_action :set_gallery_image, only: [ :update, :destroy, :upload ]
 
@@ -177,8 +177,17 @@ module Api
             return render json: { error: "Category must be #{EventGalleryImage::CATEGORY_MAX_LENGTH} characters or fewer" }, status: :unprocessable_entity
           end
 
-          updated = @event.event_gallery_images.where(id: ids).update_all(attrs.merge(updated_at: Time.current))
-          render json: { updated: updated }
+          images = @event.event_gallery_images.where(id: ids).to_a
+          EventGalleryImage.transaction do
+            images.each { |image| image.update!(attrs) }
+          end
+          render json: { updated: images.size }
+        rescue ActiveRecord::RecordInvalid => e
+          render json: {
+            updated: 0,
+            image_id: e.record.id,
+            errors: e.record.errors.full_messages
+          }, status: :unprocessable_entity
         end
 
         def bulk_destroy

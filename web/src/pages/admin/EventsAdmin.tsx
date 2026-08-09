@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, useRef, useId } from 'react'
 import type { DragEvent } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw, Copy, UploadCloud, CheckSquare, Square, EyeOff, Tags } from 'lucide-react'
+import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw, Copy, UploadCloud, CheckSquare, Square, EyeOff, Tags, CircleCheck, CircleAlert, Rocket } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -19,6 +19,7 @@ import type {
   EventRegistrationInfoItem,
   EventTravelItem,
   EventVisaItem,
+  Season,
 } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
 import ImageWithShimmer from '../../components/ImageWithShimmer'
@@ -36,6 +37,7 @@ const GALLERY_CATEGORY_UNCATEGORIZED = '__uncategorized__';
 const GALLERY_CATEGORY_CREATE = '__create_category__';
 
 const emptyForm: EventFormData = {
+  season_id: null,
   name: '', slug: '', description: '', date: '', end_date: '',
   venue_name: '', venue_address: '', city: '', country: '', country_code: '',
   asjjf_stars: 0, is_main_event: false, prize_pool: '', prize_title: '', prize_description: '',
@@ -58,8 +60,9 @@ const emptyForm: EventFormData = {
 
 function eventToForm(e: Event): EventFormData {
   return {
+    season_id: e.season_id,
     name: e.name, slug: e.slug, description: e.description || '',
-    date: e.date, end_date: e.end_date || '',
+    date: e.date || '', end_date: e.end_date || '',
     venue_name: e.venue_name || '', venue_address: e.venue_address || '',
     city: e.city || '', country: e.country || '', country_code: e.country_code || '',
     asjjf_stars: e.asjjf_stars || 0, is_main_event: e.is_main_event || false,
@@ -93,6 +96,7 @@ function eventToForm(e: Event): EventFormData {
 
 export default function EventsAdmin() {
   const [events, setEvents] = useState<Event[]>([])
+  const [seasons, setSeasons] = useState<Season[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useEditingParam()
 
@@ -134,6 +138,10 @@ export default function EventsAdmin() {
   }, [])
 
   useEffect(() => { loadEvents() }, [loadEvents])
+
+  useEffect(() => {
+    api.admin.getSeasons().then((response) => setSeasons(response.seasons)).catch(() => undefined)
+  }, [])
 
   useEffect(() => {
     const ref = pollingGenRef
@@ -268,6 +276,29 @@ export default function EventsAdmin() {
     }
   }
 
+  const handlePublish = async (status: 'upcoming' | 'live' = 'upcoming') => {
+    if (typeof editing !== 'number') return
+    setSaving(true); setError('')
+    try {
+      const response = await api.admin.publishEvent(editing, status)
+      setForm(eventToForm(response.event))
+      setSuccess(status === 'live' ? 'Event is live' : 'Event published')
+      await loadEvents()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Publishing failed')
+    } finally { setSaving(false) }
+  }
+
+  const handleUnpublish = async () => {
+    if (typeof editing !== 'number' || !window.confirm('Return this event to draft and remove it from the public site?')) return
+    setSaving(true); setError('')
+    try {
+      const response = await api.admin.unpublishEvent(editing)
+      setForm(eventToForm(response.event)); setSuccess('Event returned to draft'); await loadEvents()
+    } catch (err) { setError(err instanceof Error ? err.message : 'Unable to unpublish') }
+    finally { setSaving(false) }
+  }
+
   const handleImageUpload = async (file: File) => {
     if (typeof editing !== 'number') return
     try {
@@ -325,7 +356,7 @@ export default function EventsAdmin() {
     }
   }
 
-  const updateForm = (field: string, value: string | number | boolean | number[]) => {
+  const updateForm = (field: string, value: string | number | boolean | number[] | null) => {
     setForm(prev => ({ ...prev, [field]: value }))
   }
 
@@ -697,8 +728,23 @@ export default function EventsAdmin() {
           </div>
 
           <div className="p-4 sm:p-5 space-y-5">
+            {currentEvent?.readiness && (
+              <section className="border border-white/10 bg-navy-900/50 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div><h3 className="flex items-center gap-2 text-sm font-semibold"><Rocket className="h-4 w-4 text-gold" />Publishing readiness</h3><p className="mt-1 text-xs text-text-muted">{currentEvent.readiness.completed} of {currentEvent.readiness.total} checks complete. Save changes to refresh.</p></div>
+                  <div className="flex flex-wrap gap-2">
+                    {currentEvent.status === 'draft' ? <button onClick={() => handlePublish('upcoming')} disabled={!currentEvent.readiness.publishable || saving} className="bg-gold/10 px-3 py-2 text-xs font-medium text-gold hover:bg-gold/15 disabled:cursor-not-allowed disabled:opacity-40">Publish event</button> : <button onClick={handleUnpublish} disabled={saving} className="bg-white/5 px-3 py-2 text-xs text-text-secondary hover:bg-white/10">Return to draft</button>}
+                    {currentEvent.status === 'upcoming' && <button onClick={() => handlePublish('live')} disabled={saving} className="bg-red-400/10 px-3 py-2 text-xs text-red-300 hover:bg-red-400/15">Mark live</button>}
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {currentEvent.readiness.checks.map((check) => <div key={check.key} className={`flex items-center gap-2 text-xs ${check.complete ? 'text-green-300' : check.blocking ? 'text-red-300' : 'text-amber-300'}`}>{check.complete ? <CircleCheck className="h-3.5 w-3.5" /> : <CircleAlert className="h-3.5 w-3.5" />}{check.label}{!check.blocking && !check.complete ? ' (recommended)' : ''}</div>)}
+                </div>
+              </section>
+            )}
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <SelectField label="Season" value={form.season_id?.toString() || ''} onChange={value => updateForm('season_id', value ? Number(value) : null)} options={[{ value: '', label: 'Select a season' }, ...seasons.map((season) => ({ value: season.id.toString(), label: `${season.name}${season.current ? ' (current)' : ''}` }))]} />
               <Field label="Name" value={form.name} onChange={v => updateForm('name', v)} />
               <Field label="Slug" value={form.slug} onChange={v => updateForm('slug', v)} placeholder="auto-generated-if-blank" />
               <Field label="Date" type="date" value={form.date} onChange={v => updateForm('date', v)} />

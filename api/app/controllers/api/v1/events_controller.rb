@@ -7,7 +7,7 @@ module Api
         events = Event.publicly_visible
                       .includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } })
                       .order(:date)
-        render json: events
+        render json: events.as_json(include_admin_metadata: false)
       end
 
       def show
@@ -15,7 +15,7 @@ module Api
                      .includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } })
                      .find_by!(slug: params[:slug])
         event.complete_if_past!
-        render json: event
+        render json: event.as_json(include_admin_metadata: false)
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Event not found" }, status: :not_found
       end

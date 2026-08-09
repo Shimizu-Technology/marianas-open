@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_11_090200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -71,6 +71,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
     t.datetime "starts_at"
     t.string "title", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "audit_logs", force: :cascade do |t|
+    t.string "action", null: false
+    t.bigint "actor_id"
+    t.bigint "auditable_id"
+    t.string "auditable_label"
+    t.string "auditable_type", null: false
+    t.jsonb "change_set", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_audit_logs_on_actor_id"
+    t.index ["auditable_type", "auditable_id", "created_at"], name: "index_audit_logs_on_auditable"
+    t.index ["created_at"], name: "index_audit_logs_on_created_at"
   end
 
   create_table "competitors", force: :cascade do |t|
@@ -239,8 +254,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
     t.string "registration_url_nogi"
     t.datetime "results_imported_at"
     t.text "schedule_note"
-    t.string "slug"
-    t.string "status"
+    t.bigint "season_id"
+    t.string "slug", null: false
+    t.bigint "source_event_id"
+    t.string "status", default: "draft", null: false
     t.string "tagline"
     t.string "translation_status", default: "untranslated", null: false
     t.jsonb "translations", default: {}, null: false
@@ -253,6 +270,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
     t.text "visa_description"
     t.jsonb "visa_items", default: [], null: false
     t.index ["organization_id"], name: "index_events_on_organization_id"
+    t.index ["season_id"], name: "index_events_on_one_main_event_per_season", unique: true, where: "(is_main_event = true)"
+    t.index ["season_id"], name: "index_events_on_season_id"
+    t.index ["slug"], name: "index_events_on_slug", unique: true
+    t.index ["source_event_id"], name: "index_events_on_source_event_id"
     t.index ["translation_status"], name: "index_events_on_translation_status"
   end
 
@@ -322,6 +343,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_prize_categories_on_event_id"
     t.index ["translation_status"], name: "index_prize_categories_on_translation_status"
+  end
+
+  create_table "seasons", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "current", default: false, null: false
+    t.text "description"
+    t.date "ends_on"
+    t.string "name", null: false
+    t.date "starts_on"
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.integer "year", null: false
+    t.index ["current"], name: "index_seasons_on_current", unique: true, where: "(current = true)"
+    t.index ["year"], name: "index_seasons_on_year", unique: true
   end
 
   create_table "site_contents", force: :cascade do |t|
@@ -478,6 +513,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "sponsor_placements", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.text "body"
+    t.bigint "clicks_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.string "cta_label"
+    t.string "cta_url"
+    t.datetime "ends_at"
+    t.bigint "event_id"
+    t.string "headline"
+    t.bigint "impressions_count", default: 0, null: false
+    t.string "media_kind", default: "logo", null: false
+    t.string "placement_type", default: "featured_bar", null: false
+    t.bigint "season_id"
+    t.integer "sort_order", default: 0, null: false
+    t.bigint "sponsor_id", null: false
+    t.datetime "starts_at"
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_sponsor_placements_on_event_id"
+    t.index ["placement_type", "active", "sort_order"], name: "index_sponsor_placements_for_public_display"
+    t.index ["season_id"], name: "index_sponsor_placements_on_season_id"
+    t.index ["sponsor_id"], name: "index_sponsor_placements_on_sponsor_id"
+  end
+
   create_table "sponsors", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -532,6 +591,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "audit_logs", "users", column: "actor_id"
   add_foreign_key "competitors", "academies"
   add_foreign_key "event_accommodations", "events"
   add_foreign_key "event_gallery_images", "event_gallery_upload_batches"
@@ -540,7 +600,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
   add_foreign_key "event_results", "competitors"
   add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"
+  add_foreign_key "events", "events", column: "source_event_id"
   add_foreign_key "events", "organizations"
+  add_foreign_key "events", "seasons"
   add_foreign_key "prize_categories", "events"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
@@ -548,6 +610,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "sponsor_placements", "events"
+  add_foreign_key "sponsor_placements", "seasons"
+  add_foreign_key "sponsor_placements", "sponsors"
   add_foreign_key "sponsors", "organizations"
   add_foreign_key "users", "users", column: "invited_by_id", on_delete: :nullify
   add_foreign_key "videos", "events"

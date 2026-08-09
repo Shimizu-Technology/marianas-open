@@ -78,6 +78,16 @@ module ClerkAuthenticatable
     end
   end
 
+  def require_admin_access!
+    authenticate_user! unless @current_user
+    return if performed?
+
+    return if @current_user&.staff?
+    return if @current_user&.viewer? && request.get?
+
+    render_forbidden(@current_user&.viewer? ? "Viewer access is read-only" : "Admin access required")
+  end
+
   def find_or_create_user(clerk_id:, email:, first_name:, last_name:)
     return nil if clerk_id.blank?
 
