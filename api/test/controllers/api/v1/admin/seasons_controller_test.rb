@@ -49,17 +49,66 @@ class Api::V1::Admin::SeasonsControllerTest < ActionDispatch::IntegrationTest
     assert_equal %w[date id name slug status], summary.keys.sort
   end
 
+  test "viewer can read seasons" do
+    viewer = User.create!(
+      clerk_id: "season-viewer-clerk",
+      email: "season-viewer@example.com",
+      role: "viewer"
+    )
+    Season.create!(year: 2027, name: "2027 Marianas Open Circuit")
+
+    with_verified_user(viewer) do
+      get api_v1_admin_seasons_path, headers: authorization_header
+    end
+
+    assert_response :ok
+    assert_equal 1, response.parsed_body["seasons"].size
+  end
+
+  test "viewer cannot create a season" do
+    viewer = User.create!(
+      clerk_id: "season-write-viewer-clerk",
+      email: "season-write-viewer@example.com",
+      role: "viewer"
+    )
+
+    assert_no_difference("Season.count") do
+      with_verified_user(viewer) do
+        post api_v1_admin_seasons_path,
+          params: { year: 2027, name: "2027 Marianas Open Circuit" },
+          headers: authorization_header
+      end
+    end
+
+    assert_response :forbidden
+    assert_equal "Viewer access is read-only", response.parsed_body["error"]
+  end
+
+  test "activating a season demotes the prior current season" do
+    previous = Season.create!(year: 2026, name: "2026 Marianas Open Circuit", status: "active", current: true)
+    target = Season.create!(year: 2027, name: "2027 Marianas Open Circuit")
+
+    with_verified_user do
+      post activate_api_v1_admin_season_path(target), headers: authorization_header
+    end
+
+    assert_response :ok
+    assert_not previous.reload.current
+    assert target.reload.current
+    assert_equal "active", target.status
+    assert_equal 1, Season.where(current: true).count
+  end
+
   private
 
   def authorization_header
     { "Authorization" => "Bearer test-token" }
   end
 
-  def with_verified_user
+  def with_verified_user(user = @admin)
     original_verify = ClerkAuth.method(:verify)
-    admin = @admin
     ClerkAuth.define_singleton_method(:verify) do |_token|
-      { "sub" => admin.clerk_id, "email" => admin.email }
+      { "sub" => user.clerk_id, "email" => user.email }
     end
     yield
   ensure

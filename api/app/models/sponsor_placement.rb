@@ -18,6 +18,7 @@ class SponsorPlacement < ApplicationRecord
   validate :event_matches_season
   validate :cta_url_is_safe
   validate :media_is_safe
+  validate :featured_bar_media_is_an_image
 
   scope :active_now, -> {
     now = Time.current
@@ -39,6 +40,10 @@ class SponsorPlacement < ApplicationRecord
     return unless media.attached?
 
     Rails.application.routes.url_helpers.rails_blob_url(media, only_path: true)
+  end
+
+  def audit_label
+    "#{sponsor.name} #{placement_type.humanize}"
   end
 
   def as_json(options = {})
@@ -78,5 +83,12 @@ class SponsorPlacement < ApplicationRecord
 
     errors.add(:media, "must be a JPG, PNG, WebP, GIF, MP4, or WebM file") unless media.blob.content_type.in?(ALLOWED_MEDIA_TYPES)
     errors.add(:media, "must be smaller than 100 MB") if media.blob.byte_size > MAX_MEDIA_SIZE
+  end
+
+  def featured_bar_media_is_an_image
+    return unless placement_type == "featured_bar" && media.attached?
+    return if media.blob.content_type.to_s.start_with?("image/")
+
+    errors.add(:media, "must be an image for a featured bar")
   end
 end

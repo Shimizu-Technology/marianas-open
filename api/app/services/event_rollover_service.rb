@@ -80,6 +80,7 @@ class EventRolloverService
     new_event.season = target_season
     new_event.name = rollover_text(source_event.name) || "#{source_event.name} (Copy)"
     new_event.slug = unique_slug(new_event.name)
+    new_event.skip_automatic_translation!
 
     ActiveRecord::Base.transaction do
       new_event.save!
@@ -110,6 +111,7 @@ class EventRolloverService
       copy.event = new_event
       copy.translations = {}
       copy.translation_status = "untranslated"
+      copy.skip_automatic_translation!
       copy.save!
     end
   end
@@ -120,6 +122,7 @@ class EventRolloverService
       copy.event = new_event
       copy.translations = {}
       copy.translation_status = "untranslated"
+      copy.skip_automatic_translation!
       copy.save!
     end
   end
@@ -136,6 +139,7 @@ class EventRolloverService
         translations: {},
         translation_status: "untranslated"
       )
+      copy.skip_automatic_translation!
       copy.save!
       prepared_blob = prepared_attachments.accommodations[accommodation.id]
       copy.image.attach(prepared_blob) if prepared_blob

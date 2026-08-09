@@ -48,7 +48,7 @@ export default function AdminDashboard() {
         const now = new Date().toISOString().split('T')[0]
         setStats({
           totalEvents: events.length,
-          upcomingEvents: events.filter((e: Event) => e.date >= now).length,
+          upcomingEvents: events.filter((e: Event) => Boolean(e.date && e.date >= now)).length,
           totalSponsors: sponsorsRes.sponsors.length,
           totalUsers,
           draftsNeedingWork: events.filter((e: Event) => e.status === 'draft' && !e.readiness?.publishable).length,

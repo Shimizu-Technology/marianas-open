@@ -79,4 +79,27 @@ class EventTest < ActiveSupport::TestCase
     assert season.events.all? { |event| event.association(:source_event).loaded? }
     assert season.events.all? { |event| event.association(:season).loaded? }
   end
+
+  test "stale year readiness only inspects text inside nested rollover content" do
+    source_season = Season.create!(year: 2026, name: "2026 Marianas Open Circuit")
+    source = @organization.events.create!(
+      name: "Marianas Open 2026",
+      slug: "marianas-open-2026",
+      season: source_season,
+      date: Date.new(2026, 10, 17)
+    )
+    rolled_event = @organization.events.create!(
+      name: "Marianas Open 2027",
+      slug: "marianas-open-2027",
+      season: @season,
+      source_event: source,
+      registration_info_items: [ { label: "Page ID", value: 2026 } ]
+    )
+
+    assert rolled_event.readiness[:checks].find { |check| check[:key] == "stale_year" }[:complete]
+
+    rolled_event.update!(registration_info_items: [ { label: "Registration", value: "Deadline: October 2026" } ])
+
+    assert_not rolled_event.readiness[:checks].find { |check| check[:key] == "stale_year" }[:complete]
+  end
 end

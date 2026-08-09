@@ -53,6 +53,13 @@ module Translatable
     TranslateRecordJob.perform_later(self.class.name, id, "changed_fields" => nil, "cascade" => true)
   end
 
+  # Rollover records are intentionally left untranslated until an administrator
+  # has reviewed their year-specific content. The copied instances are
+  # disposable, so this flag only needs to live for their initial commit.
+  def skip_automatic_translation!
+    @_skip_automatic_translation = true
+  end
+
   private
 
   def track_translatable_changes
@@ -66,7 +73,7 @@ module Translatable
   end
 
   def has_translatable_changes?
-    @_translatable_changes.present?
+    !@_skip_automatic_translation && @_translatable_changes.present?
   end
 
   def enqueue_translation

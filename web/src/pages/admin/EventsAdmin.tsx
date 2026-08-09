@@ -62,7 +62,7 @@ function eventToForm(e: Event): EventFormData {
   return {
     season_id: e.season_id,
     name: e.name, slug: e.slug, description: e.description || '',
-    date: e.date, end_date: e.end_date || '',
+    date: e.date || '', end_date: e.end_date || '',
     venue_name: e.venue_name || '', venue_address: e.venue_address || '',
     city: e.city || '', country: e.country || '', country_code: e.country_code || '',
     asjjf_stars: e.asjjf_stars || 0, is_main_event: e.is_main_event || false,

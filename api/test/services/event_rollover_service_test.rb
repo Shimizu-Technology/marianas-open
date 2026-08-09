@@ -2,6 +2,8 @@ require "test_helper"
 require "stringio"
 
 class EventRolloverServiceTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
   setup do
     organization = Organization.create!(name: "Marianas Open", slug: "marianas-open")
     source_season = Season.create!(year: 2026, name: "2026 Marianas Open Circuit")
@@ -39,6 +41,27 @@ class EventRolloverServiceTest < ActiveSupport::TestCase
     assert_equal [ "Competition" ], copy.event_schedule_items.pluck(:description)
     assert_nil copy.event_accommodations.first.check_in_date
     assert_nil copy.event_accommodations.first.booking_code
+  end
+
+  test "rollover does not translate copied drafts before admin review" do
+    @source.prize_categories.create!(name: "Open weight", amount: "$1,000")
+    original_key = ENV["GT_API_KEY"]
+    original_project = ENV["GT_PROJECT_ID"]
+    ENV["GT_API_KEY"] = "test-key"
+    ENV["GT_PROJECT_ID"] = "test-project"
+    clear_enqueued_jobs
+
+    assert_no_enqueued_jobs only: TranslateRecordJob do
+      copy = EventRolloverService.call(source_event: @source, target_season: @target_season)
+
+      assert_equal "untranslated", copy.translation_status
+      assert_equal [ "untranslated" ], copy.event_schedule_items.pluck(:translation_status).uniq
+      assert_equal [ "untranslated" ], copy.prize_categories.pluck(:translation_status).uniq
+      assert_equal [ "untranslated" ], copy.event_accommodations.pluck(:translation_status).uniq
+    end
+  ensure
+    ENV["GT_API_KEY"] = original_key
+    ENV["GT_PROJECT_ID"] = original_project
   end
 
   test "duplicates attachment storage before opening the rollover transaction" do

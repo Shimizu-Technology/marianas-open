@@ -138,7 +138,9 @@ class Event < ApplicationRecord
   translation_context "Marianas Open jiu-jitsu tournament events. Translate naturally for the target audience."
 
   def as_json(options = {})
-    super(options.merge(
+    serialization_options = options.dup
+    include_admin_metadata = serialization_options.delete(:include_admin_metadata) != false
+    payload = super(serialization_options.merge(
       methods: [:hero_image_url, :poster_image_url, :asjjf_source_urls, :gallery_images_count],
       include: {
         event_schedule_items: { except: [:created_at, :updated_at] },
@@ -146,8 +148,11 @@ class Event < ApplicationRecord
         event_accommodations: { except: [:created_at, :updated_at] }
       },
       except: [:created_at, :updated_at]
-    )).merge(
-      "event_gallery_images" => gallery_preview_images.as_json,
+    )).merge("event_gallery_images" => gallery_preview_images.as_json)
+
+    return payload unless include_admin_metadata
+
+    payload.merge(
       "season" => season_summary,
       "readiness" => readiness
     )
@@ -184,9 +189,34 @@ class Event < ApplicationRecord
   end
 
   def rollover_content
-    [name, description, tagline, schedule_note, travel_description, visa_description,
-     registration_steps, registration_fee_sections, registration_info_items,
-     travel_items, visa_items].compact.join(" ")
+    rollover_values = [
+      name,
+      description,
+      tagline,
+      schedule_note,
+      travel_description,
+      visa_description,
+      registration_steps,
+      registration_fee_sections,
+      registration_info_items,
+      travel_items,
+      visa_items
+    ]
+
+    textual_rollover_values(rollover_values).join(" ")
+  end
+
+  def textual_rollover_values(value)
+    case value
+    when String
+      [ value ]
+    when Array
+      value.flat_map { |entry| textual_rollover_values(entry) }
+    when Hash
+      value.values.flat_map { |entry| textual_rollover_values(entry) }
+    else
+      []
+    end
   end
 
   def season_summary

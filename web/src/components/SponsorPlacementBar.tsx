@@ -13,7 +13,9 @@ export default function SponsorPlacementBar() {
   }, [])
 
   if (!placement) return null
-  const logo = placement.media_url || placement.sponsor.logo_url
+  const logo = placement.media_kind === 'video'
+    ? placement.sponsor.logo_url
+    : placement.media_url || placement.sponsor.logo_url
   const href = normalizeExternalUrl(placement.cta_url || placement.sponsor.website_url)
 
   const content = (

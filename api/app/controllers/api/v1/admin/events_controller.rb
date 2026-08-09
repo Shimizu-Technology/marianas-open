@@ -134,7 +134,7 @@ module Api
 
         # POST /api/v1/admin/events/:id/clone
         def clone
-          target_season = Season.find_by(id: params[:season_id])
+          target_season = Season.find(params[:season_id]) if params[:season_id].present?
           new_event = EventRolloverService.call(
             source_event: @event,
             target_season: target_season,
@@ -147,6 +147,8 @@ module Api
           render json: { event: new_event.reload.as_json }, status: :created
         rescue ActiveRecord::RecordInvalid => e
           render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+        rescue ActiveRecord::RecordNotFound
+          render json: { errors: [ "Target season not found." ] }, status: :unprocessable_entity
         rescue ActiveRecord::RecordNotUnique
           render json: { errors: ["An event with that slug already exists. Please try again."] }, status: :conflict
         end

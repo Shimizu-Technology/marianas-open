@@ -11,7 +11,7 @@ class AuditLog < ApplicationRecord
       action: action,
       auditable_type: auditable.class.name,
       auditable_id: auditable.id,
-      auditable_label: auditable.try(:name) || auditable.try(:title) || auditable.to_s,
+      auditable_label: auditable.try(:audit_label) || auditable.try(:name) || auditable.try(:title) || auditable.to_s,
       change_set: changes || {},
       metadata: metadata || {}
     )

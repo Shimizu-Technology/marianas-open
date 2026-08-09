@@ -49,8 +49,12 @@ module Api
           unless upload.content_type.in?(SponsorPlacement::ALLOWED_MEDIA_TYPES) && upload.size <= SponsorPlacement::MAX_MEDIA_SIZE
             return render json: { errors: [ "Media must be a supported image/video smaller than 100 MB." ] }, status: :unprocessable_entity
           end
+          if @placement.placement_type == "featured_bar" && !upload.content_type.start_with?("image/")
+            return render json: { errors: [ "Featured bar media must be an image." ] }, status: :unprocessable_entity
+          end
 
           @placement.media.attach(upload)
+          @placement.update!(media_kind: upload.content_type.start_with?("video/") ? "video" : "image")
           record_admin_action!("upload_media", @placement, metadata: { filename: upload.original_filename })
           render json: { sponsor_placement: @placement.reload.as_json }
         end

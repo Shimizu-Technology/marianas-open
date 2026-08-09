@@ -21,7 +21,7 @@ class Season < ApplicationRecord
     event_records = events.to_a
     ActiveRecord::Associations::Preloader.new(
       records: event_records,
-      associations: [ :source_event, { hero_image_attachment: :blob } ]
+      associations: [ :season, :source_event, { hero_image_attachment: :blob } ]
     ).call
 
     super(options.merge(except: [ :created_at, :updated_at ])).merge(
