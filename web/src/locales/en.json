@@ -168,7 +168,9 @@
     "inPersonPurchase": "Buy In Person",
     "buyOnlineGuamTime": "Buy Tickets on GuamTime",
     "ticketsSoldOut": "Tickets Sold Out",
+    "ticketsSoldOutDescription": "Spectator tickets for this event are sold out. Competitor registration is separate.",
     "ticketSalesClosed": "Ticket Sales Closed",
+    "ticketSalesClosedDescription": "Spectator ticket sales for this event are closed. Competitor registration is separate.",
     "ticketProviderNote": "Online sales are completed on GuamTime. Availability, service fees, and checkout terms are controlled by the ticket provider.",
     "ticketFlyerAlt": "Official 2026 Marianas Open spectator ticket sales flyer"
   },

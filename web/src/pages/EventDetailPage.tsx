@@ -201,9 +201,14 @@ export default function EventDetailPage() {
     ? { src: uploadedTicketFlyer, srcSet: undefined }
     : staticTicketFlyer;
   const ticketSalesStatus = mainEvent?.ticket_sales_status ?? 'unavailable';
-  const canBuySpectatorTickets = !isRegistrationClosed && ticketSalesStatus === 'on_sale' && !!ticketSalesUrl;
+  const ticketSalesAreActive = !isRegistrationClosed && ticketSalesStatus === 'on_sale';
+  const canBuySpectatorTickets = ticketSalesAreActive && !!ticketSalesUrl;
   const canShowTicketSection = ticketSalesStatus !== 'unavailable'
-    && (!!ticketFlyer || ticketOptions.length > 0 || !!ticketSalesUrl || !!mainEvent?.ticket_in_person_name);
+    && (ticketSalesStatus !== 'on_sale'
+      || !!ticketFlyer
+      || ticketOptions.length > 0
+      || !!ticketSalesUrl
+      || !!mainEvent?.ticket_in_person_name);
   const travelDescription = eventTravelDescription || '';
   const displayTravelItems = travelItems;
   const visaDescription = eventVisaDescription || '';
@@ -482,8 +487,8 @@ export default function EventDetailPage() {
       {canShowTicketSection && (
         <section id="spectator-tickets" className="relative overflow-hidden border-y border-gold-500/15 bg-surface/35 py-20 sm:py-28">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_30%,rgba(226,178,68,0.10),transparent_34%)]" />
-          <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16">
-            {ticketFlyer && (
+          <div className={`relative mx-auto grid grid-cols-1 gap-10 px-4 sm:px-6 ${ticketSalesAreActive && ticketFlyer ? 'max-w-7xl lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16' : 'max-w-3xl'}`}>
+            {ticketSalesAreActive && ticketFlyer && (
               <ScrollReveal>
                 <div className="mx-auto max-w-xl overflow-hidden border border-gold-500/25 bg-navy-900 shadow-[0_24px_80px_rgba(0,0,0,0.35)] lg:sticky lg:top-28">
                   <img
@@ -508,17 +513,21 @@ export default function EventDetailPage() {
                   {t('event.spectatorAdmission', 'Spectator Admission')}
                 </div>
                 <h2 className="max-w-2xl font-heading text-4xl font-black uppercase leading-none text-text-primary sm:text-5xl">
-                  {ticketSalesStatus === 'sold_out'
-                    ? t('event.ticketsSoldOut', 'Tickets Sold Out')
-                    : ticketSalesStatus === 'closed'
-                      ? t('event.ticketSalesClosed', 'Ticket Sales Closed')
-                      : t('event.ticketsOnSale', 'Tickets on sale now')}
+                  {ticketSalesAreActive
+                    ? t('event.ticketsOnSale', 'Tickets on sale now')
+                    : ticketSalesStatus === 'sold_out'
+                      ? t('event.ticketsSoldOut', 'Tickets Sold Out')
+                      : t('event.ticketSalesClosed', 'Ticket Sales Closed')}
                 </h2>
                 <p className="mt-5 max-w-2xl text-base leading-relaxed text-text-secondary">
-                  {t('event.ticketIntro', 'Purchase spectator admission online through GuamTime or in person. Competitors should use the separate ASJJF registration links.')}
+                  {ticketSalesAreActive
+                    ? t('event.ticketIntro', 'Purchase spectator admission online through GuamTime or in person. Competitors should use the separate ASJJF registration links.')
+                    : ticketSalesStatus === 'sold_out'
+                      ? t('event.ticketsSoldOutDescription', 'Spectator tickets for this event are sold out. Competitor registration is separate.')
+                      : t('event.ticketSalesClosedDescription', 'Spectator ticket sales for this event are closed. Competitor registration is separate.')}
                 </p>
 
-                {ticketOptions.length > 0 && (
+                {ticketSalesAreActive && ticketOptions.length > 0 && (
                   <div className="mt-8 overflow-hidden border border-white/10 bg-navy-900/55">
                     <div className="grid grid-cols-[minmax(0,1fr)_5.75rem_5.75rem] border-b border-white/10 bg-white/[0.03] px-4 py-3 text-[10px] font-heading font-bold uppercase tracking-wider text-text-muted sm:grid-cols-[minmax(0,1fr)_7rem_7rem] sm:px-5">
                       <span>{t('event.admissionOption', 'Admission')}</span>
@@ -538,17 +547,19 @@ export default function EventDetailPage() {
                   </div>
                 )}
 
-                <div className="mt-5 flex items-start gap-2 border-l-2 border-gold-500/60 bg-gold-500/[0.06] px-4 py-3 text-sm text-text-secondary">
-                  <Clock size={16} className="mt-0.5 shrink-0 text-gold-400" />
-                  {mainEvent?.ticket_early_bird_ends_on
-                    ? t('event.earlyBirdDeadline', {
-                        date: new Date(`${mainEvent.ticket_early_bird_ends_on}T00:00:00`).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
-                        defaultValue: 'Early-bird pricing ends {{date}}.',
-                      })
-                    : t('event.earlyBirdLimited', 'Early-bird pricing is available for a limited time. The organizer has not published an end date.')}
-                </div>
+                {ticketSalesAreActive && (
+                  <div className="mt-5 flex items-start gap-2 border-l-2 border-gold-500/60 bg-gold-500/[0.06] px-4 py-3 text-sm text-text-secondary">
+                    <Clock size={16} className="mt-0.5 shrink-0 text-gold-400" />
+                    {mainEvent?.ticket_early_bird_ends_on
+                      ? t('event.earlyBirdDeadline', {
+                          date: new Date(`${mainEvent.ticket_early_bird_ends_on}T00:00:00`).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
+                          defaultValue: 'Early-bird pricing ends {{date}}.',
+                        })
+                      : t('event.earlyBirdLimited', 'Early-bird pricing is available for a limited time. The organizer has not published an end date.')}
+                  </div>
+                )}
 
-                {mainEvent?.ticket_in_person_name && (
+                {ticketSalesAreActive && mainEvent?.ticket_in_person_name && (
                   <div className="mt-6 border border-white/10 px-5 py-4">
                     <div className="mb-3 flex items-center gap-2 text-xs font-heading font-bold uppercase tracking-wider text-text-primary">
                       <Store size={16} className="text-gold-400" />
@@ -568,8 +579,8 @@ export default function EventDetailPage() {
                   </div>
                 )}
 
-                <div className="mt-8">
-                  {canBuySpectatorTickets ? (
+                {canBuySpectatorTickets && (
+                  <div className="mt-8">
                     <a
                       href={ticketSalesUrl || undefined}
                       target="_blank"
@@ -580,15 +591,11 @@ export default function EventDetailPage() {
                       {t('event.buyOnlineGuamTime', 'Buy Tickets on GuamTime')}
                       <ExternalLink size={16} />
                     </a>
-                  ) : (
-                    <div className="inline-flex min-h-12 items-center border border-white/10 px-5 text-sm font-heading font-bold uppercase tracking-wider text-text-muted">
-                      {ticketSalesStatus === 'sold_out' ? t('event.ticketsSoldOut', 'Tickets Sold Out') : t('event.ticketSalesClosed', 'Ticket Sales Closed')}
-                    </div>
-                  )}
-                  <p className="mt-3 max-w-xl text-xs leading-relaxed text-text-muted">
-                    {t('event.ticketProviderNote', 'Online sales are completed on GuamTime. Availability, service fees, and checkout terms are controlled by the ticket provider.')}
-                  </p>
-                </div>
+                    <p className="mt-3 max-w-xl text-xs leading-relaxed text-text-muted">
+                      {t('event.ticketProviderNote', 'Online sales are completed on GuamTime. Availability, service fees, and checkout terms are controlled by the ticket provider.')}
+                    </p>
+                  </div>
+                )}
               </div>
             </ScrollReveal>
           </div>
