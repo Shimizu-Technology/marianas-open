@@ -508,7 +508,11 @@ export default function EventDetailPage() {
                   {t('event.spectatorAdmission', 'Spectator Admission')}
                 </div>
                 <h2 className="max-w-2xl font-heading text-4xl font-black uppercase leading-none text-text-primary sm:text-5xl">
-                  {t('event.ticketsOnSale', 'Tickets on sale now')}
+                  {ticketSalesStatus === 'sold_out'
+                    ? t('event.ticketsSoldOut', 'Tickets Sold Out')
+                    : ticketSalesStatus === 'closed'
+                      ? t('event.ticketSalesClosed', 'Ticket Sales Closed')
+                      : t('event.ticketsOnSale', 'Tickets on sale now')}
                 </h2>
                 <p className="mt-5 max-w-2xl text-base leading-relaxed text-text-secondary">
                   {t('event.ticketIntro', 'Purchase spectator admission online through GuamTime or in person. Competitors should use the separate ASJJF registration links.')}
