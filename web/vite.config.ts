@@ -7,12 +7,14 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom', 'react-router-dom'],
-          auth: ['@clerk/clerk-react'],
-          motion: ['framer-motion'],
-          analytics: ['posthog-js', 'posthog-js/react'],
-          admin: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+          if (/node_modules\/(react|react-dom|react-router|react-router-dom)\//.test(id)) return 'react'
+          if (id.includes('node_modules/@clerk/')) return 'auth'
+          if (id.includes('node_modules/framer-motion/')) return 'motion'
+          if (id.includes('node_modules/posthog-js/')) return 'analytics'
+          if (id.includes('node_modules/@dnd-kit/')) return 'admin'
+          return undefined
         },
       },
     },
