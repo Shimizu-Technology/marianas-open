@@ -6,7 +6,7 @@ module Api
 
         before_action :require_staff!
         before_action :complete_past_events, only: [:index]
-        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :import_results_preview, :import_results, :retranslate, :clone]
+        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :upload_ticket_banner, :remove_ticket_banner, :import_results_preview, :import_results, :retranslate, :clone]
 
         def index
           org = Organization.first
@@ -101,6 +101,25 @@ module Api
           render json: { event: @event.reload.as_json }
         end
 
+        def upload_ticket_banner
+          unless params[:image].present?
+            return render json: { error: "No image provided" }, status: :unprocessable_entity
+          end
+
+          @event.ticket_banner_image.attach(params[:image])
+          if @event.valid?
+            render json: { event: @event.reload.as_json }
+          else
+            @event.ticket_banner_image.purge
+            render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
+          end
+        end
+
+        def remove_ticket_banner
+          @event.ticket_banner_image.purge if @event.ticket_banner_image.attached?
+          render json: { event: @event.reload.as_json }
+        end
+
         # POST /api/v1/admin/events/:id/retranslate
         def retranslate
           @event.retranslate!
@@ -119,6 +138,13 @@ module Api
             is_main_event: false,
             results_imported_at: nil,
             asjjf_event_ids: [],
+            ticket_sales_status: "unavailable",
+            ticket_sales_url: nil,
+            ticket_early_bird_ends_on: nil,
+            ticket_options: [],
+            ticket_in_person_name: nil,
+            ticket_in_person_phone: nil,
+            ticket_in_person_address: nil,
             translations: {},
             translation_status: "untranslated"
           )
@@ -193,11 +219,14 @@ module Api
             :venue_name, :venue_address, :city, :country, :country_code,
             :asjjf_stars, :is_main_event, :prize_pool, :registration_url,
             :registration_url_gi, :registration_url_nogi,
+            :ticket_sales_status, :ticket_sales_url, :ticket_early_bird_ends_on,
+            :ticket_in_person_name, :ticket_in_person_phone, :ticket_in_person_address,
             :status, :latitude, :longitude,
             :live_stream_url, :live_stream_active,
             :tagline, :schedule_note, :travel_description, :visa_description,
             :prize_title, :prize_description,
             asjjf_event_ids: [],
+            ticket_options: [:label, :description, :early_bird_price, :regular_price],
             venue_highlights: [:title, :description],
             registration_steps: [:title, :description, :url, :link_label],
             registration_fee_sections: [:title, { rows: [:deadline, :fee, :option] }],
