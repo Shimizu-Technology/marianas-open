@@ -11,6 +11,7 @@ import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
+import { getCurrentMainEvent } from '../utils/events';
 import { getOrganizationSchema, getWebsiteSchema } from '../lib/seo';
 
 function normalizeSponsorKey(name: string) {
@@ -50,7 +51,7 @@ const ORG_PARTNERS = [
   {
     key: 'roadtotheopen',
     name: 'Road to the Open',
-    label: '2026 Pro Series',
+    label: 'Annual Pro Series',
     src: '/images/logos/road-to-open-logo-white.png',
     url: 'https://marianasopen.com/calendar',
     heightClass: 'h-16 sm:h-20',
@@ -106,6 +107,11 @@ export default function HomePage() {
     { value: sc('stat_established', t('stats.since')), label: sc('stat_established_label', t('stats.sinceLabel')), icon: Calendar },
   ];
   const showHeroSkeleton = siteContentLoading && !hasCachedContent && !siteContent;
+  const currentMainEvent = getCurrentMainEvent(events);
+  const primaryEventPath = currentMainEvent ? '/event' : '/calendar';
+  const primaryEventLabel = currentMainEvent ? t('hero.cta') : t('hero.learnMore');
+  const secondaryEventPath = currentMainEvent ? '/calendar' : '/events/past';
+  const secondaryEventLabel = currentMainEvent ? t('hero.learnMore') : t('nav.pastEvents');
 
   return (
     <div className="min-h-screen">
@@ -202,17 +208,17 @@ export default function HomePage() {
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
                 <Link
-                  to="/event"
+                  to={primaryEventPath}
                   className="group inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-all duration-300"
                 >
-                  {t('hero.cta')}
+                  {primaryEventLabel}
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
-                  to="/calendar"
+                  to={secondaryEventPath}
                   className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 border border-white/20 text-text-primary font-heading font-medium uppercase tracking-wider text-sm hover:bg-white/5 transition-all duration-300"
                 >
-                  {t('hero.learnMore')}
+                  {secondaryEventLabel}
                 </Link>
               </motion.div>
             </>
@@ -268,10 +274,10 @@ export default function HomePage() {
                 </p>
                 <div className="flex gap-4 pt-4">
                   <Link
-                    to="/event"
+                    to={primaryEventPath}
                     className="inline-flex items-center gap-2 text-gold-500 font-heading font-semibold text-sm uppercase tracking-wider hover:text-gold-400 transition-colors"
                   >
-                    {t('home.registerNow')}
+                    {currentMainEvent ? t('home.registerNow') : t('hero.learnMore')}
                     <ArrowRight size={16} />
                   </Link>
                 </div>

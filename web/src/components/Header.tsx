@@ -5,7 +5,10 @@ import { Menu, X, Shield, Search, ChevronDown } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import GlobalSearch from './GlobalSearch';
 import { useOrg } from '../contexts/OrganizationContext';
+import { useEvents } from '../hooks/useApi';
+import { useTranslatedField } from '../hooks/useTranslatedField';
 import { api } from '../services/api';
+import { getCurrentMainEvent } from '../utils/events';
 import { resolveMediaUrl } from '../utils/images';
 
 const LOGO_FALLBACK = '/images/logos/mo-logo-white.png';
@@ -45,13 +48,13 @@ function DesktopDropdown({ item, pathname }: { item: NavDropdown; pathname: stri
       </button>
       {open && (
         <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50">
-          <div className="bg-navy-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl py-1 min-w-[160px]">
+          <div className="min-w-[190px] border border-white/10 bg-navy-900/95 py-1 shadow-xl backdrop-blur-xl">
             {item.children.map(child => (
               <Link
                 key={child.to}
                 to={child.to}
                 onClick={() => setOpen(false)}
-                className={`block px-4 py-2 text-sm transition-colors ${
+                className={`block whitespace-nowrap px-4 py-2 text-sm transition-colors ${
                   pathname === child.to
                     ? 'text-gold-500 bg-white/5'
                     : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
@@ -73,6 +76,8 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const org = useOrg();
+  const { events } = useEvents();
+  const { tf } = useTranslatedField();
   const [impactVisible, setImpactVisible] = useState(false);
 
   useEffect(() => {
@@ -93,15 +98,21 @@ export default function Header() {
   }, []);
 
   const logoSrc = resolveMediaUrl(org.logo_url) || LOGO_FALLBACK;
+  const currentMainEvent = getCurrentMainEvent(events);
+  const currentMainEventLabel = currentMainEvent
+    ? tf(currentMainEvent, 'name') || currentMainEvent.name
+    : null;
+  const eventLinks = [
+    ...(currentMainEventLabel ? [{ to: '/event', label: currentMainEventLabel }] : []),
+    { to: '/calendar', label: t('nav.calendar') },
+    { to: '/events/past', label: t('nav.pastEvents') },
+  ];
 
   const navItems: NavItem[] = [
     { to: '/', label: t('nav.home') },
     {
       label: t('nav.events'),
-      children: [
-        { to: '/calendar', label: 'Calendar' },
-        { to: '/events/past', label: t('nav.pastEvents') },
-      ],
+      children: eventLinks,
     },
     { to: '/about', label: t('nav.about') },
     { to: '/rules', label: t('nav.rules') },
@@ -127,10 +138,7 @@ export default function Header() {
     },
     {
       heading: t('nav.events'),
-      links: [
-        { to: '/calendar', label: 'Calendar' },
-        { to: '/events/past', label: t('nav.pastEvents') },
-      ],
+      links: eventLinks,
     },
     {
       heading: 'Athletes',

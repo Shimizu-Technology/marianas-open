@@ -269,7 +269,7 @@ export default function EventsAdmin() {
   const handleClone = async (id: number) => {
     try {
       const res = await api.admin.cloneEvent(id)
-      setSuccess(`Event cloned as "${res.event.name}"`)
+      setSuccess(`Draft clone created as "${res.event.name}". Add new dates, registration and ticket links, deadlines, accommodation booking details, and event images before publishing.`)
       await loadEvents()
       setForm(eventToForm(res.event))
       setEditing(res.event.id)
@@ -792,6 +792,7 @@ export default function EventsAdmin() {
                 />
                 Main Event
               </label>
+              <p className="text-[10px] text-text-muted">Controls the public championship page and homepage registration links. Selecting this automatically clears the previous main event.</p>
             </div>
 
             {/* Spectator Ticket Sales */}
@@ -836,7 +837,7 @@ export default function EventsAdmin() {
                         label="Official Online Ticket URL"
                         value={form.ticket_sales_url}
                         onChange={value => updateForm('ticket_sales_url', value)}
-                        placeholder="https://events.guamtime.net/event/..."
+                        placeholder="https://tickets.example.com/event/..."
                       />
                       <p className="text-[10px] text-text-muted mt-1.5">Spectator checkout only. Athlete registration remains configured in the ASJJF fields above.</p>
                     </div>
@@ -959,7 +960,11 @@ export default function EventsAdmin() {
                           </button>
                         )}
                       </div>
-                      <p className="text-[10px] text-text-muted">JPEG, PNG, or WebP up to 8 MB. The supplied 2026 flyer is used automatically until a custom flyer is uploaded.</p>
+                      <p className="text-[10px] text-text-muted">
+                        JPEG, PNG, or WebP up to 8 MB. {form.slug === 'marianas-open-2026'
+                          ? 'The supplied 2026 flyer is used automatically until a custom flyer is uploaded.'
+                          : 'Upload the official flyer for this event. Removing it leaves this event without a ticket flyer.'}
+                      </p>
                       {(currentEvent?.ticket_banner_image_url || form.slug === 'marianas-open-2026') && (
                         <div className="w-40 aspect-[4/5] overflow-hidden border border-white/10 bg-navy-900">
                           <img

@@ -13,6 +13,7 @@ class Event < ApplicationRecord
 
   before_validation :normalize_asjjf_registration_urls
   before_validation :normalize_ticket_sales_url
+  before_save :make_main_event_exclusive
 
   validates :status, inclusion: { in: STATUSES }, allow_nil: true
   validates :ticket_sales_status, inclusion: { in: TICKET_SALES_STATUSES }
@@ -126,6 +127,14 @@ class Event < ApplicationRecord
 
   def normalize_ticket_sales_url
     self.ticket_sales_url = ticket_sales_url.to_s.strip.presence
+  end
+
+  def make_main_event_exclusive
+    return unless is_main_event? && organization_id.present?
+
+    Event.where(organization_id: organization_id, is_main_event: true)
+         .where.not(id: id)
+         .update_all(is_main_event: false, updated_at: Time.current)
   end
 
   def ticket_sales_url_is_safe

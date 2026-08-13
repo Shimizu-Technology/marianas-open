@@ -138,13 +138,14 @@ module Api
             is_main_event: false,
             results_imported_at: nil,
             asjjf_event_ids: [],
+            registration_url: nil,
+            registration_url_gi: nil,
+            registration_url_nogi: nil,
+            live_stream_active: false,
             ticket_sales_status: "unavailable",
             ticket_sales_url: nil,
             ticket_early_bird_ends_on: nil,
-            ticket_options: [],
-            ticket_in_person_name: nil,
-            ticket_in_person_phone: nil,
-            ticket_in_person_address: nil,
+            ticket_options: @event.ticket_options.deep_dup,
             translations: {},
             translation_status: "untranslated"
           )
@@ -170,6 +171,10 @@ module Api
             @event.event_accommodations.each do |acc|
               new_acc = acc.dup
               new_acc.event = new_event
+              new_acc.check_in_date = nil
+              new_acc.check_out_date = nil
+              new_acc.booking_code = nil
+              new_acc.booking_url = nil
               new_acc.translations = {}
               new_acc.translation_status = "untranslated"
               new_acc.save!

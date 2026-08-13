@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon, Ticket, Store } from 'lucide-react';
@@ -14,6 +14,7 @@ import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSpons
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { getRegistrationLinks } from '../utils/registrationLinks';
+import { getCurrentMainEvent } from '../utils/events';
 import { usePostHog } from '../providers/PostHogProvider';
 import type { EventTicketOption } from '../services/api';
 
@@ -84,7 +85,7 @@ export default function EventDetailPage() {
   // If slug provided, show that event; otherwise show main event
   const mainEvent = slug
     ? events.find(e => e.slug === slug) || null
-    : events.find(e => e.is_main_event) || null;
+    : getCurrentMainEvent(events);
 
   const isCompleted = mainEvent?.status === 'completed';
 
@@ -328,6 +329,10 @@ export default function EventDetailPage() {
     );
   }
 
+  if (!slug && !mainEvent) {
+    return <Navigate to="/calendar" replace />;
+  }
+
   return (
     <div className="min-h-screen pt-20">
       <SEO
@@ -499,7 +504,10 @@ export default function EventDetailPage() {
                     height="1351"
                     loading="lazy"
                     decoding="async"
-                    alt={t('event.ticketFlyerAlt', 'Official 2026 Marianas Open spectator ticket sales flyer')}
+                    alt={t('event.ticketFlyerAlt', {
+                      eventName,
+                      defaultValue: `Official ${eventName} spectator ticket sales flyer`,
+                    })}
                     className="h-auto w-full"
                   />
                 </div>
@@ -521,7 +529,7 @@ export default function EventDetailPage() {
                 </h2>
                 <p className="mt-5 max-w-2xl text-base leading-relaxed text-text-secondary">
                   {ticketSalesAreActive
-                    ? t('event.ticketIntro', 'Purchase spectator admission online through GuamTime or in person. Competitors should use the separate ASJJF registration links.')
+                    ? t('event.ticketIntro', 'Purchase spectator admission online or in person. Competitors should use the separate ASJJF registration links.')
                     : ticketSalesStatus === 'sold_out'
                       ? t('event.ticketsSoldOutDescription', 'Spectator tickets for this event are sold out. Competitor registration is separate.')
                       : t('event.ticketSalesClosedDescription', 'Spectator ticket sales for this event are closed. Competitor registration is separate.')}
@@ -588,11 +596,11 @@ export default function EventDetailPage() {
                       onClick={() => trackTicketClick('details')}
                       className="inline-flex min-h-14 w-full items-center justify-center gap-2 bg-gold-500 px-7 py-4 font-heading text-sm font-black uppercase tracking-wider text-navy-900 transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900 sm:w-auto"
                     >
-                      {t('event.buyOnlineGuamTime', 'Buy Tickets on GuamTime')}
+                      {t('event.buyOnlineGuamTime', 'Buy Tickets Online')}
                       <ExternalLink size={16} />
                     </a>
                     <p className="mt-3 max-w-xl text-xs leading-relaxed text-text-muted">
-                      {t('event.ticketProviderNote', 'Online sales are completed on GuamTime. Availability, service fees, and checkout terms are controlled by the ticket provider.')}
+                      {t('event.ticketProviderNote', 'Availability, service fees, and checkout terms are controlled by the official ticket provider.')}
                     </p>
                   </div>
                 )}

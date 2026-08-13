@@ -732,10 +732,20 @@ async function authHeaders(requireAuth: boolean, skipCache = false) {
   return headers;
 }
 
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 async function parseApiError(response: Response, fallback: string) {
   const body = await response.json().catch(() => ({}));
   const message = (body as Record<string, unknown>).error || (body as Record<string, unknown>).errors || fallback;
-  return new Error(typeof message === 'string' ? message : JSON.stringify(message));
+  return new ApiError(typeof message === 'string' ? message : JSON.stringify(message), response.status);
 }
 
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
