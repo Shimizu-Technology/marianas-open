@@ -164,7 +164,7 @@
     "earlyBird": "Early Bird",
     "atTheDoor": "At the Door",
     "earlyBirdDeadline": "Early-bird pricing ends {{date}}.",
-    "earlyBirdLimited": "Early-bird pricing is available for a limited time. The organizer has not published an end date.",
+    "earlyBirdLimited": "Early-bird pricing is available for a limited time.",
     "inPersonPurchase": "Buy In Person",
     "buyOnlineGuamTime": "Buy Tickets Online",
     "ticketsSoldOut": "Tickets Sold Out",
