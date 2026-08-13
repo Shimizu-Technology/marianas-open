@@ -34,6 +34,8 @@ Rails.application.routes.draw do
             post :upload_image
             post :upload_poster
             delete :remove_poster
+            post :upload_ticket_banner
+            delete :remove_ticket_banner
             get :import_results_preview
             post :import_results
             post :retranslate

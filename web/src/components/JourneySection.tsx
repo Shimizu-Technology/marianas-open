@@ -18,6 +18,7 @@ import { useTranslatedField } from '../hooks/useTranslatedField';
 import ScrollReveal from './ScrollReveal';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { getRegistrationLinks } from '../utils/registrationLinks';
+import { getEventCycleYear, getEventDetailsPath } from '../utils/events';
 
 type StopStatus = 'completed' | 'live' | 'next' | 'upcoming' | 'cancelled';
 
@@ -253,7 +254,7 @@ function MobileStop({
                 : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
         }`}
       >
-        <Link to={isMain ? '/event' : `/events/${event.slug}`} className="block">
+        <Link to={getEventDetailsPath(event)} className="block">
           <div className="flex items-center justify-between mb-2">
             <StatusBadge status={status} isMainEvent={isMain} t={t} />
             <StarRating count={event.asjjf_stars} />
@@ -364,7 +365,7 @@ function DesktopStop({
                 : 'bg-navy-900/50 border-white/5 hover:bg-navy-900'
         }`}
       >
-        <Link to={isMain ? '/event' : `/events/${event.slug}`} className="block">
+        <Link to={getEventDetailsPath(event)} className="block">
           <div className="flex justify-center mb-2">
             <StatusBadge status={status} isMainEvent={isMain} t={t} />
           </div>
@@ -414,13 +415,11 @@ export default function JourneySection({ events }: { events: Event[] }) {
   const desktopStopRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const journeyStops = useMemo<JourneyStop[]>(() => {
-    const cutoffStart = new Date('2025-01-01');
-    const cutoffEnd = new Date('2027-01-01');
+    const cycleYear = getEventCycleYear(events);
 
     const stops = events
       .filter((e) => {
-        const d = parseDateLocalSafe(e.date);
-        return d >= cutoffStart && d < cutoffEnd;
+        return cycleYear === null || Number(e.date.slice(0, 4)) === cycleYear;
       })
       .sort((a, b) => parseDateLocalSafe(a.date).getTime() - parseDateLocalSafe(b.date).getTime())
       .map((event) => ({

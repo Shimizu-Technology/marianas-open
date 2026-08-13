@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_11_234000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -242,6 +242,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
     t.string "slug"
     t.string "status"
     t.string "tagline"
+    t.date "ticket_early_bird_ends_on"
+    t.text "ticket_in_person_address"
+    t.string "ticket_in_person_name"
+    t.string "ticket_in_person_phone"
+    t.jsonb "ticket_options", default: [], null: false
+    t.string "ticket_sales_status", default: "unavailable", null: false
+    t.string "ticket_sales_url"
     t.string "translation_status", default: "untranslated", null: false
     t.jsonb "translations", default: {}, null: false
     t.text "travel_description"
@@ -254,6 +261,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_204000) do
     t.jsonb "visa_items", default: [], null: false
     t.index ["organization_id"], name: "index_events_on_organization_id"
     t.index ["translation_status"], name: "index_events_on_translation_status"
+    t.check_constraint "ticket_sales_status::text = ANY (ARRAY['unavailable'::character varying::text, 'on_sale'::character varying::text, 'sold_out'::character varying::text, 'closed'::character varying::text])", name: "events_ticket_sales_status_check"
   end
 
   create_table "fund_allocations", force: :cascade do |t|

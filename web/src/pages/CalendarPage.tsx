@@ -14,6 +14,7 @@ import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { resolveMediaUrl } from '../utils/images';
 import { getRegistrationLinks } from '../utils/registrationLinks';
+import { getEventCycleYear } from '../utils/events';
 
 // Qualifying series posters are now driven by events with poster_image_url set.
 
@@ -23,6 +24,10 @@ export default function CalendarPage() {
   const shouldReduceMotion = useReducedMotion();
   const { events, loading } = useEvents();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
+  const cycleYear = getEventCycleYear(events);
+  const cycleEventCount = cycleYear === null
+    ? events.length
+    : events.filter(event => Number(event.date.slice(0, 4)) === cycleYear).length;
 
   const upcomingEvents = useMemo(() => events.filter(e => e.status !== 'completed' && e.status !== 'cancelled'), [events]);
   const cancelledEvents = useMemo(() => events.filter(e => e.status === 'cancelled'), [events]);
@@ -93,10 +98,17 @@ export default function CalendarPage() {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] mb-6">
-              {t('calendar.title')}
+              {cycleYear
+                ? t('calendar.titleDynamic', { year: cycleYear, defaultValue: 'Guam Pro Series {{year}}' })
+                : t('calendar.title')}
             </h1>
             <p className="text-text-secondary text-lg max-w-xl mx-auto mb-6">
-              {t('calendar.subtitle')}
+              {cycleEventCount > 0
+                ? t('calendar.subtitleDynamic', {
+                    count: cycleEventCount,
+                    defaultValue: '{{count}} events across Asia-Pacific. One championship in Guam.',
+                  })
+                : t('calendar.subtitle')}
             </p>
             <div className="flex items-center justify-center gap-3">
               <SocialShare shareText={t('share.defaultText')} />
@@ -157,13 +169,34 @@ export default function CalendarPage() {
             </div>
           ) : (
           <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {upcomingEvents.map((event, i) => (
-                <ScrollReveal key={event.id} delay={i * 0.08}>
-                  <EventCard event={event} formatDate={formatEventDate} t={t} />
-                </ScrollReveal>
-              ))}
-            </div>
+            {upcomingEvents.length === 0 ? (
+              <div className="border border-white/5 bg-navy-900/50 px-6 py-14 text-center">
+                <Calendar className="mx-auto mb-4 h-8 w-8 text-gold-500" />
+                <h2 className="font-heading text-xl font-bold uppercase text-text-primary">
+                  {t('calendar.noUpcomingEvents', 'No upcoming events announced')}
+                </h2>
+                <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-text-secondary">
+                  {t('calendar.noUpcomingEventsDescription', 'The next event cycle will appear here as soon as the organizers publish it.')}
+                </p>
+                {pastEvents.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('past')}
+                    className="mt-6 min-h-11 border border-gold-500/30 px-5 py-2.5 font-heading text-xs font-bold uppercase tracking-wider text-gold-400 transition-colors hover:bg-gold-500/10 hover:text-gold-300"
+                  >
+                    {t('calendar.pastResults', 'Past Results')}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {upcomingEvents.map((event, i) => (
+                  <ScrollReveal key={event.id} delay={i * 0.08}>
+                    <EventCard event={event} formatDate={formatEventDate} t={t} />
+                  </ScrollReveal>
+                ))}
+              </div>
+            )}
             {cancelledEvents.length > 0 && (
               <div>
                 <h3 className="text-sm font-heading font-semibold text-text-muted uppercase tracking-wider mb-3">Cancelled</h3>

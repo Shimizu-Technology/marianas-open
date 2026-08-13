@@ -1,7 +1,7 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon } from 'lucide-react';
+import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon, Ticket, Store } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
 import ImageWithShimmer from '../components/ImageWithShimmer';
@@ -14,6 +14,9 @@ import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSpons
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { getRegistrationLinks } from '../utils/registrationLinks';
+import { getCurrentMainEvent } from '../utils/events';
+import { usePostHog } from '../providers/PostHogProvider';
+import type { EventTicketOption } from '../services/api';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -40,6 +43,21 @@ const EVENT_POSTER_MAP: Record<string, { src: string; label: string }> = {
   },
 };
 
+const EVENT_TICKET_FLYER_MAP: Record<string, { src: string; srcSet: string }> = {
+  'marianas-open-2026': {
+    src: '/images/tickets/marianas-open-2026-ticket-sales-1080.jpg',
+    srcSet: '/images/tickets/marianas-open-2026-ticket-sales-640.jpg 640w, /images/tickets/marianas-open-2026-ticket-sales-1080.jpg 1081w',
+  },
+};
+
+function formatTicketPrice(value: string | null | undefined) {
+  if (!value) return '—';
+  const amount = Number(value);
+  return Number.isFinite(amount)
+    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount)
+    : value;
+}
+
 function splitCommaSeparated(value: string | null | undefined) {
   return value ? value.split(/\s*,\s*/).filter(Boolean) : [];
 }
@@ -56,6 +74,7 @@ export default function EventDetailPage() {
   const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const shouldReduceMotion = useReducedMotion();
+  const posthog = usePostHog();
   const { events, loading } = useEvents();
 
   const { sponsors } = useSponsors();
@@ -66,7 +85,7 @@ export default function EventDetailPage() {
   // If slug provided, show that event; otherwise show main event
   const mainEvent = slug
     ? events.find(e => e.slug === slug) || null
-    : events.find(e => e.is_main_event) || null;
+    : getCurrentMainEvent(events);
 
   const isCompleted = mainEvent?.status === 'completed';
 
@@ -170,6 +189,27 @@ export default function EventDetailPage() {
   const isRegistrationClosed = mainEvent?.status === 'completed' || mainEvent?.status === 'cancelled';
   const canShowRegistrationActions = !isRegistrationClosed && registrationLinks.hasAny;
   const canShowRegistrationSection = !isRegistrationClosed && (displayRegistrationSteps.length > 0 || registrationLinks.hasAny);
+  const ticketSalesUrl = normalizeExternalUrl(mainEvent?.ticket_sales_url);
+  const translatedTicketOptions = mainEvent
+    ? tfa<typeof mainEvent, EventTicketOption>(mainEvent, 'ticket_options')
+    : [];
+  const ticketOptions = translatedTicketOptions.length > 0
+    ? translatedTicketOptions
+    : (mainEvent?.ticket_options ?? []);
+  const staticTicketFlyer = mainEvent?.slug ? EVENT_TICKET_FLYER_MAP[mainEvent.slug] : undefined;
+  const uploadedTicketFlyer = resolveMediaUrl(mainEvent?.ticket_banner_image_url);
+  const ticketFlyer = uploadedTicketFlyer
+    ? { src: uploadedTicketFlyer, srcSet: undefined }
+    : staticTicketFlyer;
+  const ticketSalesStatus = mainEvent?.ticket_sales_status ?? 'unavailable';
+  const ticketSalesAreActive = !isRegistrationClosed && ticketSalesStatus === 'on_sale';
+  const canBuySpectatorTickets = ticketSalesAreActive && !!ticketSalesUrl;
+  const canShowTicketSection = ticketSalesStatus !== 'unavailable'
+    && (ticketSalesStatus !== 'on_sale'
+      || !!ticketFlyer
+      || ticketOptions.length > 0
+      || !!ticketSalesUrl
+      || !!mainEvent?.ticket_in_person_name);
   const travelDescription = eventTravelDescription || '';
   const displayTravelItems = travelItems;
   const visaDescription = eventVisaDescription || '';
@@ -263,6 +303,14 @@ export default function EventDetailPage() {
 
   const eventPoster = mainEvent?.slug ? EVENT_POSTER_MAP[mainEvent.slug] : undefined;
 
+  const trackTicketClick = (placement: 'hero' | 'details') => {
+    posthog?.capture('spectator_ticket_clicked', {
+      event_slug: mainEvent?.slug,
+      ticket_provider: ticketSalesUrl ? new URL(ticketSalesUrl).hostname : undefined,
+      placement,
+    });
+  };
+
   const handleShare = (platform: string) => {
     const urls: Record<string, string> = {
       Facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
@@ -279,6 +327,10 @@ export default function EventDetailPage() {
         <LoadingSpinner />
       </div>
     );
+  }
+
+  if (!slug && !mainEvent) {
+    return <Navigate to="/calendar" replace />;
   }
 
   return (
@@ -368,8 +420,21 @@ export default function EventDetailPage() {
               )}
             </div>
 
-            {canShowRegistrationActions && (
+            {(canBuySpectatorTickets || canShowRegistrationActions) && (
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                {canBuySpectatorTickets && (
+                  <a
+                    href={ticketSalesUrl || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackTicketClick('hero')}
+                    className="inline-flex min-h-12 items-center justify-center gap-2 bg-gold-500 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-navy-900 shadow-[0_0_40px_rgba(226,178,68,0.2)] transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                  >
+                    <Ticket size={16} />
+                    {t('event.buySpectatorTickets', 'Buy Spectator Tickets')}
+                    <ExternalLink size={14} />
+                  </a>
+                )}
                 {registrationLinks.hasDirect ? (
                   <>
                     {registrationLinks.gi && (
@@ -377,9 +442,9 @@ export default function EventDetailPage() {
                         href={registrationLinks.gi}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex min-h-12 items-center justify-center gap-2 bg-gold-500 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-navy-900 shadow-[0_0_40px_rgba(226,178,68,0.16)] transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                        className="inline-flex min-h-12 items-center justify-center gap-2 border border-white/20 bg-navy-900/60 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-text-primary backdrop-blur-sm transition-colors hover:border-gold-500/50 hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
                       >
-                        {t('home.registerNowGi', 'Register Now (Gi)')}
+                        {t('event.registerToCompeteGi', 'Register to Compete (Gi)')}
                         <ExternalLink size={14} />
                       </a>
                     )}
@@ -390,7 +455,7 @@ export default function EventDetailPage() {
                         rel="noopener noreferrer"
                         className="inline-flex min-h-12 items-center justify-center gap-2 border border-gold-500/70 bg-navy-900/50 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-gold-300 backdrop-blur-sm transition-colors hover:bg-gold-500/10 hover:text-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
                       >
-                        {t('home.registerNowNogi', 'Register Now (No-Gi)')}
+                        {t('event.registerToCompeteNogi', 'Register to Compete (No-Gi)')}
                         <ExternalLink size={14} />
                       </a>
                     )}
@@ -400,9 +465,9 @@ export default function EventDetailPage() {
                     href={registrationLinks.legacy}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 bg-gold-500 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-navy-900 shadow-[0_0_40px_rgba(226,178,68,0.16)] transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 border border-white/20 bg-navy-900/60 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-text-primary backdrop-blur-sm transition-colors hover:border-gold-500/50 hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
                   >
-                    {t('home.registerNow')}
+                    {t('event.registerToCompete', 'Register to Compete')}
                     <ExternalLink size={14} />
                   </a>
                 )}
@@ -423,6 +488,127 @@ export default function EventDetailPage() {
           </motion.div>
         </div>
       </section>
+
+      {canShowTicketSection && (
+        <section id="spectator-tickets" className="relative overflow-hidden border-y border-gold-500/15 bg-surface/35 py-20 sm:py-28">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_30%,rgba(226,178,68,0.10),transparent_34%)]" />
+          <div className={`relative mx-auto grid grid-cols-1 gap-10 px-4 sm:px-6 ${ticketSalesAreActive && ticketFlyer ? 'max-w-7xl lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16' : 'max-w-3xl'}`}>
+            {ticketSalesAreActive && ticketFlyer && (
+              <ScrollReveal>
+                <div className="mx-auto max-w-xl overflow-hidden border border-gold-500/25 bg-navy-900 shadow-[0_24px_80px_rgba(0,0,0,0.35)] lg:sticky lg:top-28">
+                  <img
+                    src={ticketFlyer.src}
+                    srcSet={ticketFlyer.srcSet}
+                    sizes="(min-width: 1024px) 40vw, (min-width: 640px) 70vw, 100vw"
+                    width="1081"
+                    height="1351"
+                    loading="lazy"
+                    decoding="async"
+                    alt={t('event.ticketFlyerAlt', {
+                      eventName,
+                      defaultValue: `Official ${eventName} spectator ticket sales flyer`,
+                    })}
+                    className="h-auto w-full"
+                  />
+                </div>
+              </ScrollReveal>
+            )}
+
+            <ScrollReveal delay={0.08}>
+              <div className="flex h-full flex-col justify-center">
+                <div className="mb-3 flex items-center gap-2 text-xs font-heading font-bold uppercase tracking-[0.22em] text-gold-400">
+                  <Ticket size={16} />
+                  {t('event.spectatorAdmission', 'Spectator Admission')}
+                </div>
+                <h2 className="max-w-2xl font-heading text-4xl font-black uppercase leading-none text-text-primary sm:text-5xl">
+                  {ticketSalesAreActive
+                    ? t('event.ticketsOnSale', 'Tickets on sale now')
+                    : ticketSalesStatus === 'sold_out'
+                      ? t('event.ticketsSoldOut', 'Tickets Sold Out')
+                      : t('event.ticketSalesClosed', 'Ticket Sales Closed')}
+                </h2>
+                <p className="mt-5 max-w-2xl text-base leading-relaxed text-text-secondary">
+                  {ticketSalesAreActive
+                    ? t('event.ticketIntro', 'Purchase spectator admission online or in person. Competitors should use the separate ASJJF registration links.')
+                    : ticketSalesStatus === 'sold_out'
+                      ? t('event.ticketsSoldOutDescription', 'Spectator tickets for this event are sold out. Competitor registration is separate.')
+                      : t('event.ticketSalesClosedDescription', 'Spectator ticket sales for this event are closed. Competitor registration is separate.')}
+                </p>
+
+                {ticketSalesAreActive && ticketOptions.length > 0 && (
+                  <div className="mt-8 overflow-hidden border border-white/10 bg-navy-900/55">
+                    <div className="grid grid-cols-[minmax(0,1fr)_5.75rem_5.75rem] border-b border-white/10 bg-white/[0.03] px-4 py-3 text-[10px] font-heading font-bold uppercase tracking-wider text-text-muted sm:grid-cols-[minmax(0,1fr)_7rem_7rem] sm:px-5">
+                      <span>{t('event.admissionOption', 'Admission')}</span>
+                      <span className="text-right text-gold-400">{t('event.earlyBird', 'Early Bird')}</span>
+                      <span className="text-right">{t('event.atTheDoor', 'At the Door')}</span>
+                    </div>
+                    {ticketOptions.map((option, index) => (
+                      <div key={`${option.label}-${index}`} className="grid min-h-16 grid-cols-[minmax(0,1fr)_5.75rem_5.75rem] items-center border-b border-white/5 px-4 py-3 last:border-0 sm:grid-cols-[minmax(0,1fr)_7rem_7rem] sm:px-5">
+                        <div className="min-w-0 pr-3">
+                          <div className="text-sm font-semibold text-text-primary sm:text-base">{option.label}</div>
+                          {option.description && <div className="mt-0.5 text-xs text-text-muted">{option.description}</div>}
+                        </div>
+                        <div className="text-right font-heading text-xl font-black text-gold-400 sm:text-2xl">{formatTicketPrice(option.early_bird_price)}</div>
+                        <div className="text-right font-heading text-lg font-bold text-text-secondary sm:text-xl">{formatTicketPrice(option.regular_price)}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {ticketSalesAreActive && (
+                  <div className="mt-5 flex items-start gap-2 border-l-2 border-gold-500/60 bg-gold-500/[0.06] px-4 py-3 text-sm text-text-secondary">
+                    <Clock size={16} className="mt-0.5 shrink-0 text-gold-400" />
+                    {mainEvent?.ticket_early_bird_ends_on
+                      ? t('event.earlyBirdDeadline', {
+                          date: new Date(`${mainEvent.ticket_early_bird_ends_on}T00:00:00`).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
+                          defaultValue: 'Early-bird pricing ends {{date}}.',
+                        })
+                      : t('event.earlyBirdLimited', 'Early-bird pricing is available for a limited time. The organizer has not published an end date.')}
+                  </div>
+                )}
+
+                {ticketSalesAreActive && mainEvent?.ticket_in_person_name && (
+                  <div className="mt-6 border border-white/10 px-5 py-4">
+                    <div className="mb-3 flex items-center gap-2 text-xs font-heading font-bold uppercase tracking-wider text-text-primary">
+                      <Store size={16} className="text-gold-400" />
+                      {t('event.inPersonPurchase', 'Buy In Person')}
+                    </div>
+                    <div className="space-y-2 text-sm text-text-secondary">
+                      <div className="font-semibold text-text-primary">{mainEvent.ticket_in_person_name}</div>
+                      {mainEvent.ticket_in_person_address && (
+                        <div className="flex items-start gap-2"><MapPin size={15} className="mt-0.5 shrink-0 text-gold-400" /><span>{mainEvent.ticket_in_person_address}</span></div>
+                      )}
+                      {mainEvent.ticket_in_person_phone && (
+                        <a href={`tel:${mainEvent.ticket_in_person_phone.replace(/[^+\d]/g, '')}`} className="flex items-center gap-2 hover:text-gold-300">
+                          <Phone size={15} className="shrink-0 text-gold-400" />{mainEvent.ticket_in_person_phone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {canBuySpectatorTickets && (
+                  <div className="mt-8">
+                    <a
+                      href={ticketSalesUrl || undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackTicketClick('details')}
+                      className="inline-flex min-h-14 w-full items-center justify-center gap-2 bg-gold-500 px-7 py-4 font-heading text-sm font-black uppercase tracking-wider text-navy-900 transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900 sm:w-auto"
+                    >
+                      {t('event.buyOnlineGuamTime', 'Buy Tickets Online')}
+                      <ExternalLink size={16} />
+                    </a>
+                    <p className="mt-3 max-w-xl text-xs leading-relaxed text-text-muted">
+                      {t('event.ticketProviderNote', 'Availability, service fees, and checkout terms are controlled by the official ticket provider.')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
 
       {/* Bento Grid Info */}
       <section className="py-20 sm:py-28">

@@ -210,6 +210,13 @@ export interface EventVisaItem {
   description: string;
 }
 
+export interface EventTicketOption {
+  label: string;
+  description: string;
+  early_bird_price: string;
+  regular_price: string;
+}
+
 export interface Event {
   id: number;
   name: string;
@@ -229,6 +236,14 @@ export interface Event {
   registration_url: string | null;
   registration_url_gi: string | null;
   registration_url_nogi: string | null;
+  ticket_sales_status: 'unavailable' | 'on_sale' | 'sold_out' | 'closed';
+  ticket_sales_url: string | null;
+  ticket_early_bird_ends_on: string | null;
+  ticket_options: EventTicketOption[];
+  ticket_in_person_name: string | null;
+  ticket_in_person_phone: string | null;
+  ticket_in_person_address: string | null;
+  ticket_banner_image_url: string | null;
   prize_pool: string | null;
   prize_title: string | null;
   prize_description: string | null;
@@ -389,6 +404,13 @@ export interface EventFormData {
   registration_url: string;
   registration_url_gi: string;
   registration_url_nogi: string;
+  ticket_sales_status: 'unavailable' | 'on_sale' | 'sold_out' | 'closed';
+  ticket_sales_url: string;
+  ticket_early_bird_ends_on: string;
+  ticket_options: EventTicketOption[];
+  ticket_in_person_name: string;
+  ticket_in_person_phone: string;
+  ticket_in_person_address: string;
   status: string;
   latitude: string;
   longitude: string;
@@ -710,10 +732,20 @@ async function authHeaders(requireAuth: boolean, skipCache = false) {
   return headers;
 }
 
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 async function parseApiError(response: Response, fallback: string) {
   const body = await response.json().catch(() => ({}));
   const message = (body as Record<string, unknown>).error || (body as Record<string, unknown>).errors || fallback;
-  return new Error(typeof message === 'string' ? message : JSON.stringify(message));
+  return new ApiError(typeof message === 'string' ? message : JSON.stringify(message), response.status);
 }
 
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
@@ -911,6 +943,13 @@ export const api = {
     },
     removeEventPoster: (id: number) =>
       fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/remove_poster`, { method: 'DELETE' }, true),
+    uploadEventTicketBanner: (id: number, file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return fetchApiUpload<{ event: Event }>(`/api/v1/admin/events/${id}/upload_ticket_banner`, formData);
+    },
+    removeEventTicketBanner: (id: number) =>
+      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/remove_ticket_banner`, { method: 'DELETE' }, true),
 
     // Event Results
     getEventResults: (eventId: number, params?: Record<string, string>) => {
