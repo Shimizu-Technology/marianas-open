@@ -563,7 +563,7 @@ export default function EventDetailPage() {
                           date: new Date(`${mainEvent.ticket_early_bird_ends_on}T00:00:00`).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
                           defaultValue: 'Early-bird pricing ends {{date}}.',
                         })
-                      : t('event.earlyBirdLimited', 'Early-bird pricing is available for a limited time. The organizer has not published an end date.')}
+                      : t('event.earlyBirdLimited', 'Early-bird pricing is available for a limited time.')}
                   </div>
                 )}
 
