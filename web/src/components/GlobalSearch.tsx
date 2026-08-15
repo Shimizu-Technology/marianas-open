@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Users, Building2, CalendarDays, ArrowRight, X, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
 import type { Competitor, Academy, Event } from '../services/api';
+import { useEvents } from '../hooks/useApi';
 
 interface GlobalSearchProps {
   open: boolean;
@@ -25,16 +26,8 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResults>({ competitors: [], academies: [], events: [] });
   const [loading, setLoading] = useState(false);
-  const [allEvents, setAllEvents] = useState<Event[]>([]);
-  const eventsFetched = useRef(false);
+  const { events: allEvents } = useEvents();
   const [activeIndex, setActiveIndex] = useState(-1);
-
-  useEffect(() => {
-    if (open && !eventsFetched.current) {
-      eventsFetched.current = true;
-      api.getEvents().then(setAllEvents).catch(() => {});
-    }
-  }, [open]);
 
   useEffect(() => {
     if (open) {

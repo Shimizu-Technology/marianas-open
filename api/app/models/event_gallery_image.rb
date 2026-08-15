@@ -79,7 +79,7 @@ class EventGalleryImage < ApplicationRecord
   def as_json(options = {})
     super(options.merge(
       methods: [ :image_url, :thumbnail_url, :large_url ],
-      except: [ :created_at, :updated_at ]
+      except: [ :created_at, :updated_at, :preview_position, :public_gallery_images_count ]
     ))
   end
 

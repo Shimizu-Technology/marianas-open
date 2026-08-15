@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -7,8 +7,8 @@ import ScrollReveal from '../components/ScrollReveal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import SEO from '../components/SEO';
-import { api } from '../services/api';
 import type { Event } from '../services/api';
+import { useEvents } from '../hooks/useApi';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { resolveMediaUrl } from '../utils/images';
 
@@ -120,19 +120,13 @@ export default function PastEventsPage() {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const { tf } = useTranslatedField();
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    api.getEvents()
-      .then((data) => {
-        const completed = data.filter((e: Event) => e.status === 'completed');
-        completed.sort((a: Event, b: Event) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setEvents(completed);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { events: allEvents, loading } = useEvents();
+  const events = useMemo(
+    () => allEvents
+      .filter((event) => event.status === 'completed')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [allEvents],
+  );
 
   const eventsByYear = useMemo(() => {
     const grouped: Record<number, Event[]> = {};

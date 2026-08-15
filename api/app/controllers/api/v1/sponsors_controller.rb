@@ -2,7 +2,7 @@ module Api
   module V1
     class SponsorsController < ApplicationController
       def index
-        sponsors = Sponsor.order(:sort_order)
+        sponsors = Sponsor.includes(logo_attachment: :blob).order(:sort_order)
         render json: sponsors
       end
     end

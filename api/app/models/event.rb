@@ -73,6 +73,8 @@ class Event < ApplicationRecord
   end
 
   def gallery_images_count
+    return @preloaded_public_gallery_images_count if defined?(@preloaded_public_gallery_images_count)
+
     if event_gallery_images.loaded?
       public_gallery_images.size
     else
@@ -81,11 +83,19 @@ class Event < ApplicationRecord
   end
 
   def gallery_preview_images
+    return @preloaded_public_gallery_preview_images if defined?(@preloaded_public_gallery_preview_images)
+
     if event_gallery_images.loaded?
       public_gallery_images.first(8)
     else
       event_gallery_images.active.ready.sorted.with_image_variant_records.limit(8)
     end
+  end
+
+  def preload_public_gallery(count:, preview_images:)
+    @preloaded_public_gallery_images_count = count
+    @preloaded_public_gallery_preview_images = preview_images
+    self
   end
 
   translatable_fields :name, :description, :tagline, :venue_name, :city, :country,
