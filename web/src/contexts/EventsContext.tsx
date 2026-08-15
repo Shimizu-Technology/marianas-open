@@ -10,6 +10,11 @@ interface EventsContextValue {
 }
 
 const EventsContext = createContext<EventsContextValue | null>(null);
+const RETRY_DELAYS_MS = [500, 1_500, 4_000] as const;
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Events could not be loaded.';
+}
 
 export function EventsProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<Event[]>([]);
@@ -17,10 +22,50 @@ export function EventsProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getEvents()
-      .then(setEvents)
-      .catch((requestError: Error) => setError(requestError.message))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    let retryTimer: number | undefined;
+    let requestSequence = 0;
+
+    const beginLoad = () => {
+      const requestId = ++requestSequence;
+      if (retryTimer !== undefined) window.clearTimeout(retryTimer);
+      setLoading(true);
+      setError(null);
+
+      const attemptLoad = async (attempt: number) => {
+        try {
+          const nextEvents = await api.getEvents();
+          if (cancelled || requestId !== requestSequence) return;
+
+          setEvents(nextEvents);
+          setLoading(false);
+        } catch (requestError) {
+          if (cancelled || requestId !== requestSequence) return;
+
+          const retryDelay = RETRY_DELAYS_MS[attempt];
+          if (retryDelay !== undefined) {
+            retryTimer = window.setTimeout(() => void attemptLoad(attempt + 1), retryDelay);
+            return;
+          }
+
+          setError(errorMessage(requestError));
+          setLoading(false);
+        }
+      };
+
+      void attemptLoad(0);
+    };
+
+    const retryWhenOnline = () => beginLoad();
+    window.addEventListener('online', retryWhenOnline);
+    beginLoad();
+
+    return () => {
+      cancelled = true;
+      requestSequence += 1;
+      if (retryTimer !== undefined) window.clearTimeout(retryTimer);
+      window.removeEventListener('online', retryWhenOnline);
+    };
   }, []);
 
   const value = useMemo(
