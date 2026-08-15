@@ -16,3 +16,7 @@
 requeue_stale_event_gallery_images:
   class: RequeueStaleEventGalleryImagesJob
   schedule: every 5 minutes
+
+complete_past_events:
+  class: CompletePastEventsJob
+  schedule: every 10 minutes

@@ -56,7 +56,7 @@ module Api
       private
 
       def stats_join_sql
-        points = RankingCalculator.points_sql
+        points = RankingCalculator.points_sql(stars_col: "COALESCE(ranking_events.asjjf_stars, 3)")
         <<~SQL
           LEFT JOIN (
             SELECT
@@ -70,6 +70,7 @@ module Api
               #{points} as total_points
             FROM event_results
             INNER JOIN competitors ON competitors.id = event_results.competitor_id
+            INNER JOIN events ranking_events ON ranking_events.id = event_results.event_id
             WHERE competitors.academy_id IS NOT NULL
               AND event_results.event_id IN (#{Event.publicly_visible_ids_sql})
             GROUP BY competitors.academy_id

@@ -5,7 +5,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import SEO from '../components/SEO';
 import { api } from '../services/api';
-import type { Event, EventGalleryImage } from '../services/api';
+import type { EventGalleryImage } from '../services/api';
+import { useEvents } from '../hooks/useApi';
 import { resolveMediaUrl } from '../utils/images';
 
 const PER_PAGE = 24;
@@ -45,7 +46,11 @@ function preloadImage(url: string | null | undefined) {
 
 export default function EventGalleryPage() {
   const { slug = '' } = useParams();
-  const [event, setEvent] = useState<Event | null>(null);
+  const { events, loading: eventsLoading } = useEvents();
+  const event = useMemo(
+    () => events.find(candidate => candidate.slug === slug) || null,
+    [events, slug],
+  );
   const [images, setImages] = useState<EventGalleryImage[]>([]);
   const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
   const [activeCategory, setActiveCategory] = useState('');
@@ -63,22 +68,16 @@ export default function EventGalleryPage() {
     const loadInitialGallery = async () => {
       try {
         setError('');
-        const [eventResult, galleryResult] = await Promise.allSettled([
-          api.getEvent(slug),
-          api.getEventGallery(slug, { page: 1, per_page: PER_PAGE }),
-        ]);
-        if (eventResult.status === 'rejected') throw eventResult.reason;
+        const galleryResult = await api.getEventGallery(slug, { page: 1, per_page: PER_PAGE });
         if (cancelled) return;
-        setEvent(eventResult.value);
 
-        if (galleryResult.status === 'fulfilled') {
-          const galleryData = galleryResult.value;
-          setImages(galleryData.gallery_images);
-          setCategories(galleryData.categories || []);
-          setActiveCategory('');
-          setTotal(galleryData.total);
-          setPage(1);
-        } else {
+        setImages(galleryResult.gallery_images);
+        setCategories(galleryResult.categories || []);
+        setActiveCategory('');
+        setTotal(galleryResult.total);
+        setPage(1);
+      } catch {
+        if (!cancelled) {
           setImages([]);
           setCategories([]);
           setActiveCategory('');
@@ -86,8 +85,6 @@ export default function EventGalleryPage() {
           setPage(1);
           setError('Photos could not be loaded. Please try again.');
         }
-      } catch {
-        if (!cancelled) setEvent(null);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -213,7 +210,7 @@ export default function EventGalleryPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeIndex, moveLightbox]);
 
-  if (loading) {
+  if (loading || eventsLoading) {
     return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;
   }
 

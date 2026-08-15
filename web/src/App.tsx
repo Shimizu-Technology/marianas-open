@@ -10,6 +10,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { PostHogPageView } from './providers/PostHogProvider';
 import { OrganizationProvider } from './contexts/OrganizationContext';
+import { EventsProvider } from './contexts/EventsContext';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
@@ -176,13 +177,15 @@ export default function App() {
           path="*"
           element={
             <OrganizationProvider>
-              <BannerLayout>
-                <main>
-                  <AnimatedRoutes />
-                </main>
-                <Footer />
-                <MobileLanguageFAB />
-              </BannerLayout>
+              <EventsProvider>
+                <BannerLayout>
+                  <main>
+                    <AnimatedRoutes />
+                  </main>
+                  <Footer />
+                  <MobileLanguageFAB />
+                </BannerLayout>
+              </EventsProvider>
             </OrganizationProvider>
           }
         />

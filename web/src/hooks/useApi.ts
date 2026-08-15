@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { Organization, Event, Sponsor } from '../services/api';
+import { usePublicEvents } from '../contexts/EventsContext';
 
 export function useOrganization() {
   const [org, setOrg] = useState<Organization | null>(null);
@@ -18,18 +19,7 @@ export function useOrganization() {
 }
 
 export function useEvents() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    api.getEvents()
-      .then(setEvents)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { events, loading, error };
+  return usePublicEvents();
 }
 
 export function useEvent(slug: string) {
