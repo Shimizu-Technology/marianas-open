@@ -16,6 +16,27 @@
     }
   },
   "event": {
+    "travelOffer": {
+      "context": "Label for an event-specific travel booking offer. Do not imply a guaranteed discount."
+    },
+    "offerCode": {
+      "context": "A code travelers enter on an airline meeting-travel booking page."
+    },
+    "copyOfferCode": {
+      "context": "Button label for copying an airline travel offer code."
+    },
+    "offerCodeCopied": {
+      "context": "Short success label shown after an offer code is copied."
+    },
+    "offerCodeCopiedStatus": {
+      "context": "Screen-reader announcement confirming an offer code was copied to the clipboard."
+    },
+    "copyOfferCodeError": {
+      "context": "Short retry button label shown when copying an offer code fails."
+    },
+    "copyOfferCodeErrorStatus": {
+      "context": "Screen-reader instructions shown when an offer code cannot be copied automatically."
+    },
     "tripPackages": {
       "context": "Jiu-jitsu tournament prizes: winners receive funded trip packages to compete at the championship in Guam"
     },

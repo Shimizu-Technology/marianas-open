@@ -146,6 +146,7 @@ module Api
             ticket_sales_url: nil,
             ticket_early_bird_ends_on: nil,
             ticket_options: @event.ticket_options.deep_dup,
+            travel_items: reusable_travel_items,
             translations: {},
             translation_status: "untranslated"
           )
@@ -236,7 +237,7 @@ module Api
             registration_steps: [:title, :description, :url, :link_label],
             registration_fee_sections: [:title, { rows: [:deadline, :fee, :option] }],
             registration_info_items: [:label, :value],
-            travel_items: [:title, :description, :value, :url, :link_label],
+            travel_items: [:key, :kind, :title, :description, :value, :code, :url, :link_label],
             visa_items: [:title, :description],
             event_schedule_items_attributes: [:id, :time, :description, :sort_order, :_destroy],
             prize_categories_attributes: [:id, :name, :amount, :sort_order, :_destroy]
@@ -247,6 +248,12 @@ module Api
           # Allow passing IDs in request body or use event's stored IDs
           ids = params[:asjjf_event_ids] || @event.asjjf_event_ids
           Array(ids).map(&:to_i).reject(&:zero?)
+        end
+
+        def reusable_travel_items
+          @event.travel_items.reject do |item|
+            item.is_a?(Hash) && (item["kind"] == "offer" || item["code"].present?)
+          end.deep_dup
         end
 
         def generate_unique_slug(name)
