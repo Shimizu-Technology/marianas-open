@@ -12,7 +12,7 @@ function addressLines(address: Record<string, string>) {
 }
 
 function nextStep(order: CommerceOrder) {
-  if (order.fulfillment_method === 'pickup') return 'Deal Depot will prepare your items. Wait for the ready notification before heading over.'
+  if (order.fulfillment_method === 'pickup') return 'Deal Depot will prepare your items. Contact the Marianas Open team before heading over if you need timing details.'
   return 'Deal Depot will pack your items. We’ll email tracking as soon as the shipping label is created.'
 }
 

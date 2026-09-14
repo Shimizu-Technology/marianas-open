@@ -149,7 +149,7 @@ module Commerce
 
       def fulfillment_summary
         if order.fulfillment_method == "pickup"
-          "Deal Depot will prepare your order for pickup. Wait for the ready notification before heading over."
+          "Deal Depot will prepare your order for pickup. Contact the Marianas Open team before heading over if you need timing details."
         else
           "Deal Depot will pack your order. We will send tracking as soon as the shipping label is created."
         end

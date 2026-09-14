@@ -20,3 +20,7 @@ requeue_stale_event_gallery_images:
 complete_past_events:
   class: CompletePastEventsJob
   schedule: every 10 minutes
+
+dispatch_pending_order_notifications:
+  class: DispatchPendingOrderNotificationsJob
+  schedule: every 5 minutes

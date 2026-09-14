@@ -146,6 +146,38 @@ class CommerceNotificationsTest < ActionDispatch::IntegrationTest
     assert_includes notification.last_error, "temporary provider failure"
   end
 
+  test "the recovery dispatcher requeues abandoned pending and stale delivery records" do
+    pending_notification = Commerce::Notifications::QueueOrderPaid.call(order: @order).first
+    pending_notification.update_column(:updated_at, 2.minutes.ago)
+    stale_notification = @order.order_notifications.create!(
+      kind: "operations_new_order",
+      recipient: "operations@example.org",
+      status: "delivering",
+      subject: "Stale delivery",
+      html_body: "<p>Stale</p>",
+      text_body: "Stale",
+      updated_at: 6.minutes.ago
+    )
+    sent_notification = @order.order_notifications.create!(
+      kind: "operations_new_order",
+      recipient: "sent@example.org",
+      status: "sent",
+      subject: "Already sent",
+      html_body: "<p>Sent</p>",
+      text_body: "Sent",
+      sent_at: Time.current
+    )
+
+    DispatchPendingOrderNotificationsJob.perform_now
+
+    queued_ids = enqueued_jobs.filter_map do |job|
+      job[:args].first if job[:job] == DeliverOrderNotificationJob
+    end
+    assert_includes queued_ids, pending_notification.id
+    assert_includes queued_ids, stale_notification.id
+    refute_includes queued_ids, sent_notification.id
+  end
+
   test "a stale failed delivery cannot overwrite a newer successful attempt" do
     notification = Commerce::Notifications::QueueOrderPaid.call(order: @order).first
     gateway = Object.new

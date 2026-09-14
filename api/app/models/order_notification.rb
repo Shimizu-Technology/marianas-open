@@ -18,6 +18,11 @@ class OrderNotification < ApplicationRecord
   validates :attempts, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   scope :deliverable, -> { where(status: %w[pending failed]) }
+  scope :recovery_candidates, -> {
+    ready = where(status: %w[pending failed]).where(updated_at: ..1.minute.ago)
+    stale = where(status: "delivering").where(updated_at: ..Commerce::Notifications::DeliverOrder::PROCESSING_TIMEOUT.ago)
+    ready.or(stale)
+  }
 
   def terminal?
     sent? || suppressed?

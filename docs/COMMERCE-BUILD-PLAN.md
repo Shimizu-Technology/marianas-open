@@ -60,7 +60,7 @@
 ## Slice 5 implementation contract
 
 - Payment capture creates customer and configured operations notifications in the same database transaction as the paid order. Message bodies, recipients, and provider idempotency keys are snapshotted so retries cannot silently change an already-created confirmation.
-- A durable notification outbox records pending, delivering, sent, suppressed, and failed states. Background delivery retries transient failures without creating a second provider message, and stale delivery claims can be safely recovered.
+- A durable notification outbox records pending, delivering, sent, suppressed, and failed states. Background delivery retries transient failures without creating a second provider message, and a five-minute recurring dispatcher recovers committed notifications whose original delivery job was lost or abandoned.
 - Resend receives both accessible plain-text and responsive HTML versions. Customer confirmations include the order number, item summary, total, fulfillment expectations, support contact, and a signed status link; operations messages provide the corresponding fulfillment handoff.
 - Delivery mode is explicit: `disabled` records intentional suppression, `sandbox` can send only to approved `resend.dev` test inboxes, and `live` sends to the snapshotted recipient. Idempotency keys include the Rails environment to prevent test and production deliveries from colliding in one Resend account.
 - Staging hardcodes commerce email delivery to `disabled` in its runtime definition and does not receive a Resend key. It can exercise the full payment, outbox, and customer-status flow without contacting a real customer.
