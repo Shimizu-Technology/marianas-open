@@ -15,12 +15,20 @@ fi
 
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 backup_path="${BACKUP_DIR}/marianas-open-staging-${timestamp}.sql.gz"
+temporary_path="$(mktemp "${backup_path}.tmp.XXXXXX")"
+cleanup() {
+  rm -f "${temporary_path}"
+}
+trap cleanup EXIT
 
 compose exec -T db pg_dump \
   --username marianas_open \
   --dbname marianas_open_staging \
   --no-owner \
-  --no-privileges | gzip > "${backup_path}"
+  --no-privileges | gzip > "${temporary_path}"
+
+mv "${temporary_path}" "${backup_path}"
+trap - EXIT
 
 find "${BACKUP_DIR}" -type f -name 'marianas-open-staging-*.sql.gz' -mtime +14 -delete
 printf '%s\n' "${backup_path}"

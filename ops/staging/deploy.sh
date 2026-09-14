@@ -33,9 +33,7 @@ if [[ "${SKIP_IMAGE_PULL:-0}" != "1" ]]; then
 fi
 compose up -d --wait db
 
-if [[ -n "${previous_sha}" ]]; then
-  "${SCRIPT_DIR}/backup.sh"
-fi
+"${SCRIPT_DIR}/backup.sh"
 
 compose run --rm api bundle exec rails db:prepare
 compose up -d --remove-orphans

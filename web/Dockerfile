@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22.22-alpine AS build
+FROM node:22.22-alpine@sha256:e58326d0d441090181ac150dc2078d3e2cf6a0d42e809aebba3ef5880935ffdd AS build
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ RUN npm ci
 COPY . .
 RUN npm run build:no-translate
 
-FROM caddy:2.10-alpine
+FROM caddy:2.10-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
 
 COPY Caddyfile.staging /etc/caddy/Caddyfile
 COPY --from=build /app/dist /srv

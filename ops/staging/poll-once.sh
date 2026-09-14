@@ -25,14 +25,16 @@ if [[ -f "${state_dir}/deployed-sha" ]]; then
 fi
 
 if [[ "${latest_sha}" != "${deployed_sha}" ]]; then
-  if [[ -d "${SERVICE_DIR}/.git" ]]; then
-    if [[ -n "$(git -C "${SERVICE_DIR}" status --porcelain --untracked-files=no)" ]]; then
-      printf '%s\n' "Tracked deployment files have local changes; refusing to overwrite them." >&2
-      exit 1
-    fi
-    git -C "${SERVICE_DIR}" fetch --quiet origin staging
-    git -C "${SERVICE_DIR}" cat-file -e "${latest_sha}^{commit}"
-    git -C "${SERVICE_DIR}" checkout --quiet --detach "${latest_sha}"
+  if ! git -C "${SERVICE_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    printf '%s\n' "The staging service directory is not a Git checkout." >&2
+    exit 1
   fi
+  if [[ -n "$(git -C "${SERVICE_DIR}" status --porcelain --untracked-files=no)" ]]; then
+    printf '%s\n' "Tracked deployment files have local changes; refusing to overwrite them." >&2
+    exit 1
+  fi
+  git -C "${SERVICE_DIR}" fetch --quiet origin staging
+  git -C "${SERVICE_DIR}" cat-file -e "${latest_sha}^{commit}"
+  git -C "${SERVICE_DIR}" checkout --quiet --detach "${latest_sha}"
   exec "${SERVICE_DIR}/ops/staging/deploy.sh" "${latest_sha}"
 fi

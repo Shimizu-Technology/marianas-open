@@ -22,9 +22,10 @@ keychain_secret() {
   security find-generic-password -a "${KEYCHAIN_ACCOUNT}" -s "$1" -w
 }
 load_staging_secrets() {
-  export POSTGRES_PASSWORD="$(keychain_secret marianas-open-staging-postgres)"
-  export SECRET_KEY_BASE="$(keychain_secret marianas-open-staging-secret-key-base)"
-  export CLERK_SECRET_KEY="$(keychain_secret marianas-open-staging-clerk-secret-key)"
+  POSTGRES_PASSWORD="$(keychain_secret marianas-open-staging-postgres)"
+  SECRET_KEY_BASE="$(keychain_secret marianas-open-staging-secret-key-base)"
+  CLERK_SECRET_KEY="$(keychain_secret marianas-open-staging-clerk-secret-key)"
+  export POSTGRES_PASSWORD SECRET_KEY_BASE CLERK_SECRET_KEY
 }
 
 compose() {
