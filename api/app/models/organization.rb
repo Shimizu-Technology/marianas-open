@@ -4,6 +4,7 @@ class Organization < ApplicationRecord
   has_many :inventory_locations, dependent: :restrict_with_error
   has_many :shipping_packages, dependent: :restrict_with_error
   has_many :shipping_quotes, dependent: :restrict_with_error
+  has_many :orders, dependent: :restrict_with_error
   include HasImageUrl
 
   has_many :events, dependent: :destroy

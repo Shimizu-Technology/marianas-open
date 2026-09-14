@@ -205,6 +205,7 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
     get "/api/v1/shop/configuration"
     assert_response :success
     assert_equal false, response.parsed_body["enabled"]
+    assert_equal false, response.parsed_body["fake_checkout_enabled"]
   ensure
     ENV["COMMERCE_ENABLED"] = previous
   end

@@ -23,8 +23,14 @@ Rails.application.routes.draw do
         get :configuration, to: "configuration#show"
         get :fulfillment, to: "fulfillment#show"
         resources :shipping_quotes, only: :create, path: "shipping-quotes"
+        resources :checkout_sessions, only: :create, path: "checkout-sessions"
+        resources :orders, only: :show do
+          post :test_payment, on: :member, path: "test-payment"
+        end
         resources :products, only: %i[index show], param: :slug
       end
+
+      post "webhooks/stripe", to: "stripe_webhooks#create"
 
       # Auth
       get :me, to: "users#me"

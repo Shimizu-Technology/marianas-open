@@ -100,6 +100,30 @@ class ShopShippingQuotesTest < ActionDispatch::IntegrationTest
     assert_includes response.parsed_body.fetch("error"), "country of origin"
   end
 
+  test "product-level fulfillment controls override older variant permissions" do
+    @product.update!(shippable: false)
+    shipping_error = assert_raises(Commerce::Shipping::Error) do
+      Commerce::Shipping::Cart.new(
+        organization: @organization,
+        raw_lines: [ { variant_id: @variant.id, quantity: 1 } ],
+        fulfillment_method: "shipping",
+        inventory_location: @location
+      )
+    end
+    assert_includes shipping_error.message, "cannot be shipped"
+
+    @product.update!(shippable: true, pickup_enabled: false)
+    pickup_error = assert_raises(Commerce::Shipping::Error) do
+      Commerce::Shipping::Cart.new(
+        organization: @organization,
+        raw_lines: [ { variant_id: @variant.id, quantity: 1 } ],
+        fulfillment_method: "pickup",
+        inventory_location: @location
+      )
+    end
+    assert_includes pickup_error.message, "not available for pickup"
+  end
+
   private
 
   def with_gateway(gateway)

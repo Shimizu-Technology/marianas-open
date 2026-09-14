@@ -20,8 +20,8 @@
 |---|---|---|
 | 1 | Catalog, flexible variants, inventory ledger, public catalog API | Complete |
 | 2 | Product and inventory administration, public storefront, cart | Complete in PR #87 |
-| 3 | Delivery choice, address validation, EasyPost sandbox quotes | In progress |
-| 4 | Durable orders, reservations, Stripe Checkout Sessions, webhooks | Not started |
+| 3 | Delivery choice, address validation, EasyPost sandbox quotes | Complete in PR #88 |
+| 4 | Durable orders, reservations, Stripe Checkout Sessions, webhooks | Complete in PR #89 |
 | 5 | Customer order status, transactional notifications | Not started |
 | 6 | Deal Depot fulfillment, labels, tracking, pickup | Not started |
 | 7 | Refunds, reconciliation, reports, operational alerts | Not started |
@@ -45,6 +45,17 @@
 - EasyPost receives the verified destination, Deal Depot origin, package dimensions, total packed weight, and customs items when Guam or another territory/international route requires them. Up to five matching-currency rates are returned in price order.
 - Each rate is persisted without customer address data and returned as a signed, expiring 15-minute reference. The next slice must revalidate that reference and the submitted address/cart before creating an order and opening Stripe Checkout.
 - `EASYPOST_API_KEY` selects real EasyPost test/live behavior. Deterministic fake rates require the explicit local-only `EASYPOST_FAKE_RATES=true`; staging never falls back to fake rates.
+
+## Slice 4 implementation contract
+
+- Marianas Open creates the order before redirecting to Stripe. The order records the current product and variant names, SKU, selected options, unit price, quantity, fulfillment method, customer contact, shipping address when applicable, and the server-calculated subtotal, shipping, tax, and total.
+- Checkout accepts only a signed, unexpired shipping quote whose organization, location, cart digest, destination digest, currency, and amount still match the current server-side cart. Pickup orders require an active pickup location and never carry shipping charges or a shipping address.
+- The selected Deal Depot inventory level is locked before stock is reserved. A pending order increases `reserved` without changing `on_hand`; a verified payment atomically decreases both values and records an immutable `sold` inventory movement. Gateway failures, Stripe expiration events, and the expiration job release active reservations without reducing stock on hand.
+- A browser-generated checkout key and a Stripe idempotency key make retries return the original Checkout Session instead of creating another order or inventory hold.
+- Stripe Checkout receives server-owned line items, shipping, currency, customer email, order number, and non-sensitive order identifiers. The browser cannot provide price, shipping cost, tax, total, Stripe metadata, success URL, or cancel URL.
+- Stripe webhook processing verifies the raw request body with `STRIPE_WEBHOOK_SECRET`, records each Stripe event ID once, rejects amount or currency mismatches, and safely retries failed processing. Duplicate payment-complete events cannot consume stock twice.
+- Payment cancellation returns to the existing order with a link to resume its Checkout Session. Payment sessions expire after 45 minutes; the cleanup job waits an additional five minutes for a delayed webhook before releasing the reservation.
+- `STRIPE_API_KEY` enables real Stripe test/live Checkout; a least-privilege restricted key is preferred and each environment gets a separate key. The integration uses Stripe's current API version, client interface, dynamic payment methods, and a stable integration identifier. The explicit `STRIPE_FAKE_CHECKOUT=true` substitute works only in local Rails development so desktop and mobile browser QA can cover the redirect and payment-complete states without creating a real provider transaction.
 
 ## Live-launch gates
 

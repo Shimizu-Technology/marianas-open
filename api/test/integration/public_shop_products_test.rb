@@ -69,6 +69,7 @@ class PublicShopProductsTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal true, response.parsed_body["enabled"]
-    assert_equal [ "enabled" ], response.parsed_body.keys
+    assert_equal false, response.parsed_body["fake_checkout_enabled"]
+    assert_equal %w[enabled fake_checkout_enabled], response.parsed_body.keys
   end
 end

@@ -2,7 +2,7 @@ import { ArrowLeft, Check, Clock3, Loader2, MapPin, PackageCheck, ShieldCheck, S
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../contexts/CommerceContext'
-import { api, type FulfillmentConfiguration, type ShippingAddress, type ShippingQuoteResponse, type ShippingRateQuote } from '../services/api'
+import { api, ApiError, type FulfillmentConfiguration, type ShippingAddress, type ShippingQuoteResponse, type ShippingRateQuote } from '../services/api'
 
 const inputClass = 'w-full rounded-xl border border-white/12 bg-black/20 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-text-muted focus:border-gold/60 focus:ring-2 focus:ring-gold/15 sm:text-sm'
 const money = (cents: number, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100)
@@ -21,17 +21,20 @@ function serviceName(value: string) {
 }
 
 export default function CheckoutPage() {
-  const { enabled, loading: commerceLoading, cartLines } = useCommerce()
+  const { enabled, loading: commerceLoading, cartLines, rememberCheckout } = useCommerce()
   const [configuration, setConfiguration] = useState<FulfillmentConfiguration | null>(null)
   const [method, setMethod] = useState<'shipping' | 'pickup'>('shipping')
   const [address, setAddress] = useState<ShippingAddress>({ name: '', street1: '', street2: '', city: '', state: '', zip: '', country: 'US', phone: '', email: '' })
+  const [contact, setContact] = useState({ name: '', email: '', phone: '' })
   const [quote, setQuote] = useState<ShippingQuoteResponse | null>(null)
   const [selectedRate, setSelectedRate] = useState<ShippingRateQuote | null>(null)
   const [quoting, setQuoting] = useState(false)
+  const [startingPayment, setStartingPayment] = useState(false)
+  const [checkoutKey, setCheckoutKey] = useState(() => crypto.randomUUID())
   const [error, setError] = useState('')
 
-  const canShip = cartLines.length > 0 && cartLines.every(line => line.variant.allow_shipping) && Boolean(configuration?.shipping_available)
-  const canPickup = cartLines.length > 0 && cartLines.every(line => line.variant.allow_pickup) && Boolean(configuration?.pickup_locations.length)
+  const canShip = cartLines.length > 0 && cartLines.every(line => line.product.shippable && line.variant.allow_shipping) && Boolean(configuration?.shipping_available)
+  const canPickup = cartLines.length > 0 && cartLines.every(line => line.product.pickup_enabled && line.variant.allow_pickup) && Boolean(configuration?.pickup_locations.length)
   const currencies = [...new Set(cartLines.map(line => line.variant.currency))]
   const currency = currencies[0] || 'USD'
   const subtotal = cartLines.reduce((sum, line) => sum + line.variant.price_cents * line.quantity, 0)
@@ -52,6 +55,18 @@ export default function CheckoutPage() {
     setAddress(current => ({ ...current, [field]: value }))
     setQuote(null)
     setSelectedRate(null)
+    setCheckoutKey(crypto.randomUUID())
+  }
+
+  const updateContact = (field: 'name' | 'email' | 'phone', value: string) => {
+    setContact(current => ({ ...current, [field]: value }))
+    setCheckoutKey(crypto.randomUUID())
+  }
+
+  const chooseMethod = (nextMethod: 'shipping' | 'pickup') => {
+    setMethod(nextMethod)
+    setError('')
+    setCheckoutKey(crypto.randomUUID())
   }
 
   const requestRates = async () => {
@@ -71,12 +86,39 @@ export default function CheckoutPage() {
 
   const pickup = configuration?.pickup_locations[0]
   const total = subtotal + (method === 'shipping' ? selectedRate?.amount_cents || 0 : 0)
+  const contactReady = method === 'shipping'
+    ? Boolean(address.name.trim() && address.email?.trim())
+    : Boolean(contact.name.trim() && contact.email.trim())
+  const fulfillmentReady = method === 'shipping' ? Boolean(selectedRate) : Boolean(pickup)
+  const canStartPayment = currencies.length === 1 && contactReady && fulfillmentReady && !startingPayment
   const summaryRows = useMemo(() => cartLines.map(line => ({
     key: line.variantId,
     title: line.product.name,
     detail: `${line.variant.name} · Qty ${line.quantity}`,
     amount: line.variant.price_cents * line.quantity,
   })), [cartLines])
+
+  const startPayment = async () => {
+    if (!canStartPayment) return
+    setStartingPayment(true)
+    setError('')
+    try {
+      const result = await api.createCheckoutSession({
+        checkout_key: checkoutKey,
+        fulfillment_method: method,
+        cart: cartLines.map(line => ({ variant_id: line.variantId, quantity: line.quantity })),
+        ...(method === 'shipping'
+          ? { shipping_quote_token: selectedRate?.token, shipping_address: address }
+          : { pickup_location_id: pickup?.id, contact }),
+      })
+      rememberCheckout(result.order_token)
+      window.location.assign(result.checkout_url)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Secure checkout could not be started.')
+      if (cause instanceof ApiError && cause.status < 500) setCheckoutKey(crypto.randomUUID())
+      setStartingPayment(false)
+    }
+  }
 
   if (commerceLoading) return <div className="min-h-screen px-4 pt-40 text-center text-text-secondary">Loading your bag…</div>
   if (!enabled) return <div className="min-h-screen px-4 pt-40 text-center"><h1 className="font-heading text-3xl font-bold">Checkout is not available</h1><Link to="/" className="mt-6 inline-flex text-gold">Return home</Link></div>
@@ -98,11 +140,11 @@ export default function CheckoutPage() {
             {error && <div role="alert" className="mt-6 rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm leading-6 text-red-100">{error}</div>}
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
-              <button type="button" disabled={!canShip} onClick={() => { setMethod('shipping'); setError('') }} className={`rounded-2xl border p-5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${method === 'shipping' && canShip ? 'border-gold/50 bg-gold/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/25'} disabled:cursor-not-allowed disabled:opacity-40`}>
+              <button type="button" disabled={!canShip} onClick={() => chooseMethod('shipping')} className={`rounded-2xl border p-5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${method === 'shipping' && canShip ? 'border-gold/50 bg-gold/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/25'} disabled:cursor-not-allowed disabled:opacity-40`}>
                 <span className="flex items-start justify-between gap-3"><Truck className="h-6 w-6 text-gold" /><span className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border ${method === 'shipping' && canShip ? 'border-gold bg-gold text-navy-900' : 'border-white/25'}`}>{method === 'shipping' && canShip && <Check className="h-3.5 w-3.5" />}</span></span>
                 <strong className="mt-4 block font-heading text-lg">Ship my order</strong><span className="mt-1 block text-sm leading-6 text-text-muted">Live carrier pricing for Guam, the U.S., and supported international destinations.</span>
               </button>
-              <button type="button" disabled={!canPickup} onClick={() => { setMethod('pickup'); setError('') }} className={`rounded-2xl border p-5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${method === 'pickup' && canPickup ? 'border-gold/50 bg-gold/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/25'} disabled:cursor-not-allowed disabled:opacity-40`}>
+              <button type="button" disabled={!canPickup} onClick={() => chooseMethod('pickup')} className={`rounded-2xl border p-5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${method === 'pickup' && canPickup ? 'border-gold/50 bg-gold/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/25'} disabled:cursor-not-allowed disabled:opacity-40`}>
                 <span className="flex items-start justify-between gap-3"><Store className="h-6 w-6 text-gold" /><span className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border ${method === 'pickup' && canPickup ? 'border-gold bg-gold text-navy-900' : 'border-white/25'}`}>{method === 'pickup' && canPickup && <Check className="h-3.5 w-3.5" />}</span></span>
                 <strong className="mt-4 block font-heading text-lg">Pick up at Deal Depot</strong><span className="mt-1 block text-sm leading-6 text-text-muted">Free local pickup. We’ll let you know when the order is ready.</span>
               </button>
@@ -112,6 +154,7 @@ export default function CheckoutPage() {
               <section className="mt-6 rounded-2xl border border-white/10 bg-surface p-5 sm:p-7">
                 <div className="flex gap-4"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-gold"><MapPin className="h-5 w-5" /></div><div><h2 className="font-heading text-xl font-semibold">{pickup.name}</h2><div className="mt-2 text-sm leading-6 text-text-secondary">{formatAddress(pickup.address).map(line => <div key={line}>{line}</div>)}</div>{pickup.phone && <a className="mt-2 inline-flex text-sm text-gold hover:text-gold-300" href={`tel:${pickup.phone}`}>{pickup.phone}</a>}</div></div>
                 {pickup.pickup_instructions && <div className="mt-5 rounded-xl bg-white/[0.04] p-4 text-sm leading-6 text-text-secondary">{pickup.pickup_instructions}</div>}
+                <div className="mt-6 border-t border-white/10 pt-6"><p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Pickup contact</p><h3 className="mt-2 font-heading text-lg font-semibold">Who should we notify?</h3><div className="mt-5 grid gap-5 sm:grid-cols-2"><Field label="Full name"><input className={inputClass} autoComplete="name" value={contact.name} onChange={event => updateContact('name', event.target.value)} /></Field><Field label="Email"><input className={inputClass} type="email" autoComplete="email" value={contact.email} onChange={event => updateContact('email', event.target.value)} /></Field><div className="sm:col-span-2"><Field label="Phone" optional><input className={inputClass} type="tel" autoComplete="tel" value={contact.phone} onChange={event => updateContact('phone', event.target.value)} /></Field></div></div></div>
               </section>
             )}
 
@@ -151,8 +194,8 @@ export default function CheckoutPage() {
             <h2 className="font-heading text-xl font-semibold">Order summary</h2>
             <div className="mt-5 space-y-4">{summaryRows.map(row => <div key={row.key} className="flex justify-between gap-4 text-sm"><div><p className="font-medium">{row.title}</p><p className="mt-1 text-xs text-text-muted">{row.detail}</p></div><span className="shrink-0">{money(row.amount, currency)}</span></div>)}</div>
             <div className="mt-5 space-y-3 border-t border-white/10 pt-5 text-sm"><div className="flex justify-between text-text-secondary"><span>Subtotal</span><span>{money(subtotal, currency)}</span></div><div className="flex justify-between text-text-secondary"><span>{method === 'pickup' ? 'Pickup' : 'Shipping'}</span><span>{method === 'pickup' ? 'Free' : selectedRate ? money(selectedRate.amount_cents, selectedRate.currency) : 'Calculated next'}</span></div><div className="flex justify-between border-t border-white/10 pt-4 font-heading text-xl font-semibold"><span>Total</span><span>{money(total, currency)}</span></div></div>
-            <button disabled className="mt-6 w-full rounded-full bg-white/10 px-5 py-3.5 text-sm font-bold text-white/45">Secure payment coming next</button>
-            <p className="mt-3 text-center text-xs leading-5 text-text-muted">Nothing is charged while we finish connecting secure payment.</p>
+            <button type="button" disabled={!canStartPayment} onClick={() => void startPayment()} className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-gold px-5 py-3.5 text-sm font-bold text-navy-900 transition hover:bg-gold-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/40">{startingPayment ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening secure checkout…</> : <>Continue to secure payment</>}</button>
+            <p className="mt-3 text-center text-xs leading-5 text-text-muted">Payment is securely handled by Stripe. Your items are held for 45 minutes once checkout begins.</p>
           </aside>
         </div>
       </div>

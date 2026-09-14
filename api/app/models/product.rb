@@ -6,6 +6,7 @@ class Product < ApplicationRecord
   has_many :product_options, -> { order(:position, :id) }, dependent: :destroy
   has_many :product_option_values, through: :product_options
   has_many :product_images, -> { order(:sort_order, :id) }, dependent: :destroy
+  has_many :order_items, dependent: :restrict_with_error
 
   validates :name, :slug, presence: true
   validates :slug, uniqueness: { scope: :organization_id }, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/ }
