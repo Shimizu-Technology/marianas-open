@@ -85,6 +85,7 @@ jobs:
 
           baseline_dir="$(mktemp -d)"
           baseline_report="${RUNNER_TEMP}/brakeman-base.json"
+          current_report="${RUNNER_TEMP}/brakeman-current.json"
           cleanup() {
             git worktree remove --force "${baseline_dir}" >/dev/null 2>&1 || true
           }
@@ -94,8 +95,24 @@ jobs:
           bin/brakeman --quiet --no-pager --path "${baseline_dir}/api" \
             --format json --output "${baseline_report}" \
             --no-exit-on-warn --no-exit-on-error
-          bin/brakeman --quiet --no-pager --compare "${baseline_report}" \
-            --exit-on-warn --exit-on-error
+          bin/brakeman --quiet --no-pager --format json \
+            --output "${current_report}" \
+            --no-exit-on-warn --no-exit-on-error
+          ruby -rjson -e '
+            baseline = JSON.parse(File.read(ARGV.fetch(0)))
+            current = JSON.parse(File.read(ARGV.fetch(1)))
+            errors = current.dig("scan_info", "errors") || []
+            baseline_fingerprints = (baseline["warnings"] || []).map { |warning| warning["fingerprint"] }
+            new_warnings = (current["warnings"] || []).reject do |warning|
+              baseline_fingerprints.include?(warning["fingerprint"])
+            end
+            errors.each { |error| warn "Brakeman scan error: #{error}" }
+            new_warnings.each do |warning|
+              warn "New Brakeman warning: #{warning["warning_type"]} in #{warning["file"]}:#{warning["line"]} — #{warning["message"]}"
+            end
+            exit 1 if errors.any? || new_warnings.any?
+            puts "Brakeman found no new warnings."
+          ' "${baseline_report}" "${current_report}"
 
   web:
     name: Web
