@@ -90,11 +90,9 @@ jobs:
           trap cleanup EXIT
 
           git worktree add --detach "${baseline_dir}" "${base_sha}"
-          (
-            cd "${baseline_dir}/api"
-            bundle exec brakeman --quiet --no-pager --format json \
-              --output "${baseline_report}" --no-exit-on-warn --exit-on-error
-          )
+          bin/brakeman --quiet --no-pager --path "${baseline_dir}/api" \
+            --format json --output "${baseline_report}" \
+            --no-exit-on-warn --exit-on-error
           bin/brakeman --quiet --no-pager --compare "${baseline_report}" \
             --exit-on-warn --exit-on-error
 
