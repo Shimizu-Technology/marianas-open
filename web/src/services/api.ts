@@ -890,6 +890,7 @@ export interface CommerceOrder {
   total_cents: number;
   shipping_carrier: string | null;
   shipping_service: string | null;
+  created_at: string;
   payment_expires_at: string;
   paid_at: string | null;
   checkout_url: string | null;
@@ -1099,6 +1100,11 @@ export const api = {
   }),
   getShopOrder: (token: string) =>
     fetchApi<{ order: CommerceOrder }>(`/api/v1/shop/orders/${encodeURIComponent(token)}`),
+  lookupShopOrder: (number: string, email: string) =>
+    fetchApi<{ order_token: string }>('/api/v1/shop/order-lookup', {
+      method: 'POST',
+      body: JSON.stringify({ order_lookup: { number, email } }),
+    }),
   completeTestPayment: (token: string) =>
     fetchApi<{ order: CommerceOrder }>(`/api/v1/shop/orders/${encodeURIComponent(token)}/test-payment`, { method: 'POST' }),
 

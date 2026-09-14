@@ -1,4 +1,4 @@
-import { ArrowRight, MapPin, PackageCheck, RotateCcw, ShoppingBag, Truck } from 'lucide-react'
+import { ArrowRight, MapPin, PackageCheck, PackageSearch, RotateCcw, ShoppingBag, Truck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import SEO from '../components/SEO'
 import ProductArtwork from '../components/shop/ProductArtwork'
@@ -21,6 +21,7 @@ export default function ShopPage() {
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-gold">Official Marianas Open gear</p>
           <h1 className="mt-4 max-w-3xl font-heading text-4xl font-bold leading-[0.98] sm:text-6xl lg:text-7xl">Built for the mat.<br /><span className="text-white/45">Made for the islands.</span></h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-text-secondary sm:text-lg">Tournament apparel and essentials from Guam’s international jiu-jitsu championship.</p>
+          <Link to="/shop/order-status" className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-3 text-sm font-semibold transition hover:border-gold/35 hover:text-gold-300"><PackageSearch className="h-4 w-4" /> Check an existing order</Link>
         </div>
       </section>
 

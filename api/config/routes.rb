@@ -24,6 +24,7 @@ Rails.application.routes.draw do
         get :fulfillment, to: "fulfillment#show"
         resources :shipping_quotes, only: :create, path: "shipping-quotes"
         resources :checkout_sessions, only: :create, path: "checkout-sessions"
+        resource :order_lookup, only: :create, path: "order-lookup"
         resources :orders, only: :show do
           post :test_payment, on: :member, path: "test-payment"
         end
