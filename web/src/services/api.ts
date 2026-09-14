@@ -201,7 +201,7 @@ export interface EventTravelItem {
   key?: string | null;
   kind?: 'info' | 'offer' | null;
   title: string;
-  description: string;
+  description?: string | null;
   value?: string | null;
   code?: string | null;
   url?: string | null;

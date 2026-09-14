@@ -1261,8 +1261,9 @@ export default function EventsAdmin() {
                     {form.travel_items.map((item, idx) => (
                       <div key={item.key || `travel-${idx}`} className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-white/10 bg-white/[0.015] p-4">
                         <div>
-                          <label className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Card Type</label>
+                          <label htmlFor={`travel-${idx}-kind`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Card Type</label>
                           <select
+                            id={`travel-${idx}-kind`}
                             value={item.kind || 'info'}
                             onChange={e => updateTravelItem(idx, 'kind', e.target.value)}
                             className="min-h-11 w-full bg-surface border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
@@ -1272,8 +1273,9 @@ export default function EventsAdmin() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Title</label>
+                          <label htmlFor={`travel-${idx}-title`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Title</label>
                           <input
+                            id={`travel-${idx}-title`}
                             value={item.title}
                             onChange={e => updateTravelItem(idx, 'title', e.target.value)}
                             placeholder="United Meetings Travel"
@@ -1281,10 +1283,11 @@ export default function EventsAdmin() {
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">
+                          <label htmlFor={`travel-${idx}-${item.kind === 'offer' ? 'code' : 'value'}`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">
                             {item.kind === 'offer' ? 'Offer Code' : 'Optional Value'}
                           </label>
                           <input
+                            id={`travel-${idx}-${item.kind === 'offer' ? 'code' : 'value'}`}
                             value={item.kind === 'offer' ? (item.code || '') : (item.value || '')}
                             onChange={e => updateTravelItem(idx, item.kind === 'offer' ? 'code' : 'value', e.target.value)}
                             placeholder={item.kind === 'offer' ? 'Enter the code exactly as provided' : 'Airport code or short detail'}
@@ -1292,9 +1295,10 @@ export default function EventsAdmin() {
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Description</label>
+                          <label htmlFor={`travel-${idx}-description`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Description</label>
                           <textarea
-                            value={item.description}
+                            id={`travel-${idx}-description`}
+                            value={item.description || ''}
                             onChange={e => updateTravelItem(idx, 'description', e.target.value)}
                             rows={2}
                             placeholder="Card description"
@@ -1302,8 +1306,9 @@ export default function EventsAdmin() {
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Destination URL</label>
+                          <label htmlFor={`travel-${idx}-url`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Destination URL</label>
                           <input
+                            id={`travel-${idx}-url`}
                             type="url"
                             value={item.url || ''}
                             onChange={e => updateTravelItem(idx, 'url', e.target.value)}
@@ -1312,8 +1317,9 @@ export default function EventsAdmin() {
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Link Label</label>
+                          <label htmlFor={`travel-${idx}-link-label`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Link Label</label>
                           <input
+                            id={`travel-${idx}-link-label`}
                             value={item.link_label || ''}
                             onChange={e => updateTravelItem(idx, 'link_label', e.target.value)}
                             placeholder="Search flights"
