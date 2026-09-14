@@ -22,7 +22,7 @@
 | 2 | Product and inventory administration, public storefront, cart | Complete in PR #87 |
 | 3 | Delivery choice, address validation, EasyPost sandbox quotes | Complete in PR #88 |
 | 4 | Durable orders, reservations, Stripe Checkout Sessions, webhooks | Complete in PR #89 |
-| 5 | Customer order status, transactional notifications | Not started |
+| 5 | Customer order status, transactional notifications | Complete in PR #90 |
 | 6 | Deal Depot fulfillment, labels, tracking, pickup | Not started |
 | 7 | Refunds, reconciliation, reports, operational alerts | Not started |
 | 8 | Failure hardening, physical shipping pilot, production launch | Not started |
@@ -56,6 +56,16 @@
 - Stripe webhook processing verifies the raw request body with `STRIPE_WEBHOOK_SECRET`, records each Stripe event ID once, rejects amount or currency mismatches, and safely retries failed processing. Duplicate payment-complete events cannot consume stock twice.
 - Payment cancellation returns to the existing order with a link to resume its Checkout Session. Payment sessions expire after 45 minutes; the cleanup job waits an additional five minutes for a delayed webhook before releasing the reservation.
 - `STRIPE_API_KEY` enables real Stripe test/live Checkout; a least-privilege restricted key is preferred and each environment gets a separate key. The integration uses Stripe's current API version, client interface, dynamic payment methods, and a stable integration identifier. The explicit `STRIPE_FAKE_CHECKOUT=true` substitute works only in local Rails development so desktop and mobile browser QA can cover the redirect and payment-complete states without creating a real provider transaction.
+
+## Slice 5 implementation contract
+
+- Payment capture creates customer and configured operations notifications in the same database transaction as the paid order. Message bodies, recipients, and provider idempotency keys are snapshotted so retries cannot silently change an already-created confirmation.
+- A durable notification outbox records pending, delivering, sent, suppressed, and failed states. Background delivery retries transient failures without creating a second provider message, and a five-minute recurring dispatcher recovers committed notifications whose original delivery job was lost or abandoned.
+- Resend receives both accessible plain-text and responsive HTML versions. Customer confirmations include the order number, item summary, total, fulfillment expectations, support contact, and a signed status link; operations messages provide the corresponding fulfillment handoff.
+- Delivery mode is explicit: `disabled` records intentional suppression, `sandbox` can send only to approved `resend.dev` test inboxes, and `live` sends to the snapshotted recipient. Idempotency keys include the Rails environment to prevent test and production deliveries from colliding in one Resend account.
+- Staging hardcodes commerce email delivery to `disabled` in its runtime definition and does not receive a Resend key. It can exercise the full payment, outbox, and customer-status flow without contacting a real customer.
+- Customers can recover the signed order-status link by entering both the random order number and normalized checkout email. Failed lookups return one generic response so the endpoint does not reveal which detail matched.
+- The storefront and paid-order page expose clear status-recovery and next-step guidance for both pickup and shipping, with touch-friendly mobile layouts and equivalent desktop behavior.
 
 ## Live-launch gates
 

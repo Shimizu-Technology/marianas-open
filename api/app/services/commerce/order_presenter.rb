@@ -20,6 +20,7 @@ module Commerce
         total_cents: order.total_cents,
         shipping_carrier: order.shipping_carrier,
         shipping_service: order.shipping_service,
+        created_at: order.created_at,
         payment_expires_at: order.payment_expires_at,
         paid_at: order.paid_at,
         checkout_url: order.pending_payment? ? order.stripe_checkout_url : nil,

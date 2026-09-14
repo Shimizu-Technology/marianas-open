@@ -8,6 +8,7 @@ class Order < ApplicationRecord
   has_many :order_items, dependent: :restrict_with_error
   has_many :inventory_reservations, dependent: :restrict_with_error
   has_many :payment_events, dependent: :nullify
+  has_many :order_notifications, dependent: :restrict_with_error
 
   before_validation :assign_number, on: :create
   before_validation :normalize_contact

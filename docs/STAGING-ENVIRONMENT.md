@@ -49,7 +49,7 @@ Staging uses:
 - Clerk test credentials.
 - Stripe Sandbox credentials when commerce is added.
 - EasyPost test credentials when shipping is added.
-- No Resend key, so staging cannot send customer email.
+- No Resend key and `COMMERCE_EMAIL_DELIVERY_MODE=disabled` hardcoded in the Compose service, so staging records suppressed notification attempts but cannot send customer email even if a host variable is set accidentally.
 - A separate or disabled analytics project.
 
 Stripe and shipping webhooks must be configured for `https://mo-hooks.shimizu-technology.com/...` and must use staging-only signing secrets.

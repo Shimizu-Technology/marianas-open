@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_080000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -391,6 +391,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_080000) do
     t.check_constraint "line_total_cents = (unit_price_cents * quantity)", name: "order_items_total_matches_price"
     t.check_constraint "quantity > 0", name: "order_items_quantity_positive"
     t.check_constraint "unit_price_cents >= 0", name: "order_items_unit_price_nonnegative"
+  end
+
+  create_table "order_notifications", force: :cascade do |t|
+    t.integer "attempts", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.string "delivered_to"
+    t.string "delivery_mode"
+    t.text "html_body", null: false
+    t.string "idempotency_key", null: false
+    t.string "kind", null: false
+    t.text "last_error"
+    t.bigint "order_id", null: false
+    t.string "provider", default: "resend", null: false
+    t.string "provider_message_id"
+    t.string "recipient", null: false
+    t.datetime "sent_at"
+    t.string "status", default: "pending", null: false
+    t.string "subject", null: false
+    t.text "text_body", null: false
+    t.datetime "updated_at", null: false
+    t.index ["idempotency_key"], name: "index_order_notifications_on_idempotency_key", unique: true
+    t.index ["order_id", "kind", "recipient"], name: "index_order_notifications_on_order_id_and_kind_and_recipient", unique: true
+    t.index ["order_id"], name: "index_order_notifications_on_order_id"
+    t.index ["status", "created_at"], name: "index_order_notifications_on_status_and_created_at"
+    t.check_constraint "attempts >= 0", name: "order_notifications_attempts_nonnegative"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'delivering'::character varying, 'sent'::character varying, 'suppressed'::character varying, 'failed'::character varying]::text[])", name: "order_notifications_status_valid"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -873,6 +899,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_080000) do
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "product_variants"
   add_foreign_key "order_items", "products"
+  add_foreign_key "order_notifications", "orders"
   add_foreign_key "orders", "inventory_locations"
   add_foreign_key "orders", "organizations"
   add_foreign_key "orders", "shipping_quotes"

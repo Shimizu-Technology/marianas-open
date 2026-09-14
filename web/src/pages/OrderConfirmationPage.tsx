@@ -11,6 +11,11 @@ function addressLines(address: Record<string, string>) {
   return [address.street1, address.street2, locality, address.country].filter(Boolean)
 }
 
+function nextStep(order: CommerceOrder) {
+  if (order.fulfillment_method === 'pickup') return 'Deal Depot will prepare your items. Contact the Marianas Open team before heading over if you need timing details.'
+  return 'Deal Depot will pack your items. We’ll email tracking as soon as the shipping label is created.'
+}
+
 const statusContent = {
   pending_payment: { icon: Clock3, title: 'Confirming your payment', body: 'Stripe is finishing the payment confirmation. This page will update automatically.', tone: 'text-amber-300' },
   paid: { icon: CheckCircle2, title: 'Your order is confirmed', body: 'Payment is complete and your order is now with the Marianas Open team.', tone: 'text-emerald-400' },
@@ -78,6 +83,7 @@ export default function OrderConfirmationPage() {
           <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-gold">Order {order.number}</p>
           <h1 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">{content.title}</h1>
           <p className="mt-3 max-w-2xl leading-7 text-text-secondary">{content.body}</p>
+          {order.status === 'paid' && <div className="mt-6 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.055] p-5"><p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300">What happens next</p><p className="mt-2 text-sm leading-6 text-text-secondary">{nextStep(order)}</p><p className="mt-3 text-xs text-text-muted">Keep this status link for future updates. Confirmations are addressed to {order.customer_email}.</p></div>}
           {searchParams.get('payment') === 'cancelled' && order.status === 'pending_payment' && <div className="mt-5 rounded-xl border border-amber-300/25 bg-amber-300/[0.07] p-4 text-sm text-amber-100">Nothing was charged. Your items are still held, so you can safely resume this same checkout without creating another order.</div>}
           {error && <div role="alert" className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-100">{error}</div>}
 
@@ -89,11 +95,11 @@ export default function OrderConfirmationPage() {
           {order.status === 'pending_payment' && order.checkout_url && searchParams.get('payment') === 'cancelled' && <a href={order.checkout_url} className="ml-5 mt-6 inline-flex rounded-full bg-gold px-5 py-3 text-sm font-bold text-navy-900">Resume secure payment</a>}
 
           <div className="mt-8 grid gap-6 border-t border-white/10 pt-8 lg:grid-cols-[1.15fr_.85fr]">
-            <div><h2 className="font-heading text-xl font-semibold">Order details</h2><div className="mt-5 space-y-4">{order.items.map(item => <div key={item.sku} className="flex justify-between gap-4 text-sm"><div><p className="font-medium">{item.product_name}</p><p className="mt-1 text-xs text-text-muted">{item.variant_name} · Qty {item.quantity}</p></div><span>{money(item.line_total_cents, order.currency)}</span></div>)}</div><div className="mt-6 space-y-3 border-t border-white/10 pt-5 text-sm"><div className="flex justify-between text-text-secondary"><span>Subtotal</span><span>{money(order.subtotal_cents, order.currency)}</span></div><div className="flex justify-between text-text-secondary"><span>{order.fulfillment_method === 'pickup' ? 'Pickup' : 'Shipping'}</span><span>{order.shipping_cents ? money(order.shipping_cents, order.currency) : 'Free'}</span></div><div className="flex justify-between border-t border-white/10 pt-4 font-heading text-xl font-semibold"><span>Total</span><span>{money(order.total_cents, order.currency)}</span></div></div></div>
+            <div><h2 className="font-heading text-xl font-semibold">Order details</h2><div className="mt-5 space-y-4">{order.items.map(item => <div key={item.sku} className="flex justify-between gap-4 text-sm"><div><p className="font-medium">{item.product_name}</p><p className="mt-1 text-xs text-text-muted">{item.variant_name} · Qty {item.quantity}</p></div><span>{money(item.line_total_cents, order.currency)}</span></div>)}</div><div className="mt-6 space-y-3 border-t border-white/10 pt-5 text-sm"><div className="flex justify-between text-text-secondary"><span>Subtotal</span><span>{money(order.subtotal_cents, order.currency)}</span></div><div className="flex justify-between text-text-secondary"><span>{order.fulfillment_method === 'pickup' ? 'Pickup' : 'Shipping'}</span><span>{order.shipping_cents ? money(order.shipping_cents, order.currency) : 'Free'}</span></div>{order.tax_cents > 0 && <div className="flex justify-between text-text-secondary"><span>Tax</span><span>{money(order.tax_cents, order.currency)}</span></div>}<div className="flex justify-between border-t border-white/10 pt-4 font-heading text-xl font-semibold"><span>Total</span><span>{money(order.total_cents, order.currency)}</span></div></div></div>
             <div className="rounded-2xl bg-white/[0.035] p-5"><div className="flex items-center gap-3">{order.fulfillment_method === 'pickup' ? <MapPin className="h-5 w-5 text-gold" /> : <Truck className="h-5 w-5 text-gold" />}<h2 className="font-heading text-lg font-semibold">{order.fulfillment_method === 'pickup' ? 'Deal Depot pickup' : 'Delivery'}</h2></div>{pickup ? <div className="mt-4 text-sm leading-6 text-text-secondary"><strong className="text-white">{pickup.name}</strong>{addressLines(pickup.address).map(line => <div key={line}>{line}</div>)}{pickup.pickup_instructions && <p className="mt-3">{pickup.pickup_instructions}</p>}</div> : <div className="mt-4 text-sm leading-6 text-text-secondary">{order.shipping_carrier && <p className="font-medium text-white">{order.shipping_carrier} {order.shipping_service}</p>}{addressLines(order.shipping_address).map(line => <div key={line}>{line}</div>)}</div>}<div className="mt-5 flex items-start gap-2 border-t border-white/10 pt-4 text-xs leading-5 text-text-muted"><PackageCheck className="mt-0.5 h-4 w-4 shrink-0 text-gold" />Updates will be sent to {order.customer_email}.</div></div>
           </div>
         </section>
-        <div className="mt-6 text-center"><Link to="/shop" className="text-sm font-semibold text-gold hover:text-gold-300">Return to the shop</Link></div>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-center"><Link to="/shop" className="text-sm font-semibold text-gold hover:text-gold-300">Return to the shop</Link><Link to="/shop/order-status" className="text-sm font-semibold text-text-secondary hover:text-white">Find another order</Link></div>
       </div>
     </div>
   )

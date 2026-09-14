@@ -11,9 +11,13 @@ module Commerce
       end
 
       def call
-        Order.transaction do
+        notifications = []
+        result = Order.transaction do
           order.lock!
-          return order if order.paid?
+          if order.paid?
+            notifications = order.order_notifications.deliverable.to_a
+            next order
+          end
 
           reservations = order.inventory_reservations.where(status: "active").order(:product_variant_id).to_a
           raise "Order #{order.number} no longer has an active inventory reservation" if reservations.empty?
@@ -46,8 +50,11 @@ module Commerce
             payment_error: nil,
             stripe_payment_intent_id: payment_intent_id.presence || order.stripe_payment_intent_id
           )
+          notifications = Notifications::QueueOrderPaid.call(order:)
           order
         end
+        notifications.each { |notification| DeliverOrderNotificationJob.perform_later(notification.id) }
+        result
       end
 
       private

@@ -236,6 +236,10 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
     assert_equal 1, InventoryMovement.where(reason: "sold").count
     assert_equal 1, PaymentEvent.count
     assert_equal "processed", PaymentEvent.first.status
+    notification = OrderNotification.find_by!(order:, kind: "customer_order_confirmation")
+    assert_equal "customer@example.com", notification.recipient
+    assert_equal "pending", notification.status
+    assert_equal 1, enqueued_jobs.count { |job| job[:job] == DeliverOrderNotificationJob }
   end
 
   test "an expired payment releases reserved stock" do
