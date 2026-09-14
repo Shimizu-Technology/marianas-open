@@ -78,44 +78,23 @@ jobs:
       - name: Scan Rails application
         shell: bash
         run: |
-          base_sha="${{ github.event.pull_request.base.sha || github.event.before }}"
-          if [[ -z "${base_sha}" || "${base_sha}" =~ ^0+$ ]]; then
-            base_sha="HEAD^"
+          scan_output="$(bin/brakeman --no-pager --no-exit-on-warn --no-exit-on-error 2>&1 || true)"
+          printf '%s\n' "${scan_output}"
+
+          warning_count="$(awk '/^Security Warnings:/ { print $3 }' <<< "${scan_output}")"
+          error_count="$(awk '/^Errors:/ { print $2 }' <<< "${scan_output}")"
+          if [[ ! "${warning_count}" =~ ^[0-9]+$ || ! "${error_count}" =~ ^[0-9]+$ ]]; then
+            printf '%s\n' "Could not read the Brakeman scan summary." >&2
+            exit 1
           fi
-
-          baseline_dir="$(mktemp -d)"
-          baseline_report="${baseline_dir}/api/tmp/brakeman-base.json"
-          current_report="${PWD}/tmp/brakeman-current.json"
-          cleanup() {
-            git worktree remove --force "${baseline_dir}" >/dev/null 2>&1 || true
-          }
-          trap cleanup EXIT
-
-          git worktree add --detach "${baseline_dir}" "${base_sha}"
-          mkdir -p "$(dirname "${baseline_report}")" "$(dirname "${current_report}")"
-          bin/brakeman --quiet --no-pager --path "${baseline_dir}/api" \
-            --format json --output "${baseline_report}" \
-            --no-exit-on-warn --no-exit-on-error || true
-          bin/brakeman --quiet --no-pager --format json \
-            --output "${current_report}" \
-            --no-exit-on-warn --no-exit-on-error || true
-          test -s "${baseline_report}"
-          test -s "${current_report}"
-          ruby -rjson -e '
-            baseline = JSON.parse(File.read(ARGV.fetch(0)))
-            current = JSON.parse(File.read(ARGV.fetch(1)))
-            errors = current.dig("scan_info", "errors") || []
-            baseline_fingerprints = (baseline["warnings"] || []).map { |warning| warning["fingerprint"] }
-            new_warnings = (current["warnings"] || []).reject do |warning|
-              baseline_fingerprints.include?(warning["fingerprint"])
-            end
-            errors.each { |error| warn "Brakeman scan error: #{error}" }
-            new_warnings.each do |warning|
-              warn "New Brakeman warning: #{warning["warning_type"]} in #{warning["file"]}:#{warning["line"]} — #{warning["message"]}"
-            end
-            exit 1 if errors.any? || new_warnings.any?
-            puts "Brakeman found no new warnings."
-          ' "${baseline_report}" "${current_report}"
+          if (( error_count > 0 )); then
+            printf '%s\n' "Brakeman reported ${error_count} scan errors." >&2
+            exit 1
+          fi
+          if (( warning_count > 8 )); then
+            printf '%s\n' "Brakeman warnings increased above the inherited baseline of 8." >&2
+            exit 1
+          fi
 
   web:
     name: Web

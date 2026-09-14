@@ -38,6 +38,8 @@ No router ports are opened. Docker binds only to loopback, and Tailscale Serve f
 
 Keep only one active release train in `staging`. If unfinished work must coexist with a release candidate, place it behind a feature flag or wait to merge it.
 
+The Rails security scan currently records eight inherited Brakeman warnings. CI fails if that count increases or if the scanner itself errors. Those findings remain visible in every run and should be removed in a dedicated security pass; once fixed, lower the explicit baseline in the workflow.
+
 ## Environment boundaries
 
 Staging uses:
