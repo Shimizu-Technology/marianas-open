@@ -39,12 +39,16 @@ export default function ShopPage() {
             <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {products.map(product => {
                 const available = product.variants.filter(variant => variant.available_quantity > 0)
-                const prices = available.map(variant => variant.price_cents)
-                const from = prices.length ? Math.min(...prices) : product.variants[0]?.price_cents
+                const priceVariants = available.length ? available : product.variants
+                const minimumByCurrency = priceVariants.reduce((prices, variant) => {
+                  prices.set(variant.currency, Math.min(prices.get(variant.currency) ?? Number.POSITIVE_INFINITY, variant.price_cents))
+                  return prices
+                }, new Map<string, number>())
+                const priceLabel = [...minimumByCurrency].map(([currency, cents]) => money(cents, currency)).join(' · ')
                 return (
                   <Link key={product.id} to={`/shop/${product.slug}`} className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-4 focus-visible:ring-offset-navy-900">
                     <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 bg-surface transition duration-300 group-hover:-translate-y-1 group-hover:border-gold/30"><ProductArtwork product={product} className="transition duration-500 group-hover:scale-[1.025]" />{product.featured && <span className="absolute left-4 top-4 rounded-full bg-gold px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-navy-900">Featured</span>}{available.length === 0 && <span className="absolute inset-x-4 bottom-4 rounded-xl bg-black/75 px-3 py-2 text-center text-xs font-semibold backdrop-blur">Currently sold out</span>}</div>
-                    <div className="mt-4 flex items-start justify-between gap-4"><div><h3 className="font-heading text-lg font-semibold group-hover:text-gold-300">{product.name}</h3><p className="mt-1 text-sm text-text-muted">{product.options.map(option => option.values.map(value => value.value).join(', ')).filter(Boolean).join(' · ') || 'One size'}</p></div>{from !== undefined && <span className="shrink-0 font-heading font-semibold">{prices.length > 1 ? 'From ' : ''}{money(from)}</span>}</div>
+                    <div className="mt-4 flex items-start justify-between gap-4"><div><h3 className="font-heading text-lg font-semibold group-hover:text-gold-300">{product.name}</h3><p className="mt-1 text-sm text-text-muted">{product.options.map(option => option.values.map(value => value.value).join(', ')).filter(Boolean).join(' · ') || 'One size'}</p></div>{priceLabel && <span className="shrink-0 text-right font-heading font-semibold">{priceVariants.length > 1 ? 'From ' : ''}{priceLabel}</span>}</div>
                   </Link>
                 )
               })}
@@ -55,7 +59,7 @@ export default function ShopPage() {
 
       <section className="border-t border-white/10 bg-surface/60">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-12 sm:grid-cols-3 sm:px-6">
-          {[{ icon: Truck, title: 'Worldwide delivery', text: 'At checkout, we’ll calculate delivery for your destination.' }, { icon: MapPin, title: 'Pickup on Guam', text: 'Choose convenient pickup at Deal Depot when available.' }, { icon: RotateCcw, title: 'Straightforward support', text: 'Order updates and help from the Marianas Open team.' }].map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-4"><Icon className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h3 className="font-heading font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-text-muted">{text}</p></div></div>)}
+          {[{ icon: Truck, title: 'Worldwide delivery', text: 'Live delivery rates are being connected and tested for launch.' }, { icon: MapPin, title: 'Pickup on Guam', text: 'Choose convenient pickup at Deal Depot when available.' }, { icon: RotateCcw, title: 'Straightforward support', text: 'Order updates and help from the Marianas Open team.' }].map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-4"><Icon className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h3 className="font-heading font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-text-muted">{text}</p></div></div>)}
         </div>
       </section>
       <Link to="/" className="sr-only">Return home <ArrowRight /></Link>

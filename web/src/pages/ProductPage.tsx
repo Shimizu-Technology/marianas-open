@@ -36,11 +36,26 @@ export default function ProductPage() {
   const unavailable = !selectedVariant || selectedVariant.available_quantity < 1
   const price = selectedVariant?.price_cents ?? firstVariant?.price_cents ?? 0
 
-  const valueAvailable = (optionId: number, valueId: number) => product.variants.some(variant => {
-    if (variant.available_quantity < 1) return false
-    const ids = new Set(variant.option_value_ids || [])
-    return ids.has(valueId) && product.options.every(option => option.id === optionId || !selected[option.id!] || ids.has(selected[option.id!]))
-  })
+  const variantsForValue = (valueId: number) => product.variants.filter(variant => (
+    variant.available_quantity > 0 && (variant.option_value_ids || []).includes(valueId)
+  ))
+
+  const selectValue = (optionId: number, valueId: number) => {
+    const candidates = variantsForValue(valueId)
+    const best = candidates.sort((left, right) => {
+      const score = (variant: typeof left) => product.options.reduce((total, option) => (
+        option.id === optionId || !option.id || !selected[option.id] || (variant.option_value_ids || []).includes(selected[option.id]) ? total : total - 1
+      ), 0)
+      return score(right) - score(left)
+    })[0]
+    if (!best) return
+    const ids = new Set(best.option_value_ids || [])
+    setSelected(Object.fromEntries(product.options.flatMap(option => {
+      const value = option.values.find(candidate => candidate.id && ids.has(candidate.id))
+      return option.id && value?.id ? [[option.id, value.id]] : []
+    })))
+    setQuantity(1)
+  }
 
   return (
     <div className="min-h-screen pt-16">
@@ -61,8 +76,8 @@ export default function ProductPage() {
                   <legend className="mb-3 text-sm font-semibold">{option.name}</legend>
                   <div className="flex flex-wrap gap-2.5">{option.values.map(value => {
                     const chosen = option.id && value.id && selected[option.id] === value.id
-                    const available = option.id && value.id ? valueAvailable(option.id, value.id) : false
-                    return <button key={value.id} type="button" disabled={!available} onClick={() => option.id && value.id && setSelected(current => ({ ...current, [option.id!]: value.id! }))} className={`min-w-14 rounded-xl border px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${chosen ? 'border-gold bg-gold/10 text-gold' : available ? 'border-white/15 text-text-secondary hover:border-white/35 hover:text-white' : 'border-white/5 text-white/20 line-through'}`}>{value.value}</button>
+                    const available = value.id ? variantsForValue(value.id).length > 0 : false
+                    return <button key={value.id} type="button" disabled={!available} onClick={() => option.id && value.id && selectValue(option.id, value.id)} className={`min-w-14 rounded-xl border px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${chosen ? 'border-gold bg-gold/10 text-gold' : available ? 'border-white/15 text-text-secondary hover:border-white/35 hover:text-white' : 'border-white/5 text-white/20 line-through'}`}>{value.value}</button>
                   })}</div>
                 </fieldset>
               ))}
@@ -75,9 +90,9 @@ export default function ProductPage() {
             {selectedVariant && selectedVariant.available_quantity > 0 && selectedVariant.available_quantity <= 5 && <p className="mt-3 text-center text-xs font-semibold text-amber-300">Only {selectedVariant.available_quantity} left</p>}
 
             <div className="mt-9 divide-y divide-white/10 border-y border-white/10">{[
-              product.shippable && { icon: Truck, title: 'Shipping available', text: 'Your delivery cost will be calculated for your address at checkout.' },
-              product.pickup_enabled && { icon: MapPin, title: 'Deal Depot pickup', text: 'Pick up on Guam when your order is ready.' },
-              { icon: ShieldCheck, title: 'Secure checkout', text: 'Payment will be processed securely by Stripe.' },
+              product.shippable && { icon: Truck, title: 'Shipping at launch', text: 'Live delivery rates are being connected before checkout opens.' },
+              product.pickup_enabled && { icon: MapPin, title: 'Deal Depot pickup at launch', text: 'Pickup details are being finalized before checkout opens.' },
+              { icon: ShieldCheck, title: 'Secure checkout coming soon', text: 'Stripe payment will open after delivery testing is complete.' },
             ].filter(Boolean).map(item => item && <div key={item.title} className="flex gap-4 py-4"><item.icon className="mt-0.5 h-5 w-5 shrink-0 text-gold" /><div><h3 className="text-sm font-semibold">{item.title}</h3><p className="mt-1 text-xs leading-5 text-text-muted">{item.text}</p></div><Check className="ml-auto h-4 w-4 text-white/20" /></div>)}</div>
           </section>
         </div>

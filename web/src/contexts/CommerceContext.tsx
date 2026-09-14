@@ -64,6 +64,13 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
       }
       const catalog = await api.getShopProducts()
       setProducts(catalog.products)
+      const catalogById = new Map(catalog.products.map(product => [product.id, product]))
+      setCart(current => current.flatMap(line => {
+        const product = catalogById.get(line.productId)
+        const variant = product?.variants.find(candidate => candidate.id === line.variantId)
+        if (!variant || variant.available_quantity < 1) return []
+        return [{ ...line, quantity: Math.min(line.quantity, variant.available_quantity) }]
+      }))
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'The shop could not be loaded.')
     } finally {

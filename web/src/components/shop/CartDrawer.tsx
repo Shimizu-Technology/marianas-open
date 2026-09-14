@@ -9,7 +9,10 @@ const money = (cents: number, currency = 'USD') => new Intl.NumberFormat('en-US'
 
 export default function CartDrawer() {
   const { cartOpen, setCartOpen, cartLines, updateQuantity, removeFromCart } = useCommerce()
-  const subtotal = cartLines.reduce((sum, line) => sum + line.variant.price_cents * line.quantity, 0)
+  const subtotals = cartLines.reduce((totals, line) => {
+    totals.set(line.variant.currency, (totals.get(line.variant.currency) || 0) + line.variant.price_cents * line.quantity)
+    return totals
+  }, new Map<string, number>())
 
   useEffect(() => {
     if (!cartOpen) return
@@ -74,7 +77,7 @@ export default function CartDrawer() {
 
         {cartLines.length > 0 && (
           <div className="border-t border-white/10 bg-white/[0.025] px-5 py-5 sm:px-7">
-            <div className="flex items-center justify-between"><span className="text-sm text-text-secondary">Subtotal</span><strong className="font-heading text-xl">{money(subtotal)}</strong></div>
+            <div className="flex items-start justify-between gap-4"><span className="text-sm text-text-secondary">Subtotal</span><div className="text-right">{[...subtotals].map(([currency, cents]) => <strong key={currency} className="block font-heading text-xl">{money(cents, currency)}</strong>)}</div></div>
             <p className="mt-2 flex items-center gap-2 text-xs leading-5 text-text-muted"><Truck className="h-4 w-4 shrink-0" /> Shipping or Deal Depot pickup will be calculated at checkout.</p>
             <button disabled className="mt-5 w-full rounded-full bg-white/10 px-5 py-3.5 text-sm font-bold text-white/45">Secure checkout coming next</button>
           </div>
