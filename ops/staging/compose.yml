@@ -1,0 +1,128 @@
+name: marianas-open-staging
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+x-api-environment: &api-environment
+  RAILS_ENV: production
+  RAILS_LOG_TO_STDOUT: "true"
+  RAILS_LOG_LEVEL: ${RAILS_LOG_LEVEL:-info}
+  RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-3}
+  HOME: /rails/tmp
+  BUNDLE_USER_HOME: /rails/tmp/bundle
+  DATABASE_URL: postgresql://marianas_open:${POSTGRES_PASSWORD}@db:5432/marianas_open_staging
+  SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+  FORCE_SSL: "false"
+  ASSUME_SSL: "false"
+  ALLOWED_HOSTS: mo.shimizu-technology.com,mo-hooks.shimizu-technology.com,api,127.0.0.1,localhost
+  ALLOWED_ORIGINS: https://mo.shimizu-technology.com
+  PUBLIC_FRONTEND_URL: https://mo.shimizu-technology.com
+  ACTIVE_STORAGE_SERVICE: local
+  CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+  CLERK_JWKS_URL: ${CLERK_JWKS_URL:-}
+  CLERK_ISSUER: ${CLERK_ISSUER:-}
+  JOB_THREADS: "1"
+  JOB_CONCURRENCY: "1"
+  SOLID_QUEUE_DISPATCHER_POLLING_INTERVAL: "5"
+  SOLID_QUEUE_WORKER_POLLING_INTERVAL: "2"
+
+x-api-service: &api-service
+  image: ghcr.io/shimizu-technology/marianas-open-api:${IMAGE_TAG}
+  pull_policy: ${PULL_POLICY:-always}
+  restart: unless-stopped
+  environment: *api-environment
+  depends_on:
+    db:
+      condition: service_healthy
+  volumes:
+    - active_storage:/rails/storage
+  networks:
+    - backend
+  read_only: true
+  tmpfs:
+    - /rails/log:uid=1000,gid=1000,mode=0755
+    - /rails/tmp:uid=1000,gid=1000,mode=0755
+  security_opt:
+    - no-new-privileges:true
+  mem_limit: 768m
+  cpus: 1.5
+  pids_limit: 200
+  logging: *default-logging
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: marianas_open_staging
+      POSTGRES_USER: marianas_open
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marianas_open -d marianas_open_staging"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 150
+    logging: *default-logging
+
+  api:
+    <<: *api-service
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  worker:
+    <<: *api-service
+    command: ["bundle", "exec", "bin/jobs"]
+
+  web:
+    image: ghcr.io/shimizu-technology/marianas-open-web:${IMAGE_TAG}
+    pull_policy: ${PULL_POLICY:-always}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${STAGING_BIND_ADDRESS:-127.0.0.1}:${STAGING_PORT:-8788}:8080"
+    networks:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    read_only: true
+    tmpfs:
+      - /config:size=4m,uid=1000,gid=1000,mode=0750
+      - /data:size=16m,uid=1000,gid=1000,mode=0750
+      - /tmp:size=16m,uid=1000,gid=1000,mode=0750
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 100
+    logging: *default-logging
+
+volumes:
+  postgres_data:
+  active_storage:
+
+networks:
+  frontend:
+  backend:
+    internal: true

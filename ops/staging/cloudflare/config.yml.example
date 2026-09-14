@@ -1,0 +1,13 @@
+tunnel: REPLACE_WITH_TUNNEL_UUID
+credentials-file: /Users/jerry/.cloudflared/REPLACE_WITH_TUNNEL_UUID.json
+
+ingress:
+  - hostname: mo.shimizu-technology.com
+    service: http://100.94.119.59:8788
+    originRequest:
+      connectTimeout: 10s
+  - hostname: mo-hooks.shimizu-technology.com
+    service: http://100.94.119.59:8788
+    originRequest:
+      connectTimeout: 10s
+  - service: http_status:404

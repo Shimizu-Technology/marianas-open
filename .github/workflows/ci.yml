@@ -1,0 +1,165 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - staging
+  push:
+    branches:
+      - main
+      - staging
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: marianas_open_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d marianas_open_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: api
+    env:
+      CI: "true"
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/marianas_open_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3.7"
+          bundler-cache: true
+          working-directory: api
+      - name: Prepare test database
+        run: bin/rails db:prepare
+      - name: Run tests
+        run: bin/rails test
+      - name: Check Ruby style
+        shell: bash
+        run: |
+          base_sha="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [[ -z "${base_sha}" || "${base_sha}" =~ ^0+$ ]]; then
+            base_sha="HEAD^"
+          fi
+          mapfile -t ruby_files < <(
+            git diff --diff-filter=ACMR --name-only "${base_sha}" HEAD -- '*.rb' '*.rake' Gemfile |
+              sed 's#^api/##'
+          )
+          if (( ${#ruby_files[@]} > 0 )); then
+            bin/rubocop "${ruby_files[@]}"
+          else
+            echo "No changed Ruby files to lint."
+          fi
+      - name: Audit Ruby dependencies
+        run: bin/bundler-audit check --update
+      - name: Scan Rails application
+        run: >-
+          bin/brakeman --quiet --no-pager
+          --ignore-config config/brakeman.ignore
+          --ensure-ignore-notes
+          --ensure-no-obsolete-ignore-entries
+          --exit-on-warn
+          --exit-on-error
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.3
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Check TypeScript and lint
+        run: npm run lint
+      - name: Build production frontend
+        run: npm run build:no-translate
+
+  staging-configuration:
+    name: Staging configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose configuration
+        env:
+          IMAGE_TAG: validation
+          POSTGRES_PASSWORD: validation-only
+          SECRET_KEY_BASE: validation-only
+          CLERK_SECRET_KEY: sk_test_validation
+        run: docker compose -f ops/staging/compose.yml config --quiet
+      - name: Check deployment scripts
+        run: bash -n ops/staging/*.sh
+      - name: Build staging API image
+        run: docker build --file api/Dockerfile --tag marianas-open-api:ci api
+      - name: Build staging web image
+        run: docker build --file web/Dockerfile --tag marianas-open-web:ci web
+
+  publish-staging-images:
+    name: Publish staging images
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    needs:
+      - api
+      - web
+      - staging-configuration
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - image: marianas-open-api
+            context: api
+            file: api/Dockerfile
+          - image: marianas-open-web
+            context: web
+            file: web/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: true
+          platforms: linux/arm64
+          tags: |
+            ghcr.io/shimizu-technology/${{ matrix.image }}:${{ github.sha }}
+            ghcr.io/shimizu-technology/${{ matrix.image }}:staging
+          build-args: |
+            VITE_API_URL=
+            VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.STAGING_CLERK_PUBLISHABLE_KEY }}

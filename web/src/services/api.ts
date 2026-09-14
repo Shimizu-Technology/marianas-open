@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// Development defaults to the local Rails server. A production build with no
+// explicit URL uses the current origin so containerized staging can proxy /api.
+const DEFAULT_API_URL = import.meta.env.DEV ? 'http://localhost:3000' : '';
+const API_URL = (import.meta.env.VITE_API_URL ?? DEFAULT_API_URL).replace(/\/$/, '');
 
 export type TranslationsBlob = Record<string, Record<string, unknown>>;
 export type TranslationStatus = 'untranslated' | 'pending' | 'translated' | 'failed';

@@ -1,0 +1,38 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "352d624ac6cf312138a4474d475355895f6b4e7548dd0456d86253728e57daab",
+      "note": "Existing finding recorded when the staging CI baseline was introduced; remediate in a dedicated security change."
+    },
+    {
+      "fingerprint": "37d2dbd13a8b7da8e01a6bd98cb2ee288d63e8484fc9c30a9cbc777eead3f307",
+      "note": "Existing finding recorded when the staging CI baseline was introduced; remediate in a dedicated security change."
+    },
+    {
+      "fingerprint": "39fbaecde1e82d78b5d7ab6488ab987f5070e73ea9c5a87b1f84a2818db8f226",
+      "note": "Existing finding recorded when the staging CI baseline was introduced; remediate in a dedicated security change."
+    },
+    {
+      "fingerprint": "4c5d2f9e8be8ad7584370c79e9555f919b3c6aeb459a6c6457c2e11635260a71",
+      "note": "Existing finding recorded when the staging CI baseline was introduced; remediate in a dedicated security change."
+    },
+    {
+      "fingerprint": "673164ecfdf261c1df61f8e35ef309e61956bdb080f62dc5b7d386fdc73b997b",
+      "note": "Existing finding recorded when the staging CI baseline was introduced; remediate in a dedicated security change."
+    },
+    {
+      "fingerprint": "6f9993a3eb3b582b763c502253afd306ab0cd0aecc599a73ac4b0395d567c976",
+      "note": "Existing finding recorded when the staging CI baseline was introduced; remediate in a dedicated security change."
+    },
+    {
+      "fingerprint": "9feda520ab94446f4e611e7d5c3fe5815465c9cb78a69bb3a6280b680f5803ce",
+      "note": "Existing finding recorded when the staging CI baseline was introduced; remediate in a dedicated security change."
+    },
+    {
+      "fingerprint": "c19bea1ef9e79def8a50309356c249d5139af178681edb11767517c6346f0d87",
+      "note": "Existing finding recorded when the staging CI baseline was introduced; remediate in a dedicated security change."
+    }
+  ],
+  "updated": "2026-09-14T10:40:00Z",
+  "brakeman_version": "8.0.2"
+}

@@ -5,3 +5,6 @@ assets/
 # Reference projects (not part of this repo)
 campaign-tracker/
 .DS_Store
+/ops/staging/runtime.env
+/backups/
+/.staging-state/
