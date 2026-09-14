@@ -2,6 +2,7 @@ class ShippingQuote < ApplicationRecord
   belongs_to :organization
   belongs_to :inventory_location
   belongs_to :shipping_package
+  has_one :order, dependent: :restrict_with_error
 
   validates :cart_digest, :destination_digest, :provider, :provider_shipment_id,
     :provider_rate_id, :carrier, :service, :currency, :expires_at, presence: true

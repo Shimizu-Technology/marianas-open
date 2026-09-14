@@ -9,9 +9,11 @@ module Commerce
 
       attr_reader :lines, :currency
 
-      def initialize(organization:, raw_lines:)
+      def initialize(organization:, raw_lines:, fulfillment_method: "shipping", inventory_location: nil)
         @organization = organization
         @raw_lines = Array(raw_lines)
+        @fulfillment_method = fulfillment_method.to_s
+        @inventory_location = inventory_location
         @lines = build_lines
         @currency = currencies.one? ? currencies.first : nil
         validate!
@@ -70,12 +72,30 @@ module Commerce
         quantities.map do |variant_id, quantity|
           variant = variants[variant_id]
           raise Error, "An item in your bag is no longer available." unless variant
-          raise Error, "#{variant.product.name} cannot be shipped." unless variant.allow_shipping?
-          raise Error, "Only #{variant.available_quantity} of #{variant.product.name} is available." if quantity > variant.available_quantity
-          raise Error, "#{variant.product.name} needs a shipping weight before it can be delivered." unless variant.weight_grams&.positive?
+          validate_fulfillment!(variant)
+          available = available_quantity(variant)
+          raise Error, "Only #{available} of #{variant.product.name} is available at this location." if quantity > available
 
           Line.new(variant:, quantity:)
         end
+      end
+
+      def validate_fulfillment!(variant)
+        case @fulfillment_method
+        when "shipping"
+          raise Error, "#{variant.product.name} cannot be shipped." unless variant.allow_shipping?
+          raise Error, "#{variant.product.name} needs a shipping weight before it can be delivered." unless variant.weight_grams&.positive?
+        when "pickup"
+          raise Error, "#{variant.product.name} is not available for pickup." unless variant.allow_pickup?
+        else
+          raise Error, "Choose delivery or Deal Depot pickup."
+        end
+      end
+
+      def available_quantity(variant)
+        return variant.available_quantity unless @inventory_location
+
+        variant.inventory_levels.find { |level| level.inventory_location_id == @inventory_location.id }&.available.to_i
       end
 
       def currencies

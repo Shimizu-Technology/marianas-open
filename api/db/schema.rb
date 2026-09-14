@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_070000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_080000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -351,6 +351,89 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_070000) do
     t.check_constraint "quantity_delta <> 0", name: "inventory_movements_delta_nonzero"
   end
 
+  create_table "inventory_reservations", force: :cascade do |t|
+    t.datetime "consumed_at"
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.bigint "inventory_location_id", null: false
+    t.bigint "order_id", null: false
+    t.bigint "product_variant_id", null: false
+    t.integer "quantity", null: false
+    t.datetime "released_at"
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inventory_location_id"], name: "index_inventory_reservations_on_inventory_location_id"
+    t.index ["order_id", "product_variant_id"], name: "idx_on_order_id_product_variant_id_fdd872b0d3", unique: true
+    t.index ["order_id"], name: "index_inventory_reservations_on_order_id"
+    t.index ["product_variant_id"], name: "index_inventory_reservations_on_product_variant_id"
+    t.index ["status", "expires_at"], name: "index_inventory_reservations_on_status_and_expires_at"
+    t.check_constraint "quantity > 0", name: "inventory_reservations_quantity_positive"
+  end
+
+  create_table "order_items", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "currency", limit: 3, null: false
+    t.integer "line_total_cents", null: false
+    t.jsonb "options_snapshot", default: [], null: false
+    t.bigint "order_id", null: false
+    t.bigint "product_id", null: false
+    t.string "product_name", null: false
+    t.bigint "product_variant_id", null: false
+    t.integer "quantity", null: false
+    t.string "sku", null: false
+    t.integer "unit_price_cents", null: false
+    t.datetime "updated_at", null: false
+    t.string "variant_name", null: false
+    t.index ["order_id", "product_variant_id"], name: "index_order_items_on_order_id_and_product_variant_id", unique: true
+    t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index ["product_id"], name: "index_order_items_on_product_id"
+    t.index ["product_variant_id"], name: "index_order_items_on_product_variant_id"
+    t.check_constraint "line_total_cents = (unit_price_cents * quantity)", name: "order_items_total_matches_price"
+    t.check_constraint "quantity > 0", name: "order_items_quantity_positive"
+    t.check_constraint "unit_price_cents >= 0", name: "order_items_unit_price_nonnegative"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.datetime "cancelled_at"
+    t.string "checkout_key", null: false
+    t.datetime "created_at", null: false
+    t.string "currency", limit: 3, null: false
+    t.string "customer_email", null: false
+    t.string "customer_name", null: false
+    t.string "customer_phone"
+    t.string "fulfillment_method", null: false
+    t.bigint "inventory_location_id", null: false
+    t.string "number", null: false
+    t.bigint "organization_id", null: false
+    t.datetime "paid_at"
+    t.text "payment_error"
+    t.datetime "payment_expires_at", null: false
+    t.jsonb "shipping_address", default: {}, null: false
+    t.string "shipping_carrier"
+    t.integer "shipping_cents", default: 0, null: false
+    t.bigint "shipping_quote_id"
+    t.string "shipping_service"
+    t.string "status", default: "pending_payment", null: false
+    t.string "stripe_checkout_session_id"
+    t.text "stripe_checkout_url"
+    t.string "stripe_payment_intent_id"
+    t.integer "subtotal_cents", null: false
+    t.integer "tax_cents", default: 0, null: false
+    t.integer "total_cents", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checkout_key"], name: "index_orders_on_checkout_key", unique: true
+    t.index ["inventory_location_id"], name: "index_orders_on_inventory_location_id"
+    t.index ["organization_id", "number"], name: "index_orders_on_organization_id_and_number", unique: true
+    t.index ["organization_id", "status", "created_at"], name: "index_orders_on_organization_id_and_status_and_created_at"
+    t.index ["organization_id"], name: "index_orders_on_organization_id"
+    t.index ["shipping_quote_id"], name: "index_orders_on_shipping_quote_id"
+    t.index ["stripe_checkout_session_id"], name: "index_orders_on_stripe_checkout_session_id", unique: true, where: "(stripe_checkout_session_id IS NOT NULL)"
+    t.check_constraint "shipping_cents >= 0", name: "orders_shipping_nonnegative"
+    t.check_constraint "subtotal_cents >= 0", name: "orders_subtotal_nonnegative"
+    t.check_constraint "tax_cents >= 0", name: "orders_tax_nonnegative"
+    t.check_constraint "total_cents = (subtotal_cents + shipping_cents + tax_cents)", name: "orders_total_matches_parts"
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "contact_email"
     t.datetime "created_at", null: false
@@ -365,6 +448,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_070000) do
     t.string "slug"
     t.datetime "updated_at", null: false
     t.string "website_url"
+  end
+
+  create_table "payment_events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.bigint "order_id"
+    t.datetime "processed_at"
+    t.text "processing_error"
+    t.string "provider", default: "stripe", null: false
+    t.string "provider_event_id", null: false
+    t.string "status", default: "received", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_payment_events_on_order_id"
+    t.index ["provider", "provider_event_id"], name: "index_payment_events_on_provider_and_provider_event_id", unique: true
+    t.index ["status", "created_at"], name: "index_payment_events_on_status_and_created_at"
   end
 
   create_table "prize_categories", force: :cascade do |t|
@@ -769,6 +867,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_070000) do
   add_foreign_key "inventory_movements", "inventory_locations"
   add_foreign_key "inventory_movements", "product_variants"
   add_foreign_key "inventory_movements", "users", column: "performed_by_id"
+  add_foreign_key "inventory_reservations", "inventory_locations"
+  add_foreign_key "inventory_reservations", "orders"
+  add_foreign_key "inventory_reservations", "product_variants"
+  add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "product_variants"
+  add_foreign_key "order_items", "products"
+  add_foreign_key "orders", "inventory_locations"
+  add_foreign_key "orders", "organizations"
+  add_foreign_key "orders", "shipping_quotes"
+  add_foreign_key "payment_events", "orders"
   add_foreign_key "prize_categories", "events"
   add_foreign_key "product_collection_memberships", "product_collections"
   add_foreign_key "product_collection_memberships", "products"

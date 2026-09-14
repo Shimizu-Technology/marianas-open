@@ -863,6 +863,47 @@ export interface ShippingQuoteResponse {
   rates: ShippingRateQuote[];
 }
 
+export interface CheckoutSessionResponse {
+  order_number: string;
+  order_token: string;
+  checkout_url: string;
+  expires_at: string;
+}
+
+export interface CommerceOrder {
+  number: string;
+  status: 'pending_payment' | 'paid' | 'payment_failed' | 'expired' | 'cancelled';
+  fulfillment_method: 'shipping' | 'pickup';
+  customer_name: string;
+  customer_email: string;
+  shipping_address: Record<string, string>;
+  pickup_location: null | {
+    name: string;
+    pickup_instructions: string;
+    phone: string | null;
+    address: Record<string, string>;
+  };
+  currency: string;
+  subtotal_cents: number;
+  shipping_cents: number;
+  tax_cents: number;
+  total_cents: number;
+  shipping_carrier: string | null;
+  shipping_service: string | null;
+  payment_expires_at: string;
+  paid_at: string | null;
+  checkout_url: string | null;
+  items: Array<{
+    product_name: string;
+    variant_name: string;
+    sku: string;
+    options_snapshot: Array<{ name: string; value: string }>;
+    unit_price_cents: number;
+    quantity: number;
+    line_total_cents: number;
+  }>;
+}
+
 async function authHeaders(requireAuth: boolean, skipCache = false) {
   const headers: Record<string, string> = {};
 
@@ -1044,6 +1085,22 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ shipping_quote: data }),
     }),
+  createCheckoutSession: (data: {
+    checkout_key: string;
+    fulfillment_method: 'shipping' | 'pickup';
+    cart: Array<{ variant_id: number; quantity: number }>;
+    shipping_quote_token?: string;
+    shipping_address?: ShippingAddress;
+    pickup_location_id?: number;
+    contact?: { name: string; email: string; phone?: string };
+  }) => fetchApi<CheckoutSessionResponse>('/api/v1/shop/checkout-sessions', {
+    method: 'POST',
+    body: JSON.stringify({ checkout: data }),
+  }),
+  getShopOrder: (token: string) =>
+    fetchApi<{ order: CommerceOrder }>(`/api/v1/shop/orders/${encodeURIComponent(token)}`),
+  completeTestPayment: (token: string) =>
+    fetchApi<{ order: CommerceOrder }>(`/api/v1/shop/orders/${encodeURIComponent(token)}/test-payment`, { method: 'POST' }),
 
   // Auth
   getCurrentUser: () => {

@@ -5,6 +5,8 @@ class ProductVariant < ApplicationRecord
   has_many :product_images, dependent: :nullify
   has_many :inventory_levels, dependent: :restrict_with_error
   has_many :inventory_movements, dependent: :restrict_with_error
+  has_many :order_items, dependent: :restrict_with_error
+  has_many :inventory_reservations, dependent: :restrict_with_error
 
   before_validation :normalize_identifiers
 

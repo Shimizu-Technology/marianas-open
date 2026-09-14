@@ -3,17 +3,21 @@ module Commerce
     class CreateQuotes
       QUOTE_LIFETIME = 15.minutes
       TERRITORY_CODES = %w[AS FM GU MH MP PW PR VI].freeze
-      ADDRESS_KEYS = %i[name company street1 street2 city state zip country phone email].freeze
-
       def initialize(organization:, raw_lines:, raw_address:, gateway: Shipping.gateway)
         @organization = organization
-        @cart = Cart.new(organization:, raw_lines:)
-        @address = normalized_address(raw_address)
+        @raw_lines = raw_lines
+        @address = Address.normalize(raw_address)
         @gateway = gateway
       end
 
       def call
         location = shipping_location!
+        @cart = Cart.new(
+          organization: @organization,
+          raw_lines: @raw_lines,
+          fulfillment_method: "shipping",
+          inventory_location: location
+        )
         package = shipping_package!
         ensure_customs_ready!(location)
         response = @gateway.quote(
@@ -48,18 +52,8 @@ module Commerce
           raise(Error, "This order is too heavy for the available shipping packages. Please contact support.")
       end
 
-      def normalized_address(raw)
-        address = raw.to_h.symbolize_keys.slice(*ADDRESS_KEYS).transform_values { |value| value.to_s.strip.presence }.compact
-        address[:country] = address.fetch(:country, "US").upcase
-        address[:state] = address[:state].to_s.upcase
-        missing = %i[name street1 city state zip country].select { |key| address[key].blank? }
-        raise AddressError, "Please complete #{missing.map { |key| key.to_s.humanize.downcase }.join(', ')}." if missing.any?
-
-        address
-      end
-
       def symbolized_address(raw)
-        raw.to_h.symbolize_keys.slice(*ADDRESS_KEYS).transform_values { |value| value.to_s.strip.presence }.compact
+        Address.normalize(raw, require_delivery: false)
       end
 
       def parcel(package)
@@ -91,7 +85,7 @@ module Commerce
 
       def persist_rates!(response:, location:, package:)
         expires_at = QUOTE_LIFETIME.from_now
-        destination_digest = Digest::SHA256.hexdigest(response.fetch(:address).to_json)
+        destination_digest = Address.digest(response.fetch(:address))
         ShippingQuote.transaction do
           response.fetch(:rates).filter_map do |rate|
             next unless rate.fetch(:currency).upcase == @cart.currency

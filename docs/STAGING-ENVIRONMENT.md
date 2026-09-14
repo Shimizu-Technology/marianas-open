@@ -65,6 +65,8 @@ The intended service checkout is `/Users/leonshimizu/services/marianas-open-stag
    - `marianas-open-staging-secret-key-base`
    - `marianas-open-staging-clerk-secret-key`
    - `marianas-open-staging-easypost-api-key` (EasyPost test key; optional until commerce QA begins)
+   - `marianas-open-staging-stripe-api-key` (a least-privilege Stripe test restricted key)
+   - `marianas-open-staging-stripe-webhook-secret` (signing secret for the exact staging webhook endpoint)
 4. Install the LaunchAgent plist from `ops/staging/launchd/` into `~/Library/LaunchAgents/`.
 5. Bootstrap it with `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.shimizutechnology.marianas-open-staging.plist`.
 6. Expose the loopback origin only to the tailnet with `tailscale serve --bg --yes 8788`.
@@ -75,7 +77,7 @@ The agent checks every three minutes. It never builds source on the host and doe
 
 Create a dedicated Cloudflare Tunnel rather than modifying the tunnels that serve Party Games or Håfa Code. Install its generated configuration and credential file under Jerry's `.cloudflared` directory, then supervise that exact tunnel with launchd. Route both staging hostnames to the MacBook Tailscale origin.
 
-In Cloudflare Zero Trust, create a self-hosted Access application for `mo.shimizu-technology.com` and allow only the reviewers' email addresses. The initial tunnel configuration returns `404` for all requests to `mo-hooks.shimizu-technology.com`. When commerce endpoints exist, route only their exact paths to the origin and secure every endpoint with provider signature verification, replay protection, and rate limiting.
+In Cloudflare Zero Trust, create a self-hosted Access application for `mo.shimizu-technology.com` and allow only the reviewers' email addresses. Route only `POST /api/v1/webhooks/stripe` from `mo-hooks.shimizu-technology.com` to the origin; every other hook-host path should return `404`. Rails verifies the raw payload with the Stripe signing secret and deduplicates provider event IDs before changing an order.
 
 ## Recovery
 

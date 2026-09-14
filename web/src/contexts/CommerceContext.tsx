@@ -26,6 +26,7 @@ interface CommerceContextValue {
   addToCart: (productId: number, variantId: number, quantity?: number) => void
   updateQuantity: (variantId: number, quantity: number) => void
   removeFromCart: (variantId: number) => void
+  clearCart: () => void
   reload: () => Promise<void>
 }
 
@@ -119,6 +120,8 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
     setCart(current => current.filter(line => line.variantId !== variantId))
   }, [])
 
+  const clearCart = useCallback(() => setCart([]), [])
+
   const value = useMemo<CommerceContextValue>(() => ({
     enabled,
     loading,
@@ -131,8 +134,9 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
     addToCart,
     updateQuantity,
     removeFromCart,
+    clearCart,
     reload,
-  }), [enabled, loading, error, products, cartLines, cartOpen, addToCart, updateQuantity, removeFromCart, reload])
+  }), [enabled, loading, error, products, cartLines, cartOpen, addToCart, updateQuantity, removeFromCart, clearCart, reload])
 
   return <CommerceContext.Provider value={value}>{children}</CommerceContext.Provider>
 }

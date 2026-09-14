@@ -3,6 +3,8 @@ class InventoryLocation < ApplicationRecord
   has_many :inventory_levels, dependent: :restrict_with_error
   has_many :inventory_movements, dependent: :restrict_with_error
   has_many :shipping_quotes, dependent: :restrict_with_error
+  has_many :orders, dependent: :restrict_with_error
+  has_many :inventory_reservations, dependent: :restrict_with_error
 
   validates :name, :code, presence: true
   validates :code, uniqueness: { scope: :organization_id, case_sensitive: false }

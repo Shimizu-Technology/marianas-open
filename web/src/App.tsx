@@ -31,6 +31,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const ShopPage = lazy(() => import('./pages/ShopPage'));
 const ProductPage = lazy(() => import('./pages/ProductPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
 
 import CompetitorProfilePage from './pages/CompetitorProfilePage';
 import AcademyPage from './pages/AcademyPage';
@@ -125,6 +126,7 @@ function AnimatedRoutes() {
             <Route path="/impact" element={<ImpactPage />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/shop/checkout" element={<CheckoutPage />} />
+            <Route path="/shop/orders/:token" element={<OrderConfirmationPage />} />
             <Route path="/shop/:slug" element={<ProductPage />} />
             <Route path="/events/:slug/gallery" element={<EventGalleryPage />} />
             <Route path="/events/:slug" element={<EventDetailPage />} />
