@@ -12,7 +12,7 @@ class ProductImage < ApplicationRecord
   private
 
   def variant_belongs_to_product
-    return if product_variant.blank? || product_variant.product_id == product_id
+    return if product_variant.blank? || product_variant.product == product
 
     errors.add(:product_variant, "must belong to this product")
   end

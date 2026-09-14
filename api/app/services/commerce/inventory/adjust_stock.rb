@@ -32,7 +32,7 @@ module Commerce
           end
 
           level.update!(on_hand: new_balance)
-          InventoryMovement.create!(
+          InventoryMovement.record_adjustment!(
             product_variant: variant,
             inventory_location: location,
             performed_by: actor,

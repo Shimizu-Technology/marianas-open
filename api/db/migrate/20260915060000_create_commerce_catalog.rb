@@ -67,7 +67,7 @@ class CreateCommerceCatalog < ActiveRecord::Migration[8.1]
       t.integer :price_cents, null: false
       t.integer :compare_at_price_cents
       t.string :currency, null: false, default: "USD", limit: 3
-      t.boolean :active, null: false, default: true
+      t.boolean :active, null: false, default: false
       t.boolean :allow_shipping, null: false, default: true
       t.boolean :allow_pickup, null: false, default: true
       t.integer :weight_grams

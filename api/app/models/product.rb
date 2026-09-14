@@ -9,6 +9,7 @@ class Product < ApplicationRecord
   validates :name, :slug, presence: true
   validates :slug, uniqueness: { scope: :organization_id }, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/ }
   validate :offers_at_least_one_fulfillment_method
+  validate :organization_cannot_change, on: :update
 
   scope :published, -> { where(active: true).order(featured: :desc, sort_order: :asc, name: :asc) }
 
@@ -18,5 +19,9 @@ class Product < ApplicationRecord
     return if shippable? || pickup_enabled?
 
     errors.add(:base, "Product must support shipping, pickup, or both")
+  end
+
+  def organization_cannot_change
+    errors.add(:organization, "cannot be changed") if will_save_change_to_organization_id?
   end
 end

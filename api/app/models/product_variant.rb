@@ -18,6 +18,9 @@ class ProductVariant < ApplicationRecord
     numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validate :fulfillment_matches_product
   validate :option_values_belong_to_product
+  validate :active_variant_has_complete_option_selection
+
+  before_destroy :mark_destroying_with_option_values, prepend: true
 
   scope :available_for_sale, -> { where(active: true).order(:position, :id) }
 
@@ -27,6 +30,10 @@ class ProductVariant < ApplicationRecord
     else
       inventory_levels.sum("on_hand - reserved")
     end
+  end
+
+  def destroying_with_option_values?
+    @destroying_with_option_values == true
   end
 
   private
@@ -48,5 +55,19 @@ class ProductVariant < ApplicationRecord
 
     invalid = product_option_values.any? { |value| value.product_option.product_id != product_id }
     errors.add(:product_option_values, "must belong to this product") if invalid
+  end
+
+  def active_variant_has_complete_option_selection
+    return unless active? && product.present?
+
+    expected_option_ids = product.product_options.map(&:id).compact.sort
+    selected_option_ids = product_variant_option_values.map(&:product_option_id).compact.sort
+    return if selected_option_ids == expected_option_ids
+
+    errors.add(:product_option_values, "must select one value for every product option before activation")
+  end
+
+  def mark_destroying_with_option_values
+    @destroying_with_option_values = true
   end
 end

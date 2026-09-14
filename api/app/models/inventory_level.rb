@@ -19,7 +19,7 @@ class InventoryLevel < ApplicationRecord
 
   def location_belongs_to_product_organization
     return if product_variant.blank? || inventory_location.blank?
-    return if product_variant.product.organization_id == inventory_location.organization_id
+    return if product_variant.product&.organization == inventory_location.organization
 
     errors.add(:inventory_location, "must belong to the product's organization")
   end

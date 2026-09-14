@@ -22,6 +22,7 @@ class CommerceCatalogTest < ActiveSupport::TestCase
       hts_code: "6203199020"
     )
     @variant.product_option_values << @a2
+    @variant.update!(active: true)
     @location = @organization.inventory_locations.create!(name: "Deal Depot", code: "deal-depot", pickup_enabled: true)
   end
 
@@ -70,6 +71,27 @@ class CommerceCatalogTest < ActiveSupport::TestCase
     assert_equal 1, @variant.inventory_movements.count
   end
 
+  test "inventory movements can only be created through the service and cannot be changed" do
+    direct_movement = InventoryMovement.new(
+      product_variant: @variant,
+      inventory_location: @location,
+      reason: "received",
+      quantity_delta: 1,
+      balance_after: 1
+    )
+    assert_not direct_movement.valid?
+
+    movement = Commerce::Inventory::AdjustStock.call(
+      variant: @variant,
+      location: @location,
+      quantity_delta: 1,
+      reason: "received"
+    )
+
+    assert_raises(ActiveRecord::ReadOnlyRecord) { movement.update!(note: "Changed") }
+    assert_raises(ActiveRecord::ReadOnlyRecord) { movement.destroy! }
+  end
+
   test "rejects variants using another product's option value" do
     other_product = @organization.products.create!(name: "Towel", slug: "towel")
     material = other_product.product_options.create!(name: "Material")
@@ -91,6 +113,35 @@ class CommerceCatalogTest < ActiveSupport::TestCase
 
     @product.assign_attributes(shippable: false, pickup_enabled: false)
     assert_not @product.valid?
+  end
+
+  test "requires a complete option selection before activating a variant" do
+    color = @product.product_options.build(name: "Color")
+    assert_not color.valid?
+
+    @variant.update!(active: false)
+    color.save!
+    assert_not @variant.update(active: true)
+    assert_includes @variant.errors[:product_option_values], "must select one value for every product option before activation"
+
+    black = color.product_option_values.create!(value: "Black")
+    @variant.product_option_values << black
+    @variant.update!(active: true)
+    assert @variant.active?
+
+    assignment = @variant.product_variant_option_values.find_by!(product_option: color)
+    assert_not assignment.destroy
+  end
+
+  test "does not allow products or collections to move between organizations" do
+    collection = @organization.product_collections.create!(name: "Featured", slug: "featured")
+    collection.products << @product
+    other_organization = Organization.create!(name: "Other Seller", slug: "other-seller")
+
+    assert_not @product.update(organization: other_organization)
+    assert_not collection.update(organization: other_organization)
+    assert_equal @organization, @product.reload.organization
+    assert_equal @organization, collection.reload.organization
   end
 
   test "rejects inventory from another organization's location" do

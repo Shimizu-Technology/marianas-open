@@ -17,6 +17,7 @@ class PublicShopProductsTest < ActionDispatch::IntegrationTest
     black = option.product_option_values.create!(value: "Black")
     variant = @product.product_variants.create!(name: "Black", sku: "MO-TOWEL-BLK", price_cents: 3_500, weight_grams: 420)
     variant.product_option_values << black
+    variant.update!(active: true)
     Commerce::Inventory::AdjustStock.call(variant: variant, location: location, quantity_delta: 5, reason: "received")
 
     organization.products.create!(name: "Hidden Product", slug: "hidden-product", active: false)
@@ -35,6 +36,19 @@ class PublicShopProductsTest < ActionDispatch::IntegrationTest
     assert_equal 3_500, variant["price_cents"]
     assert_equal 5, variant["available_quantity"]
     assert_equal "Black", response.parsed_body.dig("products", 0, "options", 0, "values", 0, "value")
+  end
+
+  test "scopes products and shared slugs to the storefront organization" do
+    another_organization = Organization.create!(name: "Another Seller", slug: "another-seller")
+    another_organization.products.create!(name: "Other Towel", slug: @product.slug, active: true)
+
+    get "/api/v1/shop/products"
+    assert_response :success
+    assert_equal [ @product.id ], response.parsed_body.fetch("products").map { |product| product["id"] }
+
+    get "/api/v1/shop/products/#{@product.slug}"
+    assert_response :success
+    assert_equal @product.id, response.parsed_body.dig("product", "id")
   end
 
   test "returns a stable product destination and hides the shop when disabled" do

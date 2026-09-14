@@ -447,7 +447,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_060000) do
   end
 
   create_table "product_variants", force: :cascade do |t|
-    t.boolean "active", default: true, null: false
+    t.boolean "active", default: false, null: false
     t.boolean "allow_pickup", default: true, null: false
     t.boolean "allow_shipping", default: true, null: false
     t.integer "compare_at_price_cents"
