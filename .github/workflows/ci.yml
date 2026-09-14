@@ -93,7 +93,7 @@ jobs:
           git worktree add --detach "${baseline_dir}" "${base_sha}"
           bin/brakeman --quiet --no-pager --path "${baseline_dir}/api" \
             --format json --output "${baseline_report}" \
-            --no-exit-on-warn --exit-on-error
+            --no-exit-on-warn --no-exit-on-error
           bin/brakeman --quiet --no-pager --compare "${baseline_report}" \
             --exit-on-warn --exit-on-error
 
