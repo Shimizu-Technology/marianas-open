@@ -7,7 +7,5 @@ ingress:
     originRequest:
       connectTimeout: 10s
   - hostname: mo-hooks.shimizu-technology.com
-    service: http://100.94.119.59:8788
-    originRequest:
-      connectTimeout: 10s
+    service: http_status:404
   - service: http_status:404

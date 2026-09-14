@@ -70,7 +70,7 @@ The agent checks every three minutes. It never builds source on the host and doe
 
 Create a dedicated Cloudflare Tunnel rather than modifying the tunnels that serve Party Games or Håfa Code. Install its generated configuration and credential file under Jerry's `.cloudflared` directory, then supervise that exact tunnel with launchd. Route both staging hostnames to the MacBook Tailscale origin.
 
-In Cloudflare Zero Trust, create a self-hosted Access application for `mo.shimizu-technology.com` and allow only the reviewers' email addresses. Keep `mo-hooks.shimizu-technology.com` out of the interactive Access policy so Stripe and EasyPost can reach it; secure each webhook endpoint at the application layer.
+In Cloudflare Zero Trust, create a self-hosted Access application for `mo.shimizu-technology.com` and allow only the reviewers' email addresses. The initial tunnel configuration returns `404` for all requests to `mo-hooks.shimizu-technology.com`. When commerce endpoints exist, route only their exact paths to the origin and secure every endpoint with provider signature verification, replay protection, and rate limiting.
 
 ## Recovery
 
