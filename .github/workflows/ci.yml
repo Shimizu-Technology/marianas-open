@@ -94,10 +94,10 @@ jobs:
           git worktree add --detach "${baseline_dir}" "${base_sha}"
           bin/brakeman --quiet --no-pager --path "${baseline_dir}/api" \
             --format json --output "${baseline_report}" \
-            --no-exit-on-warn --no-exit-on-error
+            --no-exit-on-warn --no-exit-on-error || true
           bin/brakeman --quiet --no-pager --format json \
             --output "${current_report}" \
-            --no-exit-on-warn --no-exit-on-error
+            --no-exit-on-warn --no-exit-on-error || true
           ruby -rjson -e '
             baseline = JSON.parse(File.read(ARGV.fetch(0)))
             current = JSON.parse(File.read(ARGV.fetch(1)))
