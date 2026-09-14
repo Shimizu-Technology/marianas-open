@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_14_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_060000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -303,6 +303,51 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_160000) do
     t.index ["category"], name: "index_impact_metrics_on_category"
   end
 
+  create_table "inventory_levels", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "inventory_location_id", null: false
+    t.integer "on_hand", default: 0, null: false
+    t.bigint "product_variant_id", null: false
+    t.integer "reserved", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["inventory_location_id"], name: "index_inventory_levels_on_inventory_location_id"
+    t.index ["product_variant_id", "inventory_location_id"], name: "idx_inventory_levels_unique", unique: true
+    t.check_constraint "on_hand >= 0", name: "inventory_levels_on_hand_nonnegative"
+    t.check_constraint "reserved <= on_hand", name: "inventory_levels_reserved_within_stock"
+    t.check_constraint "reserved >= 0", name: "inventory_levels_reserved_nonnegative"
+  end
+
+  create_table "inventory_locations", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.jsonb "address", default: {}, null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "organization_id", null: false
+    t.boolean "pickup_enabled", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "code"], name: "index_inventory_locations_on_organization_id_and_code", unique: true
+    t.index ["organization_id"], name: "index_inventory_locations_on_organization_id"
+  end
+
+  create_table "inventory_movements", force: :cascade do |t|
+    t.integer "balance_after", null: false
+    t.datetime "created_at", null: false
+    t.bigint "inventory_location_id", null: false
+    t.text "note", default: "", null: false
+    t.bigint "performed_by_id"
+    t.bigint "product_variant_id", null: false
+    t.integer "quantity_delta", null: false
+    t.string "reason", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inventory_location_id"], name: "index_inventory_movements_on_inventory_location_id"
+    t.index ["performed_by_id"], name: "index_inventory_movements_on_performed_by_id"
+    t.index ["product_variant_id", "inventory_location_id", "created_at"], name: "idx_inventory_movements_timeline"
+    t.index ["product_variant_id"], name: "index_inventory_movements_on_product_variant_id"
+    t.check_constraint "balance_after >= 0", name: "inventory_movements_balance_nonnegative"
+    t.check_constraint "quantity_delta <> 0", name: "inventory_movements_delta_nonzero"
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "contact_email"
     t.datetime "created_at", null: false
@@ -330,6 +375,124 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_160000) do
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_prize_categories_on_event_id"
     t.index ["translation_status"], name: "index_prize_categories_on_translation_status"
+  end
+
+  create_table "product_collection_memberships", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "product_collection_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_collection_id", "product_id"], name: "idx_collection_memberships_unique", unique: true
+    t.index ["product_id", "product_collection_id"], name: "idx_collection_memberships_product"
+  end
+
+  create_table "product_collections", force: :cascade do |t|
+    t.boolean "active", default: false, null: false
+    t.datetime "created_at", null: false
+    t.text "description", default: "", null: false
+    t.string "name", null: false
+    t.bigint "organization_id", null: false
+    t.string "slug", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "active", "sort_order"], name: "idx_on_organization_id_active_sort_order_798f226c88"
+    t.index ["organization_id", "slug"], name: "index_product_collections_on_organization_id_and_slug", unique: true
+    t.index ["organization_id"], name: "index_product_collections_on_organization_id"
+  end
+
+  create_table "product_images", force: :cascade do |t|
+    t.string "alt_text", default: "", null: false
+    t.datetime "created_at", null: false
+    t.bigint "product_id", null: false
+    t.bigint "product_variant_id"
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id", "sort_order"], name: "index_product_images_on_product_id_and_sort_order"
+    t.index ["product_id"], name: "index_product_images_on_product_id"
+    t.index ["product_variant_id"], name: "index_product_images_on_product_variant_id"
+  end
+
+  create_table "product_option_values", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "position", default: 0, null: false
+    t.bigint "product_option_id", null: false
+    t.datetime "updated_at", null: false
+    t.string "value", null: false
+    t.index ["product_option_id", "position"], name: "idx_product_option_values_position"
+    t.index ["product_option_id", "value"], name: "idx_product_option_values_unique", unique: true
+    t.index ["product_option_id"], name: "index_product_option_values_on_product_option_id"
+  end
+
+  create_table "product_options", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.bigint "product_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id", "name"], name: "index_product_options_on_product_id_and_name", unique: true
+    t.index ["product_id", "position"], name: "index_product_options_on_product_id_and_position"
+    t.index ["product_id"], name: "index_product_options_on_product_id"
+  end
+
+  create_table "product_variant_option_values", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "product_option_id", null: false
+    t.bigint "product_option_value_id", null: false
+    t.bigint "product_variant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_option_value_id"], name: "idx_variant_option_values_value"
+    t.index ["product_variant_id", "product_option_id"], name: "idx_variant_option_values_one_per_option", unique: true
+    t.index ["product_variant_id", "product_option_value_id"], name: "idx_variant_option_values_unique", unique: true
+  end
+
+  create_table "product_variants", force: :cascade do |t|
+    t.boolean "active", default: false, null: false
+    t.boolean "allow_pickup", default: true, null: false
+    t.boolean "allow_shipping", default: true, null: false
+    t.integer "compare_at_price_cents"
+    t.string "country_of_origin", limit: 2
+    t.datetime "created_at", null: false
+    t.string "currency", limit: 3, default: "USD", null: false
+    t.string "customs_description"
+    t.integer "height_mm"
+    t.string "hts_code", limit: 12
+    t.integer "length_mm"
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.integer "price_cents", null: false
+    t.bigint "product_id", null: false
+    t.string "sku", null: false
+    t.datetime "updated_at", null: false
+    t.integer "weight_grams"
+    t.integer "width_mm"
+    t.index ["product_id", "active", "position"], name: "index_product_variants_on_product_id_and_active_and_position"
+    t.index ["product_id"], name: "index_product_variants_on_product_id"
+    t.index ["sku"], name: "index_product_variants_on_sku", unique: true
+    t.check_constraint "compare_at_price_cents IS NULL OR compare_at_price_cents >= price_cents", name: "product_variants_compare_price_valid"
+    t.check_constraint "height_mm IS NULL OR height_mm > 0", name: "product_variants_height_positive"
+    t.check_constraint "length_mm IS NULL OR length_mm > 0", name: "product_variants_length_positive"
+    t.check_constraint "price_cents >= 0", name: "product_variants_price_nonnegative"
+    t.check_constraint "weight_grams IS NULL OR weight_grams > 0", name: "product_variants_weight_positive"
+    t.check_constraint "width_mm IS NULL OR width_mm > 0", name: "product_variants_width_positive"
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.boolean "active", default: false, null: false
+    t.datetime "created_at", null: false
+    t.text "description", default: "", null: false
+    t.boolean "featured", default: false, null: false
+    t.string "name", null: false
+    t.bigint "organization_id", null: false
+    t.boolean "pickup_enabled", default: true, null: false
+    t.boolean "shippable", default: true, null: false
+    t.string "slug", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.jsonb "translations", default: {}, null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "active", "sort_order"], name: "index_products_on_organization_id_and_active_and_sort_order"
+    t.index ["organization_id", "slug"], name: "index_products_on_organization_id_and_slug", unique: true
+    t.index ["organization_id"], name: "index_products_on_organization_id"
   end
 
   create_table "site_contents", force: :cascade do |t|
@@ -549,7 +712,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_160000) do
   add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"
   add_foreign_key "events", "organizations"
+  add_foreign_key "inventory_levels", "inventory_locations"
+  add_foreign_key "inventory_levels", "product_variants"
+  add_foreign_key "inventory_locations", "organizations"
+  add_foreign_key "inventory_movements", "inventory_locations"
+  add_foreign_key "inventory_movements", "product_variants"
+  add_foreign_key "inventory_movements", "users", column: "performed_by_id"
   add_foreign_key "prize_categories", "events"
+  add_foreign_key "product_collection_memberships", "product_collections"
+  add_foreign_key "product_collection_memberships", "products"
+  add_foreign_key "product_collections", "organizations"
+  add_foreign_key "product_images", "product_variants"
+  add_foreign_key "product_images", "products"
+  add_foreign_key "product_option_values", "product_options"
+  add_foreign_key "product_options", "products"
+  add_foreign_key "product_variant_option_values", "product_option_values"
+  add_foreign_key "product_variant_option_values", "product_options"
+  add_foreign_key "product_variant_option_values", "product_variants"
+  add_foreign_key "product_variants", "products"
+  add_foreign_key "products", "organizations"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

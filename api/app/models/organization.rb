@@ -1,4 +1,7 @@
 class Organization < ApplicationRecord
+  has_many :products, dependent: :restrict_with_error
+  has_many :product_collections, dependent: :restrict_with_error
+  has_many :inventory_locations, dependent: :restrict_with_error
   include HasImageUrl
 
   has_many :events, dependent: :destroy
@@ -10,8 +13,8 @@ class Organization < ApplicationRecord
 
   def as_json(options = {})
     super(options.merge(
-      methods: [:logo_url, :banner_url],
-      except: [:created_at, :updated_at]
+      methods: [ :logo_url, :banner_url ],
+      except: [ :created_at, :updated_at ]
     ))
   end
 end

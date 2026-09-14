@@ -11,6 +11,7 @@
 ## Required verification
 
 - Run the repository gate before opening or updating a pull request.
+- The repository gate is `./scripts/gate.sh`.
 - Keep GitHub CI, CodeRabbit, and Greptile green on the current pull-request head.
 - For UI work, verify the affected flow in a browser against the staging environment.
 - Do not merge a staging-to-main release until the owner has accepted it on staging.
