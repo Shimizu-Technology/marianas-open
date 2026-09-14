@@ -92,6 +92,7 @@ jobs:
           trap cleanup EXIT
 
           git worktree add --detach "${baseline_dir}" "${base_sha}"
+          mkdir -p "$(dirname "${baseline_report}")" "$(dirname "${current_report}")"
           bin/brakeman --quiet --no-pager --path "${baseline_dir}/api" \
             --format json --output "${baseline_report}" \
             --no-exit-on-warn --no-exit-on-error || true
