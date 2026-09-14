@@ -82,12 +82,12 @@ export function getSponsorLogo(name: string, apiLogoUrl?: string | null): string
   return SPONSOR_LOGO_MAP[name.toLowerCase()] ?? null;
 }
 
-/** Ensure a URL has a protocol prefix so it doesn't become a relative link. */
+/** Ensure an external URL is an HTTP(S) link and never an executable scheme. */
 export function normalizeExternalUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   const trimmed = url.trim();
   if (!trimmed) return null;
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  if (/^[a-z][a-z0-9+\-.]*:/i.test(trimmed)) return trimmed;
+  if (/^[a-z][a-z0-9+\-.]*:/i.test(trimmed)) return null;
   return `https://${trimmed}`;
 }

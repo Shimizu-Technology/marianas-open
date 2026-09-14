@@ -62,6 +62,34 @@ class EventTicketSalesFlowTest < ActionDispatch::IntegrationTest
     assert response.parsed_body["errors"].any? { |message| message.include?("Ticket sales url must use http or https") }
   end
 
+  test "staff can publish a travel offer and the public event exposes it" do
+    offer = {
+      key: "united-meetings-travel-2026",
+      kind: "offer",
+      title: "United Meetings Travel",
+      description: "Search for eligible flights to Guam.",
+      code: "zsfx863836",
+      url: "https://www.united.com/en/us/meetingtravel",
+      link_label: "Search United flights"
+    }
+
+    with_verified_clerk do
+      patch "/api/v1/admin/events/#{@event.id}",
+        params: { travel_description: "Traveling to Guam?", travel_items: [offer] },
+        headers: @headers,
+        as: :json
+    end
+
+    assert_response :success
+    assert_equal "zsfx863836", response.parsed_body.dig("event", "travel_items", 0, "code")
+
+    get "/api/v1/events/#{@event.slug}"
+
+    assert_response :success
+    assert_equal "offer", response.parsed_body.dig("travel_items", 0, "kind")
+    assert_equal "https://www.united.com/en/us/meetingtravel", response.parsed_body.dig("travel_items", 0, "url")
+  end
+
   test "cloning preserves reusable admission setup but keeps the new event safely unpublished" do
     @event.update!(
       is_main_event: true,
@@ -82,7 +110,11 @@ class EventTicketSalesFlowTest < ActionDispatch::IntegrationTest
       ],
       ticket_in_person_name: "Deal Depot",
       ticket_in_person_phone: "671-647-3325",
-      ticket_in_person_address: "114 East Taitano Road, Tamuning, Guam"
+      ticket_in_person_address: "114 East Taitano Road, Tamuning, Guam",
+      travel_items: [
+        { kind: "info", title: "Arrival Airport", value: "GUM", description: "Fly into Guam." },
+        { kind: "offer", title: "Season flight offer", code: "OPEN2026", description: "Valid for this event." }
+      ]
     )
     @event.event_schedule_items.create!(time: "9:00 AM", description: "Opening matches", sort_order: 1)
     @event.prize_categories.create!(name: "Black Belt Absolute", amount: 5_000, sort_order: 1)
@@ -118,6 +150,7 @@ class EventTicketSalesFlowTest < ActionDispatch::IntegrationTest
     assert_equal "Deal Depot", clone.ticket_in_person_name
     assert_equal "671-647-3325", clone.ticket_in_person_phone
     assert_equal "114 East Taitano Road, Tamuning, Guam", clone.ticket_in_person_address
+    assert_equal ["Arrival Airport"], clone.travel_items.map { |item| item["title"] }
     assert_not clone.ticket_banner_image.attached?
     assert_equal [ [ "9:00 AM", "Opening matches" ] ], clone.event_schedule_items.pluck(:time, :description)
     assert_equal [ [ "Black Belt Absolute", 5_000.to_d ] ], clone.prize_categories.pluck(:name, :amount)

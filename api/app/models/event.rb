@@ -8,17 +8,21 @@ class Event < ApplicationRecord
   ASJJF_REGISTRATION_URL_FIELDS = %i[registration_url registration_url_gi registration_url_nogi].freeze
   TICKET_SALES_STATUSES = %w[unavailable on_sale sold_out closed].freeze
   MAX_TICKET_OPTIONS = 12
+  MAX_TRAVEL_ITEMS = 12
+  TRAVEL_ITEM_KINDS = %w[info offer].freeze
   MAX_TICKET_BANNER_BYTES = 8.megabytes
   TICKET_BANNER_CONTENT_TYPES = %w[image/jpeg image/png image/webp].freeze
 
   before_validation :normalize_asjjf_registration_urls
   before_validation :normalize_ticket_sales_url
+  before_validation :normalize_travel_items
   before_save :make_main_event_exclusive
 
   validates :status, inclusion: { in: STATUSES }, allow_nil: true
   validates :ticket_sales_status, inclusion: { in: TICKET_SALES_STATUSES }
   validate :ticket_sales_url_is_safe
   validate :ticket_options_are_valid
+  validate :travel_items_are_valid
   validate :ticket_banner_image_is_safe
 
   belongs_to :organization
@@ -106,7 +110,7 @@ class Event < ApplicationRecord
     { field: :registration_steps, sub_fields: [:title, :description, :link_label] },
     { field: :registration_fee_sections, sub_fields: [:title], nested: { rows: [:deadline, :option] } },
     { field: :registration_info_items, sub_fields: [:label, :value] },
-    { field: :travel_items, sub_fields: [:title, :description] },
+    { field: :travel_items, sub_fields: [:title, :description, :link_label] },
     { field: :visa_items, sub_fields: [:title, :description] },
     { field: :ticket_options, sub_fields: [:label, :description] }
   )
@@ -137,6 +141,20 @@ class Event < ApplicationRecord
 
   def normalize_ticket_sales_url
     self.ticket_sales_url = ticket_sales_url.to_s.strip.presence
+  end
+
+  def normalize_travel_items
+    return unless travel_items.is_a?(Array)
+
+    self.travel_items = travel_items.map do |item|
+      next item unless item.is_a?(Hash)
+
+      normalized = item.stringify_keys
+      %w[key kind title description value code url link_label].each do |field|
+        normalized[field] = normalized[field].to_s.strip if normalized.key?(field)
+      end
+      normalized
+    end
   end
 
   def make_main_event_exclusive
@@ -191,6 +209,67 @@ class Event < ApplicationRecord
         errors.add(:ticket_options, "option #{index + 1} #{price_key.humanize.downcase} must be a number")
       end
     end
+  end
+
+  def travel_items_are_valid
+    unless travel_items.is_a?(Array)
+      errors.add(:travel_items, "must be a list")
+      return
+    end
+
+    if travel_items.length > MAX_TRAVEL_ITEMS
+      errors.add(:travel_items, "cannot contain more than #{MAX_TRAVEL_ITEMS} cards")
+      return
+    end
+
+    travel_items.each_with_index do |item, index|
+      unless item.is_a?(Hash)
+        errors.add(:travel_items, "card #{index + 1} must be an object")
+        next
+      end
+
+      kind = item["kind"].presence || "info"
+      title = item["title"]
+      description = item["description"]
+      value = item["value"]
+      code = item["code"]
+      url = item["url"]
+      link_label = item["link_label"]
+      key = item["key"]
+
+      errors.add(:travel_items, "card #{index + 1} has an unsupported type") unless TRAVEL_ITEM_KINDS.include?(kind)
+      errors.add(:travel_items, "card #{index + 1} needs a title") if title.blank?
+      errors.add(:travel_items, "card #{index + 1} needs a description, value, or offer code") if description.blank? && value.blank? && code.blank?
+      errors.add(:travel_items, "card #{index + 1} needs an offer code") if kind == "offer" && code.blank?
+      errors.add(:travel_items, "card #{index + 1} code is only supported for offer cards") if kind != "offer" && code.present?
+
+      {
+        "key" => 80,
+        "kind" => 20,
+        "title" => 100,
+        "description" => 500,
+        "value" => 100,
+        "code" => 80,
+        "url" => 2_048,
+        "link_label" => 100
+      }.each do |field, maximum|
+        field_value = item[field]
+        errors.add(:travel_items, "card #{index + 1} #{field.humanize.downcase} is too long") if field_value.to_s.length > maximum
+      end
+
+      errors.add(:travel_items, "card #{index + 1} key is invalid") if key.present? && !key.match?(/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/)
+      validate_travel_item_url(url, index) if url.present?
+      errors.add(:travel_items, "card #{index + 1} needs a link label when a URL is set") if url.present? && link_label.blank?
+    end
+  end
+
+  def validate_travel_item_url(url, index)
+    uri = URI.parse(url)
+    return if uri.is_a?(URI::HTTP) && uri.host.present?
+
+    errors.add(:travel_items, "card #{index + 1} URL must use http or https")
+  rescue URI::InvalidURIError
+    errors.add(:travel_items, "card #{index + 1} URL must be valid")
   end
 
   def ticket_banner_image_is_safe

@@ -1,7 +1,8 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon, Ticket, Store } from 'lucide-react';
+import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon, Ticket, Store, Check, Copy } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
 import ImageWithShimmer from '../components/ImageWithShimmer';
@@ -16,7 +17,7 @@ import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { getRegistrationLinks } from '../utils/registrationLinks';
 import { getCurrentMainEvent } from '../utils/events';
 import { usePostHog } from '../providers/PostHogProvider';
-import type { EventTicketOption } from '../services/api';
+import type { EventTicketOption, EventTravelItem } from '../services/api';
 
 function ShareButton({ platform, onClick }: { platform: string; onClick: () => void }) {
   const colors: Record<string, string> = {
@@ -68,6 +69,151 @@ function hasMeaningfulText(value: string | null | undefined) {
 
 function getValidItems<T extends { title?: string | null; description?: string | null }>(items: T[] | null | undefined) {
   return (items ?? []).filter(item => hasMeaningfulText(item.title) && hasMeaningfulText(item.description));
+}
+
+async function copyTextToClipboard(text: string) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  const copied = document.execCommand('copy');
+  textarea.remove();
+  if (!copied) throw new Error('Copy command was unavailable');
+}
+
+function TravelItemCard({
+  item,
+  onCodeCopied,
+  onLinkClicked,
+}: {
+  item: EventTravelItem;
+  onCodeCopied: (item: EventTravelItem) => void;
+  onLinkClicked: (item: EventTravelItem, url: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const code = item.code?.trim() || '';
+  const href = normalizeExternalUrl(item.url);
+  const isOffer = item.kind === 'offer' && code.length > 0;
+
+  useEffect(() => () => {
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+  }, []);
+
+  const handleCopy = async () => {
+    try {
+      await copyTextToClipboard(code);
+      setCopyStatus('copied');
+      onCodeCopied(item);
+      if (resetTimer.current) clearTimeout(resetTimer.current);
+      resetTimer.current = setTimeout(() => setCopyStatus('idle'), 2_000);
+    } catch {
+      setCopyStatus('error');
+      if (resetTimer.current) clearTimeout(resetTimer.current);
+      resetTimer.current = setTimeout(() => setCopyStatus('idle'), 3_000);
+    }
+  };
+
+  if (isOffer) {
+    return (
+      <div className="relative h-full overflow-hidden border border-gold-500/30 bg-gradient-to-br from-gold-500/[0.12] via-navy-900 to-navy-900 p-6 sm:p-8">
+        <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-gold-500/10 blur-3xl" aria-hidden="true" />
+        <div className="relative">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center border border-gold-500/30 bg-gold-500/10 text-gold-400">
+              <Plane size={22} aria-hidden="true" />
+            </div>
+            <div>
+              <div className="text-[11px] font-heading font-semibold uppercase tracking-[0.22em] text-gold-400">
+                {t('event.travelOffer', 'Travel offer')}
+              </div>
+              <h3 className="font-heading text-xl font-bold text-text-primary">{item.title}</h3>
+            </div>
+          </div>
+
+          {item.description && (
+            <p className="max-w-2xl text-sm leading-relaxed text-text-secondary sm:text-base">{item.description}</p>
+          )}
+
+          <div className="mt-6 flex flex-col gap-4 border border-white/10 bg-black/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="mb-1 text-[10px] font-heading font-semibold uppercase tracking-[0.22em] text-text-muted">
+                {t('event.offerCode', 'Offer code')}
+              </div>
+              <code className="font-mono text-xl font-bold tracking-[0.08em] text-gold-300 sm:text-2xl">{code}</code>
+            </div>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="inline-flex min-h-11 items-center justify-center gap-2 border border-gold-500/40 bg-gold-500/10 px-4 py-2.5 text-xs font-heading font-bold uppercase tracking-wider text-gold-300 transition-colors hover:border-gold-400 hover:bg-gold-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+              aria-label={`${t('event.copyOfferCode', 'Copy code')} ${code}`}
+            >
+              {copyStatus === 'copied' ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+              {copyStatus === 'copied'
+                ? t('event.offerCodeCopied', 'Copied')
+                : copyStatus === 'error'
+                  ? t('event.copyOfferCodeError', 'Try again')
+                  : t('event.copyOfferCode', 'Copy code')}
+            </button>
+            <span className="sr-only" role="status" aria-live="polite">
+              {copyStatus === 'copied'
+                ? t('event.offerCodeCopiedStatus', 'Offer code copied to clipboard')
+                : copyStatus === 'error'
+                  ? t('event.copyOfferCodeErrorStatus', 'Unable to copy the offer code. Select the code and copy it manually.')
+                  : ''}
+            </span>
+          </div>
+
+          {href && (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => onLinkClicked(item, href)}
+              className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-heading font-bold uppercase tracking-wider text-gold-400 transition-colors hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-4 focus-visible:ring-offset-navy-900"
+            >
+              {item.link_label || t('event.learnMoreLink', 'Learn more')}
+              <ExternalLink size={15} aria-hidden="true" />
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full border border-white/5 bg-navy-900 p-8 transition-colors duration-300 hover:border-gold-500/20">
+      <Plane size={24} className="mb-4 text-gold-500" aria-hidden="true" />
+      <h3 className="mb-3 font-heading text-lg font-bold">{item.title}</h3>
+      {item.value && (
+        <div className="mb-3 font-heading text-sm font-semibold uppercase tracking-wider text-gold-400">
+          {item.value}
+        </div>
+      )}
+      {item.description && <p className="text-sm leading-relaxed text-text-secondary">{item.description}</p>}
+      {href && (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => onLinkClicked(item, href)}
+          className="mt-4 inline-flex min-h-11 items-center gap-2 text-xs text-gold-400 transition-colors hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300"
+        >
+          {item.link_label || t('event.learnMoreLink', 'Learn more')}
+          <ExternalLink size={12} aria-hidden="true" />
+        </a>
+      )}
+    </div>
+  );
 }
 
 export default function EventDetailPage() {
@@ -160,8 +306,8 @@ export default function EventDetailPage() {
   const registrationInfoItems = (registrationInfoItemsRaw.length > 0 ? registrationInfoItemsRaw : (mainEvent?.registration_info_items ?? []))
     .filter(item => hasMeaningfulText(item.label) && hasMeaningfulText(item.value));
 
-  const travelItemsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string; value?: string; url?: string; link_label?: string }>(mainEvent, 'travel_items' as keyof typeof mainEvent & string) : [];
-  const travelItems = (travelItemsRaw.length > 0 ? travelItemsRaw : (mainEvent?.travel_items ?? [])).filter(item => hasMeaningfulText(item.title) && (hasMeaningfulText(item.description) || hasMeaningfulText(item.value)));
+  const travelItemsRaw = mainEvent ? tfa<typeof mainEvent, EventTravelItem>(mainEvent, 'travel_items' as keyof typeof mainEvent & string) : [];
+  const travelItems = (travelItemsRaw.length > 0 ? travelItemsRaw : (mainEvent?.travel_items ?? [])).filter(item => hasMeaningfulText(item.title) && (hasMeaningfulText(item.description) || hasMeaningfulText(item.value) || hasMeaningfulText(item.code)));
 
   const visaItemsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string }>(mainEvent, 'visa_items' as keyof typeof mainEvent & string) : [];
   const visaItems = getValidItems(visaItemsRaw.length > 0 ? visaItemsRaw : mainEvent?.visa_items);
@@ -308,6 +454,23 @@ export default function EventDetailPage() {
       event_slug: mainEvent?.slug,
       ticket_provider: ticketSalesUrl ? new URL(ticketSalesUrl).hostname : undefined,
       placement,
+    });
+  };
+
+  const trackTravelCodeCopy = (item: EventTravelItem) => {
+    posthog?.capture('travel_offer_code_copied', {
+      event_slug: mainEvent?.slug,
+      offer_key: item.key,
+      offer_title: item.title,
+    });
+  };
+
+  const trackTravelLinkClick = (item: EventTravelItem, url: string) => {
+    posthog?.capture('travel_link_clicked', {
+      event_slug: mainEvent?.slug,
+      travel_item_key: item.key,
+      travel_item_kind: item.kind || 'info',
+      destination_host: new URL(url).hostname,
     });
   };
 
@@ -1203,28 +1366,16 @@ export default function EventDetailPage() {
 
             <div className={`grid grid-cols-1 gap-3 ${(displayTravelItems.length > 0 || displayVisaItems.length > 0 || activeAccommodations.length > 0) ? 'md:grid-cols-2' : ''}`}>
               {displayTravelItems.map((item, index) => (
-                <ScrollReveal key={`${item.title}-${index}`} delay={index * 0.05}>
-                  <div className="bg-navy-900 border border-white/5 p-8 h-full hover:border-gold-500/20 transition-colors duration-300">
-                    <Plane size={24} className="text-gold-500 mb-4" />
-                    <h3 className="font-heading font-bold text-lg mb-3">{item.title}</h3>
-                    {item.value && (
-                      <div className="text-gold-400 font-heading font-semibold text-sm uppercase tracking-wider mb-3">
-                        {item.value}
-                      </div>
-                    )}
-                    {item.description && <p className="text-text-secondary text-sm leading-relaxed">{item.description}</p>}
-                    {item.url && (
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-4 text-xs text-gold-400 hover:text-gold-300 transition-colors"
-                      >
-                        {item.link_label || t('event.learnMoreLink', 'Learn more')}
-                        <ExternalLink size={12} />
-                      </a>
-                    )}
-                  </div>
+                <ScrollReveal
+                  key={item.key || `${item.title}-${index}`}
+                  delay={index * 0.05}
+                  className={item.kind === 'offer' ? 'md:col-span-2' : undefined}
+                >
+                  <TravelItemCard
+                    item={item}
+                    onCodeCopied={trackTravelCodeCopy}
+                    onLinkClicked={trackTravelLinkClick}
+                  />
                 </ScrollReveal>
               ))}
 

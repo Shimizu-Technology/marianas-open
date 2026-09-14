@@ -162,6 +162,18 @@ end
     venue_highlights: [
       { title: "6 Competition Mats", description: "5,000+ Capacity" },
       { title: "University of Guam", description: "Mangilao, Guam 96913" }
+    ],
+    travel_description: "Traveling to Guam for the Marianas Open? Use the meeting travel option below when searching for flights.",
+    travel_items: [
+      {
+        key: "united-meetings-travel-2026",
+        kind: "offer",
+        title: "United Meetings Travel",
+        description: "Enter this code on United's Meetings Travel page when searching for eligible flights to Guam. Fare availability and terms are provided by United.",
+        code: "zsfx863836",
+        url: "https://www.united.com/en/us/meetingtravel",
+        link_label: "Search United flights"
+      }
     ]
   }
 }.each do |slug, attrs|

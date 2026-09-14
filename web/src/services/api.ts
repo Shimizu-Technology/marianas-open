@@ -198,9 +198,12 @@ export interface EventRegistrationInfoItem {
 }
 
 export interface EventTravelItem {
+  key?: string | null;
+  kind?: 'info' | 'offer' | null;
   title: string;
   description: string;
   value?: string | null;
+  code?: string | null;
   url?: string | null;
   link_label?: string | null;
 }
