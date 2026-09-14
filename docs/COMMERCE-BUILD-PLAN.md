@@ -22,7 +22,7 @@
 | 2 | Product and inventory administration, public storefront, cart | Complete in PR #87 |
 | 3 | Delivery choice, address validation, EasyPost sandbox quotes | Complete in PR #88 |
 | 4 | Durable orders, reservations, Stripe Checkout Sessions, webhooks | Complete in PR #89 |
-| 5 | Customer order status, transactional notifications | In progress |
+| 5 | Customer order status, transactional notifications | Complete in PR #90 |
 | 6 | Deal Depot fulfillment, labels, tracking, pickup | Not started |
 | 7 | Refunds, reconciliation, reports, operational alerts | Not started |
 | 8 | Failure hardening, physical shipping pilot, production launch | Not started |
