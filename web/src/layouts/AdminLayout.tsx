@@ -16,6 +16,7 @@ import {
   PanelLeftOpen,
   Play,
   Settings,
+  ShoppingBag,
   ShieldCheck,
   Swords,
   Users,
@@ -56,6 +57,12 @@ const navSections: NavSection[] = [
       { to: '/admin/competitors', icon: Swords, label: 'Competitors' },
       { to: '/admin/academies', icon: Building2, label: 'Academies' },
       { to: '/admin/sponsors', icon: Handshake, label: 'Sponsors' },
+    ],
+  },
+  {
+    label: 'Commerce',
+    items: [
+      { to: '/admin/commerce', icon: ShoppingBag, label: 'Products & Inventory' },
     ],
   },
   {

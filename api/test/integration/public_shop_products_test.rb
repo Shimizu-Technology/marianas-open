@@ -60,4 +60,12 @@ class PublicShopProductsTest < ActionDispatch::IntegrationTest
     get "/api/v1/shop/products"
     assert_response :not_found
   end
+
+  test "exposes store availability without exposing unpublished catalog data" do
+    get "/api/v1/shop/configuration"
+
+    assert_response :success
+    assert_equal true, response.parsed_body["enabled"]
+    assert_equal [ "enabled" ], response.parsed_body.keys
+  end
 end

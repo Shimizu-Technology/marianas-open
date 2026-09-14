@@ -20,7 +20,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img src={logoSrc} alt={org.name} className="h-12 w-12 object-contain" />
+              <img src={logoSrc} onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = LOGO_FALLBACK }} alt={org.name} className="h-12 w-12 object-contain" />
               <span className="font-heading font-bold text-lg uppercase tracking-wider">
                 {org.name}
               </span>

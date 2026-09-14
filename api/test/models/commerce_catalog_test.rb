@@ -71,6 +71,26 @@ class CommerceCatalogTest < ActiveSupport::TestCase
     assert_equal 1, @variant.inventory_movements.count
   end
 
+  test "adjusts an existing inventory level without creating a duplicate" do
+    Commerce::Inventory::AdjustStock.call(
+      variant: @variant,
+      location: @location,
+      quantity_delta: 5,
+      reason: "received"
+    )
+
+    Commerce::Inventory::AdjustStock.call(
+      variant: @variant,
+      location: @location,
+      quantity_delta: 2,
+      reason: "received"
+    )
+
+    assert_equal 1, @variant.inventory_levels.where(inventory_location: @location).count
+    assert_equal 7, @variant.inventory_levels.find_by!(inventory_location: @location).on_hand
+    assert_equal 2, @variant.inventory_movements.count
+  end
+
   test "inventory movements can only be created through the service and cannot be changed" do
     direct_movement = InventoryMovement.new(
       product_variant: @variant,

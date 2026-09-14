@@ -23,8 +23,22 @@ module Commerce
 
       def call
         InventoryLevel.transaction do
-          level = variant.inventory_levels.create_or_find_by!(inventory_location: location)
-          level.lock!
+          ensure_same_organization!
+          now = Time.current
+          InventoryLevel.insert_all(
+            [
+              {
+                product_variant_id: variant.id,
+                inventory_location_id: location.id,
+                on_hand: 0,
+                reserved: 0,
+                created_at: now,
+                updated_at: now
+              }
+            ],
+            unique_by: :idx_inventory_levels_unique
+          )
+          level = InventoryLevel.lock.find_by!(product_variant: variant, inventory_location: location)
           new_balance = level.on_hand + quantity_delta
           if new_balance.negative?
             level.errors.add(:on_hand, "cannot become negative")
@@ -47,6 +61,14 @@ module Commerce
       private
 
       attr_reader :variant, :location, :quantity_delta, :reason, :actor, :note
+
+      def ensure_same_organization!
+        return if variant.product.organization == location.organization
+
+        level = InventoryLevel.new(product_variant: variant, inventory_location: location)
+        level.validate
+        raise ActiveRecord::RecordInvalid, level
+      end
     end
   end
 end
