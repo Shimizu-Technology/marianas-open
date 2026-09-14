@@ -84,8 +84,8 @@ jobs:
           fi
 
           baseline_dir="$(mktemp -d)"
-          baseline_report="${RUNNER_TEMP}/brakeman-base.json"
-          current_report="${RUNNER_TEMP}/brakeman-current.json"
+          baseline_report="${baseline_dir}/api/tmp/brakeman-base.json"
+          current_report="${PWD}/tmp/brakeman-current.json"
           cleanup() {
             git worktree remove --force "${baseline_dir}" >/dev/null 2>&1 || true
           }
@@ -93,11 +93,13 @@ jobs:
 
           git worktree add --detach "${baseline_dir}" "${base_sha}"
           bin/brakeman --quiet --no-pager --path "${baseline_dir}/api" \
-            --format json --no-exit-on-warn --no-exit-on-error \
-            > "${baseline_report}" || true
+            --format json --output "${baseline_report}" \
+            --no-exit-on-warn --no-exit-on-error || true
           bin/brakeman --quiet --no-pager --format json \
-            --no-exit-on-warn --no-exit-on-error \
-            > "${current_report}" || true
+            --output "${current_report}" \
+            --no-exit-on-warn --no-exit-on-error || true
+          test -s "${baseline_report}"
+          test -s "${current_report}"
           ruby -rjson -e '
             baseline = JSON.parse(File.read(ARGV.fetch(0)))
             current = JSON.parse(File.read(ARGV.fetch(1)))
