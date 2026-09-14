@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_060000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_070000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -324,7 +324,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_060000) do
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.bigint "organization_id", null: false
+    t.string "phone"
     t.boolean "pickup_enabled", default: false, null: false
+    t.text "pickup_instructions", default: "", null: false
+    t.boolean "shipping_enabled", default: false, null: false
     t.datetime "updated_at", null: false
     t.index ["organization_id", "code"], name: "index_inventory_locations_on_organization_id_and_code", unique: true
     t.index ["organization_id"], name: "index_inventory_locations_on_organization_id"
@@ -493,6 +496,54 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_060000) do
     t.index ["organization_id", "active", "sort_order"], name: "index_products_on_organization_id_and_active_and_sort_order"
     t.index ["organization_id", "slug"], name: "index_products_on_organization_id_and_slug", unique: true
     t.index ["organization_id"], name: "index_products_on_organization_id"
+  end
+
+  create_table "shipping_packages", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.integer "empty_weight_grams", default: 0, null: false
+    t.integer "height_mm", null: false
+    t.integer "length_mm", null: false
+    t.integer "max_weight_grams", null: false
+    t.string "name", null: false
+    t.bigint "organization_id", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.integer "width_mm", null: false
+    t.index ["organization_id", "active", "sort_order"], name: "idx_on_organization_id_active_sort_order_90fcaae19c"
+    t.index ["organization_id", "name"], name: "index_shipping_packages_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_shipping_packages_on_organization_id"
+    t.check_constraint "empty_weight_grams >= 0", name: "shipping_packages_empty_weight_nonnegative"
+    t.check_constraint "height_mm > 0", name: "shipping_packages_height_positive"
+    t.check_constraint "length_mm > 0", name: "shipping_packages_length_positive"
+    t.check_constraint "max_weight_grams > 0", name: "shipping_packages_max_weight_positive"
+    t.check_constraint "width_mm > 0", name: "shipping_packages_width_positive"
+  end
+
+  create_table "shipping_quotes", force: :cascade do |t|
+    t.integer "amount_cents", null: false
+    t.string "carrier", null: false
+    t.string "cart_digest", null: false
+    t.datetime "created_at", null: false
+    t.string "currency", limit: 3, null: false
+    t.datetime "delivery_date"
+    t.integer "delivery_days"
+    t.string "destination_digest", null: false
+    t.datetime "expires_at", null: false
+    t.bigint "inventory_location_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "provider", default: "easypost", null: false
+    t.string "provider_rate_id", null: false
+    t.string "provider_shipment_id", null: false
+    t.string "service", null: false
+    t.bigint "shipping_package_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expires_at"], name: "index_shipping_quotes_on_expires_at"
+    t.index ["inventory_location_id"], name: "index_shipping_quotes_on_inventory_location_id"
+    t.index ["organization_id"], name: "index_shipping_quotes_on_organization_id"
+    t.index ["provider_rate_id"], name: "index_shipping_quotes_on_provider_rate_id", unique: true
+    t.index ["shipping_package_id"], name: "index_shipping_quotes_on_shipping_package_id"
+    t.check_constraint "amount_cents >= 0", name: "shipping_quotes_amount_nonnegative"
   end
 
   create_table "site_contents", force: :cascade do |t|
@@ -731,6 +782,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_060000) do
   add_foreign_key "product_variant_option_values", "product_variants"
   add_foreign_key "product_variants", "products"
   add_foreign_key "products", "organizations"
+  add_foreign_key "shipping_packages", "organizations"
+  add_foreign_key "shipping_quotes", "inventory_locations"
+  add_foreign_key "shipping_quotes", "organizations"
+  add_foreign_key "shipping_quotes", "shipping_packages"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

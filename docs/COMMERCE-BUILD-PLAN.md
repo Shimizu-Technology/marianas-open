@@ -20,7 +20,7 @@
 |---|---|---|
 | 1 | Catalog, flexible variants, inventory ledger, public catalog API | Complete |
 | 2 | Product and inventory administration, public storefront, cart | Complete in PR #87 |
-| 3 | Delivery choice, address validation, EasyPost sandbox quotes | Not started |
+| 3 | Delivery choice, address validation, EasyPost sandbox quotes | In progress |
 | 4 | Durable orders, reservations, Stripe Checkout Sessions, webhooks | Not started |
 | 5 | Customer order status, transactional notifications | Not started |
 | 6 | Deal Depot fulfillment, labels, tracking, pickup | Not started |
@@ -35,6 +35,16 @@
 - Every stock change goes through the transactional inventory service and records actor, reason, note, quantity delta, and resulting balance.
 - The public storefront appears only when the server-side commerce flag is enabled. It reads price and availability from the API and handles loading, empty, disabled, sold-out, and retry states.
 - The browser cart is versioned and persists only product IDs, variant IDs, and requested quantities. Checkout will re-price and revalidate every line on the server; browser totals will never be authoritative.
+
+## Slice 3 implementation contract
+
+- Staff configure Deal Depot once as both a public pickup point and the ship-from origin. Pickup instructions, phone, and address are customer-facing; inventory codes and stock details are not.
+- Staff configure the actual packed dimensions, empty weight, and maximum packed weight for each package used at Deal Depot. The first active package by operational priority that supports the packed order weight is used for the quote; package measurements must be confirmed during the physical pilot.
+- Checkout offers only methods supported by every item in the bag. Pickup is free and never asks for a shipping address.
+- For delivery, the API reloads active products, current prices, current inventory, allowed fulfillment methods, currency, weights, customs metadata, origin, and package data. Browser-supplied totals or product details are ignored.
+- EasyPost receives the verified destination, Deal Depot origin, package dimensions, total packed weight, and customs items when Guam or another territory/international route requires them. Up to five matching-currency rates are returned in price order.
+- Each rate is persisted without customer address data and returned as a signed, expiring 15-minute reference. The next slice must revalidate that reference and the submitted address/cart before creating an order and opening Stripe Checkout.
+- `EASYPOST_API_KEY` selects real EasyPost test/live behavior. Deterministic fake rates require the explicit local-only `EASYPOST_FAKE_RATES=true`; staging never falls back to fake rates.
 
 ## Live-launch gates
 

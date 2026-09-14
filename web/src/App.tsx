@@ -30,6 +30,7 @@ const ImpactPage = lazy(() => import('./pages/ImpactPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const ShopPage = lazy(() => import('./pages/ShopPage'));
 const ProductPage = lazy(() => import('./pages/ProductPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 
 import CompetitorProfilePage from './pages/CompetitorProfilePage';
 import AcademyPage from './pages/AcademyPage';
@@ -50,6 +51,7 @@ const AnnouncementsAdmin = lazy(() => import('./pages/admin/AnnouncementsAdmin')
 const ImpactAdmin = lazy(() => import('./pages/admin/ImpactAdmin'));
 const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
 const CommerceAdmin = lazy(() => import('./pages/admin/CommerceAdmin'));
+const ShippingAdmin = lazy(() => import('./pages/admin/ShippingAdmin'));
 
 function BannerLayout({ children }: { children: React.ReactNode }) {
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -122,6 +124,7 @@ function AnimatedRoutes() {
             <Route path="/events/past" element={<PastEventsPage />} />
             <Route path="/impact" element={<ImpactPage />} />
             <Route path="/shop" element={<ShopPage />} />
+            <Route path="/shop/checkout" element={<CheckoutPage />} />
             <Route path="/shop/:slug" element={<ProductPage />} />
             <Route path="/events/:slug/gallery" element={<EventGalleryPage />} />
             <Route path="/events/:slug" element={<EventDetailPage />} />
@@ -169,6 +172,7 @@ export default function App() {
           <Route path="announcements" element={<AnnouncementsAdmin />} />
           <Route path="impact" element={<ImpactAdmin />} />
           <Route path="commerce" element={<CommerceAdmin />} />
+          <Route path="commerce/shipping" element={<ShippingAdmin />} />
           <Route path="content" element={<ContentAdmin />} />
           <Route
             path="settings"

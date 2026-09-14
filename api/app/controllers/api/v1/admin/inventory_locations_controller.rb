@@ -36,11 +36,17 @@ module Api
         end
 
         def location_params
-          params.require(:inventory_location).permit(:name, :code, :active, :pickup_enabled, address: {})
+          params.require(:inventory_location).permit(
+            :name, :code, :active, :pickup_enabled, :shipping_enabled, :pickup_instructions, :phone,
+            address: %i[street1 street2 city state zip country]
+          )
         end
 
         def payload(location)
-          location.slice(:id, :name, :code, :active, :pickup_enabled, :address)
+          location.slice(
+            :id, :name, :code, :active, :pickup_enabled, :shipping_enabled,
+            :pickup_instructions, :phone, :address
+          )
         end
       end
     end

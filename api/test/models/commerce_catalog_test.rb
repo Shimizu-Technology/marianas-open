@@ -23,7 +23,10 @@ class CommerceCatalogTest < ActiveSupport::TestCase
     )
     @variant.product_option_values << @a2
     @variant.update!(active: true)
-    @location = @organization.inventory_locations.create!(name: "Deal Depot", code: "deal-depot", pickup_enabled: true)
+    @location = @organization.inventory_locations.create!(
+      name: "Deal Depot", code: "deal-depot", pickup_enabled: true,
+      address: { street1: "123 Marine Corps Drive", city: "Tamuning", state: "GU", zip: "96913", country: "US" }
+    )
   end
 
   test "supports arbitrary product options and normalizes commerce identifiers" do

@@ -21,11 +21,17 @@ export STAGING_PORT="${STAGING_PORT:-8788}"
 keychain_secret() {
   security find-generic-password -a "${KEYCHAIN_ACCOUNT}" -s "$1" -w
 }
+
+optional_keychain_secret() {
+  security find-generic-password -a "${KEYCHAIN_ACCOUNT}" -s "$1" -w 2>/dev/null || true
+}
+
 load_staging_secrets() {
   POSTGRES_PASSWORD="$(keychain_secret marianas-open-staging-postgres)"
   SECRET_KEY_BASE="$(keychain_secret marianas-open-staging-secret-key-base)"
   CLERK_SECRET_KEY="$(keychain_secret marianas-open-staging-clerk-secret-key)"
-  export POSTGRES_PASSWORD SECRET_KEY_BASE CLERK_SECRET_KEY
+  EASYPOST_API_KEY="$(optional_keychain_secret marianas-open-staging-easypost-api-key)"
+  export POSTGRES_PASSWORD SECRET_KEY_BASE CLERK_SECRET_KEY EASYPOST_API_KEY
 }
 
 compose() {

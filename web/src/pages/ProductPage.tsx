@@ -90,8 +90,8 @@ export default function ProductPage() {
             {selectedVariant && selectedVariant.available_quantity > 0 && selectedVariant.available_quantity <= 5 && <p className="mt-3 text-center text-xs font-semibold text-amber-300">Only {selectedVariant.available_quantity} left</p>}
 
             <div className="mt-9 divide-y divide-white/10 border-y border-white/10">{[
-              product.shippable && { icon: Truck, title: 'Shipping at launch', text: 'Live delivery rates are being connected before checkout opens.' },
-              product.pickup_enabled && { icon: MapPin, title: 'Deal Depot pickup at launch', text: 'Pickup details are being finalized before checkout opens.' },
+              product.shippable && { icon: Truck, title: 'Live shipping rates', text: 'Enter your address at checkout to compare available delivery services.' },
+              product.pickup_enabled && { icon: MapPin, title: 'Free Deal Depot pickup', text: 'Choose local pickup at checkout and wait for the ready email.' },
               { icon: ShieldCheck, title: 'Secure checkout coming soon', text: 'Stripe payment will open after delivery testing is complete.' },
             ].filter(Boolean).map(item => item && <div key={item.title} className="flex gap-4 py-4"><item.icon className="mt-0.5 h-5 w-5 shrink-0 text-gold" /><div><h3 className="text-sm font-semibold">{item.title}</h3><p className="mt-1 text-xs leading-5 text-text-muted">{item.text}</p></div><Check className="ml-auto h-4 w-4 text-white/20" /></div>)}</div>
           </section>
