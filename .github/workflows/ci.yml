@@ -75,13 +75,28 @@ jobs:
       - name: Audit Ruby dependencies
         run: bin/bundler-audit check --update
       - name: Scan Rails application
-        run: >-
-          bin/brakeman --quiet --no-pager
-          --ignore-config config/brakeman.ignore
-          --ensure-ignore-notes
-          --ensure-no-obsolete-ignore-entries
-          --exit-on-warn
-          --exit-on-error
+        shell: bash
+        run: |
+          base_sha="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [[ -z "${base_sha}" || "${base_sha}" =~ ^0+$ ]]; then
+            base_sha="HEAD^"
+          fi
+
+          baseline_dir="$(mktemp -d)"
+          baseline_report="${RUNNER_TEMP}/brakeman-base.json"
+          cleanup() {
+            git worktree remove --force "${baseline_dir}" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          git worktree add --detach "${baseline_dir}" "${base_sha}"
+          (
+            cd "${baseline_dir}/api"
+            bundle exec brakeman --quiet --no-pager --format json \
+              --output "${baseline_report}" --no-exit-on-warn --exit-on-error
+          )
+          bin/brakeman --quiet --no-pager --compare "${baseline_report}" \
+            --exit-on-warn --exit-on-error
 
   web:
     name: Web
