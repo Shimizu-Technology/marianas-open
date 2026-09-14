@@ -19,7 +19,7 @@
 | Slice | Scope | Status |
 |---|---|---|
 | 1 | Catalog, flexible variants, inventory ledger, public catalog API | Complete |
-| 2 | Product and inventory administration, public storefront, cart | Implemented; PR review pending |
+| 2 | Product and inventory administration, public storefront, cart | Complete in PR #87 |
 | 3 | Delivery choice, address validation, EasyPost sandbox quotes | Not started |
 | 4 | Durable orders, reservations, Stripe Checkout Sessions, webhooks | Not started |
 | 5 | Customer order status, transactional notifications | Not started |
