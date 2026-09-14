@@ -19,6 +19,8 @@ class ProductImage < ApplicationRecord
 
   def acceptable_image
     return unless image.attached?
+
+    errors.add(:image, "must be smaller than 10 MB") if image.blob.byte_size > 10.megabytes
     return if ACCEPTED_TYPES.include?(image.blob.content_type)
 
     errors.add(:image, "must be a JPEG, PNG, or WebP image")

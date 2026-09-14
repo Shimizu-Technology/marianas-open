@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Menu, X, Shield, Search, ChevronDown } from 'lucide-react';
+import { Menu, X, Shield, Search, ChevronDown, ShoppingBag } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import GlobalSearch from './GlobalSearch';
 import { useOrg } from '../contexts/OrganizationContext';
@@ -10,6 +10,7 @@ import { useTranslatedField } from '../hooks/useTranslatedField';
 import { api } from '../services/api';
 import { getCurrentMainEvent } from '../utils/events';
 import { resolveMediaUrl } from '../utils/images';
+import { useCommerce } from '../contexts/CommerceContext';
 
 const LOGO_FALLBACK = '/images/logos/mo-logo-white.png';
 
@@ -79,6 +80,7 @@ export default function Header() {
   const { events } = useEvents();
   const { tf } = useTranslatedField();
   const [impactVisible, setImpactVisible] = useState(false);
+  const { enabled: commerceEnabled, cartCount, setCartOpen } = useCommerce();
 
   useEffect(() => {
     api.getImpactStatus()
@@ -125,6 +127,7 @@ export default function Header() {
       ],
     },
     ...(impactVisible ? [{ to: '/impact', label: 'Impact' }] : []),
+    ...(commerceEnabled ? [{ to: '/shop', label: 'Shop' }] : []),
     { to: '/watch', label: t('nav.watch') },
   ];
 
@@ -153,6 +156,7 @@ export default function Header() {
       links: [
         { to: '/rules', label: t('nav.rules') },
         ...(impactVisible ? [{ to: '/impact', label: 'Impact' }] : []),
+        ...(commerceEnabled ? [{ to: '/shop', label: 'Shop' }] : []),
         { to: '/watch', label: t('nav.watch') },
       ],
     },
@@ -165,7 +169,7 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0">
-            <img src={logoSrc} alt={org.name} className="h-10 w-10 object-contain" />
+            <img src={logoSrc} onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = LOGO_FALLBACK }} alt={org.name} className="h-10 w-10 object-contain" />
             <div className="hidden sm:block">
               <span className="text-sm font-bold tracking-wider text-text-primary font-heading uppercase">
                 {org.name}
@@ -195,6 +199,16 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-1.5">
+            {commerceEnabled && (
+              <button
+                onClick={() => setCartOpen(true)}
+                className="relative rounded-lg p-2 text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                aria-label={`Open shopping bag${cartCount ? ` with ${cartCount} ${cartCount === 1 ? 'item' : 'items'}` : ''}`}
+              >
+                <ShoppingBag className="h-5 w-5" />
+                {cartCount > 0 && <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[10px] font-bold text-navy-900">{cartCount > 99 ? '99+' : cartCount}</span>}
+              </button>
+            )}
             <button
               onClick={() => setSearchOpen(true)}
               className="text-text-secondary hover:text-text-primary transition-colors p-2 rounded-lg hover:bg-white/5"

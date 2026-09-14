@@ -20,6 +20,7 @@ Rails.application.routes.draw do
       get "impact/status", to: "impact#status"
 
       namespace :shop do
+        get :configuration, to: "configuration#show"
         resources :products, only: %i[index show], param: :slug
       end
 
@@ -112,6 +113,12 @@ Rails.application.routes.draw do
             post :upload
           end
         end
+        resources :products, only: %i[index show create update destroy] do
+          resources :images, controller: "product_images", only: %i[create update destroy]
+          resources :inventory_adjustments, controller: "inventory_adjustments", only: :create,
+            path: "inventory-adjustments"
+        end
+        resources :inventory_locations, path: "inventory-locations", only: %i[index create update]
         resource :organization, only: [ :show, :update ] do
           post :upload_logo, on: :collection
           post :upload_banner, on: :collection

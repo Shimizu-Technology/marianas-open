@@ -725,6 +725,85 @@ export interface ImpactData {
   roi: ImpactROI;
 }
 
+export interface ProductOptionValue {
+  id?: number;
+  client_key?: string;
+  value: string;
+  position?: number;
+}
+
+export interface ProductOption {
+  id?: number;
+  client_key?: string;
+  name: string;
+  position?: number;
+  values: ProductOptionValue[];
+}
+
+export interface ProductImage {
+  id: number;
+  variant_id: number | null;
+  alt_text: string;
+  sort_order?: number;
+  url: string;
+}
+
+export interface ProductVariant {
+  id?: number;
+  name: string;
+  sku: string;
+  active?: boolean;
+  price_cents: number;
+  compare_at_price_cents: number | null;
+  currency: string;
+  allow_shipping: boolean;
+  allow_pickup: boolean;
+  weight_grams?: number | null;
+  length_mm?: number | null;
+  width_mm?: number | null;
+  height_mm?: number | null;
+  customs_description?: string | null;
+  country_of_origin?: string | null;
+  hts_code?: string | null;
+  position?: number;
+  option_value_ids?: number[];
+  selected_value_ids?: number[];
+  selected_value_keys?: string[];
+  available_quantity: number;
+  inventory_levels?: Array<{
+    location_id: number;
+    on_hand: number;
+    reserved: number;
+    available: number;
+  }>;
+}
+
+export interface CommerceProduct {
+  id?: number;
+  name: string;
+  slug: string;
+  description: string;
+  active?: boolean;
+  featured: boolean;
+  shippable: boolean;
+  pickup_enabled: boolean;
+  sort_order?: number;
+  translations?: Record<string, unknown>;
+  collections?: Array<{ id: number; name: string; slug: string }>;
+  images: ProductImage[];
+  options: ProductOption[];
+  variants: ProductVariant[];
+}
+
+export interface InventoryLocation {
+  id: number;
+  name: string;
+  code: string;
+  active: boolean;
+  pickup_enabled: boolean;
+  address: Record<string, string>;
+}
+
 async function authHeaders(requireAuth: boolean, skipCache = false) {
   const headers: Record<string, string> = {};
 
@@ -751,7 +830,10 @@ export class ApiError extends Error {
 async function parseApiError(response: Response, fallback: string) {
   const body = await response.json().catch(() => ({}));
   const message = (body as Record<string, unknown>).error || (body as Record<string, unknown>).errors || fallback;
-  return new ApiError(typeof message === 'string' ? message : JSON.stringify(message), response.status);
+  const readableMessage = Array.isArray(message)
+    ? message.map(String).join(' · ')
+    : typeof message === 'string' ? message : JSON.stringify(message);
+  return new ApiError(readableMessage, response.status);
 }
 
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
@@ -894,6 +976,9 @@ export const api = {
   },
   getImpactData: () => fetchApi<ImpactData>('/api/v1/impact'),
   getImpactStatus: () => fetchApi<{ visible: boolean }>('/api/v1/impact/status'),
+  getShopConfiguration: () => fetchApi<{ enabled: boolean }>('/api/v1/shop/configuration'),
+  getShopProducts: () => fetchApi<{ products: CommerceProduct[] }>('/api/v1/shop/products'),
+  getShopProduct: (slug: string) => fetchApi<{ product: CommerceProduct }>(`/api/v1/shop/products/${encodeURIComponent(slug)}`),
 
   // Auth
   getCurrentUser: () => {
@@ -921,6 +1006,53 @@ export const api = {
 
   // Admin - Events
   admin: {
+    // Commerce
+    getProducts: () => fetchApi<{ products: CommerceProduct[] }>('/api/v1/admin/products', {}, true),
+    getProduct: (id: number) => fetchApi<{ product: CommerceProduct }>(`/api/v1/admin/products/${id}`, {}, true),
+    createProduct: (product: CommerceProduct) =>
+      fetchApi<{ product: CommerceProduct }>('/api/v1/admin/products', {
+        method: 'POST',
+        body: JSON.stringify({ product }),
+      }, true),
+    updateProduct: (id: number, product: CommerceProduct) =>
+      fetchApi<{ product: CommerceProduct }>(`/api/v1/admin/products/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ product }),
+      }, true),
+    deleteProduct: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/products/${id}`, { method: 'DELETE' }, true),
+    getInventoryLocations: () =>
+      fetchApi<{ inventory_locations: InventoryLocation[] }>('/api/v1/admin/inventory-locations', {}, true),
+    createInventoryLocation: (inventory_location: Omit<InventoryLocation, 'id'>) =>
+      fetchApi<{ inventory_location: InventoryLocation }>('/api/v1/admin/inventory-locations', {
+        method: 'POST',
+        body: JSON.stringify({ inventory_location }),
+      }, true),
+    updateInventoryLocation: (id: number, inventory_location: Partial<InventoryLocation>) =>
+      fetchApi<{ inventory_location: InventoryLocation }>(`/api/v1/admin/inventory-locations/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ inventory_location }),
+      }, true),
+    adjustInventory: (productId: number, data: {
+      variant_id: number;
+      location_id: number;
+      quantity_delta: number;
+      reason: string;
+      note: string;
+    }) => fetchApi<{ inventory: { variant_id: number; location_id: number; on_hand: number; available: number; movement_id: number } }>(
+      `/api/v1/admin/products/${productId}/inventory-adjustments`, {
+        method: 'POST',
+        body: JSON.stringify({ inventory_adjustment: data }),
+      }, true),
+    uploadProductImage: (productId: number, file: File, altText: string) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('alt_text', altText);
+      return fetchApiUpload<{ product: CommerceProduct }>(`/api/v1/admin/products/${productId}/images`, formData);
+    },
+    deleteProductImage: (productId: number, imageId: number) =>
+      fetchApi<{ product: CommerceProduct }>(`/api/v1/admin/products/${productId}/images/${imageId}`, { method: 'DELETE' }, true),
+
     getEvents: () => fetchApi<{ events: Event[] }>('/api/v1/admin/events', {}, true),
     getEvent: (id: number) => fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}`, {}, true),
     createEvent: (data: Partial<EventFormData>) =>

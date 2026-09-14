@@ -11,6 +11,8 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import { PostHogPageView } from './providers/PostHogProvider';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import { EventsProvider } from './contexts/EventsContext';
+import { CommerceProvider } from './contexts/CommerceContext';
+import CartDrawer from './components/shop/CartDrawer';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
@@ -26,6 +28,8 @@ const RulesPage = lazy(() => import('./pages/RulesPage'));
 const PastEventsPage = lazy(() => import('./pages/PastEventsPage'));
 const ImpactPage = lazy(() => import('./pages/ImpactPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const ShopPage = lazy(() => import('./pages/ShopPage'));
+const ProductPage = lazy(() => import('./pages/ProductPage'));
 
 import CompetitorProfilePage from './pages/CompetitorProfilePage';
 import AcademyPage from './pages/AcademyPage';
@@ -45,6 +49,7 @@ const AcademiesAdmin = lazy(() => import('./pages/admin/AcademiesAdmin'));
 const AnnouncementsAdmin = lazy(() => import('./pages/admin/AnnouncementsAdmin'));
 const ImpactAdmin = lazy(() => import('./pages/admin/ImpactAdmin'));
 const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
+const CommerceAdmin = lazy(() => import('./pages/admin/CommerceAdmin'));
 
 function BannerLayout({ children }: { children: React.ReactNode }) {
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -116,6 +121,8 @@ function AnimatedRoutes() {
             <Route path="/watch" element={<WatchPage />} />
             <Route path="/events/past" element={<PastEventsPage />} />
             <Route path="/impact" element={<ImpactPage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/shop/:slug" element={<ProductPage />} />
             <Route path="/events/:slug/gallery" element={<EventGalleryPage />} />
             <Route path="/events/:slug" element={<EventDetailPage />} />
             <Route path="*" element={<NotFoundPage />} />
@@ -161,6 +168,7 @@ export default function App() {
           />
           <Route path="announcements" element={<AnnouncementsAdmin />} />
           <Route path="impact" element={<ImpactAdmin />} />
+          <Route path="commerce" element={<CommerceAdmin />} />
           <Route path="content" element={<ContentAdmin />} />
           <Route
             path="settings"
@@ -178,13 +186,16 @@ export default function App() {
           element={
             <OrganizationProvider>
               <EventsProvider>
-                <BannerLayout>
-                  <main>
-                    <AnimatedRoutes />
-                  </main>
-                  <Footer />
-                  <MobileLanguageFAB />
-                </BannerLayout>
+                <CommerceProvider>
+                  <BannerLayout>
+                    <main>
+                      <AnimatedRoutes />
+                    </main>
+                    <Footer />
+                    <MobileLanguageFAB />
+                    <CartDrawer />
+                  </BannerLayout>
+                </CommerceProvider>
               </EventsProvider>
             </OrganizationProvider>
           }

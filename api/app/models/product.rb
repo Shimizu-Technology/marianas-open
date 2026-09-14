@@ -4,6 +4,7 @@ class Product < ApplicationRecord
   has_many :product_collections, through: :product_collection_memberships
   has_many :product_variants, -> { order(:position, :id) }, dependent: :destroy
   has_many :product_options, -> { order(:position, :id) }, dependent: :destroy
+  has_many :product_option_values, through: :product_options
   has_many :product_images, -> { order(:sort_order, :id) }, dependent: :destroy
 
   validates :name, :slug, presence: true
