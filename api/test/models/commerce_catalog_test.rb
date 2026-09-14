@@ -102,4 +102,16 @@ class CommerceCatalogTest < ActiveSupport::TestCase
     assert_not level.valid?
     assert_includes level.errors[:inventory_location], "must belong to the product's organization"
   end
+
+  test "deletes variant option links before deleting product options" do
+    disposable = @organization.products.create!(name: "Disposable", slug: "disposable")
+    option = disposable.product_options.create!(name: "Size")
+    value = option.product_option_values.create!(value: "One size")
+    variant = disposable.product_variants.create!(name: "One size", sku: "DISPOSABLE-ONE", price_cents: 100)
+    variant.product_option_values << value
+
+    assert_difference "ProductVariantOptionValue.count", -1 do
+      disposable.destroy!
+    end
+  end
 end

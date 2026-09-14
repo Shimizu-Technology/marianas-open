@@ -2,8 +2,8 @@ class Product < ApplicationRecord
   belongs_to :organization
   has_many :product_collection_memberships, dependent: :destroy
   has_many :product_collections, through: :product_collection_memberships
-  has_many :product_options, -> { order(:position, :id) }, dependent: :destroy
   has_many :product_variants, -> { order(:position, :id) }, dependent: :destroy
+  has_many :product_options, -> { order(:position, :id) }, dependent: :destroy
   has_many :product_images, -> { order(:sort_order, :id) }, dependent: :destroy
 
   validates :name, :slug, presence: true
