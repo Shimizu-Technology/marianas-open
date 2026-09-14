@@ -71,7 +71,9 @@ Rails.application.configure do
   end
 
   # Active Storage
-  config.active_storage.service = :amazon
+  # Production defaults to S3. Staging can deliberately select local disk so
+  # its test uploads never touch the production bucket.
+  config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "amazon").to_sym
 
   # Keep image processing, mail, and other background work out of the Puma
   # request process. Render should run a separate worker with `bundle exec bin/jobs`.
