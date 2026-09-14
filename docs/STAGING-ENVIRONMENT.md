@@ -13,7 +13,8 @@ Reviewer
   -> Cloudflare Access
   -> mo.shimizu-technology.com
   -> Cloudflare Tunnel on Mac mini
-  -> Tailscale-only origin on MacBook Pro:8788
+  -> Tailscale Serve HTTPS on MacBook Pro
+  -> loopback-only Docker origin:8788
   -> Caddy web container
        -> React static application
        -> Rails API container
@@ -23,7 +24,7 @@ Reviewer
 
 The MacBook Pro is the application host because it has substantially more memory and disk headroom. The Mac mini remains the always-on control plane: it owns the Cloudflare Tunnel and availability monitoring, but it does not take on the Rails, Node, or PostgreSQL workload.
 
-No router ports are opened. The origin binds only to the MacBook's Tailscale address. Cloudflare Access protects the interactive hostname. Provider callbacks use `mo-hooks.shimizu-technology.com`; that hostname is not a substitute for webhook signature verification, replay protection, or rate limiting.
+No router ports are opened. Docker binds only to loopback, and Tailscale Serve forwards tailnet traffic on port 8788 to that loopback origin. Cloudflare Access protects the interactive hostname. Provider callbacks use `mo-hooks.shimizu-technology.com`; that hostname is not a substitute for webhook signature verification, replay protection, or rate limiting.
 
 ## Git flow and review gates
 
@@ -56,13 +57,14 @@ Stripe and shipping webhooks must be configured for `https://mo-hooks.shimizu-te
 The intended service checkout is `/Users/leonshimizu/services/marianas-open-staging`. It is a deployment checkout, not a development worktree.
 
 1. Install Colima and create the dedicated `marianas-open-staging` profile with 4 CPUs, 6 GiB RAM, and a 40 GiB disk.
-2. Copy `ops/staging/runtime.env.example` to `ops/staging/runtime.env`. Bind `STAGING_BIND_ADDRESS` to the MacBook's current Tailscale IPv4 address.
+2. Copy `ops/staging/runtime.env.example` to `ops/staging/runtime.env` and keep `STAGING_BIND_ADDRESS` on `127.0.0.1`.
 3. Store these services under the `marianas-open-staging` account in the macOS login keychain:
    - `marianas-open-staging-postgres`
    - `marianas-open-staging-secret-key-base`
    - `marianas-open-staging-clerk-secret-key`
 4. Install the LaunchAgent plist from `ops/staging/launchd/` into `~/Library/LaunchAgents/`.
 5. Bootstrap it with `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.shimizutechnology.marianas-open-staging.plist`.
+6. Expose the loopback origin only to the tailnet with `tailscale serve --bg --yes 8788`.
 
 The agent checks every three minutes. It never builds source on the host and does not require a GitHub token after the container packages are public.
 

@@ -3,9 +3,10 @@ credentials-file: /Users/jerry/.cloudflared/REPLACE_WITH_TUNNEL_UUID.json
 
 ingress:
   - hostname: mo.shimizu-technology.com
-    service: http://100.94.119.59:8788
+    service: https://leon-mbp-main.tail89afe6.ts.net
     originRequest:
       connectTimeout: 10s
+      httpHostHeader: mo.shimizu-technology.com
   - hostname: mo-hooks.shimizu-technology.com
     service: http_status:404
   - service: http_status:404
