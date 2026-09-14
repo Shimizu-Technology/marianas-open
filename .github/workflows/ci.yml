@@ -78,23 +78,17 @@ jobs:
       - name: Scan Rails application
         shell: bash
         run: |
-          scan_output="$(bin/brakeman --no-pager --no-exit-on-warn --no-exit-on-error 2>&1 || true)"
-          printf '%s\n' "${scan_output}"
-
-          warning_count="$(awk '/^Security Warnings:/ { print $3 }' <<< "${scan_output}")"
-          error_count="$(awk '/^Errors:/ { print $2 }' <<< "${scan_output}")"
-          if [[ ! "${warning_count}" =~ ^[0-9]+$ || ! "${error_count}" =~ ^[0-9]+$ ]]; then
-            printf '%s\n' "Could not read the Brakeman scan summary." >&2
-            exit 1
-          fi
-          if (( error_count > 0 )); then
-            printf '%s\n' "Brakeman reported ${error_count} scan errors." >&2
-            exit 1
-          fi
-          if (( warning_count > 8 )); then
-            printf '%s\n' "Brakeman warnings increased above the inherited baseline of 8." >&2
-            exit 1
-          fi
+          report="${RUNNER_TEMP}/brakeman.json"
+          bundle exec brakeman --quiet --no-pager --format json --output "${report}" \
+            --no-exit-on-warn --no-exit-on-error
+          ruby -rjson -e '
+            report = JSON.parse(File.read(ARGV.fetch(0)))
+            errors = report.dig("scan_info", "errors") || []
+            warning_count = (report["warnings"] || []).length
+            errors.each { |error| warn "Brakeman scan error: #{error}" }
+            warn "Brakeman warnings: #{warning_count} (inherited baseline: 8)"
+            exit 1 if errors.any? || warning_count > 8
+          ' "${report}"
 
   web:
     name: Web
