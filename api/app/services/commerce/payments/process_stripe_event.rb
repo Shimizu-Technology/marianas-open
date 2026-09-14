@@ -53,6 +53,11 @@ module Commerce
 
       def process!(payment_event)
         event_type = value(event, :type)
+        unless COMPLETED_EVENTS.include?(event_type) || RELEASE_EVENTS.key?(event_type)
+          payment_event.update!(status: "ignored", processed_at: Time.current)
+          return
+        end
+
         session = value(value(event, :data), :object)
         order = find_order(session)
         payment_event.order = order
@@ -68,8 +73,6 @@ module Commerce
         elsif RELEASE_EVENTS.key?(event_type)
           Inventory::ReleaseOrder.call(order:, status: RELEASE_EVENTS.fetch(event_type))
           payment_event.status = "processed"
-        else
-          payment_event.status = "ignored"
         end
 
         payment_event.processed_at = Time.current

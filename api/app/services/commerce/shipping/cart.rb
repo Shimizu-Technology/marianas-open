@@ -83,10 +83,14 @@ module Commerce
       def validate_fulfillment!(variant)
         case @fulfillment_method
         when "shipping"
-          raise Error, "#{variant.product.name} cannot be shipped." unless variant.allow_shipping?
+          unless variant.product.shippable? && variant.allow_shipping?
+            raise Error, "#{variant.product.name} cannot be shipped."
+          end
           raise Error, "#{variant.product.name} needs a shipping weight before it can be delivered." unless variant.weight_grams&.positive?
         when "pickup"
-          raise Error, "#{variant.product.name} is not available for pickup." unless variant.allow_pickup?
+          unless variant.product.pickup_enabled? && variant.allow_pickup?
+            raise Error, "#{variant.product.name} is not available for pickup."
+          end
         else
           raise Error, "Choose delivery or Deal Depot pickup."
         end

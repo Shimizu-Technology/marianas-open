@@ -21,7 +21,7 @@ function serviceName(value: string) {
 }
 
 export default function CheckoutPage() {
-  const { enabled, loading: commerceLoading, cartLines } = useCommerce()
+  const { enabled, loading: commerceLoading, cartLines, rememberCheckout } = useCommerce()
   const [configuration, setConfiguration] = useState<FulfillmentConfiguration | null>(null)
   const [method, setMethod] = useState<'shipping' | 'pickup'>('shipping')
   const [address, setAddress] = useState<ShippingAddress>({ name: '', street1: '', street2: '', city: '', state: '', zip: '', country: 'US', phone: '', email: '' })
@@ -33,8 +33,8 @@ export default function CheckoutPage() {
   const [checkoutKey, setCheckoutKey] = useState(() => crypto.randomUUID())
   const [error, setError] = useState('')
 
-  const canShip = cartLines.length > 0 && cartLines.every(line => line.variant.allow_shipping) && Boolean(configuration?.shipping_available)
-  const canPickup = cartLines.length > 0 && cartLines.every(line => line.variant.allow_pickup) && Boolean(configuration?.pickup_locations.length)
+  const canShip = cartLines.length > 0 && cartLines.every(line => line.product.shippable && line.variant.allow_shipping) && Boolean(configuration?.shipping_available)
+  const canPickup = cartLines.length > 0 && cartLines.every(line => line.product.pickup_enabled && line.variant.allow_pickup) && Boolean(configuration?.pickup_locations.length)
   const currencies = [...new Set(cartLines.map(line => line.variant.currency))]
   const currency = currencies[0] || 'USD'
   const subtotal = cartLines.reduce((sum, line) => sum + line.variant.price_cents * line.quantity, 0)
@@ -111,6 +111,7 @@ export default function CheckoutPage() {
           ? { shipping_quote_token: selectedRate?.token, shipping_address: address }
           : { pickup_location_id: pickup?.id, contact }),
       })
+      rememberCheckout(result.order_token)
       window.location.assign(result.checkout_url)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Secure checkout could not be started.')

@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { api, type CommerceProduct, type ProductVariant } from '../services/api'
 
 const storageKey = 'marianas-open-cart-v1'
+const activeCheckoutStorageKey = 'marianas-open-active-checkout-v1'
 
 export interface CartLine {
   productId: number
@@ -16,6 +17,7 @@ export interface ResolvedCartLine extends CartLine {
 
 interface CommerceContextValue {
   enabled: boolean
+  fakeCheckoutEnabled: boolean
   loading: boolean
   error: string
   products: CommerceProduct[]
@@ -27,6 +29,8 @@ interface CommerceContextValue {
   updateQuantity: (variantId: number, quantity: number) => void
   removeFromCart: (variantId: number) => void
   clearCart: () => void
+  rememberCheckout: (orderToken: string) => void
+  clearCartForCheckout: (orderToken: string) => void
   reload: () => Promise<void>
 }
 
@@ -45,8 +49,15 @@ function readStoredCart(): CartLine[] {
   }
 }
 
+function cartSignature(lines: CartLine[]) {
+  return JSON.stringify([...lines]
+    .sort((left, right) => left.variantId - right.variantId)
+    .map(({ productId, variantId, quantity }) => [productId, variantId, quantity]))
+}
+
 export function CommerceProvider({ children }: { children: ReactNode }) {
   const [enabled, setEnabled] = useState(false)
+  const [fakeCheckoutEnabled, setFakeCheckoutEnabled] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [products, setProducts] = useState<CommerceProduct[]>([])
@@ -59,6 +70,7 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
     try {
       const configuration = await api.getShopConfiguration()
       setEnabled(configuration.enabled)
+      setFakeCheckoutEnabled(configuration.fake_checkout_enabled)
       if (!configuration.enabled) {
         setProducts([])
         return
@@ -121,9 +133,30 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const clearCart = useCallback(() => setCart([]), [])
+  const rememberCheckout = useCallback((orderToken: string) => {
+    try {
+      window.sessionStorage.setItem(activeCheckoutStorageKey, JSON.stringify({
+        orderToken,
+        cartSignature: cartSignature(cart),
+      }))
+    } catch { /* Storage can be unavailable. */ }
+  }, [cart])
+  const clearCartForCheckout = useCallback((orderToken: string) => {
+    setCart(current => {
+      try {
+        const marker = JSON.parse(window.sessionStorage.getItem(activeCheckoutStorageKey) || 'null')
+        if (marker?.orderToken !== orderToken || marker?.cartSignature !== cartSignature(current)) return current
+        window.sessionStorage.removeItem(activeCheckoutStorageKey)
+        return []
+      } catch {
+        return current
+      }
+    })
+  }, [])
 
   const value = useMemo<CommerceContextValue>(() => ({
     enabled,
+    fakeCheckoutEnabled,
     loading,
     error,
     products,
@@ -135,8 +168,10 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
     updateQuantity,
     removeFromCart,
     clearCart,
+    rememberCheckout,
+    clearCartForCheckout,
     reload,
-  }), [enabled, loading, error, products, cartLines, cartOpen, addToCart, updateQuantity, removeFromCart, clearCart, reload])
+  }), [enabled, fakeCheckoutEnabled, loading, error, products, cartLines, cartOpen, addToCart, updateQuantity, removeFromCart, clearCart, rememberCheckout, clearCartForCheckout, reload])
 
   return <CommerceContext.Provider value={value}>{children}</CommerceContext.Provider>
 }

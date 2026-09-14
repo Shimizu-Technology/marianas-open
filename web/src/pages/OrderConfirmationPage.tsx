@@ -22,31 +22,32 @@ const statusContent = {
 export default function OrderConfirmationPage() {
   const { token = '' } = useParams()
   const [searchParams] = useSearchParams()
-  const { clearCart } = useCommerce()
+  const { clearCartForCheckout, fakeCheckoutEnabled } = useCommerce()
   const [order, setOrder] = useState<CommerceOrder | null>(null)
   const [loading, setLoading] = useState(true)
   const [completingTest, setCompletingTest] = useState(false)
   const [error, setError] = useState('')
+  const localTestCheckout = fakeCheckoutEnabled && searchParams.get('test_checkout') === '1'
 
   const loadOrder = useCallback(async () => {
     try {
       const result = await api.getShopOrder(token)
       setOrder(result.order)
       setError('')
-      if (result.order.status === 'paid') clearCart()
+      if (result.order.status === 'paid') clearCartForCheckout(token)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'We could not load this order.')
     } finally {
       setLoading(false)
     }
-  }, [token, clearCart])
+  }, [token, clearCartForCheckout])
 
   useEffect(() => { void loadOrder() }, [loadOrder])
   useEffect(() => {
-    if (order?.status !== 'pending_payment' || searchParams.get('test_checkout') === '1') return
+    if (order?.status !== 'pending_payment' || localTestCheckout) return
     const interval = window.setInterval(() => void loadOrder(), 2500)
     return () => window.clearInterval(interval)
-  }, [order?.status, searchParams, loadOrder])
+  }, [order?.status, localTestCheckout, loadOrder])
 
   const completeTestPayment = async () => {
     setCompletingTest(true)
@@ -54,7 +55,7 @@ export default function OrderConfirmationPage() {
     try {
       const result = await api.completeTestPayment(token)
       setOrder(result.order)
-      clearCart()
+      clearCartForCheckout(token)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'The test payment could not be completed.')
     } finally {
@@ -80,11 +81,11 @@ export default function OrderConfirmationPage() {
           {searchParams.get('payment') === 'cancelled' && order.status === 'pending_payment' && <div className="mt-5 rounded-xl border border-amber-300/25 bg-amber-300/[0.07] p-4 text-sm text-amber-100">Nothing was charged. Your items are still held, so you can safely resume this same checkout without creating another order.</div>}
           {error && <div role="alert" className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-100">{error}</div>}
 
-          {searchParams.get('test_checkout') === '1' && order.status === 'pending_payment' && (
+          {localTestCheckout && order.status === 'pending_payment' && (
             <div className="mt-7 rounded-2xl border border-sky-300/25 bg-sky-300/[0.06] p-5"><p className="font-semibold text-sky-100">Local Stripe test substitute</p><p className="mt-2 text-sm leading-6 text-text-secondary">This button simulates Stripe’s signed payment-complete webhook for local browser testing. Staging and production never expose it.</p><button type="button" onClick={() => void completeTestPayment()} disabled={completingTest} className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold px-5 py-3 text-sm font-bold text-navy-900 disabled:opacity-50">{completingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />} Complete test payment</button></div>
           )}
 
-          {order.status === 'pending_payment' && searchParams.get('test_checkout') !== '1' && <button type="button" onClick={() => void loadOrder()} className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-gold"><RefreshCw className="h-4 w-4" /> Check payment status</button>}
+          {order.status === 'pending_payment' && !localTestCheckout && <button type="button" onClick={() => void loadOrder()} className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-gold"><RefreshCw className="h-4 w-4" /> Check payment status</button>}
           {order.status === 'pending_payment' && order.checkout_url && searchParams.get('payment') === 'cancelled' && <a href={order.checkout_url} className="ml-5 mt-6 inline-flex rounded-full bg-gold px-5 py-3 text-sm font-bold text-navy-900">Resume secure payment</a>}
 
           <div className="mt-8 grid gap-6 border-t border-white/10 pt-8 lg:grid-cols-[1.15fr_.85fr]">

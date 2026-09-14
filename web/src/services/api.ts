@@ -1076,7 +1076,7 @@ export const api = {
   },
   getImpactData: () => fetchApi<ImpactData>('/api/v1/impact'),
   getImpactStatus: () => fetchApi<{ visible: boolean }>('/api/v1/impact/status'),
-  getShopConfiguration: () => fetchApi<{ enabled: boolean }>('/api/v1/shop/configuration'),
+  getShopConfiguration: () => fetchApi<{ enabled: boolean; fake_checkout_enabled: boolean }>('/api/v1/shop/configuration'),
   getShopProducts: () => fetchApi<{ products: CommerceProduct[] }>('/api/v1/shop/products'),
   getShopProduct: (slug: string) => fetchApi<{ product: CommerceProduct }>(`/api/v1/shop/products/${encodeURIComponent(slug)}`),
   getShopFulfillment: () => fetchApi<FulfillmentConfiguration>('/api/v1/shop/fulfillment'),

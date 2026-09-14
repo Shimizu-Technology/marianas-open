@@ -8,10 +8,14 @@ module Commerce
     class IndeterminateCheckoutError < Error; end
     class WebhookError < Error; end
 
+    def self.fake_checkout_enabled?
+      Rails.env.development? && ActiveModel::Type::Boolean.new.cast(ENV["STRIPE_FAKE_CHECKOUT"])
+    end
+
     def self.gateway
       if ENV["STRIPE_API_KEY"].present?
         StripeGateway.new(api_key: ENV.fetch("STRIPE_API_KEY"))
-      elsif Rails.env.development? && ActiveModel::Type::Boolean.new.cast(ENV["STRIPE_FAKE_CHECKOUT"])
+      elsif fake_checkout_enabled?
         DevelopmentGateway.new
       else
         raise ConfigurationError, "Secure payment is not configured yet. Please try again later."

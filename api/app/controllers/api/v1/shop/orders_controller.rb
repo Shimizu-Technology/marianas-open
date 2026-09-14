@@ -10,9 +10,7 @@ module Api
         end
 
         def test_payment
-          unless Rails.env.development? && ActiveModel::Type::Boolean.new.cast(ENV["STRIPE_FAKE_CHECKOUT"])
-            return head :not_found
-          end
+          return head :not_found unless Commerce::Payments.fake_checkout_enabled?
 
           order = Order.find_public_token!(params[:id])
           raise ActiveRecord::RecordNotFound unless order.stripe_checkout_session_id.to_s.start_with?("cs_test_dev_")

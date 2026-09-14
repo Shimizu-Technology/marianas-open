@@ -19,6 +19,14 @@ module Commerce
         raise CheckoutError, readable_error(e)
       end
 
+      def retrieve_checkout_session(id)
+        @client.v1.checkout.sessions.retrieve(id, {})
+      rescue Stripe::APIConnectionError => e
+        raise IndeterminateCheckoutError, readable_error(e)
+      rescue Stripe::StripeError => e
+        raise CheckoutError, readable_error(e)
+      end
+
       private
 
       def checkout_attributes(order)
@@ -49,16 +57,27 @@ module Commerce
             quantity: item.quantity
           }
         end
-        return items unless order.shipping_cents.positive?
-
-        items << {
-          price_data: {
-            currency: order.currency.downcase,
-            unit_amount: order.shipping_cents,
-            product_data: { name: "#{order.shipping_carrier} #{order.shipping_service} delivery" }
-          },
-          quantity: 1
-        }
+        if order.shipping_cents.positive?
+          items << {
+            price_data: {
+              currency: order.currency.downcase,
+              unit_amount: order.shipping_cents,
+              product_data: { name: "#{order.shipping_carrier} #{order.shipping_service} delivery" }
+            },
+            quantity: 1
+          }
+        end
+        if order.tax_cents.positive?
+          items << {
+            price_data: {
+              currency: order.currency.downcase,
+              unit_amount: order.tax_cents,
+              product_data: { name: "Tax" }
+            },
+            quantity: 1
+          }
+        end
+        items
       end
 
       def frontend_url

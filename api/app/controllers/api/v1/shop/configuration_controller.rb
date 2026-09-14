@@ -3,7 +3,10 @@ module Api
     module Shop
       class ConfigurationController < ApplicationController
         def show
-          render json: { enabled: Commerce::Configuration.enabled? }
+          render json: {
+            enabled: Commerce::Configuration.enabled?,
+            fake_checkout_enabled: Commerce::Payments.fake_checkout_enabled?
+          }
         end
       end
     end

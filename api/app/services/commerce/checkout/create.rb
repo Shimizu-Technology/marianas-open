@@ -9,7 +9,10 @@ module Commerce
 
       def call
         order = find_or_create_reserved_order!
-        return checkout_payload(order) if order.stripe_checkout_url.present? && (order.pending_payment? || order.paid?)
+        return checkout_payload(order) if order.paid? && order.stripe_checkout_url.present?
+        if order.pending_payment? && order.payment_expires_at.future? && order.stripe_checkout_url.present?
+          return checkout_payload(order)
+        end
         ensure_retryable!(order)
 
         session = gateway.create_checkout_session(order:)
@@ -39,7 +42,11 @@ module Commerce
       def ensure_retryable!(order)
         return if order.pending_payment? && order.payment_expires_at.future? && order.inventory_reservations.active.exists?
 
-        Inventory::ReleaseOrder.call(order:, status: "expired") if order.pending_payment? && !order.payment_expires_at.future?
+        if order.pending_payment? && !order.payment_expires_at.future?
+          raise Payments::IndeterminateCheckoutError,
+            "We’re confirming whether this checkout completed. Please wait a moment and try again."
+        end
+
         raise Payments::CheckoutError, "That checkout attempt could not be resumed. Please try again."
       end
 

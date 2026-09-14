@@ -7,8 +7,12 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
   class FakeStripeGateway
     attr_reader :orders
 
-    def initialize
+    def initialize(status: "expired", payment_status: "unpaid", amount_total: nil, currency: nil)
       @orders = []
+      @status = status
+      @payment_status = payment_status
+      @amount_total = amount_total
+      @currency = currency
     end
 
     def create_checkout_session(order:)
@@ -17,6 +21,17 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
         id: "cs_test_#{order.id}",
         url: "https://checkout.stripe.test/#{order.number}"
       }
+    end
+
+    def retrieve_checkout_session(id)
+      order = Order.find_by!(stripe_checkout_session_id: id)
+      Struct.new(:status, :payment_status, :amount_total, :currency, :payment_intent).new(
+        @status,
+        @payment_status,
+        @amount_total || order.total_cents,
+        @currency || order.currency.downcase,
+        "pi_reconciled_test"
+      )
     end
   end
 
@@ -224,17 +239,62 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
   end
 
   test "an expired payment releases reserved stock" do
-    with_gateway(FakeStripeGateway.new) do
+    gateway = FakeStripeGateway.new
+    with_gateway(gateway) do
       post "/api/v1/shop/checkout-sessions", params: pickup_payload, as: :json
     end
     order = Order.last
     order.update_column(:payment_expires_at, 1.minute.ago)
 
-    ReleaseExpiredOrderJob.perform_now(order.id)
+    with_gateway(gateway) { ReleaseExpiredOrderJob.perform_now(order.id) }
 
     assert_equal "expired", order.reload.status
     assert_equal 0, @level.reload.reserved
     assert_equal 8, @level.on_hand
+  end
+
+  test "expiration reconciliation captures a payment that arrived before its delayed webhook" do
+    gateway = FakeStripeGateway.new(status: "complete", payment_status: "paid")
+    with_gateway(gateway) do
+      post "/api/v1/shop/checkout-sessions", params: pickup_payload, as: :json
+    end
+    order = Order.last
+
+    Commerce::Payments::ReconcileOrder.call(order:, gateway:)
+
+    assert_equal "paid", order.reload.status
+    assert_equal "pi_reconciled_test", order.stripe_payment_intent_id
+    assert_equal 6, @level.reload.on_hand
+    assert_equal 0, @level.reserved
+  end
+
+  test "expiration reconciliation keeps inventory reserved while Stripe still reports an open session" do
+    gateway = FakeStripeGateway.new(status: "open", payment_status: "unpaid")
+    with_gateway(gateway) do
+      post "/api/v1/shop/checkout-sessions", params: pickup_payload, as: :json
+    end
+    order = Order.last
+
+    assert_raises(Commerce::Payments::IndeterminateCheckoutError) do
+      Commerce::Payments::ReconcileOrder.call(order:, gateway:)
+    end
+
+    assert_equal "pending_payment", order.reload.status
+    assert_equal 2, @level.reload.reserved
+  end
+
+  test "retrying an expired checkout preserves its grace-period reservation" do
+    gateway = FakeStripeGateway.new
+    payload = pickup_payload
+    with_gateway(gateway) do
+      post "/api/v1/shop/checkout-sessions", params: payload, as: :json
+      Order.last.update_column(:payment_expires_at, 1.minute.ago)
+      post "/api/v1/shop/checkout-sessions", params: payload, as: :json
+    end
+
+    assert_response :service_unavailable
+    assert_equal "pending_payment", Order.last.reload.status
+    assert_equal 2, @level.reload.reserved
   end
 
   test "a mismatched Stripe total is rejected without consuming inventory" do
@@ -263,6 +323,7 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
       post "/api/v1/shop/checkout-sessions", params: pickup_payload, as: :json
     end
     order = Order.last
+    order.update!(tax_cents: 300, total_cents: order.total_cents + 300)
     captured = nil
     session_service = Object.new
     session_service.define_singleton_method(:create) do |params, options|
@@ -278,6 +339,8 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
     assert_equal "2026-07-29.dahlia", Commerce::Payments::StripeGateway::API_VERSION
     assert_equal 3_500, captured.dig(:params, :line_items, 0, :price_data, :unit_amount)
     assert_equal 2, captured.dig(:params, :line_items, 0, :quantity)
+    assert_equal 300, captured.dig(:params, :line_items, 1, :price_data, :unit_amount)
+    assert_equal "Tax", captured.dig(:params, :line_items, 1, :price_data, :product_data, :name)
     assert_equal order.number, captured.dig(:params, :metadata, :order_number)
     assert_equal "commerce-order-#{order.id}", captured.dig(:options, :idempotency_key)
     assert_match(/\Amarianas_open_[a-z]{8}\z/, captured.dig(:params, :integration_identifier))
@@ -293,6 +356,19 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_equal 0, PaymentEvent.count
+  end
+
+  test "signed Stripe events outside the checkout lifecycle are safely ignored" do
+    ENV["STRIPE_WEBHOOK_SECRET"] = "whsec_checkout_test"
+    payload = { id: "evt_unrelated", type: "payment_intent.created", data: { object: { id: "pi_other" } } }.to_json
+
+    post "/api/v1/webhooks/stripe", params: payload,
+      headers: { "CONTENT_TYPE" => "application/json", "Stripe-Signature" => stripe_signature(payload, ENV.fetch("STRIPE_WEBHOOK_SECRET")) }
+
+    assert_response :success
+    event = PaymentEvent.find_by!(provider_event_id: "evt_unrelated")
+    assert_equal "ignored", event.status
+    assert_nil event.order
   end
 
   test "public order lookup uses the signed token and the local payment route is development-only" do
