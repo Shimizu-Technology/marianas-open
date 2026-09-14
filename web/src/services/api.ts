@@ -801,7 +801,66 @@ export interface InventoryLocation {
   code: string;
   active: boolean;
   pickup_enabled: boolean;
+  shipping_enabled: boolean;
+  pickup_instructions: string;
+  phone: string | null;
   address: Record<string, string>;
+}
+
+export interface ShippingPackage {
+  id?: number;
+  name: string;
+  length_mm: number;
+  width_mm: number;
+  height_mm: number;
+  empty_weight_grams: number;
+  max_weight_grams: number;
+  sort_order: number;
+  active: boolean;
+}
+
+export interface FulfillmentConfiguration {
+  shipping_available: boolean;
+  pickup_locations: Array<{
+    id: number;
+    name: string;
+    pickup_instructions: string;
+    phone: string | null;
+    address: Record<string, string>;
+  }>;
+}
+
+export interface ShippingAddress {
+  name: string;
+  company?: string;
+  street1: string;
+  street2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  phone?: string;
+  email?: string;
+}
+
+export interface ShippingRateQuote {
+  token: string;
+  carrier: string;
+  service: string;
+  amount_cents: number;
+  currency: string;
+  delivery_days: number | null;
+  delivery_date: string | null;
+  expires_at: string;
+}
+
+export interface ShippingQuoteResponse {
+  address: ShippingAddress;
+  messages: string[];
+  subtotal_cents: number;
+  currency: string;
+  expires_at: string;
+  rates: ShippingRateQuote[];
 }
 
 async function authHeaders(requireAuth: boolean, skipCache = false) {
@@ -979,6 +1038,12 @@ export const api = {
   getShopConfiguration: () => fetchApi<{ enabled: boolean }>('/api/v1/shop/configuration'),
   getShopProducts: () => fetchApi<{ products: CommerceProduct[] }>('/api/v1/shop/products'),
   getShopProduct: (slug: string) => fetchApi<{ product: CommerceProduct }>(`/api/v1/shop/products/${encodeURIComponent(slug)}`),
+  getShopFulfillment: () => fetchApi<FulfillmentConfiguration>('/api/v1/shop/fulfillment'),
+  createShippingQuote: (data: { cart: Array<{ variant_id: number; quantity: number }>; address: ShippingAddress }) =>
+    fetchApi<ShippingQuoteResponse>('/api/v1/shop/shipping-quotes', {
+      method: 'POST',
+      body: JSON.stringify({ shipping_quote: data }),
+    }),
 
   // Auth
   getCurrentUser: () => {
@@ -1033,6 +1098,20 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify({ inventory_location }),
       }, true),
+    getShippingPackages: () =>
+      fetchApi<{ shipping_packages: ShippingPackage[] }>('/api/v1/admin/shipping-packages', {}, true),
+    createShippingPackage: (shipping_package: ShippingPackage) =>
+      fetchApi<{ shipping_package: ShippingPackage }>('/api/v1/admin/shipping-packages', {
+        method: 'POST',
+        body: JSON.stringify({ shipping_package }),
+      }, true),
+    updateShippingPackage: (id: number, shipping_package: Partial<ShippingPackage>) =>
+      fetchApi<{ shipping_package: ShippingPackage }>(`/api/v1/admin/shipping-packages/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ shipping_package }),
+      }, true),
+    deleteShippingPackage: (id: number) =>
+      fetchApi<void>(`/api/v1/admin/shipping-packages/${id}`, { method: 'DELETE' }, true),
     adjustInventory: (productId: number, data: {
       variant_id: number;
       location_id: number;

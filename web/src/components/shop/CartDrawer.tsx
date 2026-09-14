@@ -1,5 +1,6 @@
 import { Minus, Plus, ShoppingBag, Trash2, Truck, X } from 'lucide-react'
 import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useCommerce } from '../../contexts/CommerceContext'
 import ProductArtwork from './ProductArtwork'
 
@@ -79,7 +80,7 @@ export default function CartDrawer() {
           <div className="border-t border-white/10 bg-white/[0.025] px-5 py-5 sm:px-7">
             <div className="flex items-start justify-between gap-4"><span className="text-sm text-text-secondary">Subtotal</span><div className="text-right">{[...subtotals].map(([currency, cents]) => <strong key={currency} className="block font-heading text-xl">{money(cents, currency)}</strong>)}</div></div>
             <p className="mt-2 flex items-center gap-2 text-xs leading-5 text-text-muted"><Truck className="h-4 w-4 shrink-0" /> Shipping or Deal Depot pickup will be calculated at checkout.</p>
-            <button disabled className="mt-5 w-full rounded-full bg-white/10 px-5 py-3.5 text-sm font-bold text-white/45">Secure checkout coming next</button>
+            <Link to="/shop/checkout" onClick={() => setCartOpen(false)} className="mt-5 flex w-full items-center justify-center rounded-full bg-gold px-5 py-3.5 text-sm font-bold text-navy-900 transition hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">Choose delivery or pickup</Link>
           </div>
         )}
       </section>

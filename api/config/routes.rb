@@ -21,6 +21,8 @@ Rails.application.routes.draw do
 
       namespace :shop do
         get :configuration, to: "configuration#show"
+        get :fulfillment, to: "fulfillment#show"
+        resources :shipping_quotes, only: :create, path: "shipping-quotes"
         resources :products, only: %i[index show], param: :slug
       end
 
@@ -119,6 +121,7 @@ Rails.application.routes.draw do
             path: "inventory-adjustments"
         end
         resources :inventory_locations, path: "inventory-locations", only: %i[index create update]
+        resources :shipping_packages, path: "shipping-packages", only: %i[index create update destroy]
         resource :organization, only: [ :show, :update ] do
           post :upload_logo, on: :collection
           post :upload_banner, on: :collection

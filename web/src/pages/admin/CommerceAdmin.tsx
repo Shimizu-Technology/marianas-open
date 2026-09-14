@@ -7,7 +7,6 @@ import {
   ChevronUp,
   ImagePlus,
   Loader2,
-  MapPin,
   PackagePlus,
   Plus,
   RefreshCw,
@@ -88,7 +87,7 @@ export default function CommerceAdmin() {
   const [inventoryVariant, setInventoryVariant] = useState<ProductVariant | null>(null)
   const [adjustment, setAdjustment] = useState({ location_id: '', quantity_delta: '', reason: 'received', note: '' })
   const [showLocationForm, setShowLocationForm] = useState(false)
-  const [locationForm, setLocationForm] = useState({ name: 'Deal Depot', code: 'DEAL-DEPOT', pickup_enabled: true })
+  const [locationForm, setLocationForm] = useState({ name: 'Deal Depot', code: 'DEAL-DEPOT' })
 
   const load = async () => {
     setLoading(true); setError('')
@@ -235,7 +234,10 @@ export default function CommerceAdmin() {
   const createLocation = async () => {
     setSaving(true); setError('')
     try {
-      const response = await api.admin.createInventoryLocation({ ...locationForm, active: true, address: {} })
+      const response = await api.admin.createInventoryLocation({
+        ...locationForm, active: true, pickup_enabled: false, shipping_enabled: false,
+        pickup_instructions: '', phone: null, address: {},
+      })
       setLocations(current => [...current, response.inventory_location]); setShowLocationForm(false); setAdjustment(current => ({ ...current, location_id: String(response.inventory_location.id) })); setNotice('Inventory location added.')
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Location could not be added.') }
     finally { setSaving(false) }
@@ -288,7 +290,7 @@ export default function CommerceAdmin() {
 
       {inventoryVariant && <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"><button className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setInventoryVariant(null)} aria-label="Close inventory dialog" /><div role="dialog" aria-modal="true" aria-labelledby="inventory-title" className="relative w-full max-w-lg rounded-t-2xl border border-white/10 bg-surface p-6 shadow-2xl sm:rounded-2xl"><div className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Inventory adjustment</p><h2 id="inventory-title" className="mt-2 font-heading text-xl font-semibold">{inventoryVariant.name}</h2><p className="mt-1 text-sm text-text-muted">{inventoryVariant.sku} · {inventoryVariant.available_quantity} available</p></div><button onClick={() => setInventoryVariant(null)} className="p-2 text-text-muted hover:text-white" aria-label="Close"><X className="h-5 w-5" /></button></div>{locations.length === 0 ? <div className="mt-6 rounded-xl border border-amber-300/20 bg-amber-300/5 p-4"><p className="text-sm text-amber-100">Add an inventory location before recording stock.</p><button onClick={() => setShowLocationForm(true)} className="mt-3 text-sm font-bold text-gold">Add Deal Depot</button></div> : <div className="mt-6 space-y-4"><Field label="Location"><select className={inputClass} value={adjustment.location_id} onChange={event => setAdjustment(current => ({ ...current, location_id: event.target.value }))}><option value="">Choose location</option>{locations.filter(location => location.active).map(location => <option key={location.id} value={location.id}>{location.name}</option>)}</select></Field><div className="grid grid-cols-2 gap-4"><Field label="Quantity change" hint="Use a negative number to remove stock."><input className={inputClass} type="number" step="1" value={adjustment.quantity_delta} onChange={event => setAdjustment(current => ({ ...current, quantity_delta: event.target.value }))} placeholder="12" /></Field><Field label="Reason"><select className={inputClass} value={adjustment.reason} onChange={event => setAdjustment(current => ({ ...current, reason: event.target.value }))}>{['received', 'adjustment', 'correction', 'returned', 'damaged'].map(reason => <option key={reason} value={reason}>{reason[0].toUpperCase() + reason.slice(1)}</option>)}</select></Field></div><Field label="Note" hint="Creates a permanent audit record."><input className={inputClass} value={adjustment.note} onChange={event => setAdjustment(current => ({ ...current, note: event.target.value }))} placeholder="Opening inventory count" /></Field><button onClick={() => void adjustInventory()} disabled={saving || !adjustment.location_id || !adjustment.quantity_delta || Number(adjustment.quantity_delta) === 0} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 text-sm font-bold text-navy-900 disabled:opacity-40">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Record adjustment</button></div>}</div></div>}
 
-      {showLocationForm && <div className="fixed inset-0 z-[60] flex items-center justify-center px-4"><button className="absolute inset-0 bg-black/75" onClick={() => setShowLocationForm(false)} aria-label="Close location dialog" /><div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-surface p-6"><MapPin className="h-6 w-6 text-gold" /><h2 className="mt-4 font-heading text-xl font-semibold">Add inventory location</h2><div className="mt-5 space-y-4"><Field label="Location name"><input className={inputClass} value={locationForm.name} onChange={event => setLocationForm(current => ({ ...current, name: event.target.value }))} /></Field><Field label="Location code"><input className={inputClass} value={locationForm.code} onChange={event => setLocationForm(current => ({ ...current, code: skuify(event.target.value) }))} /></Field><Toggle checked={locationForm.pickup_enabled} onChange={value => setLocationForm(current => ({ ...current, pickup_enabled: value }))} label="Customer pickup" description="Customers can collect ready orders here" /><button onClick={() => void createLocation()} disabled={saving || !locationForm.name || !locationForm.code} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 text-sm font-bold text-navy-900 disabled:opacity-40"><Plus className="h-4 w-4" /> Add location</button></div></div></div>}
+      {showLocationForm && <div className="fixed inset-0 z-[60] flex items-center justify-center px-4"><button className="absolute inset-0 bg-black/75" onClick={() => setShowLocationForm(false)} aria-label="Close location dialog" /><div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-surface p-6"><Boxes className="h-6 w-6 text-gold" /><h2 className="mt-4 font-heading text-xl font-semibold">Add inventory location</h2><p className="mt-2 text-sm leading-6 text-text-muted">This creates a stock location. Configure its public pickup and shipping address under Pickup & Shipping.</p><div className="mt-5 space-y-4"><Field label="Location name"><input className={inputClass} value={locationForm.name} onChange={event => setLocationForm(current => ({ ...current, name: event.target.value }))} /></Field><Field label="Location code"><input className={inputClass} value={locationForm.code} onChange={event => setLocationForm(current => ({ ...current, code: skuify(event.target.value) }))} /></Field><button onClick={() => void createLocation()} disabled={saving || !locationForm.name || !locationForm.code} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 text-sm font-bold text-navy-900 disabled:opacity-40"><Plus className="h-4 w-4" /> Add location</button></div></div></div>}
     </div>
   )
 }

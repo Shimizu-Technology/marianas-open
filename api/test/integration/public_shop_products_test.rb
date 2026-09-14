@@ -5,7 +5,10 @@ class PublicShopProductsTest < ActionDispatch::IntegrationTest
     @previous_commerce_enabled = ENV["COMMERCE_ENABLED"]
     ENV["COMMERCE_ENABLED"] = "true"
     organization = Organization.create!(name: "Marianas Open", slug: "marianas-open")
-    location = organization.inventory_locations.create!(name: "Deal Depot", code: "DEAL-DEPOT", pickup_enabled: true)
+    location = organization.inventory_locations.create!(
+      name: "Deal Depot", code: "DEAL-DEPOT", pickup_enabled: true,
+      address: { street1: "123 Marine Corps Drive", city: "Tamuning", state: "GU", zip: "96913", country: "US" }
+    )
     @product = organization.products.create!(
       name: "Marianas Open Towel",
       slug: "marianas-open-towel",

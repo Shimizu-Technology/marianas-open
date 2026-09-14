@@ -128,7 +128,10 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
 
     with_verified_clerk do
       post "/api/v1/admin/inventory-locations",
-        params: { inventory_location: { name: "Deal Depot", code: "deal-depot", pickup_enabled: true } },
+        params: { inventory_location: {
+          name: "Deal Depot", code: "deal-depot", pickup_enabled: true,
+          address: { street1: "123 Marine Corps Drive", city: "Tamuning", state: "GU", zip: "96913", country: "US" }
+        } },
         headers: @headers,
         as: :json
     end
@@ -160,6 +163,40 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
   test "admin commerce endpoints require authentication" do
     get "/api/v1/admin/products"
     assert_response :unauthorized
+  end
+
+  test "staff can configure and archive shipping packages" do
+    with_verified_clerk do
+      post "/api/v1/admin/shipping-packages", params: {
+        shipping_package: {
+          name: "Apparel box", length_mm: 305, width_mm: 229, height_mm: 76,
+          empty_weight_grams: 150, max_weight_grams: 4_500, active: true
+        }
+      }, headers: @headers, as: :json
+    end
+
+    assert_response :created
+    package_id = response.parsed_body.dig("shipping_package", "id")
+
+    with_verified_clerk do
+      patch "/api/v1/admin/shipping-packages/#{package_id}",
+        params: { shipping_package: { active: false } }, headers: @headers, as: :json
+    end
+
+    assert_response :success
+    assert_not response.parsed_body.dig("shipping_package", "active")
+  end
+
+  test "a customer-facing location requires a complete address" do
+    with_verified_clerk do
+      post "/api/v1/admin/inventory-locations",
+        params: { inventory_location: { name: "Incomplete pickup", code: "INCOMPLETE", pickup_enabled: true } },
+        headers: @headers,
+        as: :json
+    end
+
+    assert_response :unprocessable_entity
+    assert_includes response.parsed_body.fetch("errors").join, "Address is missing"
   end
 
   test "public configuration can safely announce whether the store is available" do

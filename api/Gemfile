@@ -45,5 +45,6 @@ gem "solid_queue"
 gem 'jwt'
 gem 'httparty'
 gem 'dotenv-rails', groups: [:development, :test]
+gem "easypost", "~> 7.7"
 
 gem "resend", "~> 1.0"

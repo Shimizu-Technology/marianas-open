@@ -9,7 +9,7 @@ export interface CartLine {
   quantity: number
 }
 
-interface ResolvedCartLine extends CartLine {
+export interface ResolvedCartLine extends CartLine {
   product: CommerceProduct
   variant: ProductVariant
 }

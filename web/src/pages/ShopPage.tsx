@@ -59,7 +59,7 @@ export default function ShopPage() {
 
       <section className="border-t border-white/10 bg-surface/60">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-12 sm:grid-cols-3 sm:px-6">
-          {[{ icon: Truck, title: 'Worldwide delivery', text: 'Live delivery rates are being connected and tested for launch.' }, { icon: MapPin, title: 'Pickup on Guam', text: 'Choose convenient pickup at Deal Depot when available.' }, { icon: RotateCcw, title: 'Straightforward support', text: 'Order updates and help from the Marianas Open team.' }].map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-4"><Icon className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h3 className="font-heading font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-text-muted">{text}</p></div></div>)}
+          {[{ icon: Truck, title: 'Worldwide delivery', text: 'Enter your address at checkout to see live available delivery rates.' }, { icon: MapPin, title: 'Pickup on Guam', text: 'Choose convenient, free pickup at Deal Depot when available.' }, { icon: RotateCcw, title: 'Straightforward support', text: 'Order updates and help from the Marianas Open team.' }].map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-4"><Icon className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h3 className="font-heading font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-text-muted">{text}</p></div></div>)}
         </div>
       </section>
       <Link to="/" className="sr-only">Return home <ArrowRight /></Link>

@@ -64,6 +64,7 @@ The intended service checkout is `/Users/leonshimizu/services/marianas-open-stag
    - `marianas-open-staging-postgres`
    - `marianas-open-staging-secret-key-base`
    - `marianas-open-staging-clerk-secret-key`
+   - `marianas-open-staging-easypost-api-key` (EasyPost test key; optional until commerce QA begins)
 4. Install the LaunchAgent plist from `ops/staging/launchd/` into `~/Library/LaunchAgents/`.
 5. Bootstrap it with `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.shimizutechnology.marianas-open-staging.plist`.
 6. Expose the loopback origin only to the tailnet with `tailscale serve --bg --yes 8788`.
