@@ -80,8 +80,8 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
   const cartLines = useMemo(() => cart.flatMap(line => {
     const product = productById.get(line.productId)
     const variant = product?.variants.find(candidate => candidate.id === line.variantId)
-    if (!product || !variant || !variant.id) return []
-    return [{ ...line, quantity: Math.min(line.quantity, Math.max(variant.available_quantity, 1)), product, variant }]
+    if (!product || !variant || !variant.id || variant.available_quantity < 1) return []
+    return [{ ...line, quantity: Math.min(line.quantity, variant.available_quantity), product, variant }]
   }), [cart, productById])
 
   const addToCart = useCallback((productId: number, variantId: number, quantity = 1) => {
@@ -103,7 +103,7 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
       if (line.variantId !== variantId) return [line]
       const product = productById.get(line.productId)
       const variant = product?.variants.find(candidate => candidate.id === variantId)
-      if (!variant || quantity <= 0) return []
+      if (!variant || variant.available_quantity < 1 || quantity <= 0) return []
       return [{ ...line, quantity: Math.min(quantity, variant.available_quantity) }]
     }))
   }, [productById])
