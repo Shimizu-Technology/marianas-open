@@ -1,23 +1,27 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
-      resource :organization, only: [:show]
-      resources :events, only: [:index, :show], param: :slug do
-        resources :event_results, only: [:index], path: 'results'
-        get 'results/summary', to: 'event_results#summary'
-        get 'gallery', to: 'event_gallery_images#index'
+      resource :organization, only: [ :show ]
+      resources :events, only: [ :index, :show ], param: :slug do
+        resources :event_results, only: [ :index ], path: "results"
+        get "results/summary", to: "event_results#summary"
+        get "gallery", to: "event_gallery_images#index"
       end
-      resources :sponsors, only: [:index]
-      resources :competitors, only: [:index, :show]
-      resources :academies, only: [:index, :show]
-      resources :videos, only: [:index, :show]
-      resources :announcements, only: [:index]
-      resources :site_contents, only: [:index], path: 'site-contents'
-      resources :site_images, only: [:index], path: 'site-images'
-      get 'rankings/competitor', to: 'rankings#competitor'
-      resources :rankings, only: [:index]
-      get 'impact', to: 'impact#index'
-      get 'impact/status', to: 'impact#status'
+      resources :sponsors, only: [ :index ]
+      resources :competitors, only: [ :index, :show ]
+      resources :academies, only: [ :index, :show ]
+      resources :videos, only: [ :index, :show ]
+      resources :announcements, only: [ :index ]
+      resources :site_contents, only: [ :index ], path: "site-contents"
+      resources :site_images, only: [ :index ], path: "site-images"
+      get "rankings/competitor", to: "rankings#competitor"
+      resources :rankings, only: [ :index ]
+      get "impact", to: "impact#index"
+      get "impact/status", to: "impact#status"
+
+      namespace :shop do
+        resources :products, only: %i[index show], param: :slug
+      end
 
       # Auth
       get :me, to: "users#me"
@@ -41,18 +45,18 @@ Rails.application.routes.draw do
             post :retranslate
             post :clone
           end
-          resources :event_results, only: [:index, :create, :update, :destroy], path: 'results' do
+          resources :event_results, only: [ :index, :create, :update, :destroy ], path: "results" do
             collection do
               post :bulk_create
               delete :destroy_all
             end
           end
-          resources :event_accommodations, only: [:index, :create, :update, :destroy], path: 'accommodations' do
+          resources :event_accommodations, only: [ :index, :create, :update, :destroy ], path: "accommodations" do
             member do
               post :upload
             end
           end
-          resources :event_gallery_images, only: [:index, :create, :update, :destroy], path: 'gallery-images' do
+          resources :event_gallery_images, only: [ :index, :create, :update, :destroy ], path: "gallery-images" do
             collection do
               post :prepare_direct_upload
               post :complete_direct_upload
@@ -63,7 +67,7 @@ Rails.application.routes.draw do
               post :upload
             end
           end
-          resources :event_gallery_upload_batches, only: [:index, :show, :create, :update, :destroy], path: 'gallery-upload-batches'
+          resources :event_gallery_upload_batches, only: [ :index, :show, :create, :update, :destroy ], path: "gallery-upload-batches"
         end
         resources :videos
         resources :sponsors do
@@ -76,7 +80,7 @@ Rails.application.routes.draw do
             post :upload_photo
           end
         end
-        resources :academies, only: [:index, :show, :update, :destroy] do
+        resources :academies, only: [ :index, :show, :update, :destroy ] do
           member do
             post :upload_logo
           end
@@ -87,28 +91,28 @@ Rails.application.routes.draw do
             delete :remove_image
           end
         end
-        resources :impact_metrics, path: 'impact-metrics' do
+        resources :impact_metrics, path: "impact-metrics" do
           collection do
             post :reorder
           end
         end
-        resources :fund_allocations, path: 'fund-allocations' do
+        resources :fund_allocations, path: "fund-allocations" do
           collection do
             post :reorder
           end
         end
-        resource :impact_configuration, path: 'impact-configuration', only: [:show, :update]
-        resources :site_contents, path: 'site-contents' do
+        resource :impact_configuration, path: "impact-configuration", only: [ :show, :update ]
+        resources :site_contents, path: "site-contents" do
           member do
             post :retranslate
           end
         end
-        resources :site_images, path: 'site-images' do
+        resources :site_images, path: "site-images" do
           member do
             post :upload
           end
         end
-        resource :organization, only: [:show, :update] do
+        resource :organization, only: [ :show, :update ] do
           post :upload_logo, on: :collection
           post :upload_banner, on: :collection
         end
@@ -116,5 +120,5 @@ Rails.application.routes.draw do
     end
   end
 
-  get '/health', to: proc { [200, {}, ['ok']] }
+  get "/health", to: proc { [ 200, {}, [ "ok" ] ] }
 end

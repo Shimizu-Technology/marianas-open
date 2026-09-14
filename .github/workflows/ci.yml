@@ -69,7 +69,7 @@ jobs:
               sed 's#^api/##'
           )
           if (( ${#ruby_files[@]} > 0 )); then
-            bin/rubocop "${ruby_files[@]}"
+            bin/rubocop --force-exclusion "${ruby_files[@]}"
           else
             echo "No changed Ruby files to lint."
           fi
