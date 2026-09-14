@@ -53,7 +53,7 @@ jobs:
           bundler-cache: true
           working-directory: api
       - name: Prepare test database
-        run: bin/rails db:prepare
+        run: bin/rails db:test:prepare
       - name: Run tests
         run: bin/rails test
       - name: Check Ruby style
