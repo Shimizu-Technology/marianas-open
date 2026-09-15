@@ -54,6 +54,7 @@ module Commerce
 
       def process!(payment_event)
         event_type = value(event, :type)
+        verify_provider_mode!
         if REFUND_EVENTS.include?(event_type)
           Refunds::ApplyStripeEvent.call(refund_object: value(value(event, :data), :object), payment_event:)
           return
@@ -83,6 +84,16 @@ module Commerce
 
         payment_event.processed_at = Time.current
         payment_event.save!
+      end
+
+      def verify_provider_mode!
+        livemode = value(event, :livemode)
+        return if livemode.nil?
+
+        event_mode = livemode ? "live" : "test"
+        return if event_mode == Payments.provider_mode
+
+        raise WebhookError, "Stripe event mode does not match this environment."
       end
 
       def find_order(session)
@@ -115,7 +126,10 @@ module Commerce
       def value(object, key)
         return if object.nil?
 
-        if object.respond_to?(:[])
+        if object.respond_to?(:key?) && object.respond_to?(:[])
+          return object[key.to_s] if object.key?(key.to_s)
+          object[key.to_sym] if object.key?(key.to_sym)
+        elsif object.respond_to?(:[])
           object[key.to_s] || object[key.to_sym]
         elsif object.respond_to?(key)
           object.public_send(key)

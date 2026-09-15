@@ -12,10 +12,7 @@ module Commerce
       end
 
       def call
-        event = ShipmentEvent.find_or_create_by!(provider: "easypost", provider_event_id: payload.fetch("id")) do |record|
-          record.event_type = payload.fetch("description", "unknown")
-          record.provider_object_id = payload.dig("result", "id")
-        end
+        event = find_or_create_event!
         return event if %w[processed ignored].include?(event.status)
 
         event.with_lock do
@@ -25,13 +22,27 @@ module Commerce
         end
         event
       rescue StandardError => e
-        event&.update!(status: "failed", last_error: e.message)
+        event&.update_columns(status: "failed", last_error: e.message.to_s.first(2_000), updated_at: Time.current)
         raise
       end
 
       private
 
       attr_reader :payload
+
+      def find_or_create_event!
+        ShipmentEvent.create!(provider: "easypost", provider_event_id: payload.fetch("id")) do |record|
+          record.event_type = payload.fetch("description", "unknown")
+          record.provider_object_id = payload.dig("result", "id")
+        end
+      rescue ActiveRecord::RecordNotUnique
+        ShipmentEvent.find_by!(provider: "easypost", provider_event_id: payload.fetch("id"))
+      rescue ActiveRecord::RecordInvalid
+        existing = ShipmentEvent.find_by(provider: "easypost", provider_event_id: payload.fetch("id"))
+        raise unless existing
+
+        existing
+      end
 
       def process(event)
         unless payload["description"] == "tracker.updated"

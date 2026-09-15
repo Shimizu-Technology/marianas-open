@@ -322,6 +322,23 @@ class CommerceCheckoutTest < ActionDispatch::IntegrationTest
     assert_equal "failed", PaymentEvent.find_by!(provider_event_id: "evt_wrong_total").status
   end
 
+  test "a signed Stripe event from the wrong provider mode is rejected" do
+    with_gateway(FakeStripeGateway.new) do
+      post "/api/v1/shop/checkout-sessions", params: pickup_payload, as: :json
+    end
+    order = Order.last
+    event = JSON.parse(stripe_event_payload(order))
+    event["id"] = "evt_wrong_mode"
+    event["livemode"] = true
+
+    assert_raises(Commerce::Payments::WebhookError) do
+      Commerce::Payments::ProcessStripeEvent.call(event:)
+    end
+
+    assert_equal "pending_payment", order.reload.status
+    assert_equal "failed", PaymentEvent.find_by!(provider_event_id: "evt_wrong_mode").status
+  end
+
   test "Stripe Checkout receives only server-owned totals and safe order metadata" do
     with_gateway(FakeStripeGateway.new) do
       post "/api/v1/shop/checkout-sessions", params: pickup_payload, as: :json

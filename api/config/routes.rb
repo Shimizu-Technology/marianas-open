@@ -140,6 +140,10 @@ Rails.application.routes.draw do
         end
         resource :commerce_operations, path: "commerce-operations", only: :show
         get "commerce-operations/report", to: "commerce_operations#report"
+        resource :commerce_launch_readiness, path: "commerce-launch-readiness",
+          controller: "commerce_launch_readiness", only: :show do
+          patch "checks/:key", action: :update_check, on: :collection
+        end
         resource :organization, only: [ :show, :update ] do
           post :upload_logo, on: :collection
           post :upload_banner, on: :collection

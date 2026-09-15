@@ -21,6 +21,7 @@ import {
   PackageCheck,
   Truck,
   ShieldCheck,
+  Rocket,
   Swords,
   Users,
   X,
@@ -69,6 +70,7 @@ const navSections: NavSection[] = [
       { to: '/admin/commerce/orders', icon: PackageCheck, label: 'Orders & Fulfillment' },
       { to: '/admin/commerce/shipping', icon: Truck, label: 'Pickup & Shipping' },
       { to: '/admin/commerce/operations', icon: CircleDollarSign, label: 'Refunds & Reports' },
+      { to: '/admin/commerce/launch', icon: Rocket, label: 'Launch Readiness' },
     ],
   },
   {
