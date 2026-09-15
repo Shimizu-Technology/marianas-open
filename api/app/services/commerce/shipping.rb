@@ -19,7 +19,10 @@ module Commerce
     def self.provider_mode
       return "test" if Rails.env.development? && ActiveModel::Type::Boolean.new.cast(ENV["EASYPOST_FAKE_RATES"])
 
-      ENV.fetch("EASYPOST_API_KEY", "").start_with?("EZTK") ? "test" : "production"
+      api_key = ENV.fetch("EASYPOST_API_KEY", "")
+      return "unconfigured" if api_key.blank?
+
+      api_key.start_with?("EZTK") ? "test" : "production"
     end
   end
 end

@@ -74,6 +74,7 @@ The intended service checkout is `/Users/leonshimizu/services/marianas-open-stag
 6. Expose the loopback origin only to the tailnet with `tailscale serve --bg --yes 8788`.
 
 The agent checks every three minutes. It never builds source on the host and does not require a GitHub token after the container packages are public.
+It rejects non-test Stripe and EasyPost keys before pulling or replacing any application container.
 
 If the agent exits with status 127 and reports `docker: command not found`, reinstall the versioned plist. The LaunchAgent PATH must include `/Users/leonshimizu/.docker/bin`, where the Docker CLI is installed on the staging MacBook.
 

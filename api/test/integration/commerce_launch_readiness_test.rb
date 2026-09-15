@@ -153,6 +153,22 @@ class CommerceLaunchReadinessTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "missing provider credentials are reported as unconfigured" do
+    with_environment(
+      "COMMERCE_DEPLOYMENT_ENV" => "staging",
+      "STRIPE_API_KEY" => nil,
+      "EASYPOST_API_KEY" => nil
+    ) do
+      with_rails_environment("production") do
+        checks = Commerce::LaunchReadiness.new(organization: @organization).as_json
+          .fetch(:automatic_checks).index_by { |check| check.fetch(:key) }
+
+        assert_equal "Expected test; detected unconfigured.", checks.fetch("stripe_mode").fetch(:detail)
+        assert_equal "Expected test; detected unconfigured.", checks.fetch("easypost_mode").fetch(:detail)
+      end
+    end
+  end
+
   test "a recently retried callback failure blocks an otherwise signed-off launch" do
     Commerce::LaunchReadiness::MANUAL_GATES.each do |gate|
       @organization.commerce_launch_checks.create!(
@@ -222,6 +238,14 @@ class CommerceLaunchReadinessTest < ActionDispatch::IntegrationTest
   ensure
     Commerce::Payments.define_singleton_method(:provider_mode, original_payments)
     Commerce::Shipping.define_singleton_method(:provider_mode, original_shipping)
+  end
+
+  def with_rails_environment(name)
+    original = Rails.method(:env)
+    Rails.define_singleton_method(:env) { ActiveSupport::EnvironmentInquirer.new(name) }
+    yield
+  ensure
+    Rails.define_singleton_method(:env, original)
   end
 
   def with_verified_clerk
