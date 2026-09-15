@@ -75,6 +75,8 @@ The intended service checkout is `/Users/leonshimizu/services/marianas-open-stag
 
 The agent checks every three minutes. It never builds source on the host and does not require a GitHub token after the container packages are public.
 
+If the agent exits with status 127 and reports `docker: command not found`, reinstall the versioned plist. The LaunchAgent PATH must include `/Users/leonshimizu/.docker/bin`, where the Docker CLI is installed on the staging MacBook.
+
 ## Mac mini installation
 
 Create a dedicated Cloudflare Tunnel rather than modifying the tunnels that serve Party Games or Håfa Code. Install its generated configuration and credential file under Jerry's `.cloudflared` directory, then supervise that exact tunnel with launchd. Route both staging hostnames to the MacBook Tailscale origin.
