@@ -61,7 +61,8 @@ Run separate pilots for Guam, mainland U.S., and each Asia destination group tha
 4. Install production Stripe and EasyPost credentials, separate webhook secrets, and live Resend sender credentials through the hosting providers' secret stores. Never commit them.
 5. Register production webhooks for the documented checkout, refund, and tracking events.
 6. Deploy with `COMMERCE_ENABLED=false` first. Run database migrations and verify the public site, admin, health endpoint, and provider configuration.
-7. Turn on `COMMERCE_ENABLED`, deploy, and complete one low-value live order under staff supervision.
+7. Open Commerce → Launch Readiness in production. Require no automatic blockers and all required sign-offs while `COMMERCE_ENABLED` remains false.
+8. Turn on `COMMERCE_ENABLED`, deploy, and complete one low-value live order under staff supervision.
 
 ## 6. Watch the first orders
 

@@ -1,6 +1,7 @@
 module Commerce
   class LaunchReadiness
     Check = Data.define(:key, :category, :title, :detail, :status, :fix_path)
+    SUPPORTED_ENVIRONMENTS = %w[development test staging production].freeze
 
     MANUAL_GATES = [
       { key: "seller_and_settlement", category: "Business", title: "Seller, Stripe account, and settlement ownership",
@@ -75,6 +76,7 @@ module Commerce
 
     def automatic_checks
       [
+        deployment_environment_check,
         stripe_key_check,
         stripe_mode_check,
         secret_check("stripe_webhook_secret", "Payments", "Stripe webhook signing secret", "STRIPE_WEBHOOK_SECRET"),
@@ -90,6 +92,13 @@ module Commerce
         inventory_check,
         webhook_health_check
       ]
+    end
+
+    def deployment_environment_check
+      valid = SUPPORTED_ENVIRONMENTS.include?(deployment_environment)
+      detail = valid ? "#{deployment_environment.capitalize} is configured." :
+        "Set COMMERCE_DEPLOYMENT_ENV to development, test, staging, or production."
+      check("deployment_environment", "Configuration", "Deployment environment is valid", valid, detail)
     end
 
     def stripe_key_check

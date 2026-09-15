@@ -174,6 +174,19 @@ class CommerceLaunchReadinessTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "an unsupported deployment environment is a launch blocker" do
+    with_launch_environment do
+      with_environment("COMMERCE_DEPLOYMENT_ENV" => "prodution") do
+        snapshot = Commerce::LaunchReadiness.new(organization: @organization).as_json
+        check = snapshot.fetch(:automatic_checks).find { |candidate| candidate.fetch(:key) == "deployment_environment" }
+
+        assert_equal "blocked", check.fetch(:status)
+        assert_equal false, snapshot.fetch(:ready_to_enable)
+        assert_includes check.fetch(:detail), "development, test, staging, or production"
+      end
+    end
+  end
+
   private
 
   def with_launch_environment
