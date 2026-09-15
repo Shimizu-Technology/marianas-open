@@ -129,6 +129,11 @@ jobs:
         run: docker compose -f ops/staging/compose.yml config --quiet
       - name: Check deployment scripts
         run: bash -n ops/staging/*.sh
+      - name: Check staging LaunchAgent command paths
+        run: >-
+          grep --fixed-strings --quiet
+          '<string>/Users/leonshimizu/.docker/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>'
+          ops/staging/launchd/com.shimizutechnology.marianas-open-staging.plist
       - name: Build staging API image
         run: docker build --file api/Dockerfile --tag marianas-open-api:ci api
       - name: Build staging web image
