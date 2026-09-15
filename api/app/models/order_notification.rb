@@ -1,5 +1,5 @@
 class OrderNotification < ApplicationRecord
-  KINDS = %w[customer_order_confirmation operations_new_order].freeze
+  KINDS = %w[customer_order_confirmation operations_new_order customer_pickup_ready customer_tracking].freeze
   STATUSES = %w[pending delivering sent suppressed failed].freeze
   DELIVERY_MODES = %w[disabled sandbox live].freeze
 

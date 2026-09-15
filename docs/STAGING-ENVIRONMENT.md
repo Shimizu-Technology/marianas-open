@@ -65,6 +65,7 @@ The intended service checkout is `/Users/leonshimizu/services/marianas-open-stag
    - `marianas-open-staging-secret-key-base`
    - `marianas-open-staging-clerk-secret-key`
    - `marianas-open-staging-easypost-api-key` (EasyPost test key; optional until commerce QA begins)
+   - `marianas-open-staging-easypost-webhook-secret` (HMAC secret for the exact EasyPost test webhook)
    - `marianas-open-staging-stripe-api-key` (a least-privilege Stripe test restricted key)
    - `marianas-open-staging-stripe-webhook-secret` (signing secret for the exact staging webhook endpoint)
 4. Install the LaunchAgent plist from `ops/staging/launchd/` into `~/Library/LaunchAgents/`.
@@ -77,7 +78,7 @@ The agent checks every three minutes. It never builds source on the host and doe
 
 Create a dedicated Cloudflare Tunnel rather than modifying the tunnels that serve Party Games or Håfa Code. Install its generated configuration and credential file under Jerry's `.cloudflared` directory, then supervise that exact tunnel with launchd. Route both staging hostnames to the MacBook Tailscale origin.
 
-In Cloudflare Zero Trust, create a self-hosted Access application for `mo.shimizu-technology.com` and allow only the reviewers' email addresses. Route only `POST /api/v1/webhooks/stripe` from `mo-hooks.shimizu-technology.com` to the origin; every other hook-host path should return `404`. Rails verifies the raw payload with the Stripe signing secret and deduplicates provider event IDs before changing an order.
+In Cloudflare Zero Trust, create a self-hosted Access application for `mo.shimizu-technology.com` and allow only the reviewers' email addresses. Route only `/api/v1/webhooks/stripe` and `/api/v1/webhooks/easypost` from `mo-hooks.shimizu-technology.com` to the origin; every other hook-host path returns `404`. Rails verifies each raw payload with its provider-specific signing secret and deduplicates provider event IDs before changing an order or shipment.
 
 ## Recovery
 

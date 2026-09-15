@@ -4,6 +4,7 @@ module Commerce
     class ConfigurationError < Error; end
     class AddressError < Error; end
     class RateError < Error; end
+    class LabelError < Error; end
 
     def self.gateway
       if ENV["EASYPOST_API_KEY"].present?
@@ -13,6 +14,12 @@ module Commerce
       else
         raise ConfigurationError, "Shipping rates are not configured yet. Please choose Deal Depot pickup or try again later."
       end
+    end
+
+    def self.provider_mode
+      return "test" if Rails.env.development? && ActiveModel::Type::Boolean.new.cast(ENV["EASYPOST_FAKE_RATES"])
+
+      ENV.fetch("EASYPOST_API_KEY", "").start_with?("EZTK") ? "test" : "production"
     end
   end
 end

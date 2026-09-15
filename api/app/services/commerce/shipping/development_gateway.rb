@@ -19,6 +19,21 @@ module Commerce
         }
       end
 
+      def purchase_label(shipment_id:, rate_id:)
+        digest = Digest::SHA256.hexdigest("#{shipment_id}:#{rate_id}").first(20)
+        {
+          mode: "test",
+          status: "pre_transit",
+          tracking_code: "EZ#{digest.upcase}",
+          tracking_url: "https://track.easypost.test/#{digest}",
+          tracker_id: "trk_dev_#{digest}",
+          label_url: "https://labels.easypost.test/#{digest}.png",
+          label_format: "image/png",
+          postage_cents: nil,
+          currency: "USD"
+        }
+      end
+
       private
 
       def rate(shipment_id, carrier, service, amount_cents, delivery_days)

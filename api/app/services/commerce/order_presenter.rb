@@ -23,6 +23,8 @@ module Commerce
         created_at: order.created_at,
         payment_expires_at: order.payment_expires_at,
         paid_at: order.paid_at,
+        fulfillment_status: order.fulfillment&.status || "unfulfilled",
+        shipment: public_shipment,
         checkout_url: order.pending_payment? ? order.stripe_checkout_url : nil,
         items: order.order_items.order(:id).map do |item|
           item.slice(:product_name, :variant_name, :sku, :options_snapshot, :unit_price_cents, :quantity, :line_total_cents)
@@ -39,6 +41,13 @@ module Commerce
 
       order.inventory_location.slice(:name, :pickup_instructions, :phone)
         .merge(address: order.inventory_location.public_address)
+    end
+
+    def public_shipment
+      shipment = order.shipment
+      return unless shipment&.purchased?
+
+      shipment.slice(:status, :carrier, :service, :tracking_code, :tracking_url, :purchased_at, :last_tracking_update_at)
     end
   end
 end

@@ -8,5 +8,11 @@ ingress:
       connectTimeout: 10s
       httpHostHeader: mo.shimizu-technology.com
   - hostname: mo-hooks.shimizu-technology.com
+    path: ^/api/v1/webhooks/(stripe|easypost)$
+    service: https://leon-mbp-main.tail89afe6.ts.net
+    originRequest:
+      connectTimeout: 10s
+      httpHostHeader: mo-hooks.shimizu-technology.com
+  - hostname: mo-hooks.shimizu-technology.com
     service: http_status:404
   - service: http_status:404
