@@ -14,7 +14,7 @@ latest_sha="$(curl --fail --silent --show-error \
   --max-time 30 \
   -H 'Accept: application/vnd.github+json' \
   -H 'X-GitHub-Api-Version: 2022-11-28' \
-  "${workflow_url}" | ruby -rjson -e 'payload = JSON.parse(STDIN.read); puts(payload.fetch("workflow_runs", []).first&.fetch("head_sha", ""))')"
+  "${workflow_url}" | ruby -E UTF-8:UTF-8 -rjson -e 'payload = JSON.parse(STDIN.read); puts(payload.fetch("workflow_runs", []).first&.fetch("head_sha", ""))')"
 
 if [[ ! "${latest_sha}" =~ ^[0-9a-f]{40}$ ]]; then
   exit 0
