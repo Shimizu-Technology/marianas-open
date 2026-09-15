@@ -131,6 +131,28 @@ class CommerceLaunchReadinessTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "staging blocks live provider credentials and outbound email" do
+    with_environment(
+      "COMMERCE_DEPLOYMENT_ENV" => "staging",
+      "STRIPE_API_KEY" => "sk_live_launch_secret",
+      "STRIPE_WEBHOOK_SECRET" => "whsec_launch_secret",
+      "EASYPOST_API_KEY" => "EZAKlaunchsecret",
+      "EASYPOST_WEBHOOK_SECRET" => "easypost_launch_secret",
+      "COMMERCE_EMAIL_DELIVERY_MODE" => "sandbox"
+    ) do
+      checks = with_provider_modes(payments: "live", shipping: "production") do
+        Commerce::LaunchReadiness.new(organization: @organization).as_json
+          .fetch(:automatic_checks).index_by { |check| check.fetch(:key) }
+      end
+
+      assert_equal "blocked", checks.fetch("stripe_mode").fetch(:status)
+      assert_equal "blocked", checks.fetch("easypost_mode").fetch(:status)
+      assert_equal "blocked", checks.fetch("notification_mode").fetch(:status)
+      assert_not_includes checks.to_json, "sk_live_launch_secret"
+      assert_not_includes checks.to_json, "EZAKlaunchsecret"
+    end
+  end
+
   private
 
   def with_launch_environment
@@ -155,6 +177,17 @@ class CommerceLaunchReadinessTest < ActionDispatch::IntegrationTest
     yield
   ensure
     previous&.each { |key, value| value.nil? ? ENV.delete(key) : ENV[key] = value }
+  end
+
+  def with_provider_modes(payments:, shipping:)
+    original_payments = Commerce::Payments.method(:provider_mode)
+    original_shipping = Commerce::Shipping.method(:provider_mode)
+    Commerce::Payments.define_singleton_method(:provider_mode) { payments }
+    Commerce::Shipping.define_singleton_method(:provider_mode) { shipping }
+    yield
+  ensure
+    Commerce::Payments.define_singleton_method(:provider_mode, original_payments)
+    Commerce::Shipping.define_singleton_method(:provider_mode, original_shipping)
   end
 
   def with_verified_clerk
