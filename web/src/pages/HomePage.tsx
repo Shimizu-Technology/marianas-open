@@ -85,7 +85,12 @@ export default function HomePage() {
   const shouldReduceMotion = useReducedMotion();
   const { events, loading: eventsLoading } = useEvents();
   const { sponsors } = useSponsors();
-  const { enabled: commerceEnabled, products: commerceProducts } = useCommerce();
+  const {
+    enabled: commerceEnabled,
+    products: commerceProducts,
+    loading: commerceLoading,
+    error: commerceError,
+  } = useCommerce();
   const { images: siteImages } = useSiteImages();
   const { content: siteContent, t: sc, loading: siteContentLoading, hasCachedContent } = useSiteContent();
 
@@ -325,6 +330,27 @@ export default function HomePage() {
                     );
                   })}
                 </div>
+              ) : commerceLoading ? (
+                <div
+                  className="relative flex min-h-80 animate-pulse items-center justify-center overflow-hidden border border-white/10 bg-surface/60 p-8 text-center motion-reduce:animate-none sm:min-h-96"
+                  role="status"
+                  aria-label="Loading merchandise"
+                >
+                  <span className="h-20 w-20 rounded-full border border-gold/15 bg-gold/[0.06]" />
+                </div>
+              ) : commerceError ? (
+                <Link
+                  to="/shop"
+                  className="group relative flex min-h-80 items-center justify-center overflow-hidden border border-white/10 bg-[linear-gradient(145deg,#18233a_0%,#0d111a_52%,#17120a_100%)] p-8 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:min-h-96"
+                >
+                  <div className="relative">
+                    <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-gold/25 bg-gold/10 text-gold transition-transform duration-300 group-hover:scale-105">
+                      <ShoppingBag className="h-9 w-9" strokeWidth={1.4} />
+                    </span>
+                    <p className="mt-6 font-heading text-xl font-black uppercase tracking-wide">Browse official merchandise</p>
+                    <p className="mt-2 text-sm text-text-muted">Open the shop for current availability</p>
+                  </div>
+                </Link>
               ) : (
                 <Link
                   to="/shop"
