@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_123000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -71,6 +71,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_110000) do
     t.datetime "starts_at"
     t.string "title", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "commerce_launch_checks", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.text "note", default: "", null: false
+    t.bigint "organization_id", null: false
+    t.datetime "reviewed_at"
+    t.bigint "reviewed_by_id"
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "key"], name: "index_commerce_launch_checks_on_organization_id_and_key", unique: true
+    t.index ["organization_id"], name: "index_commerce_launch_checks_on_organization_id"
+    t.index ["reviewed_by_id"], name: "index_commerce_launch_checks_on_reviewed_by_id"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'passed'::character varying, 'blocked'::character varying]::text[])", name: "commerce_launch_checks_status_valid"
   end
 
   create_table "competitors", force: :cascade do |t|
@@ -978,6 +993,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_110000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "commerce_launch_checks", "organizations"
+  add_foreign_key "commerce_launch_checks", "users", column: "reviewed_by_id"
   add_foreign_key "competitors", "academies"
   add_foreign_key "event_accommodations", "events"
   add_foreign_key "event_gallery_images", "event_gallery_upload_batches"

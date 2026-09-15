@@ -25,7 +25,7 @@
 | 5 | Customer order status, transactional notifications | Complete in PR #90 |
 | 6 | Deal Depot fulfillment, labels, tracking, pickup | Complete in PR #91 |
 | 7 | Refunds, reconciliation, reports, operational alerts | Complete in PR #92 |
-| 8 | Failure hardening, physical shipping pilot, production launch | Not started |
+| 8 | Failure hardening and launch-readiness controls | Complete in implementation; physical pilots and production approval remain open |
 
 ## Slice 2 implementation contract
 
@@ -97,3 +97,12 @@
 - Approve shipping, pickup, cancellation, return, privacy, and support policies.
 
 These gates do not block test-mode implementation.
+
+## Slice 8 implementation contract
+
+- Staff get one launch-readiness page that combines automatic configuration and operating-health checks with durable human sign-offs. It returns only whether credentials exist and which provider mode they select; it never returns a secret value.
+- Staging identifies itself with `COMMERCE_DEPLOYMENT_ENV=staging`, requires Stripe and EasyPost test modes, and requires notification delivery to remain disabled. Production requires live provider modes plus configured live customer email delivery. A mismatched provider or notification mode is a launch blocker.
+- Automatic checks cover Stripe and EasyPost keys and webhook secrets, customer support contact, Deal Depot address and fulfillment modes, measured package presets, published variants, shipping weight and country-of-origin data, available inventory, and recent failed provider events. A provider event that failed within the last seven days is a launch blocker until the integration is healthy again.
+- Human sign-offs cover seller and settlement ownership, Guam tax review, customer policies, Deal Depot operations, Guam and mainland shipping pilots, Asia routes when enabled, and owner acceptance. Each sign-off records status, evidence, reviewer, and review time.
+- Readiness is advisory and fail-visible: it does not turn commerce on. `COMMERCE_ENABLED` remains a separate environment-level release control changed only after staging acceptance and an approved `staging` to `main` promotion.
+- The production launch follows `docs/COMMERCE-LAUNCH-RUNBOOK.md`. A software-complete checklist is not a substitute for a real packed-and-scanned shipment or business approval.

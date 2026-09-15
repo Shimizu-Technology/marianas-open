@@ -1000,6 +1000,41 @@ export interface CommerceOperationsSnapshot {
   }>;
 }
 
+export type CommerceLaunchStatus = 'passed' | 'blocked' | 'pending' | 'warning';
+
+export interface CommerceLaunchReadiness {
+  environment: string;
+  commerce_enabled: boolean;
+  ready_to_enable: boolean;
+  summary: {
+    blockers: number;
+    warnings: number;
+    automatic_passed: number;
+    automatic_total: number;
+    manual_passed: number;
+    manual_total: number;
+  };
+  automatic_checks: Array<{
+    key: string;
+    category: string;
+    title: string;
+    detail: string;
+    status: Exclude<CommerceLaunchStatus, 'pending'>;
+    fix_path: string | null;
+  }>;
+  manual_checks: Array<{
+    key: string;
+    category: string;
+    title: string;
+    detail: string;
+    status: Exclude<CommerceLaunchStatus, 'warning'>;
+    note: string;
+    reviewed_at: string | null;
+    reviewed_by: string | null;
+  }>;
+  generated_at: string;
+}
+
 async function authHeaders(requireAuth: boolean, skipCache = false) {
   const headers: Record<string, string> = {};
 
@@ -1262,6 +1297,12 @@ export const api = {
     },
     downloadCommerceReport: (params: { from: string; to: string }) =>
       fetchApiBlob(`/api/v1/admin/commerce-operations/report?${new URLSearchParams(params).toString()}`),
+    getCommerceLaunchReadiness: () =>
+      fetchApi<CommerceLaunchReadiness>('/api/v1/admin/commerce-launch-readiness', {}, true),
+    updateCommerceLaunchCheck: (key: string, check: { status: 'pending' | 'passed' | 'blocked'; note: string }) =>
+      fetchApi<CommerceLaunchReadiness>(`/api/v1/admin/commerce-launch-readiness/checks/${encodeURIComponent(key)}`, {
+        method: 'PATCH', body: JSON.stringify({ check }),
+      }, true),
     getProducts: () => fetchApi<{ products: CommerceProduct[] }>('/api/v1/admin/products', {}, true),
     getProduct: (id: number) => fetchApi<{ product: CommerceProduct }>(`/api/v1/admin/products/${id}`, {}, true),
     createProduct: (product: CommerceProduct) =>

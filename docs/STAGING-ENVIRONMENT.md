@@ -50,6 +50,7 @@ Staging uses:
 - Stripe Sandbox credentials from a separate test restricted key. The staging webhook subscribes to checkout-session and refund lifecycle events.
 - EasyPost test credentials and a staging-only tracking webhook.
 - No Resend key and `COMMERCE_EMAIL_DELIVERY_MODE=disabled` hardcoded in the Compose service, so staging records suppressed notification attempts but cannot send customer email even if a host variable is set accidentally.
+- `COMMERCE_DEPLOYMENT_ENV=staging`, so the launch-readiness page treats live Stripe or EasyPost credentials as a blocking environment leak.
 - A separate or disabled analytics project.
 
 Stripe and shipping webhooks must be configured for `https://mo-hooks.shimizu-technology.com/...` and must use staging-only signing secrets. Stripe must deliver `checkout.session.completed`, `checkout.session.expired`, `refund.created`, `refund.updated`, and `refund.failed`; EasyPost must deliver tracker updates. Staging accepts only test-mode provider records.
@@ -96,3 +97,4 @@ In Cloudflare Zero Trust, create a self-hosted Access application for `mo.shimiz
 - Database migrations are backward compatible.
 - A staging database backup exists.
 - The `staging` to `main` pull request contains only the intended release.
+- The Commerce → Launch Readiness page has no automatic blockers, and every required physical-pilot and business sign-off is passed with evidence.
