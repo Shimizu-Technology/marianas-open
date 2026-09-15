@@ -12,6 +12,7 @@ if [[ ! "${target_sha}" =~ ^[0-9a-f]{40}$ ]]; then
 fi
 
 load_staging_secrets
+validate_staging_provider_credentials
 
 state_dir="${SERVICE_DIR}/.staging-state"
 mkdir -p "${state_dir}"

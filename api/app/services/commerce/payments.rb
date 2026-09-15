@@ -27,7 +27,10 @@ module Commerce
     def self.provider_mode
       return "test" if Rails.env.test? || fake_checkout_enabled?
 
-      ENV.fetch("STRIPE_API_KEY", "").include?("_test_") ? "test" : "live"
+      api_key = ENV.fetch("STRIPE_API_KEY", "")
+      return "unconfigured" if api_key.blank?
+
+      api_key.include?("_test_") ? "test" : "live"
     end
 
     def self.construct_stripe_event(payload:, signature:)

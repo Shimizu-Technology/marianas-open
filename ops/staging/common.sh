@@ -37,6 +37,18 @@ load_staging_secrets() {
   export POSTGRES_PASSWORD SECRET_KEY_BASE CLERK_SECRET_KEY EASYPOST_API_KEY EASYPOST_WEBHOOK_SECRET STRIPE_API_KEY STRIPE_WEBHOOK_SECRET
 }
 
+validate_staging_provider_credentials() {
+  if [[ -n "${STRIPE_API_KEY:-}" && "${STRIPE_API_KEY}" != *_test_* ]]; then
+    printf '%s\n' "Refusing to deploy staging with a non-test Stripe key." >&2
+    return 1
+  fi
+
+  if [[ -n "${EASYPOST_API_KEY:-}" && "${EASYPOST_API_KEY}" != EZTK* ]]; then
+    printf '%s\n' "Refusing to deploy staging with a non-test EasyPost key." >&2
+    return 1
+  fi
+}
+
 compose() {
   docker --context "${DOCKER_CONTEXT}" compose -f "${COMPOSE_FILE}" "$@"
 }

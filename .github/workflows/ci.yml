@@ -134,6 +134,8 @@ jobs:
           grep --fixed-strings --quiet
           '<string>/Users/leonshimizu/.docker/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>'
           ops/staging/launchd/com.shimizutechnology.marianas-open-staging.plist
+      - name: Test staging provider boundaries
+        run: ops/staging/test-provider-boundaries.sh
       - name: Build staging API image
         run: docker build --file api/Dockerfile --tag marianas-open-api:ci api
       - name: Build staging web image
