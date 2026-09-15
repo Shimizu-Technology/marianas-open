@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Menu, X, Shield, Search, ChevronDown, ShoppingBag } from 'lucide-react';
+import { ArrowRight, Menu, X, Shield, Search, ChevronDown, ShoppingBag } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import GlobalSearch from './GlobalSearch';
 import { useOrg } from '../contexts/OrganizationContext';
@@ -127,7 +127,7 @@ export default function Header() {
       ],
     },
     ...(impactVisible ? [{ to: '/impact', label: 'Impact' }] : []),
-    ...(commerceEnabled ? [{ to: '/shop', label: 'Shop' }] : []),
+    ...(commerceEnabled ? [{ to: '/shop', label: 'Shop merch' }] : []),
     { to: '/watch', label: t('nav.watch') },
   ];
 
@@ -156,7 +156,6 @@ export default function Header() {
       links: [
         { to: '/rules', label: t('nav.rules') },
         ...(impactVisible ? [{ to: '/impact', label: 'Impact' }] : []),
-        ...(commerceEnabled ? [{ to: '/shop', label: 'Shop' }] : []),
         { to: '/watch', label: t('nav.watch') },
       ],
     },
@@ -199,10 +198,35 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-1.5">
+            {commerceEnabled && (cartCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => setCartOpen(true)}
+                className="relative inline-flex min-h-11 items-center gap-1.5 rounded-full border border-gold bg-gold px-3 font-heading text-xs font-bold uppercase tracking-wider text-navy-900 transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold lg:hidden"
+                aria-label={`Open shopping bag with ${cartCount} ${cartCount === 1 ? 'item' : 'items'}`}
+              >
+                <ShoppingBag className="h-4 w-4" />
+                <span>Bag</span>
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-navy-900 px-1 text-[10px] text-gold">{cartCount > 99 ? '99+' : cartCount}</span>
+              </button>
+            ) : (
+              <Link
+                to="/shop"
+                className={`relative inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 font-heading text-xs font-bold uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold lg:hidden ${
+                  location.pathname.startsWith('/shop')
+                    ? 'border-gold bg-gold text-navy-900'
+                    : 'border-gold/40 bg-gold/10 text-gold hover:border-gold/70 hover:bg-gold/15'
+                }`}
+                aria-label="Shop merchandise"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                <span>Shop</span>
+              </Link>
+            ))}
             {commerceEnabled && (
               <button
                 onClick={() => setCartOpen(true)}
-                className="relative rounded-lg p-2 text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                className="relative hidden rounded-lg p-2 text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:inline-flex"
                 aria-label={`Open shopping bag${cartCount ? ` with ${cartCount} ${cartCount === 1 ? 'item' : 'items'}` : ''}`}
               >
                 <ShoppingBag className="h-5 w-5" />
@@ -249,6 +273,24 @@ export default function Header() {
           className="relative bg-navy-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 max-h-[calc(100vh-4rem)] overflow-y-auto"
           onClick={e => e.stopPropagation()}
         >
+          {commerceEnabled && (
+            <Link
+              to="/shop"
+              onClick={() => setMobileOpen(false)}
+              className="group mb-3 flex min-h-20 items-center justify-between gap-4 border border-gold/30 bg-gold/[0.08] px-4 py-3 transition-colors hover:border-gold/55 hover:bg-gold/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            >
+              <span className="flex items-center gap-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold text-navy-900">
+                  <ShoppingBag className="h-5 w-5" />
+                </span>
+                <span>
+                  <strong className="block font-heading text-sm uppercase tracking-wider text-text-primary">Official shop</strong>
+                  <span className="mt-1 block text-xs text-text-secondary">Browse Marianas Open gear</span>
+                </span>
+              </span>
+              <ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0 text-gold transition-transform group-hover:translate-x-1" />
+            </Link>
+          )}
           {mobileGroups.map((group, gi) => (
             <div key={gi} className={gi > 0 ? 'border-t border-white/5 mt-2 pt-2' : ''}>
               {group.heading && (

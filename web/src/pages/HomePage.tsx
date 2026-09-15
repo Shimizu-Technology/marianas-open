@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink, Handshake } from 'lucide-react';
+import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink, Handshake, MapPin, ShoppingBag, Truck } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import JourneySection from '../components/JourneySection';
@@ -13,6 +13,8 @@ import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 import { getCurrentMainEvent } from '../utils/events';
 import { getOrganizationSchema, getWebsiteSchema } from '../lib/seo';
+import ProductArtwork from '../components/shop/ProductArtwork';
+import { useCommerce } from '../contexts/CommerceContext';
 
 function normalizeSponsorKey(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -83,6 +85,12 @@ export default function HomePage() {
   const shouldReduceMotion = useReducedMotion();
   const { events, loading: eventsLoading } = useEvents();
   const { sponsors } = useSponsors();
+  const {
+    enabled: commerceEnabled,
+    products: commerceProducts,
+    loading: commerceLoading,
+    error: commerceError,
+  } = useCommerce();
   const { images: siteImages } = useSiteImages();
   const { content: siteContent, t: sc, loading: siteContentLoading, hasCachedContent } = useSiteContent();
 
@@ -112,6 +120,10 @@ export default function HomePage() {
   const primaryEventLabel = currentMainEvent ? t('hero.cta') : t('hero.learnMore');
   const secondaryEventPath = currentMainEvent ? '/calendar' : '/events/past';
   const secondaryEventLabel = currentMainEvent ? t('hero.learnMore') : t('nav.pastEvents');
+  const featuredMerchandise = commerceProducts.filter(product => product.featured).slice(0, 2);
+  const merchandisePreview = featuredMerchandise.length > 0
+    ? featuredMerchandise
+    : commerceProducts.slice(0, 2);
 
   return (
     <div className="min-h-screen">
@@ -256,6 +268,108 @@ export default function HomePage() {
           </div>
         </motion.div>
       </section>
+
+      {commerceEnabled && (
+        <section aria-labelledby="merchandise-heading" className="relative overflow-hidden border-y border-gold/15 bg-[#0c111c] py-20 sm:py-28">
+          <div className="pointer-events-none absolute inset-0 opacity-25 [background-image:linear-gradient(135deg,transparent_47%,rgba(212,168,67,.18)_47%,rgba(212,168,67,.18)_49%,transparent_49%)] [background-size:44px_44px]" />
+          <div className="pointer-events-none absolute -right-24 top-1/2 h-80 w-80 -translate-y-1/2 rounded-full bg-gold/10 blur-3xl" />
+          <div className="relative mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[minmax(0,.86fr)_minmax(480px,1.14fr)] lg:items-center lg:gap-16">
+            <ScrollReveal>
+              <div className="max-w-xl">
+                <div className="inline-flex items-center gap-2 border border-gold/30 bg-gold/[0.07] px-3 py-1.5 text-xs font-heading font-bold uppercase tracking-[0.2em] text-gold">
+                  <ShoppingBag className="h-4 w-4" />
+                  Official merchandise
+                </div>
+                <h2 id="merchandise-heading" className="mt-6 font-heading text-4xl font-black uppercase leading-[0.95] tracking-tight sm:text-5xl lg:text-6xl">
+                  Take the spirit of<br /><span className="text-gold">the Open with you.</span>
+                </h2>
+                <p className="mt-6 max-w-lg text-base leading-7 text-text-secondary sm:text-lg">
+                  Shop official Marianas Open apparel and gear, with free Deal Depot pickup on Guam and delivery to supported destinations.
+                </p>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <Link
+                    to="/shop"
+                    className="group inline-flex min-h-12 items-center justify-center gap-2 bg-gold px-6 font-heading text-sm font-bold uppercase tracking-wider text-navy-900 transition hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-4 focus-visible:ring-offset-[#0c111c]"
+                  >
+                    Shop merchandise
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                  <Link
+                    to="/shop/order-status"
+                    className="inline-flex min-h-12 items-center justify-center px-5 text-sm font-semibold text-text-secondary transition hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                  >
+                    Check an order
+                  </Link>
+                </div>
+                <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-gold" /> Guam pickup</span>
+                  <span className="inline-flex items-center gap-2"><Truck className="h-4 w-4 text-gold" /> Delivery available</span>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.15}>
+              {merchandisePreview.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3 sm:gap-5">
+                  {merchandisePreview.map((product, index) => {
+                    const inStock = product.variants.some(variant => variant.available_quantity > 0);
+                    return (
+                      <Link
+                        key={product.id}
+                        to={`/shop/${product.slug}`}
+                        className={`group relative block overflow-hidden border border-white/10 bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${index === 1 ? 'mt-8 sm:mt-12' : 'mb-8 sm:mb-12'}`}
+                      >
+                        <div className="aspect-[4/5] overflow-hidden">
+                          <ProductArtwork product={product} className="transition-transform duration-500 group-hover:scale-[1.035]" />
+                        </div>
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950 via-navy-950/85 to-transparent px-4 pb-4 pt-14 sm:px-5 sm:pb-5">
+                          <p className="font-heading text-sm font-bold uppercase tracking-wide text-text-primary sm:text-base">{product.name}</p>
+                          <p className="mt-1 text-xs text-text-muted">{inStock ? 'Shop now' : 'Coming soon'}</p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : commerceLoading ? (
+                <div
+                  className="relative flex min-h-80 animate-pulse items-center justify-center overflow-hidden border border-white/10 bg-surface/60 p-8 text-center motion-reduce:animate-none sm:min-h-96"
+                  role="status"
+                  aria-label="Loading merchandise"
+                >
+                  <span className="h-20 w-20 rounded-full border border-gold/15 bg-gold/[0.06]" />
+                </div>
+              ) : commerceError ? (
+                <Link
+                  to="/shop"
+                  className="group relative flex min-h-80 items-center justify-center overflow-hidden border border-white/10 bg-[linear-gradient(145deg,#18233a_0%,#0d111a_52%,#17120a_100%)] p-8 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:min-h-96"
+                >
+                  <div className="relative">
+                    <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-gold/25 bg-gold/10 text-gold transition-transform duration-300 group-hover:scale-105">
+                      <ShoppingBag className="h-9 w-9" strokeWidth={1.4} />
+                    </span>
+                    <p className="mt-6 font-heading text-xl font-black uppercase tracking-wide">Browse official merchandise</p>
+                    <p className="mt-2 text-sm text-text-muted">Open the shop for current availability</p>
+                  </div>
+                </Link>
+              ) : (
+                <Link
+                  to="/shop"
+                  className="group relative flex min-h-80 items-center justify-center overflow-hidden border border-white/10 bg-[linear-gradient(145deg,#18233a_0%,#0d111a_52%,#17120a_100%)] p-8 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:min-h-96"
+                >
+                  <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(135deg,transparent_45%,rgba(212,168,67,.25)_45%,rgba(212,168,67,.25)_47%,transparent_47%)] [background-size:32px_32px]" />
+                  <div className="relative">
+                    <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-gold/25 bg-gold/10 text-gold transition-transform duration-300 group-hover:scale-105">
+                      <ShoppingBag className="h-9 w-9" strokeWidth={1.4} />
+                    </span>
+                    <p className="mt-6 font-heading text-xl font-black uppercase tracking-wide">The first drop is being prepared</p>
+                    <p className="mt-2 text-sm text-text-muted">Visit the official shop</p>
+                  </div>
+                </Link>
+              )}
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
 
       {/* Featured section — editorial asymmetric layout */}
       <section className="py-24 sm:py-32">
