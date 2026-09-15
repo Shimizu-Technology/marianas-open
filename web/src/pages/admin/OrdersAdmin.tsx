@@ -1,5 +1,5 @@
 import { CheckCircle2, Clock3, ExternalLink, Loader2, MapPin, PackageCheck, Search, Truck } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api, type AdminCommerceOrder, type CommerceOrder } from '../../services/api'
 
 const money = (cents: number, currency: string) => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100)
@@ -29,6 +29,7 @@ const actions = (order: AdminCommerceOrder): Array<{ status: CommerceOrder['fulf
 }
 
 export default function OrdersAdmin() {
+  const loadSequence = useRef(0)
   const [orders, setOrders] = useState<AdminCommerceOrder[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [query, setQuery] = useState('')
@@ -39,17 +40,23 @@ export default function OrdersAdmin() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (sequence: number) => {
+    if (sequence !== loadSequence.current) return
     setLoading(true); setError('')
     try {
       const response = await api.admin.getOrders({ q: query.trim(), status, method })
+      if (sequence !== loadSequence.current) return
       setOrders(response.orders)
       setSelectedId(current => response.orders.some(order => order.id === current) ? current : response.orders[0]?.id ?? null)
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Orders could not be loaded.') }
-    finally { setLoading(false) }
+    } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Orders could not be loaded.') }
+    finally { if (sequence === loadSequence.current) setLoading(false) }
   }, [query, status, method])
 
-  useEffect(() => { const timer = window.setTimeout(() => void load(), 250); return () => window.clearTimeout(timer) }, [load])
+  useEffect(() => {
+    const sequence = ++loadSequence.current
+    const timer = window.setTimeout(() => void load(sequence), 250)
+    return () => { window.clearTimeout(timer); loadSequence.current += 1 }
+  }, [load])
   const selected = useMemo(() => orders.find(order => order.id === selectedId) || null, [orders, selectedId])
 
   const replace = (order: AdminCommerceOrder) => { setOrders(current => current.map(item => item.id === order.id ? order : item)); setSelectedId(order.id) }

@@ -51,10 +51,20 @@ module Commerce
 
         status = tracker["status"].to_s
         status = "unknown" unless TRACKING_STATUSES.include?(status)
-        shipment.update!(status:, tracking_url: tracker["public_url"].presence || shipment.tracking_url,
-          last_tracking_update_at: Time.current)
-        event.update!(shipment:, status: "processed", processed_at: Time.current)
-        mark_delivered(shipment) if status == "delivered"
+        provider_occurred_at = Time.zone.parse(payload.fetch("created_at").to_s)
+        raise ArgumentError, "EasyPost event timestamp is invalid." unless provider_occurred_at
+
+        shipment.with_lock do
+          if shipment.last_tracking_update_at.present? && provider_occurred_at <= shipment.last_tracking_update_at
+            event.update!(shipment:, status: "ignored", processed_at: Time.current)
+            return
+          end
+
+          shipment.update!(status:, tracking_url: tracker["public_url"].presence || shipment.tracking_url,
+            last_tracking_update_at: provider_occurred_at)
+          event.update!(shipment:, status: "processed", processed_at: Time.current)
+          mark_delivered(shipment) if status == "delivered"
+        end
       end
 
       def mark_delivered(shipment)

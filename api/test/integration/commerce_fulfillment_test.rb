@@ -23,6 +23,19 @@ class CommerceFulfillmentTest < ActionDispatch::IntegrationTest
     end
   end
 
+  class FlakyLabelGateway < FakeLabelGateway
+    def purchase_label(shipment_id:, rate_id:)
+      @attempts ||= 0
+      @attempts += 1
+      if @attempts == 1
+        @last_request = { shipment_id:, rate_id: }
+        raise Commerce::Shipping::LabelError, "EasyPost connection dropped"
+      end
+
+      super
+    end
+  end
+
   setup do
     @organization = Organization.create!(name: "Marianas Open", slug: "marianas-open", contact_email: "support@example.org")
     @admin = User.create!(clerk_id: "fulfillment_admin", email: "staff@example.org", role: "admin", invitation_status: "accepted")
@@ -94,6 +107,27 @@ class CommerceFulfillmentTest < ActionDispatch::IntegrationTest
     assert_nil public_order.dig(:shipment, :label_url)
   end
 
+  test "failed label purchase retries the existing shipment and rate" do
+    order = create_order(method: "shipping")
+    Commerce::Fulfillment::Transition.call(order:, status: "preparing", actor: @admin)
+    gateway = FlakyLabelGateway.new
+
+    assert_raises(Commerce::Shipping::LabelError) do
+      Commerce::Fulfillment::PurchaseLabel.call(order:, gateway:)
+    end
+
+    failed_shipment = order.reload.shipment
+    assert_equal "error", failed_shipment.status
+    assert_equal @quote.provider_shipment_id, failed_shipment.provider_shipment_id
+    assert_equal @quote.provider_rate_id, failed_shipment.provider_rate_id
+
+    recovered = Commerce::Fulfillment::PurchaseLabel.call(order:, gateway:)
+
+    assert_equal failed_shipment.id, recovered.id
+    assert recovered.purchased?
+    assert_equal({ shipment_id: @quote.provider_shipment_id, rate_id: @quote.provider_rate_id }, gateway.last_request)
+  end
+
   test "signed EasyPost tracking events update the shipment once and mark delivery" do
     order = create_order(method: "shipping")
     Commerce::Fulfillment::Transition.call(order:, status: "preparing", actor: @admin)
@@ -103,6 +137,7 @@ class CommerceFulfillmentTest < ActionDispatch::IntegrationTest
     ENV["EASYPOST_WEBHOOK_SECRET"] = "fulfillment-webhook-secret"
     payload = {
       id: "evt_tracker_delivered", description: "tracker.updated", mode: "test",
+      created_at: Time.current.iso8601(6),
       result: { id: shipment.provider_tracker_id, tracking_code: shipment.tracking_code, status: "delivered", public_url: shipment.tracking_url }
     }.to_json
     signature = "hmac-sha256-hex=#{OpenSSL::HMAC.hexdigest('sha256', ENV.fetch('EASYPOST_WEBHOOK_SECRET'), payload)}"
@@ -117,6 +152,22 @@ class CommerceFulfillmentTest < ActionDispatch::IntegrationTest
     assert_equal 1, ShipmentEvent.where(provider_event_id: "evt_tracker_delivered").count
   ensure
     ENV["EASYPOST_WEBHOOK_SECRET"] = previous_secret
+  end
+
+  test "stale EasyPost tracking events cannot regress shipment status" do
+    order = create_order(method: "shipping")
+    Commerce::Fulfillment::Transition.call(order:, status: "preparing", actor: @admin)
+    shipment = Commerce::Fulfillment::PurchaseLabel.call(order:, gateway: FakeLabelGateway.new)
+    newer_time = Time.current.change(usec: 0)
+    newer = tracking_event(shipment:, id: "evt_tracking_newer", status: "out_for_delivery", created_at: newer_time)
+    older = tracking_event(shipment:, id: "evt_tracking_older", status: "in_transit", created_at: newer_time - 5.minutes)
+
+    Commerce::Fulfillment::ProcessEasyPostEvent.call(payload: newer)
+    Commerce::Fulfillment::ProcessEasyPostEvent.call(payload: older)
+
+    assert_equal "out_for_delivery", shipment.reload.status
+    assert_equal newer_time, shipment.last_tracking_update_at
+    assert_equal "ignored", ShipmentEvent.find_by!(provider_event_id: "evt_tracking_older").status
   end
 
   test "EasyPost webhook rejects an invalid signature without recording an event" do
@@ -147,6 +198,13 @@ class CommerceFulfillmentTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def tracking_event(shipment:, id:, status:, created_at:)
+    {
+      "id" => id, "description" => "tracker.updated", "mode" => "test", "created_at" => created_at.iso8601,
+      "result" => { "id" => shipment.provider_tracker_id, "tracking_code" => shipment.tracking_code, "status" => status }
+    }
+  end
 
   def create_order(method:, status: "paid")
     order = @organization.orders.create!(

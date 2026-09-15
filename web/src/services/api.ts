@@ -915,7 +915,7 @@ export interface CommerceOrder {
   }>;
 }
 
-export interface AdminCommerceOrder extends CommerceOrder {
+export interface AdminCommerceOrder extends Omit<CommerceOrder, 'shipment'> {
   id: number;
   customer_phone: string | null;
   fulfillment: {
@@ -927,14 +927,21 @@ export interface AdminCommerceOrder extends CommerceOrder {
     shipped_at: string | null;
     delivered_at: string | null;
   };
-  shipment: null | (NonNullable<CommerceOrder['shipment']> & {
+  shipment: null | {
+    status: string;
+    carrier: string;
+    service: string;
+    tracking_code: string | null;
+    tracking_url: string | null;
+    purchased_at: string | null;
+    last_tracking_update_at: string | null;
     provider_mode: string;
-    label_url: string;
+    label_url: string | null;
     label_format: string | null;
     postage_cents: number | null;
     currency: string;
     last_error: string | null;
-  });
+  };
 }
 
 async function authHeaders(requireAuth: boolean, skipCache = false) {
