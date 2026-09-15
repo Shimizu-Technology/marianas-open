@@ -60,10 +60,12 @@ export default function OrderConfirmationPage() {
 
   useEffect(() => { void loadOrder() }, [loadOrder])
   useEffect(() => {
-    if (order?.status !== 'pending_payment' || localTestCheckout) return
+    const awaitingPayment = order?.status === 'pending_payment' && !localTestCheckout
+    const awaitingRefund = order?.refund_status === 'pending'
+    if (!awaitingPayment && !awaitingRefund) return
     const interval = window.setInterval(() => void loadOrder(), 2500)
     return () => window.clearInterval(interval)
-  }, [order?.status, localTestCheckout, loadOrder])
+  }, [order?.status, order?.refund_status, localTestCheckout, loadOrder])
 
   const completeTestPayment = async () => {
     setCompletingTest(true)

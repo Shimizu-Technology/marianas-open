@@ -106,6 +106,24 @@ class CommerceOperationsTest < ActionDispatch::IntegrationTest
     assert_equal [ local.id, local.id ], gateway.refund_calls.pluck(:refund_id)
   end
 
+  test "a refund request key cannot be reused for a different order" do
+    request_key = SecureRandom.uuid
+    create_refund(request_key:, gateway: FakeGateway.new)
+    other_order = @order.dup
+    other_order.number = nil
+    other_order.checkout_key = SecureRandom.uuid
+    other_order.stripe_checkout_session_id = "cs_test_other_order"
+    other_order.stripe_payment_intent_id = "pi_test_other_order"
+    other_order.save!
+
+    assert_raises(Commerce::Refunds::InvalidRefund) do
+      Commerce::Refunds::Create.call(
+        order: other_order, amount_cents: 1_000, reason: "duplicate", staff_note: "Duplicate payment",
+        actor: @admin, request_key:, gateway: FakeGateway.new
+      )
+    end
+  end
+
   test "Stripe refund webhooks import Dashboard refunds and deduplicate events" do
     refund_object = {
       "id" => "re_dashboard_test", "livemode" => false, "status" => "succeeded", "amount" => 1_200,
@@ -183,6 +201,7 @@ class CommerceOperationsTest < ActionDispatch::IntegrationTest
     gateway = FakeGateway.new
     Commerce::Payments::ReconcilePaidOrder.call(order: @order, gateway:)
     assert @order.reload.last_reconciled_at.present?
+    assert @order.last_reconciliation_attempt_at.present?
     assert_nil @order.payment_error
 
     gateway.session_total = @order.total_cents + 1
@@ -190,6 +209,7 @@ class CommerceOperationsTest < ActionDispatch::IntegrationTest
       Commerce::Payments::ReconcilePaidOrder.call(order: @order, gateway:)
     end
     assert_includes @order.reload.payment_error, "total"
+    assert_operator @order.last_reconciliation_attempt_at, :>=, @order.last_reconciled_at
 
     snapshot = Commerce::OperationsSnapshot.new(organization: @organization).as_json
     assert_equal 1, snapshot.dig(:summary, :paid_orders)

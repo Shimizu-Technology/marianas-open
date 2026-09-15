@@ -16,7 +16,7 @@ class ReconcileCommerceJob < ApplicationJob
 
   def reconcile_orders(gateway)
     Order.where(status: "paid").where("last_reconciled_at IS NULL OR last_reconciled_at < ?", 6.hours.ago)
-      .order(Arel.sql("last_reconciled_at ASC NULLS FIRST"), :id).limit(ORDER_BATCH_SIZE).each do |order|
+      .order(Arel.sql("last_reconciliation_attempt_at ASC NULLS FIRST"), :id).limit(ORDER_BATCH_SIZE).each do |order|
       Commerce::Payments::ReconcilePaidOrder.call(order:, gateway:)
     rescue StandardError => e
       Rails.logger.error("Commerce payment reconciliation failed for #{order.number}: #{e.class}: #{e.message}")

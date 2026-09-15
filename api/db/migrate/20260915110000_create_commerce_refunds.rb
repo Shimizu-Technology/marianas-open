@@ -30,6 +30,8 @@ class CreateCommerceRefunds < ActiveRecord::Migration[8.1]
 
     add_column :orders, :last_reconciled_at, :datetime
     add_index :orders, :last_reconciled_at
+    add_column :orders, :last_reconciliation_attempt_at, :datetime
+    add_index :orders, :last_reconciliation_attempt_at
 
     add_column :order_notifications, :reference_key, :string, null: false, default: "order"
     remove_index :order_notifications, column: [ :order_id, :kind, :recipient ]

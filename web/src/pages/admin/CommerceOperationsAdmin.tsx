@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowRight, CircleDollarSign, Download, Loader2, RefreshCw, RotateCcw, ShieldCheck } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, type CommerceOperationsSnapshot } from '../../services/api'
 
@@ -13,6 +13,7 @@ function dateInputValue(date: Date) {
 }
 
 export default function CommerceOperationsAdmin() {
+  const loadSequence = useRef(0)
   const [from, setFrom] = useState(() => { const date = new Date(); date.setDate(date.getDate() - 29); return dateInputValue(date) })
   const [to, setTo] = useState(() => dateInputValue(new Date()))
   const [snapshot, setSnapshot] = useState<CommerceOperationsSnapshot | null>(null)
@@ -21,10 +22,16 @@ export default function CommerceOperationsAdmin() {
   const [error, setError] = useState('')
 
   const load = useCallback(async () => {
+    const sequence = ++loadSequence.current
     setLoading(true); setError('')
-    try { setSnapshot(await api.admin.getCommerceOperations({ from, to })) }
-    catch (cause) { setError(cause instanceof Error ? cause.message : 'Commerce operations could not be loaded.') }
-    finally { setLoading(false) }
+    try {
+      const nextSnapshot = await api.admin.getCommerceOperations({ from, to })
+      if (sequence === loadSequence.current) setSnapshot(nextSnapshot)
+    } catch (cause) {
+      if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Commerce operations could not be loaded.')
+    } finally {
+      if (sequence === loadSequence.current) setLoading(false)
+    }
   }, [from, to])
 
   useEffect(() => { void load() }, [load])

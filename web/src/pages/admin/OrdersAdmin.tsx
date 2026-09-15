@@ -43,11 +43,17 @@ export default function OrdersAdmin() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [refundOpen, setRefundOpen] = useState(false)
+  const [refundOrderId, setRefundOrderId] = useState<number | null>(null)
   const [refundAmount, setRefundAmount] = useState('')
   const [refundReason, setRefundReason] = useState('requested_by_customer')
   const [refundNote, setRefundNote] = useState('')
   const [refundConfirmed, setRefundConfirmed] = useState(false)
   const [refundRequestKey, setRefundRequestKey] = useState('')
+
+  const resetRefund = useCallback(() => {
+    setRefundOpen(false); setRefundOrderId(null); setRefundAmount(''); setRefundReason('requested_by_customer')
+    setRefundNote(''); setRefundConfirmed(false); setRefundRequestKey('')
+  }, [])
 
   const load = useCallback(async (sequence: number) => {
     if (sequence !== loadSequence.current) return
@@ -72,7 +78,12 @@ export default function OrdersAdmin() {
   }, [load])
   const selected = useMemo(() => orders.find(order => order.id === selectedId) || null, [orders, selectedId])
 
+  useEffect(() => {
+    if (refundOpen && refundOrderId !== selectedId) resetRefund()
+  }, [refundOpen, refundOrderId, resetRefund, selectedId])
+
   const replace = (order: AdminCommerceOrder) => { setOrders(current => current.map(item => item.id === order.id ? order : item)); setSelectedId(order.id) }
+  const selectOrder = (orderId: number) => { if (orderId !== selectedId) resetRefund(); setSelectedId(orderId) }
   const transition = async (next: CommerceOrder['fulfillment_status']) => {
     if (!selected) return
     setWorking(true); setError(''); setNotice('')
@@ -90,17 +101,20 @@ export default function OrdersAdmin() {
 
   const openRefund = () => {
     if (!selected) return
+    setRefundOrderId(selected.id)
     setRefundAmount((selected.refundable_cents / 100).toFixed(2)); setRefundReason('requested_by_customer')
     setRefundNote(''); setRefundConfirmed(false); setRefundRequestKey(crypto.randomUUID()); setRefundOpen(true)
   }
   const submitRefund = async () => {
-    if (!selected || !refundConfirmed) return
+    if (!selected || selected.id !== refundOrderId) { setError('The selected order changed. Open a new refund form.'); resetRefund(); return }
+    if (!refundConfirmed) return
     const cents = Math.round(Number(refundAmount) * 100)
     if (!Number.isFinite(cents) || cents <= 0) { setError('Enter a refund amount greater than zero.'); return }
+    if (cents > selected.refundable_cents) { setError('The refund exceeds the available balance.'); return }
     setWorking(true); setError(''); setNotice('')
     try {
       const response = await api.admin.createOrderRefund(selected.id, { amount_cents: cents, reason: refundReason, staff_note: refundNote, request_key: refundRequestKey })
-      replace(response.order); setRefundOpen(false); setNotice(`${money(cents, selected.currency)} refund recorded with Stripe.`)
+      replace(response.order); resetRefund(); setNotice(`${money(cents, selected.currency)} refund recorded with Stripe.`)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'The refund could not be completed.')
       const sequence = ++loadSequence.current
@@ -135,7 +149,7 @@ export default function OrdersAdmin() {
     <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(300px,.72fr)_minmax(0,1.28fr)]">
       <section className="overflow-hidden rounded-2xl border border-white/10 bg-surface">
         <div className="border-b border-white/10 px-4 py-3 text-xs font-bold uppercase tracking-[.14em] text-text-muted">{loading ? 'Loading…' : `${orders.length} paid order${orders.length === 1 ? '' : 's'}`}</div>
-        {loading ? <div className="flex h-48 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-gold" /></div> : orders.length === 0 ? <div className="p-8 text-center text-sm text-text-muted">No orders match these filters.</div> : <div className="max-h-[68vh] divide-y divide-white/5 overflow-y-auto">{orders.map(order => <button key={order.id} type="button" onClick={() => setSelectedId(order.id)} className={`w-full p-4 text-left transition ${selectedId === order.id ? 'bg-gold/[0.08]' : 'hover:bg-white/[0.03]'}`}><div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{order.number}</p><p className="mt-1 text-sm text-text-secondary">{order.customer_name}</p></div><span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-semibold text-text-secondary">{label(order.fulfillment.status)}</span></div><div className="mt-3 flex items-center justify-between text-xs text-text-muted"><span>{methodSummary(order)}</span><span>{money(order.total_cents, order.currency)}</span></div></button>)}</div>}
+        {loading ? <div className="flex h-48 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-gold" /></div> : orders.length === 0 ? <div className="p-8 text-center text-sm text-text-muted">No orders match these filters.</div> : <div className="max-h-[68vh] divide-y divide-white/5 overflow-y-auto">{orders.map(order => <button key={order.id} type="button" onClick={() => selectOrder(order.id)} className={`w-full p-4 text-left transition ${selectedId === order.id ? 'bg-gold/[0.08]' : 'hover:bg-white/[0.03]'}`}><div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{order.number}</p><p className="mt-1 text-sm text-text-secondary">{order.customer_name}</p></div><span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-semibold text-text-secondary">{label(order.fulfillment.status)}</span></div><div className="mt-3 flex items-center justify-between text-xs text-text-muted"><span>{methodSummary(order)}</span><span>{money(order.total_cents, order.currency)}</span></div></button>)}</div>}
       </section>
       <section className="min-w-0 rounded-2xl border border-white/10 bg-surface p-5 sm:p-7">
         {!selected ? <div className="flex min-h-64 items-center justify-center text-sm text-text-muted">Choose an order to see fulfillment details.</div> : <>
@@ -148,7 +162,7 @@ export default function OrdersAdmin() {
             {selected.payment_error && <div role="alert" className="mt-4 rounded-xl border border-red-400/20 bg-red-400/[0.07] p-3 text-sm text-red-100">{selected.payment_error}</div>}
             {selected.refunds.length > 0 && <div className="mt-4 divide-y divide-white/5 border-y border-white/5">{selected.refunds.map(refund => <div key={refund.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-sm font-medium">{money(refund.amount_cents, refund.currency)} · {label(refund.status)}</p><p className="mt-1 text-xs text-text-muted">{label(refund.reason)} · {refund.source === 'admin' ? refund.staff_note : 'Created in Stripe Dashboard'}</p>{refund.failure_reason && <p className="mt-1 text-xs text-red-200">{refund.failure_reason}</p>}</div>{['pending_provider', 'pending', 'requires_action', 'error'].includes(refund.status) && <button type="button" onClick={() => void reconcileRefund(refund.id)} disabled={working} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-amber-300/20 px-4 text-sm font-semibold text-amber-200 disabled:opacity-50"><RotateCcw className="h-4 w-4" />Check Stripe</button>}</div>)}</div>}
             {!refundOpen && selected.refundable_cents > 0 && <button type="button" onClick={openRefund} disabled={working} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-amber-300/25 px-4 text-sm font-semibold text-amber-200 transition hover:bg-amber-300/[0.06] disabled:opacity-50"><RotateCcw className="h-4 w-4" />Issue a refund</button>}
-            {refundOpen && <div className="mt-5 rounded-xl border border-amber-300/20 bg-amber-300/[0.045] p-4"><div className="flex items-start justify-between gap-3"><div><h4 className="font-semibold text-amber-100">Issue Stripe refund</h4><p className="mt-1 text-xs leading-5 text-text-muted">Maximum {money(selected.refundable_cents, selected.currency)}. This action cannot be undone.</p></div><button type="button" onClick={() => setRefundOpen(false)} className="flex h-11 w-11 items-center justify-center rounded-full text-text-muted hover:bg-white/5 hover:text-white" aria-label="Close refund form"><X className="h-4 w-4" /></button></div><div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-xs text-text-muted"><span className="mb-1.5 block">Amount ({selected.currency})</span><input type="number" min="0.01" step="0.01" max={(selected.refundable_cents / 100).toFixed(2)} value={refundAmount} onChange={event => setRefundAmount(event.target.value)} className={inputClass} /></label><label className="text-xs text-text-muted"><span className="mb-1.5 block">Reason</span><select value={refundReason} onChange={event => setRefundReason(event.target.value)} className={inputClass}><option value="requested_by_customer">Customer request</option><option value="duplicate">Duplicate payment</option><option value="fraudulent">Fraudulent payment</option></select></label></div><label className="mt-3 block text-xs text-text-muted"><span className="mb-1.5 block">Internal note</span><textarea value={refundNote} onChange={event => setRefundNote(event.target.value)} rows={3} placeholder="Why is this refund being issued?" className={`${inputClass} py-3`} /></label><label className="mt-4 flex cursor-pointer items-start gap-3 text-sm leading-6 text-text-secondary"><input type="checkbox" checked={refundConfirmed} onChange={event => setRefundConfirmed(event.target.checked)} className="mt-1 h-4 w-4 accent-amber-300" /><span>I verified the amount and understand that merchandise is not automatically returned to inventory.</span></label><button type="button" onClick={() => void submitRefund()} disabled={working || !refundConfirmed || refundNote.trim().length < 3} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-amber-300 px-5 text-sm font-bold text-navy-950 disabled:cursor-not-allowed disabled:opacity-45">{working ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}Refund {refundAmount ? money(Math.max(Math.round(Number(refundAmount) * 100) || 0, 0), selected.currency) : ''}</button></div>}
+            {refundOpen && <div className="mt-5 rounded-xl border border-amber-300/20 bg-amber-300/[0.045] p-4"><div className="flex items-start justify-between gap-3"><div><h4 className="font-semibold text-amber-100">Issue Stripe refund</h4><p className="mt-1 text-xs leading-5 text-text-muted">Maximum {money(selected.refundable_cents, selected.currency)}. This action cannot be undone.</p></div><button type="button" onClick={resetRefund} className="flex h-11 w-11 items-center justify-center rounded-full text-text-muted hover:bg-white/5 hover:text-white" aria-label="Close refund form"><X className="h-4 w-4" /></button></div><div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-xs text-text-muted"><span className="mb-1.5 block">Amount ({selected.currency})</span><input type="number" min="0.01" step="0.01" max={(selected.refundable_cents / 100).toFixed(2)} value={refundAmount} onChange={event => setRefundAmount(event.target.value)} className={inputClass} /></label><label className="text-xs text-text-muted"><span className="mb-1.5 block">Reason</span><select value={refundReason} onChange={event => setRefundReason(event.target.value)} className={inputClass}><option value="requested_by_customer">Customer request</option><option value="duplicate">Duplicate payment</option><option value="fraudulent">Fraudulent payment</option></select></label></div><label className="mt-3 block text-xs text-text-muted"><span className="mb-1.5 block">Internal note</span><textarea value={refundNote} onChange={event => setRefundNote(event.target.value)} rows={3} placeholder="Why is this refund being issued?" className={`${inputClass} py-3`} /></label><label className="mt-4 flex cursor-pointer items-start gap-3 text-sm leading-6 text-text-secondary"><input type="checkbox" checked={refundConfirmed} onChange={event => setRefundConfirmed(event.target.checked)} className="mt-1 h-4 w-4 accent-amber-300" /><span>I verified the amount and understand that merchandise is not automatically returned to inventory.</span></label><button type="button" onClick={() => void submitRefund()} disabled={working || !refundConfirmed || refundNote.trim().length < 3} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-amber-300 px-5 text-sm font-bold text-navy-950 disabled:cursor-not-allowed disabled:opacity-45">{working ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}Refund {refundAmount ? money(Math.max(Math.round(Number(refundAmount) * 100) || 0, 0), selected.currency) : ''}</button></div>}
             <p className="mt-4 text-xs leading-5 text-text-muted">Inventory stays unchanged. Record returned merchandise through the inventory adjustment workflow only after Deal Depot physically receives it.</p>
           </div>
           <div className="flex flex-col gap-3 rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.045] p-5 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Next step</p><p className="mt-1 text-sm text-text-secondary">Only advance the order after the physical handoff is actually complete.</p></div><div className="flex flex-wrap gap-2">{actions(selected).map(action => <button key={action.status} type="button" disabled={working} onClick={() => void transition(action.status)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-400 px-5 py-2.5 text-sm font-bold text-navy-950 disabled:opacity-50">{working ? <Loader2 className="h-4 w-4 animate-spin" /> : selected.fulfillment_method === 'pickup' ? <CheckCircle2 className="h-4 w-4" /> : <Clock3 className="h-4 w-4" />}{action.label}</button>)}</div></div>

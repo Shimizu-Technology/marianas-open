@@ -37,7 +37,7 @@ module Commerce
       def prepare
         OrderRefund.transaction do
           order.lock!
-          existing = order.order_refunds.find_by(request_key:)
+          existing = OrderRefund.find_by(request_key:)
           return verify_retry!(existing) if existing
 
           validate!
@@ -47,9 +47,13 @@ module Commerce
             requested_at: Time.current
           )
         end
+      rescue ActiveRecord::RecordNotUnique
+        verify_retry!(OrderRefund.find_by!(request_key:))
       end
 
       def verify_retry!(refund)
+        raise InvalidRefund, "That refund request key belongs to a different order." unless refund.order_id == order.id
+
         unless refund.amount_cents == amount_cents && refund.reason == reason && refund.staff_note.to_s == staff_note
           raise InvalidRefund, "That refund request key was already used with different details."
         end

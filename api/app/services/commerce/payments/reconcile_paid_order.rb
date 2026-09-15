@@ -11,6 +11,7 @@ module Commerce
       end
 
       def call
+        record_attempt!
         raise CheckoutError, "Only paid orders can be reconciled." unless order.paid?
         raise CheckoutError, "Order is missing its Stripe Checkout Session." if order.stripe_checkout_session_id.blank?
 
@@ -26,6 +27,13 @@ module Commerce
       private
 
       attr_reader :order, :gateway
+
+      def record_attempt!
+        return unless order.persisted?
+
+        attempted_at = Time.current
+        order.update_columns(last_reconciliation_attempt_at: attempted_at, updated_at: attempted_at)
+      end
 
       def verify!(session)
         raise CheckoutError, "Stripe reports checkout is not complete." unless value(session, :status) == "complete"

@@ -477,6 +477,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_110000) do
     t.string "customer_phone"
     t.string "fulfillment_method", null: false
     t.bigint "inventory_location_id", null: false
+    t.datetime "last_reconciliation_attempt_at"
     t.datetime "last_reconciled_at"
     t.string "number", null: false
     t.bigint "organization_id", null: false
@@ -498,6 +499,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_110000) do
     t.datetime "updated_at", null: false
     t.index ["checkout_key"], name: "index_orders_on_checkout_key", unique: true
     t.index ["inventory_location_id"], name: "index_orders_on_inventory_location_id"
+    t.index ["last_reconciliation_attempt_at"], name: "index_orders_on_last_reconciliation_attempt_at"
     t.index ["last_reconciled_at"], name: "index_orders_on_last_reconciled_at"
     t.index ["organization_id", "number"], name: "index_orders_on_organization_id_and_number", unique: true
     t.index ["organization_id", "status", "created_at"], name: "index_orders_on_organization_id_and_status_and_created_at"

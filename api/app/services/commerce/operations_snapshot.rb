@@ -87,28 +87,31 @@ module Commerce
     end
 
     def payment_alerts
-      organization.orders.where(status: "paid").where.not(payment_error: [ nil, "" ]).limit(50).map do |order|
+      organization.orders.where(status: "paid").where.not(payment_error: [ nil, "" ]).order(updated_at: :desc).limit(50).map do |order|
         alert("payment", "Payment needs reconciliation", order.payment_error, order:, occurred_at: order.updated_at,
           reference: "order-#{order.id}")
       end
     end
 
     def event_alerts
-      PaymentEvent.where(status: "failed", order_id: organization.orders.select(:id)).includes(:order).limit(50).map do |event|
+      PaymentEvent.where(status: "failed", order_id: organization.orders.select(:id)).includes(:order)
+        .order(updated_at: :desc).limit(50).map do |event|
         alert("payment", "Stripe event failed", event.processing_error.presence || event.event_type, order: event.order,
           occurred_at: event.updated_at, reference: "event-#{event.id}")
       end
     end
 
     def notification_alerts
-      OrderNotification.where(status: "failed", order_id: organization.orders.select(:id)).includes(:order).limit(50).map do |notification|
+      OrderNotification.where(status: "failed", order_id: organization.orders.select(:id)).includes(:order)
+        .order(updated_at: :desc).limit(50).map do |notification|
         alert("notification", "Customer message failed", notification.last_error.presence || notification.kind,
           order: notification.order, occurred_at: notification.updated_at, reference: "notification-#{notification.id}")
       end
     end
 
     def shipment_alerts
-      Shipment.where(status: %w[failure return_to_sender error], order_id: organization.orders.select(:id)).includes(:order).limit(50).map do |shipment|
+      Shipment.where(status: %w[failure return_to_sender error], order_id: organization.orders.select(:id)).includes(:order)
+        .order(updated_at: :desc).limit(50).map do |shipment|
         alert("shipping", "Shipment needs attention", shipment.last_error.presence || shipment.status.humanize,
           order: shipment.order, occurred_at: shipment.updated_at, reference: "shipment-#{shipment.id}")
       end
@@ -117,7 +120,7 @@ module Commerce
     def refund_alerts
       scope = OrderRefund.where(status: %w[failed requires_action error], order_id: organization.orders.select(:id))
         .or(OrderRefund.where(status: %w[pending_provider pending], order_id: organization.orders.select(:id), updated_at: ...1.day.ago))
-      scope.includes(:order).limit(50).map do |refund|
+      scope.includes(:order).order(updated_at: :desc).limit(50).map do |refund|
         alert("refund", "Refund needs attention", refund.failure_reason.presence || refund.status.humanize,
           order: refund.order, occurred_at: refund.updated_at, reference: "refund-#{refund.id}")
       end
@@ -151,7 +154,7 @@ module Commerce
 
     def csv_cell(value)
       string = value.to_s
-      string.match?(/\A[=+\-@]/) ? "'#{string}" : string
+      string.match?(/\A[=+\-@\t\r\n]/) ? "'#{string}" : string
     end
   end
 end
