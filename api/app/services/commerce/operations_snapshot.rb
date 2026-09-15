@@ -32,9 +32,10 @@ module Commerce
         report_orders.each do |order|
           refunded = order.refunded_cents
           csv << [
-            order.number, order.paid_at&.iso8601, order.customer_email, order.fulfillment_method, order.currency,
+            csv_cell(order.number), order.paid_at&.iso8601, csv_cell(order.customer_email),
+            csv_cell(order.fulfillment_method), csv_cell(order.currency),
             order.subtotal_cents, order.shipping_cents, order.tax_cents, order.total_cents, refunded,
-            order.total_cents - refunded, order.fulfillment&.status || "unfulfilled"
+            order.total_cents - refunded, csv_cell(order.fulfillment&.status || "unfulfilled")
           ]
         end
       end
@@ -146,6 +147,11 @@ module Commerce
       value.present? ? Date.iso8601(value.to_s) : fallback
     rescue Date::Error
       raise ArgumentError, "Use a valid date in YYYY-MM-DD format."
+    end
+
+    def csv_cell(value)
+      string = value.to_s
+      string.match?(/\A[=+\-@]/) ? "'#{string}" : string
     end
   end
 end

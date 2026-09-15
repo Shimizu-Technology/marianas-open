@@ -45,7 +45,9 @@ class Order < ApplicationRecord
   end
 
   def refundable_cents
-    reserved = refund_amount_for(OrderRefund::RESERVING_STATUSES)
+    # This value guards money movement, so always read the locked database state
+    # rather than a potentially preloaded association.
+    reserved = order_refunds.where(status: OrderRefund::RESERVING_STATUSES).sum(:amount_cents)
     [ total_cents - reserved, 0 ].max
   end
 

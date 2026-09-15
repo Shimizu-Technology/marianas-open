@@ -172,6 +172,13 @@ class CommerceOperationsTest < ActionDispatch::IntegrationTest
     assert_equal 8_500, summary.fetch(:net_cents)
   end
 
+  test "a preloaded refund association cannot make the refundable balance stale" do
+    @order.order_refunds.load
+    create_refund(request_key: SecureRandom.uuid, gateway: FakeGateway.new)
+
+    assert_equal 9_000, @order.refundable_cents
+  end
+
   test "paid-order reconciliation records success and exposes mismatches as operational alerts" do
     gateway = FakeGateway.new
     Commerce::Payments::ReconcilePaidOrder.call(order: @order, gateway:)
@@ -190,6 +197,7 @@ class CommerceOperationsTest < ActionDispatch::IntegrationTest
   end
 
   test "staff can read operations and download a cents-precise CSV while anonymous users cannot" do
+    @order.update!(customer_email: "=2+2@example.org")
     get "/api/v1/admin/commerce-operations"
     assert_response :unauthorized
 
@@ -203,6 +211,7 @@ class CommerceOperationsTest < ActionDispatch::IntegrationTest
     assert_equal "text/csv", response.media_type
     assert_includes response.body, @order.number
     assert_includes response.body, "10000"
+    assert_includes response.body, "'=2+2@example.org"
   end
 
   private
