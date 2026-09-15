@@ -9,6 +9,7 @@ class Order < ApplicationRecord
   has_many :inventory_reservations, dependent: :restrict_with_error
   has_many :payment_events, dependent: :nullify
   has_many :order_notifications, dependent: :restrict_with_error
+  has_many :order_refunds, dependent: :restrict_with_error
   has_one :fulfillment, dependent: :restrict_with_error
   has_one :shipment, dependent: :restrict_with_error
 
@@ -39,11 +40,27 @@ class Order < ApplicationRecord
     signed_id(purpose: :commerce_order)
   end
 
+  def refunded_cents
+    refund_amount_for([ "succeeded" ])
+  end
+
+  def refundable_cents
+    reserved = refund_amount_for(OrderRefund::RESERVING_STATUSES)
+    [ total_cents - reserved, 0 ].max
+  end
+
   def self.find_public_token!(token)
     find_signed!(token, purpose: :commerce_order)
   end
 
   private
+
+  def refund_amount_for(statuses)
+    association = association(:order_refunds)
+    return association.target.select { |refund| statuses.include?(refund.status) }.sum(&:amount_cents) if association.loaded?
+
+    order_refunds.where(status: statuses).sum(:amount_cents)
+  end
 
   def assign_number
     self.number ||= "MO-#{Time.current.strftime('%Y%m%d')}-#{SecureRandom.alphanumeric(8).upcase}"

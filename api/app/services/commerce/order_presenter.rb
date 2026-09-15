@@ -23,6 +23,8 @@ module Commerce
         created_at: order.created_at,
         payment_expires_at: order.payment_expires_at,
         paid_at: order.paid_at,
+        refunded_cents: order.refunded_cents,
+        refund_status: refund_status,
         fulfillment_status: order.fulfillment&.status || "unfulfilled",
         shipment: public_shipment,
         checkout_url: order.pending_payment? ? order.stripe_checkout_url : nil,
@@ -48,6 +50,15 @@ module Commerce
       return unless shipment&.purchased?
 
       shipment.slice(:status, :carrier, :service, :tracking_code, :tracking_url, :purchased_at, :last_tracking_update_at)
+    end
+
+    def refund_status
+      refunds = order.order_refunds.to_a.select { |refund| %w[pending requires_action succeeded].include?(refund.status) }
+      return "none" if refunds.empty?
+      return "pending" if refunds.any? { |refund| %w[pending requires_action].include?(refund.status) }
+      return "refunded" if refunds.select { |refund| refund.status == "succeeded" }.sum(&:amount_cents) >= order.total_cents
+
+      "partially_refunded"
     end
   end
 end

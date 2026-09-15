@@ -47,12 +47,12 @@ Staging uses:
 - A local PostgreSQL volume with synthetic test records.
 - A local Active Storage volume, never the production S3 bucket.
 - Clerk test credentials.
-- Stripe Sandbox credentials when commerce is added.
-- EasyPost test credentials when shipping is added.
+- Stripe Sandbox credentials from a separate test restricted key. The staging webhook subscribes to checkout-session and refund lifecycle events.
+- EasyPost test credentials and a staging-only tracking webhook.
 - No Resend key and `COMMERCE_EMAIL_DELIVERY_MODE=disabled` hardcoded in the Compose service, so staging records suppressed notification attempts but cannot send customer email even if a host variable is set accidentally.
 - A separate or disabled analytics project.
 
-Stripe and shipping webhooks must be configured for `https://mo-hooks.shimizu-technology.com/...` and must use staging-only signing secrets.
+Stripe and shipping webhooks must be configured for `https://mo-hooks.shimizu-technology.com/...` and must use staging-only signing secrets. Stripe must deliver `checkout.session.completed`, `checkout.session.expired`, `refund.created`, `refund.updated`, and `refund.failed`; EasyPost must deliver tracker updates. Staging accepts only test-mode provider records.
 
 ## MacBook Pro installation
 

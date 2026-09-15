@@ -1,5 +1,6 @@
-import { CheckCircle2, Clock3, ExternalLink, Loader2, MapPin, PackageCheck, Search, Truck } from 'lucide-react'
+import { CheckCircle2, CircleDollarSign, Clock3, ExternalLink, Loader2, MapPin, PackageCheck, RefreshCw, RotateCcw, Search, Truck, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { api, type AdminCommerceOrder, type CommerceOrder } from '../../services/api'
 
 const money = (cents: number, currency: string) => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100)
@@ -29,6 +30,8 @@ const actions = (order: AdminCommerceOrder): Array<{ status: CommerceOrder['fulf
 }
 
 export default function OrdersAdmin() {
+  const [searchParams] = useSearchParams()
+  const requestedOrder = searchParams.get('order')
   const loadSequence = useRef(0)
   const [orders, setOrders] = useState<AdminCommerceOrder[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -39,6 +42,12 @@ export default function OrdersAdmin() {
   const [working, setWorking] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [refundOpen, setRefundOpen] = useState(false)
+  const [refundAmount, setRefundAmount] = useState('')
+  const [refundReason, setRefundReason] = useState('requested_by_customer')
+  const [refundNote, setRefundNote] = useState('')
+  const [refundConfirmed, setRefundConfirmed] = useState(false)
+  const [refundRequestKey, setRefundRequestKey] = useState('')
 
   const load = useCallback(async (sequence: number) => {
     if (sequence !== loadSequence.current) return
@@ -47,10 +56,14 @@ export default function OrdersAdmin() {
       const response = await api.admin.getOrders({ q: query.trim(), status, method })
       if (sequence !== loadSequence.current) return
       setOrders(response.orders)
-      setSelectedId(current => response.orders.some(order => order.id === current) ? current : response.orders[0]?.id ?? null)
+      setSelectedId(current => {
+        if (response.orders.some(order => order.id === current)) return current
+        const requestedId = Number(requestedOrder)
+        return response.orders.find(order => order.id === requestedId)?.id ?? response.orders[0]?.id ?? null
+      })
     } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : 'Orders could not be loaded.') }
     finally { if (sequence === loadSequence.current) setLoading(false) }
-  }, [query, status, method])
+  }, [query, status, method, requestedOrder])
 
   useEffect(() => {
     const sequence = ++loadSequence.current
@@ -75,6 +88,41 @@ export default function OrdersAdmin() {
     finally { setWorking(false) }
   }
 
+  const openRefund = () => {
+    if (!selected) return
+    setRefundAmount((selected.refundable_cents / 100).toFixed(2)); setRefundReason('requested_by_customer')
+    setRefundNote(''); setRefundConfirmed(false); setRefundRequestKey(crypto.randomUUID()); setRefundOpen(true)
+  }
+  const submitRefund = async () => {
+    if (!selected || !refundConfirmed) return
+    const cents = Math.round(Number(refundAmount) * 100)
+    if (!Number.isFinite(cents) || cents <= 0) { setError('Enter a refund amount greater than zero.'); return }
+    setWorking(true); setError(''); setNotice('')
+    try {
+      const response = await api.admin.createOrderRefund(selected.id, { amount_cents: cents, reason: refundReason, staff_note: refundNote, request_key: refundRequestKey })
+      replace(response.order); setRefundOpen(false); setNotice(`${money(cents, selected.currency)} refund recorded with Stripe.`)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'The refund could not be completed.')
+      const sequence = ++loadSequence.current
+      void load(sequence)
+    }
+    finally { setWorking(false) }
+  }
+  const reconcileRefund = async (refundId: number) => {
+    if (!selected) return
+    setWorking(true); setError(''); setNotice('')
+    try { const response = await api.admin.reconcileOrderRefund(selected.id, refundId); replace(response.order); setNotice('Refund status reconciled with Stripe.') }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'The refund could not be reconciled.') }
+    finally { setWorking(false) }
+  }
+  const reconcileOrder = async () => {
+    if (!selected) return
+    setWorking(true); setError(''); setNotice('')
+    try { const response = await api.admin.reconcileOrder(selected.id); replace(response.order); setNotice('Payment matches Stripe.') }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'The payment could not be reconciled.') }
+    finally { setWorking(false) }
+  }
+
   return <div>
     <div className="mb-6 flex items-center gap-3"><PackageCheck className="h-6 w-6 text-gold" /><div><h1 className="font-heading text-2xl font-bold">Orders & fulfillment</h1><p className="mt-1 text-sm text-text-muted">Prepare Deal Depot pickups, buy delivery labels, and keep customers updated.</p></div></div>
     <div className="grid gap-3 sm:grid-cols-[1fr_180px_160px]">
@@ -94,6 +142,15 @@ export default function OrdersAdmin() {
           <div className="flex flex-col gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-gold">{selected.fulfillment_method === 'pickup' ? 'Pickup order' : 'Delivery order'}</p><h2 className="mt-2 font-heading text-2xl font-bold">{selected.number}</h2><p className="mt-2 text-sm text-text-secondary">{selected.customer_name} · {selected.customer_email}{selected.customer_phone ? ` · ${selected.customer_phone}` : ''}</p></div><div className="rounded-xl border border-white/10 bg-black/15 px-4 py-3"><p className="text-[11px] uppercase tracking-wide text-text-muted">Current stage</p><p className="mt-1 font-semibold text-emerald-300">{label(selected.fulfillment.status)}</p></div></div>
           <div className="grid gap-6 py-6 lg:grid-cols-2"><div><h3 className="font-heading font-semibold">Pack these items</h3><div className="mt-4 space-y-3">{selected.items.map(item => <div key={item.sku} className="flex justify-between gap-4 rounded-xl bg-white/[0.035] p-3 text-sm"><div><p className="font-medium">{item.product_name}</p><p className="mt-1 text-xs text-text-muted">{item.variant_name} · {item.sku}</p></div><strong>×{item.quantity}</strong></div>)}</div></div><div><h3 className="font-heading font-semibold">Destination</h3><div className="mt-4 rounded-xl bg-white/[0.035] p-4 text-sm leading-6 text-text-secondary">{selected.fulfillment_method === 'pickup' ? <><p className="flex items-center gap-2 font-semibold text-white"><MapPin className="h-4 w-4 text-gold" />Deal Depot pickup</p><p className="mt-2">Customer pickup details are already on their order status page.</p></> : <><p className="flex items-center gap-2 font-semibold text-white"><Truck className="h-4 w-4 text-gold" />{methodSummary(selected)}</p>{addressLines(selected.shipping_address).map(line => <div key={line}>{line}</div>)}</>}</div></div></div>
           {selected.fulfillment_method === 'shipping' && <div className="mb-6 rounded-2xl border border-white/10 bg-black/15 p-5"><h3 className="font-heading font-semibold">Shipping label</h3>{selected.shipment?.label_url ? <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0 text-sm text-text-secondary"><p className="font-medium text-white">{selected.shipment.carrier} {selected.shipment.service}</p><p className="mt-1 break-all">Tracking {selected.shipment.tracking_code}</p><p className="mt-1 text-xs">EasyPost {selected.shipment.provider_mode} mode</p></div><a href={selected.shipment.label_url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gold/30 px-4 py-2.5 text-sm font-semibold text-gold"><ExternalLink className="h-4 w-4" />Open printable label</a></div> : <><p className="mt-2 text-sm leading-6 text-text-secondary">This purchases the exact EasyPost rate the customer paid for. Check the packed order and destination first.</p><button type="button" disabled={working || selected.fulfillment.status !== 'preparing'} onClick={() => void purchaseLabel()} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-sm font-bold text-navy-900 disabled:cursor-not-allowed disabled:opacity-45">{working ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}Purchase shipping label</button>{selected.fulfillment.status !== 'preparing' && <p className="mt-2 text-xs text-text-muted">Start preparing the order before buying its label.</p>}</>}</div>}
+          <div className="mb-6 rounded-2xl border border-white/10 bg-black/15 p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex items-center gap-2"><CircleDollarSign className="h-5 w-5 text-gold" /><h3 className="font-heading font-semibold">Payment & refunds</h3></div><p className="mt-2 text-sm text-text-secondary">Refunds return money to the original Stripe payment method.</p></div><button type="button" onClick={() => void reconcileOrder()} disabled={working} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-4 text-sm font-semibold text-text-secondary transition hover:border-white/20 hover:text-white disabled:opacity-50"><RefreshCw className="h-4 w-4" />Reconcile payment</button></div>
+            <div className="mt-4 grid grid-cols-3 gap-px overflow-hidden rounded-xl bg-white/10"><div className="bg-surface/80 p-3"><p className="text-[10px] uppercase tracking-wide text-text-muted">Paid</p><p className="mt-1 font-semibold">{money(selected.total_cents, selected.currency)}</p></div><div className="bg-surface/80 p-3"><p className="text-[10px] uppercase tracking-wide text-text-muted">Refunded</p><p className="mt-1 font-semibold text-amber-200">{money(selected.refunded_cents, selected.currency)}</p></div><div className="bg-surface/80 p-3"><p className="text-[10px] uppercase tracking-wide text-text-muted">Available</p><p className="mt-1 font-semibold text-emerald-200">{money(selected.refundable_cents, selected.currency)}</p></div></div>
+            {selected.payment_error && <div role="alert" className="mt-4 rounded-xl border border-red-400/20 bg-red-400/[0.07] p-3 text-sm text-red-100">{selected.payment_error}</div>}
+            {selected.refunds.length > 0 && <div className="mt-4 divide-y divide-white/5 border-y border-white/5">{selected.refunds.map(refund => <div key={refund.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-sm font-medium">{money(refund.amount_cents, refund.currency)} · {label(refund.status)}</p><p className="mt-1 text-xs text-text-muted">{label(refund.reason)} · {refund.source === 'admin' ? refund.staff_note : 'Created in Stripe Dashboard'}</p>{refund.failure_reason && <p className="mt-1 text-xs text-red-200">{refund.failure_reason}</p>}</div>{['pending_provider', 'pending', 'requires_action', 'error'].includes(refund.status) && <button type="button" onClick={() => void reconcileRefund(refund.id)} disabled={working} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-amber-300/20 px-4 text-sm font-semibold text-amber-200 disabled:opacity-50"><RotateCcw className="h-4 w-4" />Check Stripe</button>}</div>)}</div>}
+            {!refundOpen && selected.refundable_cents > 0 && <button type="button" onClick={openRefund} disabled={working} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-amber-300/25 px-4 text-sm font-semibold text-amber-200 transition hover:bg-amber-300/[0.06] disabled:opacity-50"><RotateCcw className="h-4 w-4" />Issue a refund</button>}
+            {refundOpen && <div className="mt-5 rounded-xl border border-amber-300/20 bg-amber-300/[0.045] p-4"><div className="flex items-start justify-between gap-3"><div><h4 className="font-semibold text-amber-100">Issue Stripe refund</h4><p className="mt-1 text-xs leading-5 text-text-muted">Maximum {money(selected.refundable_cents, selected.currency)}. This action cannot be undone.</p></div><button type="button" onClick={() => setRefundOpen(false)} className="flex h-11 w-11 items-center justify-center rounded-full text-text-muted hover:bg-white/5 hover:text-white" aria-label="Close refund form"><X className="h-4 w-4" /></button></div><div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-xs text-text-muted"><span className="mb-1.5 block">Amount ({selected.currency})</span><input type="number" min="0.01" step="0.01" max={(selected.refundable_cents / 100).toFixed(2)} value={refundAmount} onChange={event => setRefundAmount(event.target.value)} className={inputClass} /></label><label className="text-xs text-text-muted"><span className="mb-1.5 block">Reason</span><select value={refundReason} onChange={event => setRefundReason(event.target.value)} className={inputClass}><option value="requested_by_customer">Customer request</option><option value="duplicate">Duplicate payment</option><option value="fraudulent">Fraudulent payment</option></select></label></div><label className="mt-3 block text-xs text-text-muted"><span className="mb-1.5 block">Internal note</span><textarea value={refundNote} onChange={event => setRefundNote(event.target.value)} rows={3} placeholder="Why is this refund being issued?" className={`${inputClass} py-3`} /></label><label className="mt-4 flex cursor-pointer items-start gap-3 text-sm leading-6 text-text-secondary"><input type="checkbox" checked={refundConfirmed} onChange={event => setRefundConfirmed(event.target.checked)} className="mt-1 h-4 w-4 accent-amber-300" /><span>I verified the amount and understand that merchandise is not automatically returned to inventory.</span></label><button type="button" onClick={() => void submitRefund()} disabled={working || !refundConfirmed || refundNote.trim().length < 3} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-amber-300 px-5 text-sm font-bold text-navy-950 disabled:cursor-not-allowed disabled:opacity-45">{working ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}Refund {refundAmount ? money(Math.max(Math.round(Number(refundAmount) * 100) || 0, 0), selected.currency) : ''}</button></div>}
+            <p className="mt-4 text-xs leading-5 text-text-muted">Inventory stays unchanged. Record returned merchandise through the inventory adjustment workflow only after Deal Depot physically receives it.</p>
+          </div>
           <div className="flex flex-col gap-3 rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.045] p-5 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Next step</p><p className="mt-1 text-sm text-text-secondary">Only advance the order after the physical handoff is actually complete.</p></div><div className="flex flex-wrap gap-2">{actions(selected).map(action => <button key={action.status} type="button" disabled={working} onClick={() => void transition(action.status)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-400 px-5 py-2.5 text-sm font-bold text-navy-950 disabled:opacity-50">{working ? <Loader2 className="h-4 w-4 animate-spin" /> : selected.fulfillment_method === 'pickup' ? <CheckCircle2 className="h-4 w-4" /> : <Clock3 className="h-4 w-4" />}{action.label}</button>)}</div></div>
         </>}
       </section>

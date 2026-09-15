@@ -8,7 +8,7 @@ module Api
         before_action :set_order, only: :show
 
         def index
-          orders = organization.orders.includes(:fulfillment, :shipment, :order_items, :inventory_location)
+          orders = organization.orders.includes(:fulfillment, :shipment, :order_items, :order_refunds, :inventory_location)
             .where(status: "paid").order(created_at: :desc)
           orders = orders.where(fulfillment_method: params[:method]) if Order::FULFILLMENT_METHODS.include?(params[:method])
           if params[:status].present?
@@ -33,7 +33,7 @@ module Api
         end
 
         def set_order
-          @order = organization.orders.includes(:fulfillment, :shipment, :shipping_quote, :order_items, :inventory_location).find(params[:id])
+          @order = organization.orders.includes(:fulfillment, :shipment, :shipping_quote, :order_items, :order_refunds, :inventory_location).find(params[:id])
         end
 
         def present(order)

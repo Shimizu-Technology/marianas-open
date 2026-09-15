@@ -133,7 +133,13 @@ Rails.application.routes.draw do
         resources :orders, only: %i[index show] do
           resource :fulfillment, only: :create
           resource :shipment, controller: "order_shipments", only: :create
+          resources :refunds, controller: "order_refunds", only: :create do
+            post :reconcile, on: :member
+          end
+          resource :reconciliation, controller: "order_reconciliations", only: :create
         end
+        resource :commerce_operations, path: "commerce-operations", only: :show
+        get "commerce-operations/report", to: "commerce_operations#report"
         resource :organization, only: [ :show, :update ] do
           post :upload_logo, on: :collection
           post :upload_banner, on: :collection
