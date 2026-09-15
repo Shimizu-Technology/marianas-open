@@ -893,6 +893,16 @@ export interface CommerceOrder {
   created_at: string;
   payment_expires_at: string;
   paid_at: string | null;
+  fulfillment_status: 'unfulfilled' | 'preparing' | 'ready_for_pickup' | 'picked_up' | 'shipped' | 'delivered';
+  shipment: null | {
+    status: string;
+    carrier: string;
+    service: string;
+    tracking_code: string;
+    tracking_url: string | null;
+    purchased_at: string;
+    last_tracking_update_at: string | null;
+  };
   checkout_url: string | null;
   items: Array<{
     product_name: string;
@@ -903,6 +913,28 @@ export interface CommerceOrder {
     quantity: number;
     line_total_cents: number;
   }>;
+}
+
+export interface AdminCommerceOrder extends CommerceOrder {
+  id: number;
+  customer_phone: string | null;
+  fulfillment: {
+    status: CommerceOrder['fulfillment_status'];
+    staff_note: string | null;
+    preparing_at: string | null;
+    ready_for_pickup_at: string | null;
+    picked_up_at: string | null;
+    shipped_at: string | null;
+    delivered_at: string | null;
+  };
+  shipment: null | (NonNullable<CommerceOrder['shipment']> & {
+    provider_mode: string;
+    label_url: string;
+    label_format: string | null;
+    postage_cents: number | null;
+    currency: string;
+    last_error: string | null;
+  });
 }
 
 async function authHeaders(requireAuth: boolean, skipCache = false) {
@@ -1135,6 +1167,16 @@ export const api = {
   // Admin - Events
   admin: {
     // Commerce
+    getOrders: (params?: { q?: string; status?: string; method?: string }) => {
+      const query = params ? `?${new URLSearchParams(Object.entries(params).filter(([, value]) => value).map(([key, value]) => [key, value!])).toString()}` : '';
+      return fetchApi<{ orders: AdminCommerceOrder[] }>(`/api/v1/admin/orders${query}`, {}, true);
+    },
+    getOrder: (id: number) => fetchApi<{ order: AdminCommerceOrder }>(`/api/v1/admin/orders/${id}`, {}, true),
+    transitionOrder: (id: number, status: CommerceOrder['fulfillment_status'], staffNote?: string) =>
+      fetchApi<{ order: AdminCommerceOrder }>(`/api/v1/admin/orders/${id}/fulfillment`, {
+        method: 'POST', body: JSON.stringify({ fulfillment: { status, staff_note: staffNote } }),
+      }, true),
+    purchaseOrderLabel: (id: number) => fetchApi<{ order: AdminCommerceOrder }>(`/api/v1/admin/orders/${id}/shipment`, { method: 'POST' }, true),
     getProducts: () => fetchApi<{ products: CommerceProduct[] }>('/api/v1/admin/products', {}, true),
     getProduct: (id: number) => fetchApi<{ product: CommerceProduct }>(`/api/v1/admin/products/${id}`, {}, true),
     createProduct: (product: CommerceProduct) =>

@@ -54,6 +54,7 @@ const ImpactAdmin = lazy(() => import('./pages/admin/ImpactAdmin'));
 const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
 const CommerceAdmin = lazy(() => import('./pages/admin/CommerceAdmin'));
 const ShippingAdmin = lazy(() => import('./pages/admin/ShippingAdmin'));
+const OrdersAdmin = lazy(() => import('./pages/admin/OrdersAdmin'));
 
 function BannerLayout({ children }: { children: React.ReactNode }) {
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -177,6 +178,7 @@ export default function App() {
           <Route path="impact" element={<ImpactAdmin />} />
           <Route path="commerce" element={<CommerceAdmin />} />
           <Route path="commerce/shipping" element={<ShippingAdmin />} />
+          <Route path="commerce/orders" element={<OrdersAdmin />} />
           <Route path="content" element={<ContentAdmin />} />
           <Route
             path="settings"

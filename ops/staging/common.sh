@@ -31,9 +31,10 @@ load_staging_secrets() {
   SECRET_KEY_BASE="$(keychain_secret marianas-open-staging-secret-key-base)"
   CLERK_SECRET_KEY="$(keychain_secret marianas-open-staging-clerk-secret-key)"
   EASYPOST_API_KEY="$(optional_keychain_secret marianas-open-staging-easypost-api-key)"
+  EASYPOST_WEBHOOK_SECRET="$(optional_keychain_secret marianas-open-staging-easypost-webhook-secret)"
   STRIPE_API_KEY="$(optional_keychain_secret marianas-open-staging-stripe-api-key)"
   STRIPE_WEBHOOK_SECRET="$(optional_keychain_secret marianas-open-staging-stripe-webhook-secret)"
-  export POSTGRES_PASSWORD SECRET_KEY_BASE CLERK_SECRET_KEY EASYPOST_API_KEY STRIPE_API_KEY STRIPE_WEBHOOK_SECRET
+  export POSTGRES_PASSWORD SECRET_KEY_BASE CLERK_SECRET_KEY EASYPOST_API_KEY EASYPOST_WEBHOOK_SECRET STRIPE_API_KEY STRIPE_WEBHOOK_SECRET
 }
 
 compose() {

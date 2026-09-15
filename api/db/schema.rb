@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -262,6 +262,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_090000) do
     t.index ["organization_id"], name: "index_events_on_organization_id"
     t.index ["translation_status"], name: "index_events_on_translation_status"
     t.check_constraint "ticket_sales_status::text = ANY (ARRAY['unavailable'::character varying::text, 'on_sale'::character varying::text, 'sold_out'::character varying::text, 'closed'::character varying::text])", name: "events_ticket_sales_status_check"
+  end
+
+  create_table "fulfillments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "delivered_at"
+    t.bigint "order_id", null: false
+    t.datetime "picked_up_at"
+    t.datetime "preparing_at"
+    t.datetime "ready_for_pickup_at"
+    t.datetime "shipped_at"
+    t.text "staff_note"
+    t.string "status", default: "unfulfilled", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["order_id"], name: "index_fulfillments_on_order_id", unique: true
+    t.index ["status", "updated_at"], name: "index_fulfillments_on_status_and_updated_at"
+    t.index ["updated_by_id"], name: "index_fulfillments_on_updated_by_id"
+    t.check_constraint "status::text = ANY (ARRAY['unfulfilled'::character varying, 'preparing'::character varying, 'ready_for_pickup'::character varying, 'picked_up'::character varying, 'shipped'::character varying, 'delivered'::character varying]::text[])", name: "fulfillments_status_valid"
   end
 
   create_table "fund_allocations", force: :cascade do |t|
@@ -622,6 +640,54 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_090000) do
     t.index ["organization_id"], name: "index_products_on_organization_id"
   end
 
+  create_table "shipment_events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.text "last_error"
+    t.datetime "processed_at"
+    t.string "provider", default: "easypost", null: false
+    t.string "provider_event_id", null: false
+    t.string "provider_object_id"
+    t.bigint "shipment_id"
+    t.string "status", default: "received", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider", "provider_event_id"], name: "index_shipment_events_on_provider_and_provider_event_id", unique: true
+    t.index ["shipment_id"], name: "index_shipment_events_on_shipment_id"
+    t.index ["status", "created_at"], name: "index_shipment_events_on_status_and_created_at"
+    t.check_constraint "status::text = ANY (ARRAY['received'::character varying, 'processing'::character varying, 'processed'::character varying, 'ignored'::character varying, 'failed'::character varying]::text[])", name: "shipment_events_status_valid"
+  end
+
+  create_table "shipments", force: :cascade do |t|
+    t.string "carrier", null: false
+    t.datetime "created_at", null: false
+    t.string "currency", limit: 3, default: "USD", null: false
+    t.string "label_format"
+    t.string "label_url"
+    t.text "last_error"
+    t.datetime "last_tracking_update_at"
+    t.bigint "order_id", null: false
+    t.integer "postage_cents"
+    t.string "provider", default: "easypost", null: false
+    t.string "provider_mode", null: false
+    t.string "provider_rate_id", null: false
+    t.string "provider_shipment_id", null: false
+    t.string "provider_tracker_id"
+    t.datetime "purchased_at"
+    t.string "service", null: false
+    t.bigint "shipping_quote_id", null: false
+    t.string "status", default: "purchasing", null: false
+    t.string "tracking_code"
+    t.string "tracking_url"
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_shipments_on_order_id", unique: true
+    t.index ["provider", "provider_shipment_id"], name: "index_shipments_on_provider_and_provider_shipment_id", unique: true
+    t.index ["provider_tracker_id"], name: "index_shipments_on_provider_tracker_id", unique: true, where: "(provider_tracker_id IS NOT NULL)"
+    t.index ["shipping_quote_id"], name: "index_shipments_on_shipping_quote_id"
+    t.index ["status", "updated_at"], name: "index_shipments_on_status_and_updated_at"
+    t.check_constraint "postage_cents IS NULL OR postage_cents >= 0", name: "shipments_postage_nonnegative"
+    t.check_constraint "status::text = ANY (ARRAY['purchasing'::character varying, 'purchased'::character varying, 'unknown'::character varying, 'pre_transit'::character varying, 'in_transit'::character varying, 'out_for_delivery'::character varying, 'delivered'::character varying, 'available_for_pickup'::character varying, 'return_to_sender'::character varying, 'failure'::character varying, 'cancelled'::character varying, 'error'::character varying]::text[])", name: "shipments_status_valid"
+  end
+
   create_table "shipping_packages", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
@@ -887,6 +953,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_090000) do
   add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"
   add_foreign_key "events", "organizations"
+  add_foreign_key "fulfillments", "orders"
+  add_foreign_key "fulfillments", "users", column: "updated_by_id"
   add_foreign_key "inventory_levels", "inventory_locations"
   add_foreign_key "inventory_levels", "product_variants"
   add_foreign_key "inventory_locations", "organizations"
@@ -917,6 +985,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_090000) do
   add_foreign_key "product_variant_option_values", "product_variants"
   add_foreign_key "product_variants", "products"
   add_foreign_key "products", "organizations"
+  add_foreign_key "shipment_events", "shipments"
+  add_foreign_key "shipments", "orders"
+  add_foreign_key "shipments", "shipping_quotes"
   add_foreign_key "shipping_packages", "organizations"
   add_foreign_key "shipping_quotes", "inventory_locations"
   add_foreign_key "shipping_quotes", "organizations"

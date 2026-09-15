@@ -17,6 +17,7 @@ import {
   Play,
   Settings,
   ShoppingBag,
+  PackageCheck,
   Truck,
   ShieldCheck,
   Swords,
@@ -64,6 +65,7 @@ const navSections: NavSection[] = [
     label: 'Commerce',
     items: [
       { to: '/admin/commerce', icon: ShoppingBag, label: 'Products & Inventory' },
+      { to: '/admin/commerce/orders', icon: PackageCheck, label: 'Orders & Fulfillment' },
       { to: '/admin/commerce/shipping', icon: Truck, label: 'Pickup & Shipping' },
     ],
   },

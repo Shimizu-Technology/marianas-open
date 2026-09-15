@@ -32,6 +32,7 @@ Rails.application.routes.draw do
       end
 
       post "webhooks/stripe", to: "stripe_webhooks#create"
+      post "webhooks/easypost", to: "easy_post_webhooks#create"
 
       # Auth
       get :me, to: "users#me"
@@ -129,6 +130,10 @@ Rails.application.routes.draw do
         end
         resources :inventory_locations, path: "inventory-locations", only: %i[index create update]
         resources :shipping_packages, path: "shipping-packages", only: %i[index create update destroy]
+        resources :orders, only: %i[index show] do
+          resource :fulfillment, only: :create
+          resource :shipment, controller: "order_shipments", only: :create
+        end
         resource :organization, only: [ :show, :update ] do
           post :upload_logo, on: :collection
           post :upload_banner, on: :collection

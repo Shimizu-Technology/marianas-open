@@ -1,3 +1,5 @@
+require "timeout"
+
 module Commerce
   module Shipping
     class EasyPostGateway
@@ -25,7 +27,38 @@ module Commerce
         raise RateError, readable_error(e, "Shipping rates are temporarily unavailable.")
       end
 
+      def purchase_label(shipment_id:, rate_id:)
+        Timeout.timeout(15.seconds, LabelError, "EasyPost did not confirm the label purchase in time.") do
+          shipment = @client.shipment.retrieve(shipment_id)
+          shipment = @client.shipment.buy(shipment_id, rate: { id: rate_id }) unless purchased?(shipment)
+          shipment_payload(shipment)
+        end
+      rescue EasyPost::Errors::EasyPostError => e
+        raise LabelError, readable_error(e, "The shipping label could not be purchased.")
+      end
+
       private
+
+      def purchased?(shipment)
+        shipment.tracking_code.present? && shipment.postage_label&.label_url.present?
+      end
+
+      def shipment_payload(shipment)
+        rate = shipment.selected_rate
+        tracker = shipment.tracker
+        label = shipment.postage_label
+        {
+          mode: shipment.mode,
+          status: shipment.status.presence || "purchased",
+          tracking_code: shipment.tracking_code,
+          tracking_url: tracker&.public_url,
+          tracker_id: tracker&.id,
+          label_url: label&.label_pdf_url.presence || label&.label_url,
+          label_format: label&.label_file_type,
+          postage_cents: rate&.rate.present? ? (BigDecimal(rate.rate.to_s) * 100).round.to_i : nil,
+          currency: rate&.currency.to_s.upcase.presence || "USD"
+        }
+      end
 
       def verify_address(address)
         @client.address.create(address.merge(verify: true))

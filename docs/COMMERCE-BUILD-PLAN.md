@@ -23,7 +23,7 @@
 | 3 | Delivery choice, address validation, EasyPost sandbox quotes | Complete in PR #88 |
 | 4 | Durable orders, reservations, Stripe Checkout Sessions, webhooks | Complete in PR #89 |
 | 5 | Customer order status, transactional notifications | Complete in PR #90 |
-| 6 | Deal Depot fulfillment, labels, tracking, pickup | Not started |
+| 6 | Deal Depot fulfillment, labels, tracking, pickup | Implemented; PR pending |
 | 7 | Refunds, reconciliation, reports, operational alerts | Not started |
 | 8 | Failure hardening, physical shipping pilot, production launch | Not started |
 
@@ -66,6 +66,15 @@
 - Staging hardcodes commerce email delivery to `disabled` in its runtime definition and does not receive a Resend key. It can exercise the full payment, outbox, and customer-status flow without contacting a real customer.
 - Customers can recover the signed order-status link by entering both the random order number and normalized checkout email. Failed lookups return one generic response so the endpoint does not reveal which detail matched.
 - The storefront and paid-order page expose clear status-recovery and next-step guidance for both pickup and shipping, with touch-friendly mobile layouts and equivalent desktop behavior.
+
+## Slice 6 implementation contract
+
+- Paid orders enter a separate fulfillment workflow so payment state, physical work, and carrier state cannot overwrite one another. Staff follow guarded transitions for preparing, ready-for-pickup, picked-up, shipped, and delivered work.
+- Deal Depot gets one responsive order workspace with search and practical work-stage and delivery-method filters. The detail view keeps the packing list, destination, label, tracking, and single next action together on mobile and desktop.
+- A delivery label purchases the exact EasyPost shipment and rate selected and paid for at checkout. A local shipment record is created before the provider call; retries retrieve the existing EasyPost shipment first so an uncertain response does not buy duplicate postage.
+- Label purchase records provider mode, carrier, service, tracking, postage, label URL, and errors. The printable label remains staff-only, while customers receive only carrier-safe tracking details.
+- EasyPost tracking webhooks require the configured HMAC secret, deduplicate event IDs, reject cross-mode updates, and keep shipment and delivered fulfillment state current. The public hook hostname routes only Stripe and EasyPost webhook paths.
+- Pickup-ready and tracking messages use the durable notification outbox from Slice 5. Staging continues to suppress delivery, while still exercising message creation, retry, and customer-status behavior.
 
 ## Live-launch gates
 
