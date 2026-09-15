@@ -213,9 +213,9 @@ module Commerce
 
     def webhook_health_check
       recent = 7.days.ago
-      failures = PaymentEvent.where(status: "failed", created_at: recent..).count +
-        ShipmentEvent.where(status: "failed", created_at: recent..).count
-      status = failures.zero? ? "passed" : "warning"
+      failures = PaymentEvent.where(status: "failed", updated_at: recent..).count +
+        ShipmentEvent.where(status: "failed", updated_at: recent..).count
+      status = failures.zero? ? "passed" : "blocked"
       Check.new(key: "webhook_health", category: "Operations", title: "Provider callbacks are healthy",
         detail: failures.zero? ? "No failed Stripe or EasyPost events in the last 7 days." : "#{failures} provider event#{'s' unless failures == 1} failed in the last 7 days; review before launch.",
         status:, fix_path: "/admin/commerce/operations")

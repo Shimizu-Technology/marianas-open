@@ -153,6 +153,27 @@ class CommerceLaunchReadinessTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a recently retried callback failure blocks an otherwise signed-off launch" do
+    Commerce::LaunchReadiness::MANUAL_GATES.each do |gate|
+      @organization.commerce_launch_checks.create!(
+        key: gate.fetch(:key), status: "passed", note: "Verified for launch.", reviewed_by: @admin, reviewed_at: Time.current
+      )
+    end
+    event = PaymentEvent.create!(
+      provider: "stripe", provider_event_id: "evt_launch_retry", event_type: "checkout.session.completed", status: "received"
+    )
+    event.update_columns(status: "failed", created_at: 10.days.ago, updated_at: Time.current)
+
+    with_launch_environment do
+      snapshot = Commerce::LaunchReadiness.new(organization: @organization).as_json
+      check = snapshot.fetch(:automatic_checks).find { |candidate| candidate.fetch(:key) == "webhook_health" }
+
+      assert_equal "blocked", check.fetch(:status)
+      assert_equal false, snapshot.fetch(:ready_to_enable)
+      assert_equal 1, snapshot.dig(:summary, :blockers)
+    end
+  end
+
   private
 
   def with_launch_environment
