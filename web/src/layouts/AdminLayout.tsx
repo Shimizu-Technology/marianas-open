@@ -6,6 +6,7 @@ import {
   BarChart3,
   Building2,
   CalendarDays,
+  CircleDollarSign,
   FileText,
   Handshake,
   Image,
@@ -64,9 +65,10 @@ const navSections: NavSection[] = [
   {
     label: 'Commerce',
     items: [
-      { to: '/admin/commerce', icon: ShoppingBag, label: 'Products & Inventory' },
+      { to: '/admin/commerce', icon: ShoppingBag, label: 'Products & Inventory', end: true },
       { to: '/admin/commerce/orders', icon: PackageCheck, label: 'Orders & Fulfillment' },
       { to: '/admin/commerce/shipping', icon: Truck, label: 'Pickup & Shipping' },
+      { to: '/admin/commerce/operations', icon: CircleDollarSign, label: 'Refunds & Reports' },
     ],
   },
   {

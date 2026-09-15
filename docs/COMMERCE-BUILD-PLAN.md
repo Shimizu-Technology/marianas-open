@@ -23,8 +23,8 @@
 | 3 | Delivery choice, address validation, EasyPost sandbox quotes | Complete in PR #88 |
 | 4 | Durable orders, reservations, Stripe Checkout Sessions, webhooks | Complete in PR #89 |
 | 5 | Customer order status, transactional notifications | Complete in PR #90 |
-| 6 | Deal Depot fulfillment, labels, tracking, pickup | Implemented; PR pending |
-| 7 | Refunds, reconciliation, reports, operational alerts | Not started |
+| 6 | Deal Depot fulfillment, labels, tracking, pickup | Complete in PR #91 |
+| 7 | Refunds, reconciliation, reports, operational alerts | Complete in PR #92 |
 | 8 | Failure hardening, physical shipping pilot, production launch | Not started |
 
 ## Slice 2 implementation contract
@@ -75,6 +75,17 @@
 - Label purchase records provider mode, carrier, service, tracking, postage, label URL, and errors. The printable label remains staff-only, while customers receive only carrier-safe tracking details.
 - EasyPost tracking webhooks require the configured HMAC secret, deduplicate event IDs, reject cross-mode updates, and keep shipment and delivered fulfillment state current. The public hook hostname routes only Stripe and EasyPost webhook paths.
 - Pickup-ready and tracking messages use the durable notification outbox from Slice 5. Staging continues to suppress delivery, while still exercising message creation, retry, and customer-status behavior.
+
+## Slice 7 implementation contract
+
+- Staff can issue full or partial refunds to the original payment method from the order workspace. Refund requests are recorded locally before contacting Stripe, use a stable idempotency key, and retry the same provider request after an uncertain response.
+- The server calculates the refundable balance from successful and still-reserving refunds. It rejects zero, excessive, wrong-currency, unpaid-order, and missing-payment requests; browser-supplied limits are never trusted.
+- Stripe refund webhooks are authoritative for provider status. `refund.created`, `refund.updated`, and `refund.failed` events update existing refunds or safely import refunds created in the Stripe Dashboard. Duplicate and out-of-order events cannot regress a terminal state.
+- A refund does not automatically add stock back to inventory. Deal Depot records an inspected physical return through the inventory adjustment workflow, keeping money movement separate from stock movement.
+- Customers see successful or in-progress refund information on their signed order-status page. Successful refunds queue an accessible customer message through the durable notification outbox; staging records that message as suppressed.
+- Staff can reconcile a paid order against its Stripe Checkout Session on demand. A six-hour recovery job rechecks stale paid orders and unsettled refunds so a delayed webhook or uncertain provider response does not require a database edit.
+- The responsive operations dashboard shows exact-cent gross sales, refunds, net payment activity, shipping collected, tax collected, reconciliation coverage, recent refunds, and actionable payment, notification, shipping, and refund alerts. Its downloadable CSV uses the same bounded date range and never derives totals from browser state.
+- Staging and production Stripe webhook endpoints must subscribe to `checkout.session.completed`, `checkout.session.expired`, `refund.created`, `refund.updated`, and `refund.failed`. Each environment keeps its own signing secret and provider mode.
 
 ## Live-launch gates
 

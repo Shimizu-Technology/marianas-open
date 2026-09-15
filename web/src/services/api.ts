@@ -893,6 +893,8 @@ export interface CommerceOrder {
   created_at: string;
   payment_expires_at: string;
   paid_at: string | null;
+  refunded_cents: number;
+  refund_status: 'none' | 'pending' | 'partially_refunded' | 'refunded';
   fulfillment_status: 'unfulfilled' | 'preparing' | 'ready_for_pickup' | 'picked_up' | 'shipped' | 'delivered';
   shipment: null | {
     status: string;
@@ -918,6 +920,9 @@ export interface CommerceOrder {
 export interface AdminCommerceOrder extends Omit<CommerceOrder, 'shipment'> {
   id: number;
   customer_phone: string | null;
+  last_reconciled_at: string | null;
+  payment_error: string | null;
+  refundable_cents: number;
   fulfillment: {
     status: CommerceOrder['fulfillment_status'];
     staff_note: string | null;
@@ -942,6 +947,57 @@ export interface AdminCommerceOrder extends Omit<CommerceOrder, 'shipment'> {
     currency: string;
     last_error: string | null;
   };
+  refunds: Array<{
+    id: number;
+    status: 'pending_provider' | 'pending' | 'requires_action' | 'succeeded' | 'failed' | 'canceled' | 'error';
+    reason: 'requested_by_customer' | 'duplicate' | 'fraudulent';
+    staff_note: string | null;
+    amount_cents: number;
+    currency: string;
+    source: 'admin' | 'stripe_dashboard';
+    provider_mode: string;
+    provider_refund_id: string | null;
+    failure_reason: string | null;
+    requested_at: string;
+    processed_at: string | null;
+  }>;
+}
+
+export interface CommerceOperationsSnapshot {
+  period: { from: string; to: string };
+  summary: {
+    paid_orders: number;
+    gross_cents: number;
+    refunded_cents: number;
+    net_cents: number;
+    shipping_cents: number;
+    tax_cents: number;
+    currency: string;
+  };
+  reconciliation: { current: number; due: number; last_completed_at: string | null };
+  alerts: Array<{
+    key: string;
+    category: 'payment' | 'notification' | 'shipping' | 'refund';
+    title: string;
+    detail: string;
+    order_id: number | null;
+    order_number: string | null;
+    occurred_at: string;
+  }>;
+  recent_refunds: Array<{
+    id: number;
+    order_id: number;
+    order_number: string;
+    amount_cents: number;
+    currency: string;
+    status: string;
+    reason: string;
+    source: string;
+    requested_by: string | null;
+    requested_at: string;
+    processed_at: string | null;
+    failure_reason: string | null;
+  }>;
 }
 
 async function authHeaders(requireAuth: boolean, skipCache = false) {
@@ -1001,6 +1057,14 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireA
 
   if (response.status === 204) return undefined as T;
   return response.json();
+}
+
+async function fetchApiBlob(endpoint: string): Promise<Blob> {
+  const send = async (skipCache = false) => fetch(`${API_URL}${endpoint}`, { headers: await authHeaders(true, skipCache) });
+  let response = await send();
+  if (response.status === 401 && getAuthToken) response = await send(true);
+  if (!response.ok) throw await parseApiError(response, `Download error: ${response.status}`);
+  return response.blob();
 }
 
 async function fetchApiUpload<T>(endpoint: string, formData: FormData): Promise<T> {
@@ -1184,6 +1248,20 @@ export const api = {
         method: 'POST', body: JSON.stringify({ fulfillment: { status, staff_note: staffNote } }),
       }, true),
     purchaseOrderLabel: (id: number) => fetchApi<{ order: AdminCommerceOrder }>(`/api/v1/admin/orders/${id}/shipment`, { method: 'POST' }, true),
+    createOrderRefund: (id: number, refund: { amount_cents: number; reason: string; staff_note: string; request_key: string }) =>
+      fetchApi<{ order: AdminCommerceOrder }>(`/api/v1/admin/orders/${id}/refunds`, {
+        method: 'POST', body: JSON.stringify({ refund }),
+      }, true),
+    reconcileOrderRefund: (orderId: number, refundId: number) =>
+      fetchApi<{ order: AdminCommerceOrder }>(`/api/v1/admin/orders/${orderId}/refunds/${refundId}/reconcile`, { method: 'POST' }, true),
+    reconcileOrder: (id: number) =>
+      fetchApi<{ order: AdminCommerceOrder }>(`/api/v1/admin/orders/${id}/reconciliation`, { method: 'POST' }, true),
+    getCommerceOperations: (params?: { from?: string; to?: string }) => {
+      const query = params ? `?${new URLSearchParams(Object.entries(params).filter(([, value]) => value).map(([key, value]) => [key, value!])).toString()}` : '';
+      return fetchApi<CommerceOperationsSnapshot>(`/api/v1/admin/commerce-operations${query}`, {}, true);
+    },
+    downloadCommerceReport: (params: { from: string; to: string }) =>
+      fetchApiBlob(`/api/v1/admin/commerce-operations/report?${new URLSearchParams(params).toString()}`),
     getProducts: () => fetchApi<{ products: CommerceProduct[] }>('/api/v1/admin/products', {}, true),
     getProduct: (id: number) => fetchApi<{ product: CommerceProduct }>(`/api/v1/admin/products/${id}`, {}, true),
     createProduct: (product: CommerceProduct) =>

@@ -24,3 +24,7 @@ complete_past_events:
 dispatch_pending_order_notifications:
   class: DispatchPendingOrderNotificationsJob
   schedule: every 5 minutes
+
+reconcile_commerce:
+  class: ReconcileCommerceJob
+  schedule: every 6 hours

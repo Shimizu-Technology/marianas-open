@@ -7,6 +7,7 @@ module Commerce
         "checkout.session.expired" => "expired",
         "checkout.session.async_payment_failed" => "payment_failed"
       }.freeze
+      REFUND_EVENTS = %w[refund.created refund.updated refund.failed].freeze
 
       def self.call(event:)
         new(event:).call
@@ -53,6 +54,11 @@ module Commerce
 
       def process!(payment_event)
         event_type = value(event, :type)
+        if REFUND_EVENTS.include?(event_type)
+          Refunds::ApplyStripeEvent.call(refund_object: value(value(event, :data), :object), payment_event:)
+          return
+        end
+
         unless COMPLETED_EVENTS.include?(event_type) || RELEASE_EVENTS.key?(event_type)
           payment_event.update!(status: "ignored", processed_at: Time.current)
           return

@@ -7,6 +7,8 @@ module Commerce
     class CheckoutError < Error; end
     class IndeterminateCheckoutError < Error; end
     class WebhookError < Error; end
+    class RefundError < Error; end
+    class IndeterminateRefundError < RefundError; end
 
     def self.fake_checkout_enabled?
       Rails.env.development? && ActiveModel::Type::Boolean.new.cast(ENV["STRIPE_FAKE_CHECKOUT"])
@@ -20,6 +22,12 @@ module Commerce
       else
         raise ConfigurationError, "Secure payment is not configured yet. Please try again later."
       end
+    end
+
+    def self.provider_mode
+      return "test" if Rails.env.test? || fake_checkout_enabled?
+
+      ENV.fetch("STRIPE_API_KEY", "").include?("_test_") ? "test" : "live"
     end
 
     def self.construct_stripe_event(payload:, signature:)

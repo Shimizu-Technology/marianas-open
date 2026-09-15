@@ -87,7 +87,7 @@ class CommerceNotificationsTest < ActionDispatch::IntegrationTest
     assert_includes customer.html_body, "Gi &lt;Limited&gt;"
     operations = @order.order_notifications.find_by!(kind: "operations_new_order", recipient: "orders@example.org")
     assert_includes operations.html_body, "Kai &lt;Customer&gt;"
-    assert_match(%r{\Amarianas-open/test/customer_order_confirmation/#{@order.id}/[0-9a-f]{16}\z}, customer.idempotency_key)
+    assert_match(%r{\Amarianas-open/test/customer_order_confirmation/#{@order.id}/order/[0-9a-f]{16}\z}, customer.idempotency_key)
   end
 
   test "disabled delivery records an intentional suppression without calling a provider" do

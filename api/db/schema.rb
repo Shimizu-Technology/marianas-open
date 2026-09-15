@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -424,17 +424,47 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_100000) do
     t.string "provider", default: "resend", null: false
     t.string "provider_message_id"
     t.string "recipient", null: false
+    t.string "reference_key", default: "order", null: false
     t.datetime "sent_at"
     t.string "status", default: "pending", null: false
     t.string "subject", null: false
     t.text "text_body", null: false
     t.datetime "updated_at", null: false
     t.index ["idempotency_key"], name: "index_order_notifications_on_idempotency_key", unique: true
-    t.index ["order_id", "kind", "recipient"], name: "index_order_notifications_on_order_id_and_kind_and_recipient", unique: true
+    t.index ["order_id", "kind", "recipient", "reference_key"], name: "index_order_notifications_on_delivery_identity", unique: true
     t.index ["order_id"], name: "index_order_notifications_on_order_id"
     t.index ["status", "created_at"], name: "index_order_notifications_on_status_and_created_at"
     t.check_constraint "attempts >= 0", name: "order_notifications_attempts_nonnegative"
     t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'delivering'::character varying, 'sent'::character varying, 'suppressed'::character varying, 'failed'::character varying]::text[])", name: "order_notifications_status_valid"
+  end
+
+  create_table "order_refunds", force: :cascade do |t|
+    t.integer "amount_cents", null: false
+    t.datetime "created_at", null: false
+    t.string "currency", limit: 3, null: false
+    t.string "failure_reason"
+    t.bigint "order_id", null: false
+    t.datetime "processed_at"
+    t.string "provider", default: "stripe", null: false
+    t.string "provider_balance_transaction_id"
+    t.string "provider_mode", null: false
+    t.string "provider_refund_id"
+    t.string "reason", null: false
+    t.string "request_key", null: false
+    t.datetime "requested_at", null: false
+    t.bigint "requested_by_id"
+    t.string "source", default: "admin", null: false
+    t.text "staff_note"
+    t.string "status", default: "pending_provider", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id", "status"], name: "index_order_refunds_on_order_id_and_status"
+    t.index ["order_id"], name: "index_order_refunds_on_order_id"
+    t.index ["provider", "provider_refund_id"], name: "index_order_refunds_on_provider_and_provider_refund_id", unique: true, where: "(provider_refund_id IS NOT NULL)"
+    t.index ["request_key"], name: "index_order_refunds_on_request_key", unique: true
+    t.index ["requested_by_id"], name: "index_order_refunds_on_requested_by_id"
+    t.check_constraint "amount_cents > 0", name: "order_refunds_amount_positive"
+    t.check_constraint "source::text = ANY (ARRAY['admin'::character varying, 'stripe_dashboard'::character varying]::text[])", name: "order_refunds_source_valid"
+    t.check_constraint "status::text = ANY (ARRAY['pending_provider'::character varying, 'pending'::character varying, 'requires_action'::character varying, 'succeeded'::character varying, 'failed'::character varying, 'canceled'::character varying, 'error'::character varying]::text[])", name: "order_refunds_status_valid"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -447,6 +477,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_100000) do
     t.string "customer_phone"
     t.string "fulfillment_method", null: false
     t.bigint "inventory_location_id", null: false
+    t.datetime "last_reconciliation_attempt_at"
+    t.datetime "last_reconciled_at"
     t.string "number", null: false
     t.bigint "organization_id", null: false
     t.datetime "paid_at"
@@ -467,6 +499,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_100000) do
     t.datetime "updated_at", null: false
     t.index ["checkout_key"], name: "index_orders_on_checkout_key", unique: true
     t.index ["inventory_location_id"], name: "index_orders_on_inventory_location_id"
+    t.index ["last_reconciliation_attempt_at"], name: "index_orders_on_last_reconciliation_attempt_at"
+    t.index ["last_reconciled_at"], name: "index_orders_on_last_reconciled_at"
     t.index ["organization_id", "number"], name: "index_orders_on_organization_id_and_number", unique: true
     t.index ["organization_id", "status", "created_at"], name: "index_orders_on_organization_id_and_status_and_created_at"
     t.index ["organization_id"], name: "index_orders_on_organization_id"
@@ -968,6 +1002,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_100000) do
   add_foreign_key "order_items", "product_variants"
   add_foreign_key "order_items", "products"
   add_foreign_key "order_notifications", "orders"
+  add_foreign_key "order_refunds", "orders"
+  add_foreign_key "order_refunds", "users", column: "requested_by_id"
   add_foreign_key "orders", "inventory_locations"
   add_foreign_key "orders", "organizations"
   add_foreign_key "orders", "shipping_quotes"

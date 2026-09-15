@@ -55,6 +55,7 @@ const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
 const CommerceAdmin = lazy(() => import('./pages/admin/CommerceAdmin'));
 const ShippingAdmin = lazy(() => import('./pages/admin/ShippingAdmin'));
 const OrdersAdmin = lazy(() => import('./pages/admin/OrdersAdmin'));
+const CommerceOperationsAdmin = lazy(() => import('./pages/admin/CommerceOperationsAdmin'));
 
 function BannerLayout({ children }: { children: React.ReactNode }) {
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -179,6 +180,7 @@ export default function App() {
           <Route path="commerce" element={<CommerceAdmin />} />
           <Route path="commerce/shipping" element={<ShippingAdmin />} />
           <Route path="commerce/orders" element={<OrdersAdmin />} />
+          <Route path="commerce/operations" element={<CommerceOperationsAdmin />} />
           <Route path="content" element={<ContentAdmin />} />
           <Route
             path="settings"
