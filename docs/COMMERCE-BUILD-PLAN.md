@@ -24,7 +24,7 @@
 | 4 | Durable orders, reservations, Stripe Checkout Sessions, webhooks | Complete in PR #89 |
 | 5 | Customer order status, transactional notifications | Complete in PR #90 |
 | 6 | Deal Depot fulfillment, labels, tracking, pickup | Complete in PR #91 |
-| 7 | Refunds, reconciliation, reports, operational alerts | Implemented; PR pending |
+| 7 | Refunds, reconciliation, reports, operational alerts | Complete in PR #92 |
 | 8 | Failure hardening, physical shipping pilot, production launch | Not started |
 
 ## Slice 2 implementation contract
