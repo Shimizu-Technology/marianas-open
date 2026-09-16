@@ -396,6 +396,7 @@ end
   { name: "Stroll Guam",     tier: "official", sort_order: 15, website_url: "https://stroll.international" },
   { name: "Boss 104",        tier: "official", sort_order: 16 },
   { name: "Sticky Fingers",  tier: "official", sort_order: 17 },
+  { name: "Hotel Tano Guam", tier: "official", sort_order: 18 }
 ].each do |data|
   sponsor = org.sponsors.create!(data)
   puts "Created sponsor: #{sponsor.name}"
