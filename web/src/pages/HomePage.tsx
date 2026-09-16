@@ -5,7 +5,6 @@ import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink, Handsha
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import JourneySection from '../components/JourneySection';
-import HotelPartnerSection, { HOTEL_TANO_URL } from '../components/HotelPartnerSection';
 import SEO from '../components/SEO';
 import { useEvents, useSponsors } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
@@ -59,6 +58,8 @@ const ORG_PARTNERS = [
   },
 ] as const;
 
+const HOTEL_TANO_URL = 'https://www.hoteltano.com';
+
 const OFFICIAL_SPONSORS_STATIC = [
   { name: 'Triple J' },
   { name: 'Pacific Points' },
@@ -78,7 +79,6 @@ const OFFICIAL_SPONSORS_STATIC = [
   { name: 'Sticky Fingers' },
   { name: 'Hotel Tano Guam', url: HOTEL_TANO_URL },
 ] as const;
-
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -372,8 +372,6 @@ export default function HomePage() {
           </ScrollReveal>
         </div>
       </section>
-
-      <HotelPartnerSection />
 
       {/* Official Sponsors Section */}
       <section className="pt-16 sm:pt-20 pb-24 sm:pb-32 bg-surface border-t border-white/5">

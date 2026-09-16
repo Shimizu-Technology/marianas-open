@@ -15,22 +15,6 @@
       "context": "ASJJF = Asia Sport Jiu-Jitsu Federation. Star ranking indicates tournament prestige."
     }
   },
-  "home": {
-    "hotelPartner": {
-      "eyebrow": {
-        "context": "Hotel Tano Guam is the official lodging partner for the 2026 Guam Marianas Open International Championship."
-      },
-      "discountLabel": {
-        "context": "Label for a lodging discount code offered to friends and family of Marianas Open attendees."
-      },
-      "discountInstruction": {
-        "context": "Short instruction shown directly above the hotel booking discount code."
-      },
-      "bookingNote": {
-        "context": "Clarifies that the booking button opens Hotel Tano Guam's external official website."
-      }
-    }
-  },
   "event": {
     "travelOffer": {
       "context": "Label for an event-specific travel booking offer. Do not imply a guaranteed discount."

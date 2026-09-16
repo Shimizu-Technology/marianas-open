@@ -48,25 +48,6 @@
     "presentingPartner": "프리젠팅 파트너",
     "officialSponsors": "공식 스폰서",
     "gvbQuote": "프리젠팅 파트너인 Guam Visitors Bureau는 괌의 고유한 문화와 환대를 세계에 알리는 동시에 스포츠 관광의 성장을 선도하고 있습니다.",
-    "hotelPartner": {
-      "eyebrow": "공식 파트너 호텔",
-      "title": "2026 Marianas Open을 위한 편안한 숙소",
-      "description": "Hotel Tano Guam은 2026 Guam Marianas Open International Championship의 공식 파트너 호텔입니다. 가족 및 친구 전용 요금으로 대회 가까이에서 머무르세요.",
-      "discountLabel": "가족 및 친구 할인 코드",
-      "discountInstruction": "예약 시 이 코드를 사용하세요",
-      "bookStay": "숙박 예약",
-      "bookingNote": "Hotel Tano Guam 공식 웹사이트로 이동합니다.",
-      "addressLabel": "호텔 주소",
-      "address": "1000 Pale San Vitores Road, Tumon, Guam 96913",
-      "amenitiesTitle": "호텔 편의시설",
-      "amenities": {
-        "swimming": "수영장",
-        "fitness": "피트니스",
-        "convenienceStore": "24시간 편의점",
-        "wifi": "Wi-Fi",
-        "parking": "무료 주차"
-      }
-    },
     "featuredTitle": "Marianas Open",
     "featuredDesc": "Marianas Open은 2007년부터 토너먼트를 개최해 온 마리아나 제도 최대이자 가장 오랜 역사를 지닌 주짓수 단체입니다. 우리의 목표는 모든 선수, 코치, 관중에게 전문적이고 체계적인 토너먼트 경험을 제공하는 것입니다.",
     "viewCalendar": "전체 일정 보기",
