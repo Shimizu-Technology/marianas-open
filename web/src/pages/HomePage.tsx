@@ -75,6 +75,7 @@ const OFFICIAL_SPONSORS_STATIC = [
   { name: 'Stroll Guam', url: 'https://stroll.international' },
   { name: 'Boss 104' },
   { name: 'Sticky Fingers' },
+  { name: 'Hotel Tano Guam' },
 ] as const;
 
 
@@ -485,14 +486,15 @@ export default function HomePage() {
                       }));
 
                   return items.map((item) => {
+                    const isHotelTano = normalizeSponsorKey(item.name) === 'hoteltanoguam';
                     const inner = (
                       <div className="group/card bg-navy-900/80 border border-white/5 hover:border-gold-500/20 rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-500/5 w-[calc(33.333vw-1.5rem)] sm:w-36 md:w-40 h-24 sm:h-28">
                         {item.logoSrc ? (
-                          <div className="bg-white/95 rounded-md px-3 py-2 flex items-center justify-center w-full h-full">
+                          <div className={`${isHotelTano ? 'overflow-hidden bg-black' : 'bg-white/95'} rounded-md px-3 py-2 flex items-center justify-center w-full h-full`}>
                             <img
                               src={item.logoSrc}
                               alt={item.name}
-                              className="max-h-14 sm:max-h-16 max-w-full object-contain"
+                              className={`${isHotelTano ? 'scale-[2.35] sm:scale-[3.2]' : ''} max-h-14 max-w-full object-contain sm:max-h-16`}
                             />
                           </div>
                         ) : (

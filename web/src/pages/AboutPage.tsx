@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Users, Globe, Trophy, Calendar, MapPin, Mail, Phone } from 'lucide-react';
+import { Users, Globe, Trophy, Calendar, MapPin, Mail, Phone, ShieldCheck, Globe2 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import SEO from '../components/SEO';
@@ -167,6 +167,98 @@ export default function AboutPage() {
                 </ScrollReveal>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Federation clarification */}
+      <section
+        id="federation"
+        aria-labelledby="federation-title"
+        className="relative overflow-hidden border-t border-white/5 bg-surface py-20 sm:py-28"
+      >
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent"
+        />
+
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <ScrollReveal>
+            <div className="mb-10 max-w-3xl sm:mb-14">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="h-px w-10 bg-gold-500" aria-hidden="true" />
+                <span className="font-heading text-xs font-semibold uppercase tracking-[0.28em] text-gold-500">
+                  {t('about.federation.eyebrow')}
+                </span>
+              </div>
+              <h2
+                id="federation-title"
+                className="font-heading text-3xl font-black uppercase tracking-tight text-text-primary sm:text-4xl lg:text-5xl"
+              >
+                {t('about.federation.title')}
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-text-secondary sm:text-lg">
+                {t('about.federation.intro')}
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.1}>
+            <figure className="relative overflow-hidden border border-white/10 bg-navy-900">
+              <ImageWithShimmer
+                src="/images/about/msjjf-general-assembly-2026.jpg"
+                alt={t('about.federation.photoAlt')}
+                className="aspect-[16/9] w-full object-cover"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-900/80 via-transparent to-transparent" />
+              <figcaption className="absolute inset-x-0 bottom-0 px-5 pb-5 pt-12 text-sm text-text-secondary sm:px-8 sm:pb-7">
+                {t('about.federation.photoCaption')}
+              </figcaption>
+            </figure>
+          </ScrollReveal>
+
+          <div className="mt-12 grid gap-10 lg:grid-cols-[0.8fr_1.7fr] lg:gap-16">
+            <ScrollReveal delay={0.15}>
+              <aside className="border-l-2 border-gold-500 pl-6 lg:sticky lg:top-28">
+                <p className="font-heading text-2xl font-black uppercase leading-tight text-text-primary sm:text-3xl">
+                  {t('about.federation.pullQuote')}
+                </p>
+                <div className="mt-7 space-y-4 text-sm text-text-secondary">
+                  <div className="flex items-center gap-3">
+                    <MapPin size={17} className="shrink-0 text-gold-500" aria-hidden="true" />
+                    <span>{t('about.federation.factGuam')}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck size={17} className="shrink-0 text-gold-500" aria-hidden="true" />
+                    <span>{t('about.federation.factIndependent')}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Globe2 size={17} className="shrink-0 text-gold-500" aria-hidden="true" />
+                    <span>{t('about.federation.factInternational')}</span>
+                  </div>
+                </div>
+              </aside>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.2}>
+              <div className="max-w-3xl space-y-6 text-base leading-[1.8] text-text-secondary sm:text-lg">
+                <p>{t('about.federation.p1')}</p>
+                <p>{t('about.federation.p2')}</p>
+                <p>{t('about.federation.p3')}</p>
+                <p>{t('about.federation.p4')}</p>
+                <p>{t('about.federation.p5')}</p>
+                <p>{t('about.federation.p6')}</p>
+                <p>{t('about.federation.p7')}</p>
+                <div className="border-t border-white/10 pt-6">
+                  <p className="font-heading text-sm font-bold uppercase tracking-[0.18em] text-text-primary">
+                    {t('about.federation.signature')}
+                  </p>
+                  <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-gold-500">
+                    {t('about.federation.tagline')}
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
