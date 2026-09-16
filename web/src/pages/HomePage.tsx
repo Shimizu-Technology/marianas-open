@@ -5,6 +5,7 @@ import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink, Handsha
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import JourneySection from '../components/JourneySection';
+import HotelPartnerSection, { HOTEL_TANO_URL } from '../components/HotelPartnerSection';
 import SEO from '../components/SEO';
 import { useEvents, useSponsors } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
@@ -75,7 +76,7 @@ const OFFICIAL_SPONSORS_STATIC = [
   { name: 'Stroll Guam', url: 'https://stroll.international' },
   { name: 'Boss 104' },
   { name: 'Sticky Fingers' },
-  { name: 'Hotel Tano Guam' },
+  { name: 'Hotel Tano Guam', url: HOTEL_TANO_URL },
 ] as const;
 
 
@@ -372,6 +373,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <HotelPartnerSection />
+
       {/* Official Sponsors Section */}
       <section className="pt-16 sm:pt-20 pb-24 sm:pb-32 bg-surface border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -487,6 +490,7 @@ export default function HomePage() {
 
                   return items.map((item) => {
                     const isHotelTano = normalizeSponsorKey(item.name) === 'hoteltanoguam';
+                    const href = normalizeExternalUrl(item.url) || (isHotelTano ? HOTEL_TANO_URL : null);
                     const inner = (
                       <div className="group/card bg-navy-900/80 border border-white/5 hover:border-gold-500/20 rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-500/5 w-[calc(33.333vw-1.5rem)] sm:w-36 md:w-40 h-24 sm:h-28">
                         {item.logoSrc ? (
@@ -505,10 +509,10 @@ export default function HomePage() {
                       </div>
                     );
 
-                    return item.url ? (
+                    return href ? (
                       <a
                         key={item.name}
-                        href={normalizeExternalUrl(item.url) || '#'}
+                        href={href}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block"

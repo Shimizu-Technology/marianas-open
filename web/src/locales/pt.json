@@ -48,6 +48,25 @@
     "presentingPartner": "Parceiro Apresentador",
     "officialSponsors": "Patrocinadores Oficiais",
     "gvbQuote": "Como nosso Parceiro Apresentador, o Guam Visitors Bureau impulsiona o crescimento do turismo esportivo enquanto apresenta ao mundo a cultura única e a hospitalidade de Guam.",
+    "hotelPartner": {
+      "eyebrow": "Hotel Parceiro Oficial",
+      "title": "Sua Base para o Marianas Open 2026",
+      "description": "O Hotel Tano Guam é o hotel parceiro oficial do Guam Marianas Open International Championship 2026. Fique perto da competição com uma tarifa exclusiva para amigos e familiares.",
+      "discountLabel": "Código de Desconto para Amigos e Familiares",
+      "discountInstruction": "Use este código ao reservar",
+      "bookStay": "Reserve Sua Estadia",
+      "bookingNote": "Você será redirecionado ao site oficial do Hotel Tano Guam.",
+      "addressLabel": "Endereço do Hotel",
+      "address": "1000 Pale San Vitores Road, Tumon, Guam 96913",
+      "amenitiesTitle": "Comodidades do Hotel",
+      "amenities": {
+        "swimming": "Piscina",
+        "fitness": "Academia",
+        "convenienceStore": "Loja 24 Horas",
+        "wifi": "Wi-Fi",
+        "parking": "Estacionamento Grátis"
+      }
+    },
     "featuredTitle": "O Marianas Open",
     "featuredDesc": "O Marianas Open é a maior e mais tradicional organização de jiu-jítsu das Marianas, com torneios desde 2007. Nosso objetivo é proporcionar uma experiência de torneio profissional e bem organizada para todos os atletas, treinadores e espectadores.",
     "viewCalendar": "Ver calendário completo",

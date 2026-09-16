@@ -48,6 +48,25 @@
     "presentingPartner": "冠名合作夥伴",
     "officialSponsors": "官方贊助商",
     "gvbQuote": "作為我們的冠名合作夥伴，Guam Visitors Bureau 致力推動運動觀光發展，同時向世界展現 Guam 獨特的文化與好客精神。",
+    "hotelPartner": {
+      "eyebrow": "官方合作飯店",
+      "title": "2026 Marianas Open賽事住宿首選",
+      "description": "Hotel Tano Guam是2026 Guam Marianas Open International Championship的官方合作飯店。使用親友專屬優惠，便利入住賽事附近。",
+      "discountLabel": "親友專屬優惠碼",
+      "discountInstruction": "預訂時請使用此優惠碼",
+      "bookStay": "預訂住宿",
+      "bookingNote": "您將前往Hotel Tano Guam官方網站。",
+      "addressLabel": "飯店地址",
+      "address": "1000 Pale San Vitores Road, Tumon, Guam 96913",
+      "amenitiesTitle": "飯店設施",
+      "amenities": {
+        "swimming": "游泳池",
+        "fitness": "健身房",
+        "convenienceStore": "24小時商店",
+        "wifi": "Wi-Fi",
+        "parking": "免費停車"
+      }
+    },
     "featuredTitle": "Marianas Open",
     "featuredDesc": "Marianas Open 是馬里亞納群島規模最大、歷史最悠久的巴西柔術組織，自 2007 年起舉辦各項錦標賽。我們的目標是為所有運動員、教練與觀眾提供專業且井然有序的賽事體驗。",
     "viewCalendar": "查看完整行事曆",

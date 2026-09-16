@@ -48,6 +48,25 @@
     "presentingPartner": "Pangunahing Kasosyo",
     "officialSponsors": "Mga Opisyal na Sponsor",
     "gvbQuote": "Bilang aming Pangunahing Kasosyo, itinataguyod ng Guam Visitors Bureau ang paglago ng sports tourism habang ipinapakita sa mundo ang natatanging kultura at mabuting pagtanggap ng Guam.",
+    "hotelPartner": {
+      "eyebrow": "Opisyal na Partner Hotel",
+      "title": "Ang Iyong Tuluyan para sa 2026 Marianas Open",
+      "description": "Ang Hotel Tano Guam ang opisyal na partner hotel ng 2026 Guam Marianas Open International Championship. Manatiling malapit sa aksiyon gamit ang espesyal na rate para sa mga kaibigan at pamilya.",
+      "discountLabel": "Discount Code para sa Kaibigan at Pamilya",
+      "discountInstruction": "Gamitin ang code na ito sa pag-book",
+      "bookStay": "Mag-book ng Tuluyan",
+      "bookingNote": "Dadalhin ka sa opisyal na website ng Hotel Tano Guam.",
+      "addressLabel": "Address ng Hotel",
+      "address": "1000 Pale San Vitores Road, Tumon, Guam 96913",
+      "amenitiesTitle": "Mga Amenity ng Hotel",
+      "amenities": {
+        "swimming": "Swimming Pool",
+        "fitness": "Fitness",
+        "convenienceStore": "24-Oras na Tindahan",
+        "wifi": "Wi-Fi",
+        "parking": "Libreng Parking"
+      }
+    },
     "featuredTitle": "Ang Marianas Open",
     "featuredDesc": "Ang Marianas Open ang pinakamalaki at pinakamatagal nang jiu-jitsu organization sa Marianas, na nagsasagawa ng mga torneo mula pa noong 2007. Layunin naming magbigay ng propesyonal at maayos na karanasan sa torneo para sa lahat ng atleta, coach, at manonood.",
     "viewCalendar": "Tingnan ang Buong Kalendaryo",
