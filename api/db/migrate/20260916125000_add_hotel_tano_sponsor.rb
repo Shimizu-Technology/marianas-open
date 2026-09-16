@@ -18,11 +18,7 @@ class AddHotelTanoSponsor < ActiveRecord::Migration[8.1]
   end
 
   def down
-    org = Organization.find_by(slug: ORGANIZATION_SLUG)
-    return unless org
-
-    # Preserve pre-existing or administrator-edited records. Only remove the
-    # unchanged record with the exact attributes this migration creates.
-    org.sponsors.find_by(SPONSOR_ATTRIBUTES)&.destroy!
+    raise ActiveRecord::IrreversibleMigration,
+          "Hotel Tano sponsor ownership cannot be determined safely"
   end
 end

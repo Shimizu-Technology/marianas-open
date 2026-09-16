@@ -7,7 +7,7 @@ class AddHotelTanoSponsorTest < ActiveSupport::TestCase
     @migration = AddHotelTanoSponsor.new
   end
 
-  test "up targets the Marianas Open organization and down removes the inserted sponsor" do
+  test "up targets the Marianas Open organization" do
     other_organization = Organization.create!(name: "Partner Series", slug: "partner-series")
 
     @migration.up
@@ -16,13 +16,9 @@ class AddHotelTanoSponsorTest < ActiveSupport::TestCase
     sponsor = @organization.sponsors.find_by!(name: "Hotel Tano Guam")
     assert_equal "official", sponsor.tier
     assert_equal 18, sponsor.sort_order
-
-    @migration.down
-
-    assert_nil @organization.sponsors.find_by(name: "Hotel Tano Guam")
   end
 
-  test "up and down preserve a pre-existing sponsor" do
+  test "up preserves a pre-existing sponsor" do
     sponsor = @organization.sponsors.create!(
       name: "Hotel Tano Guam",
       tier: "presenting",
@@ -31,20 +27,27 @@ class AddHotelTanoSponsorTest < ActiveSupport::TestCase
     )
 
     @migration.up
-    @migration.down
 
     assert_equal "presenting", sponsor.reload.tier
     assert_equal 3, sponsor.sort_order
     assert_equal "https://example.com/hotel-tano", sponsor.website_url
   end
 
-  test "down preserves a sponsor edited after migration" do
+  test "down is irreversible and preserves a pre-existing exact match" do
+    sponsor = @organization.sponsors.create!(
+      AddHotelTanoSponsor::SPONSOR_ATTRIBUTES
+    )
+
     @migration.up
-    sponsor = @organization.sponsors.find_by!(name: "Hotel Tano Guam")
-    sponsor.update!(sort_order: 7)
 
-    @migration.down
+    assert_raises(ActiveRecord::IrreversibleMigration) { @migration.down }
 
-    assert_equal 7, sponsor.reload.sort_order
+    assert_equal AddHotelTanoSponsor::SPONSOR_ATTRIBUTES,
+                 sponsor.reload.attributes.symbolize_keys.slice(
+                   :name,
+                   :tier,
+                   :sort_order,
+                   :website_url
+                 )
   end
 end
