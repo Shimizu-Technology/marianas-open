@@ -58,6 +58,8 @@ const ORG_PARTNERS = [
   },
 ] as const;
 
+const HOTEL_TANO_URL = 'https://www.hoteltano.com';
+
 const OFFICIAL_SPONSORS_STATIC = [
   { name: 'Triple J' },
   { name: 'Pacific Points' },
@@ -75,9 +77,8 @@ const OFFICIAL_SPONSORS_STATIC = [
   { name: 'Stroll Guam', url: 'https://stroll.international' },
   { name: 'Boss 104' },
   { name: 'Sticky Fingers' },
-  { name: 'Hotel Tano Guam' },
+  { name: 'Hotel Tano Guam', url: HOTEL_TANO_URL },
 ] as const;
-
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -487,6 +488,7 @@ export default function HomePage() {
 
                   return items.map((item) => {
                     const isHotelTano = normalizeSponsorKey(item.name) === 'hoteltanoguam';
+                    const href = isHotelTano ? HOTEL_TANO_URL : normalizeExternalUrl(item.url);
                     const inner = (
                       <div className="group/card bg-navy-900/80 border border-white/5 hover:border-gold-500/20 rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-500/5 w-[calc(33.333vw-1.5rem)] sm:w-36 md:w-40 h-24 sm:h-28">
                         {item.logoSrc ? (
@@ -505,10 +507,10 @@ export default function HomePage() {
                       </div>
                     );
 
-                    return item.url ? (
+                    return href ? (
                       <a
                         key={item.name}
-                        href={normalizeExternalUrl(item.url) || '#'}
+                        href={href}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block"
