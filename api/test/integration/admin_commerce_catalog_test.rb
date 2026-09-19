@@ -64,6 +64,65 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
     assert product.product_variants.first.active?
   end
 
+  test "new products in POC mode default to the simulated catalog" do
+    previous_enabled = ENV["COMMERCE_ENABLED"]
+    ENV["COMMERCE_ENABLED"] = "true"
+
+    with_poc_mode do
+      with_verified_clerk do
+        post "/api/v1/admin/products", params: { product: {
+          name: "Preview hat", slug: "preview-hat", active: true,
+          shippable: true, pickup_enabled: true,
+          variants: [ { name: "Standard", sku: "PREVIEW-HAT", price_cents: 4_000,
+                        active: true, weight_grams: 250, allow_shipping: true, allow_pickup: true } ]
+        } }, headers: @headers, as: :json
+      end
+
+      assert_response :created
+      assert_equal true, response.parsed_body.dig("product", "demo_only")
+      assert Product.find_by!(slug: "preview-hat").demo_only?
+
+      get "/api/v1/shop/products"
+      assert_response :success
+      assert_includes response.parsed_body.fetch("products").map { |product| product.fetch("slug") }, "preview-hat"
+    end
+  ensure
+    ENV["COMMERCE_ENABLED"] = previous_enabled
+  end
+
+  test "staff can classify an existing product as demo-only before it receives an order" do
+    product = create_product
+
+    with_verified_clerk do
+      patch "/api/v1/admin/products/#{product.id}",
+        params: { product: { demo_only: true, active: false } }, headers: @headers, as: :json
+    end
+
+    assert_response :success
+    assert_equal true, response.parsed_body.dig("product", "demo_only")
+    assert product.reload.demo_only?
+  end
+
+  test "demo-only classification cannot change after an order" do
+    product = create_product
+    location = @organization.inventory_locations.create!(name: "Deal Depot", code: "DEAL-DEPOT")
+    order = @organization.orders.create!(
+      inventory_location: location, checkout_key: SecureRandom.uuid,
+      status: "pending_payment", fulfillment_method: "pickup",
+      customer_name: "Demo Customer", customer_email: "demo@example.test",
+      currency: "USD", payment_expires_at: 30.minutes.from_now,
+      subtotal_cents: 3_500, shipping_cents: 0, tax_cents: 0, total_cents: 3_500
+    )
+    order.order_items.create!(
+      product:, product_variant: product.product_variants.first,
+      product_name: product.name, variant_name: "Standard", sku: "TOWEL-STD",
+      currency: "USD", unit_price_cents: 3_500, line_total_cents: 3_500, quantity: 1
+    )
+
+    assert_not product.update(demo_only: true)
+    assert_includes product.errors.full_messages.join, "cannot be changed after an order"
+  end
+
   test "publishing fails atomically when a variant does not select every option" do
     payload = {
       product: {
@@ -227,5 +286,13 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
     yield
   ensure
     ClerkAuth.define_singleton_method(:verify, original_verify)
+  end
+
+  def with_poc_mode
+    original = Commerce::Configuration.method(:poc_mode?)
+    Commerce::Configuration.define_singleton_method(:poc_mode?) { true }
+    yield
+  ensure
+    Commerce::Configuration.define_singleton_method(:poc_mode?, original)
   end
 end

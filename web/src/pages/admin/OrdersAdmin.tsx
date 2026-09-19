@@ -95,8 +95,8 @@ export default function OrdersAdmin() {
   const purchaseLabel = async () => {
     if (!selected) return
     setWorking(true); setError(''); setNotice('')
-    try { const response = await api.admin.purchaseOrderLabel(selected.id); replace(response.order); setNotice('Label purchased. Print it, attach it, then mark the package handed to the carrier.') }
-    catch (cause) { setError(cause instanceof Error ? cause.message : 'The label could not be purchased.') }
+    try { const response = await api.admin.purchaseOrderLabel(selected.id); replace(response.order); setNotice(response.order.simulated ? 'Demo label recorded. No postage was purchased; continue the simulated fulfillment steps.' : 'Label purchased. Print it, attach it, then mark the package handed to the carrier.') }
+    catch (cause) { setError(cause instanceof Error ? cause.message : selected.simulated ? 'The demo label could not be recorded.' : 'The label could not be purchased.') }
     finally { setWorking(false) }
   }
 

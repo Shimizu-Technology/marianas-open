@@ -10,8 +10,10 @@ class Product < ApplicationRecord
 
   validates :name, :slug, presence: true
   validates :slug, uniqueness: { scope: :organization_id }, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/ }
+  before_validation :lock_row_for_demo_only_change, on: :update
   validate :offers_at_least_one_fulfillment_method
   validate :organization_cannot_change, on: :update
+  validate :demo_only_cannot_change_after_orders, on: :update
 
   scope :published, -> { where(active: true).order(featured: :desc, sort_order: :asc, name: :asc) }
 
@@ -25,5 +27,15 @@ class Product < ApplicationRecord
 
   def organization_cannot_change
     errors.add(:organization, "cannot be changed") if will_save_change_to_organization_id?
+  end
+
+  def demo_only_cannot_change_after_orders
+    return unless will_save_change_to_demo_only? && order_items.exists?
+
+    errors.add(:demo_only, "cannot be changed after an order contains this product")
+  end
+
+  def lock_row_for_demo_only_change
+    self.class.lock.find(id) if will_save_change_to_demo_only?
   end
 end
