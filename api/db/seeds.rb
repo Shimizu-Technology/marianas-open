@@ -186,6 +186,29 @@ end
 
 # Event accommodations
 {
+  "marianas-open-2026" => [
+    {
+      hotel_name: "Hotel Tano Guam",
+      description: <<~TEXT.strip,
+        Official partner hotel for the 2026 Guam Marianas Open International Championship. Stay close to the action with a dedicated friends and family rate.
+
+        Hotel address
+        1000 Pale San Vitores Road, Tumon, Guam 96913
+      TEXT
+      rate_info: "Friends & Family rate",
+      inclusions: <<~TEXT.strip,
+        Swimming
+        Fitness center
+        24-hour store
+        Wi-Fi
+        Free parking
+      TEXT
+      booking_url: "https://www.hoteltano.com",
+      booking_code: "tanosports",
+      sort_order: 1,
+      active: true
+    }
+  ],
   "marianas-pro-manila-2026" => [
     {
       hotel_name: "Ibis Styles Manila Araneta City",
@@ -396,7 +419,7 @@ end
   { name: "Stroll Guam",     tier: "official", sort_order: 15, website_url: "https://stroll.international" },
   { name: "Boss 104",        tier: "official", sort_order: 16 },
   { name: "Sticky Fingers",  tier: "official", sort_order: 17 },
-  { name: "Hotel Tano Guam", tier: "official", sort_order: 18 }
+  { name: "Hotel Tano Guam", tier: "official", sort_order: 18, website_url: "https://www.hoteltano.com" }
 ].each do |data|
   sponsor = org.sponsors.create!(data)
   puts "Created sponsor: #{sponsor.name}"
