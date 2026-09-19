@@ -288,8 +288,14 @@ export default function EventDetailPage() {
     .filter(a => a.active)
     .sort((a, b) => a.sort_order - b.sort_order);
   const accommodationImages = activeAccommodations
-    .map(a => a.image_url ? resolveMediaUrl(a.image_url) : null)
+    .map(a => resolveMediaUrl(a.image_url) || getSponsorLogo(a.hotel_name))
     .filter((url): url is string => url !== null && url !== undefined);
+  const accommodationBackdrop = activeAccommodations
+    .map(a => resolveMediaUrl(a.image_url))
+    .find((url): url is string => url !== null && url !== undefined);
+  const featuredAccommodationUsesLogo = activeAccommodations.length === 1
+    && !resolveMediaUrl(activeAccommodations[0].image_url)
+    && accommodationImages.length > 0;
 
   // Use translated JSONB arrays for current locale (falls back to English)
   const venueHighlightsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string }>(mainEvent, 'venue_highlights' as keyof typeof mainEvent & string) : [];
@@ -947,9 +953,9 @@ export default function EventDetailPage() {
       {/* Official Accommodation — dynamic from API (shown right after venue) */}
       {activeAccommodations.length > 0 && (
         <section className="relative py-16 sm:py-20 overflow-hidden">
-          {accommodationImages[0] && (
+          {accommodationBackdrop && (
             <div className="absolute inset-0 pointer-events-none">
-              <img src={accommodationImages[0]} alt="" className="w-full h-full object-cover opacity-[0.12]" />
+              <img src={accommodationBackdrop} alt="" className="w-full h-full object-cover opacity-[0.12]" />
               <div className="absolute inset-0 bg-navy-900/70" />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-navy-900/60 to-navy-900" />
             </div>
@@ -970,9 +976,19 @@ export default function EventDetailPage() {
               <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-4 max-w-6xl mx-auto items-stretch">
                 <ScrollReveal>
                   <div className="grid grid-cols-2 gap-4 h-full min-h-[420px]">
-                    <div className="col-span-2 relative overflow-hidden border border-white/10 bg-navy-900">
-                      <img src={accommodationImages[0]} alt="" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-transparent to-transparent" />
+                    <div className={`col-span-2 relative overflow-hidden border border-white/10 bg-navy-900 ${featuredAccommodationUsesLogo ? 'flex items-center justify-center p-12 sm:p-16' : ''}`}>
+                      <img
+                        src={accommodationImages[0]}
+                        alt=""
+                        className={featuredAccommodationUsesLogo
+                          ? 'relative z-10 w-full max-w-sm object-contain'
+                          : 'w-full h-full object-cover'}
+                      />
+                      {featuredAccommodationUsesLogo ? (
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(201,153,53,0.12),transparent_62%)]" />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-transparent to-transparent" />
+                      )}
                     </div>
                     {accommodationImages.slice(1, 3).map((src, index) => (
                       <div key={src} className="relative overflow-hidden border border-white/10 bg-navy-900 min-h-[180px]">
@@ -1015,7 +1031,7 @@ export default function EventDetailPage() {
                           {acc.inclusions && (
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.inclusions', 'Includes')}</span>
-                              <span className="text-text-secondary">{tf(acc, 'inclusions')}</span>
+                              <span className="text-text-secondary whitespace-pre-line">{tf(acc, 'inclusions')}</span>
                             </div>
                           )}
                           {acc.check_in_date && acc.check_out_date && (
@@ -1112,7 +1128,7 @@ export default function EventDetailPage() {
                           {acc.inclusions && (
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.inclusions', 'Includes')}</span>
-                              <span className="text-text-secondary">{tf(acc, 'inclusions')}</span>
+                              <span className="text-text-secondary whitespace-pre-line">{tf(acc, 'inclusions')}</span>
                             </div>
                           )}
                           {acc.check_in_date && acc.check_out_date && (

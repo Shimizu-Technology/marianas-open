@@ -71,7 +71,7 @@ events_data = [
   { name: "Marianas Pro Japan 2023", slug: "marianas-pro-japan-2023", description: "Marianas Pro Series in Tokyo, Japan", date: "2023-04-15", end_date: nil, venue_name: "Sumida City Gymnasium", venue_address: "Sumida City Gymnasium", city: "Tokyo", country: "Japan", country_code: "JP", asjjf_stars: 4, is_main_event: false, status: "completed" },
 
   # === 2022 Completed ===
-  { name: "Copa De Marianas 2022", slug: "copa-de-marianas-2022", description: "Copa De Marianas tournament in Guam", date: "2022-01-29", end_date: nil, venue_name: "UOG Calvo Fieldhouse", venue_address: "UOG Calvo Fieldhouse", city: "Mangilao", country: "Guam", country_code: "GU", asjjf_stars: 3, is_main_event: false, status: "completed" },
+  { name: "Copa De Marianas 2022", slug: "copa-de-marianas-2022", description: "Copa De Marianas tournament in Guam", date: "2022-01-29", end_date: nil, venue_name: "UOG Calvo Fieldhouse", venue_address: "UOG Calvo Fieldhouse", city: "Mangilao", country: "Guam", country_code: "GU", asjjf_stars: 3, is_main_event: false, status: "completed" }
 ]
 
 events_data.each_with_index do |data, i|
@@ -249,22 +249,22 @@ end
   "marianas-pro-nagoya-2026" => [
     { time: "8:00 AM", description: "Doors Open", sort_order: 1 },
     { time: "9:00 AM", description: "Official Weigh-ins", sort_order: 2 },
-    { time: "10:00 AM", description: "First matches begin. Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 3 },
+    { time: "10:00 AM", description: "First matches begin. Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 3 }
   ],
   "marianas-pro-manila-2026" => [
     { time: "April 25 (Saturday)", description: "All Gi Juvenile, Adult, and Masters divisions.", sort_order: 1 },
-    { time: "April 26 (Sunday)", description: "All Kids divisions.", sort_order: 2 },
+    { time: "April 26 (Sunday)", description: "All Kids divisions.", sort_order: 2 }
   ],
   "marianas-pro-taiwan-2026" => [
     { time: "May 30 (Saturday)", description: "All Gi Juvenile, Adult, and Masters divisions.", sort_order: 1 },
-    { time: "May 31 (Sunday)", description: "All Kids divisions.", sort_order: 2 },
+    { time: "May 31 (Sunday)", description: "All Kids divisions.", sort_order: 2 }
   ],
   "marianas-pro-korea-2026" => [
-    { time: "June 6 (Saturday)", description: "Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 1 },
+    { time: "June 6 (Saturday)", description: "Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 1 }
   ],
   "marianas-pro-hong-kong-2026" => [
     { time: "July 18 (Saturday)", description: "Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 1 },
-    { time: "July 19 (Sunday)", description: "Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 2 },
+    { time: "July 19 (Sunday)", description: "Kids: white, grey, yellow, orange, green; Juvenile: white, blue, purple; Adult: white, blue, purple, brown, black; Master: white, blue, purple, brown, black.", sort_order: 2 }
   ],
   "marianas-open-2026" => [
     { time: "7:00 AM", description: "Doors Open / Weigh-ins", sort_order: 1 },
@@ -273,8 +273,8 @@ end
     { time: "1:00 PM", description: "Adult Purple & Brown Belt", sort_order: 4 },
     { time: "4:00 PM", description: "Black Belt Divisions", sort_order: 5 },
     { time: "6:00 PM", description: "Black Belt Finals / Open Class", sort_order: 6 },
-    { time: "8:00 PM", description: "Awards Ceremony", sort_order: 7 },
-  ],
+    { time: "8:00 PM", description: "Awards Ceremony", sort_order: 7 }
+  ]
 }.each do |slug, schedule_items|
   event = Event.find_by(slug: slug)
   next unless event
@@ -307,7 +307,7 @@ end
     "Female Black Master 30 Open Weight — 1 Trip Package",
     "Teams Adult/Masters Overall (Gi + No-Gi) — 1st Place: 2 Trip Packages",
     "Teams Adult/Masters Overall (Gi + No-Gi) — 2nd Place: 1 Trip Package",
-    "Teams Adult/Masters Overall (Gi + No-Gi) — 3rd Place: 1 Trip Package",
+    "Teams Adult/Masters Overall (Gi + No-Gi) — 3rd Place: 1 Trip Package"
   ],
   "marianas-pro-manila-2026" => [
     "Male Adult Black Open Weight — 1 Trip Package",
@@ -316,7 +316,7 @@ end
     "Teams Adult/Masters Overall (Gi + No-Gi) — 2nd Place: 2 Trip Packages",
     "Teams Adult/Masters Overall (Gi + No-Gi) — 3rd Place: 1 Trip Package",
     "Teams Kids Overall (Gi + No-Gi) — 1st Place: 2 Trip Packages + 2 Parent Tickets",
-    "Teams Kids Overall (Gi + No-Gi) — 2nd Place: 1 Trip Package + 1 Parent Ticket",
+    "Teams Kids Overall (Gi + No-Gi) — 2nd Place: 1 Trip Package + 1 Parent Ticket"
   ],
   "marianas-pro-taiwan-2026" => [
     "Male Adult Blue Open Weight — 1 Trip Package",
@@ -330,7 +330,7 @@ end
     "Teams Adult/Masters Overall (Gi + No-Gi) — 2nd Place: 1 Trip Package",
     "Teams Adult/Masters Overall (Gi + No-Gi) — 3rd Place: 1 Trip Package",
     "Teams Kids Overall (Gi + No-Gi) — 1st Place: 1 Trip Package + 1 Parent Ticket",
-    "Teams Kids Overall (Gi + No-Gi) — 2nd Place: 1 Trip Package + 1 Parent Ticket",
+    "Teams Kids Overall (Gi + No-Gi) — 2nd Place: 1 Trip Package + 1 Parent Ticket"
   ],
   "marianas-pro-korea-2026" => [
     "Male Blue Juvenile Open Weight — 1 Trip Package",
@@ -347,7 +347,7 @@ end
     "Male Black Master 30 Open Weight — 1 Trip Package",
     "Teams Adult/Masters Overall (Gi + No-Gi) — 1st Place: 2 Trip Packages",
     "Teams Adult/Masters Overall (Gi + No-Gi) — 2nd Place: 1 Trip Package",
-    "Teams Adult/Masters Overall (Gi + No-Gi) — 3rd Place: 1 Trip Package",
+    "Teams Adult/Masters Overall (Gi + No-Gi) — 3rd Place: 1 Trip Package"
   ],
   "marianas-pro-hong-kong-2026" => [
     "Male Blue Juvenile Open Weight — 1 Trip Package",
@@ -364,8 +364,8 @@ end
     "Male Black Master 30 Open Weight — 1 Trip Package",
     "Teams Adult/Masters Overall (Gi + No-Gi) — 1st Place: 2 Trip Packages",
     "Teams Adult/Masters Overall (Gi + No-Gi) — 2nd Place: 1 Trip Package",
-    "Teams Adult/Masters Overall (Gi + No-Gi) — 3rd Place: 1 Trip Package",
-  ],
+    "Teams Adult/Masters Overall (Gi + No-Gi) — 3rd Place: 1 Trip Package"
+  ]
 }.each do |slug, prizes|
   event = Event.find_by(slug: slug)
   next unless event
@@ -396,6 +396,7 @@ end
   { name: "Stroll Guam",     tier: "official", sort_order: 15, website_url: "https://stroll.international" },
   { name: "Boss 104",        tier: "official", sort_order: 16 },
   { name: "Sticky Fingers",  tier: "official", sort_order: 17 },
+  { name: "Hotel Tano Guam", tier: "official", sort_order: 18 }
 ].each do |data|
   sponsor = org.sponsors.create!(data)
   puts "Created sponsor: #{sponsor.name}"
@@ -417,7 +418,7 @@ videos_data = [
     category: "gi",
     event: marianas_open_2024,
     featured: true,
-    sort_order: 1,
+    sort_order: 1
   },
   {
     title: "Brandon Vera vs Kim Hee Dong — Brown Belt Open Class Final",
@@ -430,7 +431,7 @@ videos_data = [
     category: "gi",
     event: marianas_open_2024,
     featured: true,
-    sort_order: 2,
+    sort_order: 2
   },
   {
     title: "Milena Sakumoto vs Lenora Matanane — Female Black Belt Light Feather Final",
@@ -443,7 +444,7 @@ videos_data = [
     category: "gi",
     event: marianas_open_2024,
     featured: true,
-    sort_order: 3,
+    sort_order: 3
   },
   {
     title: "Samkang Kim vs Sho Saito — Brown Belt Light Final",
@@ -455,7 +456,7 @@ videos_data = [
     round: "Final",
     category: "gi",
     event: marianas_open_2024,
-    sort_order: 4,
+    sort_order: 4
   },
   {
     title: "Yoko Abe vs Lee Yoonja — Female Master 3 Black Belt Heavy Final",
@@ -467,7 +468,7 @@ videos_data = [
     round: "Final",
     category: "gi",
     event: pro_korea_2024,
-    sort_order: 5,
+    sort_order: 5
   },
   {
     title: "Yoon Minho vs Dave Kim — Black Belt Super Heavy Final",
@@ -479,7 +480,7 @@ videos_data = [
     round: "Final",
     category: "gi",
     event: pro_korea_2024,
-    sort_order: 6,
+    sort_order: 6
   },
   {
     title: "Keenan Cornelius vs Mike Fowler — Black Belt Open Class Final (2015)",
@@ -492,7 +493,7 @@ videos_data = [
     category: "gi",
     event: nil,
     featured: true,
-    sort_order: 7,
+    sort_order: 7
   },
   {
     title: "Marianas Open / Marianas Pro / Copa de Marianas — Highlight Reel",
@@ -500,8 +501,8 @@ videos_data = [
     category: "gi",
     event: nil,
     featured: false,
-    sort_order: 8,
-  },
+    sort_order: 8
+  }
 ]
 
 videos_data.each do |data|
@@ -524,7 +525,7 @@ site_images_data = [
   { title: "Podium Ceremony 2", placement: "featured", alt_text: "Podium ceremony at the Marianas Open", sort_order: 5, filename: "podium-2.webp" },
   { title: "Ceremony 1", placement: "featured", alt_text: "Award ceremony", sort_order: 6, filename: "ceremony-1.webp" },
   { title: "Ceremony 2", placement: "featured", alt_text: "Award ceremony", sort_order: 7, filename: "ceremony-2.webp" },
-  { title: "Venue Mats", placement: "about", alt_text: "Competition mats at the venue", sort_order: 0, filename: "venue-mats.webp" },
+  { title: "Venue Mats", placement: "about", alt_text: "Competition mats at the venue", sort_order: 0, filename: "venue-mats.webp" }
 ]
 
 site_images_data.each do |data|
@@ -569,7 +570,7 @@ competitors_data = [
   { first_name: "Jake", last_name: "Thompson", country_code: "US", belt_rank: "blue", weight_class: "Heavy", academy: "Guam Jiu-Jitsu Academy", bio: "Local Guam competitor representing the island.", wins: 12, losses: 3, draws: 2, gold_medals: 3, silver_medals: 2, bronze_medals: 1 },
   { first_name: "Ayaka", last_name: "Sato", country_code: "JP", belt_rank: "black", weight_class: "Light Feather", academy: "Paraestra Tokyo", bio: "Dominant force in women's BJJ across Asia.", instagram_url: "https://instagram.com/ayaka_sato_bjj", wins: 40, losses: 6, draws: 0, gold_medals: 14, silver_medals: 3, bronze_medals: 2 },
   { first_name: "Diego", last_name: "Cruz", country_code: "PH", belt_rank: "brown", weight_class: "Light", academy: "ATOS Philippines", bio: "Filipino-American competitor bridging the gap between US and Asian circuits.", wins: 25, losses: 8, draws: 1, gold_medals: 6, silver_medals: 4, bronze_medals: 3 },
-  { first_name: "Soo-Yeon", last_name: "Lee", country_code: "KR", belt_rank: "purple", weight_class: "Feather", academy: "Korea Jiu-Jitsu Academy", bio: "Rising star in Korean women's BJJ.", wins: 15, losses: 3, draws: 0, gold_medals: 4, silver_medals: 2, bronze_medals: 1 },
+  { first_name: "Soo-Yeon", last_name: "Lee", country_code: "KR", belt_rank: "purple", weight_class: "Feather", academy: "Korea Jiu-Jitsu Academy", bio: "Rising star in Korean women's BJJ.", wins: 15, losses: 3, draws: 0, gold_medals: 4, silver_medals: 2, bronze_medals: 1 }
 ]
 
 competitors_data.each do |data|
