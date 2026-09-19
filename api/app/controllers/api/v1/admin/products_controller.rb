@@ -53,7 +53,7 @@ module Api
 
         def product_payload
           params.require(:product).permit(
-            :name, :slug, :description, :active, :featured, :shippable, :pickup_enabled, :sort_order,
+            :name, :slug, :description, :active, :featured, :shippable, :pickup_enabled, :sort_order, :demo_only,
             options: [ :id, :client_key, :name, :position, { values: %i[id client_key value position] } ],
             variants: [
               :id, :name, :sku, :active, :price_cents, :compare_at_price_cents, :currency,

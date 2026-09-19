@@ -25,8 +25,8 @@ const skuify = (value: string) => value.toUpperCase().trim().replace(/[^A-Z0-9]+
 const money = (cents: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
 const MAX_VARIANTS = 250
 
-const emptyProduct = (): CommerceProduct => ({
-  name: '', slug: '', description: '', active: false, featured: false,
+const emptyProduct = (pocMode = false): CommerceProduct => ({
+  name: '', slug: '', description: '', active: false, featured: false, demo_only: pocMode,
   shippable: true, pickup_enabled: true, sort_order: 0, images: [], options: [], variants: [],
 })
 
@@ -77,6 +77,7 @@ function combinationCount(options: ProductOption[]) {
 
 export default function CommerceAdmin() {
   const [products, setProducts] = useState<CommerceProduct[]>([])
+  const [pocMode, setPocMode] = useState(false)
   const [locations, setLocations] = useState<InventoryLocation[]>([])
   const [draft, setDraft] = useState<CommerceProduct | null>(null)
   const [loading, setLoading] = useState(true)
@@ -92,9 +93,12 @@ export default function CommerceAdmin() {
   const load = async () => {
     setLoading(true); setError('')
     try {
-      const [productResponse, locationResponse] = await Promise.all([api.admin.getProducts(), api.admin.getInventoryLocations()])
+      const [productResponse, locationResponse, configuration] = await Promise.all([
+        api.admin.getProducts(), api.admin.getInventoryLocations(), api.getShopConfiguration(),
+      ])
       setProducts(productResponse.products.map(normalized))
       setLocations(locationResponse.inventory_locations)
+      setPocMode(configuration.poc_mode)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Commerce data could not be loaded.')
     } finally { setLoading(false) }
@@ -103,7 +107,7 @@ export default function CommerceAdmin() {
   useEffect(() => { void load() }, [])
 
   const selectedProduct = draft?.id ? products.find(product => product.id === draft.id) : undefined
-  const dirty = Boolean(draft && JSON.stringify(draft) !== JSON.stringify(selectedProduct || emptyProduct()))
+  const dirty = Boolean(draft && JSON.stringify(draft) !== JSON.stringify(selectedProduct || emptyProduct(pocMode)))
 
   const updateDraft = <K extends keyof CommerceProduct>(field: K, value: CommerceProduct[K]) => setDraft(current => current ? { ...current, [field]: value } : current)
 
@@ -265,10 +269,10 @@ export default function CommerceAdmin() {
 
   if (!draft) return (
     <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Commerce</p><h1 className="mt-2 font-heading text-3xl font-bold">Products & inventory</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary">Build the merchandise catalog, control what customers can buy, and keep stock accurate across Deal Depot and future locations.</p></div><button onClick={() => { setDraft(emptyProduct()); setNotice('') }} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 text-sm font-bold text-navy-900 transition hover:bg-gold-400"><PackagePlus className="h-4 w-4" /> Add product</button></div>
+      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Commerce</p><h1 className="mt-2 font-heading text-3xl font-bold">Products & inventory</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary">Build the merchandise catalog, control what customers can buy, and keep stock accurate across Deal Depot and future locations.</p></div><button onClick={() => { setDraft(emptyProduct(pocMode)); setNotice('') }} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 text-sm font-bold text-navy-900 transition hover:bg-gold-400"><PackagePlus className="h-4 w-4" /> Add product</button></div>
       {error && <div className="mt-6 rounded-xl border border-red-400/25 bg-red-400/5 px-4 py-3 text-sm text-red-200" role="alert">{error}</div>}
       {notice && <div className="mt-6 flex items-center gap-2 rounded-xl border border-emerald-400/25 bg-emerald-400/5 px-4 py-3 text-sm text-emerald-200"><Check className="h-4 w-4" />{notice}</div>}
-      {products.length === 0 ? <div className="mt-10 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-20 text-center"><Boxes className="mx-auto h-12 w-12 text-white/20" /><h2 className="mt-5 font-heading text-xl font-semibold">Start with your first product</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-text-muted">Add a towel, shirt, gi, bag, hat, or any other item. Each product can have its own sizes, colors, materials, and prices.</p></div> : <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{products.map(product => <button key={product.id} onClick={() => { setDraft(normalized(product)); setNotice(''); setError('') }} className="group overflow-hidden rounded-2xl border border-white/10 bg-surface text-left transition hover:-translate-y-0.5 hover:border-gold/30"><div className="aspect-[16/9] bg-black/20">{product.images[0] ? <img src={resolveMediaUrl(product.images[0].url) || product.images[0].url} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Boxes className="h-9 w-9 text-white/15" /></div>}</div><div className="p-5"><div className="flex items-start justify-between gap-3"><h2 className="font-heading text-lg font-semibold group-hover:text-gold">{product.name}</h2><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${product.active ? 'bg-emerald-400/10 text-emerald-300' : 'bg-white/5 text-text-muted'}`}>{product.active ? 'Live' : 'Draft'}</span></div><p className="mt-2 text-sm text-text-muted">{product.variants.length} {product.variants.length === 1 ? 'variant' : 'variants'} · {product.variants.reduce((sum, variant) => sum + variant.available_quantity, 0)} available</p><p className="mt-4 font-heading font-semibold">{product.variants.length ? `From ${money(Math.min(...product.variants.map(variant => variant.price_cents)))}` : 'No price yet'}</p></div></button>)}</div>}
+      {products.length === 0 ? <div className="mt-10 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-20 text-center"><Boxes className="mx-auto h-12 w-12 text-white/20" /><h2 className="mt-5 font-heading text-xl font-semibold">Start with your first product</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-text-muted">Add a towel, shirt, gi, bag, hat, or any other item. Each product can have its own sizes, colors, materials, and prices.</p></div> : <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{products.map(product => <button key={product.id} onClick={() => { setDraft(normalized(product)); setNotice(''); setError('') }} className="group overflow-hidden rounded-2xl border border-white/10 bg-surface text-left transition hover:-translate-y-0.5 hover:border-gold/30"><div className="aspect-[16/9] bg-black/20">{product.images[0] ? <img src={resolveMediaUrl(product.images[0].url) || product.images[0].url} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Boxes className="h-9 w-9 text-white/15" /></div>}</div><div className="p-5"><div className="flex items-start justify-between gap-3"><h2 className="font-heading text-lg font-semibold group-hover:text-gold">{product.name}</h2><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${product.active ? 'bg-emerald-400/10 text-emerald-300' : 'bg-white/5 text-text-muted'}`}>{product.active ? 'Live' : 'Draft'}</span></div><p className="mt-2 text-sm text-text-muted">{product.variants.length} {product.variants.length === 1 ? 'variant' : 'variants'} · {product.variants.reduce((sum, variant) => sum + variant.available_quantity, 0)} available{product.demo_only ? ' · Demo-only' : ''}</p><p className="mt-4 font-heading font-semibold">{product.variants.length ? `From ${money(Math.min(...product.variants.map(variant => variant.price_cents)))}` : 'No price yet'}</p></div></button>)}</div>}
     </div>
   )
 
@@ -280,6 +284,19 @@ export default function CommerceAdmin() {
 
       <div className="space-y-6">
         <section className="rounded-2xl border border-white/10 bg-surface p-5 sm:p-7"><div className="mb-6"><p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">1 · Product</p><h2 className="mt-2 font-heading text-xl font-semibold">What are you selling?</h2></div><div className="grid gap-5 sm:grid-cols-2"><Field label="Product name"><input className={inputClass} value={draft.name} onChange={event => { const name = event.target.value; updateDraft('name', name); if (!draft.id) updateDraft('slug', slugify(name)) }} placeholder="Marianas Open Competition Gi" /></Field><Field label="Store URL" hint={`marianasopen.com/shop/${draft.slug || 'product-name'}`}><input className={inputClass} value={draft.slug} onChange={event => updateDraft('slug', slugify(event.target.value))} placeholder="marianas-open-competition-gi" /></Field><div className="sm:col-span-2"><Field label="Description"><textarea className={`${inputClass} min-h-28 resize-y`} value={draft.description} onChange={event => updateDraft('description', event.target.value)} placeholder="Tell customers what makes this item special, what it includes, and how it fits." /></Field></div></div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Toggle checked={Boolean(draft.shippable)} onChange={value => updateDraft('shippable', value)} label="Shipping" description="Can be delivered" /><Toggle checked={Boolean(draft.pickup_enabled)} onChange={value => updateDraft('pickup_enabled', value)} label="Store pickup" description="Deal Depot pickup" /><Toggle checked={Boolean(draft.featured)} onChange={value => updateDraft('featured', value)} label="Featured" description="Prioritize in shop" /><Toggle checked={Boolean(draft.active)} onChange={value => updateDraft('active', value)} label="Published" description="Visible to customers" /></div></section>
+        <section className="rounded-2xl border border-white/10 bg-surface p-5 sm:p-7">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Catalog visibility</p>
+          <h2 className="mt-2 font-heading text-xl font-semibold">Where should this item appear?</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">
+            {pocMode
+              ? 'Demo-only items appear in this simulated shop. Regular merchandise stays hidden here.'
+              : 'Demo-only items stay out of the live shop and checkout.'}
+            {' '}This setting cannot change after the item is included in an order.
+          </p>
+          <div className="mt-5 max-w-md">
+            <Toggle checked={Boolean(draft.demo_only)} onChange={value => updateDraft('demo_only', value)} label="Demo-only item" description="Show in the simulated shop, never the live shop" />
+          </div>
+        </section>
 
         <section className="rounded-2xl border border-white/10 bg-surface p-5 sm:p-7"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">2 · Options</p><h2 className="mt-2 font-heading text-xl font-semibold">How can customers choose?</h2><p className="mt-2 max-w-xl text-sm leading-6 text-text-muted">Add only what applies to this product—size, color, material, style, or any other choice.</p>{optionSchemaLocked && <p className="mt-2 text-xs leading-5 text-amber-200/80">The option types are locked after variants are saved so historical SKUs stay stable. You can still rename them and add new values.</p>}</div><button onClick={addOption} disabled={optionSchemaLocked} className={`${buttonSecondary} disabled:cursor-not-allowed disabled:opacity-40`}><Plus className="h-4 w-4" /> Add option</button></div>{draft.options.length === 0 ? <div className="mt-6 rounded-xl border border-dashed border-white/10 px-5 py-7 text-center text-sm text-text-muted">No options means this product will have one “Standard” variant.</div> : <div className="mt-6 space-y-4">{draft.options.map((option, optionIndex) => <div key={option.client_key} className="rounded-xl border border-white/10 bg-black/15 p-4"><div className="flex items-center gap-3"><input className={inputClass} aria-label={`Option ${optionIndex + 1} name`} value={option.name} onChange={event => updateOption(optionIndex, { name: event.target.value })} placeholder="Size" />{!option.id && <button onClick={() => removeOption(optionIndex)} className="rounded-lg p-2.5 text-text-muted hover:bg-red-400/10 hover:text-red-300" aria-label={`Remove ${option.name || 'option'}`}><Trash2 className="h-4 w-4" /></button>}</div><div className="mt-3 flex flex-wrap gap-2">{option.values.map((value, valueIndex) => <div key={value.client_key} className="flex items-center rounded-lg border border-white/10 bg-white/[0.03]"><input className="w-24 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-text-muted sm:w-32" value={value.value} onChange={event => updateValue(optionIndex, valueIndex, event.target.value)} placeholder="Medium" aria-label={`${option.name || 'Option'} value`} />{!value.id && <button onClick={() => removeValue(optionIndex, valueIndex)} className="border-l border-white/10 p-2 text-text-muted hover:text-red-300" aria-label={`Remove ${value.value || 'value'}`}><X className="h-3.5 w-3.5" /></button>}</div>)}<button onClick={() => addValue(optionIndex)} className="inline-flex items-center gap-1 rounded-lg border border-dashed border-white/15 px-3 py-2 text-xs font-semibold text-text-muted hover:border-white/30 hover:text-white"><Plus className="h-3.5 w-3.5" /> Value</button></div></div>)}</div>}<button onClick={generateVariants} disabled={plannedVariantCount > MAX_VARIANTS} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gold/30 bg-gold/[0.07] px-5 py-3 text-sm font-bold text-gold transition hover:bg-gold/[0.12] disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-text-muted"><Sparkles className="h-4 w-4" />{plannedVariantCount > MAX_VARIANTS ? `Limit options to ${MAX_VARIANTS} variants` : `Generate ${plannedVariantCount} ${plannedVariantCount === 1 ? 'variant' : 'variants'}`}</button></section>
 

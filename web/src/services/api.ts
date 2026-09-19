@@ -784,6 +784,7 @@ export interface CommerceProduct {
   slug: string;
   description: string;
   active?: boolean;
+  demo_only?: boolean;
   featured: boolean;
   shippable: boolean;
   pickup_enabled: boolean;

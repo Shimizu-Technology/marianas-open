@@ -11,6 +11,7 @@ module Commerce
         slug: product.slug,
         description: product.description,
         active: product.active,
+        demo_only: product.demo_only,
         featured: product.featured,
         shippable: product.shippable,
         pickup_enabled: product.pickup_enabled,

@@ -2,7 +2,7 @@ module Commerce
   class SaveProduct
     class InvalidCatalog < StandardError; end
 
-    PRODUCT_FIELDS = %w[name slug description featured shippable pickup_enabled sort_order].freeze
+    PRODUCT_FIELDS = %w[name slug description featured shippable pickup_enabled sort_order demo_only].freeze
     VARIANT_FIELDS = %w[
       name sku price_cents compare_at_price_cents currency allow_shipping allow_pickup
       weight_grams length_mm width_mm height_mm customs_description country_of_origin hts_code position
@@ -22,6 +22,7 @@ module Commerce
         product = find_or_build_product
         requested_product_active = truthy?(attributes["active"])
 
+        product.demo_only = Configuration.poc_mode? if product.new_record? && !attributes.key?("demo_only")
         product.assign_attributes(attributes.slice(*PRODUCT_FIELDS))
         product.active = false
         product.save!
@@ -48,7 +49,7 @@ module Commerce
     def find_or_build_product
       return organization.products.new unless attributes["id"].present?
 
-      organization.products.find(attributes["id"])
+      organization.products.lock.find(attributes["id"])
     end
 
     def sync_options(product)
