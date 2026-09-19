@@ -315,14 +315,14 @@ export default function HomePage() {
 
             <ScrollReveal delay={0.15}>
               {merchandisePreview.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 sm:gap-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
                   {merchandisePreview.map((product, index) => {
                     const inStock = product.variants.some(variant => variant.available_quantity > 0);
                     return (
                       <Link
                         key={product.id}
                         to={`/shop/${product.slug}`}
-                        className={`group relative block overflow-hidden border border-white/10 bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${index === 1 ? 'mt-8 sm:mt-12' : 'mb-8 sm:mb-12'}`}
+                        className={`group relative block overflow-hidden border border-white/10 bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${index === 1 ? 'sm:mt-12' : 'sm:mb-12'}`}
                       >
                         <div className="aspect-[4/5] overflow-hidden">
                           <ProductArtwork product={product} className="transition-transform duration-500 group-hover:scale-[1.035]" />
