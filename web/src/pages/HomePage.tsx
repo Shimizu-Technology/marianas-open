@@ -89,6 +89,7 @@ export default function HomePage() {
   const { sponsors } = useSponsors();
   const {
     enabled: commerceEnabled,
+    pocMode: commercePocMode,
     products: commerceProducts,
     loading: commerceLoading,
     error: commerceError,
@@ -280,32 +281,34 @@ export default function HomePage() {
               <div className="max-w-xl">
                 <div className="inline-flex items-center gap-2 border border-gold/30 bg-gold/[0.07] px-3 py-1.5 text-xs font-heading font-bold uppercase tracking-[0.2em] text-gold">
                   <ShoppingBag className="h-4 w-4" />
-                  Official merchandise
+                  {commercePocMode ? 'Merchandise preview' : 'Official merchandise'}
                 </div>
                 <h2 id="merchandise-heading" className="mt-6 font-heading text-4xl font-black uppercase leading-[0.95] tracking-tight sm:text-5xl lg:text-6xl">
                   Take the spirit of<br /><span className="text-gold">the Open with you.</span>
                 </h2>
                 <p className="mt-6 max-w-lg text-base leading-7 text-text-secondary sm:text-lg">
-                  Shop official Marianas Open apparel and gear, with free Deal Depot pickup on Guam and delivery to supported destinations.
+                  {commercePocMode
+                    ? 'Explore sample gear and try example delivery or Deal Depot pickup. No purchase, shipment, or pickup will happen in this preview.'
+                    : 'Shop official Marianas Open apparel and gear, with free Deal Depot pickup on Guam and delivery to supported destinations.'}
                 </p>
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                   <Link
                     to="/shop"
                     className="group inline-flex min-h-12 items-center justify-center gap-2 bg-gold px-6 font-heading text-sm font-bold uppercase tracking-wider text-navy-900 transition hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-4 focus-visible:ring-offset-[#0c111c]"
                   >
-                    Shop merchandise
+                    {commercePocMode ? 'Preview merchandise' : 'Shop merchandise'}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                   <Link
                     to="/shop/order-status"
                     className="inline-flex min-h-12 items-center justify-center px-5 text-sm font-semibold text-text-secondary transition hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                   >
-                    Check an order
+                    {commercePocMode ? 'Check demo order' : 'Check an order'}
                   </Link>
                 </div>
                 <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-xs font-semibold uppercase tracking-wider text-text-muted">
-                  <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-gold" /> Guam pickup</span>
-                  <span className="inline-flex items-center gap-2"><Truck className="h-4 w-4 text-gold" /> Delivery available</span>
+                  <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-gold" /> {commercePocMode ? 'Demo pickup' : 'Guam pickup'}</span>
+                  <span className="inline-flex items-center gap-2"><Truck className="h-4 w-4 text-gold" /> {commercePocMode ? 'Example delivery' : 'Delivery available'}</span>
                 </div>
               </div>
             </ScrollReveal>
