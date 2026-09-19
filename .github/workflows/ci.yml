@@ -150,6 +150,8 @@ jobs:
           ops/staging/launchd/com.shimizutechnology.marianas-open-staging.plist
       - name: Test staging provider boundaries
         run: ops/staging/test-provider-boundaries.sh
+      - name: Test staging Clerk configuration
+        run: ops/staging/test-clerk-configuration.sh
       - name: Build staging API image
         run: docker build --file api/Dockerfile --tag marianas-open-api:ci api
       - name: Build staging web image
