@@ -141,6 +141,19 @@ jobs:
             ((.services.api.networks | keys) == ["backend", "egress"]) and
             ((.services.worker.networks | keys) == ["backend", "egress"])
           '
+      - name: Check staging multipart temp directory
+        env:
+          IMAGE_TAG: validation
+          POSTGRES_PASSWORD: validation-only
+          SECRET_KEY_BASE: validation-only
+          CLERK_SECRET_KEY: sk_test_validation
+        run: |
+          docker compose -f ops/staging/compose.yml config --format json | jq -e '
+            (.services.api.environment.TMPDIR == "/rails/tmp") and
+            (.services.worker.environment.TMPDIR == "/rails/tmp") and
+            ((.services.api.tmpfs | any(startswith("/rails/tmp:"))) == true) and
+            ((.services.worker.tmpfs | any(startswith("/rails/tmp:"))) == true)
+          '
       - name: Check deployment scripts
         run: bash -n ops/staging/*.sh
       - name: Check staging LaunchAgent command paths
