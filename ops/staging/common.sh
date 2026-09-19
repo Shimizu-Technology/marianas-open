@@ -37,6 +37,16 @@ load_staging_secrets() {
   export POSTGRES_PASSWORD SECRET_KEY_BASE CLERK_SECRET_KEY EASYPOST_API_KEY EASYPOST_WEBHOOK_SECRET STRIPE_API_KEY STRIPE_WEBHOOK_SECRET
 }
 
+validate_staging_clerk_configuration() {
+  local issuer="${CLERK_ISSUER:-}"
+  local jwks_url="${CLERK_JWKS_URL:-}"
+
+  if [[ ! "${issuer}" =~ ^https://[A-Za-z0-9.-]+$ || "${issuer}" == *your-clerk-frontend-api* || "${jwks_url}" != "${issuer}/.well-known/jwks.json" ]]; then
+    printf '%s\n' "Staging requires a real HTTPS Clerk issuer and its matching JWKS URL." >&2
+    return 1
+  fi
+}
+
 validate_staging_provider_credentials() {
   local poc_mode
   poc_mode="$(printf '%s' "${COMMERCE_POC_MODE:-false}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | tr '[:upper:]' '[:lower:]')"
