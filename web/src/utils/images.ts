@@ -11,7 +11,9 @@ function getApiOrigin(): string {
       return configured;
     }
   }
-  return 'http://localhost:3000';
+  // Staging proxies API and Active Storage paths through the current origin.
+  // Keep the local Rails default only for the Vite development server.
+  return import.meta.env.DEV ? 'http://localhost:3000' : window.location.origin;
 }
 
 /** Normalize backend/media URLs for production safety. */
