@@ -99,6 +99,7 @@ module Commerce
         expires_at = Payments::CHECKOUT_LIFETIME.from_now
 
         Order.transaction do
+          lock_and_verify_products!(cart)
           order = organization.orders.create!(
             inventory_location: location,
             shipping_quote: quote,
@@ -123,6 +124,15 @@ module Commerce
           ReleaseExpiredOrderJob.set(wait_until: order.payment_expires_at + 5.minutes).perform_later(order.id)
           order
         end
+      end
+
+      def lock_and_verify_products!(cart)
+        product_ids = cart.lines.map { |line| line.variant.product_id }.uniq.sort
+        products = organization.products.where(id: product_ids).order(:id).lock.to_a
+        return if products.length == product_ids.length &&
+          products.all? { |product| product.active? && product.demo_only? == Configuration.poc_mode? }
+
+        raise Shipping::Error, "This item is not available in the current shop preview."
       end
 
       def fulfillment_details(method)

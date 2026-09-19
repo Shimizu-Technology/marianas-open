@@ -49,7 +49,7 @@ module Commerce
     def find_or_build_product
       return organization.products.new unless attributes["id"].present?
 
-      organization.products.find(attributes["id"])
+      organization.products.lock.find(attributes["id"])
     end
 
     def sync_options(product)
