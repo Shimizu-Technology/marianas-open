@@ -42,8 +42,10 @@ module Commerce
     def pickup_location
       return unless order.fulfillment_method == "pickup"
 
-      order.inventory_location.slice(:name, :pickup_instructions, :phone)
+      payload = order.inventory_location.slice(:name, :pickup_instructions, :phone)
         .merge(address: order.inventory_location.public_address)
+      payload.merge!(pickup_instructions: nil, phone: nil) if order.simulated?
+      payload
     end
 
     def public_shipment

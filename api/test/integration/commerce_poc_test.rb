@@ -38,6 +38,7 @@ class CommercePocTest < ActionDispatch::IntegrationTest
     @organization = Organization.create!(name: "Marianas Open", slug: "marianas-open")
     @location = @organization.inventory_locations.create!(
       name: "Deal Depot", code: "DEAL-DEPOT", pickup_enabled: true, shipping_enabled: true,
+      pickup_instructions: "Bring your confirmation email and a photo ID.", phone: "671-555-0100",
       address: { street1: "123 Marine Corps Drive", city: "Tamuning", state: "GU", zip: "96913", country: "US" }
     )
     @organization.shipping_packages.create!(
@@ -93,6 +94,31 @@ class CommercePocTest < ActionDispatch::IntegrationTest
       assert_equal "mock", Commerce::Payments.provider_mode
       assert_equal "mock", Commerce::Shipping.provider_mode
     end
+  end
+
+  test "demo pickup hides real collection instructions even after POC mode ends" do
+    with_poc_mode do
+      get "/api/v1/shop/fulfillment"
+      pickup = response.parsed_body.fetch("pickup_locations").first
+      assert_nil pickup["pickup_instructions"]
+      assert_nil pickup["phone"]
+
+      post "/api/v1/shop/checkout-sessions", params: {
+        checkout: {
+          checkout_key: SecureRandom.uuid, fulfillment_method: "pickup",
+          cart: [ { variant_id: @variant.id, quantity: 1 } ], pickup_location_id: @location.id,
+          contact: { name: "Demo Customer", email: "demo@example.test" }
+        }
+      }, as: :json
+      assert_response :created
+      @order_token = response.parsed_body.fetch("order_token")
+    end
+
+    get "/api/v1/shop/orders/#{@order_token}"
+    assert_response :success
+    assert_equal true, response.parsed_body.dig("order", "simulated")
+    assert_nil response.parsed_body.dig("order", "pickup_location", "pickup_instructions")
+    assert_nil response.parsed_body.dig("order", "pickup_location", "phone")
   end
 
   test "demo delivery, payment, label and refund work without external providers" do

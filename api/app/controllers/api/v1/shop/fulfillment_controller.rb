@@ -24,7 +24,9 @@ module Api
         end
 
         def pickup_payload(location)
-          location.slice(:id, :name, :pickup_instructions, :phone).merge(address: location.public_address)
+          payload = location.slice(:id, :name, :pickup_instructions, :phone).merge(address: location.public_address)
+          payload.merge!(pickup_instructions: nil, phone: nil) if Commerce::Configuration.poc_mode?
+          payload
         end
       end
     end
