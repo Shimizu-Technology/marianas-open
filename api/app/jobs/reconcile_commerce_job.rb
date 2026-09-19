@@ -16,7 +16,7 @@ class ReconcileCommerceJob < ApplicationJob
   private
 
   def reconcile_orders(gateway)
-    Order.where(status: "paid", simulated: false).where("last_reconciled_at IS NULL OR last_reconciled_at < ?", 6.hours.ago)
+    Order.real_payment.where(status: "paid").where("last_reconciled_at IS NULL OR last_reconciled_at < ?", 6.hours.ago)
       .order(Arel.sql("last_reconciliation_attempt_at ASC NULLS FIRST"), :id).limit(ORDER_BATCH_SIZE).each do |order|
       Commerce::Payments::ReconcilePaidOrder.call(order:, gateway:)
     rescue StandardError => e
@@ -25,7 +25,7 @@ class ReconcileCommerceJob < ApplicationJob
   end
 
   def reconcile_refunds(gateway)
-    OrderRefund.joins(:order).where(status: %w[pending_provider pending requires_action error], orders: { simulated: false })
+    OrderRefund.joins(:order).merge(Order.real_payment).where(status: %w[pending_provider pending requires_action error])
       .order(:updated_at).limit(REFUND_BATCH_SIZE).each do |refund|
       Commerce::Refunds::Reconcile.call(refund:, gateway:)
     rescue StandardError => e

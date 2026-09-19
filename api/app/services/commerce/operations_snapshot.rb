@@ -15,7 +15,10 @@ module Commerce
     def as_json
       {
         period: period,
-        simulated_preview: paid_orders_in_period.where(simulated: true).exists?,
+        simulated_preview: paid_orders_in_period.where(
+          "orders.simulated = TRUE OR orders.stripe_checkout_session_id LIKE ?",
+          "#{Order.sanitize_sql_like(Order::DEMO_SESSION_PREFIX)}%"
+        ).exists?,
         summary: summary,
         reconciliation: reconciliation,
         alerts: alerts.first(100),
@@ -74,7 +77,7 @@ module Commerce
     end
 
     def reconciliation
-      paid = organization.orders.where(status: "paid", simulated: false)
+      paid = organization.orders.real_payment.where(status: "paid")
       {
         current: paid.where(last_reconciled_at: 6.hours.ago..).count,
         due: paid.where(last_reconciled_at: nil).or(paid.where(last_reconciled_at: ...6.hours.ago)).count,

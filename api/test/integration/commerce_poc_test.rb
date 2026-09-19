@@ -329,6 +329,17 @@ class CommercePocTest < ActionDispatch::IntegrationTest
     snapshot = Commerce::OperationsSnapshot.new(organization: @organization).as_json
     assert snapshot.fetch(:simulated_preview)
     assert_equal 0, snapshot.dig(:reconciliation, :due)
+
+    # Older mock checkout records are recognizable by their session ID even if
+    # they predate the persisted simulated flag.
+    order.update_columns(simulated: false)
+    assert order.reload.simulated?
+    with_recording_gateway(gateway) { ReconcileCommerceJob.perform_now }
+    assert_empty gateway.session_calls
+    assert_empty gateway.refund_calls
+    legacy_snapshot = Commerce::OperationsSnapshot.new(organization: @organization).as_json
+    assert legacy_snapshot.fetch(:simulated_preview)
+    assert_equal 0, legacy_snapshot.dig(:reconciliation, :due)
   end
 
   private
