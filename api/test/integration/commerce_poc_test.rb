@@ -121,6 +121,45 @@ class CommercePocTest < ActionDispatch::IntegrationTest
     assert_nil response.parsed_body.dig("order", "pickup_location", "phone")
   end
 
+  test "demo pickup cannot queue or deliver a ready email after POC mode ends" do
+    with_poc_mode do
+      post "/api/v1/shop/checkout-sessions", params: {
+        checkout: {
+          checkout_key: SecureRandom.uuid, fulfillment_method: "pickup",
+          cart: [ { variant_id: @variant.id, quantity: 1 } ], pickup_location_id: @location.id,
+          contact: { name: "Demo Customer", email: "demo@example.test" }
+        }
+      }, as: :json
+      assert_response :created
+      post "/api/v1/shop/orders/#{response.parsed_body.fetch('order_token')}/test-payment", as: :json
+      assert_response :success
+    end
+
+    order = Order.last.reload
+    ENV["COMMERCE_EMAIL_DELIVERY_MODE"] = "live"
+    Commerce::Fulfillment::Transition.call(order:, status: "preparing", actor: nil)
+    Commerce::Fulfillment::Transition.call(order:, status: "ready_for_pickup", actor: nil)
+    assert_empty order.order_notifications.where(kind: "customer_pickup_ready")
+
+    # A ready message queued by an older version must also be blocked at delivery.
+    message = Commerce::Notifications::FulfillmentUpdateMessage.new(order:, status: "ready_for_pickup").call
+    assert_includes message.text, @location.public_address.fetch("street1")
+    notification = order.order_notifications.create!(
+      kind: "customer_pickup_ready", recipient: order.customer_email,
+      subject: message.subject, html_body: message.html, text_body: message.text
+    )
+    deliveries = []
+    gateway = Object.new
+    gateway.define_singleton_method(:deliver) { |**details| deliveries << details }
+
+    Commerce::Notifications::DeliverOrder.new(notification:, gateway:, mode: "live").call
+
+    assert_empty deliveries
+    assert_equal "suppressed", notification.reload.status
+    assert_equal "disabled", notification.delivery_mode
+    assert_match(/simulated/i, notification.last_error)
+  end
+
   test "demo delivery, payment, label and refund work without external providers" do
     with_poc_mode do
       get "/api/v1/shop/configuration"

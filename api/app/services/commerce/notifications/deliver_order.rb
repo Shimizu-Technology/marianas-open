@@ -11,7 +11,8 @@ module Commerce
 
       def call
         return notification unless claim!
-        return suppress! if mode == "disabled"
+        return suppress!("Simulated orders never send email.") if notification.order.simulated?
+        return suppress!("Commerce email delivery is disabled for this environment.") if mode == "disabled"
 
         destination = delivery_recipient
         message_id = (gateway || Notifications.gateway).deliver(notification:, to: destination)
@@ -46,11 +47,11 @@ module Commerce
         end
       end
 
-      def suppress!
+      def suppress!(reason)
         finalize!(
           status: "suppressed",
           delivery_mode: "disabled",
-          last_error: "Commerce email delivery is disabled for this environment."
+          last_error: reason
         )
         notification
       end
