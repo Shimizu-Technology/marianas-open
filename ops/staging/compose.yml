@@ -49,6 +49,7 @@ x-api-service: &api-service
     - active_storage:/rails/storage
   networks:
     - backend
+    - egress
   read_only: true
   tmpfs:
     - /rails/log:uid=1000,gid=1000,mode=0755
@@ -134,3 +135,4 @@ networks:
   frontend:
   backend:
     internal: true
+  egress:

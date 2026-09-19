@@ -127,6 +127,20 @@ jobs:
           SECRET_KEY_BASE: validation-only
           CLERK_SECRET_KEY: sk_test_validation
         run: docker compose -f ops/staging/compose.yml config --quiet
+      - name: Check staging network boundaries
+        env:
+          IMAGE_TAG: validation
+          POSTGRES_PASSWORD: validation-only
+          SECRET_KEY_BASE: validation-only
+          CLERK_SECRET_KEY: sk_test_validation
+        run: |
+          docker compose -f ops/staging/compose.yml config --format json | jq -e '
+            (.networks.backend.internal == true) and
+            (.networks.egress.internal != true) and
+            ((.services.db.networks | keys) == ["backend"]) and
+            ((.services.api.networks | keys) == ["backend", "egress"]) and
+            ((.services.worker.networks | keys) == ["backend", "egress"])
+          '
       - name: Check deployment scripts
         run: bash -n ops/staging/*.sh
       - name: Check staging LaunchAgent command paths
