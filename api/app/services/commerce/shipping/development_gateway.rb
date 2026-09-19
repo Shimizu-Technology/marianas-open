@@ -10,11 +10,11 @@ module Commerce
 
         {
           address: to_address.transform_values { |value| value.to_s.strip }.merge(country: country),
-          messages: [ "Development estimate — connect an EasyPost test key for carrier rates." ],
+          messages: [ "Simulated shipping prices for this preview only. These are not carrier quotes and no package will be sent." ],
           shipment_id: shipment_id,
           rates: [
-            rate(shipment_id, "USPS", "Priority", base, 4),
-            rate(shipment_id, "USPS", "PriorityExpress", base + 1_850, 2)
+            rate(shipment_id, "Demo carrier", "Standard", base, 4),
+            rate(shipment_id, "Demo carrier", "Express", base + 1_850, 2)
           ]
         }
       end
@@ -22,13 +22,13 @@ module Commerce
       def purchase_label(shipment_id:, rate_id:)
         digest = Digest::SHA256.hexdigest("#{shipment_id}:#{rate_id}").first(20)
         {
-          mode: "test",
+          mode: Shipping.provider_mode,
           status: "pre_transit",
           tracking_code: "EZ#{digest.upcase}",
-          tracking_url: "https://track.easypost.test/#{digest}",
+          tracking_url: nil,
           tracker_id: "trk_dev_#{digest}",
           label_url: "https://labels.easypost.test/#{digest}.png",
-          label_format: "image/png",
+          label_format: "mock",
           postage_cents: nil,
           currency: "USD"
         }

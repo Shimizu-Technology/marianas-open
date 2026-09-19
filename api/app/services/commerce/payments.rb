@@ -11,20 +11,22 @@ module Commerce
     class IndeterminateRefundError < RefundError; end
 
     def self.fake_checkout_enabled?
-      Rails.env.development? && ActiveModel::Type::Boolean.new.cast(ENV["STRIPE_FAKE_CHECKOUT"])
+      Configuration.poc_mode? ||
+        (Rails.env.development? && ActiveModel::Type::Boolean.new.cast(ENV["STRIPE_FAKE_CHECKOUT"]))
     end
 
     def self.gateway
-      if ENV["STRIPE_API_KEY"].present?
-        StripeGateway.new(api_key: ENV.fetch("STRIPE_API_KEY"))
-      elsif fake_checkout_enabled?
+      if fake_checkout_enabled?
         DevelopmentGateway.new
+      elsif ENV["STRIPE_API_KEY"].present?
+        StripeGateway.new(api_key: ENV.fetch("STRIPE_API_KEY"))
       else
         raise ConfigurationError, "Secure payment is not configured yet. Please try again later."
       end
     end
 
     def self.provider_mode
+      return "mock" if Configuration.poc_mode?
       return "test" if Rails.env.test? || fake_checkout_enabled?
 
       api_key = ENV.fetch("STRIPE_API_KEY", "")

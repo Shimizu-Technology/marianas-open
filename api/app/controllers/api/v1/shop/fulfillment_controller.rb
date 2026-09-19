@@ -10,7 +10,7 @@ module Api
 
           render json: {
             shipping_available: organization.inventory_locations.exists?(active: true, shipping_enabled: true) &&
-              organization.shipping_packages.exists?(active: true),
+              organization.shipping_packages.for_checkout.exists?,
             pickup_locations: locations.map { |location| pickup_payload(location) }
           }
         end

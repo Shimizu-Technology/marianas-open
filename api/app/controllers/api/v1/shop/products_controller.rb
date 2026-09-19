@@ -25,7 +25,7 @@ module Api
         end
 
         def storefront_products
-          Organization.order(:id).first!.products.published.includes(
+          Organization.order(:id).first!.products.published.where(demo_only: Commerce::Configuration.poc_mode?).includes(
             :product_collections,
             product_options: :product_option_values,
             product_variants: [ :product_option_values, :inventory_levels ],

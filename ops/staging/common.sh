@@ -38,6 +38,15 @@ load_staging_secrets() {
 }
 
 validate_staging_provider_credentials() {
+  case "${COMMERCE_POC_MODE:-false}" in
+    1|true|yes|on)
+      if [[ -n "${STRIPE_API_KEY:-}" || -n "${EASYPOST_API_KEY:-}" ]]; then
+        printf '%s\n' "Refusing to mix simulated staging commerce with provider keys." >&2
+        return 1
+      fi
+      ;;
+  esac
+
   if [[ -n "${STRIPE_API_KEY:-}" && "${STRIPE_API_KEY}" != *_test_* ]]; then
     printf '%s\n' "Refusing to deploy staging with a non-test Stripe key." >&2
     return 1

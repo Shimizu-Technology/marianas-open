@@ -1,4 +1,8 @@
 class Order < ApplicationRecord
+  def simulated?
+    self[:simulated] || stripe_checkout_session_id.to_s.start_with?("cs_test_dev_")
+  end
+
   STATUSES = %w[pending_payment paid payment_failed expired cancelled].freeze
   FULFILLMENT_METHODS = %w[shipping pickup].freeze
 

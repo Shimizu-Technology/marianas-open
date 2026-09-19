@@ -52,6 +52,9 @@ module Commerce
           order.lock!
           raise InvalidTransition, "Only paid delivery orders can purchase labels." unless order.paid? && order.fulfillment_method == "shipping"
           quote = order.shipping_quote or raise InvalidTransition, "This order does not have a shipping quote."
+          if quote.provider_shipment_id.start_with?("shp_dev_") != Shipping.fake_rates_enabled?
+            raise InvalidTransition, "A simulated shipment cannot purchase a real shipping label."
+          end
           record = order.shipment
           if record.nil?
             owns_attempt = true

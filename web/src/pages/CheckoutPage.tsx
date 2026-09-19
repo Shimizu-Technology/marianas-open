@@ -2,6 +2,7 @@ import { ArrowLeft, Check, Clock3, Loader2, MapPin, PackageCheck, ShieldCheck, S
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../contexts/CommerceContext'
+import CommerceDemoNotice from '../components/shop/CommerceDemoNotice'
 import { api, ApiError, type FulfillmentConfiguration, type ShippingAddress, type ShippingQuoteResponse, type ShippingRateQuote } from '../services/api'
 
 const inputClass = 'w-full rounded-xl border border-white/12 bg-black/20 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-text-muted focus:border-gold/60 focus:ring-2 focus:ring-gold/15 sm:text-sm'
@@ -21,7 +22,7 @@ function serviceName(value: string) {
 }
 
 export default function CheckoutPage() {
-  const { enabled, loading: commerceLoading, cartLines, rememberCheckout } = useCommerce()
+  const { enabled, pocMode, loading: commerceLoading, cartLines, rememberCheckout } = useCommerce()
   const [configuration, setConfiguration] = useState<FulfillmentConfiguration | null>(null)
   const [method, setMethod] = useState<'shipping' | 'pickup'>('shipping')
   const [address, setAddress] = useState<ShippingAddress>({ name: '', street1: '', street2: '', city: '', state: '', zip: '', country: 'US', phone: '', email: '' })
@@ -114,7 +115,7 @@ export default function CheckoutPage() {
       rememberCheckout(result.order_token)
       window.location.assign(result.checkout_url)
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Secure checkout could not be started.')
+      setError(cause instanceof Error ? cause.message : 'Checkout could not be started.')
       if (cause instanceof ApiError && cause.status < 500) setCheckoutKey(crypto.randomUUID())
       setStartingPayment(false)
     }
@@ -130,11 +131,12 @@ export default function CheckoutPage() {
     <div className="min-h-screen px-4 pb-24 pt-32 sm:px-6 sm:pt-36">
       <div className="mx-auto max-w-6xl">
         <Link to="/shop" className="inline-flex items-center gap-2 text-sm text-text-secondary transition hover:text-white"><ArrowLeft className="h-4 w-4" /> Continue shopping</Link>
+        {pocMode && <CommerceDemoNotice className="mt-6" />}
         <div className="mt-7 grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)] lg:items-start">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Checkout</p>
             <h1 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">How should we get it to you?</h1>
-            <p className="mt-3 max-w-2xl leading-7 text-text-secondary">Choose delivery or free pickup at Deal Depot. We’ll show the complete total before payment.</p>
+            <p className="mt-3 max-w-2xl leading-7 text-text-secondary">{pocMode ? 'Try delivery or pickup and see the full simulated total before completing a demo order.' : 'Choose delivery or free pickup at Deal Depot. We’ll show the complete total before payment.'}</p>
 
             {currencies.length > 1 && <div className="mt-6 rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-100">Items using different currencies must be purchased separately.</div>}
             {error && <div role="alert" className="mt-6 rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm leading-6 text-red-100">{error}</div>}
@@ -142,11 +144,11 @@ export default function CheckoutPage() {
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               <button type="button" disabled={!canShip} onClick={() => chooseMethod('shipping')} className={`rounded-2xl border p-5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${method === 'shipping' && canShip ? 'border-gold/50 bg-gold/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/25'} disabled:cursor-not-allowed disabled:opacity-40`}>
                 <span className="flex items-start justify-between gap-3"><Truck className="h-6 w-6 text-gold" /><span className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border ${method === 'shipping' && canShip ? 'border-gold bg-gold text-navy-900' : 'border-white/25'}`}>{method === 'shipping' && canShip && <Check className="h-3.5 w-3.5" />}</span></span>
-                <strong className="mt-4 block font-heading text-lg">Ship my order</strong><span className="mt-1 block text-sm leading-6 text-text-muted">Live carrier pricing for Guam, the U.S., and supported international destinations.</span>
+                <strong className="mt-4 block font-heading text-lg">Ship my order</strong><span className="mt-1 block text-sm leading-6 text-text-muted">{pocMode ? 'Example delivery pricing. No package will be shipped.' : 'Live carrier pricing for Guam, the U.S., and supported international destinations.'}</span>
               </button>
               <button type="button" disabled={!canPickup} onClick={() => chooseMethod('pickup')} className={`rounded-2xl border p-5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${method === 'pickup' && canPickup ? 'border-gold/50 bg-gold/[0.08]' : 'border-white/10 bg-white/[0.025] hover:border-white/25'} disabled:cursor-not-allowed disabled:opacity-40`}>
                 <span className="flex items-start justify-between gap-3"><Store className="h-6 w-6 text-gold" /><span className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border ${method === 'pickup' && canPickup ? 'border-gold bg-gold text-navy-900' : 'border-white/25'}`}>{method === 'pickup' && canPickup && <Check className="h-3.5 w-3.5" />}</span></span>
-                <strong className="mt-4 block font-heading text-lg">Pick up at Deal Depot</strong><span className="mt-1 block text-sm leading-6 text-text-muted">Free local pickup. We’ll let you know when the order is ready.</span>
+                <strong className="mt-4 block font-heading text-lg">Pick up at Deal Depot</strong><span className="mt-1 block text-sm leading-6 text-text-muted">{pocMode ? 'Walk through the pickup flow. No item will be reserved.' : 'Free local pickup. We’ll let you know when the order is ready.'}</span>
               </button>
             </div>
 
@@ -178,14 +180,14 @@ export default function CheckoutPage() {
 
             {method === 'shipping' && quote && (
               <section className="mt-6 rounded-2xl border border-white/10 bg-surface p-5 sm:p-7">
-                <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" /><div><h2 className="font-heading text-xl font-semibold">Verified delivery options</h2><p className="mt-1 text-sm leading-6 text-text-secondary">{formatAddress(quote.address).join(' · ')}</p></div></div>
+                <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" /><div><h2 className="font-heading text-xl font-semibold">{pocMode ? 'Example delivery options' : 'Verified delivery options'}</h2><p className="mt-1 text-sm leading-6 text-text-secondary">{formatAddress(quote.address).join(' · ')}</p></div></div>
                 {quote.messages.map(message => <p key={message} className="mt-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] p-3 text-xs leading-5 text-amber-100">{message}</p>)}
                 <div className="mt-5 space-y-3">{quote.rates.map(rate => (
                   <button type="button" key={rate.token} onClick={() => setSelectedRate(rate)} className={`flex w-full items-center justify-between gap-4 rounded-xl border p-4 text-left transition ${selectedRate?.token === rate.token ? 'border-gold/50 bg-gold/[0.08]' : 'border-white/10 bg-black/10 hover:border-white/25'}`}>
                     <span><strong className="block text-sm">{rate.carrier} {serviceName(rate.service)}</strong><span className="mt-1 flex items-center gap-1.5 text-xs text-text-muted"><Clock3 className="h-3.5 w-3.5" />{rate.delivery_days ? `Estimated ${rate.delivery_days} days` : 'Delivery estimate at purchase'}</span></span><strong className="font-heading text-lg">{money(rate.amount_cents, rate.currency)}</strong>
                   </button>
                 ))}</div>
-                <p className="mt-4 text-xs text-text-muted">Rates are held for 15 minutes and rechecked before payment.</p>
+                <p className="mt-4 text-xs text-text-muted">{pocMode ? 'These example rates are not carrier quotes and cannot be used to ship.' : 'Rates are held for 15 minutes and rechecked before payment.'}</p>
               </section>
             )}
           </div>
@@ -194,8 +196,8 @@ export default function CheckoutPage() {
             <h2 className="font-heading text-xl font-semibold">Order summary</h2>
             <div className="mt-5 space-y-4">{summaryRows.map(row => <div key={row.key} className="flex justify-between gap-4 text-sm"><div><p className="font-medium">{row.title}</p><p className="mt-1 text-xs text-text-muted">{row.detail}</p></div><span className="shrink-0">{money(row.amount, currency)}</span></div>)}</div>
             <div className="mt-5 space-y-3 border-t border-white/10 pt-5 text-sm"><div className="flex justify-between text-text-secondary"><span>Subtotal</span><span>{money(subtotal, currency)}</span></div><div className="flex justify-between text-text-secondary"><span>{method === 'pickup' ? 'Pickup' : 'Shipping'}</span><span>{method === 'pickup' ? 'Free' : selectedRate ? money(selectedRate.amount_cents, selectedRate.currency) : 'Calculated next'}</span></div><div className="flex justify-between border-t border-white/10 pt-4 font-heading text-xl font-semibold"><span>Total</span><span>{money(total, currency)}</span></div></div>
-            <button type="button" disabled={!canStartPayment} onClick={() => void startPayment()} className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-gold px-5 py-3.5 text-sm font-bold text-navy-900 transition hover:bg-gold-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/40">{startingPayment ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening secure checkout…</> : <>Continue to secure payment</>}</button>
-            <p className="mt-3 text-center text-xs leading-5 text-text-muted">Payment is securely handled by Stripe. Your items are held for 45 minutes once checkout begins.</p>
+            <button type="button" disabled={!canStartPayment} onClick={() => void startPayment()} className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-gold px-5 py-3.5 text-sm font-bold text-navy-900 transition hover:bg-gold-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/40">{startingPayment ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening checkout…</> : <>{pocMode ? 'Continue to demo checkout' : 'Continue to secure payment'}</>}</button>
+            <p className="mt-3 text-center text-xs leading-5 text-text-muted">{pocMode ? 'No payment details are collected. This creates a simulated order only.' : 'Payment is securely handled by Stripe. Your items are held for 45 minutes once checkout begins.'}</p>
           </aside>
         </div>
       </div>

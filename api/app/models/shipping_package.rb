@@ -9,6 +9,7 @@ class ShippingPackage < ApplicationRecord
     numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   scope :available, -> { where(active: true).order(:sort_order, :id) }
+  scope :for_checkout, -> { available.where(demo_only: Commerce::Configuration.poc_mode?) }
 
   def fits_weight?(contents_weight_grams)
     contents_weight_grams + empty_weight_grams <= max_weight_grams

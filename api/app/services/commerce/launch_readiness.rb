@@ -102,7 +102,7 @@ module Commerce
     end
 
     def stripe_key_check
-      configured = ENV["STRIPE_API_KEY"].present? || Payments.fake_checkout_enabled?
+      configured = ENV["STRIPE_API_KEY"].present?
       check("stripe_api_key", "Payments", "Stripe payments configured", configured,
         configured ? "A payment gateway is available." : "Add a restricted Stripe key for this environment.")
     end
@@ -115,8 +115,7 @@ module Commerce
     end
 
     def easy_post_key_check
-      configured = ENV["EASYPOST_API_KEY"].present? ||
-        (Rails.env.development? && ActiveModel::Type::Boolean.new.cast(ENV["EASYPOST_FAKE_RATES"]))
+      configured = ENV["EASYPOST_API_KEY"].present?
       check("easypost_api_key", "Shipping", "EasyPost rates configured", configured,
         configured ? "A shipping-rate gateway is available." : "Add an EasyPost key for this environment.", "/admin/commerce/shipping")
     end
@@ -177,14 +176,14 @@ module Commerce
     end
 
     def package_check
-      count = organization.shipping_packages.available.count
+      count = organization.shipping_packages.available.where(demo_only: false).count
       check("shipping_packages", "Shipping", "Measured package preset available", count.positive?,
         count.positive? ? "#{count} active package preset#{'s' unless count == 1} available." : "Add a physically measured package preset.",
         "/admin/commerce/shipping")
     end
 
     def catalog_check
-      products = organization.products.published
+      products = organization.products.published.where(demo_only: false)
       active_variants = ProductVariant.joins(:product).where(products: { id: products.select(:id) }, active: true).count
       okay = products.exists? && active_variants.positive?
       check("published_catalog", "Catalog", "Launch catalog published", okay,
@@ -251,7 +250,7 @@ module Commerce
     end
 
     def launch_variants
-      @launch_variants ||= ProductVariant.joins(:product).where(products: { organization_id: organization.id, active: true }, active: true)
+      @launch_variants ||= ProductVariant.joins(:product).where(products: { organization_id: organization.id, active: true, demo_only: false }, active: true)
     end
 
     def complete_address?(location)

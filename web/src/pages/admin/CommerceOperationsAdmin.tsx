@@ -2,6 +2,7 @@ import { AlertTriangle, ArrowRight, CircleDollarSign, Download, Loader2, Refresh
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, type CommerceOperationsSnapshot } from '../../services/api'
+import CommerceDemoNotice from '../../components/shop/CommerceDemoNotice'
 
 const money = (cents: number, currency: string) => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100)
 const label = (value: string) => value.replaceAll('_', ' ').replace(/\b\w/g, letter => letter.toUpperCase())
@@ -50,10 +51,10 @@ export default function CommerceOperationsAdmin() {
 
   const currency = snapshot?.summary.currency || 'USD'
   const cards = snapshot ? [
-    { label: 'Gross collected', value: money(snapshot.summary.gross_cents, currency), detail: `${snapshot.summary.paid_orders} paid orders`, tone: 'text-white' },
-    { label: 'Refunds issued', value: money(snapshot.summary.refunded_cents, currency), detail: 'Processed in this period', tone: 'text-amber-200' },
-    { label: 'Net activity', value: money(snapshot.summary.net_cents, currency), detail: 'Gross less issued refunds', tone: 'text-emerald-300' },
-    { label: 'Shipping collected', value: money(snapshot.summary.shipping_cents, currency), detail: `Tax ${money(snapshot.summary.tax_cents, currency)}`, tone: 'text-sky-200' },
+    { label: snapshot.simulated_preview ? 'Demo order total' : 'Gross collected', value: money(snapshot.summary.gross_cents, currency), detail: `${snapshot.summary.paid_orders} ${snapshot.simulated_preview ? 'simulated' : 'paid'} orders`, tone: 'text-white' },
+    { label: snapshot.simulated_preview ? 'Demo refunds' : 'Refunds issued', value: money(snapshot.summary.refunded_cents, currency), detail: 'Processed in this period', tone: 'text-amber-200' },
+    { label: snapshot.simulated_preview ? 'Demo net activity' : 'Net activity', value: money(snapshot.summary.net_cents, currency), detail: 'Order total less recorded refunds', tone: 'text-emerald-300' },
+    { label: snapshot.simulated_preview ? 'Demo shipping total' : 'Shipping collected', value: money(snapshot.summary.shipping_cents, currency), detail: `Tax ${money(snapshot.summary.tax_cents, currency)}`, tone: 'text-sky-200' },
   ] : []
 
   return <div>
@@ -63,6 +64,7 @@ export default function CommerceOperationsAdmin() {
     </div>
 
     {error && <div role="alert" className="mt-5 rounded-xl border border-red-400/25 bg-red-400/10 p-4 text-sm text-red-100">{error}</div>}
+    {snapshot?.simulated_preview && <CommerceDemoNotice className="mt-6" />}
     {loading ? <div className="flex h-64 items-center justify-center"><Loader2 className="h-7 w-7 animate-spin text-gold" /></div> : snapshot && <>
       <div className="mt-7 grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-2 xl:grid-cols-4">{cards.map(card => <div key={card.label} className="bg-surface p-5"><p className="text-[11px] font-bold uppercase tracking-[.15em] text-text-muted">{card.label}</p><p className={`mt-3 font-heading text-2xl font-bold ${card.tone}`}>{card.value}</p><p className="mt-1 text-xs text-text-muted">{card.detail}</p></div>)}</div>
 

@@ -15,6 +15,7 @@ module Commerce
     def as_json
       {
         period: period,
+        simulated_preview: Configuration.poc_mode?,
         summary: summary,
         reconciliation: reconciliation,
         alerts: alerts.first(100),
@@ -28,11 +29,11 @@ module Commerce
 
     def to_csv
       CSV.generate(headers: true) do |csv|
-        csv << %w[order_number paid_at customer_email fulfillment_method currency subtotal shipping tax total refunded net fulfillment_status]
+        csv << %w[order_number simulated paid_at customer_email fulfillment_method currency subtotal shipping tax total refunded net fulfillment_status]
         report_orders.each do |order|
           refunded = order.refunded_cents
           csv << [
-            csv_cell(order.number), order.paid_at&.iso8601, csv_cell(order.customer_email),
+            csv_cell(order.number), order.simulated?, order.paid_at&.iso8601, csv_cell(order.customer_email),
             csv_cell(order.fulfillment_method), csv_cell(order.currency),
             order.subtotal_cents, order.shipping_cents, order.tax_cents, order.total_cents, refunded,
             order.total_cents - refunded, csv_cell(order.fulfillment&.status || "unfulfilled")

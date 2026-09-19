@@ -8,6 +8,7 @@ module Commerce
       {
         number: order.number,
         status: order.status,
+        simulated: order.simulated?,
         fulfillment_method: order.fulfillment_method,
         customer_name: order.customer_name,
         customer_email: order.customer_email,
@@ -47,6 +48,7 @@ module Commerce
 
     def public_shipment
       shipment = order.shipment
+      return if order.simulated?
       return unless shipment&.purchased?
 
       shipment.slice(:status, :carrier, :service, :tracking_code, :tracking_url, :purchased_at, :last_tracking_update_at)
