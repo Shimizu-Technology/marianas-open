@@ -79,6 +79,8 @@ It rejects non-test Stripe and EasyPost keys before pulling or replacing any app
 
 Keep `ACTIVE_STORAGE_SERVICE=local` in the private `runtime.env` for the first deployment of S3-capable code. Once that deployment is healthy and the scoped AWS credentials are in Keychain, change it to `amazon` and redeploy the same reviewed staging SHA. The deployment script refuses to start S3 mode without both credentials. Verify a new admin upload, its image URL, and a customer-side image load before migrating older local blobs. Active Storage records each blob's service, so retaining both service configurations and the local volume allows old and new images to coexist. If reverting the default to `local`, keep the S3 credentials available for blobs already stored there.
 
+For the six named demo products, run `bundle exec rails runner script/migrate_demo_product_images_to_s3.rb` inside the staging API container first to inspect the dry-run count, then repeat with `--apply`. The script checks the staging environment and bucket, verifies both local and S3 checksums, changes each blob's storage pointer only after a successful copy, and retains its local original for rollback. It is idempotent for images already on S3.
+
 If the agent exits with status 127 and reports `docker: command not found`, reinstall the versioned plist. The LaunchAgent PATH must include `/Users/leonshimizu/.docker/bin`, where the Docker CLI is installed on the staging MacBook.
 
 ## Mac mini installation
