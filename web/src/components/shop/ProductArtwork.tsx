@@ -2,7 +2,7 @@ import { Package } from 'lucide-react'
 import { resolveMediaUrl } from '../../utils/images'
 import type { CommerceProduct, ProductImage } from '../../services/api'
 
-export default function ProductArtwork({ product, image = product.images[0], className = '', compact = false }: { product: CommerceProduct; image?: ProductImage; className?: string; compact?: boolean }) {
+export default function ProductArtwork({ product, image = product.images[0], className = '', compact = false }: { product: CommerceProduct; image?: ProductImage | null; className?: string; compact?: boolean }) {
   if (image) {
     return (
       <img

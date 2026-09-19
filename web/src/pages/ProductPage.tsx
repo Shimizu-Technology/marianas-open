@@ -34,7 +34,8 @@ export default function ProductPage() {
   }), [product, selected])
 
   useEffect(() => {
-    const image = product?.images.find(candidate => candidate.variant_id === selectedVariant?.id) || product?.images[0]
+    const image = product?.images.find(candidate => candidate.variant_id === selectedVariant?.id)
+      || product?.images.find(candidate => candidate.variant_id === null)
     setImageId(image?.id || null)
   }, [product?.id, selectedVariant?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -43,7 +44,7 @@ export default function ProductPage() {
 
   const unavailable = !selectedVariant || selectedVariant.available_quantity < 1
   const price = selectedVariant?.price_cents ?? firstVariant?.price_cents ?? 0
-  const shownImage = product.images.find(image => image.id === imageId) || product.images[0]
+  const shownImage = imageId === null ? null : product.images.find(image => image.id === imageId) || null
 
   const variantsForValue = (valueId: number) => product.variants.filter(variant => (
     variant.available_quantity > 0 && (variant.option_value_ids || []).includes(valueId)
