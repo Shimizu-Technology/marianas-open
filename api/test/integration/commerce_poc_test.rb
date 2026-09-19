@@ -1,6 +1,30 @@
 require "test_helper"
 
 class CommercePocTest < ActionDispatch::IntegrationTest
+  class RecordingGateway
+    attr_reader :session_calls, :refund_calls
+
+    def initialize
+      @session_calls = []
+      @refund_calls = []
+    end
+
+    def retrieve_checkout_session(id)
+      @session_calls << id
+      raise "A demo order reached the active payment gateway"
+    end
+
+    def create_refund(refund:)
+      @refund_calls << refund.id
+      raise "A demo refund reached the active payment gateway"
+    end
+
+    def retrieve_refund(id)
+      @refund_calls << id
+      raise "A demo refund reached the active payment gateway"
+    end
+  end
+
   setup do
     @previous_commerce = ENV["COMMERCE_ENABLED"]
     @previous_poc = ENV["COMMERCE_POC_MODE"]
@@ -249,6 +273,64 @@ class CommercePocTest < ActionDispatch::IntegrationTest
     assert_equal "error", order.order_refunds.last.status
   end
 
+  test "paid demo orders and refunds never reach Stripe reconciliation after POC mode ends" do
+    with_poc_mode do
+      post "/api/v1/shop/checkout-sessions", params: {
+        checkout: {
+          checkout_key: SecureRandom.uuid, fulfillment_method: "pickup",
+          cart: [ { variant_id: @variant.id, quantity: 1 } ], pickup_location_id: @location.id,
+          contact: { name: "Demo Customer", email: "demo@example.test" }
+        }
+      }, as: :json
+      assert_response :created
+      post "/api/v1/shop/orders/#{response.parsed_body.fetch('order_token')}/test-payment", as: :json
+      assert_response :success
+    end
+    order = Order.last
+    refund = order.order_refunds.create!(
+      provider_mode: "mock", request_key: SecureRandom.uuid, source: "admin", status: "error",
+      reason: "requested_by_customer", staff_note: "Demo retry guard", amount_cents: 500,
+      currency: "USD", requested_at: Time.current
+    )
+    ENV["STRIPE_API_KEY"] = "rk_test_not_called"
+    gateway = RecordingGateway.new
+
+    with_recording_gateway(gateway) { ReconcileCommerceJob.perform_now }
+    assert_empty gateway.session_calls
+    assert_empty gateway.refund_calls
+    assert_nil order.reload.last_reconciliation_attempt_at
+
+    assert_raises(Commerce::Payments::CheckoutError) do
+      Commerce::Payments::ReconcilePaidOrder.call(order:, gateway:)
+    end
+    assert_raises(Commerce::Payments::RefundError) do
+      Commerce::Refunds::Reconcile.call(refund:, gateway:)
+    end
+    assert_empty gateway.session_calls
+    assert_empty gateway.refund_calls
+    assert_equal "error", refund.reload.status
+
+    User.create!(clerk_id: "poc_staff", email: "pocstaff@example.test", role: "admin", invitation_status: "accepted")
+    with_verified_clerk do
+      with_recording_gateway(gateway) do
+        post "/api/v1/admin/orders/#{order.id}/reconciliation", headers: { "Authorization" => "Bearer test-token" }, as: :json
+        assert_response :bad_gateway
+        assert_match(/Demo orders cannot be reconciled/, response.parsed_body.fetch("error"))
+
+        post "/api/v1/admin/orders/#{order.id}/refunds/#{refund.id}/reconcile",
+          headers: { "Authorization" => "Bearer test-token" }, as: :json
+        assert_response :bad_gateway
+        assert_match(/different payment environment/, response.parsed_body.fetch("error"))
+      end
+    end
+    assert_empty gateway.session_calls
+    assert_empty gateway.refund_calls
+
+    snapshot = Commerce::OperationsSnapshot.new(organization: @organization).as_json
+    assert snapshot.fetch(:simulated_preview)
+    assert_equal 0, snapshot.dig(:reconciliation, :due)
+  end
+
   private
 
   def with_poc_mode
@@ -265,6 +347,22 @@ class CommercePocTest < ActionDispatch::IntegrationTest
     yield
   ensure
     Rails.define_singleton_method(:env, original)
+  end
+
+  def with_verified_clerk
+    original = ClerkAuth.method(:verify)
+    ClerkAuth.define_singleton_method(:verify) { |_token| { "sub" => "poc_staff", "email" => "pocstaff@example.test" } }
+    yield
+  ensure
+    ClerkAuth.define_singleton_method(:verify, original)
+  end
+
+  def with_recording_gateway(gateway)
+    original = Commerce::Payments.method(:gateway)
+    Commerce::Payments.define_singleton_method(:gateway) { gateway }
+    yield
+  ensure
+    Commerce::Payments.define_singleton_method(:gateway, original)
   end
 
   def address

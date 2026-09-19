@@ -15,7 +15,7 @@ module Commerce
     def as_json
       {
         period: period,
-        simulated_preview: Configuration.poc_mode?,
+        simulated_preview: paid_orders_in_period.where(simulated: true).exists?,
         summary: summary,
         reconciliation: reconciliation,
         alerts: alerts.first(100),

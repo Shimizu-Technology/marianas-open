@@ -38,7 +38,9 @@ load_staging_secrets() {
 }
 
 validate_staging_provider_credentials() {
-  case "${COMMERCE_POC_MODE:-false}" in
+  local poc_mode
+  poc_mode="$(printf '%s' "${COMMERCE_POC_MODE:-false}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | tr '[:upper:]' '[:lower:]')"
+  case "${poc_mode}" in
     1|true|yes|on)
       if [[ -n "${STRIPE_API_KEY:-}" || -n "${EASYPOST_API_KEY:-}" ]]; then
         printf '%s\n' "Refusing to mix simulated staging commerce with provider keys." >&2

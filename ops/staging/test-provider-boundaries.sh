@@ -18,6 +18,13 @@ if validate_staging_provider_credentials 2>/dev/null; then
 fi
 COMMERCE_POC_MODE=false
 
+COMMERCE_POC_MODE=" TRUE "
+if validate_staging_provider_credentials 2>/dev/null; then
+  printf '%s\n' "Expected whitespace-padded uppercase POC mode to reject provider keys." >&2
+  exit 1
+fi
+COMMERCE_POC_MODE=false
+
 COMMERCE_POC_MODE=1
 if validate_staging_provider_credentials 2>/dev/null; then
   printf '%s\n' "Expected provider keys to be rejected for numeric POC mode too." >&2
