@@ -39,6 +39,23 @@ class CommerceDemoClassificationConcurrencyTest < ActionDispatch::IntegrationTes
   end
 
   test "an admin cannot reclassify a product while checkout commits its first order item" do
+    assert_reclassification_waits_for_checkout do
+      Commerce::SaveProduct.call(
+        organization: @organization,
+        attributes: { id: @product.id, demo_only: true, active: true }
+      )
+    end
+  end
+
+  test "direct product updates also wait for the checkout product lock" do
+    assert_reclassification_waits_for_checkout do
+      Product.find(@product.id).update!(demo_only: true)
+    end
+  end
+
+  private
+
+  def assert_reclassification_waits_for_checkout
     item_created = Queue.new
     finish_checkout = Queue.new
     gateway = Object.new
@@ -70,10 +87,7 @@ class CommerceDemoClassificationConcurrencyTest < ActionDispatch::IntegrationTes
       admin_thread = Thread.new do
         admin_started << true
         begin
-          Commerce::SaveProduct.call(
-            organization: @organization,
-            attributes: { id: @product.id, demo_only: true, active: true }
-          )
+          yield
         rescue ActiveRecord::RecordInvalid => e
           e
         end
