@@ -17,7 +17,7 @@ demo_product_names = [
 abort "Staging only" unless ENV["COMMERCE_DEPLOYMENT_ENV"] == "staging"
 abort "S3 must be active" unless ENV["ACTIVE_STORAGE_SERVICE"] == "amazon"
 abort "Unexpected bucket" unless ENV["AWS_S3_BUCKET"] == expected_bucket
-abort "Use no arguments for dry run or --apply to copy" unless ARGV.empty? || ARGV == ["--apply"]
+abort "Use no arguments for dry run or --apply to copy" unless ARGV.empty? || ARGV == [ "--apply" ]
 
 products = Product.includes(product_images: { image_attachment: :blob }).where(name: demo_product_names).to_a
 abort "Expected all six named demo products" unless products.length == demo_product_names.length
@@ -28,7 +28,7 @@ abort "Unexpected current image service" unless images.all? { |image| %w[local a
 
 local_count = images.count { |image| image.image.blob.service_name == "local" }
 puts "Demo product images: #{images.length}; local to copy: #{local_count}; already S3: #{images.length - local_count}"
-exit unless ARGV == ["--apply"]
+exit unless ARGV == [ "--apply" ]
 
 s3 = ActiveStorage::Blob.services.fetch("amazon")
 images.each do |image|
