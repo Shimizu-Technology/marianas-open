@@ -110,6 +110,7 @@ class CommercePocTest < ActionDispatch::IntegrationTest
       assert order.simulated?
       assert_equal "paid", order.status
       assert_equal true, response.parsed_body.dig("order", "simulated")
+      assert_equal 0, Commerce::OperationsSnapshot.new(organization: @organization).as_json.dig(:reconciliation, :due)
 
       Commerce::Fulfillment::Transition.call(order:, status: "preparing", actor: nil)
       shipment = Commerce::Fulfillment::PurchaseLabel.call(order:)

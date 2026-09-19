@@ -74,7 +74,7 @@ module Commerce
     end
 
     def reconciliation
-      paid = organization.orders.where(status: "paid")
+      paid = organization.orders.where(status: "paid", simulated: false)
       {
         current: paid.where(last_reconciled_at: 6.hours.ago..).count,
         due: paid.where(last_reconciled_at: nil).or(paid.where(last_reconciled_at: ...6.hours.ago)).count,
