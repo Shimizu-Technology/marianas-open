@@ -3,7 +3,7 @@ module Api
     module Admin
       class CommerceOperationsController < ApplicationController
         include ClerkAuthenticatable
-        before_action :require_staff!
+        before_action -> { require_permission!(:commerce_reports_view) }
 
         def show
           render json: Commerce::OperationsSnapshot.new(organization:, from: params[:from], to: params[:to]).as_json

@@ -3,7 +3,7 @@ module Api
     module Admin
       class CommerceLaunchReadinessController < ApplicationController
         include ClerkAuthenticatable
-        before_action :require_staff!
+        before_action -> { require_permission!(:commerce_launch_manage) }
 
         def show
           render json: readiness.as_json

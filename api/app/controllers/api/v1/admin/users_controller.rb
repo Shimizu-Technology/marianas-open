@@ -47,9 +47,22 @@ module Api
 
         # PATCH /api/v1/admin/users/:id
         def update
-          if @user.update(user_params)
+          result = User.transaction do
+            admins = User.where(role: "admin").order(:id).lock.to_a if user_params[:role].present?
+            @user.reload if admins
+            if @user.admin? && user_params[:role].present? && user_params[:role] != "admin" && admins.length <= 1
+              :last_admin
+            else
+              @user.update(user_params) ? :updated : :invalid
+            end
+          end
+
+          case result
+          when :updated
             render json: { user: user_json(@user) }
-          else
+          when :last_admin
+            render json: { error: "Cannot remove the last admin user" }, status: :unprocessable_entity
+          when :invalid
             render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
           end
         end
@@ -60,8 +73,21 @@ module Api
             return render json: { error: "Cannot delete yourself" }, status: :unprocessable_entity
           end
 
-          if @user.admin? && User.where(role: "admin").count <= 1
+          result = User.transaction do
+            admins = User.where(role: "admin").order(:id).lock.to_a
+            @user.reload
+            if @user.admin? && admins.length <= 1
+              :last_admin
+            else
+              @user.destroy ? :deleted : :invalid
+            end
+          end
+
+          if result == :last_admin
             return render json: { error: "Cannot delete the last admin user" }, status: :unprocessable_entity
+          end
+          if result == :invalid
+            return render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
           end
 
           if @user.clerk_invitation_id.present? && @user.invitation_pending?
@@ -69,7 +95,6 @@ module Api
             service.revoke_invitation(@user.clerk_invitation_id) if service.configured?
           end
 
-          @user.destroy
           head :no_content
         end
 
@@ -114,8 +139,8 @@ module Api
 
         def invite_params
           permitted = params.permit(:email, :role)
-          unless %w[admin staff].include?(permitted[:role])
-            permitted[:role] = "staff"
+          unless %w[admin events_admin merchandise_admin fulfillment_staff].include?(permitted[:role])
+            permitted[:role] = "events_admin"
           end
           permitted
         end
@@ -161,6 +186,7 @@ module Api
             role: user.role,
             is_admin: user.is_admin,
             is_staff: user.is_staff,
+            permissions: user.permissions,
             invitation_status: user.invitation_status,
             invitation_pending: user.invitation_pending?,
             invited_at: user.invited_at,

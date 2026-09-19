@@ -4,7 +4,7 @@ module Api
       class ShippingPackagesController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action -> { require_permission!(:commerce_settings_manage) }
         before_action :set_package, only: %i[update destroy]
 
         def index

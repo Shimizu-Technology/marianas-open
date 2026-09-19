@@ -4,9 +4,9 @@ module Api
       class EventsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
-        before_action :complete_past_events, only: [:index]
-        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :upload_ticket_banner, :remove_ticket_banner, :import_results_preview, :import_results, :retranslate, :clone]
+        before_action -> { require_permission!(:events_manage) }
+        before_action :complete_past_events, only: [ :index ]
+        before_action :set_event, only: [ :show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :upload_ticket_banner, :remove_ticket_banner, :import_results_preview, :import_results, :retranslate, :clone ]
 
         def index
           org = Organization.first
@@ -179,7 +179,7 @@ module Api
               new_acc.translations = {}
               new_acc.translation_status = "untranslated"
               new_acc.save!
-              acc_blobs << [new_acc, acc.image.blob] if acc.image.attached?
+              acc_blobs << [ new_acc, acc.image.blob ] if acc.image.attached?
             end
           end
 
@@ -204,7 +204,7 @@ module Api
         rescue ActiveRecord::RecordInvalid => e
           render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
         rescue ActiveRecord::RecordNotUnique
-          render json: { errors: ["An event with that slug already exists. Please try again."] }, status: :conflict
+          render json: { errors: [ "An event with that slug already exists. Please try again." ] }, status: :conflict
         end
 
         private
@@ -232,15 +232,15 @@ module Api
             :tagline, :schedule_note, :travel_description, :visa_description,
             :prize_title, :prize_description,
             asjjf_event_ids: [],
-            ticket_options: [:label, :description, :early_bird_price, :regular_price],
-            venue_highlights: [:title, :description],
-            registration_steps: [:title, :description, :url, :link_label],
-            registration_fee_sections: [:title, { rows: [:deadline, :fee, :option] }],
-            registration_info_items: [:label, :value],
-            travel_items: [:key, :kind, :title, :description, :value, :code, :url, :link_label],
-            visa_items: [:title, :description],
-            event_schedule_items_attributes: [:id, :time, :description, :sort_order, :_destroy],
-            prize_categories_attributes: [:id, :name, :amount, :sort_order, :_destroy]
+            ticket_options: [ :label, :description, :early_bird_price, :regular_price ],
+            venue_highlights: [ :title, :description ],
+            registration_steps: [ :title, :description, :url, :link_label ],
+            registration_fee_sections: [ :title, { rows: [ :deadline, :fee, :option ] } ],
+            registration_info_items: [ :label, :value ],
+            travel_items: [ :key, :kind, :title, :description, :value, :code, :url, :link_label ],
+            visa_items: [ :title, :description ],
+            event_schedule_items_attributes: [ :id, :time, :description, :sort_order, :_destroy ],
+            prize_categories_attributes: [ :id, :name, :amount, :sort_order, :_destroy ]
           )
         end
 

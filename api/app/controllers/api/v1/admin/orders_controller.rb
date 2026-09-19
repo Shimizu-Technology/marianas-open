@@ -4,7 +4,7 @@ module Api
       class OrdersController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action -> { require_permission!(:commerce_orders_view) }
         before_action :set_order, only: :show
 
         def index
@@ -37,7 +37,7 @@ module Api
         end
 
         def present(order)
-          Commerce::AdminOrderPresenter.new(order).as_json
+          Commerce::AdminOrderPresenter.new(order, financial: current_user.can?(:commerce_refunds_manage)).as_json
         end
       end
     end

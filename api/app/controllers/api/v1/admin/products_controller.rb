@@ -4,7 +4,7 @@ module Api
       class ProductsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action -> { require_permission!(:commerce_catalog_manage) }
         before_action :set_product, only: %i[show update destroy]
 
         def index

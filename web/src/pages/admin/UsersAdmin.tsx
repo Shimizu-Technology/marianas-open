@@ -4,8 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { UserProfile } from '../../services/api'
 
-const INVITE_ROLES = ['admin', 'staff'] as const
-const EDIT_ROLES = ['admin', 'staff', 'viewer'] as const
+const INVITE_ROLES = ['events_admin', 'merchandise_admin', 'fulfillment_staff', 'admin'] as const
+const EDIT_ROLES = ['admin', 'events_admin', 'merchandise_admin', 'fulfillment_staff', 'staff', 'viewer'] as const
+const roleLabels: Record<UserProfile['role'], string> = {
+  admin: 'Full admin', staff: 'Legacy event staff', events_admin: 'Events admin',
+  merchandise_admin: 'Merchandise admin', fulfillment_staff: 'Deal Depot fulfillment', viewer: 'Viewer',
+}
 
 function StatusBadge({ user }: { user: UserProfile }) {
   if (user.invitation_pending) {
@@ -28,7 +32,7 @@ export default function UsersAdmin() {
   const [users, setUsers] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<number | 'invite' | null>(null)
-  const [inviteForm, setInviteForm] = useState({ email: '', role: 'staff' as string })
+  const [inviteForm, setInviteForm] = useState({ email: '', role: 'events_admin' as string })
   const [editRole, setEditRole] = useState('')
   const [saving, setSaving] = useState(false)
   const [resending, setResending] = useState<number | null>(null)
@@ -62,7 +66,7 @@ export default function UsersAdmin() {
         setSuccess(`User created, but invitation email failed: ${res.invitation_error || 'Unknown error'}. You can resend it.`)
       }
       setEditing(null)
-      setInviteForm({ email: '', role: 'staff' })
+      setInviteForm({ email: '', role: 'events_admin' })
       await load()
       setTimeout(() => setSuccess(''), 5000)
     } catch (err) {
@@ -148,8 +152,10 @@ export default function UsersAdmin() {
       <div className="mb-4 p-4 bg-surface border border-white/5 text-xs text-text-secondary leading-relaxed">
         <p>
           <strong className="text-text-primary">Manage admin and staff access.</strong>{' '}
-          <strong>Admins</strong> have full access to all settings and configurations.{' '}
-          <strong>Staff</strong> can manage events, content, and competitors but cannot manage users or organization settings.{' '}
+          <strong>Full admins</strong> manage everything and invite users.{' '}
+          <strong>Events admins</strong> manage tournament content only.{' '}
+          <strong>Merchandise admins</strong> manage products, orders, shipping settings, and refunds.{' '}
+          <strong>Deal Depot fulfillment</strong> can prepare orders, buy labels, and update inventory, but cannot access events or refunds.{' '}
           Invited users receive an email to set up their account.
         </p>
       </div>
@@ -198,7 +204,7 @@ export default function UsersAdmin() {
                   onChange={e => setInviteForm(prev => ({ ...prev, role: e.target.value }))}
                   className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none"
                 >
-                  {INVITE_ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                  {INVITE_ROLES.map(r => <option key={r} value={r}>{roleLabels[r]}</option>)}
                 </select>
               </div>
             </div>
@@ -252,7 +258,7 @@ export default function UsersAdmin() {
                               onChange={e => setEditRole(e.target.value)}
                               className="bg-white/[0.03] border border-white/10 px-2 py-1 text-xs text-text-primary focus:border-gold/40 focus:outline-none"
                             >
-                              {EDIT_ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                              {EDIT_ROLES.map(r => <option key={r} value={r}>{roleLabels[r]}</option>)}
                             </select>
                             <button
                               onClick={() => handleUpdateRole(user.id)}
@@ -271,7 +277,7 @@ export default function UsersAdmin() {
                             user.role === 'staff' ? 'bg-blue-500/10 text-blue-400' :
                             'bg-white/5 text-text-muted'
                           }`}>
-                            {user.role}
+                            {roleLabels[user.role]}
                           </span>
                         )}
                       </td>
@@ -342,7 +348,7 @@ export default function UsersAdmin() {
                             onChange={e => setEditRole(e.target.value)}
                             className="bg-white/[0.03] border border-white/10 px-2 py-1 text-xs text-text-primary focus:border-gold/40 focus:outline-none"
                           >
-                            {EDIT_ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                            {EDIT_ROLES.map(r => <option key={r} value={r}>{roleLabels[r]}</option>)}
                           </select>
                           <button
                             onClick={() => handleUpdateRole(user.id)}
@@ -361,7 +367,7 @@ export default function UsersAdmin() {
                           user.role === 'staff' ? 'bg-blue-500/10 text-blue-400' :
                           'bg-white/5 text-text-muted'
                         }`}>
-                          {user.role}
+                          {roleLabels[user.role]}
                         </span>
                       )}
                       <StatusBadge user={user} />

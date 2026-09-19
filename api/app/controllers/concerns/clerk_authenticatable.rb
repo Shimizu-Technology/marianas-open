@@ -78,6 +78,13 @@ module ClerkAuthenticatable
     end
   end
 
+  def require_permission!(permission)
+    authenticate_user! unless @current_user
+    return if performed?
+
+    render_forbidden("Permission required: #{permission}") unless @current_user&.can?(permission)
+  end
+
   def find_or_create_user(clerk_id:, email:, first_name:, last_name:)
     return nil if clerk_id.blank?
 

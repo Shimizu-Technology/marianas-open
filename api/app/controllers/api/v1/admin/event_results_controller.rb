@@ -4,13 +4,13 @@ module Api
       class EventResultsController < ApplicationController
         include ClerkAuthenticatable
         before_action :authenticate_user!
-        before_action :require_staff!
+        before_action -> { require_permission!(:events_manage) }
         before_action :set_event
-        before_action :set_result, only: [:update, :destroy]
+        before_action :set_result, only: [ :update, :destroy ]
 
         def index
           page = (params[:page] || 1).to_i
-          per_page = [(params[:per_page] || 100).to_i, 200].min
+          per_page = [ (params[:per_page] || 100).to_i, 200 ].min
 
           base_scope = @event.event_results.order(:division, :placement)
           base_scope = base_scope.where("competitor_name ILIKE :q OR event_results.academy ILIKE :q", q: "%#{params[:search]}%") if params[:search].present?

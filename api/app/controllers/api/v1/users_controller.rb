@@ -24,6 +24,7 @@ module Api
           role: user.role,
           is_admin: user.is_admin,
           is_staff: user.is_staff,
+          permissions: user.permissions,
           created_at: user.created_at,
           updated_at: user.updated_at
         }

@@ -4,9 +4,9 @@ module Api
       class EventGalleryUploadBatchesController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action -> { require_permission!(:events_manage) }
         before_action :set_event
-        before_action :set_batch, only: [:show, :update, :destroy]
+        before_action :set_batch, only: [ :show, :update, :destroy ]
 
         def index
           batches = @event.event_gallery_upload_batches.recent.limit(25)

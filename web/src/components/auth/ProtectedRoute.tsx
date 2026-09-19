@@ -6,11 +6,12 @@ import LoadingSpinner from '../LoadingSpinner'
 interface ProtectedRouteProps {
   children: React.ReactNode
   requiredRole?: 'admin' | 'staff'
+  requiredPermission?: string
 }
 
 const ClerkProtectedContent = lazy(() => import('./ClerkProtectedContent'))
 
-export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, requiredRole, requiredPermission }: ProtectedRouteProps) {
   const { isClerkEnabled } = useAuthContext()
 
   if (!isClerkEnabled) {
@@ -35,7 +36,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
 
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <ClerkProtectedContent requiredRole={requiredRole}>
+      <ClerkProtectedContent requiredRole={requiredRole} requiredPermission={requiredPermission}>
         {children}
       </ClerkProtectedContent>
     </Suspense>

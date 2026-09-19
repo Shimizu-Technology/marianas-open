@@ -4,9 +4,9 @@ module Api
       class EventAccommodationsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action -> { require_permission!(:events_manage) }
         before_action :set_event
-        before_action :set_accommodation, only: [:update, :destroy, :upload]
+        before_action :set_accommodation, only: [ :update, :destroy, :upload ]
 
         def index
           accommodations = @event.event_accommodations.sorted

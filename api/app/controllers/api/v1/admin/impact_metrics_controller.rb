@@ -3,8 +3,8 @@ module Api
     module Admin
       class ImpactMetricsController < ApplicationController
         include ClerkAuthenticatable
-        before_action :require_staff!
-        before_action :set_metric, only: [:show, :update, :destroy]
+        before_action -> { require_permission!(:events_manage) }
+        before_action :set_metric, only: [ :show, :update, :destroy ]
 
         def index
           metrics = ImpactMetric.order(:sort_order, :created_at)

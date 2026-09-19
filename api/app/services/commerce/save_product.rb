@@ -116,6 +116,9 @@ module Commerce
       if variants.any? { |variant| variant.allow_shipping? && variant.weight_grams.blank? }
         raise InvalidCatalog, "Every shippable active variant needs a weight before the product can be published"
       end
+      unless product.product_images.any? { |image| image.image.attached? }
+        raise InvalidCatalog, "Upload at least one product image before publishing"
+      end
     end
   end
 end
