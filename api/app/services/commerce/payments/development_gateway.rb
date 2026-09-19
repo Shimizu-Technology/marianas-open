@@ -2,10 +2,9 @@ module Commerce
   module Payments
     class DevelopmentGateway
       def create_checkout_session(order:)
-        frontend = ENV.fetch("PUBLIC_FRONTEND_URL", "http://localhost:5173").delete_suffix("/")
         {
           id: "cs_test_dev_#{SecureRandom.hex(12)}",
-          url: "#{frontend}/shop/orders/#{order.public_token}?test_checkout=1"
+          url: "/shop/orders/#{order.public_token}?test_checkout=1"
         }
       end
 
@@ -19,7 +18,7 @@ module Commerce
 
       def create_refund(refund:)
         {
-          id: "re_test_dev_#{refund.id}", mode: "test", status: "succeeded", amount_cents: refund.amount_cents,
+          id: "re_test_dev_#{refund.id}", mode: refund.provider_mode, status: "succeeded", amount_cents: refund.amount_cents,
           currency: refund.currency, payment_intent_id: refund.order.stripe_payment_intent_id,
           balance_transaction_id: "txn_test_dev_#{refund.id}", failure_reason: nil
         }

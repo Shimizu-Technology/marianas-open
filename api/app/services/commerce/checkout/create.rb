@@ -30,13 +30,30 @@ module Commerce
       attr_reader :organization, :attributes, :gateway
 
       def find_or_create_reserved_order!
-        organization.orders.find_by(checkout_key: attributes[:checkout_key]) || create_reserved_order!
+        existing = organization.orders.find_by(checkout_key: attributes[:checkout_key])
+        if existing
+          verify_order_environment!(existing)
+          return existing
+        end
+
+        create_reserved_order!
       rescue ActiveRecord::RecordNotUnique
-        organization.orders.find_by!(checkout_key: attributes[:checkout_key])
+        existing = organization.orders.find_by!(checkout_key: attributes[:checkout_key])
+        verify_order_environment!(existing)
+        existing
       rescue ActiveRecord::RecordInvalid => e
         raise unless e.record.is_a?(Order) && e.record.errors.added?(:checkout_key, :taken)
 
-        organization.orders.find_by!(checkout_key: attributes[:checkout_key])
+        existing = organization.orders.find_by!(checkout_key: attributes[:checkout_key])
+        verify_order_environment!(existing)
+        existing
+      end
+
+      def verify_order_environment!(order)
+        if order.order_items.includes(:product).any? { |item| item.product.demo_only? != Configuration.poc_mode? } ||
+            order.simulated? != Payments.fake_checkout_enabled?
+          raise Payments::CheckoutError, "This checkout belongs to a different shop environment. Start a new checkout."
+        end
       end
 
       def ensure_retryable!(order)
@@ -74,6 +91,9 @@ module Commerce
           fulfillment_method:,
           inventory_location: location
         )
+        if cart.lines.any? { |line| line.variant.product.demo_only? != Configuration.poc_mode? }
+          raise Shipping::Error, "This item is not available in the current shop preview."
+        end
         verify_quote!(quote:, cart:, address:) if fulfillment_method == "shipping"
         contact = normalized_contact(address)
         expires_at = Payments::CHECKOUT_LIFETIME.from_now
@@ -83,6 +103,7 @@ module Commerce
             inventory_location: location,
             shipping_quote: quote,
             checkout_key: attributes.fetch(:checkout_key),
+            simulated: Payments.fake_checkout_enabled?,
             fulfillment_method:,
             customer_name: contact.fetch(:name),
             customer_email: contact.fetch(:email),
@@ -123,6 +144,9 @@ module Commerce
       end
 
       def verify_quote!(quote:, cart:, address:)
+        if quote.provider_shipment_id.start_with?("shp_dev_") != Shipping.fake_rates_enabled?
+          raise Shipping::Error, "This delivery rate belongs to a different shop environment. Refresh the rates."
+        end
         raise Shipping::Error, "Your bag changed. Please refresh the delivery rates." unless quote.cart_digest == cart.digest
         return if quote.destination_digest == Shipping::Address.digest(address)
 

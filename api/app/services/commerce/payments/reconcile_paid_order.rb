@@ -1,7 +1,7 @@
 module Commerce
   module Payments
     class ReconcilePaidOrder
-      def self.call(order:, gateway: Payments.gateway)
+      def self.call(order:, gateway: nil)
         new(order:, gateway:).call
       end
 
@@ -11,16 +11,18 @@ module Commerce
       end
 
       def call
+        raise CheckoutError, "Demo orders cannot be reconciled with Stripe." if order.simulated?
+
         record_attempt!
         raise CheckoutError, "Only paid orders can be reconciled." unless order.paid?
         raise CheckoutError, "Order is missing its Stripe Checkout Session." if order.stripe_checkout_session_id.blank?
 
-        session = gateway.retrieve_checkout_session(order.stripe_checkout_session_id)
+        session = (gateway || Payments.gateway).retrieve_checkout_session(order.stripe_checkout_session_id)
         verify!(session)
         order.update!(last_reconciled_at: Time.current, payment_error: nil)
         order
       rescue StandardError => e
-        order.update_columns(payment_error: e.message.to_s.first(2_000), updated_at: Time.current) if order&.persisted?
+        order.update_columns(payment_error: e.message.to_s.first(2_000), updated_at: Time.current) if order&.persisted? && !order.simulated?
         raise
       end
 

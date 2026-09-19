@@ -3,13 +3,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SEO from '../components/SEO'
 import ProductArtwork from '../components/shop/ProductArtwork'
+import CommerceDemoNotice from '../components/shop/CommerceDemoNotice'
 import { useCommerce } from '../contexts/CommerceContext'
 
 const money = (cents: number, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100)
 
 export default function ProductPage() {
   const { slug } = useParams()
-  const { products, loading, enabled, addToCart } = useCommerce()
+  const { products, loading, enabled, pocMode, addToCart } = useCommerce()
   const product = products.find(candidate => candidate.slug === slug)
   const firstVariant = product?.variants.find(variant => variant.available_quantity > 0) || product?.variants[0]
   const [selected, setSelected] = useState<Record<number, number>>({})
@@ -62,6 +63,7 @@ export default function ProductPage() {
       <SEO title={product.name} description={product.description || `Shop ${product.name} from the official Marianas Open collection.`} />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-14">
         <Link to="/shop" className="mb-7 inline-flex items-center gap-2 text-sm text-text-secondary transition hover:text-white"><ArrowLeft className="h-4 w-4" /> Back to shop</Link>
+        {pocMode && <CommerceDemoNotice className="mb-8" />}
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.18fr)_minmax(360px,.82fr)] lg:gap-16">
           <div className="aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 bg-surface lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)]"><ProductArtwork product={product} /></div>
           <section className="lg:py-5">
@@ -90,9 +92,9 @@ export default function ProductPage() {
             {selectedVariant && selectedVariant.available_quantity > 0 && selectedVariant.available_quantity <= 5 && <p className="mt-3 text-center text-xs font-semibold text-amber-300">Only {selectedVariant.available_quantity} left</p>}
 
             <div className="mt-9 divide-y divide-white/10 border-y border-white/10">{[
-              product.shippable && { icon: Truck, title: 'Live shipping rates', text: 'Enter your address at checkout to compare available delivery services.' },
-              product.pickup_enabled && { icon: MapPin, title: 'Free Deal Depot pickup', text: 'Choose local pickup at checkout and wait for the ready email.' },
-              { icon: ShieldCheck, title: 'Secure Stripe checkout', text: 'Pay by card through Stripe after reviewing the complete order total.' },
+              product.shippable && { icon: Truck, title: pocMode ? 'Example shipping rates' : 'Live shipping rates', text: pocMode ? 'Enter an address to see simulated delivery options and totals.' : 'Enter your address at checkout to compare available delivery services.' },
+              product.pickup_enabled && { icon: MapPin, title: pocMode ? 'Simulated Deal Depot pickup' : 'Free Deal Depot pickup', text: pocMode ? 'Try the pickup flow; no merchandise will be held.' : 'Choose local pickup at checkout and wait for the ready email.' },
+              { icon: ShieldCheck, title: pocMode ? 'Simulated checkout' : 'Secure Stripe checkout', text: pocMode ? 'No card is needed and no charge will occur.' : 'Pay by card through Stripe after reviewing the complete order total.' },
             ].filter(Boolean).map(item => item && <div key={item.title} className="flex gap-4 py-4"><item.icon className="mt-0.5 h-5 w-5 shrink-0 text-gold" /><div><h3 className="text-sm font-semibold">{item.title}</h3><p className="mt-1 text-xs leading-5 text-text-muted">{item.text}</p></div><Check className="ml-auto h-4 w-4 text-white/20" /></div>)}</div>
           </section>
         </div>

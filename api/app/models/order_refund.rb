@@ -11,7 +11,7 @@ class OrderRefund < ApplicationRecord
   validates :request_key, uniqueness: true
   validates :provider_refund_id, uniqueness: { scope: :provider }, allow_nil: true
   validates :status, inclusion: { in: STATUSES }
-  validates :provider_mode, inclusion: { in: %w[test live] }
+  validates :provider_mode, inclusion: { in: %w[mock test live] }
   validates :reason, inclusion: { in: REASONS }
   validates :source, inclusion: { in: SOURCES }
   validates :amount_cents, numericality: { only_integer: true, greater_than: 0 }

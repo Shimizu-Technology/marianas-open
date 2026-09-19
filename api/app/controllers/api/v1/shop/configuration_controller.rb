@@ -5,7 +5,8 @@ module Api
         def show
           render json: {
             enabled: Commerce::Configuration.enabled?,
-            fake_checkout_enabled: Commerce::Payments.fake_checkout_enabled?
+            fake_checkout_enabled: Commerce::Payments.fake_checkout_enabled?,
+            poc_mode: Commerce::Configuration.poc_mode?
           }
         end
       end

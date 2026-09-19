@@ -20,6 +20,7 @@ module Commerce
       end
 
       def call
+        ensure_provider_environment!
         refund = prepare
         return refund if %w[pending requires_action succeeded].include?(refund.status)
 
@@ -33,6 +34,12 @@ module Commerce
       private
 
       attr_reader :order, :amount_cents, :reason, :staff_note, :actor, :request_key, :gateway
+
+      def ensure_provider_environment!
+        return if order.simulated? == Payments.fake_checkout_enabled?
+
+        raise InvalidRefund, "This order belongs to a different payment environment."
+      end
 
       def prepare
         OrderRefund.transaction do

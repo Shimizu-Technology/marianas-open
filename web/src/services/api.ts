@@ -873,6 +873,7 @@ export interface CheckoutSessionResponse {
 export interface CommerceOrder {
   number: string;
   status: 'pending_payment' | 'paid' | 'payment_failed' | 'expired' | 'cancelled';
+  simulated: boolean;
   fulfillment_method: 'shipping' | 'pickup';
   customer_name: string;
   customer_email: string;
@@ -965,6 +966,7 @@ export interface AdminCommerceOrder extends Omit<CommerceOrder, 'shipment'> {
 
 export interface CommerceOperationsSnapshot {
   period: { from: string; to: string };
+  simulated_preview: boolean;
   summary: {
     paid_orders: number;
     gross_cents: number;
@@ -1215,7 +1217,7 @@ export const api = {
   },
   getImpactData: () => fetchApi<ImpactData>('/api/v1/impact'),
   getImpactStatus: () => fetchApi<{ visible: boolean }>('/api/v1/impact/status'),
-  getShopConfiguration: () => fetchApi<{ enabled: boolean; fake_checkout_enabled: boolean }>('/api/v1/shop/configuration'),
+  getShopConfiguration: () => fetchApi<{ enabled: boolean; fake_checkout_enabled: boolean; poc_mode: boolean }>('/api/v1/shop/configuration'),
   getShopProducts: () => fetchApi<{ products: CommerceProduct[] }>('/api/v1/shop/products'),
   getShopProduct: (slug: string) => fetchApi<{ product: CommerceProduct }>(`/api/v1/shop/products/${encodeURIComponent(slug)}`),
   getShopFulfillment: () => fetchApi<FulfillmentConfiguration>('/api/v1/shop/fulfillment'),

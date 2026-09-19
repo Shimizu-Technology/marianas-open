@@ -1,4 +1,10 @@
 class Order < ApplicationRecord
+  DEMO_SESSION_PREFIX = "cs_test_dev_".freeze
+
+  def simulated?
+    self[:simulated] || stripe_checkout_session_id.to_s.start_with?(DEMO_SESSION_PREFIX)
+  end
+
   STATUSES = %w[pending_payment paid payment_failed expired cancelled].freeze
   FULFILLMENT_METHODS = %w[shipping pickup].freeze
 
@@ -31,6 +37,12 @@ class Order < ApplicationRecord
   validate :fulfillment_records_belong_to_organization
 
   scope :awaiting_payment, -> { where(status: "pending_payment") }
+  scope :real_payment, -> {
+    where(simulated: false).where(
+      "orders.stripe_checkout_session_id IS NULL OR orders.stripe_checkout_session_id NOT LIKE ?",
+      "#{sanitize_sql_like(DEMO_SESSION_PREFIX)}%"
+    )
+  }
 
   STATUSES.each do |value|
     define_method("#{value}?") { status == value }

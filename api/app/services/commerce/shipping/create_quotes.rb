@@ -18,6 +18,9 @@ module Commerce
           fulfillment_method: "shipping",
           inventory_location: location
         )
+        if @cart.lines.any? { |line| line.variant.product.demo_only? != Configuration.poc_mode? }
+          raise Error, "This item is not available in the current shop preview."
+        end
         package = shipping_package!
         ensure_customs_ready!(location)
         response = @gateway.quote(
@@ -47,7 +50,7 @@ module Commerce
       end
 
       def shipping_package!
-        packages = @organization.shipping_packages.available
+        packages = @organization.shipping_packages.for_checkout
         packages.detect { |candidate| candidate.fits_weight?(@cart.contents_weight_grams) } ||
           raise(Error, "This order is too heavy for the available shipping packages. Please contact support.")
       end

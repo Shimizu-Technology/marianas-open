@@ -15,6 +15,10 @@ module Commerce
     def as_json
       {
         period: period,
+        simulated_preview: paid_orders_in_period.where(
+          "(orders.simulated = TRUE OR orders.stripe_checkout_session_id LIKE ?)",
+          "#{Order.sanitize_sql_like(Order::DEMO_SESSION_PREFIX)}%"
+        ).exists?,
         summary: summary,
         reconciliation: reconciliation,
         alerts: alerts.first(100),
@@ -28,11 +32,11 @@ module Commerce
 
     def to_csv
       CSV.generate(headers: true) do |csv|
-        csv << %w[order_number paid_at customer_email fulfillment_method currency subtotal shipping tax total refunded net fulfillment_status]
+        csv << %w[order_number simulated paid_at customer_email fulfillment_method currency subtotal shipping tax total refunded net fulfillment_status]
         report_orders.each do |order|
           refunded = order.refunded_cents
           csv << [
-            csv_cell(order.number), order.paid_at&.iso8601, csv_cell(order.customer_email),
+            csv_cell(order.number), order.simulated?, order.paid_at&.iso8601, csv_cell(order.customer_email),
             csv_cell(order.fulfillment_method), csv_cell(order.currency),
             order.subtotal_cents, order.shipping_cents, order.tax_cents, order.total_cents, refunded,
             order.total_cents - refunded, csv_cell(order.fulfillment&.status || "unfulfilled")
@@ -73,7 +77,7 @@ module Commerce
     end
 
     def reconciliation
-      paid = organization.orders.where(status: "paid")
+      paid = organization.orders.real_payment.where(status: "paid")
       {
         current: paid.where(last_reconciled_at: 6.hours.ago..).count,
         due: paid.where(last_reconciled_at: nil).or(paid.where(last_reconciled_at: ...6.hours.ago)).count,

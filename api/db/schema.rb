@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_17_070000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_19_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -504,6 +504,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_070000) do
     t.integer "shipping_cents", default: 0, null: false
     t.bigint "shipping_quote_id"
     t.string "shipping_service"
+    t.boolean "simulated", default: false, null: false
     t.string "status", default: "pending_payment", null: false
     t.string "stripe_checkout_session_id"
     t.text "stripe_checkout_url"
@@ -674,6 +675,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_070000) do
   create_table "products", force: :cascade do |t|
     t.boolean "active", default: false, null: false
     t.datetime "created_at", null: false
+    t.boolean "demo_only", default: false, null: false
     t.text "description", default: "", null: false
     t.boolean "featured", default: false, null: false
     t.string "name", null: false
@@ -740,6 +742,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_070000) do
   create_table "shipping_packages", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
+    t.boolean "demo_only", default: false, null: false
     t.integer "empty_weight_grams", default: 0, null: false
     t.integer "height_mm", null: false
     t.integer "length_mm", null: false

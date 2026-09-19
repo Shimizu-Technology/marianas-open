@@ -18,6 +18,7 @@ export interface ResolvedCartLine extends CartLine {
 interface CommerceContextValue {
   enabled: boolean
   fakeCheckoutEnabled: boolean
+  pocMode: boolean
   loading: boolean
   error: string
   products: CommerceProduct[]
@@ -58,6 +59,7 @@ function cartSignature(lines: CartLine[]) {
 export function CommerceProvider({ children }: { children: ReactNode }) {
   const [enabled, setEnabled] = useState(false)
   const [fakeCheckoutEnabled, setFakeCheckoutEnabled] = useState(false)
+  const [pocMode, setPocMode] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [products, setProducts] = useState<CommerceProduct[]>([])
@@ -71,6 +73,7 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
       const configuration = await api.getShopConfiguration()
       setEnabled(configuration.enabled)
       setFakeCheckoutEnabled(configuration.fake_checkout_enabled)
+      setPocMode(configuration.poc_mode)
       if (!configuration.enabled) {
         setProducts([])
         return
@@ -157,6 +160,7 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CommerceContextValue>(() => ({
     enabled,
     fakeCheckoutEnabled,
+    pocMode,
     loading,
     error,
     products,
@@ -171,7 +175,7 @@ export function CommerceProvider({ children }: { children: ReactNode }) {
     rememberCheckout,
     clearCartForCheckout,
     reload,
-  }), [enabled, fakeCheckoutEnabled, loading, error, products, cartLines, cartOpen, addToCart, updateQuantity, removeFromCart, clearCart, rememberCheckout, clearCartForCheckout, reload])
+  }), [enabled, fakeCheckoutEnabled, pocMode, loading, error, products, cartLines, cartOpen, addToCart, updateQuantity, removeFromCart, clearCart, rememberCheckout, clearCartForCheckout, reload])
 
   return <CommerceContext.Provider value={value}>{children}</CommerceContext.Provider>
 }
