@@ -29,11 +29,18 @@ module Api
         end
 
         def destroy
-          if @product.active? && @product.product_images.joins(:image_attachment).count <= 1
+          deleted = @product.with_lock do
+            if @product.active? && @image.image.attached? && @product.product_images.joins(:image_attachment).count <= 1
+              false
+            else
+              @image.destroy!
+              true
+            end
+          end
+          unless deleted
             return render json: { errors: [ "Archive the product or upload a replacement before removing its last image" ] }, status: :unprocessable_entity
           end
 
-          @image.destroy!
           render json: { product: present_product }
         end
 

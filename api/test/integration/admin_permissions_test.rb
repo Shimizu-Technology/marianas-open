@@ -46,6 +46,8 @@ class AdminPermissionsTest < ActionDispatch::IntegrationTest
       assert_response :forbidden
       post "/api/v1/admin/inventory-locations", params: { inventory_location: { name: "Other" } }, headers: @headers, as: :json
       assert_response :forbidden
+      get "/api/v1/admin/inventory-locations", headers: @headers
+      assert_response :forbidden
     end
   end
 

@@ -220,6 +220,26 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
     end
     assert_response :unprocessable_entity
     assert image.reload.image.attached?
+
+    attach_product_image(product)
+    with_verified_clerk do
+      delete "/api/v1/admin/products/#{product.id}/images/#{image.id}", headers: @headers
+    end
+    assert_response :success
+    assert_equal 1, product.product_images.joins(:image_attachment).count
+
+    remaining = product.product_images.first
+    with_verified_clerk do
+      delete "/api/v1/admin/products/#{product.id}/images/#{remaining.id}", headers: @headers
+    end
+    assert_response :unprocessable_entity
+
+    product.update!(active: false)
+    with_verified_clerk do
+      delete "/api/v1/admin/products/#{product.id}/images/#{remaining.id}", headers: @headers
+    end
+    assert_response :success
+    assert_equal 0, product.product_images.count
   end
 
   test "staff can create a location and record an audited stock adjustment" do
