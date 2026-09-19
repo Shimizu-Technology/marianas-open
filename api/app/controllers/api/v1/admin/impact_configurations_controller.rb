@@ -3,7 +3,7 @@ module Api
     module Admin
       class ImpactConfigurationsController < ApplicationController
         include ClerkAuthenticatable
-        before_action :require_staff!
+        before_action -> { require_permission!(:events_manage) }
 
         def show
           config = ImpactConfiguration.current

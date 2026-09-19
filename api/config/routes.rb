@@ -129,6 +129,7 @@ Rails.application.routes.draw do
             path: "inventory-adjustments"
         end
         resources :inventory_locations, path: "inventory-locations", only: %i[index create update]
+        get "inventory-snapshot", to: "inventory_snapshots#show"
         resources :shipping_packages, path: "shipping-packages", only: %i[index create update destroy]
         resources :orders, only: %i[index show] do
           resource :fulfillment, only: :create

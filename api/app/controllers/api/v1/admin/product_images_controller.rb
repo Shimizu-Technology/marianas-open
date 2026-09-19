@@ -4,7 +4,7 @@ module Api
       class ProductImagesController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action -> { require_permission!(:commerce_catalog_manage) }
         before_action :set_product
         before_action :set_image, only: %i[update destroy]
 
@@ -29,7 +29,18 @@ module Api
         end
 
         def destroy
-          @image.destroy!
+          deleted = @product.with_lock do
+            if @product.active? && @image.image.attached? && @product.product_images.joins(:image_attachment).count <= 1
+              false
+            else
+              @image.destroy!
+              true
+            end
+          end
+          unless deleted
+            return render json: { errors: [ "Archive the product or upload a replacement before removing its last image" ] }, status: :unprocessable_entity
+          end
+
           render json: { product: present_product }
         end
 

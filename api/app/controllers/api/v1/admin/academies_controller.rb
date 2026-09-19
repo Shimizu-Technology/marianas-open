@@ -4,8 +4,8 @@ module Api
       class AcademiesController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
-        before_action :set_academy, only: [:show, :update, :destroy, :upload_logo]
+        before_action -> { require_permission!(:events_manage) }
+        before_action :set_academy, only: [ :show, :update, :destroy, :upload_logo ]
 
         def index
           scope = Academy.all
@@ -13,7 +13,7 @@ module Api
 
           total = scope.count
           page = (params[:page] || 1).to_i
-          per_page = [(params[:per_page] || 50).to_i, 200].min
+          per_page = [ (params[:per_page] || 50).to_i, 200 ].min
 
           dir = params[:sort_dir] == "asc" ? "ASC" : "DESC"
           order_clause = case params[:sort_by]
@@ -44,7 +44,7 @@ module Api
         end
 
         def show
-          stats = bulk_compute_stats([@academy.id])[@academy.id] || empty_stats
+          stats = bulk_compute_stats([ @academy.id ])[@academy.id] || empty_stats
 
           athletes = @academy.competitors.order(:last_name, :first_name).map do |c|
             { id: c.id, first_name: c.first_name, last_name: c.last_name,

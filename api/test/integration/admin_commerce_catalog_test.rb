@@ -18,7 +18,7 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
         name: "Marianas Competition Gi",
         slug: "marianas-competition-gi",
         description: "A durable competition gi.",
-        active: true,
+        active: false,
         featured: true,
         shippable: true,
         pickup_enabled: true,
@@ -58,7 +58,12 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     product = Product.find(response.parsed_body.dig("product", "id"))
-    assert product.active?
+    attach_product_image(product)
+    with_verified_clerk do
+      patch "/api/v1/admin/products/#{product.id}", params: { product: { active: true } }, headers: @headers, as: :json
+    end
+    assert_response :success
+    assert product.reload.active?
     assert_equal %w[Gi\ size Color], product.product_options.map(&:name)
     assert_equal %w[A2 Black], product.product_variants.first.product_option_values.map(&:value)
     assert product.product_variants.first.active?
@@ -71,7 +76,7 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
     with_poc_mode do
       with_verified_clerk do
         post "/api/v1/admin/products", params: { product: {
-          name: "Preview hat", slug: "preview-hat", active: true,
+          name: "Preview hat", slug: "preview-hat", active: false,
           shippable: true, pickup_enabled: true,
           variants: [ { name: "Standard", sku: "PREVIEW-HAT", price_cents: 4_000,
                         active: true, weight_grams: 250, allow_shipping: true, allow_pickup: true } ]
@@ -80,7 +85,13 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
 
       assert_response :created
       assert_equal true, response.parsed_body.dig("product", "demo_only")
-      assert Product.find_by!(slug: "preview-hat").demo_only?
+      product = Product.find_by!(slug: "preview-hat")
+      assert product.demo_only?
+      attach_product_image(product)
+      with_verified_clerk do
+        patch "/api/v1/admin/products/#{product.id}", params: { product: { active: true } }, headers: @headers, as: :json
+      end
+      assert_response :success
 
       get "/api/v1/shop/products"
       assert_response :success
@@ -182,6 +193,86 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
     assert_includes response.parsed_body.fetch("errors"), "Every shippable active variant needs a weight before the product can be published"
   end
 
+  test "publishing requires a photo and the last published photo cannot be removed" do
+    product = @organization.products.create!(name: "Photo-required towel", slug: "photo-required-towel")
+    product.product_variants.create!(
+      name: "Standard", sku: "PHOTO-TOWEL", price_cents: 3_500, active: true,
+      weight_grams: 300, allow_shipping: true, allow_pickup: true
+    )
+
+    with_verified_clerk do
+      patch "/api/v1/admin/products/#{product.id}", params: { product: { active: true } }, headers: @headers, as: :json
+    end
+    assert_response :unprocessable_entity
+    assert_includes response.parsed_body.fetch("errors"), "Upload at least one product image before publishing"
+    assert_not product.reload.active?
+
+    attach_product_image(product)
+    with_verified_clerk do
+      patch "/api/v1/admin/products/#{product.id}", params: { product: { active: true } }, headers: @headers, as: :json
+    end
+    assert_response :success
+    assert product.reload.active?
+
+    image = product.product_images.first
+    with_verified_clerk do
+      delete "/api/v1/admin/products/#{product.id}/images/#{image.id}", headers: @headers
+    end
+    assert_response :unprocessable_entity
+    assert image.reload.image.attached?
+
+    attach_product_image(product)
+    with_verified_clerk do
+      delete "/api/v1/admin/products/#{product.id}/images/#{image.id}", headers: @headers
+    end
+    assert_response :success
+    assert_equal 1, product.product_images.joins(:image_attachment).count
+
+    remaining = product.product_images.first
+    with_verified_clerk do
+      delete "/api/v1/admin/products/#{product.id}/images/#{remaining.id}", headers: @headers
+    end
+    assert_response :unprocessable_entity
+
+    product.update!(active: false)
+    with_verified_clerk do
+      delete "/api/v1/admin/products/#{product.id}/images/#{remaining.id}", headers: @headers
+    end
+    assert_response :success
+    assert_equal 0, product.product_images.count
+  end
+
+  test "admin can assign and clear a product photo for a variant" do
+    previous_enabled = ENV["COMMERCE_ENABLED"]
+    ENV["COMMERCE_ENABLED"] = "true"
+    product = create_product
+    attach_product_image(product)
+    image = product.product_images.first
+    variant = product.product_variants.first
+
+    with_verified_clerk do
+      patch "/api/v1/admin/products/#{product.id}/images/#{image.id}",
+        params: { product_variant_id: variant.id }, headers: @headers, as: :json
+    end
+    assert_response :success
+    assert_equal variant.id, response.parsed_body.dig("product", "images", 0, "variant_id")
+    assert_equal variant.id, image.reload.product_variant_id
+
+    product.update!(active: true)
+    get "/api/v1/shop/products/#{product.slug}"
+    assert_response :success
+    assert_equal variant.id, response.parsed_body.dig("product", "images", 0, "variant_id")
+
+    with_verified_clerk do
+      patch "/api/v1/admin/products/#{product.id}/images/#{image.id}",
+        params: { product_variant_id: nil }, headers: @headers, as: :json
+    end
+    assert_response :success
+    assert_nil image.reload.product_variant_id
+  ensure
+    ENV["COMMERCE_ENABLED"] = previous_enabled
+  end
+
   test "staff can create a location and record an audited stock adjustment" do
     product = create_product
 
@@ -270,6 +361,12 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def attach_product_image(product)
+    bytes = Base64.decode64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
+    image = product.product_images.create!
+    image.image.attach(io: StringIO.new(bytes), filename: "product.png", content_type: "image/png")
+  end
 
   def create_product
     product = @organization.products.create!(name: "Towel", slug: "towel")

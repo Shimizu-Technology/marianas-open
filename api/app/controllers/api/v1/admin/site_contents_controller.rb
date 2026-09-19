@@ -4,8 +4,8 @@ module Api
       class SiteContentsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
-        before_action :set_site_content, only: [:update, :destroy, :retranslate]
+        before_action -> { require_permission!(:events_manage) }
+        before_action :set_site_content, only: [ :update, :destroy, :retranslate ]
 
         def index
           contents = SiteContent.all.order(:section, :sort_order)

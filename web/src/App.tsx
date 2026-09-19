@@ -1,11 +1,10 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { lazy, Suspense, useEffect, useRef, useState, useCallback } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LiveStreamBanner from './components/LiveStreamBanner';
 import AnnouncementBar from './components/AnnouncementBar';
-import MobileLanguageFAB from './components/MobileLanguageFAB';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { PostHogPageView } from './providers/PostHogProvider';
@@ -13,6 +12,7 @@ import { OrganizationProvider } from './contexts/OrganizationContext';
 import { EventsProvider } from './contexts/EventsContext';
 import { CommerceProvider } from './contexts/CommerceContext';
 import CartDrawer from './components/shop/CartDrawer';
+import { api } from './services/api';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
@@ -57,6 +57,24 @@ const ShippingAdmin = lazy(() => import('./pages/admin/ShippingAdmin'));
 const OrdersAdmin = lazy(() => import('./pages/admin/OrdersAdmin'));
 const CommerceOperationsAdmin = lazy(() => import('./pages/admin/CommerceOperationsAdmin'));
 const CommerceLaunchReadinessAdmin = lazy(() => import('./pages/admin/CommerceLaunchReadinessAdmin'));
+const InventoryAdmin = lazy(() => import('./pages/admin/InventoryAdmin'));
+
+function AdminLanding() {
+  const [destination, setDestination] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    api.getCurrentUser().then(({ user }) => {
+      if (!active) return;
+      setDestination(user.permissions.includes('events_manage') ? '/admin/dashboard' : '/admin/commerce/orders');
+    }).catch(() => { if (active) setDestination('/'); });
+    return () => { active = false; };
+  }, []);
+  return destination ? <Navigate to={destination} replace /> : <LoadingSpinner />;
+}
+
+function WithPermission({ permission, children }: { permission: string; children: React.ReactNode }) {
+  return <ProtectedRoute requiredPermission={permission}>{children}</ProtectedRoute>;
+}
 
 function BannerLayout({ children }: { children: React.ReactNode }) {
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -160,14 +178,15 @@ export default function App() {
             </Suspense>
           }
         >
-          <Route index element={<AdminDashboard />} />
-          <Route path="events" element={<EventsAdmin />} />
-          <Route path="events/:eventId/results" element={<EventResultsAdmin />} />
-          <Route path="sponsors" element={<SponsorsAdmin />} />
-          <Route path="videos" element={<VideosAdmin />} />
-          <Route path="competitors" element={<CompetitorsAdmin />} />
-          <Route path="academies" element={<AcademiesAdmin />} />
-          <Route path="images" element={<ImagesAdmin />} />
+          <Route index element={<AdminLanding />} />
+          <Route path="dashboard" element={<WithPermission permission="events_manage"><AdminDashboard /></WithPermission>} />
+          <Route path="events" element={<WithPermission permission="events_manage"><EventsAdmin /></WithPermission>} />
+          <Route path="events/:eventId/results" element={<WithPermission permission="events_manage"><EventResultsAdmin /></WithPermission>} />
+          <Route path="sponsors" element={<WithPermission permission="events_manage"><SponsorsAdmin /></WithPermission>} />
+          <Route path="videos" element={<WithPermission permission="events_manage"><VideosAdmin /></WithPermission>} />
+          <Route path="competitors" element={<WithPermission permission="events_manage"><CompetitorsAdmin /></WithPermission>} />
+          <Route path="academies" element={<WithPermission permission="events_manage"><AcademiesAdmin /></WithPermission>} />
+          <Route path="images" element={<WithPermission permission="events_manage"><ImagesAdmin /></WithPermission>} />
           <Route
             path="users"
             element={(
@@ -176,14 +195,15 @@ export default function App() {
               </ProtectedRoute>
             )}
           />
-          <Route path="announcements" element={<AnnouncementsAdmin />} />
-          <Route path="impact" element={<ImpactAdmin />} />
-          <Route path="commerce" element={<CommerceAdmin />} />
-          <Route path="commerce/shipping" element={<ShippingAdmin />} />
-          <Route path="commerce/orders" element={<OrdersAdmin />} />
-          <Route path="commerce/operations" element={<CommerceOperationsAdmin />} />
-          <Route path="commerce/launch" element={<CommerceLaunchReadinessAdmin />} />
-          <Route path="content" element={<ContentAdmin />} />
+          <Route path="announcements" element={<WithPermission permission="events_manage"><AnnouncementsAdmin /></WithPermission>} />
+          <Route path="impact" element={<WithPermission permission="events_manage"><ImpactAdmin /></WithPermission>} />
+          <Route path="commerce" element={<WithPermission permission="commerce_catalog_manage"><CommerceAdmin /></WithPermission>} />
+          <Route path="commerce/inventory" element={<WithPermission permission="commerce_inventory_manage"><InventoryAdmin /></WithPermission>} />
+          <Route path="commerce/shipping" element={<WithPermission permission="commerce_settings_manage"><ShippingAdmin /></WithPermission>} />
+          <Route path="commerce/orders" element={<WithPermission permission="commerce_orders_view"><OrdersAdmin /></WithPermission>} />
+          <Route path="commerce/operations" element={<WithPermission permission="commerce_reports_view"><CommerceOperationsAdmin /></WithPermission>} />
+          <Route path="commerce/launch" element={<WithPermission permission="commerce_launch_manage"><CommerceLaunchReadinessAdmin /></WithPermission>} />
+          <Route path="content" element={<WithPermission permission="events_manage"><ContentAdmin /></WithPermission>} />
           <Route
             path="settings"
             element={(
@@ -206,7 +226,6 @@ export default function App() {
                       <AnimatedRoutes />
                     </main>
                     <Footer />
-                    <MobileLanguageFAB />
                     <CartDrawer />
                   </BannerLayout>
                 </CommerceProvider>

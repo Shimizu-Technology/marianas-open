@@ -18,7 +18,7 @@ module Commerce
         @quantity_delta = Integer(quantity_delta)
         @reason = reason
         @actor = actor
-        @note = note
+        @note = note.to_s
       end
 
       def call

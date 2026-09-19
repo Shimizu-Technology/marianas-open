@@ -4,12 +4,12 @@ module Api
       class CompetitorsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
-        before_action :set_competitor, only: [:show, :update, :destroy, :upload_photo]
+        before_action -> { require_permission!(:events_manage) }
+        before_action :set_competitor, only: [ :show, :update, :destroy, :upload_photo ]
 
         def index
           page = (params[:page] || 1).to_i
-          per_page = [(params[:per_page] || 50).to_i, 100].min
+          per_page = [ (params[:per_page] || 50).to_i, 100 ].min
 
           scope = Competitor.all
           scope = scope.search_by_name(params[:search]) if params[:search].present?
@@ -47,7 +47,7 @@ module Api
         end
 
         def show
-          stats = bulk_compute_stats([@competitor.id])[@competitor.id] || empty_stats
+          stats = bulk_compute_stats([ @competitor.id ])[@competitor.id] || empty_stats
 
           results = @competitor.event_results
             .joins(:event)

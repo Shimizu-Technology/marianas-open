@@ -1,15 +1,14 @@
 import { Package } from 'lucide-react'
 import { resolveMediaUrl } from '../../utils/images'
-import type { CommerceProduct } from '../../services/api'
+import type { CommerceProduct, ProductImage } from '../../services/api'
 
-export default function ProductArtwork({ product, className = '', compact = false }: { product: CommerceProduct; className?: string; compact?: boolean }) {
-  const image = product.images[0]
+export default function ProductArtwork({ product, image = product.images[0], className = '', compact = false }: { product: CommerceProduct; image?: ProductImage | null; className?: string; compact?: boolean }) {
   if (image) {
     return (
       <img
         src={resolveMediaUrl(image.url) || image.url}
         alt={image.alt_text || product.name}
-        className={`h-full w-full object-cover ${className}`}
+        className={`h-full w-full bg-[linear-gradient(145deg,#192337,#11151e)] object-contain ${className}`}
       />
     )
   }

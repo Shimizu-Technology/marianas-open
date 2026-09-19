@@ -4,8 +4,8 @@ module Api
       class SponsorsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
-        before_action :set_sponsor, only: [:show, :update, :destroy, :upload_logo]
+        before_action -> { require_permission!(:events_manage) }
+        before_action :set_sponsor, only: [ :show, :update, :destroy, :upload_logo ]
 
         def show
           render json: { sponsor: @sponsor.as_json }

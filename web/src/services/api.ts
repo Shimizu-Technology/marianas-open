@@ -333,9 +333,10 @@ export interface UserProfile {
   first_name: string;
   last_name: string;
   full_name: string;
-  role: 'admin' | 'staff' | 'viewer';
+  role: 'admin' | 'staff' | 'events_admin' | 'merchandise_admin' | 'fulfillment_staff' | 'viewer';
   is_admin: boolean;
   is_staff: boolean;
+  permissions: string[];
   invitation_status: 'pending' | 'accepted' | 'expired' | 'revoked';
   invitation_pending: boolean;
   invited_at?: string;
@@ -806,6 +807,22 @@ export interface InventoryLocation {
   pickup_instructions: string;
   phone: string | null;
   address: Record<string, string>;
+}
+
+export interface InventorySnapshot {
+  locations: Array<{ id: number; name: string }>;
+  products: Array<{
+    id: number;
+    name: string;
+    active: boolean;
+    variants: Array<{
+      id: number;
+      name: string;
+      sku: string;
+      active: boolean;
+      inventory_levels: Array<{ inventory_location_id: number; on_hand: number; reserved: number; available: number }>;
+    }>;
+  }>;
 }
 
 export interface ShippingPackage {
@@ -1322,6 +1339,7 @@ export const api = {
       fetchApi<void>(`/api/v1/admin/products/${id}`, { method: 'DELETE' }, true),
     getInventoryLocations: () =>
       fetchApi<{ inventory_locations: InventoryLocation[] }>('/api/v1/admin/inventory-locations', {}, true),
+    getInventorySnapshot: () => fetchApi<InventorySnapshot>('/api/v1/admin/inventory-snapshot', {}, true),
     createInventoryLocation: (inventory_location: Omit<InventoryLocation, 'id'>) =>
       fetchApi<{ inventory_location: InventoryLocation }>('/api/v1/admin/inventory-locations', {
         method: 'POST',
@@ -1363,6 +1381,10 @@ export const api = {
       formData.append('alt_text', altText);
       return fetchApiUpload<{ product: CommerceProduct }>(`/api/v1/admin/products/${productId}/images`, formData);
     },
+    assignProductImage: (productId: number, imageId: number, variantId: number | null) =>
+      fetchApi<{ product: CommerceProduct }>(`/api/v1/admin/products/${productId}/images/${imageId}`, {
+        method: 'PATCH', body: JSON.stringify({ product_variant_id: variantId }),
+      }, true),
     deleteProductImage: (productId: number, imageId: number) =>
       fetchApi<{ product: CommerceProduct }>(`/api/v1/admin/products/${productId}/images/${imageId}`, { method: 'DELETE' }, true),
 
