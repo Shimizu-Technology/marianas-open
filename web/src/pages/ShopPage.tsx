@@ -15,11 +15,12 @@ export default function ShopPage() {
   return (
     <div className="min-h-screen pt-16">
       <SEO title="Official Shop" description={pocMode ? 'Preview the Marianas Open merchandise experience. No real purchases are available yet.' : 'Shop official Marianas Open apparel and merchandise, available for shipping or pickup on Guam.'} />
+      {pocMode && <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6"><CommerceDemoNotice /></div>}
       <section className="relative overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(212,168,67,.18),transparent_38%),linear-gradient(180deg,#111827_0%,#0a0a0b_100%)]" />
         <div className="absolute inset-y-0 right-0 w-1/2 opacity-20 [background-image:linear-gradient(135deg,transparent_47%,rgba(212,168,67,.3)_47%,rgba(212,168,67,.3)_49%,transparent_49%)] [background-size:42px_42px]" />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-gold">Official Marianas Open gear</p>
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-gold">{pocMode ? 'Merchandise preview' : 'Official Marianas Open gear'}</p>
           <h1 className="mt-4 max-w-3xl font-heading text-4xl font-bold leading-[0.98] sm:text-6xl lg:text-7xl">Built for the mat.<br /><span className="text-white/45">Made for the islands.</span></h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-text-secondary sm:text-lg">Tournament apparel and essentials from Guam’s international jiu-jitsu championship.</p>
           <Link to="/shop/order-status" className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-3 text-sm font-semibold transition hover:border-gold/35 hover:text-gold-300"><PackageSearch className="h-4 w-4" /> Check an existing order</Link>
@@ -27,7 +28,6 @@ export default function ShopPage() {
       </section>
 
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
-        {pocMode && <CommerceDemoNotice className="mb-10" />}
         {loading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading products">{[1, 2, 3].map(item => <div key={item} className="aspect-[4/5] rounded-2xl shimmer-loading" />)}</div>
         ) : error ? (

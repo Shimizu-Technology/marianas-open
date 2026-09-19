@@ -102,7 +102,7 @@ class CommercePocTest < ActionDispatch::IntegrationTest
       assert_response :created
       assert_equal @variant.price_cents + quote.fetch("amount_cents"), Order.last.total_cents
       token = response.parsed_body.fetch("order_token")
-      assert_includes response.parsed_body.fetch("checkout_url"), "test_checkout=1"
+      assert_equal "/shop/orders/#{token}?test_checkout=1", response.parsed_body.fetch("checkout_url")
 
       post "/api/v1/shop/orders/#{token}/test-payment", as: :json
       assert_response :success
