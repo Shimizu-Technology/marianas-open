@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=common.sh
 source "${SCRIPT_DIR}/common.sh"
 load_staging_secrets
+validate_staging_storage_configuration
 
 curl --fail --silent --show-error \
   --connect-timeout 5 \
