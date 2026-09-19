@@ -7,6 +7,8 @@ module Commerce
       }.freeze
 
       def self.call(order:, status:)
+        return [] if order.simulated?
+
         kind = KIND_BY_STATUS[status.to_s]
         return [] unless kind
 
