@@ -4,7 +4,8 @@ module Api
       class InventoryLocationsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action -> { require_permission!(:commerce_inventory_manage) }, only: :index
+        before_action -> { require_permission!(:commerce_settings_manage) }, only: %i[create update]
         before_action :set_location, only: :update
 
         def index

@@ -8,11 +8,12 @@ import { RefreshCw, ShieldX, TriangleAlert } from 'lucide-react'
 interface ClerkProtectedContentProps {
   children: React.ReactNode
   requiredRole?: 'admin' | 'staff'
+  requiredPermission?: string
 }
 
 type AuthStatus = 'loading' | 'checking' | 'authorized' | 'unauthorized' | 'access_denied' | 'verification_error'
 
-export default function ClerkProtectedContent({ children, requiredRole }: ClerkProtectedContentProps) {
+export default function ClerkProtectedContent({ children, requiredRole, requiredPermission }: ClerkProtectedContentProps) {
   const { isLoaded, isSignedIn, getToken } = useAuth()
   const [authStatus, setAuthStatus] = useState<AuthStatus>('loading')
   const [, setCurrentUser] = useState<UserProfile | null>(null)
@@ -49,6 +50,11 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
           const user = response.user
           setCurrentUser(user)
 
+          if (requiredPermission && !user.permissions?.includes(requiredPermission)) {
+            setAuthStatus('access_denied')
+            return
+          }
+
           if (requiredRole) {
             const hasAccess =
               requiredRole === 'staff' ? user.is_staff :
@@ -76,7 +82,7 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
     }
 
     verifyUser()
-  }, [isLoaded, isSignedIn, requiredRole, verificationAttempt])
+  }, [isLoaded, isSignedIn, requiredRole, requiredPermission, verificationAttempt])
 
   if (!isLoaded || authStatus === 'loading' || authStatus === 'checking') {
     return <LoadingSpinner />

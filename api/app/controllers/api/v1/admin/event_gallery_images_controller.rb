@@ -7,7 +7,7 @@ module Api
         UploadAlreadyUsed = Class.new(StandardError)
         UNCATEGORIZED_FILTER = "__uncategorized__".freeze
 
-        before_action :require_staff!
+        before_action -> { require_permission!(:events_manage) }
         before_action :set_event
         before_action :set_gallery_image, only: [ :update, :destroy, :upload ]
 

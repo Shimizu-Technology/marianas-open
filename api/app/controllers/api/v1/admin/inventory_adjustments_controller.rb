@@ -4,7 +4,7 @@ module Api
       class InventoryAdjustmentsController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
+        before_action -> { require_permission!(:commerce_inventory_manage) }
 
         def create
           product = organization.products.find(params[:product_id])

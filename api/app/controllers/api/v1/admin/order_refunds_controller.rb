@@ -3,7 +3,7 @@ module Api
     module Admin
       class OrderRefundsController < ApplicationController
         include ClerkAuthenticatable
-        before_action :require_staff!
+        before_action -> { require_permission!(:commerce_refunds_manage) }
 
         def create
           order = organization.orders.find(params[:order_id])

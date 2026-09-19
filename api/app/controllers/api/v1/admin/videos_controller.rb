@@ -4,8 +4,8 @@ module Api
       class VideosController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
-        before_action :set_video, only: [:show, :update, :destroy]
+        before_action -> { require_permission!(:events_manage) }
+        before_action :set_video, only: [ :show, :update, :destroy ]
 
         def index
           videos = Video.includes(:event).order(sort_order: :asc, created_at: :desc)

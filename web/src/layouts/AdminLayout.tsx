@@ -4,6 +4,7 @@ import { Link, NavLink, Outlet } from 'react-router-dom'
 import {
   ArrowLeft,
   BarChart3,
+  Boxes,
   Building2,
   CalendarDays,
   CircleDollarSign,
@@ -40,6 +41,7 @@ type NavItem = {
   label: string
   end?: boolean
   adminOnly?: boolean
+  permission?: string
 }
 
 type NavSection = {
@@ -51,36 +53,37 @@ const navSections: NavSection[] = [
   {
     label: 'Command',
     items: [
-      { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
+      { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard', permission: 'events_manage' },
     ],
   },
   {
     label: 'Tournament',
     items: [
-      { to: '/admin/events', icon: CalendarDays, label: 'Events & Results' },
-      { to: '/admin/competitors', icon: Swords, label: 'Competitors' },
-      { to: '/admin/academies', icon: Building2, label: 'Academies' },
-      { to: '/admin/sponsors', icon: Handshake, label: 'Sponsors' },
+      { to: '/admin/events', icon: CalendarDays, label: 'Events & Results', permission: 'events_manage' },
+      { to: '/admin/competitors', icon: Swords, label: 'Competitors', permission: 'events_manage' },
+      { to: '/admin/academies', icon: Building2, label: 'Academies', permission: 'events_manage' },
+      { to: '/admin/sponsors', icon: Handshake, label: 'Sponsors', permission: 'events_manage' },
     ],
   },
   {
     label: 'Commerce',
     items: [
-      { to: '/admin/commerce', icon: ShoppingBag, label: 'Products & Inventory', end: true },
-      { to: '/admin/commerce/orders', icon: PackageCheck, label: 'Orders & Fulfillment' },
-      { to: '/admin/commerce/shipping', icon: Truck, label: 'Pickup & Shipping' },
-      { to: '/admin/commerce/operations', icon: CircleDollarSign, label: 'Refunds & Reports' },
-      { to: '/admin/commerce/launch', icon: Rocket, label: 'Launch Readiness' },
+      { to: '/admin/commerce', icon: ShoppingBag, label: 'Products & Inventory', end: true, permission: 'commerce_catalog_manage' },
+      { to: '/admin/commerce/inventory', icon: Boxes, label: 'Deal Depot inventory', permission: 'commerce_inventory_manage' },
+      { to: '/admin/commerce/orders', icon: PackageCheck, label: 'Orders & Fulfillment', permission: 'commerce_orders_view' },
+      { to: '/admin/commerce/shipping', icon: Truck, label: 'Pickup & Shipping', permission: 'commerce_settings_manage' },
+      { to: '/admin/commerce/operations', icon: CircleDollarSign, label: 'Refunds & Reports', permission: 'commerce_reports_view' },
+      { to: '/admin/commerce/launch', icon: Rocket, label: 'Launch Readiness', permission: 'commerce_launch_manage' },
     ],
   },
   {
     label: 'Media & Content',
     items: [
-      { to: '/admin/videos', icon: Play, label: 'Videos' },
-      { to: '/admin/images', icon: Image, label: 'Images' },
-      { to: '/admin/content', icon: FileText, label: 'Content' },
-      { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
-      { to: '/admin/impact', icon: BarChart3, label: 'Impact' },
+      { to: '/admin/videos', icon: Play, label: 'Videos', permission: 'events_manage' },
+      { to: '/admin/images', icon: Image, label: 'Images', permission: 'events_manage' },
+      { to: '/admin/content', icon: FileText, label: 'Content', permission: 'events_manage' },
+      { to: '/admin/announcements', icon: Megaphone, label: 'Announcements', permission: 'events_manage' },
+      { to: '/admin/impact', icon: BarChart3, label: 'Impact', permission: 'events_manage' },
     ],
   },
   {
@@ -250,11 +253,13 @@ function UtilityLink({
 function SidebarContent({
   collapsed,
   isAdmin,
+  permissions,
   onNavigate,
   onToggleCollapse,
 }: {
   collapsed: boolean
   isAdmin: boolean
+  permissions: string[]
   onNavigate: () => void
   onToggleCollapse?: () => void
 }) {
@@ -264,7 +269,7 @@ function SidebarContent({
   const visibleNavSections = navSections
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => !item.adminOnly || isAdmin),
+      items: section.items.filter((item) => (!item.adminOnly || isAdmin) && (!item.permission || permissions.includes(item.permission))),
     }))
     .filter((section) => section.items.length > 0)
 
@@ -352,8 +357,8 @@ function SidebarContent({
             <div className="flex items-start gap-2.5">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
               <div>
-                <p className="text-xs font-semibold text-text-primary">Tournament operations</p>
-                <p className="mt-1 text-[11px] leading-4 text-text-muted">Manage events, media, content, and access from one workspace.</p>
+                <p className="text-xs font-semibold text-text-primary">{permissions.includes('events_manage') ? 'Tournament operations' : 'Merchandise operations'}</p>
+                <p className="mt-1 text-[11px] leading-4 text-text-muted">{permissions.includes('events_manage') ? 'Manage events, media, content, and access from one workspace.' : 'Prepare orders and keep merchandise moving.'}</p>
               </div>
             </div>
           </div>
@@ -366,6 +371,7 @@ function SidebarContent({
 
 export default function AdminLayout() {
   const [isAdmin, setIsAdmin] = useState(false)
+  const [permissions, setPermissions] = useState<string[]>([])
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [desktopCollapsed, setDesktopCollapsed] = useState(readSidebarPreference)
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -376,10 +382,13 @@ export default function AdminLayout() {
 
     api.getCurrentUser()
       .then(({ user }) => {
-        if (!cancelled) setIsAdmin(user.is_admin)
+        if (!cancelled) {
+          setIsAdmin(user.is_admin)
+          setPermissions(user.permissions || [])
+        }
       })
       .catch(() => {
-        if (!cancelled) setIsAdmin(false)
+        if (!cancelled) { setIsAdmin(false); setPermissions([]) }
       })
 
     return () => {
@@ -478,7 +487,7 @@ export default function AdminLayout() {
           >
             <X className="h-5 w-5" />
           </button>
-          <SidebarContent collapsed={false} isAdmin={isAdmin} onNavigate={closeMobileNav} />
+          <SidebarContent collapsed={false} isAdmin={isAdmin} permissions={permissions} onNavigate={closeMobileNav} />
         </aside>
 
         <aside
@@ -489,6 +498,7 @@ export default function AdminLayout() {
           <SidebarContent
             collapsed={desktopCollapsed}
             isAdmin={isAdmin}
+            permissions={permissions}
             onNavigate={() => undefined}
             onToggleCollapse={() => setDesktopCollapsed((value) => !value)}
           />

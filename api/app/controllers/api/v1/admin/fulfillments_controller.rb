@@ -3,7 +3,7 @@ module Api
     module Admin
       class FulfillmentsController < ApplicationController
         include ClerkAuthenticatable
-        before_action :require_staff!
+        before_action -> { require_permission!(:commerce_fulfillment_manage) }
 
         def create
           order = organization.orders.find(params[:order_id])
@@ -11,7 +11,7 @@ module Api
             order:, status: fulfillment_params.fetch(:status), actor: current_user,
             staff_note: fulfillment_params[:staff_note]
           )
-          render json: { order: Commerce::AdminOrderPresenter.new(order.reload).as_json }
+          render json: { order: Commerce::AdminOrderPresenter.new(order.reload, financial: current_user.can?(:commerce_refunds_manage)).as_json }
         rescue Commerce::Fulfillment::InvalidTransition => e
           render json: { error: e.message }, status: :unprocessable_entity
         end

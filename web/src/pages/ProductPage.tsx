@@ -5,6 +5,7 @@ import SEO from '../components/SEO'
 import ProductArtwork from '../components/shop/ProductArtwork'
 import CommerceDemoNotice from '../components/shop/CommerceDemoNotice'
 import { useCommerce } from '../contexts/CommerceContext'
+import { resolveMediaUrl } from '../utils/images'
 
 const money = (cents: number, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100)
 
@@ -15,6 +16,7 @@ export default function ProductPage() {
   const firstVariant = product?.variants.find(variant => variant.available_quantity > 0) || product?.variants[0]
   const [selected, setSelected] = useState<Record<number, number>>({})
   const [quantity, setQuantity] = useState(1)
+  const [imageId, setImageId] = useState<number | null>(null)
 
   useEffect(() => {
     if (!product || !firstVariant) return
@@ -31,11 +33,17 @@ export default function ProductPage() {
     return product.options.every(option => option.id && selected[option.id] && ids.has(selected[option.id]))
   }), [product, selected])
 
+  useEffect(() => {
+    const image = product?.images.find(candidate => candidate.variant_id === selectedVariant?.id) || product?.images[0]
+    setImageId(image?.id || null)
+  }, [product?.id, selectedVariant?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
   if (loading) return <div className="min-h-screen pt-32"><div className="mx-auto h-[65vh] max-w-7xl rounded-2xl shimmer-loading" /></div>
   if (!enabled || !product) return <div className="min-h-screen px-4 pb-24 pt-36 text-center"><h1 className="font-heading text-3xl font-bold">Product not found</h1><Link to="/shop" className="mt-6 inline-flex text-gold hover:text-gold-300">Return to the shop</Link></div>
 
   const unavailable = !selectedVariant || selectedVariant.available_quantity < 1
   const price = selectedVariant?.price_cents ?? firstVariant?.price_cents ?? 0
+  const shownImage = product.images.find(image => image.id === imageId) || product.images[0]
 
   const variantsForValue = (valueId: number) => product.variants.filter(variant => (
     variant.available_quantity > 0 && (variant.option_value_ids || []).includes(valueId)
@@ -65,7 +73,7 @@ export default function ProductPage() {
         <Link to="/shop" className="mb-7 inline-flex items-center gap-2 text-sm text-text-secondary transition hover:text-white"><ArrowLeft className="h-4 w-4" /> Back to shop</Link>
         {pocMode && <CommerceDemoNotice className="mb-8" />}
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.18fr)_minmax(360px,.82fr)] lg:gap-16">
-          <div className="aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 bg-surface lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)]"><ProductArtwork product={product} /></div>
+          <div className="min-w-0 lg:sticky lg:top-24 lg:self-start"><div className="aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 bg-surface lg:max-h-[calc(100vh-12rem)]"><ProductArtwork product={product} image={shownImage} /></div>{product.images.length > 1 && <div className="mt-3 flex gap-3 overflow-x-auto pb-1" aria-label="Product photos">{product.images.map((image, index) => <button key={image.id} type="button" onClick={() => setImageId(image.id)} aria-label={`Show product photo ${index + 1}`} aria-pressed={shownImage?.id === image.id} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:h-20 sm:w-20 ${shownImage?.id === image.id ? 'border-gold' : 'border-white/10'}`}><img src={resolveMediaUrl(image.url) || image.url} alt={image.alt_text || `${product.name} view ${index + 1}`} className="h-full w-full object-contain" /></button>)}</div>}</div>
           <section className="lg:py-5">
             {product.featured && <p className="text-xs font-bold uppercase tracking-[0.22em] text-gold">Featured release</p>}
             <h1 className="mt-3 font-heading text-4xl font-bold leading-tight sm:text-5xl">{product.name}</h1>

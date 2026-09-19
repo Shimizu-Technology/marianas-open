@@ -3,8 +3,8 @@ module Api
     module Admin
       class FundAllocationsController < ApplicationController
         include ClerkAuthenticatable
-        before_action :require_staff!
-        before_action :set_allocation, only: [:show, :update, :destroy]
+        before_action -> { require_permission!(:events_manage) }
+        before_action :set_allocation, only: [ :show, :update, :destroy ]
 
         def index
           allocations = FundAllocation.order(:sort_order, :created_at)

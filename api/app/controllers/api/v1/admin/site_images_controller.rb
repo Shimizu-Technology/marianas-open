@@ -4,8 +4,8 @@ module Api
       class SiteImagesController < ApplicationController
         include ClerkAuthenticatable
 
-        before_action :require_staff!
-        before_action :set_site_image, only: [:show, :update, :destroy, :upload]
+        before_action -> { require_permission!(:events_manage) }
+        before_action :set_site_image, only: [ :show, :update, :destroy, :upload ]
 
         def index
           images = SiteImage.order(:placement, :sort_order)
