@@ -242,6 +242,37 @@ class AdminCommerceCatalogTest < ActionDispatch::IntegrationTest
     assert_equal 0, product.product_images.count
   end
 
+  test "admin can assign and clear a product photo for a variant" do
+    previous_enabled = ENV["COMMERCE_ENABLED"]
+    ENV["COMMERCE_ENABLED"] = "true"
+    product = create_product
+    attach_product_image(product)
+    image = product.product_images.first
+    variant = product.product_variants.first
+
+    with_verified_clerk do
+      patch "/api/v1/admin/products/#{product.id}/images/#{image.id}",
+        params: { product_variant_id: variant.id }, headers: @headers, as: :json
+    end
+    assert_response :success
+    assert_equal variant.id, response.parsed_body.dig("product", "images", 0, "variant_id")
+    assert_equal variant.id, image.reload.product_variant_id
+
+    product.update!(active: true)
+    get "/api/v1/shop/products/#{product.slug}"
+    assert_response :success
+    assert_equal variant.id, response.parsed_body.dig("product", "images", 0, "variant_id")
+
+    with_verified_clerk do
+      patch "/api/v1/admin/products/#{product.id}/images/#{image.id}",
+        params: { product_variant_id: nil }, headers: @headers, as: :json
+    end
+    assert_response :success
+    assert_nil image.reload.product_variant_id
+  ensure
+    ENV["COMMERCE_ENABLED"] = previous_enabled
+  end
+
   test "staff can create a location and record an audited stock adjustment" do
     product = create_product
 

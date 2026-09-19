@@ -9,7 +9,8 @@ module Api
         def show
           organization = Organization.order(:id).first!
           locations = organization.inventory_locations.where(active: true).order(:name)
-          products = organization.products.published.where(demo_only: Commerce::Configuration.poc_mode?)
+          products = organization.products.where(demo_only: Commerce::Configuration.poc_mode?)
+            .where(id: ProductVariant.select(:product_id))
             .includes(product_variants: :inventory_levels).order(:name)
 
           render json: {
@@ -19,7 +20,7 @@ module Api
                 id: product.id,
                 name: product.name,
                 active: product.active,
-                variants: product.product_variants.select(&:active?).map do |variant|
+                variants: product.product_variants.map do |variant|
                   {
                     id: variant.id,
                     name: variant.name,

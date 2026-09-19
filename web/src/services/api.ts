@@ -1381,6 +1381,10 @@ export const api = {
       formData.append('alt_text', altText);
       return fetchApiUpload<{ product: CommerceProduct }>(`/api/v1/admin/products/${productId}/images`, formData);
     },
+    assignProductImage: (productId: number, imageId: number, variantId: number | null) =>
+      fetchApi<{ product: CommerceProduct }>(`/api/v1/admin/products/${productId}/images/${imageId}`, {
+        method: 'PATCH', body: JSON.stringify({ product_variant_id: variantId }),
+      }, true),
     deleteProductImage: (productId: number, imageId: number) =>
       fetchApi<{ product: CommerceProduct }>(`/api/v1/admin/products/${productId}/images/${imageId}`, { method: 'DELETE' }, true),
 

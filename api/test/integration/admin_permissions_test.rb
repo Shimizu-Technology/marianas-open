@@ -109,6 +109,31 @@ class AdminPermissionsTest < ActionDispatch::IntegrationTest
     assert_not variant_payload.key?("price_cents")
   end
 
+  test "fulfillment staff can see draft and archived stock before and after sale" do
+    location = @organization.inventory_locations.create!(name: "Deal Depot", code: "DEAL-DEPOT")
+    draft = @organization.products.create!(name: "Upcoming Gi", slug: "upcoming-gi")
+    draft_variant = draft.product_variants.create!(name: "Medium", sku: "GI-M", price_cents: 8_000, active: true)
+    archived = @organization.products.create!(name: "Old Towel", slug: "old-towel")
+    archived_variant = archived.product_variants.create!(name: "Standard", sku: "OLD-TOWEL", price_cents: 2_000)
+    archived_variant.inventory_levels.create!(inventory_location: location, on_hand: 2)
+
+    with_role("fulfillment_staff") do
+      get "/api/v1/admin/inventory-snapshot", headers: @headers
+      assert_response :success
+      products = response.parsed_body.fetch("products").index_by { |product| product.fetch("name") }
+      assert_equal false, products.fetch("Upcoming Gi").fetch("active")
+      assert_equal true, products.fetch("Upcoming Gi").fetch("variants").first.fetch("active")
+      assert_equal false, products.fetch("Old Towel").fetch("variants").first.fetch("active")
+      assert_equal 2, products.fetch("Old Towel").dig("variants", 0, "inventory_levels", 0, "on_hand")
+
+      post "/api/v1/admin/products/#{draft.id}/inventory-adjustments",
+        params: { inventory_adjustment: { variant_id: draft_variant.id, location_id: location.id, quantity_delta: 3, reason: "received" } },
+        headers: @headers, as: :json
+      assert_response :created
+      assert_equal 3, draft_variant.inventory_levels.find_by!(inventory_location: location).on_hand
+    end
+  end
+
   test "unverified request is unauthorized rather than forbidden" do
     get "/api/v1/admin/products"
     assert_response :unauthorized
