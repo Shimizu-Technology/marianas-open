@@ -16,7 +16,7 @@ module Commerce
       {
         period: period,
         simulated_preview: paid_orders_in_period.where(
-          "orders.simulated = TRUE OR orders.stripe_checkout_session_id LIKE ?",
+          "(orders.simulated = TRUE OR orders.stripe_checkout_session_id LIKE ?)",
           "#{Order.sanitize_sql_like(Order::DEMO_SESSION_PREFIX)}%"
         ).exists?,
         summary: summary,
