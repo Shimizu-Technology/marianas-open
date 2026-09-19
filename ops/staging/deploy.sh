@@ -13,6 +13,7 @@ fi
 
 load_staging_secrets
 validate_staging_provider_credentials
+validate_staging_storage_configuration
 validate_staging_clerk_configuration
 
 state_dir="${SERVICE_DIR}/.staging-state"

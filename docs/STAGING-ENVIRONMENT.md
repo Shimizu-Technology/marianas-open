@@ -45,7 +45,7 @@ The Rails security scan currently records eight inherited Brakeman warnings. CI 
 Staging uses:
 
 - A local PostgreSQL volume with synthetic test records.
-- A local Active Storage volume, never the production S3 bucket.
+- A dedicated private S3 bucket (`mo-staging-media-248189943429`) for new uploads after activation, never the production bucket. The local Active Storage volume stays mounted so existing blobs remain readable until they are deliberately migrated.
 - Clerk test credentials.
 - Stripe Sandbox credentials from a separate test restricted key. The staging webhook subscribes to checkout-session and refund lifecycle events.
 - EasyPost test credentials and a staging-only tracking webhook.
@@ -69,12 +69,15 @@ The intended service checkout is `/Users/leonshimizu/services/marianas-open-stag
    - `marianas-open-staging-easypost-webhook-secret` (HMAC secret for the exact EasyPost test webhook)
    - `marianas-open-staging-stripe-api-key` (a least-privilege Stripe test restricted key)
    - `marianas-open-staging-stripe-webhook-secret` (signing secret for the exact staging webhook endpoint)
+   - `marianas-open-staging-aws-access-key-id` and `marianas-open-staging-aws-secret-access-key` (the dedicated `marianas-open-staging-storage` IAM user, limited to the staging media bucket)
 4. Install the LaunchAgent plist from `ops/staging/launchd/` into `~/Library/LaunchAgents/`.
 5. Bootstrap it with `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.shimizutechnology.marianas-open-staging.plist`.
 6. Expose the loopback origin only to the tailnet with `tailscale serve --bg --yes 8788`.
 
 The agent checks every three minutes. It never builds source on the host and does not require a GitHub token after the container packages are public.
 It rejects non-test Stripe and EasyPost keys before pulling or replacing any application container.
+
+Keep `ACTIVE_STORAGE_SERVICE=local` in the private `runtime.env` for the first deployment of S3-capable code. Once that deployment is healthy and the scoped AWS credentials are in Keychain, change it to `amazon` and redeploy the same reviewed staging SHA. The deployment script refuses to start S3 mode without both credentials. Verify a new admin upload, its image URL, and a customer-side image load before migrating older local blobs. Active Storage records each blob's service, so retaining both service configurations and the local volume allows old and new images to coexist. If reverting the default to `local`, keep the S3 credentials available for blobs already stored there.
 
 If the agent exits with status 127 and reports `docker: command not found`, reinstall the versioned plist. The LaunchAgent PATH must include `/Users/leonshimizu/.docker/bin`, where the Docker CLI is installed on the staging MacBook.
 
@@ -99,5 +102,6 @@ In Cloudflare Zero Trust, create a self-hosted Access application for `mo.shimiz
 - Stripe remains in Sandbox and EasyPost remains in test mode during acceptance.
 - Database migrations are backward compatible.
 - A staging database backup exists.
+- The staging-only S3 upload and retrieval path has been checked without using the production bucket.
 - The `staging` to `main` pull request contains only the intended release.
 - The Commerce → Launch Readiness page has no automatic blockers, and every required physical-pilot and business sign-off is passed with evidence.

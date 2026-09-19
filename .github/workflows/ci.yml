@@ -154,6 +154,26 @@ jobs:
             ((.services.api.tmpfs | any(startswith("/rails/tmp:"))) == true) and
             ((.services.worker.tmpfs | any(startswith("/rails/tmp:"))) == true)
           '
+      - name: Check staging S3 isolation
+        env:
+          IMAGE_TAG: validation
+          POSTGRES_PASSWORD: validation-only
+          SECRET_KEY_BASE: validation-only
+          CLERK_SECRET_KEY: sk_test_validation
+          ACTIVE_STORAGE_SERVICE: amazon
+          AWS_ACCESS_KEY_ID: AKIAVALIDATION
+          AWS_SECRET_ACCESS_KEY: validation-only
+        run: |
+          docker compose -f ops/staging/compose.yml config --format json | jq -e '
+            (.services.api.environment.ACTIVE_STORAGE_SERVICE == "amazon") and
+            (.services.worker.environment.ACTIVE_STORAGE_SERVICE == "amazon") and
+            (.services.api.environment.AWS_S3_BUCKET == "mo-staging-media-248189943429") and
+            (.services.worker.environment.AWS_S3_BUCKET == "mo-staging-media-248189943429") and
+            (.services.api.environment.AWS_REGION == "ap-southeast-2") and
+            (.services.worker.environment.AWS_REGION == "ap-southeast-2") and
+            (.services.api.environment.AWS_ACCESS_KEY_ID == "AKIAVALIDATION") and
+            (.services.worker.environment.AWS_ACCESS_KEY_ID == "AKIAVALIDATION")
+          '
       - name: Check deployment scripts
         run: bash -n ops/staging/*.sh
       - name: Check staging LaunchAgent command paths
@@ -163,6 +183,8 @@ jobs:
           ops/staging/launchd/com.shimizutechnology.marianas-open-staging.plist
       - name: Test staging provider boundaries
         run: ops/staging/test-provider-boundaries.sh
+      - name: Test staging storage boundaries
+        run: ops/staging/test-storage-boundaries.sh
       - name: Test staging Clerk configuration
         run: ops/staging/test-clerk-configuration.sh
       - name: Build staging API image

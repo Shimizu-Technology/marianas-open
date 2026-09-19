@@ -34,7 +34,9 @@ load_staging_secrets() {
   EASYPOST_WEBHOOK_SECRET="$(optional_keychain_secret marianas-open-staging-easypost-webhook-secret)"
   STRIPE_API_KEY="$(optional_keychain_secret marianas-open-staging-stripe-api-key)"
   STRIPE_WEBHOOK_SECRET="$(optional_keychain_secret marianas-open-staging-stripe-webhook-secret)"
-  export POSTGRES_PASSWORD SECRET_KEY_BASE CLERK_SECRET_KEY EASYPOST_API_KEY EASYPOST_WEBHOOK_SECRET STRIPE_API_KEY STRIPE_WEBHOOK_SECRET
+  AWS_ACCESS_KEY_ID="$(optional_keychain_secret marianas-open-staging-aws-access-key-id)"
+  AWS_SECRET_ACCESS_KEY="$(optional_keychain_secret marianas-open-staging-aws-secret-access-key)"
+  export POSTGRES_PASSWORD SECRET_KEY_BASE CLERK_SECRET_KEY EASYPOST_API_KEY EASYPOST_WEBHOOK_SECRET STRIPE_API_KEY STRIPE_WEBHOOK_SECRET AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
 }
 
 validate_staging_clerk_configuration() {
@@ -68,6 +70,22 @@ validate_staging_provider_credentials() {
     printf '%s\n' "Refusing to deploy staging with a non-test EasyPost key." >&2
     return 1
   fi
+}
+
+validate_staging_storage_configuration() {
+  case "${ACTIVE_STORAGE_SERVICE:-local}" in
+    local) ;;
+    amazon)
+      if [[ -z "${AWS_ACCESS_KEY_ID:-}" || -z "${AWS_SECRET_ACCESS_KEY:-}" ]]; then
+        printf '%s\n' "Staging S3 requires its dedicated AWS keychain credentials." >&2
+        return 1
+      fi
+      ;;
+    *)
+      printf '%s\n' "Staging supports only local or amazon Active Storage." >&2
+      return 1
+      ;;
+  esac
 }
 
 compose() {
