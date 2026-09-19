@@ -34,7 +34,13 @@ s3 = ActiveStorage::Blob.services.fetch("amazon")
 images.each do |image|
   blob = image.image.blob
   blob.with_lock do
-    next if blob.service_name == "amazon"
+    if blob.service_name == "amazon"
+      abort "S3 image missing: #{blob.id}" unless s3.exist?(blob.key)
+      remote_checksum = Base64.strict_encode64(Digest::MD5.digest(s3.download(blob.key)))
+      abort "S3 image checksum mismatch: #{blob.id}" unless remote_checksum == blob.checksum
+
+      next
+    end
     abort "Image service changed during migration" unless blob.service_name == "local"
 
     bytes = blob.download
