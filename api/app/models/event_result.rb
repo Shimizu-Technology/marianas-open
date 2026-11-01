@@ -20,7 +20,7 @@ class EventResult < ApplicationRecord
   scope :search, ->(q) {
     if q.present?
       names = Competitor.search_by_name(q).select(:id)
-      where("competitor_name ILIKE :q OR academy ILIKE :q OR competitor_id IN (:ids)",
+      left_joins(:result_academy).where("event_results.competitor_name ILIKE :q OR event_results.academy ILIKE :q OR academies.name ILIKE :q OR event_results.competitor_id IN (:ids)",
         q: "%#{sanitize_sql_like(q)}%", ids: names)
     end
   }

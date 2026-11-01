@@ -156,6 +156,33 @@ class IdentityAttributionTest < ActionDispatch::IntegrationTest
     assert_public_gym "Old Gym"
   end
 
+  test "results search finds canonical and raw academy names after a rename" do
+    @old_gym.update!(name: "Historic Grappling")
+    @early_result.update!(academy: "Historic Grappling")
+    patch "/api/v1/admin/academies/#{@old_gym.id}", params: { name: "Canonical Combat" }, headers: @headers, as: :json
+    assert_response :success
+    [ "Canonical Combat", "Historic Grappling" ].each do |query|
+      get "/api/v1/events/#{@early.slug}/results", params: { q: query }
+      assert_response :success
+      rows = response.parsed_body.flat_map { |division| division["results"] }
+      assert_equal [ @early_result.id ], rows.map { |row| row["id"] }
+      assert_equal "Canonical Combat", rows.first["academy"]
+      get "/api/v1/academies", params: { search: query }
+      assert_response :success
+      assert_equal [ @old_gym.id ], response.parsed_body["academies"].map { |row| row["id"] }
+    end
+    get "/api/v1/events/#{@early.slug}/results", params: { q: "No Such Gym" }
+    assert_response :success
+    assert_empty response.parsed_body
+    @early_result.update_columns(academy_id: nil)
+    get "/api/v1/events/#{@early.slug}/results", params: { q: "Historic Grappling" }
+    assert_response :success
+    assert_equal @early_result.id, response.parsed_body.dig(0, "results", 0, "id")
+    get "/api/v1/competitors", params: { search: @competitor.full_name }
+    assert_response :success
+    assert_equal [ @competitor.id ], response.parsed_body["competitors"].map { |row| row["id"] }
+  end
+
   test "merge APIs accept profile choices and previews expose conflicts" do
     @new_gym.update!(description: "New description")
     @old_gym.update!(description: "Old description")

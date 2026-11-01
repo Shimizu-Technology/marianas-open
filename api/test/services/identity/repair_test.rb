@@ -43,6 +43,9 @@ class IdentityRepairTest < ActiveSupport::TestCase
     assert_equal report[:projected], report[:after]
     [ 71004, 71005, 71006, 71007 ].each { |id| assert Academy.exists?(id) }
     [ 72003, 72004, 72005, 72006, 72007, 72008, 72009, 72010 ].each { |id| assert Competitor.exists?(id) }
+    # Other canonical athletes still own these name keys. The admitted merge
+    # succeeds without creating aliases that could hijack their identities.
+    assert_empty CompetitorAlias.where(competitor_id: 72001)
     raw = EventResult.pluck(:academy, :competitor_name, :placement)
     repeated = repair(apply: true)
     assert_empty repeated[:operations]

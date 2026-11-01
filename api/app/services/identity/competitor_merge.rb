@@ -3,11 +3,16 @@ module Identity
     class << self
       def preview(source, target)
         validate_pair!(source, target)
+        skipped = CompetitorAlias.name_plan(competitor: target, names: alias_names(source), excluding_competitor_ids: [ source.id ])
+          .select { |item| item[:competitor_ids].any? }
+        history_warnings = HistoryCheck.call(source, target)
         details = {
           source: { id: source.id, name: source.full_name },
           target: { id: target.id, name: target.full_name },
           results_count: EventResult.where(competitor_id: source.id).count,
-          warnings: HistoryCheck.call(source, target),
+          skipped_aliases: skipped,
+          history_warnings: history_warnings,
+          warnings: history_warnings + skipped.map { |item| "Skip alias #{item[:raw_name].inspect}: matches another athlete (IDs #{item[:competitor_ids].join(', ')})" },
           blocked: source.identity_separate? || target.identity_separate?,
           conflicts: ProfileMerge.conflicts(source, target)
         }
@@ -30,13 +35,10 @@ module Identity
           if review_token.present? && verifier.verified(review_token, purpose: "competitor_merge") != review_payload(details)
             raise ArgumentError, "Merge preview changed or expired; reload it and review the current warnings and counts"
           end
-          if details[:warnings].any? && confirm_warnings != true
-            raise ArgumentError, "Review and explicitly confirm history warnings: #{details[:warnings].join('; ')}"
+          if details[:history_warnings].any? && confirm_warnings != true
+            raise ArgumentError, "Review and explicitly confirm history warnings: #{details[:history_warnings].join('; ')}"
           end
-          raw_names = EventResult.where(competitor_id: source.id).pluck(:competitor_name, :raw_competitor_name).flatten.compact
-          names = source.identity_names + raw_names + raw_names.map { |name| NameNormalizer.person_parts(name).join(" ") }
-          CompetitorAlias.where(competitor_id: source.id).update_all(competitor_id: target.id)
-          CompetitorAlias.record_names!(competitor: target, names: names, source: "merge", actor: actor)
+          details[:skipped_aliases] = CompetitorAlias.record_names!(competitor: target, names: alias_names(source), source: "merge", actor: actor, excluding_competitor_ids: [ source.id ])
           discarded = ProfileMerge.apply(source, target, keep: keep)
           EventResult.where(competitor_id: source.id).update_all(competitor_id: target.id)
           # A gym with result history is derived from the latest result, not a
@@ -50,6 +52,8 @@ module Identity
           audit = details.except(:review_token).merge(action: "identity.competitor_merge", actor_id: actor&.id, discarded_values: discarded)
           ActiveRecord.after_all_transactions_commit { Rails.logger.info(audit.to_json) }
           target.reload
+          target.skipped_aliases = details[:skipped_aliases]
+          target
         end
       end
 
@@ -60,7 +64,12 @@ module Identity
       end
 
       def review_payload(details)
-        details.slice(:source, :target, :results_count, :blocked, :conflicts).merge(warnings: details[:warnings].sort).deep_stringify_keys
+        details.slice(:source, :target, :results_count, :blocked, :conflicts, :skipped_aliases).merge(warnings: details[:warnings].sort).deep_stringify_keys
+      end
+
+      def alias_names(source)
+        raw_names = EventResult.where(competitor_id: source.id).pluck(:competitor_name, :raw_competitor_name).flatten.compact
+        source.identity_names + source.competitor_aliases.order(:id).pluck(:raw_name) + raw_names + raw_names.map { |name| NameNormalizer.person_parts(name).join(" ") }
       end
 
       def validate_pair!(source, target)

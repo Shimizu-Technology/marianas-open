@@ -89,4 +89,39 @@ class IdentityNormalizationTest < ActiveSupport::TestCase
     assert_equal academy, AcademyLinker.resolve("Historic Review Label", create: false)
     assert_equal academy, Identity::AcademyAttribution.name_map[Identity::NameNormalizer.key("Historic Review Label")]
   end
+  test "competitor alias creation rejects canonical and alias collisions but accepts a single owner" do
+    owner = Competitor.create!(first_name: "Dan", last_name: "Santos")
+    canonical = Competitor.create!(first_name: "Daniel", last_name: "Santos")
+    [ "Daniel Santos", "Santos Daniel" ].each do |name|
+      candidate = CompetitorAlias.new(competitor: owner, raw_name: name, source: "manual")
+      assert_not candidate.valid?
+      assert candidate.errors[:normalized_key].any?
+    end
+    approved = CompetitorAlias.create!(competitor: owner, raw_name: "Danny Santos", source: "manual")
+    collision = CompetitorAlias.new(competitor: canonical, raw_name: "Danny-Santos", source: "rename")
+    assert_not collision.valid?
+    skipped = CompetitorAlias.record_names!(competitor: canonical, names: [ "Danny Santos" ], source: "rename")
+    assert_equal [ owner.id ], skipped.fetch(0).fetch(:competitor_ids)
+    assert_equal owner.id, approved.reload.competitor_id
+    assert_no_difference "Competitor.count" do
+      assert_equal owner, CompetitorLinker.find_or_create("Danny Santos")
+    end
+  end
+
+  test "linker combines legacy aliases and canonical matches and honors protected alias owners" do
+    owner = Competitor.create!(first_name: "Dan", last_name: "Santos")
+    approved = CompetitorAlias.create!(competitor: owner, raw_name: "Daniel Santos", source: "manual")
+    other = Competitor.create!(first_name: "Daniel", last_name: "Santos")
+    [ false, true ].each do |separate|
+      other.update!(identity_separate: separate)
+      assert_equal [ owner.id, other.id ].sort, CompetitorLinker.candidates_for("Daniel Santos").map(&:id).sort
+      assert_no_difference "Competitor.count" do
+        assert_nil CompetitorLinker.find_or_create("Daniel Santos")
+      end
+    end
+    other.destroy!
+    assert_equal owner, CompetitorLinker.find_or_create(approved.raw_name)
+    owner.update!(identity_separate: true)
+    assert_nil CompetitorLinker.find_or_create(approved.raw_name)
+  end
 end

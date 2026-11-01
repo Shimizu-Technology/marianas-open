@@ -135,14 +135,8 @@ class CompetitorLinker
     end
 
     def name_candidates(key)
-      approved = CompetitorAlias.find_by(normalized_key: key)
-      return [ approved.competitor ] if approved
-      indexed = Competitor.where(normalized_name: key).or(Competitor.where(reverse_normalized_name: key)).to_a
-      legacy = Competitor.where(normalized_name: nil).select do |competitor|
-        [normalize("#{competitor.first_name} #{competitor.last_name}"),
-          normalize("#{competitor.last_name} #{competitor.first_name}")].include?(key)
-      end
-      (indexed + legacy).uniq(&:id)
+      approved = Competitor.where(id: CompetitorAlias.where(normalized_key: key).select(:competitor_id)).to_a
+      (Competitor.canonical_name_matches(key) + approved).uniq(&:id)
     end
 
     def compatible_result?(competitor, sample)

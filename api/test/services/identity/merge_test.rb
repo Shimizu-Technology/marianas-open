@@ -257,7 +257,7 @@ class IdentityMergeTest < ActiveSupport::TestCase
     end
   end
 
-  test "existing approved aliases move to the survivor and conflicting approved identities roll back" do
+  test "existing approved aliases move to the survivor and conflicting approved identities are reported and skipped" do
     source = person(first_name: "Daniel", last_name: "Santos")
     target = person(first_name: "Dan", last_name: "Santos")
     prior = CompetitorAlias.create!(competitor: source, raw_name: "Santos Danny", source: "manual")
@@ -265,9 +265,27 @@ class IdentityMergeTest < ActiveSupport::TestCase
     assert_equal target.id, prior.reload.competitor_id
     duplicate = person(first_name: "Daniel", last_name: "Santos")
     other = person(first_name: "Different")
-    assert_raises(ArgumentError) { Identity::CompetitorMerge.call(source: duplicate, target: other, confirm: true, confirm_warnings: true) }
-    assert Competitor.exists?(duplicate.id)
+    preview = Identity::CompetitorMerge.preview(duplicate, other)
+    merged = Identity::CompetitorMerge.call(source: duplicate, target: other, confirm: true, confirm_warnings: true)
+    assert_not Competitor.exists?(duplicate.id)
+    assert_equal preview[:skipped_aliases], merged.skipped_aliases
+    assert_equal %w[danielsantos santosdaniel], merged.skipped_aliases.map { |item| item[:normalized_key] }.sort
+    assert merged.skipped_aliases.all? { |item| item[:competitor_ids] == [ target.id ] }
+    assert_empty other.competitor_aliases
     assert_equal target.id, CompetitorAlias.find_by!(normalized_key: "danielsantos").competitor_id
+  end
+
+  test "transferred aliases that collide with a third canonical athlete are skipped" do
+    source = person(first_name: "Daniel", last_name: "Santos")
+    target = person(first_name: "Dan", last_name: "Santos")
+    prior = CompetitorAlias.create!(competitor: source, raw_name: "Santos Danny", source: "manual")
+    third = person(first_name: "Danny", last_name: "Santos", identity_separate: true)
+    merged = Identity::CompetitorMerge.call(source: source, target: target, confirm: true, confirm_warnings: true)
+    assert_not CompetitorAlias.exists?(prior.id)
+    skip = merged.skipped_aliases.find { |item| item[:normalized_key] == "santosdanny" }
+    assert_equal [ third.id ], skip[:competitor_ids]
+    assert_nil CompetitorLinker.find_or_create("Santos Danny")
+    assert_equal target, CompetitorLinker.find_or_create("Santos Daniel")
   end
 
   test "legacy encoded academy twins merge in either direction with attachments" do

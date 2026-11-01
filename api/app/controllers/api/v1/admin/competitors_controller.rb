@@ -90,7 +90,7 @@ module Api
           raise ArgumentError, "A current merge preview is required" unless params[:review_token].is_a?(String) && params[:review_token].present?
           target = Identity::CompetitorMerge.call(source: @competitor, target: Competitor.find(params[:target_id]),
             confirm: params[:confirm] == true, confirm_warnings: params[:confirm_warnings] == true, actor: current_user, review_token: params[:review_token], keep: (params[:keep].present? ? params.permit(keep: {}).fetch(:keep).to_h : {}))
-          render json: { competitor: target.as_json }
+          render json: { competitor: target.as_json, skipped_aliases: target.skipped_aliases }
         rescue ArgumentError, ActiveRecord::RecordInvalid => e
           render json: { error: e.message }, status: :unprocessable_entity
         rescue ActiveRecord::RecordNotFound
@@ -109,17 +109,22 @@ module Api
         def update
           old_name = @competitor.full_name
           saved = false
+          skipped_aliases = []
           Competitor.transaction do
             Competitor.connection.execute("SELECT pg_advisory_xact_lock(184527002)")
             @competitor.lock!
             old_names = @competitor.identity_names
             renamed = competitor_params.slice(:first_name, :last_name).to_h.any? { |key, value| @competitor.public_send(key) != value }
             saved = @competitor.update(competitor_params)
-            CompetitorAlias.record_names!(competitor: @competitor, names: old_names, source: "rename", actor: current_user) if saved && renamed
+            if saved
+              skipped_aliases = CompetitorAlias.record_names!(competitor: @competitor, names: old_names, source: "rename", actor: current_user) if renamed
+              audit = { action: "identity.competitor_update", actor_id: current_user.id, competitor_id: @competitor.id,
+                old_name: old_name, new_name: @competitor.full_name, skipped_aliases: skipped_aliases }
+              ActiveRecord.after_all_transactions_commit { Rails.logger.info(audit.to_json) }
+            end
           end
           if saved
-            Rails.logger.info("[Identity] competitor_update actor=#{current_user.id} competitor=#{@competitor.id} old_name=#{old_name.inspect} new_name=#{@competitor.full_name.inspect}")
-            render json: { competitor: @competitor.reload.as_json }
+            render json: { competitor: @competitor.reload.as_json, skipped_aliases: skipped_aliases }
           else
             render json: { errors: @competitor.errors.full_messages }, status: :unprocessable_entity
           end

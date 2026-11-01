@@ -1,4 +1,6 @@
 class Competitor < ApplicationRecord
+  attr_accessor :skipped_aliases
+
   has_one_attached :photo
   has_many :event_results, dependent: :nullify
   has_many :competitor_aliases, dependent: :destroy
@@ -15,6 +17,17 @@ class Competitor < ApplicationRecord
       q: "%#{sanitize_sql_like(query)}%", key: "%#{Identity::NameNormalizer.key(query)}%")
   }
   scope :with_results, -> { where(id: EventResult.select(:competitor_id).distinct) }
+
+  def self.canonical_name_matches(key)
+    return [] if key.blank?
+    indexed = where(normalized_name: key).or(where(reverse_normalized_name: key)).to_a
+    legacy = where(normalized_name: nil).or(where(reverse_normalized_name: nil)).select do |competitor|
+      ["#{competitor.first_name} #{competitor.last_name}", "#{competitor.last_name} #{competitor.first_name}"].any? do |name|
+        Identity::NameNormalizer.key(name) == key
+      end
+    end
+    (indexed + legacy).uniq(&:id)
+  end
 
   def refresh_current_academy!
     latest = event_results.joins(:event).order("events.date DESC NULLS LAST, events.id DESC, event_results.id DESC").first
