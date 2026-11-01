@@ -16,12 +16,12 @@ C1 owns HomePage, EventDetailPage, CalendarPage, PastEventsPage, EventGalleryPag
 | Case | Required coverage | Expected outcome | Status |
 | --- | --- | --- | --- |
 | C2-01 Public routes | Home, calendar, Copa 2026, rankings, competitors, teams at 390×844 and 1440×900 | Live data loads, no serious/critical axe issues, no horizontal overflow | Passed |
-| C2-02 Search | Both widths, keyboard and pointer, real public results | Full-viewport dimming, named dialog/input/close, focus remains in modal, Escape restores opener and scroll, result opens its public destination | In progress |
-| C2-03 Mobile nav/language | 390px, English/Japanese | 44px language target, translated navigation, no FAB or public mobile Admin link, locale persists | In progress |
+| C2-02 Search | Both widths, keyboard and pointer, real public results | Full-viewport dimming, named dialog/input/close, focus remains in modal, Escape restores opener and scroll, result opens its public destination | Passed |
+| C2-03 Mobile nav/language | 390px, English/Japanese | 44px language target, translated navigation, no FAB or public mobile Admin link, locale persists | Passed |
 | C2-04 Loading/navigation | Four measured routes, cold load plus client navigation | Immediate route changes, scroll resets without smooth-scroll race, full-height fallback, reserved Impact slot | Passed |
 | C2-05 Public/admin boundary | Unit tests and production build graph; public network inspection | Public routes never import Clerk; direct and client-side admin entry load lazy boundary, fail closed without configured auth | Passed |
 | C2-06 Analytics | Unit tests | SDK loads after paint/idle, pageview once with current route, admin identity remains functional | Passed |
-| C2-07 Motion/input | Emulated touch/reduced motion and source checks | Mobile inputs ≥16px, focus/press feedback, no route animation, local images select responsive source | In progress |
+| C2-07 Motion/input | Emulated touch/reduced motion and source checks | Mobile inputs ≥16px, focus/press feedback, no route animation, local images select responsive source | Passed |
 
 No sign-in to production admin and no production mutations. No API test DB is needed. Physical iOS/Android keyboard, browser chrome, and touch hardware are not available; emulation and CSS checks do not establish those hardware behaviors.
 
@@ -58,7 +58,7 @@ Raw summarized evidence: [before](c2/before.json), [after](c2/after.json), [chun
 
 Screenshots: [search before](c2/search-before.png), [search after](c2/search-after.png), [mobile navigation before](c2/nav-before.png), [mobile navigation after](c2/nav-after.png).
 
-Final keyboard, search result, Japanese locale persistence, reduced-motion, input-size, local image source, and admin-boundary interaction script is running after measurement; its result will be added before handoff.
+Final interaction QA passed at 390px and 1440px: search portals outside the header with full-viewport dimming; search input receives focus; Shift+Tab/Tab wrap; Escape restores opener and scroll; real Copa results navigate with scroll reset; public routes request no Clerk assets; local production `/admin` fails closed without a configured key. At 390px the language target is ≥44×44px, the public mobile nav has translated Japanese labels and no Admin/FAB, Japanese persists across navigation, headings use auto-phrase/keep-all without horizontal overflow, mobile inputs are ≥16px, primary press feedback responds, and reduced-motion disables smooth scrolling. Mobile menu → Ctrl+K → Escape restores body styles. Known local image sources expose srcset/sizes; uploaded originals remain untouched. See [interaction results](c2/interactions.json), [Japanese nav](c2/nav-ja.png), and [Japanese home](c2/home-ja.png).
 
 | Width | Route | CLS before → after | LCP before → after | Serious/critical axe nodes before → after |
 | --- | --- | --- | --- | --- |
@@ -75,3 +75,7 @@ Final keyboard, search result, Japanese locale persistence, reduced-motion, inpu
 | 1440 | /competitors | 0.287 → 0.000 | 0.76s → 0.47s | 26 → 0 |
 | 1440 | /teams | 0.277 → 0.000 | 0.87s → 0.48s | 32 → 0 |
 
+
+## Resource and integration disposition
+
+Owned preview server and temporary browser processes are cleaned at handoff; no resource is intentionally transferred. The worktree and `agent/a11y-performance` branch remain for parent-owned merge/integration. PR #118 must not be merged by this implementation worker. Re-check current CI and CodeRabbit on the final documentation head before integration; code validation refers to implementation `33c0212`, and later commits only add evidence.
