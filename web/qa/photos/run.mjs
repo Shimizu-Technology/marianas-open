@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 const session = process.env.DEV_LIFECYCLE_SESSION_ID;
 if (!session) throw new Error('Set DEV_LIFECYCLE_SESSION_ID to the task lifecycle session.');
 const evidence = fileURLToPath(new URL('../../../docs/qa/photo-intake/', import.meta.url));
+const sourceCommit = spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).stdout.trim();
 await mkdir(evidence, { recursive: true });
 const lifecycle = (...args) => {
   const result = spawnSync('dev-lifecycle', args, { encoding: 'utf8' });
@@ -75,7 +76,7 @@ try {
     await context.close();
   }
   await browser.close();
-  await writeFile(`${evidence}browser-results.json`, JSON.stringify({ synthetic: true, physicalPhone: 'not_run', results }, null, 2) + '\n');
+  await writeFile(`${evidence}browser-results.json`, JSON.stringify({ sourceCommit, synthetic: true, physicalPhone: 'not_run', results }, null, 2) + '\n');
   console.log(JSON.stringify(results));
 } finally {
   await server.close();
