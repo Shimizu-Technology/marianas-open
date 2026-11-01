@@ -4,12 +4,15 @@ import { Building2, Pencil, X, Loader2, Save, Search, Medal, ChevronDown, Chevro
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Academy, AcademyFormData, AcademyDetail } from '../../services/api'
+import IdentityMergePanel from '../../components/admin/IdentityMergePanel'
+import AcademyIdentityReviewQueue from '../../components/admin/AcademyIdentityReviewQueue'
+import IdentityRecordPicker from '../../components/admin/IdentityRecordPicker'
 import ImageUpload from '../../components/ImageUpload'
 import { useEditingParam } from '../../hooks/useEditingParam'
 
 const emptyForm: AcademyFormData = {
   name: '', country_code: '', location: '', website_url: '',
-  instagram_url: '', facebook_url: '', description: '', aliases: [],
+  instagram_url: '', facebook_url: '', description: '', aliases: [], parent_id: null, unaffiliated: false,
 }
 
 const PAGE_SIZE = 50
@@ -23,6 +26,11 @@ export default function AcademiesAdmin() {
   const [editing, setEditing] = useEditingParam()
   const [editDetail, setEditDetail] = useState<AcademyDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [detailAttempt, setDetailAttempt] = useState(0)
+  const [detailError, setDetailError] = useState('')
+  const [profileDirty, setProfileDirty] = useState(false)
+  const [mergeBusy, setMergeBusy] = useState(false)
+  const [parentChoice, setParentChoice] = useState<{ id: number; name: string } | null>(null)
 
   const [form, setForm] = useState<AcademyFormData>(emptyForm)
   const [saving, setSaving] = useState(false)
@@ -73,32 +81,41 @@ export default function AcademiesAdmin() {
   }, [load])
 
   useEffect(() => {
+    let active = true
+    setEditDetail(null); setForm(emptyForm); setProfileDirty(false); setDetailError(''); setParentChoice(null)
     if (typeof editing === 'number') {
-      const a = academies.find(x => x.id === editing)
-      if (a) {
-        setForm({
-          name: a.name, country_code: a.country_code || '',
-          location: a.location || '', website_url: a.website_url || '',
-          instagram_url: a.instagram_url || '', facebook_url: a.facebook_url || '',
-          description: a.description || '', aliases: a.aliases || [],
-        })
-      }
       setDetailLoading(true)
-      api.admin.getAcademy(editing)
-        .then(res => setEditDetail(res.academy))
-        .catch(() => setEditDetail(null))
-        .finally(() => setDetailLoading(false))
-    } else {
-      setEditDetail(null)
-    }
-  }, [editing, academies])
+      api.admin.getAcademy(editing).then(({ academy: a }) => {
+        if (!active) return
+        setEditDetail(a)
+        setForm({
+          name: a.name, country_code: a.country_code || '', location: a.location || '',
+          website_url: a.website_url || '', instagram_url: a.instagram_url || '',
+          facebook_url: a.facebook_url || '', description: a.description || '', aliases: a.aliases || [],
+          parent_id: a.parent_id ?? null, unaffiliated: a.unaffiliated ?? false,
+        })
+        if (a.parent_id) {
+          const parentId = a.parent_id
+          setParentChoice({ id: parentId, name: 'Parent academy' })
+          // Resolve the saved parent's display name even when it is outside the current table page.
+          api.admin.getAcademy(parentId).then(({ academy: parent }) => {
+            if (active) setParentChoice(choice => choice?.id === parentId ? { id: parentId, name: parent.name } : choice)
+          }).catch(() => { /* Keep the saved ID visible if its name cannot be loaded. */ })
+        }
+      }).catch(err => { if (active) setDetailError(err instanceof Error ? err.message : 'Could not load academy.') })
+        .finally(() => { if (active) setDetailLoading(false) })
+    } else setDetailLoading(false)
+    return () => { active = false }
+  }, [editing, detailAttempt])
 
   const handleSave = async () => {
-    if (typeof editing !== 'number') return
+    if (typeof editing !== 'number' || editDetail?.id !== editing || !form.name.trim() || mergeBusy) return
     setSaving(true); setError('')
     try {
       const payload = { ...form, aliases: form.aliases.filter(s => s.trim() !== '') }
-      await api.admin.updateAcademy(editing, payload)
+      const response = await api.admin.updateAcademy(editing, payload)
+      setEditDetail(detail => detail ? { ...detail, ...response.academy, athletes: detail.athletes } : null)
+      setProfileDirty(false)
       setSuccess('Academy updated')
       await load()
       setTimeout(() => setSuccess(''), 3000)
@@ -109,8 +126,12 @@ export default function AcademiesAdmin() {
 
   const handleLogoUpload = async (file: File) => {
     if (typeof editing !== 'number') return
-    await api.admin.uploadAcademyLogo(editing, file)
-    await load()
+    setSaving(true)
+    try {
+      const response = await api.admin.uploadAcademyLogo(editing, file)
+      setEditDetail(detail => detail ? { ...detail, ...response.academy, athletes: detail.athletes } : null)
+      await load()
+    } finally { setSaving(false) }
   }
 
   const currentAcademy = typeof editing === 'number' ? academies.find(a => a.id === editing) : null
@@ -153,21 +174,23 @@ export default function AcademiesAdmin() {
       <AnimatePresence>
         {success && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="mb-4 px-4 py-2 bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
+            role="status" className="mb-4 px-4 py-2 bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
           >{success}</motion.div>
         )}
         {error && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="mb-4 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+            role="alert" className="mb-4 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
           >{error}</motion.div>
         )}
       </AnimatePresence>
+
+      {editing === null && <AcademyIdentityReviewQueue onResolved={() => { void load() }} />}
 
       {editing !== null && typeof editing === 'number' ? (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-surface border border-white/5">
           <div className="px-4 sm:px-5 py-4 border-b border-white/5 flex items-center justify-between">
             <h2 className="font-heading text-sm font-semibold text-text-primary">Edit Academy Profile</h2>
-            <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
+            <button aria-label="Close academy editor" disabled={saving || mergeBusy} onClick={() => { setEditing(null); setError('') }} className="min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-text-primary disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -201,100 +224,119 @@ export default function AcademiesAdmin() {
           )}
 
           <div className="p-4 sm:p-5 space-y-4">
-            {/* Athletes list */}
-            {detailLoading ? (
-              <div className="flex items-center gap-2 py-4 text-text-muted text-xs"><Loader2 className="w-3 h-3 animate-spin" /> Loading athletes...</div>
-            ) : editDetail?.athletes && editDetail.athletes.length > 0 ? (
-              <div>
-                <label className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-2 block">
-                  Athletes ({editDetail.athletes.length})
-                </label>
-                <div className="max-h-48 overflow-y-auto border border-white/5 divide-y divide-white/5">
-                  {editDetail.athletes.map((a: { id: number; full_name: string; belt_rank: string | null; country_code: string | null }) => (
-                    <div key={a.id} className="px-3 py-2 flex items-center justify-between text-xs">
-                      <button
-                        onClick={() => navigate(`/admin/competitors?edit=${a.id}`)}
-                        className="text-text-primary hover:text-gold transition-colors text-left"
-                      >
-                        {a.full_name}
-                      </button>
-                      <div className="flex items-center gap-2 text-text-muted">
-                        {a.belt_rank && <span className="capitalize">{a.belt_rank}</span>}
-                        {a.country_code && <span>{a.country_code}</span>}
+            {detailError && <p role="alert" className="text-sm text-red-300">{detailError} <button type="button" onClick={() => setDetailAttempt(n => n + 1)} className="min-h-11 px-3 underline">Retry profile</button></p>}
+            <fieldset disabled={saving || mergeBusy || detailLoading || editDetail?.id !== editing} onChange={() => setProfileDirty(true)} className="min-w-0 space-y-4">
+              {/* Athletes list */}
+              {detailLoading ? (
+                <div className="flex items-center gap-2 py-4 text-text-muted text-xs"><Loader2 className="w-3 h-3 animate-spin" /> Loading athletes...</div>
+              ) : editDetail?.athletes && editDetail.athletes.length > 0 ? (
+                <div>
+                  <label className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-2 block">
+                    Athletes ({editDetail.athletes.length})
+                  </label>
+                  <div className="max-h-48 overflow-y-auto border border-white/5 divide-y divide-white/5">
+                    {editDetail.athletes.map((a: { id: number; full_name: string; belt_rank: string | null; country_code: string | null }) => (
+                      <div key={a.id} className="px-3 py-2 flex items-center justify-between text-xs">
+                        <button
+                          onClick={() => navigate(`/admin/competitors?edit=${a.id}`)}
+                          className="text-text-primary hover:text-gold transition-colors text-left"
+                        >
+                          {a.full_name}
+                        </button>
+                        <div className="flex items-center gap-2 text-text-muted">
+                          {a.belt_rank && <span className="capitalize">{a.belt_rank}</span>}
+                          {a.country_code && <span>{a.country_code}</span>}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : null}
+              ) : null}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Academy Name *</label>
-                <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Country Code</label>
-                  <input value={form.country_code} onChange={e => setForm(p => ({ ...p, country_code: e.target.value.toUpperCase().slice(0, 2) }))}
-                    placeholder="GU, JP, KR..."
-                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                  <label htmlFor="academy-name" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Academy Name *</label>
+                  <input id="academy-name" required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="academy-country" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Country Code</label>
+                    <input id="academy-country" maxLength={3} value={form.country_code} onChange={e => setForm(p => ({ ...p, country_code: e.target.value.toUpperCase().slice(0, 3) }))}
+                      placeholder="GU / GUM, JP / JPN…"
+                      className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label htmlFor="academy-location" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Location</label>
+                    <input id="academy-location" value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))}
+                      placeholder="City, Country"
+                      className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="academy-website_url" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Website</label>
+                  <input id="academy-website_url" value={form.website_url} onChange={e => setForm(p => ({ ...p, website_url: e.target.value }))}
+                    placeholder="https://..."
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Location</label>
-                  <input value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))}
-                    placeholder="City, Country"
-                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                  <label htmlFor="academy-instagram_url" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Instagram</label>
+                  <input id="academy-instagram_url" value={form.instagram_url} onChange={e => setForm(p => ({ ...p, instagram_url: e.target.value }))}
+                    placeholder="https://instagram.com/..."
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label htmlFor="academy-facebook_url" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Facebook</label>
+                  <input id="academy-facebook_url" value={form.facebook_url} onChange={e => setForm(p => ({ ...p, facebook_url: e.target.value }))}
+                    placeholder="https://facebook.com/..."
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
                 </div>
               </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Website</label>
-                <input value={form.website_url} onChange={e => setForm(p => ({ ...p, website_url: e.target.value }))}
-                  placeholder="https://..."
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                <label htmlFor="academy-description" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Description</label>
+                <textarea id="academy-description" value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3}
+                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none resize-none" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Instagram</label>
-                <input value={form.instagram_url} onChange={e => setForm(p => ({ ...p, instagram_url: e.target.value }))}
-                  placeholder="https://instagram.com/..."
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                <label htmlFor="academy-aliases" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Aliases (previous / alternate names)</label>
+                <textarea id="academy-aliases"
+                  value={form.aliases.join('\n')}
+                  onChange={e => setForm(p => ({ ...p, aliases: e.target.value.split('\n').map(s => s.trim()) }))}
+                  rows={3}
+                  placeholder="One name per line, e.g.&#10;Atos Jiu-Jitsu Guam&#10;Atos BJJ Guam"
+                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none" />
+                <p className="text-[10px] text-text-muted mt-1">When importing results, competitors from these names will be linked to this academy.</p>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Facebook</label>
-                <input value={form.facebook_url} onChange={e => setForm(p => ({ ...p, facebook_url: e.target.value }))}
-                  placeholder="https://facebook.com/..."
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Description</label>
-              <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3}
-                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none resize-none" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Aliases (previous / alternate names)</label>
-              <textarea
-                value={form.aliases.join('\n')}
-                onChange={e => setForm(p => ({ ...p, aliases: e.target.value.split('\n').map(s => s.trim()) }))}
-                rows={3}
-                placeholder="One name per line, e.g.&#10;Atos Jiu-Jitsu Guam&#10;Atos BJJ Guam"
-                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none" />
-              <p className="text-[10px] text-text-muted mt-1">When importing results, competitors from these names will be linked to this academy.</p>
-            </div>
 
-            <ImageUpload currentUrl={currentAcademy?.logo_url || null} onUpload={handleLogoUpload} label="Logo" />
+              <p className="text-sm text-text-secondary">Changing the name updates this gym's profile. Use aliases above to recognize its previous names on future imports.</p>
+              <label htmlFor="academy-unaffiliated" className="flex items-start gap-3 py-2 text-sm text-text-primary">
+                <input id="academy-unaffiliated" type="checkbox" checked={form.unaffiliated} onChange={e => setForm(p => ({ ...p, unaffiliated: e.target.checked }))} className="mt-1 size-5 shrink-0 accent-gold" />
+                <span>Unaffiliated / no gym</span>
+              </label>
+              <IdentityRecordPicker kind="academies" label="Parent academy (optional)" excludeId={typeof editing === 'number' ? editing : undefined}
+                value={parentChoice} disabled={saving || mergeBusy || detailLoading || editDetail?.id !== editing} onChange={value => {
+                  setParentChoice(value); setForm(p => ({ ...p, parent_id: value?.id ?? null })); setProfileDirty(true)
+                }} />
+              {form.parent_id && <button type="button" onClick={() => { setParentChoice(null); setForm(p => ({ ...p, parent_id: null })); setProfileDirty(true) }} className="min-h-11 px-3 text-sm text-gold underline">Remove parent academy</button>}
+              <p className="text-sm text-text-secondary">A parent keeps branches separate. A merge removes a duplicate record.</p>
 
-            <div className="flex gap-3 pt-2">
-              <button onClick={handleSave} disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50">
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-              <button onClick={() => { setEditing(null); setError('') }} className="px-5 py-2.5 text-text-muted text-sm hover:text-text-primary">Cancel</button>
-            </div>
+              <ImageUpload currentUrl={editDetail?.logo_url || currentAcademy?.logo_url || null} onUpload={handleLogoUpload} label="Logo" />
+
+              <div className="flex gap-3 pt-2">
+                <button onClick={handleSave} disabled={saving || detailLoading || editDetail?.id !== editing || !form.name.trim()}
+                  className="min-h-11 flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50">
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button disabled={saving || mergeBusy} onClick={() => { setEditing(null); setError('') }} className="min-h-11 px-5 py-2.5 text-text-muted text-sm hover:text-text-primary">Cancel</button>
+              </div>
+            </fieldset>
+            {editDetail?.id === editing && <IdentityMergePanel key={`${editing}:${profileDirty}`} kind="academies" source={{ id: editing, name: editDetail.name }}
+              disabled={saving || detailLoading || profileDirty} onBusyChange={setMergeBusy} onMerged={target => {
+                setSuccess(`Merged academy into ${target.name} (ID ${target.id}).`); setEditing(target.id); void load()
+              }} />}
           </div>
         </motion.div>
       ) : (
@@ -304,7 +346,7 @@ export default function AcademiesAdmin() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input type="text" value={searchInput} onChange={e => handleSearchChange(e.target.value)}
                 placeholder="Search academies..."
-                className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
             </div>
           </div>
 

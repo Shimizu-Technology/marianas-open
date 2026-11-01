@@ -1,3 +1,4 @@
+import CountryFlag from '../components/CountryFlag';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -188,11 +189,7 @@ export default function CompetitorProfilePage() {
                         {profile.country_code && (
                           <span className="flex items-center gap-1.5">
                             <MapPin size={14} className="text-text-muted" />
-                            <img
-                              src={`https://flagcdn.com/w40/${profile.country_code.toLowerCase()}.png`}
-                              alt={profile.country_code}
-                              className="w-5 h-3.5 object-cover rounded-sm inline-block"
-                            />
+                            <CountryFlag code={profile.country_code} />
                             {profile.country_code}
                           </span>
                         )}

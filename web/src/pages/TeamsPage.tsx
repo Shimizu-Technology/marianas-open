@@ -1,3 +1,4 @@
+import CountryFlag from '../components/CountryFlag';
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -7,15 +8,6 @@ import type { Academy } from '../services/api';
 import ScrollReveal from '../components/ScrollReveal';
 import SEO from '../components/SEO';
 
-function CountryFlag({ code }: { code: string }) {
-  return (
-    <img
-      src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
-      alt={code}
-      className="w-5 h-3.5 object-cover rounded-sm inline-block"
-    />
-  );
-}
 
 function AcademyCard({ academy }: { academy: Academy }) {
   return (

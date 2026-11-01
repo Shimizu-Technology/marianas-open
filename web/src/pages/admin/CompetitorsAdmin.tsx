@@ -4,6 +4,7 @@ import { Users, Pencil, Trash2, X, Loader2, Save, Search, Medal, ChevronDown, Ch
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Competitor, CompetitorFormData, CompetitorDetail, CompetitorProfileResult } from '../../services/api'
+import IdentityMergePanel from '../../components/admin/IdentityMergePanel'
 import ImageUpload from '../../components/ImageUpload'
 import { useEditingParam } from '../../hooks/useEditingParam'
 
@@ -78,6 +79,10 @@ export default function CompetitorsAdmin() {
   const [editing, setEditing] = useEditingParam()
   const [editDetail, setEditDetail] = useState<CompetitorDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [detailError, setDetailError] = useState('')
+  const [detailAttempt, setDetailAttempt] = useState(0)
+  const [profileDirty, setProfileDirty] = useState(false)
+  const [mergeBusy, setMergeBusy] = useState(false)
 
   const [form, setForm] = useState<CompetitorFormData>(emptyForm)
   const [saving, setSaving] = useState(false)
@@ -118,14 +123,14 @@ export default function CompetitorsAdmin() {
 
   useEffect(() => { load() }, [load])
 
-  // When editing changes, load the competitor detail (with results)
   useEffect(() => {
-    if (editing === 'new') {
-      setForm(emptyForm)
-      setEditDetail(null)
-    } else if (typeof editing === 'number') {
-      const c = competitors.find(x => x.id === editing)
-      if (c) {
+    let active = true
+    setEditDetail(null); setForm(emptyForm); setProfileDirty(false); setDetailError('')
+    if (typeof editing === 'number') {
+      setDetailLoading(true)
+      api.admin.getCompetitor(editing).then(({ competitor: c }) => {
+        if (!active) return
+        setEditDetail(c)
         setForm({
           first_name: c.first_name, last_name: c.last_name, nickname: c.nickname || '',
           country_code: c.country_code || '', belt_rank: c.belt_rank || '',
@@ -133,18 +138,14 @@ export default function CompetitorsAdmin() {
           instagram_url: c.instagram_url || '', youtube_url: c.youtube_url || '',
           wins: c.wins, losses: c.losses, draws: c.draws,
         })
-      }
-      setDetailLoading(true)
-      api.admin.getCompetitor(editing)
-        .then(res => setEditDetail(res.competitor))
-        .catch(() => setEditDetail(null))
-        .finally(() => setDetailLoading(false))
-    } else {
-      setEditDetail(null)
-    }
-  }, [editing, competitors])
+      }).catch(err => { if (active) setDetailError(err instanceof Error ? err.message : 'Could not load competitor.') })
+        .finally(() => { if (active) setDetailLoading(false) })
+    } else setDetailLoading(false)
+    return () => { active = false }
+  }, [editing, detailAttempt])
 
   const handleSave = async () => {
+    if (!form.first_name.trim() || !form.last_name.trim() || mergeBusy || (typeof editing === 'number' && editDetail?.id !== editing)) return
     setSaving(true); setError('')
     try {
       if (editing === 'new') {
@@ -153,7 +154,9 @@ export default function CompetitorsAdmin() {
         await load()
         if (res.competitor?.id) setEditing(res.competitor.id)
       } else if (typeof editing === 'number') {
-        await api.admin.updateCompetitor(editing, form)
+        const response = await api.admin.updateCompetitor(editing, form)
+        setProfileDirty(false)
+        setEditDetail(detail => detail ? { ...detail, ...response.competitor } : null)
         setSuccess('Competitor updated')
         await load()
       }
@@ -174,8 +177,12 @@ export default function CompetitorsAdmin() {
 
   const handlePhotoUpload = async (file: File) => {
     if (typeof editing !== 'number') return
-    await api.admin.uploadCompetitorPhoto(editing, file)
-    await load()
+    setSaving(true)
+    try {
+      const response = await api.admin.uploadCompetitorPhoto(editing, file)
+      setEditDetail(detail => detail ? { ...detail, ...response.competitor } : null)
+      await load()
+    } finally { setSaving(false) }
   }
 
   const currentCompetitor = typeof editing === 'number' ? competitors.find(c => c.id === editing) : null
@@ -220,12 +227,12 @@ export default function CompetitorsAdmin() {
       <AnimatePresence>
         {success && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="mb-4 px-4 py-2 bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
+            role="status" className="mb-4 px-4 py-2 bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
           >{success}</motion.div>
         )}
         {error && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="mb-4 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+            role="alert" className="mb-4 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
           >{error}</motion.div>
         )}
       </AnimatePresence>
@@ -236,7 +243,7 @@ export default function CompetitorsAdmin() {
             <h2 className="font-heading text-sm font-semibold text-text-primary">
               {editing === 'new' ? 'Add Competitor' : 'Edit Competitor Profile'}
             </h2>
-            <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
+            <button aria-label="Close competitor editor" disabled={saving || mergeBusy} onClick={() => { setEditing(null); setError('') }} className="min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-text-primary disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -271,118 +278,125 @@ export default function CompetitorsAdmin() {
           )}
 
           <div className="p-4 sm:p-5 space-y-4">
-            {/* Tournament Results */}
-            {typeof editing === 'number' && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Trophy className="w-4 h-4 text-gold" />
-                  <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">Tournament Results</label>
-                </div>
-                {detailLoading ? (
-                  <div className="flex items-center gap-2 py-4 text-text-muted text-xs"><Loader2 className="w-3 h-3 animate-spin" /> Loading results...</div>
-                ) : (
-                  <ResultsTable results={editDetail?.results || []} />
-                )}
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">First Name *</label>
-                <input value={form.first_name} onChange={e => setForm(p => ({ ...p, first_name: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Last Name *</label>
-                <input value={form.last_name} onChange={e => setForm(p => ({ ...p, last_name: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Nickname</label>
-                <input value={form.nickname} onChange={e => setForm(p => ({ ...p, nickname: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Belt Rank</label>
-                <select value={form.belt_rank} onChange={e => setForm(p => ({ ...p, belt_rank: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none">
-                  <option value="">Select...</option>
-                  {BELT_RANKS.map(b => <option key={b} value={b}>{b.charAt(0).toUpperCase() + b.slice(1)}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Weight Class</label>
-                <select value={form.weight_class} onChange={e => setForm(p => ({ ...p, weight_class: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none">
-                  <option value="">Select...</option>
-                  {WEIGHT_CLASSES.map(w => <option key={w} value={w}>{w}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Country Code</label>
-                <input value={form.country_code} onChange={e => setForm(p => ({ ...p, country_code: e.target.value.toUpperCase().slice(0, 2) }))}
-                  placeholder="US, JP, KR..."
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Academy</label>
-                <input value={form.academy} onChange={e => setForm(p => ({ ...p, academy: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
+            {detailError && <p role="alert" className="text-sm text-red-300">{detailError} <button type="button" onClick={() => setDetailAttempt(n => n + 1)} className="min-h-11 px-3 underline">Retry profile</button></p>}
+            <fieldset disabled={saving || mergeBusy || detailLoading || (typeof editing === 'number' && editDetail?.id !== editing)} onChange={() => setProfileDirty(true)} className="min-w-0 space-y-4">
+              {/* Tournament Results */}
+              {typeof editing === 'number' && (
                 <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Wins</label>
-                  <input type="number" value={form.wins} onChange={e => setForm(p => ({ ...p, wins: parseInt(e.target.value, 10) || 0 }))}
-                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  <div className="flex items-center gap-2 mb-2">
+                    <Trophy className="w-4 h-4 text-gold" />
+                    <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">Tournament Results</label>
+                  </div>
+                  {detailLoading ? (
+                    <div className="flex items-center gap-2 py-4 text-text-muted text-xs"><Loader2 className="w-3 h-3 animate-spin" /> Loading results...</div>
+                  ) : (
+                    <ResultsTable results={editDetail?.results || []} />
+                  )}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="competitor-first" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">First Name *</label>
+                  <input id="competitor-first" required value={form.first_name} onChange={e => setForm(p => ({ ...p, first_name: e.target.value }))}
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Losses</label>
-                  <input type="number" value={form.losses} onChange={e => setForm(p => ({ ...p, losses: parseInt(e.target.value, 10) || 0 }))}
-                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  <label htmlFor="competitor-last" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Last Name *</label>
+                  <input id="competitor-last" required value={form.last_name} onChange={e => setForm(p => ({ ...p, last_name: e.target.value }))}
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Draws</label>
-                  <input type="number" value={form.draws} onChange={e => setForm(p => ({ ...p, draws: parseInt(e.target.value, 10) || 0 }))}
-                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  <label htmlFor="competitor-nickname" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Nickname</label>
+                  <input id="competitor-nickname" value={form.nickname} onChange={e => setForm(p => ({ ...p, nickname: e.target.value }))}
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
                 </div>
               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Instagram URL</label>
-                <input value={form.instagram_url} onChange={e => setForm(p => ({ ...p, instagram_url: e.target.value }))}
-                  placeholder="https://instagram.com/..."
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="competitor-belt_rank" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Belt Rank</label>
+                  <select id="competitor-belt_rank" value={form.belt_rank} onChange={e => setForm(p => ({ ...p, belt_rank: e.target.value }))}
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none">
+                    <option value="">Select...</option>
+                    {BELT_RANKS.map(b => <option key={b} value={b}>{b.charAt(0).toUpperCase() + b.slice(1)}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="competitor-weight_class" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Weight Class</label>
+                  <select id="competitor-weight_class" value={form.weight_class} onChange={e => setForm(p => ({ ...p, weight_class: e.target.value }))}
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none">
+                    <option value="">Select...</option>
+                    {WEIGHT_CLASSES.map(w => <option key={w} value={w}>{w}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="competitor-country_code" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Country Code</label>
+                  <input id="competitor-country_code" value={form.country_code} onChange={e => setForm(p => ({ ...p, country_code: e.target.value.toUpperCase().slice(0, 3) }))}
+                    placeholder="US, JP, KR..."
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="competitor-academy" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Academy</label>
+                  <input id="competitor-academy" value={form.academy} onChange={e => setForm(p => ({ ...p, academy: e.target.value }))}
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label htmlFor="competitor-wins" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Wins</label>
+                    <input id="competitor-wins" type="number" value={form.wins} onChange={e => setForm(p => ({ ...p, wins: parseInt(e.target.value, 10) || 0 }))}
+                      className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label htmlFor="competitor-losses" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Losses</label>
+                    <input id="competitor-losses" type="number" value={form.losses} onChange={e => setForm(p => ({ ...p, losses: parseInt(e.target.value, 10) || 0 }))}
+                      className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label htmlFor="competitor-draws" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Draws</label>
+                    <input id="competitor-draws" type="number" value={form.draws} onChange={e => setForm(p => ({ ...p, draws: parseInt(e.target.value, 10) || 0 }))}
+                      className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Instagram URL</label>
+                  <input id="competitor-instagram_url" value={form.instagram_url} onChange={e => setForm(p => ({ ...p, instagram_url: e.target.value }))}
+                    placeholder="https://instagram.com/..."
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">YouTube URL</label>
+                  <input id="competitor-youtube_url" value={form.youtube_url} onChange={e => setForm(p => ({ ...p, youtube_url: e.target.value }))}
+                    placeholder="https://youtube.com/..."
+                    className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">YouTube URL</label>
-                <input value={form.youtube_url} onChange={e => setForm(p => ({ ...p, youtube_url: e.target.value }))}
-                  placeholder="https://youtube.com/..."
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                <label htmlFor="competitor-bio" className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Bio</label>
+                <textarea id="competitor-bio" value={form.bio} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} rows={3}
+                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2.5 text-base sm:text-sm text-text-primary focus:border-gold/40 focus:outline-none resize-none" />
               </div>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Bio</label>
-              <textarea value={form.bio} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} rows={3}
-                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none resize-none" />
-            </div>
 
-            {typeof editing === 'number' && (
-              <ImageUpload currentUrl={currentCompetitor?.photo_url || null} onUpload={handlePhotoUpload} label="Photo" />
-            )}
+              {typeof editing === 'number' && (
+                <ImageUpload currentUrl={editDetail?.photo_url || currentCompetitor?.photo_url || null} onUpload={handlePhotoUpload} label="Photo" />
+              )}
 
-            <div className="flex gap-3 pt-2">
-              <button onClick={handleSave} disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50">
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-              <button onClick={() => { setEditing(null); setError('') }} className="px-5 py-2.5 text-text-muted text-sm hover:text-text-primary">Cancel</button>
-            </div>
+              <div className="flex gap-3 pt-2">
+                <button onClick={handleSave} disabled={saving || detailLoading || !form.first_name.trim() || !form.last_name.trim() || (typeof editing === 'number' && editDetail?.id !== editing)}
+                  className="min-h-11 flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50">
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button disabled={saving || mergeBusy} onClick={() => { setEditing(null); setError('') }} className="min-h-11 px-5 py-2.5 text-text-muted text-sm hover:text-text-primary">Cancel</button>
+              </div>
+            </fieldset>
+            {typeof editing === 'number' && editDetail?.id === editing && <IdentityMergePanel key={`${editing}:${profileDirty}`} kind="competitors" source={{ id: editing, name: editDetail.full_name }}
+              disabled={saving || detailLoading || profileDirty} onBusyChange={setMergeBusy} onMerged={target => {
+                setSuccess(`Merged competitor into ${target.name} (ID ${target.id}).`); setEditing(target.id); void load()
+              }} />}
           </div>
         </motion.div>
       ) : (
@@ -392,7 +406,7 @@ export default function CompetitorsAdmin() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input type="text" value={searchInput} onChange={e => handleSearchChange(e.target.value)}
                 placeholder="Search competitors..."
-                className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
             </div>
           </div>
 
