@@ -1,3 +1,4 @@
+import EditorSaveBar from '../../components/admin/event-editor/EditorSaveBar'
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import {
   CalendarDays,
@@ -1402,7 +1403,7 @@ export default function EventsAdmin() {
               )}
             </section>{' '}
           </fieldset>
-          <div className="editor-save-bar flex flex-wrap items-center gap-3 border-t border-white/10 bg-surface px-4 py-3">
+          <EditorSaveBar>
             <span role="status" className={`mr-auto text-sm ${anyDirty ? 'text-amber-300' : 'text-text-secondary'}`}>
               {dirty
                 ? 'Unsaved event changes'
@@ -1427,7 +1428,7 @@ export default function EventsAdmin() {
             >
               Cancel
             </button>
-          </div>
+          </EditorSaveBar>
         </div>
       ) : (
         /* Events Table */

@@ -38,9 +38,11 @@ class EventReadinessTest < ActiveSupport::TestCase
   test "stale years in nested text and hotels block readiness" do
     @event.travel_items = [ { kind: "info", title: "Travel", description: "Book by 2026" } ]
     assert_not readiness[:publishable]
+    assert_equal "venue", readiness[:checks].find { |item| item[:key] == "stale_year" }[:section]
     @event.travel_items = []
     @event.event_accommodations.create!(hotel_name: "Hotel 2026")
     assert_not readiness[:publishable]
+    assert_equal "hotels", readiness[:checks].find { |item| item[:key] == "stale_year" }[:section]
   end
 
   private

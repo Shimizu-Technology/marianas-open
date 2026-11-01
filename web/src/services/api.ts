@@ -249,7 +249,7 @@ export interface Event {
   country_code: string;
   latitude: number | null;
   longitude: number | null;
-  asjjf_stars: number;
+  asjjf_stars: number | null;
   is_main_event: boolean;
   registration_url: string | null;
   registration_url_gi: string | null;

@@ -12,8 +12,21 @@ export default function EditorNavigation({
   return (
     <nav
       aria-label="Event sections"
-      className="grid grid-cols-2 gap-1 border-b border-white/10 p-3 sm:grid-cols-3 lg:grid-cols-5"
+      className="border-b border-white/10 p-3"
     >
+      <label className="block sm:hidden">
+        <span className="mb-1 block text-sm text-text-secondary">Event section</span>
+        <select
+          className="w-full border border-white/15 bg-surface px-3 py-2 text-text-primary"
+          value={active}
+          onChange={(event) => onSelect(event.target.value as EditorSection)}
+        >
+          {editorSections.map(([id, label]) => (
+            <option key={id} value={id}>{label}{errors[id]?.length ? ` (${errors[id]?.length} errors)` : ''}</option>
+          ))}
+        </select>
+      </label>
+      <div className="hidden gap-1 sm:grid sm:grid-cols-3 lg:grid-cols-5">
       {editorSections.map(([id, label]) => (
         <button
           key={id}
@@ -30,6 +43,7 @@ export default function EditorNavigation({
           ) : null}
         </button>
       ))}
+      </div>
     </nav>
   )
 }

@@ -28,8 +28,13 @@
 .event-admin [hidden] {
   display: none !important;
 }
+.event-admin:has(.editor-save-bar) {
+  padding-bottom: calc(var(--editor-save-height, 112px) + 12px);
+}
 .event-admin .editor-save-bar {
-  position: sticky;
+  position: fixed;
+  left: var(--editor-save-left, 16px);
+  width: var(--editor-save-width, calc(100% - 32px));
   bottom: 0;
   z-index: 20;
   padding-bottom: max(12px, env(safe-area-inset-bottom));

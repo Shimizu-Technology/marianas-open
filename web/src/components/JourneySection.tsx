@@ -31,10 +31,10 @@ function getStopStatus(event: Event): StopStatus {
   return eventPhase(event);
 }
 
-function StarRating({ count }: { count: number }) {
+function StarRating({ count }: { count: number | null }) {
   return (
     <div className="flex gap-0.5">
-      {Array.from({ length: count }).map((_, i) => (
+      {Array.from({ length: count ?? 0 }).map((_, i) => (
         <Star key={i} size={10} className="fill-gold-500 text-gold-500" />
       ))}
     </div>

@@ -201,3 +201,13 @@ it('renders a copied null prize amount as blank while keeping its confirmation f
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(api.admin.updateEvent).toHaveBeenCalledWith(7, expect.objectContaining({ prize_categories_attributes: [expect.objectContaining({ amount: '', confirmed: false })] })))
 })
+
+it('keeps typed changes while the phone section picker moves between sections', async () => {
+  await editor()
+  fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Phone draft preserved' } })
+  fireEvent.change(screen.getByLabelText('Event section'), { target: { value: 'registration' } })
+  expect(screen.getByRole('region', { name: 'Dates & Registration' })).toBeTruthy()
+  fireEvent.change(screen.getByLabelText('Event section'), { target: { value: 'basics' } })
+  expect((screen.getByRole('textbox', { name: 'Name' }) as HTMLInputElement).value).toBe('Phone draft preserved')
+  expect(screen.getByText('Unsaved event changes')).toBeTruthy()
+})
