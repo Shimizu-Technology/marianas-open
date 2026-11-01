@@ -1183,7 +1183,7 @@ export default function EventsAdmin() {
                           <div className="flex gap-2 sm:gap-3 items-start">
                             <input
                               aria-label="Amount (0 if non-cash)"
-                              value={item.amount}
+                              value={item.amount ?? ''}
                               onChange={(e) => updatePrizeCategory(idx, 'amount', e.target.value)}
                               placeholder="Amount (0 if non-cash)"
                               className="w-full sm:w-28 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"

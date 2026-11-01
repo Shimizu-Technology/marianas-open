@@ -191,3 +191,13 @@ it('blocks editing a saved record when loading fails and recovers through retry'
   await screen.findByRole('textbox', { name: 'Name' })
   expect((screen.getByRole('textbox', { name: 'Name' }) as HTMLInputElement).value).toBe(saved.name)
 })
+
+it('renders a copied null prize amount as blank while keeping its confirmation false', async () => {
+  saved = eventEditorFixture({ prize_categories: [{ id: 13, name: 'Adult black belt', amount: null, confirmed: false, sort_order: 0 }] })
+  await editor()
+  section('Prizes')
+  expect((screen.getByRole('textbox', { name: 'Amount (0 if non-cash)' }) as HTMLInputElement).value).toBe('')
+  expect((screen.getByRole('checkbox', { name: 'Confirmed' }) as HTMLInputElement).checked).toBe(false)
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(api.admin.updateEvent).toHaveBeenCalledWith(7, expect.objectContaining({ prize_categories_attributes: [expect.objectContaining({ amount: '', confirmed: false })] })))
+})

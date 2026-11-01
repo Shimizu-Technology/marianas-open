@@ -69,7 +69,7 @@ export interface EventScheduleItem {
 export interface PrizeCategory {
   id?: number;
   name: string;
-  amount: string;
+  amount: string | null;
   sort_order: number;
   confirmed?: boolean;
   _destroy?: boolean;
