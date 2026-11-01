@@ -55,10 +55,10 @@ class AsjjfResultsSyncTest < ActiveSupport::TestCase
     assert_equal "applied", @event.results_sync_status
     assert_equal 3, @event.event_results.distinct.count(:division)
     assert @event.event_results.all? { |row| row.division.start_with?("[GI]") && row.asjjf_event_id == 2062 && row.academy_id && row.competitor_id }
-    ids = @event.event_results.pluck(:id)
+    ids = @event.event_results.order(:id).pluck(:id)
     result = sync(@event)
     assert_equal "no_changes", result.status, result.guard_failures.inspect
-    assert_equal ids, @event.event_results.pluck(:id)
+    assert_equal ids, @event.event_results.order(:id).pluck(:id)
     assert_equal ids.size, result.diff_summary["unchanged"]
     assert_equal 0, result.diff_summary["added"]
   end
@@ -84,17 +84,17 @@ class AsjjfResultsSyncTest < ActiveSupport::TestCase
     Asjjf::ResultsAssembler.new(@event).call.rows.each do |attrs|
       @event.event_results.create!(attrs.merge(discipline: "gi", division: attrs[:division].sub("[NOGI]", "[GI]"), asjjf_event_id: nil, division_key: nil))
     end
-    ids = @event.event_results.pluck(:id)
+    ids = @event.event_results.order(:id).pluck(:id)
     result = sync(@event)
     assert_equal "held", result.status
     assert_equal 1, result.diff_summary["relabeled_divisions"]
     assert_includes result.diff_summary["messages"], "Corrects 1 divisions labeled Gi that are actually No-Gi"
     assert result.diff_summary["approvable"]
-    assert_equal "[GI]", @event.event_results.first.division.split.first
+    assert_equal "[GI]", @event.event_results.order(:id).first.division.split.first
     Asjjf::ResultsSync.new(@event).approve!(result, user: @admin)
     assert_equal "applied", result.reload.status
     assert_equal @admin.id, result.approved_by_id
-    assert_equal ids, @event.event_results.pluck(:id)
+    assert_equal ids, @event.event_results.order(:id).pluck(:id)
     assert @event.event_results.all? { |row| row.division.start_with?("[NOGI]") && row.discipline == "nogi" }
     assert_equal "no_changes", sync(@event).status
   end
@@ -262,12 +262,12 @@ class AsjjfResultsSyncTest < ActiveSupport::TestCase
     end
     attrs = rows.first
     @event.event_results.create!(attrs.merge(discipline: "gi", division: attrs[:division].sub("[NOGI]", "[GI]")))
-    ids = @event.event_results.pluck(:id)
+    ids = @event.event_results.order(:id).pluck(:id)
     result = sync(@event)
     assert_equal "held", result.status
     assert_not result.diff_summary["approvable"]
     assert result.guard_failures.any? { |message| message.include?("Ambiguous label repair") }
-    assert_equal ids, @event.event_results.pluck(:id)
+    assert_equal ids, @event.event_results.order(:id).pluck(:id)
   end
 
   test "discard remains effective through an intervening failed evaluation" do
