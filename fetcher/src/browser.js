@@ -34,16 +34,22 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
       observe();
     });
     const page = await context.newPage();
-    // Only the top-level document is captured, so the host boundary and challenge
-    // status apply to main-frame navigations and their redirect chains. ASJJF pages
-    // embed third-party iframes (Facebook, Google Tag Manager); those load as in the
-    // verified probe and never affect the saved HTML.
+    // The host boundary, GET-only rule, and challenge status apply to every top-level
+    // navigation (any frame without a parent, including popups) and its redirect chain.
+    // ASJJF pages embed third-party iframes (Facebook, Google Tag Manager); child frames
+    // load as in the verified probe and never affect the saved HTML.
     const isMainFrameNavigation = request => {
       if (!request.isNavigationRequest()) return false;
       try {
-        return typeof request.frame !== 'function' || request.frame() === page.mainFrame();
+        if (typeof request.frame !== 'function') return true;
+        const frame = request.frame();
+        return !frame || typeof frame.parentFrame !== 'function' || frame.parentFrame() === null;
       } catch { return true; }
     };
+    // Only the original page is ever fetched; close anything the site tries to open.
+    if (typeof context.on === 'function') {
+      context.on('page', extra => { if (extra !== page) void extra.close().catch(() => {}); });
+    }
     page.on('request', request => {
       if (!isMainFrameNavigation(request)) return;
       try {

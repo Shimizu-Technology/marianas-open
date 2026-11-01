@@ -118,8 +118,8 @@ test('challenge evidence survives a later disallowed redirect without returning 
 test('third-party iframes on an ASJJF page do not trip the navigation boundary or latch a challenge', async () => {
   const listeners = {};
   let routeHandler, closed = 0;
-  const mainFrame = { name: 'main' };
-  const subFrame = { name: 'facebook-iframe' };
+  const mainFrame = { name: 'main', parentFrame: () => null };
+  const subFrame = { name: 'facebook-iframe', parentFrame: () => mainFrame };
   const nav = (url, frame) => ({ isNavigationRequest: () => true, method: () => 'GET', url: () => url, redirectedFrom: () => null, frame: () => frame });
   const page = {
     mainFrame: () => mainFrame,
@@ -154,11 +154,45 @@ test('third-party iframes on an ASJJF page do not trip the navigation boundary o
 
 test('a main-frame navigation to a disallowed host is still rejected when frames are reported', async () => {
   let requestListener;
-  const mainFrame = {};
+  const mainFrame = { parentFrame: () => null };
   const page = { mainFrame: () => mainFrame, on: (event, listener) => { if (event === 'request') requestListener = listener; },
     goto: async () => requestListener({ isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://evil.test/',
       redirectedFrom: () => null, frame: () => mainFrame }) };
   const launch = async () => ({ close: async () => {}, newContext: async () => ({
     exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async () => {} }) });
   await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_navigation/);
+});
+
+test('popup top-level navigations are bounded by the context route and extra pages are closed', async () => {
+  let routeHandler, pageListener, extraClosed = false;
+  const original = { on: () => {}, goto: async () => {}, title: async () => 'ASJJF', content: async () => '<html></html>',
+    url: () => 'https://asjjf.org/', waitForTimeout: async () => {} };
+  const popupFrame = { parentFrame: () => null };
+  const nav = (url, method = 'GET', frame = popupFrame) => ({ isNavigationRequest: () => true, method: () => method,
+    url: () => url, redirectedFrom: () => null, frame: () => frame });
+  const decide = async request => {
+    let outcome;
+    await routeHandler({ request: () => request, continue: async () => { outcome = 'continue'; }, abort: async () => { outcome = 'abort'; } });
+    return outcome;
+  };
+  const launch = async () => ({ close: async () => {}, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => original,
+    on: (event, listener) => { if (event === 'page') pageListener = listener; },
+    route: async (_pattern, handler) => { routeHandler = handler; } }) });
+  await fetchPage('https://asjjf.org/', config, { launch });
+  assert.equal(await decide(nav('https://evil.test/')), 'abort');
+  assert.equal(await decide(nav('https://asjjf.org/form', 'POST')), 'abort');
+  assert.equal(await decide(nav('https://asjjf.org/ok')), 'continue');
+  // A frame() that throws is treated as top-level and validated.
+  const throwing = { isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://evil.test/',
+    redirectedFrom: () => null, frame: () => { throw new Error('no frame yet'); } };
+  assert.equal(await decide(throwing), 'abort');
+  // Child-frame navigations elsewhere stay allowed.
+  const child = nav('https://www.facebook.com/plugin', 'GET', { parentFrame: () => popupFrame });
+  assert.equal(await decide(child), 'continue');
+  // Any page other than the original is closed.
+  pageListener({ close: async () => { extraClosed = true; } });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(extraClosed, true);
+  pageListener(original);
 });
