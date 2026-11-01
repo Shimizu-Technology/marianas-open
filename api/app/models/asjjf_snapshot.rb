@@ -28,6 +28,7 @@ class AsjjfSnapshot < ApplicationRecord
       raise InflationLimitError, "Inflated HTML exceeds 10 MiB" if output.bytesize + chunk.bytesize > MAX_INFLATED_BYTES
       output << chunk
     end
+    raise Zlib::BufError, "Incomplete compressed HTML" unless inflater.finished?
     output.force_encoding(Encoding::UTF_8)
   ensure
     inflater&.close

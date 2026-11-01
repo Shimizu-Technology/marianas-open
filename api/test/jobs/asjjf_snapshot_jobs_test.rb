@@ -65,6 +65,14 @@ class AsjjfSnapshotJobsTest < ActiveSupport::TestCase
     assert_equal 0, EventResult.count
   end
 
+  test "incomplete compressed evidence records a parse failure" do
+    saved = snapshot(parse_status: "pending")
+    saved.update_columns(compressed_html: saved.compressed_html.byteslice(0...-2))
+    ParseAsjjfSnapshotJob.perform_now(saved.id)
+    assert_equal "failed", saved.reload.parse_status
+    assert_includes saved.parse_error, "Zlib::BufError"
+  end
+
   test "inflation permits exactly the output cap" do
     saved = snapshot
     saved.compressed_html = Zlib::Deflate.deflate("x" * AsjjfSnapshot::MAX_INFLATED_BYTES)
