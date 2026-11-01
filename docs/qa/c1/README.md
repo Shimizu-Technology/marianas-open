@@ -43,7 +43,7 @@ The first post-rebase web run hit a timing failure in C2's unchanged GlobalSearc
 
 The T3 preview loaded production pages but screenshot capture timed out twice (`Preview automation snapshot timed out after 15000ms.`). QA used isolated headless Chrome 156 via the repository's pinned Playwright Core. Production CORS does not allow local port 5351: the harness adds CORS response headers to **GET `/api/v1/*` responses only**, preserving real production response bodies. Image requests go directly to production/S3. No admin, registration submissions, ASJJF scraping or production writes were performed.
 
-Controlled fixtures are clearly named `fixture-*`: they override event-list responses only in the isolated browser. Off-season uses real MO/Copa 2026 data/counts; cancelled/live fixtures alter Copa 2027's state/date only inside that browser. The summary-error fixture returns a local 503 for summary statistics while fetching actual result divisions from production. The harness closes contexts only after removing route handlers; an early cleanup race was corrected and rerun.
+Controlled fixtures are clearly named `fixture-*`: they override event-list responses only in the isolated browser. Off-season uses real MO/Copa 2026 data/counts; cancelled/live fixtures alter Copa 2027's state/date only inside that browser. The summary-error fixture returns a local 503 for summary statistics while fetching actual result divisions from production. The harness closes contexts only after removing route handlers; an early cleanup race was corrected and rerun. Final visual inspection also caught an anchor assertion that accepted a hidden zero-height container; it now waits for a visible, positive-height results target in the viewport. Both widths were rerun successfully and the spinner screenshots were replaced with loaded results. Archive evidence explicitly shows pending and available badges at both widths.
 
 Coverage: all eight requested English routes at 390×844 and 1440×900; Japanese home, MO 2026 and gallery at both widths; no horizontal overflow. Home details navigation, calendar tabs, result search with empty/recovered filter, preview-photo deep link, next/Escape lightbox controls, scroll restoration, gallery load more and category selection checked. Off-season results/gallery destinations, no-events note, cancelled/live phases and summary failure recovery verified at both widths. Fixtures do not assert real-world event changes.
 
@@ -103,7 +103,11 @@ Before screenshots show deployed production. All after/fixture screenshots show 
 - [mo-2026-results-390.png](screenshots/mo-2026-results-390.png)
 - [past-events-1440.png](screenshots/past-events-1440.png)
 - [past-events-390.png](screenshots/past-events-390.png)
+- [past-results-available-1440.png](screenshots/past-results-available-1440.png)
+- [past-results-available-390.png](screenshots/past-results-available-390.png)
+- [past-results-pending-1440.png](screenshots/past-results-pending-1440.png)
+- [past-results-pending-390.png](screenshots/past-results-pending-390.png)
 
 ## Merge-owner handoff
 
-Implementation and acceptance are complete. One PR targets `main`; this worker has no merge authority. The parent/merge owner should inspect final CI/reviewer state, then decide when to merge. No deployment or production data changes are authorized or performed by this worker. The branch and worktree remain available for review. Runtime resources will be cleaned and the isolated C1 database dropped before returning the PR.
+Implementation and acceptance are complete. One PR targets `main`; this worker has no merge authority. The parent/merge owner should inspect final CI/reviewer state, then decide when to merge. No deployment or production data changes are authorized or performed by this worker. The branch and worktree remain available for review. Owned Vite servers and browser sessions were cleaned; lifecycle status has no active owned resources. The dedicated `marianas_open_test_c1` database was dropped and its absence verified. No runtime resources are handed off. The branch/worktree are intentionally retained for the merge owner.

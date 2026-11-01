@@ -52,7 +52,8 @@ try {
       await page.screenshot({ path: `${screenshots}fixture-${scenario}-${width}.png` });
       if (scenario === 'off-season') {
         await page.getByRole('link', { name: 'Latest results', exact: true }).click();
-        await page.waitForFunction(() => { const box = document.getElementById('results')?.getBoundingClientRect(); return box && box.top >= 0 && box.top < innerHeight / 2; });
+        await page.locator('#results').waitFor({ state: 'visible' });
+        await page.waitForFunction(() => { const box = document.getElementById('results')?.getBoundingClientRect(); return box && box.height > 0 && box.top >= 0 && box.top < innerHeight / 2; });
         await page.screenshot({ path: `${screenshots}fixture-results-link-${width}.png` });
         await page.goto('http://127.0.0.1:5351/calendar');
         const emptyHeading = page.getByRole('heading', { name: 'No upcoming events announced' });

@@ -116,6 +116,12 @@ try {
         assert.equal(await page.getByRole('dialog').count(), 0);
         assert.equal(await page.evaluate(() => document.body.style.overflow), '');
       }
+      if (name === 'past-events') {
+        for (const [slug, label, status] of [['marianas-open-2026', 'Results pending', 'pending'], ['copa-de-marianas-2026', 'View Results', 'available']]) {
+          const badge = page.locator(`a[href="/events/${slug}"]`).filter({ hasText: label }).first().getByText(label, { exact: true });
+          await shot(`past-results-${status}-${width}`, badge);
+        }
+      }
       if (name === 'gallery') {
         const before = await page.getByRole('button', { name: /^Open photo/ }).count();
         await page.getByRole('button', { name: 'Load more', exact: true }).click();
