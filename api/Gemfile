@@ -47,3 +47,6 @@ gem 'httparty'
 gem 'dotenv-rails', groups: [:development, :test]
 
 gem "resend", "~> 1.0"
+
+gem "sentry-ruby", "~> 7.2"
+gem "sentry-rails", "~> 7.2"

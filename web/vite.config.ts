@@ -2,7 +2,14 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+// Compute once per build; repeated deploys of the same commit need distinct guards.
+const commit = process.env.COMMIT_REF || process.env.GITHUB_SHA || 'local'
+const deployment = process.env.DEPLOY_ID || process.env.BUILD_ID || Date.now().toString()
+
 export default defineConfig({
+  define: {
+    __BUILD_ID__: JSON.stringify(`${commit}-${deployment}`),
+  },
   plugins: [react(), tailwindcss()],
   build: {
     rollupOptions: {

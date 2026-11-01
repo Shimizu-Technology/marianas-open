@@ -1,3 +1,6 @@
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { initMonitoring } from './monitoring'
+import { installPreloadRecovery } from './utils/preloadRecovery'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ClerkProvider } from '@clerk/clerk-react'
@@ -7,6 +10,9 @@ import './i18n'
 import './index.css'
 import App from './App'
 import { PostHogProvider } from './providers/PostHogProvider'
+
+initMonitoring()
+installPreloadRecovery()
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 const isClerkEnabled = Boolean(PUBLISHABLE_KEY && PUBLISHABLE_KEY !== 'YOUR_PUBLISHABLE_KEY')
@@ -48,7 +54,9 @@ function Root() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Root />
+    <ErrorBoundary>
+      <Root />
+    </ErrorBoundary>
   </StrictMode>,
 )
 
