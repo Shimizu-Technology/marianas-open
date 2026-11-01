@@ -134,6 +134,16 @@ class AsjjfIntakeTest < ActionDispatch::IntegrationTest
     assert AsjjfSnapshot.last.parse_error.present?
   end
 
+  test "successful fetcher submission requires a final URL" do
+    lease
+    [ nil, "" ].each do |final_url|
+      signed(:post, "/api/v1/internal/asjjf/snapshots", body: payload.merge(final_url: final_url).to_json)
+      assert_response :unprocessable_entity
+      assert_equal "leased", @fetch_request.reload.status
+      assert_equal 0, AsjjfSnapshot.count
+    end
+  end
+
   test "redirects cannot change page identity or result category" do
     lease
     signed(:post, "/api/v1/internal/asjjf/snapshots", body: payload.merge(final_url: "https://asjjf.org/main/eventResults/2063").to_json)

@@ -14,6 +14,18 @@ class AsjjfRankingsTest < AsjjfParserTest
     assert parsed[:rows].all? { |row| row[:points].is_a?(BigDecimal) }
   end
 
+  def test_team_category_must_match_requested_age_group
+    file = "team_rank_227.html"
+    assert_raises(PARSERS::ParseError) { parse_fixture(file, url: "https://asjjf.org/ranking/teamRank/227?rankType=kids") }
+    assert_raises(PARSERS::ParseError) { parse_fixture(file, url: "https://asjjf.org/ranking/teamRank/227?rankType=unknown") }
+    kids_html = mutate(file) { |doc| doc.at_css("#academyRank h2").content = "Kids Team Ranking" }
+    parsed = parse_fixture(file, html: kids_html, url: "https://asjjf.org/ranking/teamRank/227?rankType=kids")
+    assert_equal "Kids Team Ranking", parsed[:category]
+    assert_raises(PARSERS::ParseError) { parse_fixture(file, html: kids_html) }
+    unknown = mutate(file) { |doc| doc.at_css("#academyRank h2").content = "Other Ranking" }
+    assert_raises(PARSERS::ParseError) { parse_fixture(file, html: unknown) }
+  end
+
   def test_individual_index_division_inventory_and_default_table
     parsed = parse_fixture("individual_ranking_227.html")
     assert_equal({ divisions: 85, rows: 39 }, parsed[:counts])

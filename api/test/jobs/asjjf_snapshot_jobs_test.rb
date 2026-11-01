@@ -33,7 +33,7 @@ class AsjjfSnapshotJobsTest < ActiveSupport::TestCase
     assert_equal original.id, promoted.id
     assert promoted.include_divisions?
     AsjjfFetchRequest.lease!(fetcher_id: "home")
-    snapshot = Asjjf::SnapshotIntake.call(request_id: promoted.id, fetcher_id: "home", url: promoted.url,
+    snapshot = Asjjf::SnapshotIntake.call(request_id: promoted.id, fetcher_id: "home", url: promoted.url, final_url: promoted.url,
       html: File.read(Rails.root.join("test/fixtures/files/asjjf/individual_ranking_227.html")))
     assert_equal "parsed", snapshot.parse_status
     assert_equal 85, AsjjfFetchRequest.where(page_type: "individual_ranking_division").count
@@ -51,7 +51,7 @@ class AsjjfSnapshotJobsTest < ActiveSupport::TestCase
   test "index-only planner and admin snapshots do not fan out" do
     request = Asjjf::FetchPlanner.new.plan_ranking(227, include_divisions: false).find { |item| item.page_type == "individual_ranking" }
     AsjjfFetchRequest.lease!(fetcher_id: "home")
-    Asjjf::SnapshotIntake.call(request_id: request.id, fetcher_id: "home", url: request.url, html: File.read(Rails.root.join("test/fixtures/files/asjjf/individual_ranking_227.html")))
+    Asjjf::SnapshotIntake.call(request_id: request.id, fetcher_id: "home", url: request.url, final_url: request.url, html: File.read(Rails.root.join("test/fixtures/files/asjjf/individual_ranking_227.html")))
     assert_equal 0, AsjjfFetchRequest.where(page_type: "individual_ranking_division").count
   end
 

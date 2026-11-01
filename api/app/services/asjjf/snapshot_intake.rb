@@ -23,6 +23,9 @@ module Asjjf
         uri = Url.parse(url, page_type: page_type)
         outcome = "challenged" if Parsers::ChallengeDetector.challenged?(html) || http_status == 403
         outcome = "error" if outcome == "ok" && http_status != 200
+        if outcome == "ok" && source == "fetcher" && final_url.blank?
+          raise ArgumentError, "Successful fetcher snapshots require a final URL"
+        end
         if outcome == "ok" && final_url.present?
           final_uri = Url.parse(final_url, page_type: page_type)
           keys = page_type == "results_list" ? %w[gender age] : (page_type == "team_ranking" ? %w[rankType] : [])

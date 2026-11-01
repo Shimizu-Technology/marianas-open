@@ -92,7 +92,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130100) do
     t.index ["lease_expires_at"], name: "index_asjjf_fetch_requests_on_lease_expires_at"
     t.index ["snapshot_id"], name: "index_asjjf_fetch_requests_on_snapshot_id"
     t.index ["status", "priority", "created_at"], name: "index_asjjf_requests_for_leasing"
-    t.index ["url"], name: "index_asjjf_requests_active_url", unique: true, where: "((status)::text = ANY (ARRAY[('pending'::character varying)::text, ('leased'::character varying)::text]))"
+    t.index ["url"], name: "index_asjjf_requests_active_url", unique: true, where: "((status)::text = ANY ((ARRAY['pending'::character varying, 'leased'::character varying])::text[]))"
   end
 
   create_table "asjjf_fetcher_heartbeats", force: :cascade do |t|
