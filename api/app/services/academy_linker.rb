@@ -1,73 +1,88 @@
-# Finds or creates Academy records and links Competitors to them.
-#
-# Usage:
-#   AcademyLinker.link_all          # backfill all competitors
-#   AcademyLinker.link_event(event) # link competitors from one event's results
-#
+require "zlib"
+
 class AcademyLinker
   class << self
     def link_all
-      created = 0
-      linked = 0
-
-      Competitor.where(academy_id: nil)
-        .where("competitors.academy IS NOT NULL AND competitors.academy != ''")
-        .find_each do |competitor|
-          academy = find_or_create(competitor.read_attribute(:academy), competitor.country_code)
-          competitor.update_column(:academy_id, academy.id)
-          linked += 1
-          created += 1 if academy.previously_new_record?
-        end
-
-      { created: created, linked: linked }
+      link_results(EventResult.all)
     end
 
     def link_event(event)
-      competitor_ids = event.event_results.where.not(competitor_id: nil).distinct.pluck(:competitor_id)
-      competitors = Competitor.where(id: competitor_ids, academy_id: nil)
-        .where("competitors.academy IS NOT NULL AND competitors.academy != ''")
+      link_results(event.event_results)
+    end
 
-      created = 0
+    def link_results(results)
+      created_before = Academy.count
       linked = 0
-
-      competitors.find_each do |competitor|
-        academy = find_or_create(competitor.read_attribute(:academy), competitor.country_code)
-        competitor.update_column(:academy_id, academy.id)
-        linked += 1
-        created += 1 if academy.previously_new_record?
+      competitor_ids = []
+      results.find_each do |result|
+        academy = resolve(result.academy)
+        result.update_columns(academy_id: academy&.id)
+        linked += 1 if academy
+        competitor_ids << result.competitor_id if result.competitor_id
       end
-
-      { created: created, linked: linked }
+      Competitor.where(id: competitor_ids.uniq).find_each(&:refresh_current_academy!)
+      { created: Academy.count - created_before, linked: linked }
     end
 
-    def find_or_create(name, country_code = nil)
-      normalized = normalize(name)
+    # create:false is strictly read-only, including the review queue.
+    def resolve(raw_name, create: true)
+      name = Identity::NameNormalizer.display(raw_name)
+      return nil if name.blank?
+      key = Identity::NameNormalizer.key(name)
+      return lookup(name) unless create
 
-      if normalized.blank?
-        begin
-          return Academy.find_or_create_by!(name: "Independent") { |a| a.slug = "independent" }
-        rescue ActiveRecord::RecordNotUnique
-          return Academy.find_by!(name: "Independent")
+      Academy.transaction do
+        # All auto-creation/queue decisions share one lock so two close names
+        # imported concurrently cannot both bypass near-duplicate detection.
+        Academy.connection.execute("SELECT pg_advisory_xact_lock(184527001)")
+        matches = Academy.identity_matches(name)
+        return matches.first if matches.one?
+        return nil if matches.many?
+
+        review = IdentityReview.find_by(normalized_name: key)
+        return review.resolved_academy if review&.status == "resolved"
+        return nil if review
+
+        candidates = Academy.all.flat_map { |academy| ([ academy.name ] + Array(academy.aliases)).map { |value| [ academy, Identity::NameNormalizer.key(value) ] } }
+        closest = candidates.min_by { |_, candidate_key| distance(key, candidate_key) }
+        candidate, candidate_key = closest if closest
+        if candidate && near?(key, candidate_key)
+          IdentityReview.create!(raw_name: name, normalized_name: key, candidate_academy: candidate)
+          return nil
         end
+
+        Academy.create!(name: name, unaffiliated: %w[other independent unaffiliated].include?(key))
       end
-
-      academy = Academy.matching_name_or_alias(name).first
-      return academy if academy
-
-      country = CompetitorLinker.normalize_country(country_code) if country_code.present?
-
-      Academy.create!(
-        name: name.strip.gsub(/\s+/, " "),
-        country_code: country
-      )
-    rescue ActiveRecord::RecordNotUnique
-      Academy.matching_name_or_alias(name.strip.gsub(/\s+/, " ")).first!
     end
 
-    private
+    # Legacy callers pass athlete nationality. It is deliberately ignored:
+    # a gym's country must be set from its location by staff.
+    def find_or_create(name, _country_code = nil)
+      resolve(name)
+    end
 
-    def normalize(name)
-      name.to_s.strip.downcase.gsub(/\s+/, " ")
+    def lookup(name)
+      matches = Academy.identity_matches(name)
+      return matches.first if matches.one?
+      return nil if matches.many?
+      IdentityReview.find_by(normalized_name: Identity::NameNormalizer.key(name), status: "resolved")&.resolved_academy
+    end
+
+    def near?(left, right)
+      return false if [ left.length, right.length ].min < 6
+      distance(left, right) <= ([ left.length, right.length ].min >= 12 ? 2 : 1)
+    end
+
+    def distance(left, right)
+      previous = (0..right.length).to_a
+      left.each_char.with_index(1) do |char, i|
+        current = [ i ]
+        right.each_char.with_index(1) do |other, j|
+          current[j] = [ current[j - 1] + 1, previous[j] + 1, previous[j - 1] + (char == other ? 0 : 1) ].min
+        end
+        previous = current
+      end
+      previous.last
     end
   end
 end

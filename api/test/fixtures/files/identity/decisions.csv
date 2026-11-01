@@ -1,0 +1,5 @@
+group_id,academy_ids,academy_names,verdict,canonical_name,canonical_country,evidence,confidence,results_count,total_points
+G01,71001 71002,Harbor Grappling | Harbor Grappling Club,MERGE_SAME_GYM,Harbor Grappling,GU,Anonymized verified rename,high,2,90
+G02,71003,Island&#39;s Gym,RENAME_ONLY,Island's Gym,JP,Anonymized HTML entity spelling,high,0,0
+G03,71004 71005,North Branch | South Branch,KEEP_SEPARATE_BRANCHES,North Branch,,Different branches,high,0,0
+G04,71006 71007,Mountain Academy | Mountain Association,UNCERTAIN_ASK_TEAM,Mountain Academy,,Needs operator decision,low,0,0

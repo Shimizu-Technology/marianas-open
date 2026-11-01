@@ -18,9 +18,8 @@ module Api
 
           total = base_scope.count
 
-          records = base_scope
-            .left_joins(:competitor)
-            .select("event_results.*, competitors.academy_id as linked_academy_id")
+          records = base_scope.includes(:competitor, :result_academy)
+            .select("event_results.*, event_results.academy_id as linked_academy_id")
             .offset((page - 1) * per_page)
             .limit(per_page)
 
@@ -87,7 +86,12 @@ module Api
         end
 
         def destroy_all
-          count = @event.event_results.delete_all
+          count = nil
+          EventResult.transaction do
+            previous_ids = @event.event_results.where.not(competitor_id: nil).distinct.pluck(:competitor_id)
+            count = @event.event_results.delete_all
+            Competitor.where(id: previous_ids).find_each(&:refresh_current_academy!)
+          end
           render json: { deleted: count }
         end
 

@@ -3,7 +3,7 @@ module Api
     class EventResultsController < ApplicationController
       def index
         event = Event.publicly_visible.find_by!(slug: params[:event_slug])
-        results = event.event_results
+        results = event.event_results.includes(:competitor, :result_academy)
 
         results = results.by_belt(params[:belt_rank]) if params[:belt_rank].present?
         results = results.by_gender(params[:gender]) if params[:gender].present?
@@ -16,7 +16,7 @@ module Api
         grouped = results.group_by(&:division).map do |division, div_results|
           {
             division: division,
-            results: div_results.as_json
+            results: div_results.map { |result| result.as_json.merge("competitor_name" => result.display_competitor_name, "academy" => result.display_academy_name, "raw_academy" => result.academy) }
           }
         end
 

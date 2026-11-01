@@ -1,3 +1,4 @@
+import CountryFlag from '../components/CountryFlag';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, MotionConfig } from 'framer-motion';
@@ -23,15 +24,6 @@ function BeltBadge({ rank }: { rank: string }) {
   );
 }
 
-function CountryFlag({ code }: { code: string }) {
-  return (
-    <img
-      src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
-      alt={code}
-      className="w-5 h-3.5 object-cover rounded-sm inline-block"
-    />
-  );
-}
 
 export default function AcademyPage() {
   const { slug } = useParams<{ slug: string }>();

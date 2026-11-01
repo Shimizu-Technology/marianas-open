@@ -1,3 +1,4 @@
+import CountryFlag from './CountryFlag';
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
@@ -21,17 +22,6 @@ const PLACEMENT_STYLES: Record<number, { bg: string; text: string; border: strin
   3: { bg: 'bg-[#CD7F32]/10', text: 'text-[#CD7F32]', border: 'border-[#CD7F32]/30', key: 'results.placementBadge3' },
 };
 
-function CountryFlag({ code, className = 'w-5 h-4' }: { code: string; className?: string }) {
-  if (!code) return null;
-  return (
-    <img
-      src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
-      alt={code}
-      className={`${className} object-cover rounded-sm inline-block`}
-      loading="lazy"
-    />
-  );
-}
 
 function BeltBadge({ belt }: { belt: string }) {
   const { t } = useTranslation();

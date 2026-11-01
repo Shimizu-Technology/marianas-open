@@ -1,3 +1,4 @@
+import CountryFlag from '../components/CountryFlag';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -23,16 +24,6 @@ const COUNTRY_CODE_KEYS: Record<string, string> = {
   CA: 'countries.canada', AU: 'countries.australia', PW: 'countries.palau', FM: 'countries.micronesia',
 };
 
-function CountryFlag({ code }: { code: string }) {
-  const { t } = useTranslation();
-  return (
-    <img
-      src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
-      alt={COUNTRY_CODE_KEYS[code] ? t(COUNTRY_CODE_KEYS[code]) : code}
-      className="w-5 h-3.5 object-cover rounded-sm inline-block"
-    />
-  );
-}
 
 function BeltBadge({ rank }: { rank: string }) {
   const { t } = useTranslation();
@@ -55,6 +46,7 @@ function MedalRow({ gold, silver, bronze }: { gold: number; silver: number; bron
 }
 
 function CompetitorCard({ competitor }: { competitor: Competitor }) {
+  const { t } = useTranslation();
   return (
     <Link to={`/competitors/${competitor.id}`}>
       <motion.div
@@ -85,7 +77,7 @@ function CompetitorCard({ competitor }: { competitor: Competitor }) {
 
         <div className="p-4">
           <div className="flex items-center gap-2 mb-1">
-            {competitor.country_code && <CountryFlag code={competitor.country_code} />}
+            {competitor.country_code && <CountryFlag code={competitor.country_code} label={COUNTRY_CODE_KEYS[competitor.country_code] ? t(COUNTRY_CODE_KEYS[competitor.country_code]) : competitor.country_code} />}
             <h3 className="text-sm font-semibold text-text-primary truncate">
               {competitor.first_name} {competitor.last_name}
             </h3>

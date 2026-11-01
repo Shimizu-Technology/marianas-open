@@ -15,7 +15,7 @@ module Api
         page = pagination_page
         per_page = pagination_limit(default: PER_PAGE)
 
-        records = scope
+        records = scope.includes(:team)
           .joins(stats_join_sql)
           .select(
             "competitors.*",
@@ -111,7 +111,7 @@ module Api
           country_code: c.country_code,
           belt_rank: c.belt_rank,
           weight_class: c.weight_class,
-          academy: c.read_attribute(:academy),
+          academy: c.current_academy_name,
           bio: c.bio,
           instagram_url: c.instagram_url,
           youtube_url: c.youtube_url,

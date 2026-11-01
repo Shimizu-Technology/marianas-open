@@ -1,16 +1,57 @@
 class Competitor < ApplicationRecord
+  attr_accessor :skipped_aliases
+
   has_one_attached :photo
   has_many :event_results, dependent: :nullify
+  has_many :competitor_aliases, dependent: :destroy
   belongs_to :team, class_name: "Academy", foreign_key: "academy_id", optional: true
 
   validates :first_name, :last_name, presence: true
   validates :belt_rank, inclusion: { in: %w[white blue purple brown black], allow_blank: true }
   validates :country_code, length: { is: 2 }, allow_blank: true
 
+  before_validation :normalize_identity
+
   scope :search_by_name, ->(query) {
-    where("first_name ILIKE :q OR last_name ILIKE :q OR CONCAT(first_name, ' ', last_name) ILIKE :q", q: "%#{query}%")
+    where("first_name ILIKE :q OR last_name ILIKE :q OR CONCAT(first_name, ' ', last_name) ILIKE :q OR CONCAT(last_name, ' ', first_name) ILIKE :q OR normalized_name LIKE :key OR reverse_normalized_name LIKE :key",
+      q: "%#{sanitize_sql_like(query)}%", key: "%#{Identity::NameNormalizer.key(query)}%")
   }
   scope :with_results, -> { where(id: EventResult.select(:competitor_id).distinct) }
+
+  def self.canonical_name_matches(key)
+    return [] if key.blank?
+    indexed = where(normalized_name: key).or(where(reverse_normalized_name: key)).to_a
+    legacy = where(normalized_name: nil).or(where(reverse_normalized_name: nil)).select do |competitor|
+      ["#{competitor.first_name} #{competitor.last_name}", "#{competitor.last_name} #{competitor.first_name}"].any? do |name|
+        Identity::NameNormalizer.key(name) == key
+      end
+    end
+    (indexed + legacy).uniq(&:id)
+  end
+
+  def refresh_current_academy!
+    latest = event_results.joins(:event).order("events.date DESC NULLS LAST, events.id DESC, event_results.id DESC").first
+    gym = latest&.result_academy || AcademyLinker.resolve(latest&.academy, create: false)
+    update_columns(academy_id: gym&.id, academy: gym&.name || latest&.academy)
+  end
+
+  def normalize_identity
+    self.first_name = Identity::NameNormalizer.person_display(first_name)
+    self.last_name = Identity::NameNormalizer.person_display(last_name)
+    self.normalized_name = Identity::NameNormalizer.key("#{first_name} #{last_name}")
+    self.reverse_normalized_name = Identity::NameNormalizer.key("#{last_name} #{first_name}")
+    self.country_code = Identity::CountryCode.normalize(country_code)
+  end
+
+  def identity_names
+    names = [ "#{first_name} #{last_name}", "#{last_name} #{first_name}", full_name ]
+    names << "#{last_name} #{first_name} \"#{nickname}\"" if nickname.present?
+    names
+  end
+
+  def current_academy_name
+    team&.name || self[:academy]
+  end
 
   def full_name
     nickname.present? ? "#{first_name} \"#{nickname}\" #{last_name}" : "#{first_name} #{last_name}"
@@ -53,6 +94,7 @@ class Competitor < ApplicationRecord
       methods: [:full_name, :photo_url],
       except: [:created_at, :updated_at]
     ))
+    base["academy"] = current_academy_name
     return base if options[:skip_stats]
 
     stats = computed_stats

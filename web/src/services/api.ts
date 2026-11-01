@@ -29,6 +29,7 @@ export interface CompetitorProfile {
 export interface RankingEntry {
   competitor_name?: string;
   competitor_id?: number;
+  result_id?: number | null;
   academy?: string;
   academy_id?: number;
   country_code?: string;
@@ -552,6 +553,8 @@ export interface Academy {
   athletes: number;
   events_competed: number;
   results_count: number;
+  parent_id?: number | null;
+  unaffiliated?: boolean;
 }
 
 export interface AcademyDetail extends Omit<Academy, 'athletes'> {
@@ -574,6 +577,30 @@ export interface AcademyFormData {
   facebook_url: string;
   description: string;
   aliases: string[];
+  parent_id: number | null;
+  unaffiliated: boolean;
+}
+
+export type IdentityMergeKeep = Record<string, 'source' | 'target'>;
+
+export interface IdentityMergePreview {
+  conflicts?: { field: string; source: unknown; target: unknown }[];
+  source: { id: number; name: string };
+  target: { id: number; name: string };
+  results_count: number;
+  athletes_count?: number;
+  warnings: string[];
+  review_token?: string;
+  blocked?: boolean;
+}
+
+export interface AcademyIdentityReview {
+  id: number;
+  raw_name: string;
+  candidate_academy_id: number | null;
+  candidate_name: string | null;
+  status: string;
+  results_count: number;
 }
 
 export interface Announcement {
@@ -1138,6 +1165,12 @@ export const api = {
     },
 
     // Competitors
+    previewCompetitorMerge: (id: number, targetId: number) =>
+      fetchApi<IdentityMergePreview>(`/api/v1/admin/competitors/${id}/merge_preview?target_id=${targetId}`, {}, true),
+    mergeCompetitor: (id: number, targetId: number, reviewToken?: string, confirmWarnings = false, keep?: IdentityMergeKeep) =>
+      fetchApi<{ competitor: Competitor }>(`/api/v1/admin/competitors/${id}/merge`, {
+        method: 'POST', body: JSON.stringify({ target_id: targetId, confirm: true, confirm_warnings: confirmWarnings, review_token: reviewToken, keep }),
+      }, true),
     getCompetitors: (params?: Record<string, string>) => {
       const query = params ? '?' + new URLSearchParams(params).toString() : '';
       return fetchApi<{ competitors: Competitor[]; total: number; page: number; per_page: number }>(`/api/v1/admin/competitors${query}`, {}, true);
@@ -1162,6 +1195,17 @@ export const api = {
     },
 
     // Academies
+    previewAcademyMerge: (id: number, targetId: number) =>
+      fetchApi<IdentityMergePreview>(`/api/v1/admin/academies/${id}/merge_preview?target_id=${targetId}`, {}, true),
+    mergeAcademy: (id: number, targetId: number, keep?: IdentityMergeKeep) =>
+      fetchApi<{ academy: Academy }>(`/api/v1/admin/academies/${id}/merge`, {
+        method: 'POST', body: JSON.stringify({ target_id: targetId, confirm: true, keep }),
+      }, true),
+    getIdentityReviews: () => fetchApi<{ reviews: AcademyIdentityReview[] }>('/api/v1/admin/identity_reviews', {}, true),
+    resolveIdentityReview: (id: number, data: { academy_id: number } | { create_new: true; confirm: true }) =>
+      fetchApi<unknown>(`/api/v1/admin/identity_reviews/${id}/resolve`, {
+        method: 'POST', body: JSON.stringify({ ...data, confirm: true }),
+      }, true),
     getAcademies: (params?: Record<string, string>) => {
       const query = params ? '?' + new URLSearchParams(params).toString() : '';
       return fetchApi<{ academies: Academy[]; total: number; page: number; per_page: number }>(`/api/v1/admin/academies${query}`, {}, true);
@@ -1339,6 +1383,6 @@ export const api = {
     const qs = searchParams.toString();
     return fetchApi<RankingsResponse>(`/api/v1/rankings${qs ? `?${qs}` : ''}`);
   },
-  getCompetitorProfile: (name: string) =>
-    fetchApi<CompetitorProfile>(`/api/v1/rankings/competitor?name=${encodeURIComponent(name)}`),
+  getCompetitorProfile: (name: string, resultId?: string) =>
+    fetchApi<CompetitorProfile>(`/api/v1/rankings/competitor?${resultId ? `result_id=${encodeURIComponent(resultId)}` : `name=${encodeURIComponent(name)}`}`),
 };

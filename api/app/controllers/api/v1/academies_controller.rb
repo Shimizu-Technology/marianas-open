@@ -4,7 +4,7 @@ module Api
       PER_PAGE = 50
 
       def index
-        scope = Academy.joins(competitors: { event_results: :event }).merge(Event.publicly_visible).distinct
+        scope = Academy.where(id: Identity::AcademyAttribution.relation.joins(:event).merge(Event.publicly_visible).pluck(Arel.sql(Identity::AcademyAttribution.id_sql))).distinct
 
         scope = scope.where(country_code: params[:country_code]) if params[:country_code].present?
         scope = scope.search_by_name(params[:search]) if params[:search].present?
@@ -39,9 +39,9 @@ module Api
         academy = Academy.find_by!(slug: params[:id])
         stats = bulk_compute_stats([ academy.id ])[academy.id] || empty_stats
 
-        athletes = academy.competitors.to_a
+        athletes = Competitor.where(id: Identity::AcademyAttribution.relation.joins(:event).merge(Event.publicly_visible).where(attributed_academy_id: academy.id).select(:competitor_id)).to_a
         athlete_ids = athletes.map(&:id)
-        athlete_stats = bulk_compute_athlete_stats(athlete_ids)
+        athlete_stats = bulk_compute_athlete_stats(athlete_ids, academy.id)
 
         athlete_data = athletes
           .map { |c| serialize_athlete(c, athlete_stats[c.id]) }
@@ -57,11 +57,13 @@ module Api
       private
 
       def stats_join_sql
+        attribution = Identity::AcademyAttribution.results_sql
+        academy_id_sql = "event_results.attributed_academy_id"
         points = RankingCalculator.points_sql(stars_col: "COALESCE(ranking_events.asjjf_stars, 3)")
         <<~SQL
           LEFT JOIN (
             SELECT
-              competitors.academy_id,
+              #{academy_id_sql} AS academy_id,
               COUNT(*) as results_count,
               COUNT(DISTINCT event_results.competitor_id) as athletes,
               COUNT(DISTINCT event_results.event_id) as events_competed,
@@ -69,12 +71,11 @@ module Api
               COUNT(*) FILTER (WHERE event_results.placement = 2) as silver,
               COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze,
               #{points} as total_points
-            FROM event_results
-            INNER JOIN competitors ON competitors.id = event_results.competitor_id
+            FROM #{attribution} event_results
             INNER JOIN events ranking_events ON ranking_events.id = event_results.event_id
-            WHERE competitors.academy_id IS NOT NULL
+            WHERE #{academy_id_sql} IS NOT NULL
               AND event_results.event_id IN (#{Event.publicly_visible_ids_sql})
-            GROUP BY competitors.academy_id
+            GROUP BY #{academy_id_sql}
           ) stats ON stats.academy_id = academies.id
         SQL
       end
@@ -105,14 +106,14 @@ module Api
       def bulk_compute_stats(academy_ids)
         return {} if academy_ids.empty?
 
-        rows = EventResult
-          .joins(competitor: :team)
+        attributed_column = Identity::AcademyAttribution.id_sql
+        rows = Identity::AcademyAttribution.relation
           .joins(:event)
           .merge(Event.publicly_visible)
-          .where(competitors: { academy_id: academy_ids })
-          .group("competitors.academy_id")
+          .where(attributed_academy_id: academy_ids)
+          .group(attributed_column)
           .select(
-            "competitors.academy_id",
+            "#{attributed_column} AS academy_id",
             "COUNT(*) as results_count",
             "COUNT(DISTINCT event_results.competitor_id) as athletes",
             "COUNT(DISTINCT event_results.event_id) as events_competed",
@@ -131,11 +132,12 @@ module Api
         end
       end
 
-      def bulk_compute_athlete_stats(competitor_ids)
+      def bulk_compute_athlete_stats(competitor_ids, academy_id)
         return {} if competitor_ids.empty?
 
-        rows = EventResult
+        rows = Identity::AcademyAttribution.relation
           .where(competitor_id: competitor_ids)
+          .where(attributed_academy_id: academy_id)
           .joins(:event)
           .merge(Event.publicly_visible)
           .group(:competitor_id)

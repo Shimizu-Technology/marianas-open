@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_130200) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,11 +23,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130200) do
     t.string "instagram_url"
     t.string "location"
     t.string "name", null: false
+    t.string "normalized_name"
+    t.bigint "parent_id"
     t.string "slug", null: false
+    t.boolean "unaffiliated", default: false, null: false
     t.datetime "updated_at", null: false
     t.string "website_url"
     t.index ["aliases"], name: "index_academies_on_aliases", using: :gin
     t.index ["country_code"], name: "index_academies_on_country_code"
+    t.index ["normalized_name"], name: "index_academies_on_normalized_name"
+    t.index ["parent_id"], name: "index_academies_on_parent_id"
     t.index ["slug"], name: "index_academies_on_slug", unique: true
   end
 
@@ -157,6 +162,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130200) do
     t.index ["url", "fetched_at"], name: "index_asjjf_snapshots_on_url_and_fetched_at"
   end
 
+  create_table "competitor_aliases", force: :cascade do |t|
+    t.bigint "competitor_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.string "normalized_key", null: false
+    t.string "raw_name", null: false
+    t.string "source", null: false
+    t.datetime "updated_at", null: false
+    t.index ["competitor_id"], name: "index_competitor_aliases_on_competitor_id"
+    t.index ["created_by_id"], name: "index_competitor_aliases_on_created_by_id"
+    t.index ["normalized_key"], name: "index_competitor_aliases_on_normalized_key", unique: true
+  end
+
   create_table "competitors", force: :cascade do |t|
     t.string "academy"
     t.bigint "academy_id"
@@ -168,10 +186,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130200) do
     t.integer "draws", default: 0, null: false
     t.string "first_name", null: false
     t.integer "gold_medals", default: 0, null: false
+    t.boolean "identity_separate", default: false, null: false
     t.string "instagram_url"
     t.string "last_name", null: false
     t.integer "losses", default: 0, null: false
     t.string "nickname"
+    t.string "normalized_name"
+    t.string "reverse_normalized_name"
     t.integer "silver_medals", default: 0, null: false
     t.datetime "updated_at", null: false
     t.string "weight_class"
@@ -180,6 +201,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130200) do
     t.index ["academy_id"], name: "index_competitors_on_academy_id"
     t.index ["belt_rank"], name: "index_competitors_on_belt_rank"
     t.index ["country_code"], name: "index_competitors_on_country_code"
+    t.index ["normalized_name"], name: "index_competitors_on_normalized_name"
+    t.index ["reverse_normalized_name"], name: "index_competitors_on_reverse_normalized_name"
     t.index ["weight_class"], name: "index_competitors_on_weight_class"
   end
 
@@ -272,6 +295,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130200) do
 
   create_table "event_results", force: :cascade do |t|
     t.string "academy"
+    t.bigint "academy_id"
     t.string "age_category"
     t.string "belt_rank"
     t.bigint "competitor_id"
@@ -283,9 +307,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130200) do
     t.string "gender"
     t.text "notes"
     t.integer "placement", null: false
+    t.string "raw_competitor_name"
     t.string "submission_method"
     t.datetime "updated_at", null: false
     t.string "weight_class"
+    t.index ["academy_id"], name: "index_event_results_on_academy_id"
     t.index ["competitor_id"], name: "index_event_results_on_competitor_id"
     t.index ["competitor_name"], name: "index_event_results_on_competitor_name"
     t.index ["event_id", "belt_rank"], name: "index_event_results_on_event_id_and_belt_rank"
@@ -369,6 +395,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130200) do
     t.integer "sort_order", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["active", "sort_order"], name: "index_fund_allocations_on_active_and_sort_order"
+  end
+
+  create_table "identity_reviews", force: :cascade do |t|
+    t.bigint "candidate_academy_id"
+    t.datetime "created_at", null: false
+    t.string "normalized_name", null: false
+    t.string "raw_name", null: false
+    t.bigint "resolved_academy_id"
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["candidate_academy_id"], name: "index_identity_reviews_on_candidate_academy_id"
+    t.index ["normalized_name"], name: "index_identity_reviews_on_normalized_name", unique: true
+    t.index ["resolved_academy_id"], name: "index_identity_reviews_on_resolved_academy_id"
   end
 
   create_table "impact_configurations", force: :cascade do |t|
@@ -633,20 +672,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130200) do
     t.index ["youtube_video_id"], name: "index_videos_on_youtube_video_id"
   end
 
+  add_foreign_key "academies", "academies", column: "parent_id"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "asjjf_fetch_requests", "asjjf_snapshots", column: "snapshot_id"
   add_foreign_key "asjjf_snapshots", "users", column: "uploaded_by_user_id", on_delete: :nullify
+  add_foreign_key "competitor_aliases", "competitors"
+  add_foreign_key "competitor_aliases", "users", column: "created_by_id"
   add_foreign_key "competitors", "academies"
   add_foreign_key "event_accommodations", "events"
   add_foreign_key "event_asjjf_sources", "events"
   add_foreign_key "event_gallery_images", "event_gallery_upload_batches"
   add_foreign_key "event_gallery_images", "events"
   add_foreign_key "event_gallery_upload_batches", "events"
+  add_foreign_key "event_results", "academies"
   add_foreign_key "event_results", "competitors"
   add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"
   add_foreign_key "events", "organizations"
+  add_foreign_key "identity_reviews", "academies", column: "candidate_academy_id"
+  add_foreign_key "identity_reviews", "academies", column: "resolved_academy_id"
   add_foreign_key "prize_categories", "events"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_staff!
-        before_action :set_competitor, only: [ :show, :update, :destroy, :upload_photo ]
+        before_action :set_competitor, only: [ :show, :update, :destroy, :upload_photo, :merge_preview, :merge ]
 
         def index
           page = pagination_page
@@ -24,7 +24,7 @@ module Api
           else "COALESCE(stats.total_points, 0) #{dir}, COALESCE(stats.gold, 0) DESC"
           end
 
-          records = scope
+          records = scope.includes(:team)
             .joins(stats_join_sql)
             .select(
               "competitors.*",
@@ -80,6 +80,23 @@ module Api
           render json: { competitor: data }
         end
 
+        def merge_preview
+          render json: Identity::CompetitorMerge.preview(@competitor, Competitor.find(params[:target_id]))
+        rescue ActiveRecord::RecordNotFound
+          render json: { error: "Target competitor not found" }, status: :not_found
+        end
+
+        def merge
+          raise ArgumentError, "A current merge preview is required" unless params[:review_token].is_a?(String) && params[:review_token].present?
+          target = Identity::CompetitorMerge.call(source: @competitor, target: Competitor.find(params[:target_id]),
+            confirm: params[:confirm] == true, confirm_warnings: params[:confirm_warnings] == true, actor: current_user, review_token: params[:review_token], keep: (params[:keep].present? ? params.permit(keep: {}).fetch(:keep).to_h : {}))
+          render json: { competitor: target.as_json, skipped_aliases: target.skipped_aliases }
+        rescue ArgumentError, ActiveRecord::RecordInvalid => e
+          render json: { error: e.message }, status: :unprocessable_entity
+        rescue ActiveRecord::RecordNotFound
+          render json: { error: "Target competitor not found" }, status: :not_found
+        end
+
         def create
           competitor = Competitor.new(competitor_params)
           if competitor.save
@@ -90,11 +107,29 @@ module Api
         end
 
         def update
-          if @competitor.update(competitor_params)
-            render json: { competitor: @competitor.reload.as_json }
+          old_name = @competitor.full_name
+          saved = false
+          skipped_aliases = []
+          Competitor.transaction do
+            Competitor.connection.execute("SELECT pg_advisory_xact_lock(184527002)")
+            @competitor.lock!
+            old_names = @competitor.identity_names
+            renamed = competitor_params.slice(:first_name, :last_name).to_h.any? { |key, value| @competitor.public_send(key) != value }
+            saved = @competitor.update(competitor_params)
+            if saved
+              skipped_aliases = CompetitorAlias.record_names!(competitor: @competitor, names: old_names, source: "rename", actor: current_user) if renamed
+              audit = { action: "identity.competitor_update", actor_id: current_user.id, competitor_id: @competitor.id,
+                old_name: old_name, new_name: @competitor.full_name, skipped_aliases: skipped_aliases }
+              ActiveRecord.after_all_transactions_commit { Rails.logger.info(audit.to_json) }
+            end
+          end
+          if saved
+            render json: { competitor: @competitor.reload.as_json, skipped_aliases: skipped_aliases }
           else
             render json: { errors: @competitor.errors.full_messages }, status: :unprocessable_entity
           end
+        rescue ArgumentError, ActiveRecord::RecordInvalid => e
+          render json: { error: e.message }, status: :unprocessable_entity
         end
 
         def destroy
@@ -142,7 +177,7 @@ module Api
           params.permit(
             :first_name, :last_name, :nickname, :country_code, :belt_rank,
             :weight_class, :academy, :bio, :instagram_url, :youtube_url,
-            :wins, :losses, :draws
+            :wins, :losses, :draws, :identity_separate
           )
         end
 
@@ -152,11 +187,12 @@ module Api
             first_name: c.first_name,
             last_name: c.last_name,
             full_name: c.full_name,
+            identity_separate: c.identity_separate,
             nickname: c.nickname,
             country_code: c.country_code,
             belt_rank: c.belt_rank,
             weight_class: c.weight_class,
-            academy: c.read_attribute(:academy),
+            academy: c.current_academy_name,
             academy_id: c.academy_id,
             bio: c.bio,
             instagram_url: c.instagram_url,

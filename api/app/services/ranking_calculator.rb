@@ -25,25 +25,12 @@ class RankingCalculator
 
   # Returns individual competitor rankings.
   # Groups by competitor_id when available, falls back to name for unlinked results.
-  # Merges name-based groups into id-based groups to avoid split entries.
+  # Ambiguous unlinked names stay separate until a staff-reviewed link exists.
   def self.individual(options = {})
     results = base_query(options)
 
     grouped = results.group_by do |r|
-      r.competitor_id.present? ? "id:#{r.competitor_id}" : "name:#{normalize_name(r.competitor_name)}"
-    end
-
-    id_name_map = {}
-    grouped.each do |key, records|
-      next unless key.start_with?("id:")
-      id_name_map[normalize_name(records.first.competitor_name)] = key
-    end
-
-    grouped.keys.select { |k| k.start_with?("name:") }.each do |name_key|
-      norm = name_key.delete_prefix("name:")
-      if (id_key = id_name_map[norm])
-        grouped[id_key].concat(grouped.delete(name_key))
-      end
+      r.competitor_id.present? ? "id:#{r.competitor_id}" : "unlinked:#{r.id}"
     end
 
     rankings = grouped.map do |_key, records|
@@ -53,10 +40,11 @@ class RankingCalculator
       bronzes = records.count { |r| r.placement == 3 }
 
       {
-        competitor_name: records.first.competitor_name,
+        competitor_name: records.first.display_competitor_name,
         competitor_id: records.first.competitor_id,
-        academy: most_common(records.map(&:academy)),
-        country_code: most_common(records.map(&:country_code)),
+        result_id: records.first.competitor_id ? nil : records.first.id,
+        academy: records.first.competitor&.current_academy_name || most_common(records.map(&:academy)),
+        country_code: most_common(records.map { |r| Identity::CountryCode.normalize(r.country_code) }),
         total_points: total_points,
         gold: golds,
         silver: silvers,
@@ -73,30 +61,14 @@ class RankingCalculator
 
   # Returns academy/team rankings.
   # Groups by academy_id when available, falls back to academy name string.
-  # Merges name-based groups into id-based groups to avoid split entries
-  # during the window between import and linking completion.
+  # Unresolved imports retain a raw-name group until reviewed and linked.
   def self.teams(options = {})
     results = base_query(options)
 
+    legacy_map = Identity::AcademyAttribution.name_map
+    results.each { |r| r.result_academy = legacy_map[normalize_name(r.academy)] if r.academy_id.nil? }
     grouped = results.group_by do |r|
-      if r.respond_to?(:competitor_academy_id) && r.competitor_academy_id.present?
-        "id:#{r.competitor_academy_id}"
-      else
-        "name:#{normalize_name(r.academy.presence || 'Independent')}"
-      end
-    end
-
-    id_name_map = {}
-    grouped.each do |key, records|
-      next unless key.start_with?("id:")
-      id_name_map[normalize_name(records.first.academy.presence || "Independent")] = key
-    end
-
-    grouped.keys.select { |k| k.start_with?("name:") }.each do |name_key|
-      norm = name_key.delete_prefix("name:")
-      if (id_key = id_name_map[norm])
-        grouped[id_key].concat(grouped.delete(name_key))
-      end
+      r.academy_id.present? ? "id:#{r.academy_id}" : "name:#{normalize_name(r.academy.presence || 'Independent')}"
     end
 
     rankings = grouped.map do |_key, records|
@@ -105,12 +77,13 @@ class RankingCalculator
       silvers = records.count { |r| r.placement == 2 }
       bronzes = records.count { |r| r.placement == 3 }
 
-      academy_id = records.first.respond_to?(:competitor_academy_id) ? records.first.competitor_academy_id : nil
+      academy = records.first.result_academy
+      academy_id = academy&.id
 
       {
-        academy: records.first.academy.presence || "Independent",
+        academy: academy&.name || records.first.academy.presence || "Independent",
         academy_id: academy_id,
-        country_code: most_common(records.map(&:country_code)),
+        country_code: academy&.country_code,
         total_points: total_points,
         gold: golds,
         silver: silvers,
@@ -129,7 +102,7 @@ class RankingCalculator
   def self.countries(options = {})
     results = base_query(options)
 
-    grouped = results.group_by { |r| r.country_code.presence || "Unknown" }
+    grouped = results.group_by { |r| Identity::CountryCode.normalize(r.country_code) || "Unknown" }
 
     rankings = grouped.map do |country, records|
       total_points = records.sum { |r| points_for(r.placement, r.event_stars) }
@@ -141,7 +114,7 @@ class RankingCalculator
         gold: golds,
         silver: records.count { |r| r.placement == 2 },
         bronze: records.count { |r| r.placement == 3 },
-        athletes: records.map { |r| normalize_name(r.competitor_name) }.uniq.count,
+        athletes: records.map { |r| r.competitor_id || normalize_name(r.competitor_name) }.uniq.count,
         academies: records.map { |r| normalize_name(r.academy.presence || "") }.uniq.count - 1 # subtract empty
       }
     end
@@ -158,10 +131,10 @@ class RankingCalculator
       scope = EventResult
         .joins(:event)
         .merge(Event.publicly_visible)
-        .left_joins(:competitor)
+        .includes(:result_academy, competitor: :team)
         .select(
           "event_results.*, events.asjjf_stars as event_stars, events.id as event_id, " \
-          "event_results.competitor_id, competitors.academy_id as competitor_academy_id"
+          "event_results.competitor_id"
         )
 
       scope = scope.where("LOWER(event_results.belt_rank) = ?", options[:belt].downcase) if options[:belt].present?
@@ -182,7 +155,7 @@ class RankingCalculator
 
     def normalize_name(name)
       return "" if name.blank?
-      name.strip.downcase.gsub(/\s+/, " ")
+      Identity::NameNormalizer.key(name)
     end
 
     def most_common(arr)
