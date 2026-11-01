@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { Event, EventResult, EventResultFormData, ImportPreview } from '../../services/api'
 import { formatDate } from '../../utils/dates'
+import AsjjfIntakePanel from '../../components/admin/AsjjfIntakePanel'
 
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black']
 const GENDERS = ['male', 'female']
@@ -298,6 +299,8 @@ export default function EventResultsAdmin() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AsjjfIntakePanel eventId={numericEventId} />
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">

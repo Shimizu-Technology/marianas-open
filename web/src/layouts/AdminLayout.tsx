@@ -18,6 +18,7 @@ import {
   Settings,
   ShieldCheck,
   Swords,
+  RefreshCw,
   Users,
   X,
   type LucideIcon,
@@ -53,6 +54,7 @@ const navSections: NavSection[] = [
     label: 'Tournament',
     items: [
       { to: '/admin/events', icon: CalendarDays, label: 'Events & Results' },
+      { to: '/admin/asjjf', icon: RefreshCw, label: 'ASJJF sync' },
       { to: '/admin/competitors', icon: Swords, label: 'Competitors' },
       { to: '/admin/academies', icon: Building2, label: 'Academies' },
       { to: '/admin/sponsors', icon: Handshake, label: 'Sponsors' },
@@ -487,7 +489,7 @@ export default function AdminLayout() {
               transition={{ duration: 0.25 }}
               className="p-4 sm:p-6 lg:p-8"
             >
-              <Outlet />
+              <Outlet context={{ isAdmin }} />
             </motion.div>
           </main>
         </div>
