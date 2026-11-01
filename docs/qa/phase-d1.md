@@ -16,6 +16,7 @@ Acceptance (agent executed on isolated local databases):
 | D1-4 Authorization and override | Staff normal publishing; admin reason override records failed checks; viewer/anonymous denied | Passed in API/component coverage |
 | D1-5 ASJJF facts | Parsed snapshot fills facts/provenance; missing snapshot queues and explains; wrong season rejected | Passed in API/component coverage |
 | D1-6 Editor at 390/1440 | Section navigation, edits preserved, dirty save state, fix links, rollover and publishing flows | Passed in component integration and synthetic browser harness; real Clerk session blocked |
+| D1-8 Undated override recovery | Public calendar/archive/gallery show a pending date; API client and dated home selection tolerate absent dates without inventing facts | Passed: 20 focused API-client/selector/rendered-page tests |
 | D1-7 Existing admin integration | B3 badge/results links retained; gallery/hotels remain available | B3 links seen in browser; child editor and hotel readiness refresh component tests passed |
 
 Clerk prevents actual local admin sign-in. Component integration and browser fixtures will cover the editor without weakening runtime authentication. Resized mobile browser coverage does not prove physical-device keyboard/gesture behavior.
@@ -38,3 +39,5 @@ Limits: Clerk blocks actual local admin login. No physical phone, production wri
 Runtime cleanup: owned Vite server and native Chrome QA window stopped/closed, original zoom restored; shared/baseline resources untouched. The QA database was dropped. The final handoff records disposal of the isolated test database after the combined suite. Branch/worktree remain available for the merge owner.
 
 Advisory Impeccable 4.6.0 detection returned an empty findings array for changed UI paths.
+
+Undated overrides: a final acceptance pass found null dates could crash public string-date consumers or show the old October 2026 fallback. Public API client dates normalize to empty strings, dated home highlights require dates, and calendar/archive/gallery cards use the season year or pending-date label. The old fixed fallback was removed; non-English locales use English for this label until static translations regenerate. A targeted independent review found archive/gallery gaps in the first fix; those were addressed and verified in the 20-test focused run. No sponsor- or rankings-owned files were edited.
