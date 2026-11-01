@@ -225,9 +225,6 @@ function uploadToStorage(url: string, headers: Record<string, string>, file: Fil
   });
 }
 
-function titleFromFilename(fileName: string) {
-  return fileName.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
-}
 
 function formatBytes(bytes: number) {
   if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
@@ -376,9 +373,8 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
           put: (prepared, file, progress, uploadSignal) => uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, file, progress, uploadSignal),
           complete: async record => {
             if (!current()) throw new DOMException('Upload session ended', 'AbortError');
-            const title = titleFromFilename(record.task.fileName);
             const completed = await withTimeout(api.admin.completeEventGalleryDirectUpload(record.task.eventId, {
-              signed_id: record.prepared!.signed_id, batch_id: record.task.batchId, title, alt_text: title,
+              signed_id: record.prepared!.signed_id, batch_id: record.task.batchId, title: '', alt_text: '',
               caption: record.meta.caption, category: record.meta.category, sort_order: record.meta.sortOrder, active: record.meta.active,
             }), COMPLETE_UPLOAD_TIMEOUT_MS, 'Saving gallery record timed out. Retry to confirm the uploaded file.');
             return completed.gallery_image;

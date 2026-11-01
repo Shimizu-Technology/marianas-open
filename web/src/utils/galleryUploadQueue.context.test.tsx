@@ -197,6 +197,17 @@ describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage
     expect(await store.file('clerk-a', '23')).toBeUndefined();
   });
 
+  it('sends blank public labels for camera filenames and preserves only the user caption', async () => {
+    render(<View />);
+    const cameraFile = new File(['image'], 'IMG_20261031_173012.jpg', { type: 'image/jpeg' });
+    await act(async () => { await queue.startUpload(options([cameraFile])); });
+    await waitFor(() => expect(queue.completedCount).toBe(1));
+    expect(api.admin.completeEventGalleryDirectUpload).toHaveBeenCalledWith(1, {
+      signed_id: 'signed-fixture', batch_id: 8, title: '', alt_text: '', caption: 'Day 1', category: 'day-1', sort_order: 0, active: false,
+    });
+    expect(JSON.stringify(vi.mocked(api.admin.completeEventGalleryDirectUpload).mock.calls)).not.toContain(cameraFile.name);
+  });
+
   it('checksums a large non-JPEG in chunks without changing the uploaded bytes', async () => {
     render(<View />);
     const bytes = new Uint8Array(5 * 1024 * 1024).fill(3);
