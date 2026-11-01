@@ -285,7 +285,7 @@ export default function EventResultsSection({ eventSlug, sourceUrls, onReady }: 
     setError(false);
     Promise.all([
       api.getEventResults(eventSlug),
-      api.getEventResultsSummary(eventSlug),
+      api.getEventResultsSummary(eventSlug).catch(() => null),
     ]).then(([res, sum]) => {
       if (cancelled) return;
       setResults(res);

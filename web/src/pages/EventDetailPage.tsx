@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon, Ticket, Store, Check, Copy } from 'lucide-react';
@@ -223,6 +223,7 @@ function TravelItemCard({
 export default function EventDetailPage() {
   const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
+  const { hash } = useLocation();
   const shouldReduceMotion = useReducedMotion();
   const posthog = usePostHog();
   const { events, loading, error, retry } = useEvents();
@@ -240,6 +241,13 @@ export default function EventDetailPage() {
   const mainEvent = countedEvents[0] ?? null;
   const [readyResultsSlug, setReadyResultsSlug] = useState<string | null>(null);
   const onResultsReady = useCallback((eventSlug: string) => setReadyResultsSlug(eventSlug), []);
+  useEffect(() => {
+    if (hash !== '#results' || loading || resultsLoading || !mainEvent || eventPhase(mainEvent) !== 'completed') return;
+    if (hasEventResults(mainEvent) && readyResultsSlug !== mainEvent.slug) return;
+    // Wait until the archive is visible and the route's scroll reset has finished.
+    const frame = requestAnimationFrame(() => document.getElementById('results')?.scrollIntoView({ block: 'start', behavior: 'instant' }));
+    return () => cancelAnimationFrame(frame);
+  }, [hash, loading, resultsLoading, mainEvent, readyResultsSlug]);
 
   if (loading || resultsLoading) {
     return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;
