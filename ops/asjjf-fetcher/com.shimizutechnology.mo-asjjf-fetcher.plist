@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.shimizutechnology.mo-asjjf-fetcher</string>
+  <key>UserName</key><string>jerry</string>
+  <key>GroupName</key><string>staff</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key><string>/Users/jerry</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>MO_FETCHER_CHECKOUT</key><string>/Users/jerry/work/marianas-open</string>
+  </dict>
+  <key>ProgramArguments</key>
+  <array><string>/bin/zsh</string><string>/Users/jerry/work/marianas-open/ops/asjjf-fetcher/run.sh</string></array>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>2</integer><key>Minute</key><integer>30</integer></dict>
+  <key>ProcessType</key><string>Background</string>
+  <key>ExitTimeOut</key><integer>360</integer>
+  <key>StandardOutPath</key><string>/Users/jerry/Library/Logs/mo-asjjf-fetcher/launchd.log</string>
+  <key>StandardErrorPath</key><string>/Users/jerry/Library/Logs/mo-asjjf-fetcher/launchd.log</string>
+</dict>
+</plist>
