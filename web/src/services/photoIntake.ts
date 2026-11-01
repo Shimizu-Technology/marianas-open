@@ -46,6 +46,6 @@ export const photoIntake = {
   imports: (eventId: number) => request<{ imports: PhotoImport[] }>(eventId, 'gallery-imports'),
   prepareZip: (eventId: number, data: { filename: string; byte_size: number; checksum: string }) => request<DirectUploadPreparation>(eventId, 'gallery-imports/prepare_direct_upload', 'POST', data),
   completeZip: (eventId: number, signed_id: string, options: ImportOptions) => request<{ import: PhotoImport }>(eventId, 'gallery-imports', 'POST', { signed_id, ...options }),
-  proposals: (eventId: number, album_type: string) => request<{ proposals: DayProposal[]; unassigned_count: number }>(eventId, `gallery-day-proposals?${new URLSearchParams({ album_type })}`),
-  applyProposals: (eventId: number, album_type: string, proposals: DayProposal[]) => request<{ updated: number }>(eventId, 'gallery-day-proposals', 'POST', { album_type, proposals }),
+  proposals: (eventId: number, album_type: string, category?: string) => request<{ proposals: DayProposal[]; unassigned_count: number }>(eventId, `gallery-day-proposals?${new URLSearchParams({ album_type, ...(category === undefined ? {} : { category }) })}`),
+  applyProposals: (eventId: number, album_type: string, proposals: DayProposal[], category?: string) => request<{ updated: number }>(eventId, 'gallery-day-proposals', 'POST', { album_type, proposals, ...(category === undefined ? {} : { category }) }),
 };

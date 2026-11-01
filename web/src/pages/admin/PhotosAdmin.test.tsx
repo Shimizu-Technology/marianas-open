@@ -113,7 +113,7 @@ it('previews actual day dates and applies only after explicit confirmation', asy
   expect(photoIntake.applyProposals).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Confirm 1 photo assignments' }));
   await screen.findByText('Day albums applied to the confirmed photos.');
-  expect(photoIntake.applyProposals).toHaveBeenCalledWith(7, 'Podium', [{ category: 'Podium Day 2', date: '2027-10-24', image_ids: [21] }]);
+  expect(photoIntake.applyProposals).toHaveBeenCalledWith(7, 'Podium', [{ category: 'Podium Day 2', date: '2027-10-24', image_ids: [21] }], '');
 });
 
 it('recovers a failed initial load and handles an empty album without losing controls', async () => {
@@ -134,7 +134,17 @@ it('saves explicit review hold and permits a custom day album type', async () =>
   fireEvent.change(screen.getByLabelText('Album type for day suggestions'), { target: { value: '__custom__' } });
   fireEvent.change(screen.getByLabelText('Custom album type'), { target: { value: 'Awards' } });
   fireEvent.click(screen.getByRole('button', { name: 'Preview day albums' }));
-  await waitFor(() => expect(photoIntake.proposals).toHaveBeenCalledWith(7, 'Awards'));
+  await waitFor(() => expect(photoIntake.proposals).toHaveBeenCalledWith(7, 'Awards', ''));
+});
+
+it('includes the chosen source album when proposing a different type for direct uploads', async () => {
+  mount(); await loaded();
+  fireEvent.change(screen.getByRole('combobox', { name: /Upload to album/ }), { target: { value: 'Tournament' } });
+  fireEvent.change(screen.getByLabelText('Album type for day suggestions'), { target: { value: 'Opening Ceremony' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Preview day albums' }));
+  await waitFor(() => expect(photoIntake.proposals).toHaveBeenCalledWith(7, 'Opening Ceremony', 'Tournament'));
+  fireEvent.click(await screen.findByRole('button', { name: 'Confirm 1 photo assignments' }));
+  await waitFor(() => expect(photoIntake.applyProposals).toHaveBeenCalledWith(7, 'Opening Ceremony', expect.any(Array), 'Tournament'));
 });
 
 it('refreshes the current filters when an older bulk action finishes after navigation', async () => {

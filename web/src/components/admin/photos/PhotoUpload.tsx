@@ -78,7 +78,7 @@ export default function PhotoUpload({ event, albums, settings, selectedAlbum, im
     <div className="mt-4 space-y-3 border-t border-white/10 pt-4">
       <label className="block text-sm font-medium">Album type for day suggestions<select className={`${photoInput} mt-1`} value={albumType} onChange={event => setAlbumType(event.target.value)}><option>Podium</option><option>Tournament</option><option>Opening Ceremony</option><option value="__custom__">Custom type…</option></select></label>
       {albumType === '__custom__' && <label className="block text-sm">Custom album type<input className={`${photoInput} mt-1`} value={customType} onChange={event => setCustomType(event.target.value)} maxLength={65} placeholder="e.g. Awards" /></label>}
-      <DayAlbums eventId={event.id} albumType={resolvedType} timezone={settings.timezone} busy={busy} mutate={mutate} />
+      <DayAlbums eventId={event.id} albumType={resolvedType} category={category} timezone={settings.timezone} busy={busy} mutate={mutate} />
       <ZipIntake eventId={event.id} options={{ album_type: resolvedType, category, timezone: settings.timezone, hold_flagged: settings.hold_flagged }} imports={imports} onImported={refresh} />
     </div>
   </section>;
