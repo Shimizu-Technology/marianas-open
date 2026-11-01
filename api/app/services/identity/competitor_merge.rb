@@ -46,6 +46,7 @@ module Identity
           # history exists; refresh below remains authoritative when it does.
           target.academy_id ||= source.academy_id
           target.academy = target.academy.presence || source.academy
+          AsjjfRankingEntry.where(competitor_id: source.id).update_all(competitor_id: target.id)
           source.destroy!
           target.save!
           target.refresh_current_academy! if target.event_results.exists?

@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import HeldRankingSnapshots from '../../components/admin/HeldRankingSnapshots'
+import RankingSnapshotReview from '../../components/admin/RankingSnapshotReview'
+import RankingSeasonSettings from '../../components/admin/RankingSeasonSettings'
 import { useOutletContext } from 'react-router-dom'
 import AsjjfIntakePanel, { asjjfButtonClass } from '../../components/admin/AsjjfIntakePanel'
 import { api, type AsjjfStatus } from '../../services/api'
@@ -109,7 +112,7 @@ export default function AsjjfSyncAdmin() {
           </section>
           <section aria-labelledby="asjjf-snapshots" className="space-y-3">
             <h2 id="asjjf-snapshots" className="font-heading text-lg font-bold text-text-primary">Recent snapshots</h2>
-            <p className="text-sm text-text-secondary">Parsing runs after a snapshot is saved. Refresh status to see updates. Snapshots won't yet replace published results.</p>
+            <p className="text-sm text-text-secondary">Parsing runs after a snapshot is saved. Refresh status to see updates. Ranking snapshots update confirmed official lists; event results follow their separate review flow.</p>
             {status.recent_snapshots.length === 0 && <p className="text-sm text-text-secondary">No snapshots yet. Queue an event check or upload a saved ASJJF page below.</p>}
             {status.recent_snapshots.map(snapshot => (
               <article key={snapshot.id} className="min-w-0 space-y-3 rounded-xl border border-white/10 bg-surface p-4 sm:p-5">
@@ -122,6 +125,7 @@ export default function AsjjfSyncAdmin() {
                   <div><dt className="text-text-secondary">Parse status</dt><dd className="break-words text-text-primary">{label(snapshot.parse_status)}</dd></div>
                 </dl>
                 {snapshot.parse_error && <p className="break-words text-sm text-red-400">Parse error: {snapshot.parse_error}</p>}
+                <RankingSnapshotReview id={snapshot.id} status={snapshot.ranking_apply_status} error={snapshot.ranking_apply_error} isAdmin={isAdmin} />
                 {snapshot.parsed_summary != null && (
                   <details>
                     <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-gold focus-visible:outline-2 focus-visible:outline-gold">Parsed summary</summary>
@@ -133,6 +137,8 @@ export default function AsjjfSyncAdmin() {
           </section>
         </>
       )}
+      <HeldRankingSnapshots isAdmin={isAdmin} />
+      <RankingSeasonSettings isAdmin={isAdmin} />
       <AsjjfIntakePanel />
     </div>
   )

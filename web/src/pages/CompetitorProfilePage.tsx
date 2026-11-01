@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, MotionConfig } from 'framer-motion';
-import { ArrowLeft, Trophy, Medal, Award, MapPin, Users, Calendar, Instagram, Youtube } from 'lucide-react';
+import { ArrowLeft, Medal, Award, MapPin, Users, Calendar, Instagram, Youtube } from 'lucide-react';
 import { api } from '../services/api';
 import type { CompetitorProfile, CompetitorDetail } from '../services/api';
 import SEO from '../components/SEO';
+import CompetitorStandings from '../components/rankings/CompetitorStandings';
 
 const PLACEMENT_STYLE: Record<number, { key: string; className: string }> = {
   1: { key: 'competitorProfile.gold', className: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' },
@@ -42,12 +43,11 @@ type UnifiedProfile = {
   bio: string | null;
   instagram_url: string | null;
   youtube_url: string | null;
-  total_points: number;
   gold: number;
   silver: number;
   bronze: number;
   events_competed: number;
-  results: { event_id?: number; event_name: string; event_slug: string; event_date: string; division: string; placement: number; belt_rank: string; points_earned: number }[];
+  results: { event_id?: number; event_name: string; event_slug: string; event_date: string; division: string; placement: number; belt_rank: string }[];
 };
 
 function fromCompetitorDetail(d: CompetitorDetail): UnifiedProfile {
@@ -61,7 +61,6 @@ function fromCompetitorDetail(d: CompetitorDetail): UnifiedProfile {
     bio: d.bio,
     instagram_url: d.instagram_url,
     youtube_url: d.youtube_url,
-    total_points: d.total_points,
     gold: d.gold_medals,
     silver: d.silver_medals,
     bronze: d.bronze_medals,
@@ -81,7 +80,6 @@ function fromCompetitorProfile(p: CompetitorProfile): UnifiedProfile {
     bio: null,
     instagram_url: null,
     youtube_url: null,
-    total_points: p.total_points,
     gold: p.gold,
     silver: p.silver,
     bronze: p.bronze,
@@ -102,22 +100,17 @@ export default function CompetitorProfilePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (id) {
-      setLoading(true);
-      api.getCompetitor(Number(id))
-        .then(d => setProfile(fromCompetitorDetail(d)))
-        .catch(() => setError(t('competitorProfile.noResults')))
-        .finally(() => setLoading(false));
-    } else if (name || resultId) {
-      setLoading(true);
-      api.getCompetitorProfile(name, resultId || undefined)
-        .then(p => setProfile(fromCompetitorProfile(p)))
-        .catch(() => setError(t('competitorProfile.noResults')))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-      setError('No competitor specified');
-    }
+    let active = true;
+    setProfile(null);
+    setError('');
+    setLoading(true);
+    const request = id ? api.getCompetitor(Number(id)).then(fromCompetitorDetail)
+      : name || resultId ? api.getCompetitorProfile(name, resultId || undefined).then(fromCompetitorProfile)
+        : Promise.reject(new Error('Missing competitor'));
+    request.then(data => { if (active) setProfile(data); })
+      .catch(() => { if (active) setError(t('competitorProfile.noResults')); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [id, name, resultId, t]);
 
   const seoPath = id ? `/competitors/${id}` : resultId ? `/competitors/profile?result_id=${encodeURIComponent(resultId)}` : name ? `/competitors/profile?name=${encodeURIComponent(name)}` : '/competitors/profile';
@@ -226,16 +219,17 @@ export default function CompetitorProfilePage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                <StatCard icon={<Trophy size={20} className="text-gold-500" />} label={t('competitorProfile.totalPoints')} value={profile.total_points} />
+              <div className="grid grid-cols-3 gap-3 mb-6">
                 <StatCard icon={<Medal size={20} className="text-yellow-400" />} label={t('competitorProfile.gold')} value={profile.gold} />
                 <StatCard icon={<Medal size={20} className="text-gray-300" />} label={t('competitorProfile.silver')} value={profile.silver} />
                 <StatCard icon={<Award size={20} className="text-amber-500" />} label={t('competitorProfile.bronze')} value={profile.bronze} />
               </div>
 
+              <CompetitorStandings competitorId={id ? Number(id) : undefined} />
+
               <div className="bg-surface border border-white/5 rounded-xl overflow-hidden">
                 <div className="p-4 border-b border-white/5">
-                  <h2 className="text-lg font-semibold text-white">{t('competitorProfile.results')}</h2>
+                  <h2 className="text-lg font-semibold text-white">{t('officialRankings.medalHistory')}</h2>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -245,7 +239,6 @@ export default function CompetitorProfilePage() {
                         <th className="p-3 font-medium">{t('competitorProfile.division')}</th>
                         <th className="p-3 font-medium">{t('competitorProfile.placement')}</th>
                         <th className="p-3 font-medium">{t('competitorProfile.beltRank')}</th>
-                        <th className="p-3 font-medium text-right">{t('competitorProfile.pointsEarned')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -281,7 +274,6 @@ export default function CompetitorProfilePage() {
                               )}
                             </td>
                             <td className="p-3 text-text-secondary">{t(`watch.belt.${r.belt_rank}`, r.belt_rank)}</td>
-                            <td className="p-3 text-right font-medium text-white">{r.points_earned}</td>
                           </motion.tr>
                         );
                       })}

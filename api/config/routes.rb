@@ -15,7 +15,11 @@ Rails.application.routes.draw do
       resources :site_contents, only: [:index], path: 'site-contents'
       resources :site_images, only: [:index], path: 'site-images'
       get 'rankings/competitor', to: 'rankings#competitor'
-      resources :rankings, only: [:index]
+      get 'rankings', to: 'official_rankings#lists'
+      get 'rankings/lists', to: 'official_rankings#lists'
+      get 'rankings/lists/:id/divisions', to: 'official_rankings#divisions'
+      get 'rankings/lists/:id/entries', to: 'official_rankings#entries'
+      get 'rankings/standings', to: 'official_rankings#standings'
       get 'impact', to: 'impact#index'
       get 'impact/status', to: 'impact#status'
 
@@ -24,13 +28,19 @@ Rails.application.routes.draw do
 
       namespace :internal do
         get "asjjf/work", to: "asjjf#work"
+        post "asjjf/snapshots/:id/apply_ranking", to: "asjjf#apply_ranking"
         post "asjjf/snapshots", to: "asjjf#snapshots"
         post "asjjf/heartbeat", to: "asjjf#heartbeat"
       end
 
       # Admin
       namespace :admin do
+        get "asjjf/ranking_holds", to: "asjjf#ranking_holds"
+        get "asjjf/snapshots/:id", to: "asjjf#snapshot"
         get "asjjf/status", to: "asjjf#status"
+        get "asjjf/ranking_seasons", to: "asjjf#ranking_seasons"
+        put "asjjf/ranking_seasons/:season_year", to: "asjjf#update_ranking_season"
+        post "asjjf/snapshots/:id/apply_ranking", to: "asjjf#apply_ranking"
         post "asjjf/snapshots", to: "asjjf#snapshots"
         post "asjjf/close_breaker", to: "asjjf#close_breaker"
         post "events/:id/asjjf_check", to: "asjjf#check"

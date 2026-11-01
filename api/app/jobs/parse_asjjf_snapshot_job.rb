@@ -6,6 +6,8 @@ class ParseAsjjfSnapshotJob < ApplicationJob
     return unless snapshot.outcome == "ok"
     parsed = Asjjf::Parsers.parse(page_type: snapshot.page_type, html: snapshot.html, url: snapshot.url)
     snapshot.update!(parsed_summary: parsed, parse_status: "parsed", parsed_at: Time.current, parse_error: nil)
+    Asjjf::RankingDiscovery.call(snapshot)
+    ApplyRankingSnapshotJob.perform_later(snapshot.id) if %w[individual_ranking individual_ranking_division team_ranking].include?(snapshot.page_type)
     discipline = parsed[:discipline] || parsed["discipline"]
     if %w[event_info event_results].include?(snapshot.page_type) && %w[gi nogi].include?(discipline)
       EventAsjjfSource.where(asjjf_event_id: snapshot.asjjf_id, discipline: "unknown").update_all(discipline: discipline, updated_at: Time.current)
@@ -18,6 +20,7 @@ class ParseAsjjfSnapshotJob < ApplicationJob
     end
   rescue StandardError => e
     snapshot&.update!(parse_status: "failed", parse_error: "#{e.class}: #{e.message}".truncate(2000), parsed_at: Time.current)
+    ApplyRankingSnapshotJob.perform_later(snapshot.id) if snapshot && %w[individual_ranking individual_ranking_division team_ranking].include?(snapshot.page_type)
     Rails.logger.error("[ASJJF] Snapshot #{snapshot_id} parse failed: #{e.class}: #{e.message}")
   end
 end

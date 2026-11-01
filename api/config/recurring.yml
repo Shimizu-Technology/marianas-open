@@ -28,3 +28,7 @@ complete_past_events:
 prune_asjjf_snapshots:
   class: PruneAsjjfSnapshotsJob
   schedule: every day at 4am
+
+plan_official_rankings:
+  class: PlanRankingSyncJob
+  schedule: every day at 11pm

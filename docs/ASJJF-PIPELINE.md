@@ -108,4 +108,35 @@ The event results admin page includes check/upload controls and a link to status
 
 `PruneAsjjfSnapshotsJob` runs daily at 04:00 through the existing recurring Solid Queue schedule. It preserves the latest `outcome=ok` snapshot for every URL forever (including pages awaiting a parser fix) and removes other snapshots older than 120 days. Request references to pruned snapshots are nullified. The latest success is ordered by fetched time, then ID. There is no automatic deletion of queue/history/heartbeat records.
 
-To retry a parse after a parser fix: `ParseAsjjfSnapshotJob.perform_later(snapshot_id)`. It never applies published data. To resume fetching: investigate challenge evidence, reset the breaker as admin when appropriate, then requeue the event. This PR does not deploy/configure B2 or verify email delivery with a live Resend send.
+To retry a parse after a parser fix: `ParseAsjjfSnapshotJob.perform_later(snapshot_id)`. Ranking reparses enqueue the B5 apply job for confirmed sources; other page types retain their separate apply/review flow. To resume fetching: investigate challenge evidence, reset the breaker as admin when appropriate, then requeue the event. This PR does not deploy/configure B2 or verify email delivery with a live Resend send.
+
+## Official ranking mirrors (B5)
+
+Confirmed sources live in `asjjf_ranking_seasons`; `current` is an explicit admin choice. The migration configures 2026 Gi individual/team 227 and No-Gi individual 234, with pending lists and no imported standings. Admins edit these IDs at `/admin/asjjf`. Menu links found in saved pages become suggestions only. Selecting a suggestion fills the form; saving confirms it. No discovery result changes the current season automatically.
+
+After parsing ranking pages, `ApplyRankingSnapshotJob` publishes configured lists, division inventories, and official entries. Each division/table replacement runs under a list lock and transaction. It preserves the source text, decimal points, medal counts where published, normalized and raw country codes, and snapshot provenance. Matching uses canonical names and approved aliases; ambiguity stays unmatched, and no athlete or academy is created. Identity merges transfer ranking links to the surviving record. Older snapshots cannot overwrite newer tables. Division snapshots received before their index are replayed when the index establishes the mapping.
+
+Malformed, incomplete, and empty replacements preserve previous data. Any decrease in row count, or any removal from the division inventory, is held for review, since a closed HTML table alone cannot prove completeness. The persistent, paginated held-snapshot queue shows the reason and loads each saved summary on demand; it is independent of the 20 most recent uploads. After checking the smaller table against ASJJF, an administrator can explicitly approve it; an empty replacement remains blocked. Verified division removals delete the removed divisions and their entries atomically. Failed or login-required sources are unavailable when there is no published data; a failed fetch does not erase a previously published table. Referenced source snapshots and outstanding held snapshots survive retention.
+
+`PlanRankingSyncJob` runs nightly at 23:00 in the existing recurring schedule. It queues confirmed current-season lists once per seven days during that calendar season, plus once for each new `results_imported_at` observed within the previous three days for events dated in that season. It waits while any relevant index, team, or division request is pending/leased. This retains the existing 90-second pacing and challenge breaker; a full 2026 crawl is about 146 requests (roughly 3.7 hours). It does not change results-import jobs or enqueue additional daily crawls. The three-day event-results check also runs outside the calendar-season window.
+
+Public API (five-minute public caching and conditional ETags):
+
+- `GET /api/v1/rankings` and `/rankings/lists`: confirmed seasons and source list inventory.
+- `GET /api/v1/rankings/lists/:id/divisions`: ordered divisions and gender/age groups.
+- `GET /api/v1/rankings/lists/:id/entries?division_id=:id&page=1&per_page=50`: official rows, capped at 100 per page; omit division for a team list.
+- `GET /api/v1/rankings/standings?competitor_id=:id`: matched current-season official standings.
+
+The public page no longer uses `RankingCalculator`. Legacy profile and academy APIs retain their medal-stat fields for compatibility; public pages label medals as history and do not display calculated points. There is no public country-ranking substitute for ASJJF standings.
+
+After merge, deploy migrations and the worker, then enqueue one full check for 227 and an individual-only check for 234:
+
+```ruby
+planner = Asjjf::FetchPlanner.new(requested_by: "B5 rollout")
+planner.plan_ranking(227)
+planner.plan_ranking(234, include_team: false)
+```
+
+Run this once in the deployment environment after checking the fetcher/breaker state. The existing fetcher fills snapshots over its next run; division requests fan out from each index. Inspect `/admin/asjjf` for parse/apply outcomes. A kids team tab appears publicly only after its separate table becomes available. A 2025 login-required page can stay unavailable; do not submit session or credential-bearing HTML. Confirm the 2027 IDs and explicitly select 2027 when its official sources are published.
+
+For isolated local acceptance, use the owned `marianas_open_qa_b5` database and `bin/rails runner script/seed_official_rankings_qa.rb`. The script refuses any other database name and uses only the saved public ranking fixtures. Never run fixture seeding on production.

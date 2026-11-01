@@ -40,13 +40,12 @@ class HardeningTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "rankings clamp limits for every ranking type" do
+  test "legacy ranking filters cannot expose computed rankings" do
     %w[individual team country].each do |type|
-      { "100000" => 200, "abc" => 1, "-1" => 1, "0" => 1 }.each do |limit, expected|
-        get "/api/v1/rankings", params: { type: type, limit: limit }
-        assert_response :success
-        assert_equal expected, response.parsed_body.dig("meta", "filters", "limit")
-      end
+      get "/api/v1/rankings", params: { type: type, limit: "100000" }
+      assert_response :success
+      assert response.parsed_body.key?("lists")
+      assert_nil response.parsed_body["rankings"]
     end
   end
 

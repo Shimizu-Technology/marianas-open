@@ -66,6 +66,7 @@ module Asjjf
       ChallengeAlert.deliver(snapshot) if notify
       # Run the isolated parsing job after committing intake, so parser errors never undo a saved page.
       ParseAsjjfSnapshotJob.perform_now(snapshot.id) if snapshot.parse_status == "pending"
+      ApplyRankingSnapshotJob.perform_later(snapshot.id) if snapshot.parse_status == "skipped" && %w[individual_ranking individual_ranking_division team_ranking].include?(snapshot.page_type)
       snapshot.reload
     end
   end

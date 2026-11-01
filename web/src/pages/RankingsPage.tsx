@@ -1,396 +1,108 @@
-import { useState, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { motion, MotionConfig } from 'framer-motion';
-import { Trophy, Users, Globe, Star, Medal, ChevronDown, Filter } from 'lucide-react';
-import ScrollReveal from '../components/ScrollReveal';
+import { divisionLabel } from '../components/rankings/divisionLabel';
+import { useSearchParams } from 'react-router-dom';
+import { Trophy } from 'lucide-react';
 import SEO from '../components/SEO';
-import { api } from '../services/api';
-import type { RankingEntry } from '../services/api';
-
-type RankingTab = 'individual' | 'team' | 'country';
-
-const BELT_OPTIONS = [
-  { api: 'All',    key: 'all' },
-  { api: 'Black',  key: 'black' },
-  { api: 'Brown',  key: 'brown' },
-  { api: 'Purple', key: 'purple' },
-  { api: 'Blue',   key: 'blue' },
-  { api: 'White',  key: 'white' },
-] as const;
-
-const GI_OPTIONS = [
-  { api: 'Combined', key: 'combined' },
-  { api: 'Gi',       key: 'gi' },
-  { api: 'No-Gi',    key: 'noGi' },
-] as const;
-
-const BELT_COLORS: Record<string, string> = {
-  Black: 'bg-gray-900 border-gray-700',
-  Brown: 'bg-amber-900/60 border-amber-700',
-  Purple: 'bg-purple-900/60 border-purple-600',
-  Blue: 'bg-blue-900/60 border-blue-600',
-  White: 'bg-white/10 border-white/30',
-};
-
-const COUNTRY_CODE_KEYS: Record<string, string> = {
-  GUM: 'countries.guam', JPN: 'countries.japan', KOR: 'countries.southKorea', PHL: 'countries.philippines',
-  BRA: 'countries.brazil', USA: 'countries.unitedStates', TAI: 'countries.taiwan', MNP: 'countries.nMarianIslands',
-  FRA: 'countries.france', PLW: 'countries.palau', HKG: 'countries.hongKong', AUS: 'countries.australia',
-  GBR: 'countries.unitedKingdom', CAN: 'countries.canada', SGP: 'countries.singapore', IND: 'countries.india',
-  MEX: 'countries.mexico', CHN: 'countries.china', THA: 'countries.thailand', IDN: 'countries.indonesia',
-  FSM: 'countries.micronesia', MHL: 'countries.marshallIslands', NZL: 'countries.newZealand',
-};
-
-const STAR_TIERS = [
-  { stars: 5, gold: 75, silver: 35, bronze: 15 },
-  { stars: 4, gold: 60, silver: 28, bronze: 12 },
-  { stars: 3, gold: 45, silver: 21, bronze: 9 },
-];
-
-function StarDisplay({ count }: { count: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: count }).map((_, i) => (
-        <Star key={i} size={12} className="fill-gold-500 text-gold-500" />
-      ))}
-    </div>
-  );
-}
-
-function MedalCount({ gold, silver, bronze }: { gold: number; silver: number; bronze: number }) {
-  return (
-    <div className="flex items-center gap-3 text-xs">
-      <span className="flex items-center gap-1">
-        <span className="w-3 h-3 rounded-full bg-gold-500 inline-block" />
-        {gold}
-      </span>
-      <span className="flex items-center gap-1">
-        <span className="w-3 h-3 rounded-full bg-gray-400 inline-block" />
-        {silver}
-      </span>
-      <span className="flex items-center gap-1">
-        <span className="w-3 h-3 rounded-full bg-amber-700 inline-block" />
-        {bronze}
-      </span>
-    </div>
-  );
-}
-
-function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <div className="w-8 h-8 rounded-full bg-gold-500/20 flex items-center justify-center text-gold-500 font-bold text-sm">1</div>;
-  if (rank === 2) return <div className="w-8 h-8 rounded-full bg-gray-400/20 flex items-center justify-center text-gray-400 font-bold text-sm">2</div>;
-  if (rank === 3) return <div className="w-8 h-8 rounded-full bg-amber-700/20 flex items-center justify-center text-amber-600 font-bold text-sm">3</div>;
-  return <div className="w-8 h-8 flex items-center justify-center text-text-muted text-sm">{rank}</div>;
-}
+import { officialRankingsApi } from '../services/officialRankingsApi';
+import { useRankingRequest } from '../components/rankings/useRankingRequest';
+import DivisionPicker, { selectDivision } from '../components/rankings/DivisionPicker';
+import RankingState from '../components/rankings/RankingState';
+import RankingSource from '../components/rankings/RankingSource';
+import RankingEntries from '../components/rankings/RankingEntries';
 
 export default function RankingsPage() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<RankingTab>('individual');
-  const [belt, setBelt] = useState('All');
-  const [giNogi, setGiNogi] = useState('Combined');
-  const [rankings, setRankings] = useState<RankingEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useSearchParams();
+  const catalog = useRankingRequest(useCallback((signal: AbortSignal) => officialRankingsApi.getLists(signal), []));
+  const seasons = catalog.data?.seasons ?? [];
+  const requestedYear = Number(filters.get('season'));
+  const season = seasons.includes(requestedYear) ? requestedYear : catalog.data?.current_season;
+  const discipline = filters.get('discipline') === 'nogi' ? 'nogi' : 'gi';
+  const kind = filters.get('kind') === 'team' ? 'team' : 'individual';
+  const lists = catalog.data?.lists.filter(l => l.season_year === season && l.discipline === discipline && l.kind === kind) ?? [];
+  const categories = [...new Set(lists.filter(l => l.status === 'available').map(l => l.category))];
+  const category = categories.includes(filters.get('category') as 'adult' | 'kids') ? filters.get('category')! : categories.includes('adult') ? 'adult' : categories[0];
+  const list = lists.find(l => l.category === category) ?? lists.find(l => l.category === 'adult') ?? lists[0];
+  const listId = Number(list?.id);
+  const listAvailable = list?.status === 'available';
+  const divisionRequest = useCallback((signal: AbortSignal) => officialRankingsApi.getDivisions(listId, signal), [listId]);
+  const divisions = useRankingRequest(listAvailable && kind === 'individual' ? divisionRequest : null);
+  const division = selectDivision(divisions.data?.divisions ?? [], filters);
+  const divisionId = Number(division?.id);
+  const parsedPage = Number(filters.get('page') || 1);
+  const page = Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const entryRequest = useCallback((signal: AbortSignal) => officialRankingsApi.getEntries(listId, kind === 'individual' ? divisionId : undefined, page, signal), [listId, kind, divisionId, page]);
+  const entries = useRankingRequest(listAvailable && (kind === 'team' || division?.status === 'available') ? entryRequest : null);
 
-  useEffect(() => {
-    setLoading(true);
-    api.getRankings({
-      type: tab,
-      belt: belt === 'All' ? undefined : belt,
-      gi_nogi: giNogi === 'Combined' ? undefined : giNogi,
-      limit: 50,
-    }).then(data => {
-      setRankings(data.rankings);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [tab, belt, giNogi]);
+  function update(values: Record<string, string>) {
+    const next = new URLSearchParams(filters);
+    // Write resolved defaults too, so copied links and back navigation retain context.
+    if (season) next.set('season', String(season));
+    next.set('discipline', discipline);
+    next.set('kind', kind);
+    if (list) next.set('category', list.category);
+    if (division) {
+      next.set('gender', division.gender); next.set('age', division.age_group); next.set('belt', division.belt);
+    }
+    if (!('page' in values)) next.delete('page');
+    if (!('division_id' in values) && !('page' in values)) next.delete('division_id');
+    Object.entries(values).forEach(([key, value]) => next.set(key, value));
+    setFilters(next);
+  }
 
-  const tabs: { key: RankingTab; label: string; icon: typeof Trophy }[] = [
-    { key: 'individual', label: t('rankings.athletes', 'Athletes'), icon: Trophy },
-    { key: 'team', label: t('rankings.academies', 'Academies'), icon: Users },
-    { key: 'country', label: t('rankings.countries', 'Countries'), icon: Globe },
-  ];
+  const state = catalog.loading ? 'loading' : catalog.error ? 'error'
+    : !list ? 'unavailable' : list.status !== 'available' ? list.status
+      : divisions.loading ? 'loading' : divisions.error ? 'error'
+        : kind === 'individual' && !division ? 'empty'
+          : kind === 'individual' && division?.status !== 'available' ? division!.status
+            : entries.loading ? 'loading' : entries.error ? 'error' : !entries.data?.entries.length ? 'empty' : null;
+  const retry = catalog.error ? catalog.retry : divisions.error ? divisions.retry : entries.retry;
+  const buttonClass = 'min-h-11 min-w-0 flex-1 rounded-md px-3 py-2 text-sm font-medium active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-gold-500';
 
-  return (
-    <MotionConfig reducedMotion="user">
-      <div className="min-h-svh pt-24 pb-20">
-        <SEO
-          title="Rankings"
-          description="View Marianas Open athlete, academy, and country rankings across belts and Gi or No-Gi competition."
-          path="/rankings"
-          image="/images/podium-1.webp"
-          structuredData={[
-            {
-              '@context': 'https://schema.org',
-              '@type': 'CollectionPage',
-              name: 'Marianas Open Rankings',
-              url: 'https://marianasopen.com/rankings',
-              description: 'Athlete, academy, and country rankings for Marianas Open competition.',
-            },
-          ]}
-        />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          {/* Header */}
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1 className="font-heading text-4xl sm:text-5xl font-bold mb-4">
-              {t('rankings.title')}
-            </h1>
-            <p className="text-text-secondary max-w-2xl mx-auto mb-2">
-              {t('rankings.dynamicSubtitle', 'Live rankings calculated from official ASJJF event results across all Marianas Open tournaments.')}
-            </p>
-            <p className="text-xs text-text-muted">
-              {t('rankings.formula', 'Fighter (5-Star): Gold 75, Silver 35, Bronze 15. Team (4-Star): Gold 21, Silver 9, Bronze 3.')}
-            </p>
-          </motion.div>
-
-          <div className="grid lg:grid-cols-4 gap-6">
-            {/* Main content */}
-            <div className="lg:col-span-3">
-              {/* Tabs */}
-              <div className="flex gap-1 bg-surface border border-white/5 rounded-lg p-1 mb-4">
-                {tabs.map(({ key, label, icon: Icon }) => (
-                  <button
-                    key={key}
-                    onClick={() => setTab(key)}
-                    aria-pressed={tab === key}
-                    className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${
-                      tab === key
-                        ? 'bg-gold-500/15 text-gold-500'
-                        : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
-                    }`}
-                  >
-                    <Icon size={16} />
-                    <span>{label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Filters */}
-              {tab === 'individual' && (
-                <div className="mb-4">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center gap-2 text-sm text-text-muted hover:text-text-secondary transition-colors mb-2"
-                  >
-                    <Filter size={14} />
-                    {t('rankings.filters', 'Filters')}
-                    <ChevronDown size={14} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {showFilters && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      className="flex flex-wrap gap-4 p-4 bg-surface border border-white/5 rounded-lg"
-                    >
-                      <div>
-                        <label className="text-xs text-text-muted block mb-1.5">{t('rankings.beltRank', 'Belt Rank')}</label>
-                        <div className="flex gap-1">
-                          {BELT_OPTIONS.map((opt) => (
-                            <button
-                              key={opt.api}
-                              onClick={() => setBelt(opt.api)}
-                              className={`px-3 py-1 text-xs rounded-md border transition-all ${
-                                belt === opt.api
-                                  ? (opt.api === 'All' ? 'bg-gold-500/15 border-gold-500/30 text-gold-500' : `${BELT_COLORS[opt.api]} text-white`)
-                                  : 'border-white/10 text-text-muted hover:border-white/20'
-                              }`}
-                            >
-                              {t(`rankings.belt.${opt.key}`)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-xs text-text-muted block mb-1.5">{t('rankings.giNoGi')}</label>
-                        <div className="flex gap-1">
-                          {GI_OPTIONS.map((opt) => (
-                            <button
-                              key={opt.api}
-                              onClick={() => setGiNogi(opt.api)}
-                              className={`px-3 py-1 text-xs rounded-md border transition-all ${
-                                giNogi === opt.api
-                                  ? 'bg-gold-500/15 border-gold-500/30 text-gold-500'
-                                  : 'border-white/10 text-text-muted hover:border-white/20'
-                              }`}
-                            >
-                              {t(`rankings.gi.${opt.key}`)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-              )}
-
-              {/* Rankings Table */}
-              <div className="bg-surface border border-white/5 rounded-lg overflow-hidden">
-                {loading ? (
-                  <div className="min-h-svh flex flex-col items-center justify-center p-12 text-center text-text-muted">
-                    <div className="w-8 h-8 border-2 border-gold-500/30 border-t-gold-500 rounded-full animate-spin mx-auto mb-3" />
-                    {t('rankings.loading', 'Calculating rankings...')}
-                  </div>
-                ) : rankings.length === 0 ? (
-                  <div className="p-12 text-center text-text-muted">
-                    {t('rankings.noResults', 'No results found for these filters.')}
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-white/5 text-text-muted text-xs">
-                          <th className="text-left p-3 w-12">#</th>
-                          <th className="text-left p-3">
-                            {tab === 'individual' ? t('rankings.athlete', 'Athlete') :
-                             tab === 'team' ? t('rankings.academy', 'Academy') :
-                             t('rankings.country', 'Country')}
-                          </th>
-                          {tab === 'individual' && <th className="text-left p-3 hidden sm:table-cell">{t('rankings.academy', 'Academy')}</th>}
-                          <th className="text-center p-3">{t('rankings.points', 'Points')}</th>
-                          <th className="text-center p-3 hidden sm:table-cell">{t('rankings.medals', 'Medals')}</th>
-                          <th className="text-center p-3 hidden md:table-cell">
-                            {tab === 'country' ? t('rankings.athletes', 'Athletes') : t('rankings.events', 'Events')}
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rankings.map((entry, i) => (
-                          <motion.tr
-                            key={i}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: Math.min(i * 0.02, 0.5) }}
-                            className="border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02] transition-colors"
-                          >
-                            <td className="p-3">
-                              <RankBadge rank={i + 1} />
-                            </td>
-                            <td className="p-3">
-                              <div>
-                                <span className={`font-medium ${i < 3 ? 'text-white' : 'text-text-secondary'}`}>
-                                  {tab === 'individual' ? (
-                                    <Link
-                                      to={entry.competitor_id ? `/competitors/${entry.competitor_id}` : `/competitors/profile?result_id=${entry.result_id}`}
-                                      className="hover:text-gold-400 transition-colors"
-                                    >
-                                      {entry.competitor_name}
-                                    </Link>
-                                  ) : tab === 'team' ? entry.academy :
-                                   COUNTRY_CODE_KEYS[entry.country_code || ''] ? t(COUNTRY_CODE_KEYS[entry.country_code || '']) : entry.country_code}
-                                </span>
-                                {tab === 'individual' && entry.country_code && (
-                                  <span className="ml-2 text-xs text-text-muted">{entry.country_code}</span>
-                                )}
-                                {tab === 'team' && entry.country_code && (
-                                  <span className="ml-2 text-xs text-text-muted">{entry.country_code}</span>
-                                )}
-                              </div>
-                            </td>
-                            {tab === 'individual' && (
-                              <td className="p-3 text-text-muted text-xs hidden sm:table-cell max-w-[160px] truncate">
-                                {entry.academy || '—'}
-                              </td>
-                            )}
-                            <td className="text-center p-3">
-                              <span className={`font-bold ${i < 3 ? 'text-gold-500 text-base' : 'text-white'}`}>
-                                {entry.total_points.toLocaleString()}
-                              </span>
-                            </td>
-                            <td className="text-center p-3 hidden sm:table-cell">
-                              <MedalCount gold={entry.gold} silver={entry.silver} bronze={entry.bronze} />
-                            </td>
-                            <td className="text-center p-3 text-text-muted hidden md:table-cell">
-                              {tab === 'country' ? entry.athletes :
-                               tab === 'team' ? (entry.athletes || entry.events_competed) :
-                               entry.events_competed}
-                            </td>
-                          </motion.tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Sidebar — Points Reference */}
-            <div className="lg:col-span-1">
-              <ScrollReveal>
-                <div className="bg-surface border border-white/5 rounded-lg overflow-hidden sticky top-24">
-                  <div className="p-4 border-b border-white/5 flex items-center gap-2">
-                    <Medal size={16} className="text-gold-500" />
-                    <h3 className="font-heading font-bold text-sm">
-                      {t('rankings.fighterPoints', 'Fighter Ranking Points')}
-                    </h3>
-                  </div>
-                  <div className="p-4 space-y-3">
-                    {STAR_TIERS.map(tier => (
-                      <div key={tier.stars} className="flex items-center justify-between text-xs">
-                        <StarDisplay count={tier.stars} />
-                        <div className="flex gap-2 text-text-muted">
-                          <span className="text-gold-500">{tier.gold}</span>
-                          <span>/</span>
-                          <span className="text-gray-400">{tier.silver}</span>
-                          <span>/</span>
-                          <span className="text-amber-500">{tier.bronze}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="px-4 pb-4">
-                    <h4 className="text-xs text-text-muted mb-2 font-medium">{t('rankings.teamPoints', 'Team Ranking Points (4-Star)')}</h4>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-text-secondary">4★</span>
-                      <div className="flex gap-2 text-text-muted">
-                        <span className="text-gold-500">21</span>
-                        <span>/</span>
-                        <span className="text-gray-400">9</span>
-                        <span>/</span>
-                        <span className="text-amber-500">3</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <p className="text-xs text-text-muted leading-relaxed border-t border-white/5 pt-3">
-                      {t('rankings.formulaNote', 'Official reference: Fighter ranking points use 5-Star values; team ranking points use 4-Star values. Alone brackets and same-team one brackets follow organizer policy on the official rankings page.')}
-                    </p>
-                  </div>
-
-                  {/* Quick Stats */}
-                  <div className="border-t border-white/5 p-4">
-                    <h4 className="text-xs text-text-muted mb-2 font-medium">{t('rankings.eventStars', 'Event Star Ratings')}</h4>
-                    <div className="space-y-1.5 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-text-secondary">{t('rankings.eventMarianasOpen')}</span>
-                        <StarDisplay count={5} />
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-text-secondary">{t('rankings.eventProTokyoNagoya')}</span>
-                        <StarDisplay count={4} />
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-text-secondary">{t('rankings.eventProSeriesOthers')}</span>
-                        <StarDisplay count={3} />
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-text-secondary">{t('rankings.eventCopaDeMarianas')}</span>
-                        <StarDisplay count={3} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </ScrollReveal>
-            </div>
-          </div>
+  return <div className="min-h-svh pt-24 pb-20">
+    <SEO title={t('officialRankings.seoTitle')} description={t('officialRankings.subtitle')} path="/rankings" image="/images/podium-1.webp" />
+    <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <header className="mb-7 border-b border-white/10 pb-6">
+        <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-gold-400"><Trophy size={18} aria-hidden="true" />{t('officialRankings.badge')}</p>
+        <h1 className="font-heading text-3xl font-bold sm:text-5xl">{season ? t('officialRankings.title', { year: season }) : t('officialRankings.seoTitle')}</h1>
+        <p className="mt-3 max-w-2xl text-text-secondary">{t('officialRankings.subtitle')}</p>
+        {list && <RankingSource list={list} syncedAt={kind === 'individual' && division ? division.last_synced_at : list.last_synced_at} />}
+      </header>
+      {catalog.data && <section aria-label={t('officialRankings.filters')} className="mb-5 space-y-4 rounded-xl border border-white/10 bg-surface p-4 sm:p-5">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,2fr)]">
+          <label className="text-sm text-text-secondary"><span className="mb-2 block">{t('officialRankings.season')}</span>
+            <select value={season ?? ''} onChange={e => update({ season: e.target.value })} className="min-h-11 w-full rounded-md border border-white/15 bg-dark px-3 text-base text-white">
+              {seasons.map(year => <option key={year} value={year}>{year}</option>)}
+            </select>
+          </label>
+          {([
+            { key: 'discipline', value: discipline, options: ['gi', 'nogi'] },
+            { key: 'kind', value: kind, options: ['individual', 'team'] },
+          ] as const).map(control => <fieldset key={control.key} className={`min-w-0 ${control.key === 'kind' ? 'col-span-2 sm:col-span-1' : ''}`}><legend className="mb-2 text-sm text-text-secondary">{t(`officialRankings.${control.key}`)}</legend>
+            <div className="flex gap-1 rounded-lg bg-dark p-1">{control.options.map(option => <button key={option} aria-pressed={option === control.value}
+              className={`${buttonClass} ${option === control.value ? 'bg-gold-500/15 text-gold-400' : 'text-text-secondary'}`}
+              onClick={() => update({ [control.key]: option })}>{t(`officialRankings.${option}`)}</button>)}</div>
+          </fieldset>)}
         </div>
-      </div>
-    </MotionConfig>
-  );
+        {kind === 'team' && categories.length > 1 && <fieldset><legend className="mb-2 text-sm text-text-secondary">{t('officialRankings.category')}</legend>
+          <div className="flex max-w-sm gap-1 rounded-lg bg-dark p-1">{categories.map(value => <button key={value} aria-pressed={value === list?.category}
+            onClick={() => update({ category: value })} className={`${buttonClass} ${value === list?.category ? 'bg-gold-500/15 text-gold-400' : 'text-text-secondary'}`}>{t(`officialRankings.${value}`)}</button>)}</div>
+        </fieldset>}
+        {kind === 'individual' && division && <DivisionPicker divisions={divisions.data!.divisions} selected={division} onChange={update} />}
+      </section>}
+      <section aria-label={t('officialRankings.standings')} aria-busy={state === 'loading'} className="overflow-hidden rounded-xl border border-white/10 bg-surface">
+        {list && <div className="border-b border-white/10 px-4 py-4 sm:px-5">
+          <h2 className="font-heading text-lg font-semibold">{t(`officialRankings.${discipline}`)} · {t(`officialRankings.${kind}`)}{kind === 'team' && ` · ${t(`officialRankings.${list.category}`)}`}</h2>
+          {division && kind === 'individual' && <p className="mt-1 text-sm text-text-secondary">{[division.gender, division.age_group, division.belt].map(value => divisionLabel(value, t)).join(' · ')}</p>}
+        </div>}
+        {state ? <RankingState state={state} retry={retry} /> : <RankingEntries entries={entries.data!.entries} team={kind === 'team'} />}
+        {!entries.error && entries.data && (page > 1 || page * entries.data.per_page < entries.data.total) && <nav aria-label={t('officialRankings.pagination')} className="flex items-center justify-between gap-2 border-t border-white/10 p-4">
+          <button className={`${buttonClass} border border-white/15 disabled:opacity-40`} disabled={page <= 1} onClick={() => update({ page: String(page - 1) })}>{t('officialRankings.previous')}</button>
+          <span className="shrink-0 text-sm text-text-secondary">{t('officialRankings.page', { page })}</span>
+          <button className={`${buttonClass} border border-white/15 disabled:opacity-40`} disabled={page * entries.data.per_page >= entries.data.total} onClick={() => update({ page: String(page + 1) })}>{t('officialRankings.next')}</button>
+        </nav>}
+      </section>
+    </div>
+  </div>;
 }

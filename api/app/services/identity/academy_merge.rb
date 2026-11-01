@@ -39,6 +39,7 @@ module Identity
           Academy.where(parent_id: source.id).where.not(id: target.id).update_all(parent_id: target.id)
           IdentityReview.where(candidate_academy_id: source.id).update_all(candidate_academy_id: target.id)
           IdentityReview.where(resolved_academy_id: source.id).update_all(resolved_academy_id: target.id)
+          AsjjfRankingEntry.where(academy_id: source.id).update_all(academy_id: target.id)
           source.destroy!
           # The source no longer participates in duplicate validation. This also
           # handles legacy encoded/decoded twins in either merge direction.

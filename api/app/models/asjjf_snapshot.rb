@@ -34,9 +34,18 @@ class AsjjfSnapshot < ApplicationRecord
     inflater&.close
   end
 
+  def self.ranking_holds
+    latest = where(page_type: %w[individual_ranking individual_ranking_division team_ranking], outcome: "ok", parse_status: "parsed")
+      .select("DISTINCT ON (url) id").order(:url, fetched_at: :desc, id: :desc)
+    where(id: latest, ranking_apply_status: "rejected").order(fetched_at: :desc, id: :desc)
+  end
+
   def self.prune!(before: 120.days.ago)
     # DISTINCT ON retains one deterministic latest fetch success per URL forever.
     keep = where(outcome: "ok").select("DISTINCT ON (url) id").order(:url, fetched_at: :desc, id: :desc)
-    where("created_at < ?", before).where.not(id: keep).find_each(&:destroy!)
+    held = ranking_holds.pluck(:id)
+    referenced = [ AsjjfRankingList, AsjjfRankingDivision, AsjjfRankingEntry, AsjjfRankingSuggestion ]
+      .flat_map { |model| model.where.not(source_snapshot_id: nil).distinct.pluck(:source_snapshot_id) }
+    where("created_at < ?", before).where.not(id: keep).where.not(id: referenced + held).find_each(&:destroy!)
   end
 end
