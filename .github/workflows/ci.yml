@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - staging
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: marianas_open_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d marianas_open_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: api
+    env:
+      CI: "true"
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/marianas_open_test
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1
+        with:
+          ruby-version: "3.3.7"
+          bundler-cache: true
+          working-directory: api
+      - name: Install image processing library
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
+      - name: Prepare test database
+        run: bin/rails db:schema:load
+      - name: Run tests
+        run: bin/rails test
+      - name: Check Ruby style
+        run: bin/rubocop
+      - name: Audit Ruby dependencies
+        run: bin/bundler-audit check --update
+      - name: Scan Rails application
+        shell: bash
+        run: |
+          report="${RUNNER_TEMP}/brakeman.json"
+          bin/brakeman --quiet --no-pager --format json --output "${report}" \
+            --no-exit-on-warn --no-exit-on-error
+          ruby -rjson -e '
+            report = JSON.parse(File.read(ARGV.fetch(0)))
+            errors = report["errors"] || []
+            warning_count = (report["warnings"] || []).length
+            errors.each { |error| warn "Brakeman scan error: #{error}" }
+            warn "Brakeman warnings: #{warning_count} (inherited baseline: 8)"
+            exit 1 if errors.any? || warning_count > 8
+          ' "${report}"
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.3
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - run: npm run lint
+      - run: npx tsc -b
+      - run: npm test
+      - name: Build production frontend
+        run: npx vite build

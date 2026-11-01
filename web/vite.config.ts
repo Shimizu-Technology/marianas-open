@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
+  define: {
+    __BUILD_ID__: JSON.stringify(process.env.COMMIT_REF || process.env.GITHUB_SHA || `local-${Date.now()}`),
+  },
   plugins: [react(), tailwindcss()],
   build: {
     rollupOptions: {

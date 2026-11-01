@@ -66,3 +66,16 @@ The public site and public tournament content can be demonstrated. Do not expose
 ---
 
 *Shimizu Technology — Building for the Marianas*
+
+## CI and error monitoring
+
+Root GitHub Actions CI tests PRs to `main` and `staging`, pushes to `main`, and manual runs. It runs the Rails tests against disposable PostgreSQL, RuboCop, Brakeman, bundler-audit, frontend lint, TypeScript, Vite build, Vitest, and a production npm audit. Brakeman permits the eight inherited warnings measured at `e9cf217`; scan errors or a higher warning count fail. The generated `api/.rubocop_todo.yml` records inherited lint debt so full-repository RuboCop can run without unrelated controller/service edits. Remove exclusions as those files are cleaned up.
+
+Monitoring is opt-in. Leon must create separate Sentry Rails and React projects, then set:
+
+- Render API **and the separate Solid Queue worker**: `SENTRY_DSN` for the Rails project. Optional `SENTRY_TRACES_SAMPLE_RATE` defaults to `0.01` (set `0` to disable traces). Environment follows `RAILS_ENV`; release follows `RENDER_GIT_COMMIT`.
+- Netlify: `VITE_SENTRY_DSN` for the browser project, then rebuild. Optional `VITE_SENTRY_ENVIRONMENT` overrides Vite's mode. Release follows Netlify's `COMMIT_REF`, falling back to `GITHUB_SHA` or a local build timestamp.
+
+Empty DSNs skip Sentry initialization and network calls. Default PII collection is off; Rails parameter filtering applies to request data and queue argument collection is disabled. ActiveJob failures, including Solid Queue retry attempts and terminal failures, are reported when enabled. Browser render errors and unhandled errors are reported; benign ResizeObserver loop warnings are ignored. Session replay is not installed. No production settings are changed by this PR. Source-map uploads and alert rules require a separate Sentry setup; this change does not publish source maps or provision alerts.
+
+After a deployment, an old tab's failed lazy import reloads the current URL once per build per tab. A sessionStorage guard prevents repeat reloads; blocked storage or persistent errors fall through to the root recovery screen with **Reload page** and **Home**. Reload/Home can discard unsaved edits. The unforced `/assets/* /asset-not-found.html 404` rule precedes the SPA fallback: existing files still win through Netlify file shadowing, while missing chunks get HTTP 404 rather than HTML with 200. [Netlify documents these semantics](https://docs.netlify.com/manage/routing/redirects/redirect-options/). Vite preview does not emulate Netlify redirects.
