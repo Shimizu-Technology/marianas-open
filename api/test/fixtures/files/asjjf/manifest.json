@@ -1,0 +1,58 @@
+{
+  "copied_from": "/tmp/mo-asjjf-fixtures/out",
+  "copied_on": "2026-11-02",
+  "files": {
+    "cloudflare_challenge.html": {
+      "sha256": "38c66b5075c42cbc9ff2307a3d59b5f78c232bccdb6c2e18b8a1cd470fa5b700",
+      "bytes": 5455
+    },
+    "event_info_2211_manila_gi.html": {
+      "sha256": "4e1ce6fc5576502f42650e9ad234df4d56fe9a7b743aa4e941535f5b8f90dde8",
+      "bytes": 102929
+    },
+    "event_info_2233_tokyo_gi.html": {
+      "sha256": "e6df4b059d8a31d70a0e244397a49c62d5f7cc586c82ad93ebb829a32c272a4a",
+      "bytes": 138575
+    },
+    "event_info_2258_copa_gi.html": {
+      "sha256": "2b0277a327a45991221e4a1619acd8ee388b34ca565889ecd17443b4ec23e341",
+      "bytes": 135864
+    },
+    "event_results_2062_gi.html": {
+      "sha256": "3005c5ca1004b6b208e60dbef864ca22b3693cef31dcabad3aa6190264aba5d3",
+      "bytes": 179835
+    },
+    "event_results_2063_nogi.html": {
+      "sha256": "c2a9607b80afeb08d306791792f92c6ba45c1b73518f2b243facc695cb39cc01",
+      "bytes": 106110
+    },
+    "individual_ranking_227.html": {
+      "sha256": "b8833ef8ac4f73945ea508068109b00cc9b732a9c507c4c038eb0617606a9fa2",
+      "bytes": 144156
+    },
+    "individual_ranking_234_nogi.html": {
+      "sha256": "46b8e0fffb2fa3d9b86591aee82310f312edb22a67472e1185623d074ee7aa61",
+      "bytes": 98723
+    },
+    "individual_ranking_division_20401_get.html": {
+      "sha256": "61d9c83a43c9b7eba95605cc1ac0a1dc3b4f8d7a7b5a9e010c056b1aaba52556",
+      "bytes": 130741
+    },
+    "results_list_2062_female_adult.html": {
+      "sha256": "ae035f1f34d6ac78805c2892a2f380d4dda47ac4b402a9117951e888de3d2951",
+      "bytes": 43175
+    },
+    "results_list_2062_male_kids.html": {
+      "sha256": "b2d140006a99add505d44d043d659506305af772dda1e7c60bcf65812f887fbb",
+      "bytes": 63385
+    },
+    "season_calendar_381.html": {
+      "sha256": "badf211e11ce0fc4149c3edde4e09658d6674a286203de809a311a7fdd5cda7c",
+      "bytes": 292469
+    },
+    "team_rank_227.html": {
+      "sha256": "1fac56c412c8b068c7792d6ef5bf12829ab6b009cc753da161391613ff06082f",
+      "bytes": 285852
+    }
+  }
+}

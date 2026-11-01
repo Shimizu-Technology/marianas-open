@@ -323,6 +323,42 @@ export interface Sponsor {
   logo_url: string | null;
 }
 
+export interface AsjjfHeartbeat {
+  received_at?: string | null;
+  fetcher_id: string;
+  fetcher_version: string;
+  run_started_at: string | null;
+  run_finished_at: string | null;
+  fetched: number;
+  challenged: number;
+  errors: number;
+  updated_at: string;
+}
+
+export interface AsjjfBreaker {
+  paused_until: string | null;
+  open: boolean;
+}
+
+export interface AsjjfSnapshot {
+  id: number;
+  url: string;
+  page_type: string;
+  source: string;
+  outcome: string;
+  fetched_at: string;
+  parse_status: string;
+  parse_error: string | null;
+  parsed_summary: unknown;
+}
+
+export interface AsjjfStatus {
+  heartbeats: AsjjfHeartbeat[];
+  queue_counts: Record<string, number>;
+  breaker: AsjjfBreaker;
+  recent_snapshots: AsjjfSnapshot[];
+}
+
 export interface UserProfile {
   id: number;
   clerk_id?: string;
@@ -918,6 +954,15 @@ export const api = {
 
   // Admin - Events
   admin: {
+    // ASJJF intake stores snapshots only; it does not apply published results.
+    getAsjjfStatus: () => fetchApi<AsjjfStatus>('/api/v1/admin/asjjf/status', {}, true),
+    checkAsjjf: (eventId: number) =>
+      fetchApi<{ queued_count: number }>(`/api/v1/admin/events/${eventId}/asjjf_check`, { method: 'POST' }, true),
+    uploadAsjjfSnapshot: (data: FormData) =>
+      fetchApiUpload<{ snapshot_id: number; parse_status: string }>('/api/v1/admin/asjjf/snapshots', data),
+    closeAsjjfBreaker: () =>
+      fetchApi<{ breaker: AsjjfBreaker }>('/api/v1/admin/asjjf/close_breaker', { method: 'POST' }, true),
+
     getEvents: () => fetchApi<{ events: Event[] }>('/api/v1/admin/events', {}, true),
     getEvent: (id: number) => fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}`, {}, true),
     createEvent: (data: Partial<EventFormData>) =>

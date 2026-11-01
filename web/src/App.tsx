@@ -45,6 +45,7 @@ const AcademiesAdmin = lazy(() => import('./pages/admin/AcademiesAdmin'));
 const AnnouncementsAdmin = lazy(() => import('./pages/admin/AnnouncementsAdmin'));
 const ImpactAdmin = lazy(() => import('./pages/admin/ImpactAdmin'));
 const EventResultsAdmin = lazy(() => import('./pages/admin/EventResultsAdmin'));
+const AsjjfSyncAdmin = lazy(() => import('./pages/admin/AsjjfSyncAdmin'));
 
 function BannerLayout({ children }: { children: React.ReactNode }) {
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -145,6 +146,7 @@ export default function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="events" element={<EventsAdmin />} />
+          <Route path="asjjf" element={<AsjjfSyncAdmin />} />
           <Route path="events/:eventId/results" element={<EventResultsAdmin />} />
           <Route path="sponsors" element={<SponsorsAdmin />} />
           <Route path="videos" element={<VideosAdmin />} />
