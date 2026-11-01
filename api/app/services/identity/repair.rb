@@ -187,26 +187,53 @@ module Identity
     end
 
     def project(before, operations)
-      projected = before.deep_dup
-      moved_academies = {}
+      academies = Academy.all.to_h { |academy| [ academy.id, { name: academy.name, aliases: Array(academy.aliases) } ] }
+      people = Competitor.pluck(:id, :academy_id).to_h
+      rows = EventResult.includes(:event).map do |row|
+        { id: row.id, academy_id: row.academy_id, academy: row.academy, competitor_id: row.competitor_id,
+         date: row.event&.date || Date.new(1, 1, 1), event_id: row.event_id,
+         points: RankingCalculator.points_for(row.placement, row.event&.asjjf_stars) }
+      end
       operations.each do |operation|
+        source_id = operation[:source_id]
+        target_id = operation[:target_id]
         case operation[:type]
         when :academy_merge
-          source = projected[:per_academy].delete(operation[:source_id])
-          target = projected[:per_academy].fetch(operation[:target_id])
-          %i[results athletes points].each { |key| target[key] += source[key] }
-          projected[:academies] -= 1
-          moved_academies[operation[:source_id]] = operation[:target_id]
+          names = projected_names(academies)
+          rows.each { |row| row[:academy_id] = target_id if projected_gym(row, names) == source_id }
+          people.transform_values! { |id| id == source_id ? target_id : id }
+          source = academies.delete(source_id)
+          academies[target_id][:aliases] += source[:aliases] + [ source[:name] ]
         when :academy_rename
-          projected[:per_academy].fetch(operation[:target_id])[:name] = operation[:name]
+          academies[target_id][:aliases] << academies[target_id][:name]
+          academies[target_id][:name] = operation[:name]
         when :competitor_merge
-          academy_id = Competitor.find(operation[:source_id]).academy_id
-          academy_id = moved_academies.fetch(academy_id, academy_id)
-          projected[:per_academy][academy_id][:athletes] -= 1 if projected[:per_academy].key?(academy_id)
-          projected[:athletes] -= 1
+          rows.each { |row| row[:competitor_id] = target_id if row[:competitor_id] == source_id }
+          people.delete(source_id)
+          latest = rows.select { |row| row[:competitor_id] == target_id }.max_by { |row| [ row[:date], row[:event_id], row[:id] ] }
+          people[target_id] = latest ? projected_gym(latest, projected_names(academies)) : nil
         end
       end
-      projected
+      names = projected_names(academies)
+      grouped = rows.group_by { |row| projected_gym(row, names) }
+      gym_counts = people.values.tally
+      per_academy = academies.to_h do |id, academy|
+        attributed = grouped.fetch(id, [])
+        [ id, { name: academy[:name], results: attributed.size, athletes: gym_counts.fetch(id, 0), points: attributed.sum { |row| row[:points] } } ]
+      end
+      { academies: academies.size, athletes: people.size, results: before[:results], points: before[:points], per_academy: per_academy }
+    end
+
+    def projected_names(academies)
+      names = Hash.new { |hash, key| hash[key] = [] }
+      academies.each do |id, academy|
+        ([ academy[:name] ] + academy[:aliases]).each { |name| names[NameNormalizer.key(name)] << id }
+      end
+      names.transform_values { |ids| ids.uniq.one? ? ids.first : nil }
+    end
+
+    def projected_gym(row, names)
+      row[:academy_id] || names[NameNormalizer.key(row[:academy])]
     end
 
     def snapshot

@@ -124,7 +124,7 @@ class IdentityAttributionTest < ActionDispatch::IntegrationTest
     get "/api/v1/admin/competitors/#{duplicate.id}/merge_preview", params: { target_id: @competitor.id }, headers: @headers
     assert_response :success
     assert response.parsed_body["warnings"].any? { |warning| warning.include?("genders") }
-    payload = { target_id: @competitor.id, confirm: true }
+    payload = { target_id: @competitor.id, confirm: true, review_token: response.parsed_body["review_token"] }
     post "/api/v1/admin/competitors/#{duplicate.id}/merge", params: payload, headers: @headers, as: :json
     assert_response :unprocessable_entity
     duplicate.update!(identity_separate: true)

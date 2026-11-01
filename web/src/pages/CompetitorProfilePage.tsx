@@ -96,6 +96,7 @@ export default function CompetitorProfilePage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const name = searchParams.get('name') || '';
+  const resultId = searchParams.get('result_id') || '';
   const [profile, setProfile] = useState<UnifiedProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -107,9 +108,9 @@ export default function CompetitorProfilePage() {
         .then(d => setProfile(fromCompetitorDetail(d)))
         .catch(() => setError(t('competitorProfile.noResults')))
         .finally(() => setLoading(false));
-    } else if (name) {
+    } else if (name || resultId) {
       setLoading(true);
-      api.getCompetitorProfile(name)
+      api.getCompetitorProfile(name, resultId || undefined)
         .then(p => setProfile(fromCompetitorProfile(p)))
         .catch(() => setError(t('competitorProfile.noResults')))
         .finally(() => setLoading(false));
@@ -117,9 +118,9 @@ export default function CompetitorProfilePage() {
       setLoading(false);
       setError('No competitor specified');
     }
-  }, [id, name, t]);
+  }, [id, name, resultId, t]);
 
-  const seoPath = id ? `/competitors/${id}` : name ? `/competitors/profile?name=${encodeURIComponent(name)}` : '/competitors/profile';
+  const seoPath = id ? `/competitors/${id}` : resultId ? `/competitors/profile?result_id=${encodeURIComponent(resultId)}` : name ? `/competitors/profile?name=${encodeURIComponent(name)}` : '/competitors/profile';
 
   return (
     <MotionConfig reducedMotion="user">

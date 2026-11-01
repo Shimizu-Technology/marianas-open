@@ -35,7 +35,9 @@ module Api
       # GET /api/v1/rankings/competitor?name=Cruz+Anthony
       def competitor
         name = params[:name].to_s.strip
-        return render json: { error: "name parameter is required" }, status: :bad_request if name.blank?
+        if name.blank? && params[:result_id].blank?
+          return render json: { error: "name or result_id parameter is required" }, status: :bad_request
+        end
 
         results = EventResult
           .joins(:event)
@@ -45,9 +47,25 @@ module Api
             "events.name as event_name, events.slug as event_slug, events.date as event_date"
           )
           .includes(:competitor)
-          .where("LOWER(TRIM(event_results.competitor_name)) = :name OR competitor_id IN (:ids)",
-            name: name.downcase, ids: Competitor.search_by_name(name).select(:id))
           .order("events.date DESC")
+
+        if params[:result_id].present?
+          reference = results.find_by(id: params[:result_id])
+          return render json: { error: "Result not found" }, status: :not_found unless reference
+          results = reference.competitor_id ? results.where(competitor_id: reference.competitor_id) : results.where(id: reference.id)
+        else
+          candidates = CompetitorLinker.candidates_for(name)
+          if candidates.many? || candidates.any?(&:identity_separate?)
+            return render json: { error: "Ambiguous identity; select an athlete or result link" }, status: :conflict
+          end
+          if candidates.one?
+            results = results.where(competitor_id: candidates.first.id)
+          else
+            # Unlinked rows have no established person identity. A stable result
+            # link is required rather than combining rows that share a label.
+            return render json: { error: "Select a result link for this unlinked identity" }, status: :conflict
+          end
+        end
 
         return render json: { error: "Competitor not found" }, status: :not_found if results.empty?
 

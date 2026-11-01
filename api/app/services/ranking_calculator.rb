@@ -42,6 +42,7 @@ class RankingCalculator
       {
         competitor_name: records.first.display_competitor_name,
         competitor_id: records.first.competitor_id,
+        result_id: records.first.competitor_id ? nil : records.first.id,
         academy: most_common(records.map(&:academy)),
         country_code: most_common(records.map { |r| Identity::CountryCode.normalize(r.country_code) }),
         total_points: total_points,

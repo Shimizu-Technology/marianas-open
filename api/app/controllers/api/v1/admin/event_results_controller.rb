@@ -86,7 +86,12 @@ module Api
         end
 
         def destroy_all
-          count = @event.event_results.delete_all
+          count = nil
+          EventResult.transaction do
+            previous_ids = @event.event_results.where.not(competitor_id: nil).distinct.pluck(:competitor_id)
+            count = @event.event_results.delete_all
+            Competitor.where(id: previous_ids).find_each(&:refresh_current_academy!)
+          end
           render json: { deleted: count }
         end
 

@@ -52,6 +52,6 @@ class EventResult < ApplicationRecord
 
   def as_json(options = {})
     merged_except = (Array(options[:except]) + [:created_at, :updated_at]).uniq
-    super(options.merge(except: merged_except)).merge("competitor_name" => display_competitor_name, "country_code" => Identity::CountryCode.normalize(country_code))
+    super(options.merge(except: merged_except)).merge("display_competitor_name" => display_competitor_name, "country_code" => Identity::CountryCode.normalize(country_code))
   end
 end

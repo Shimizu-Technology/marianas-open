@@ -26,7 +26,10 @@ class AsjjfScraper
     all_results = fetch_and_parse(asjjf_event_ids)
     raise ScraperError, "No results found from ASJJF" if all_results.empty?
 
+    link_stats = nil
+    academy_stats = nil
     ActiveRecord::Base.transaction do
+      previous_competitor_ids = event.event_results.where.not(competitor_id: nil).distinct.pluck(:competitor_id)
       event.event_results.delete_all
 
       batch = all_results.map do |r|
@@ -49,12 +52,13 @@ class AsjjfScraper
 
       EventResult.insert_all(batch)
       event.update_column(:results_imported_at, Time.current)
+      link_stats = CompetitorLinker.link_event(event)
+      academy_stats = AcademyLinker.link_event(event)
+      Competitor.where(id: previous_competitor_ids).find_each(&:refresh_current_academy!)
     end
 
-    link_stats = CompetitorLinker.link_event(event)
     Rails.logger.info("[AsjjfScraper] Linked #{link_stats[:linked]} results, created #{link_stats[:created]} new competitors")
 
-    academy_stats = AcademyLinker.link_event(event)
     Rails.logger.info("[AsjjfScraper] Linked #{academy_stats[:linked]} competitors to academies, created #{academy_stats[:created]} new academies")
 
     {

@@ -12,11 +12,11 @@ it('uses authenticated merge-preview and explicit confirmed mutation contracts',
   await api.admin.previewAcademyMerge(1, 2)
   await api.admin.mergeAcademy(1, 2)
   await api.admin.previewCompetitorMerge(3, 4)
-  await api.admin.mergeCompetitor(3, 4)
+  await api.admin.mergeCompetitor(3, 4, "review-token", false)
   expect(fetchMock.mock.calls[0][0]).toMatch(/\/api\/v1\/admin\/academies\/1\/merge_preview\?target_id=2$/)
   expect(fetchMock.mock.calls[1][1]).toEqual(expect.objectContaining({ method: 'POST', body: JSON.stringify({ target_id: 2, confirm: true }), headers: expect.objectContaining({ Authorization: 'Bearer test-token' }) }))
   expect(fetchMock.mock.calls[2][0]).toMatch(/\/api\/v1\/admin\/competitors\/3\/merge_preview\?target_id=4$/)
-  expect(fetchMock.mock.calls[3][1]?.body).toBe(JSON.stringify({ target_id: 4, confirm: true, confirm_warnings: true }))
+  expect(fetchMock.mock.calls[3][1]?.body).toBe(JSON.stringify({ target_id: 4, confirm: true, confirm_warnings: false, review_token: "review-token" }))
 })
 it('uses the review queue and both resolve contracts', async () => {
   fetchMock.mockImplementation(async () => new Response(JSON.stringify({}), { status: 200 }))

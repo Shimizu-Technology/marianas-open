@@ -90,6 +90,10 @@ class CompetitorLinker
       end
     end
 
+    def candidates_for(name)
+      name_candidates(Identity::NameNormalizer.key(name))
+    end
+
     def normalize_country(code)
       Identity::CountryCode.normalize(code)
     end

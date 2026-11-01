@@ -48,7 +48,7 @@ it('requires a separate acknowledgement of competitor warnings', async () => {
   fireEvent.click(screen.getByRole('checkbox', { name: /I reviewed every warning/ }))
   expect(disabled('Permanently merge records')).toBe(false)
   fireEvent.click(screen.getByRole('button', { name: 'Permanently merge records' }))
-  await waitFor(() => expect(api.admin.mergeCompetitor).toHaveBeenCalledWith(1, 2))
+  await waitFor(() => expect(api.admin.mergeCompetitor).toHaveBeenCalledWith(1, 2, undefined, true))
 })
 it('never offers confirmation for a blocked competitor merge', async () => {
   vi.mocked(api.admin.previewCompetitorMerge).mockResolvedValue({ ...preview, blocked: true, warnings: ['Incompatible identities'] })
@@ -116,4 +116,13 @@ it('locks selection and repeated submission while the merge is pending', async (
   finish({ academy: academyFixture() })
   await waitFor(() => expect(onMerged).toHaveBeenCalledOnce())
   expect(onBusyChange).toHaveBeenLastCalledWith(false)
+})
+
+it('does not acknowledge warnings after a warning-free preview', async () => {
+  vi.mocked(api.admin.previewCompetitorMerge).mockResolvedValue({...preview, warnings: [], review_token: 'signed-preview'})
+  render(<IdentityMergePanel kind="competitors" source={{id: 1, name: 'Source Athlete'}} onMerged={vi.fn()} />)
+  await chooseTarget('Target Athlete')
+  fireEvent.click(screen.getByRole('checkbox', {name: /Permanently merge/}))
+  fireEvent.click(screen.getByRole('button', {name: 'Permanently merge records'}))
+  await waitFor(() => expect(api.admin.mergeCompetitor).toHaveBeenCalledWith(1, 2, 'signed-preview', false))
 })

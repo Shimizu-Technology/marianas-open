@@ -19,7 +19,7 @@ class IdentityLinkingTest < ActiveSupport::TestCase
       CompetitorLinker.link_event(@late)
     end
     assert_equal first.reload.competitor_id, second.reload.competitor_id
-    assert_equal "Braydon-Angel Santos", second.as_json["competitor_name"]
+    assert_equal "Braydon-Angel Santos", second.as_json["display_competitor_name"]
     assert_equal "Santos　Braydon-Angel", second.raw_competitor_name
     assert_equal "GU", second.country_code
     assert_equal first.competitor, CompetitorLinker.find_or_create("Braydon Angel Santos")

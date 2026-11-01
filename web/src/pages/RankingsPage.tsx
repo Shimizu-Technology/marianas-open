@@ -277,7 +277,7 @@ export default function RankingsPage() {
                                 <span className={`font-medium ${i < 3 ? 'text-white' : 'text-text-secondary'}`}>
                                   {tab === 'individual' ? (
                                     <Link
-                                      to={`/competitors/profile?name=${encodeURIComponent(entry.competitor_name || '')}`}
+                                      to={entry.competitor_id ? `/competitors/${entry.competitor_id}` : `/competitors/profile?result_id=${entry.result_id}`}
                                       className="hover:text-gold-400 transition-colors"
                                     >
                                       {entry.competitor_name}

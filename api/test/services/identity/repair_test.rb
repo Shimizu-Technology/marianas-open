@@ -142,6 +142,17 @@ class IdentityRepairTest < ActiveSupport::TestCase
     assert report[:skipped].any? { |row| row[:reason].include?("CSV names do not match current athletes") }
   end
 
+
+  test "projection includes the surviving athletes gym change from the newest moved result" do
+    with_athlete_rows([ [ "DUPLICATE_RECORDS", "72001 72002", "River Kai-Lin", "SAME_PERSON", "high", "", "2", "" ] ]) do |path|
+      report = Identity::Repair.call(athletes: path, apply: true, io: @io)
+      assert_equal report[:projected], report[:after]
+      assert_equal 0, report[:after][:per_academy][71002][:athletes]
+      assert_equal 9, report[:after][:per_academy][71001][:athletes]
+      assert_equal 71001, Competitor.find(72001).academy_id
+    end
+  end
+
   private
 
   def repair(apply: false)

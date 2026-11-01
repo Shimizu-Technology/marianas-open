@@ -49,7 +49,7 @@ function MergeConfirmation({ kind, source, target, disabled, setBusy, onMerged }
     setMerging(true); setBusy(true); setError('')
     try {
       if (kind === 'academies') await api.admin.mergeAcademy(source.id, target.id)
-      else await api.admin.mergeCompetitor(source.id, target.id)
+      else await api.admin.mergeCompetitor(source.id, target.id, preview.review_token, warningsConfirmed)
       onMerged({ id: preview.target.id, name: preview.target.name })
     } catch (err) {
       setError(`${err instanceof Error ? err.message : 'Merge failed.'} The merge was not confirmed. Reload the preview to check the current records before trying again.`)

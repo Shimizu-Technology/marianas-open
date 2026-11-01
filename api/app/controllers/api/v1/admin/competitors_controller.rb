@@ -87,8 +87,9 @@ module Api
         end
 
         def merge
+          raise ArgumentError, "A current merge preview is required" unless params[:review_token].is_a?(String) && params[:review_token].present?
           target = Identity::CompetitorMerge.call(source: @competitor, target: Competitor.find(params[:target_id]),
-            confirm: params[:confirm] == true, confirm_warnings: params[:confirm_warnings] == true, actor: current_user)
+            confirm: params[:confirm] == true, confirm_warnings: params[:confirm_warnings] == true, actor: current_user, review_token: params[:review_token])
           render json: { competitor: target.as_json }
         rescue ArgumentError, ActiveRecord::RecordInvalid => e
           render json: { error: e.message }, status: :unprocessable_entity

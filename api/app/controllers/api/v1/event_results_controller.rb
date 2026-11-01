@@ -16,7 +16,7 @@ module Api
         grouped = results.group_by(&:division).map do |division, div_results|
           {
             division: division,
-            results: div_results.as_json
+            results: div_results.map { |result| result.as_json.merge("competitor_name" => result.display_competitor_name) }
           }
         end
 

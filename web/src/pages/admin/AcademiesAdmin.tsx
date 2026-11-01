@@ -115,6 +115,10 @@ export default function AcademiesAdmin() {
       const payload = { ...form, aliases: form.aliases.filter(s => s.trim() !== '') }
       const response = await api.admin.updateAcademy(editing, payload)
       setEditDetail(detail => detail ? { ...detail, ...response.academy, athletes: detail.athletes } : null)
+      const saved = response.academy
+      setForm({name: saved.name, country_code: saved.country_code || '', location: saved.location || '',
+        website_url: saved.website_url || '', instagram_url: saved.instagram_url || '', facebook_url: saved.facebook_url || '',
+        description: saved.description || '', aliases: saved.aliases || [], parent_id: saved.parent_id ?? null, unaffiliated: saved.unaffiliated ?? false})
       setProfileDirty(false)
       setSuccess('Academy updated')
       await load()
@@ -165,8 +169,8 @@ export default function AcademiesAdmin() {
       <div className="mb-4 p-4 bg-surface border border-white/5 text-xs text-text-secondary leading-relaxed">
         <p>
           <strong className="text-text-primary">Academies are auto-populated from tournament results.</strong>{' '}
-          When event results are imported, academy records are automatically created from competitor affiliations.
-          Points and medals are aggregated from all athletes. You can enrich profiles by adding logos, locations,
+          When event results are imported, academy records are resolved from the gym listed for each result.
+          Points and medals follow those results. You can enrich profiles by adding logos, locations,
           and social links.
         </p>
       </div>
