@@ -71,6 +71,7 @@
     "location": "University of Guam, Mangilao, Guam",
     "asjjfRank": "ASJJF 5-Star 排名賽事",
     "asjjfRankDynamic": "ASJJF {{count}}-Star 排名賽事",
+    "asjjfSanctioned": "ASJJF 官方認證賽事",
     "prizePool": "$50,000 獎金池",
     "schedule": "賽事賽程",
     "scheduleDesc": "各組別將於 6 個比賽墊同步進行。黑帶決賽於晚間舉行。",

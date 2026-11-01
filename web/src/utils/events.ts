@@ -33,3 +33,26 @@ export function getEventCycleYear(events: Event[]): number | null {
   if (!anchor?.date) return null;
   return Number(anchor.date.slice(0, 4)) || null;
 }
+
+/**
+ * Builds a one-line venue address without repeating the city or country when the
+ * stored street address already includes them (e.g. "303 University Dr, Mangilao, 96913, Guam").
+ */
+export function formatVenueAddress(
+  address: string | null | undefined,
+  city: string | null | undefined,
+  country: string | null | undefined,
+): string {
+  const parts: string[] = [];
+  const base = address?.trim() ?? '';
+  if (base) parts.push(base);
+  const haystack = base.toLowerCase();
+  for (const part of [city, country]) {
+    const value = part?.trim();
+    if (!value) continue;
+    if (haystack.includes(value.toLowerCase())) continue;
+    if (parts.some(existing => existing.toLowerCase() === value.toLowerCase())) continue;
+    parts.push(value);
+  }
+  return parts.join(', ');
+}

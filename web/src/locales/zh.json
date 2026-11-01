@@ -71,6 +71,7 @@
     "location": "University of Guam，Mangilao，Guam",
     "asjjfRank": "ASJJF 5-Star 评级赛事",
     "asjjfRankDynamic": "ASJJF {{count}}-Star 评级赛事",
+    "asjjfSanctioned": "ASJJF 官方认证赛事",
     "prizePool": "$50,000 奖金池",
     "schedule": "赛事赛程",
     "scheduleDesc": "各组别将在 6 个场地同时进行，黑带决赛于晚间举行。",

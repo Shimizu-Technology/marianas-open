@@ -71,6 +71,7 @@
     "location": "University of Guam, Mangilao, Guam",
     "asjjfRank": "ASJJF 5-Star Ranked Event",
     "asjjfRankDynamic": "ASJJF {{count}}-Star Ranked Event",
+    "asjjfSanctioned": "ASJJF Sanctioned Event",
     "prizePool": "$50,000 Prize Pool",
     "schedule": "Event Schedule",
     "scheduleDesc": "Divisions run simultaneously across 6 mats. Black belt finals in the evening.",

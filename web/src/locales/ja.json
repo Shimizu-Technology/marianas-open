@@ -71,6 +71,7 @@
     "location": "University of Guam, Mangilao, Guam",
     "asjjfRank": "ASJJF 5-Star ランク対象大会",
     "asjjfRankDynamic": "ASJJF {{count}}-Star ランク対象大会",
+    "asjjfSanctioned": "ASJJF公認大会",
     "prizePool": "$50,000 賞金総額",
     "schedule": "大会スケジュール",
     "scheduleDesc": "各部門は6面のマットで同時進行します。黒帯決勝は夕方に行われます。",

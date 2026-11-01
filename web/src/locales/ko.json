@@ -71,6 +71,7 @@
     "location": "University of Guam, Mangilao, Guam",
     "asjjfRank": "ASJJF 5-Star 랭크 대회",
     "asjjfRankDynamic": "ASJJF {{count}}-Star 랭크 대회",
+    "asjjfSanctioned": "ASJJF 공인 대회",
     "prizePool": "$50,000 상금 총액",
     "schedule": "대회 일정",
     "scheduleDesc": "디비전은 6개 매트에서 동시에 진행됩니다. 블랙 벨트 결승전은 저녁에 열립니다.",

@@ -71,6 +71,7 @@
     "location": "University of Guam, Mangilao, Guam",
     "asjjfRank": "Evento ASJJF com classificação 5-Star",
     "asjjfRankDynamic": "Evento ASJJF com classificação {{count}}-Star",
+    "asjjfSanctioned": "Evento sancionado pela ASJJF",
     "prizePool": "Premiação total de $50,000",
     "schedule": "Programação do evento",
     "scheduleDesc": "As divisões acontecem simultaneamente em 6 tatames. As finais de Faixa Preta acontecem à noite.",
