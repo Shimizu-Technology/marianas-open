@@ -58,6 +58,66 @@ class AsjjfAdminTest < ActionDispatch::IntegrationTest
     tempfile&.close!
   end
 
+  test "ranking configuration requires admin and suggestions do not select a new season" do
+    put "/api/v1/admin/asjjf/ranking_seasons/2027", params: { gi_ranking_id: 300, current: true }, headers: @headers
+    assert_response :forbidden
+    @user.update!(role: "admin")
+    put "/api/v1/admin/asjjf/ranking_seasons/2027", params: { gi_ranking_id: 300, current: true }, headers: @headers
+    assert_response :success
+    assert_equal 2027, AsjjfRankingSeason.current_season.season_year
+    assert_equal 300, AsjjfRankingSeason.current_season.asjjf_ranking_lists.first.asjjf_ranking_id
+    put "/api/v1/admin/asjjf/ranking_seasons/2027", params: { gi_ranking_id: -1 }, headers: @headers
+    assert_response :unprocessable_entity
+    assert_equal 300, AsjjfRankingSeason.current_season.gi_ranking_id
+    get "/api/v1/admin/asjjf/ranking_seasons", headers: @headers
+    assert_response :success
+    assert response.parsed_body.key?("suggestions")
+  end
+
+  test "reviewed ranking reductions require admin and explicit confirmation" do
+    saved = AsjjfSnapshot.create!(url: "https://asjjf.org/ranking/teamRank/227", page_type: "team_ranking", asjjf_id: 227,
+      html: "saved public ranking", source: "admin_upload", fetched_at: Time.current, outcome: "ok", parse_status: "parsed")
+    path = "/api/v1/admin/asjjf/snapshots/#{saved.id}/apply_ranking"
+    post path, params: { confirm: true }, headers: @headers, as: :json
+    assert_response :forbidden
+    @user.update!(role: "admin")
+    post path, params: {}, headers: @headers, as: :json
+    assert_response :unprocessable_entity
+    post path, params: { confirm: true }, headers: @headers, as: :json
+    assert_response :success
+    assert response.parsed_body["queued"]
+    saved.update!(parse_status: "failed")
+    post path, params: { confirm: true }, headers: @headers, as: :json
+    assert_response :unprocessable_entity
+  end
+
+  test "held ranking snapshots remain discoverable beyond recent history and superseded holds disappear" do
+    held = AsjjfSnapshot.create!(url: "https://asjjf.org/ranking/teamRank/227", page_type: "team_ranking", asjjf_id: 227,
+      html: "saved public ranking", source: "admin_upload", fetched_at: 150.days.ago, created_at: 150.days.ago,
+      outcome: "ok", parse_status: "parsed", ranking_apply_status: "rejected", ranking_apply_error: "Row count decreased", parsed_summary: { counts: { rows: 1 }, rows: [ { name: "Biba" } ] })
+    25.times do |index|
+      AsjjfSnapshot.create!(url: "https://asjjf.org/main/eventInfo/#{index + 1}", page_type: "event_info", asjjf_id: index + 1,
+        html: "saved", source: "admin_upload", fetched_at: Time.current, outcome: "ok", parse_status: "parsed")
+    end
+    get "/api/v1/admin/asjjf/ranking_holds", headers: @headers
+    assert_response :success
+    assert_equal [ held.id ], response.parsed_body["snapshots"].map { |snapshot| snapshot["id"] }
+    assert_nil response.parsed_body["snapshots"].first["parsed_summary"]
+    get "/api/v1/admin/asjjf/snapshots/#{held.id}", headers: @headers
+    assert_response :success
+    assert_equal "Biba", response.parsed_body.dig("snapshot", "parsed_summary", "rows", 0, "name")
+    AsjjfSnapshot.create!(url: held.url, page_type: held.page_type, asjjf_id: 227, html: "later valid page", source: "admin_upload",
+      fetched_at: 140.days.ago, created_at: 140.days.ago, outcome: "ok", parse_status: "failed")
+    AsjjfSnapshot.prune!
+    assert AsjjfSnapshot.exists?(held.id)
+    newer = held.dup
+    newer.fetched_at = Time.current
+    newer.ranking_apply_status = "applied"
+    newer.save!
+    get "/api/v1/admin/asjjf/ranking_holds", headers: @headers
+    assert_empty response.parsed_body["snapshots"]
+  end
+
   test "only admin can resume, while viewer and anonymous cannot access staff APIs" do
     AsjjfSetting.breaker.update!(paused_until: 12.hours.from_now)
     post "/api/v1/admin/asjjf/close_breaker", headers: @headers
