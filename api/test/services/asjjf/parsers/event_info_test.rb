@@ -12,6 +12,7 @@ class AsjjfEventInfoTest < AsjjfParserTest
     assert_equal "https://asjjf.org/main/eventNotice/2258", parsed[:registration_url]
     assert_equal "University Of Guam Calvo Fieldhouse", parsed[:venue][:name]
     assert_equal "303 University Dr, Mangilao, 96913, Guam Guam Guam", parsed[:venue][:address]
+    assert_equal [ "303 University Dr, Mangilao, 96913,", "Guam Guam", "Guam" ], parsed[:venue][:address_lines]
     assert_match %r{https://www.google.com/maps/embed}, parsed[:venue][:map_url]
   end
 

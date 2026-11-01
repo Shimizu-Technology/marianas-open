@@ -99,7 +99,7 @@ export default function AsjjfSyncAdmin() {
                 <h3 className="break-words font-semibold text-text-primary">{heartbeat.fetcher_id}</h3>
                 <p className="mt-1 break-words text-sm text-text-secondary">Version: {heartbeat.fetcher_version}</p>
                 <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
-                  <div><dt className="text-text-secondary">Last heartbeat</dt><dd className="text-text-primary">{timestamp(heartbeat.updated_at)}</dd></div>
+                  <div><dt className="text-text-secondary">Last heartbeat</dt><dd className="text-text-primary">{timestamp(heartbeat.received_at ?? heartbeat.updated_at)}</dd></div>
                   <div><dt className="text-text-secondary">Run started</dt><dd className="text-text-primary">{timestamp(heartbeat.run_started_at)}</dd></div>
                   <div><dt className="text-text-secondary">Run finished</dt><dd className="text-text-primary">{timestamp(heartbeat.run_finished_at)}</dd></div>
                   <div><dt className="text-text-secondary">Run totals</dt><dd className="text-text-primary">Fetched: {heartbeat.fetched} · Challenged: {heartbeat.challenged} · Errors: {heartbeat.errors}</dd></div>

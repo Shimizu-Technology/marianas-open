@@ -50,6 +50,17 @@ class AsjjfSeasonCalendarTest < AsjjfParserTest
     assert_equal original, Marshal.dump(events)
   end
 
+  def test_dumau_open_selection_requires_guam_and_can_be_configured
+    events = [
+      { event_id: 1, title: "Dumau Open 2027", place: "University of Guam" },
+      { event_id: 2, title: "Dumau Open 2027", place: "Tokyo Japan" },
+      { event_id: 3, title: "Other Open", place: "Guam" }
+    ]
+    assert_equal [ 1 ], PARSERS::SeasonCalendar.select_marianas(events).map { |row| row[:event_id] }
+    assert_equal [ 2 ], PARSERS::SeasonCalendar.select_marianas(events, place_pattern: /Japan/).map { |row| row[:event_id] }
+    assert_empty PARSERS::SeasonCalendar.select_marianas(events, dumau_pattern: nil)
+  end
+
   def test_missing_calendar_date_and_invalid_date_fail_closed
     html = mutate(FILE) { |doc| doc.at_css(".event-name").ancestors("a").first.css("strong").first.parent.next_element.content = "February 31, 2027" }
     assert_raises(PARSERS::ParseError) { parse_fixture(FILE, html: html) }

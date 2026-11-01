@@ -24,3 +24,7 @@ requeue_stale_event_gallery_images:
 complete_past_events:
   class: CompletePastEventsJob
   schedule: every 10 minutes
+
+prune_asjjf_snapshots:
+  class: PruneAsjjfSnapshotsJob
+  schedule: every day at 4am

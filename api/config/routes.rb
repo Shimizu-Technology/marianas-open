@@ -22,8 +22,18 @@ Rails.application.routes.draw do
       # Auth
       get :me, to: "users#me"
 
+      namespace :internal do
+        get "asjjf/work", to: "asjjf#work"
+        post "asjjf/snapshots", to: "asjjf#snapshots"
+        post "asjjf/heartbeat", to: "asjjf#heartbeat"
+      end
+
       # Admin
       namespace :admin do
+        get "asjjf/status", to: "asjjf#status"
+        post "asjjf/snapshots", to: "asjjf#snapshots"
+        post "asjjf/close_breaker", to: "asjjf#close_breaker"
+        post "events/:id/asjjf_check", to: "asjjf#check"
         resources :users do
           member do
             post :resend_invitation

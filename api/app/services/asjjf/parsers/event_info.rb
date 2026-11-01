@@ -27,6 +27,7 @@ module Asjjf
         venue = {
           name: required(text(venue_section.at_css(".table-responsive > strong")), "venue name"),
           address: required(text(venue_section.at_css("address")), "venue address"),
+          address_lines: venue_section.at_css("address").inner_html.split(/<br\s*\/?\s*>/i).map { |line| text(Nokogiri::HTML.fragment(line)) }.reject(&:empty?),
           map_url: venue_section.at_css("iframe")&.[]("src")
         }
         registration_link = @doc.css('a[href*="/main/eventNotice/"]').find { |link| text(link) == "Event Registration" }

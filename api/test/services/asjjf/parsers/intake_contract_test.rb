@@ -1,6 +1,12 @@
 require_relative "parser_test_helper"
 
 class AsjjfIntakeContractTest < AsjjfParserTest
+  def test_dumau_host_is_accepted_by_the_same_parser
+    html = fixture("event_results_2062_gi.html")
+    parsed = PARSERS.parse(page_type: "event_results", html: html, url: "https://dumau.asjjf.org/main/eventResults/2062")
+    assert_equal 93, parsed[:counts][:divisions]
+  end
+
   def test_challenge_detector_accepts_all_public_snapshots
     PAGES.each_key { |file| refute PARSERS::ChallengeDetector.challenged?(fixture(file)), file }
   end

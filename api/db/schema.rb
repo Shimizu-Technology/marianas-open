@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_130100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,6 +73,80 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_120000) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "asjjf_fetch_requests", force: :cascade do |t|
+    t.integer "attempts", default: 0, null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.boolean "include_divisions", default: false, null: false
+    t.text "last_error"
+    t.datetime "lease_expires_at"
+    t.string "leased_by"
+    t.string "page_type", null: false
+    t.integer "priority", default: 0, null: false
+    t.text "reason"
+    t.string "requested_by"
+    t.bigint "snapshot_id"
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.text "url", null: false
+    t.index ["lease_expires_at"], name: "index_asjjf_fetch_requests_on_lease_expires_at"
+    t.index ["snapshot_id"], name: "index_asjjf_fetch_requests_on_snapshot_id"
+    t.index ["status", "priority", "created_at"], name: "index_asjjf_requests_for_leasing"
+    t.index ["url"], name: "index_asjjf_requests_active_url", unique: true, where: "((status)::text = ANY (ARRAY[('pending'::character varying)::text, ('leased'::character varying)::text]))"
+  end
+
+  create_table "asjjf_fetcher_heartbeats", force: :cascade do |t|
+    t.integer "challenged", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.integer "error_count", default: 0, null: false
+    t.integer "fetched", default: 0, null: false
+    t.string "fetcher_id", null: false
+    t.string "fetcher_version"
+    t.integer "rate_count", default: 0, null: false
+    t.datetime "rate_window_started_at"
+    t.datetime "received_at"
+    t.datetime "run_finished_at"
+    t.datetime "run_started_at"
+    t.datetime "updated_at", null: false
+    t.index ["fetcher_id"], name: "index_asjjf_fetcher_heartbeats_on_fetcher_id", unique: true
+  end
+
+  create_table "asjjf_settings", force: :cascade do |t|
+    t.datetime "alerted_at"
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.datetime "paused_until"
+    t.text "reason"
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_asjjf_settings_on_key", unique: true
+  end
+
+  create_table "asjjf_snapshots", force: :cascade do |t|
+    t.bigint "asjjf_id"
+    t.integer "byte_size", null: false
+    t.binary "compressed_html", null: false
+    t.datetime "created_at", null: false
+    t.datetime "fetched_at", null: false
+    t.string "fetcher_id"
+    t.text "final_url"
+    t.integer "http_status"
+    t.string "outcome", null: false
+    t.string "page_type", null: false
+    t.jsonb "params", default: {}, null: false
+    t.text "parse_error"
+    t.string "parse_status", default: "pending", null: false
+    t.datetime "parsed_at"
+    t.jsonb "parsed_summary", default: {}, null: false
+    t.string "sha256", null: false
+    t.string "source", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "uploaded_by_user_id"
+    t.text "url", null: false
+    t.index ["parse_status", "created_at"], name: "index_asjjf_snapshots_on_parse_status_and_created_at"
+    t.index ["uploaded_by_user_id"], name: "index_asjjf_snapshots_on_uploaded_by_user_id"
+    t.index ["url", "fetched_at"], name: "index_asjjf_snapshots_on_url_and_fetched_at"
+  end
+
   create_table "competitors", force: :cascade do |t|
     t.string "academy"
     t.bigint "academy_id"
@@ -121,6 +195,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_120000) do
     t.index ["event_id", "active"], name: "index_event_accommodations_on_event_id_and_active"
     t.index ["event_id"], name: "index_event_accommodations_on_event_id"
     t.index ["translation_status"], name: "index_event_accommodations_on_translation_status"
+  end
+
+  create_table "event_asjjf_sources", force: :cascade do |t|
+    t.bigint "asjjf_event_id", null: false
+    t.datetime "created_at", null: false
+    t.string "derived_from", null: false
+    t.string "discipline", default: "unknown", null: false
+    t.bigint "event_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "asjjf_event_id"], name: "index_event_asjjf_sources_on_event_id_and_asjjf_event_id", unique: true
+    t.index ["event_id"], name: "index_event_asjjf_sources_on_event_id"
   end
 
   create_table "event_gallery_images", force: :cascade do |t|
@@ -540,8 +625,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_120000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "asjjf_fetch_requests", "asjjf_snapshots", column: "snapshot_id"
+  add_foreign_key "asjjf_snapshots", "users", column: "uploaded_by_user_id", on_delete: :nullify
   add_foreign_key "competitors", "academies"
   add_foreign_key "event_accommodations", "events"
+  add_foreign_key "event_asjjf_sources", "events"
   add_foreign_key "event_gallery_images", "event_gallery_upload_batches"
   add_foreign_key "event_gallery_images", "events"
   add_foreign_key "event_gallery_upload_batches", "events"

@@ -18,7 +18,7 @@ module Asjjf
         @doc = Nokogiri::HTML(@html)
         @url = url.to_s
         @uri = URI.parse(@url)
-        unless %w[http https].include?(@uri.scheme) && %w[asjjf.org www.asjjf.org].include?(@uri.host)
+        unless @uri.scheme == "https" && %w[asjjf.org dumau.asjjf.org].include?(@uri.host) && @uri.port == 443 && @uri.userinfo.nil? && @uri.fragment.nil?
           raise ParseError, "Expected an ASJJF source URL"
         end
       rescue URI::InvalidURIError

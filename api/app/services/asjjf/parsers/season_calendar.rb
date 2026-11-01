@@ -6,10 +6,12 @@ module Asjjf
       DEFAULT_MARIANAS_PATTERN = /\bmarianas\b/i
 
       # Return selected source events without changing or grouping gi/no-gi records.
-      def self.select_marianas(events, pattern: DEFAULT_MARIANAS_PATTERN, event_ids: [], exclude_ids: [])
+      def self.select_marianas(events, pattern: DEFAULT_MARIANAS_PATTERN, event_ids: [], exclude_ids: [],
+        dumau_pattern: /\bdumau\s+open\b/i, place_pattern: /\bguam\b/i)
         events.select do |event|
           !exclude_ids.include?(event[:event_id]) &&
-            (event_ids.include?(event[:event_id]) || pattern&.match?(event[:title]))
+            (event_ids.include?(event[:event_id]) || pattern&.match?(event[:title]) ||
+              (dumau_pattern&.match?(event[:title]) && place_pattern&.match?(event[:place].to_s)))
         end
       end
 

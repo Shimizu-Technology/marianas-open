@@ -324,6 +324,7 @@ export interface Sponsor {
 }
 
 export interface AsjjfHeartbeat {
+  received_at?: string | null;
   fetcher_id: string;
   fetcher_version: string;
   run_started_at: string | null;
