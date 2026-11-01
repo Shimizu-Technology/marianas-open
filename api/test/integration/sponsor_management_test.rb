@@ -80,7 +80,7 @@ class SponsorManagementTest < ActionDispatch::IntegrationTest
     assert @sponsor.reload.logo_dark.attached?
     assert_not @sponsor.logo.attached?
     assert_equal "uploaded_logo_dark", SponsorAuditLog.last.action
-    unsafe = Rack::Test::UploadedFile.new(Rails.root.join("test/fixtures/files/sponsor.png"), "text/html")
+    unsafe = Rack::Test::UploadedFile.new(Rails.root.join("test/fixtures/files/sponsor.html"), "text/html")
     blob_id = @sponsor.logo_dark.blob.id
     assert_no_difference "SponsorAuditLog.count" do
       post "/api/v1/admin/sponsors/#{@sponsor.id}/upload_logo", headers: @headers, params: { logo: unsafe, variant: "dark" }
