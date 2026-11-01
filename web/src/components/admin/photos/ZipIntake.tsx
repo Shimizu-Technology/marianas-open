@@ -8,10 +8,13 @@ import { photoButton, photoInput } from './styles';
 interface Props { eventId: number; options: ImportOptions; onImported: () => void; imports: PhotoImport[] }
 export default function ZipIntake(props: Props) {
   const { userId } = useAuth();
-  return <ZipIntakeSession key={userId || 'signed-out'} {...props} userId={userId} />;
+  const currentOwner = useRef(userId);
+  currentOwner.current = userId;
+  const isOwnerCurrent = useCallback(() => currentOwner.current === userId, [userId]);
+  return <ZipIntakeSession key={userId || 'signed-out'} {...props} userId={userId} isOwnerCurrent={isOwnerCurrent} />;
 }
 
-function ZipIntakeSession({ eventId, options, onImported, imports, userId }: Props & { userId: string | null | undefined }) {
+function ZipIntakeSession({ eventId, options, onImported, imports, userId, isOwnerCurrent }: Props & { userId: string | null | undefined; isOwnerCurrent: () => boolean }) {
   const key = userId ? `${userId}:${eventId}` : '';
   const [saved, setSaved] = useState<SavedZip | null>(null);
   const [busy, setBusy] = useState(false);
@@ -36,7 +39,7 @@ function ZipIntakeSession({ eventId, options, onImported, imports, userId }: Pro
         const latest = await zipQueue.load(record.key);
         if (!latest) { setSaved(null); setStage('This ZIP was completed or removed in another tab.'); return; }
         if (latest.id !== record.id) throw new Error('Another ZIP was saved in another tab. Reload Photos to resume it.');
-        await sendSavedZip(latest, (label, percent) => { setStage(label); setProgress(percent); }, abort.signal);
+        await sendSavedZip(latest, (label, percent) => { setStage(label); setProgress(percent); }, abort.signal, isOwnerCurrent);
         if (abort.signal.aborted) return;
         setSaved(null); setStage('ZIP received. The worker is importing your photos.');
         onImportedRef.current();
@@ -44,7 +47,7 @@ function ZipIntakeSession({ eventId, options, onImported, imports, userId }: Pro
     } catch (cause) {
       if (!abort.signal.aborted) setError(cause instanceof Error ? cause.message : 'Could not send ZIP. Retry below.');
     } finally { running.current = false; if (!abort.signal.aborted) setBusy(false); }
-  }, []);
+  }, [isOwnerCurrent]);
 
   useEffect(() => {
     let cancelled = false;

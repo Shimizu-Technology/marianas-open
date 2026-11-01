@@ -23,8 +23,10 @@ afterEach(cleanup);
 it('aborts an account’s ZIP transfer and removes its filename when another account signs in', async () => {
   vi.mocked(zipQueue.load).mockImplementation(async key => key === record.key ? record : undefined);
   let transferSignal: AbortSignal | undefined;
-  vi.mocked(sendSavedZip).mockImplementation((_record, _progress, signal) => new Promise((_resolve, reject) => {
+  let ownerIsCurrent: (() => boolean) | undefined;
+  vi.mocked(sendSavedZip).mockImplementation((_record, _progress, signal, isOwnerCurrent) => new Promise((_resolve, reject) => {
     transferSignal = signal;
+    ownerIsCurrent = isOwnerCurrent;
     signal.addEventListener('abort', () => reject(new DOMException('Paused', 'AbortError')));
   }));
   const mounted = render(view());
@@ -33,6 +35,7 @@ it('aborts an account’s ZIP transfer and removes its filename when another acc
   identity.userId = 'staff-b'; mounted.rerender(view());
   expect(screen.queryByText('private-staff-a.zip')).toBeNull();
   expect(transferSignal?.aborted).toBe(true);
+  expect(ownerIsCurrent?.()).toBe(false);
   await waitFor(() => expect(screen.getByLabelText('ZIP file')).toHaveProperty('disabled', false));
 });
 

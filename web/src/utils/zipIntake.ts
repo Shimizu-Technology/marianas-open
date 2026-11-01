@@ -115,24 +115,26 @@ export function uploadZipBytes(file: File, prepared: DirectUploadPreparation, pr
   });
 }
 
-export async function sendSavedZip(record: SavedZip, progress: (stage: string, percent: number) => void, signal: AbortSignal) {
-  const scope = { signal, isCurrent: () => !signal.aborted };
+export async function sendSavedZip(record: SavedZip, progress: (stage: string, percent: number) => void, signal: AbortSignal, isOwnerCurrent = () => true) {
+  const scope = { signal, isCurrent: () => !signal.aborted && isOwnerCurrent() };
+  const check = () => { checkAbort(signal); if (!isOwnerCurrent()) throw new DOMException('Upload session ended', 'AbortError'); };
+  check();
   if (!record.checksum) {
     record.checksum = await zipChecksum(record.file, percent => progress('Checking ZIP', percent), signal);
     await zipQueue.save(record);
   }
-  checkAbort(signal);
+  check();
   if (!record.uploaded) {
     // Presigned PUT URLs expire; unfinished transfers start again with a fresh one.
     progress('Preparing storage', 0);
     record.prepared = await photoIntake.prepareZip(record.eventId, { filename: record.file.name, byte_size: record.file.size, checksum: record.checksum }, scope);
     await zipQueue.save(record);
-    checkAbort(signal);
+    check();
     await uploadZipBytes(record.file, record.prepared, percent => progress('Sending ZIP', percent), signal);
     record.uploaded = true;
     await zipQueue.save(record);
   }
-  checkAbort(signal);
+  check();
   if (!record.prepared) throw new Error('Saved ZIP checkpoint is missing. Remove it and choose the ZIP again.');
   progress('Starting import', 100);
   const result = await photoIntake.completeZip(record.eventId, record.prepared.signed_id, record.options, scope);

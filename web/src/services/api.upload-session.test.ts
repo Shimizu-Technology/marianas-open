@@ -2,6 +2,7 @@ import { waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { api, setAuthTokenGetter, type AuthenticatedRequestScope } from './api';
 import { photoIntake } from './photoIntake';
+import { sendSavedZip, type SavedZip } from '../utils/zipIntake';
 
 afterEach(() => { vi.unstubAllGlobals(); setAuthTokenGetter(async () => null); });
 const unauthorized = () => new Response(JSON.stringify({ error: 'Expired' }), { status: 401 });
@@ -59,4 +60,39 @@ it('still retries an expired token once while the original owner is current', as
   expect(token).toHaveBeenLastCalledWith({ skipCache: true });
   expect(fetch).toHaveBeenCalledTimes(2);
   expect(fetch.mock.calls[1][1]).toMatchObject({ signal: scope.signal, headers: { Authorization: 'Bearer fresh-A' } });
+});
+
+function savedZip(): SavedZip {
+  return { id: 'zip-A', key: 'A:7', eventId: 7, file: new File(['zip'], 'A.zip'), checksum: 'saved-checksum', uploaded: true,
+    prepared: { signed_id: 'A-zip', direct_upload: { url: 'https://storage.invalid/A', headers: {} } },
+    options: { album_type: 'Podium', category: '', timezone: 'Pacific/Guam', hold_flagged: false } };
+}
+
+it('keeps a resumed ZIP completion bound to its account before passive cleanup aborts', async () => {
+  let owner = 'A';
+  let respond!: (response: Response) => void;
+  const token = vi.fn(async () => `token-${owner}`); setAuthTokenGetter(token);
+  const fetch = vi.fn(() => new Promise<Response>(resolve => { respond = resolve; })); vi.stubGlobal('fetch', fetch);
+  const signal = new AbortController().signal;
+  const request = sendSavedZip(savedZip(), () => {}, signal, () => owner === 'A');
+  await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+  owner = 'B'; respond(unauthorized());
+  await expect(request).rejects.toHaveProperty('name', 'AbortError');
+  expect(signal.aborted).toBe(false);
+  expect(token).toHaveBeenCalledTimes(1);
+  expect(fetch).toHaveBeenCalledTimes(1);
+});
+
+it('checks the ZIP owner after an in-progress token refresh during preparation', async () => {
+  let owner = 'A';
+  let refreshed!: (token: string) => void;
+  const token = vi.fn().mockResolvedValueOnce('token-A').mockImplementationOnce(() => new Promise<string>(resolve => { refreshed = resolve; })); setAuthTokenGetter(token);
+  const fetch = vi.fn().mockResolvedValue(unauthorized()); vi.stubGlobal('fetch', fetch);
+  const signal = new AbortController().signal;
+  const request = sendSavedZip({ ...savedZip(), uploaded: false, prepared: undefined }, () => {}, signal, () => owner === 'A');
+  await waitFor(() => expect(token).toHaveBeenCalledTimes(2));
+  owner = 'B'; refreshed('token-B');
+  await expect(request).rejects.toHaveProperty('name', 'AbortError');
+  expect(signal.aborted).toBe(false);
+  expect(fetch).toHaveBeenCalledTimes(1);
 });
