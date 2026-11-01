@@ -685,6 +685,7 @@
     "refresh": "刷新待审核快照"
   },
   "sponsorPlacements": {
+    "loadError": "无法加载赞助商。请重试。",
     "featured": "精选赞助商",
     "presenting": "冠名合作伙伴",
     "secondary": "支持合作伙伴",
@@ -695,6 +696,7 @@
     "closeVideo": "关闭视频"
   },
   "sponsorAdmin": {
+    "notFound": "找不到此赞助商。请返回赞助商列表。",
     "title": "赞助商",
     "intro": "添加赞助商, 选择展示位置并设置日期.",
     "add": "添加赞助商",

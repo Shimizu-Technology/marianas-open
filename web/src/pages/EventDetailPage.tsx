@@ -1,4 +1,4 @@
-import { SponsorTiers } from '../components/SponsorPlacements';
+import { SponsorTiers, SponsorPlacementsError } from '../components/SponsorPlacements';
 import { useSponsorPlacements } from '../hooks/useSponsorPlacements';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
@@ -241,7 +241,7 @@ export default function EventDetailPage() {
   }, [events, slug]);
   const { events: countedEvents, loading: resultsLoading } = useResultCounts(selectedEvents);
   const mainEvent = countedEvents[0] ?? null;
-  const sponsorPlacements = useSponsorPlacements(mainEvent?.id, Boolean(mainEvent));
+  const { placements: sponsorPlacements, error: placementsError, retry: retryPlacements } = useSponsorPlacements(mainEvent?.id, Boolean(mainEvent));
   const [readyResultsSlug, setReadyResultsSlug] = useState<string | null>(null);
   const onResultsReady = useCallback((eventSlug: string) => setReadyResultsSlug(eventSlug), []);
   useEffect(() => {
@@ -1561,8 +1561,11 @@ export default function EventDetailPage() {
 
       {!isClosed && gallerySection}
 
-      {sponsorPlacements.length > 0 && <section className="border-y border-white/5 bg-navy-900/60 px-4 py-14">
-        <div className="mx-auto max-w-7xl"><SponsorTiers placements={sponsorPlacements} event /></div>
+      {(sponsorPlacements.length > 0 || placementsError) && <section className="border-y border-white/5 bg-navy-900/60 px-4 py-14">
+        <div className="mx-auto max-w-7xl">
+          {placementsError && <SponsorPlacementsError retry={retryPlacements} />}
+          <SponsorTiers placements={sponsorPlacements} event />
+        </div>
       </section>}
 
       {/* Share */}

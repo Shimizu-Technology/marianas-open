@@ -39,7 +39,7 @@ function PlacementCard({ placement }: { placement: SponsorPlacement }) {
     else dialog.current?.close();
   }, [playing]);
   if (!sponsor) return null;
-  const href = normalizeExternalUrl(placement.cta_url || sponsor.website_url);
+  const href = normalizeExternalUrl(placement.cta_url) || normalizeExternalUrl(sponsor.website_url);
   const close = () => {
     setPlaying(false);
     trigger.current?.focus();
@@ -164,6 +164,18 @@ export function SponsorTiers({ placements, event = false }: { placements: Sponso
           </section>
         );
       })}
+    </div>
+  );
+}
+
+export function SponsorPlacementsError({ retry }: { retry: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div role="alert" className="mx-auto max-w-7xl space-y-3 px-4 py-6 text-center">
+      <p>{t("sponsorPlacements.loadError")}</p>
+      <button type="button" onClick={retry} className="min-h-11 rounded border border-white/20 px-4 py-2 focus-visible:outline-2 focus-visible:outline-gold-400">
+        {t("eventDetail.retry")}
+      </button>
     </div>
   );
 }

@@ -685,6 +685,7 @@
     "refresh": "重新整理待審核快照"
   },
   "sponsorPlacements": {
+    "loadError": "無法載入贊助商。請再試一次。",
     "featured": "精選贊助商",
     "presenting": "冠名合作夥伴",
     "secondary": "支持合作夥伴",
@@ -695,6 +696,7 @@
     "closeVideo": "關閉影片"
   },
   "sponsorAdmin": {
+    "notFound": "找不到此贊助商。請返回贊助商清單。",
     "title": "贊助商",
     "intro": "新增贊助商,選擇顯示位置,並設定日期.",
     "add": "新增贊助商",

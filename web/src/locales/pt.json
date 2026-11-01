@@ -687,6 +687,7 @@
     "refresh": "Atualizar capturas pendentes"
   },
   "sponsorPlacements": {
+    "loadError": "Não foi possível carregar os patrocinadores. Tente novamente.",
     "featured": "Patrocinadores em destaque",
     "presenting": "Parceiro apresentador",
     "secondary": "Parceiros apoiadores",
@@ -697,6 +698,7 @@
     "closeVideo": "Fechar vídeo"
   },
   "sponsorAdmin": {
+    "notFound": "Este patrocinador não foi encontrado. Volte à lista de patrocinadores.",
     "title": "Patrocinadores",
     "intro": "Adicione um patrocinador, escolha onde ele aparece e defina as datas.",
     "add": "Adicionar patrocinador",

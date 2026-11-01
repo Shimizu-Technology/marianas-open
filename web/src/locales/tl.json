@@ -686,6 +686,7 @@
     "refresh": "I-refresh ang mga naghihintay na snapshot"
   },
   "sponsorPlacements": {
+    "loadError": "Hindi ma-load ang mga sponsor. Pakisubukang muli.",
     "featured": "Mga tampok na tagasuporta",
     "presenting": "Pangunahing kasosyo",
     "secondary": "Mga sumusuportang kasosyo",
@@ -696,6 +697,7 @@
     "closeVideo": "Isara ang video"
   },
   "sponsorAdmin": {
+    "notFound": "Hindi mahanap ang sponsor na ito. Bumalik sa listahan ng mga sponsor.",
     "title": "Mga Tagasuporta",
     "intro": "Magdagdag ng tagasuporta, piliin kung saan ito lilitaw, at itakda ang mga petsa.",
     "add": "Magdagdag ng tagasuporta",

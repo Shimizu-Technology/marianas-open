@@ -730,6 +730,7 @@
     "refresh": "Refresh held snapshots"
   },
   "sponsorPlacements": {
+    "loadError": "Sponsors could not be loaded. Please try again.",
     "featured": "Featured sponsors",
     "presenting": "Presenting partner",
     "secondary": "Supporting partners",
@@ -740,6 +741,7 @@
     "closeVideo": "Close video"
   },
   "sponsorAdmin": {
+    "notFound": "This sponsor could not be found. Return to the sponsor list.",
     "title": "Sponsors",
     "intro": "Add a sponsor, choose where it appears, and set dates.",
     "add": "Add sponsor",

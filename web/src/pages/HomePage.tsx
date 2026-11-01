@@ -10,7 +10,7 @@ import { useEvents } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
-import { FeaturedSponsorBar, SponsorTiers } from '../components/SponsorPlacements';
+import { FeaturedSponsorBar, SponsorTiers, SponsorPlacementsError } from '../components/SponsorPlacements';
 import { useSponsorPlacements } from '../hooks/useSponsorPlacements';
 import { eventPhase, getCurrentMainEvent, getEventCycleYear, selectHomeState } from '../utils/events';
 import { useResultCounts } from '../hooks/useResultCounts';
@@ -58,7 +58,7 @@ export default function HomePage() {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const { events, loading: eventsLoading } = useEvents();
-  const placements = useSponsorPlacements();
+  const { placements, error: placementsError, retry: retryPlacements } = useSponsorPlacements();
   const { images: siteImages } = useSiteImages();
   const { content: siteContent, t: sc, loading: siteContentLoading, hasCachedContent } = useSiteContent();
 
@@ -371,6 +371,7 @@ export default function HomePage() {
             </div>
           </ScrollReveal>
 
+          {placementsError && <SponsorPlacementsError retry={retryPlacements} />}
           <SponsorTiers placements={placements} />
         </div>
       </section>

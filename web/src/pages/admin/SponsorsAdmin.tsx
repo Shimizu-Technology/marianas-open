@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { api, type Sponsor, type SponsorFormData, type SponsorPlacement, type Event } from "../../services/api";
 import { FeaturedSponsorBar, SponsorTiers, SponsorLogo } from "../../components/SponsorPlacements";
 import { normalizeExternalUrl } from "../../utils/images";
@@ -41,6 +42,7 @@ export default function SponsorsAdmin() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [editing, setEditing] = useEditingParam();
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState<SponsorFormData>(empty);
   const [files, setFiles] = useState<{ light?: File; dark?: File }>({});
   const [previewUrls, setPreviewUrls] = useState<{ light?: string; dark?: string }>({});
@@ -54,6 +56,8 @@ export default function SponsorsAdmin() {
   const [placementFilter, setPlacementFilter] = useState<SponsorPlacement["placement_type"]>("featured_bar");
   const initializedEditor = useRef<number | "new" | null>(null);
   const current = sponsors.find((s) => s.id === editing);
+  const missingTarget = searchParams.has("edit") && editing !== "new" && !current;
+  const editorOpen = editing !== null && !missingTarget;
   const placements = form.sponsor_placements_attributes || [];
   const load = async () => {
     const data = await api.admin.getSponsors();
@@ -111,13 +115,20 @@ export default function SponsorsAdmin() {
   const preview = placements.filter((p) => !p._destroy).map((p) => ({ ...p, sponsor: previewSponsor }));
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
+    const id = initializedEditor.current;
+    const validTarget = !missingTarget && (editing === "new"
+      ? id === "new" || (typeof id === "number" && sponsors.some(s => s.id === id))
+      : typeof editing === "number" && id === editing && Boolean(current));
+    if (saving || !validTarget) {
+      if (!validTarget) setError(t("sponsorAdmin.notFound"));
+      return;
+    }
     setSaving(true);
     setError("");
     setSuccess("");
     try {
       // The URL may still be transitioning when an upload fails. Use the saved
       // identity immediately so a fast retry cannot create another sponsor.
-      const id = initializedEditor.current;
       const data = typeof id === 'number'
         ? await api.admin.updateSponsor(id, form)
         : await api.admin.createSponsor(form);
@@ -145,12 +156,15 @@ export default function SponsorsAdmin() {
   const remove = async (id: number) => {
     setSaving(true);
     setError("");
+    setSuccess("");
     try {
       await api.admin.deleteSponsor(id);
+      setSponsors(items => items.filter(sponsor => sponsor.id !== id));
       setConfirmDelete(null);
       if (editing === id) setEditing(null);
-      await load();
       setSuccess(t("sponsorAdmin.deleted"));
+      // Deletion is already committed. A failed refresh must not undo its UI outcome.
+      await load().catch(() => {});
     } catch (err) {
       setError(err instanceof Error ? err.message : t("sponsorAdmin.saveFailed"));
     } finally {
@@ -175,22 +189,30 @@ export default function SponsorsAdmin() {
       const reordered = [...ordered];
       [reordered[index], reordered[index + delta]] = [second, first];
       const bySponsor = new Map<number, SponsorPlacement[]>();
-      reordered.forEach((item, i) =>
+      reordered.forEach((item, i) => {
+        if (item.placement.sort_order === i) return;
         bySponsor.set(item.sponsor.id, [
           ...(bySponsor.get(item.sponsor.id) || []),
           { ...item.placement, sort_order: i },
-        ])
-      );
+        ]);
+      });
       for (const [id, values] of bySponsor)
         await api.admin.updateSponsor(id, { sponsor_placements_attributes: values });
       await load();
       setSuccess(t("sponsorAdmin.orderSaved"));
     } catch (err) {
       setError(err instanceof Error ? err.message : t("sponsorAdmin.saveFailed"));
-      await load();
+      await load().catch(() => {});
     } finally {
       setSaving(false);
     }
+  };
+  const placementLabel = (item: { sponsor: Sponsor; placement: SponsorPlacement }) => {
+    if (item.placement.placement_type !== "event") return item.sponsor.name;
+    const scope = item.placement.event_id == null
+      ? t("sponsorAdmin.allEvents")
+      : events.find(event => event.id === item.placement.event_id)?.name || `#${item.placement.event_id}`;
+    return `${item.sponsor.name} · ${scope}`;
   };
   if (loading) return <p role="status">{t("sponsorAdmin.loading")}</p>;
   if (loadFailed) return <div role="alert" className="space-y-4 rounded border border-red-400/40 p-4">
@@ -203,7 +225,7 @@ export default function SponsorsAdmin() {
           <h1 className="font-heading text-2xl font-bold">{t("sponsorAdmin.title")}</h1>
           <p className="mt-2 text-sm text-text-secondary">{t("sponsorAdmin.intro")}</p>
         </div>
-        {editing === null && (
+        {editing === null && !missingTarget && (
           <button
             className={buttonClass}
             disabled={saving}
@@ -217,18 +239,24 @@ export default function SponsorsAdmin() {
           </button>
         )}
       </header>
-      {error && (
+      {!editorOpen && error && (
         <p role="alert" className="rounded border border-red-400/40 p-4 text-red-300">
           {error}
         </p>
       )}
-      {success && (
+      {!editorOpen && success && (
         <p role="status" className="rounded border border-green-400/40 p-4 text-green-300">
           {success}
         </p>
       )}
-      {editing !== null ? (
+      {missingTarget ? (
+        <div className="space-y-4">
+          <p role="alert">{t("sponsorAdmin.notFound")}</p>
+          <button type="button" className={buttonClass} onClick={() => setEditing(null)}>{t("sponsorAdmin.back")}</button>
+        </div>
+      ) : editing !== null ? (
         <form onSubmit={save} className="space-y-6 rounded border border-white/15 bg-surface p-4 sm:p-6">
+          <fieldset disabled={saving} className="min-w-0 space-y-6">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-xl font-bold">{t(editing === "new" ? "sponsorAdmin.add" : "sponsorAdmin.edit")}</h2>
             <button type="button" className={buttonClass} disabled={saving} onClick={() => setEditing(null)}>
@@ -444,10 +472,12 @@ export default function SponsorsAdmin() {
             <SponsorTiers placements={preview} />
             <SponsorTiers placements={preview} event />
           </section>
-          <div className="sticky bottom-0 z-10 flex gap-3 border-t border-white/20 bg-surface py-4">
+          <div className="sticky bottom-0 z-10 min-w-0 space-y-3 border-t border-white/20 bg-surface py-4">
             <button className={`${buttonClass} bg-gold-500 text-navy-900`} disabled={saving}>
               {t(saving ? "sponsorAdmin.saving" : "sponsorAdmin.save")}
             </button>
+            {error && <p role="alert" className="min-w-0 break-words text-sm text-red-300">{error}</p>}
+            {success && <p role="status" className="min-w-0 break-words text-sm text-green-300">{success}</p>}
           </div>
           {current?.audit_history?.length ? (
             <section>
@@ -462,6 +492,7 @@ export default function SponsorsAdmin() {
               </ul>
             </section>
           ) : null}
+          </fieldset>
         </form>
       ) : (
         <>
@@ -491,6 +522,7 @@ export default function SponsorsAdmin() {
                 <div className="flex gap-2">
                   <button
                     className={buttonClass}
+                    disabled={saving}
                     onClick={() => {
                       setEditing(sponsor.id);
                       setError("");
@@ -499,7 +531,7 @@ export default function SponsorsAdmin() {
                   >
                     {t("sponsorAdmin.edit")}
                   </button>
-                  <button className={buttonClass} onClick={() => setConfirmDelete(sponsor.id)}>
+                  <button className={buttonClass} disabled={saving} onClick={() => setConfirmDelete(sponsor.id)}>
                     {t("sponsorAdmin.delete")}
                   </button>
                 </div>
@@ -528,6 +560,7 @@ export default function SponsorsAdmin() {
               <select
                 className={inputClass}
                 value={placementFilter}
+                disabled={saving}
                 onChange={(e) => setPlacementFilter(e.target.value as SponsorPlacement["placement_type"])}
               >
                 {["featured_bar", "presenting", "secondary", "official", "event"].map((type) => (
@@ -542,12 +575,12 @@ export default function SponsorsAdmin() {
                 key={item.placement.id}
                 className="flex items-center justify-between gap-2 border-t border-white/10 py-3"
               >
-                <span className="min-w-0 break-words">{item.sponsor.name}</span>
+                <span className="min-w-0 break-words">{placementLabel(item)}</span>
                 <div className="flex shrink-0 gap-2">
                   <button
                     className={buttonClass}
                     disabled={saving || index === 0}
-                    aria-label={t("sponsorAdmin.moveUp", { name: item.sponsor.name })}
+                    aria-label={t("sponsorAdmin.moveUp", { name: placementLabel(item) })}
                     onClick={() => move(index, -1)}
                   >
                     ↑
@@ -555,7 +588,7 @@ export default function SponsorsAdmin() {
                   <button
                     className={buttonClass}
                     disabled={saving || index === ordered.length - 1}
-                    aria-label={t("sponsorAdmin.moveDown", { name: item.sponsor.name })}
+                    aria-label={t("sponsorAdmin.moveDown", { name: placementLabel(item) })}
                     onClick={() => move(index, 1)}
                   >
                     ↓
