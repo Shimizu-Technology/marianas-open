@@ -80,7 +80,9 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
           if (location) validateUrl(new URL(location, response.url()).href, config.allowedHosts);
         }
       } catch { rejectHop(); }
-      if (response.frame() === page.mainFrame()) status = response.status();
+      try {
+        if (response.frame() === page.mainFrame()) status = response.status();
+      } catch { /* Early popup responses may not have a frame yet; they never set status. */ }
     };
     page.on('request', guardRequest);
     page.on('response', guardResponse);

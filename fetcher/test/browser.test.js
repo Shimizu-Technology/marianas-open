@@ -217,3 +217,21 @@ test('a popup redirect to a disallowed host closes the browser via context-wide 
   await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_navigation/);
   assert.ok(closed >= 1);
 });
+
+test('a popup response whose frame is not available yet does not throw from the guard', async () => {
+  const contextListeners = {};
+  const unavailable = () => { throw new Error('Frame for this navigation request is not available'); };
+  const request = { isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://asjjf.org/redirect',
+    redirectedFrom: () => null, frame: unavailable };
+  const original = { mainFrame: () => ({ parentFrame: () => null }), on: () => {},
+    goto: async () => {
+      contextListeners.response({ request: () => request, status: () => 302, url: () => 'https://asjjf.org/redirect',
+        headers: () => ({ location: 'https://asjjf.org/elsewhere' }), frame: unavailable });
+    },
+    title: async () => 'ASJJF', content: async () => '<html></html>', url: () => 'https://asjjf.org/', waitForTimeout: async () => {} };
+  const launch = async () => ({ close: async () => {}, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => original, route: async () => {},
+    on: (event, listener) => { contextListeners[event] = listener; } }) });
+  const result = await fetchPage('https://asjjf.org/', config, { launch });
+  assert.equal(result.final_url, 'https://asjjf.org/');
+});
