@@ -2,14 +2,19 @@
   "nav": {
     "home": "Início",
     "events": "Eventos",
-    "calendar": "Pro Series",
+    "calendar": "Série Profissional",
     "watch": "Assistir",
     "about": "Sobre",
     "rankings": "Rankings",
     "competitors": "Competidores",
     "pastEvents": "Eventos Passados",
     "rules": "Regras",
-    "toggleMenu": "Abrir/fechar menu"
+    "toggleMenu": "Abrir/fechar menu",
+    "athletes": "Atletas",
+    "teams": "Equipes",
+    "impact": "Impacto",
+    "admin": "Administração",
+    "language": "Idioma"
   },
   "pastEvents": {
     "badge": "Arquivo de eventos",
@@ -577,5 +582,10 @@
     "loadErrorTitle": "Não foi possível carregar o evento",
     "loadErrorMessage": "Não conseguimos carregar este evento. Tente novamente.",
     "retry": "Tentar novamente"
+  },
+  "search": {
+    "title": "Pesquisar",
+    "close": "Fechar pesquisa",
+    "placeholder": "Pesquisar atletas, academias, eventos..."
   }
 }

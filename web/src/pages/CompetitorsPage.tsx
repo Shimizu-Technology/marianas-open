@@ -68,7 +68,7 @@ function CompetitorCard({ competitor }: { competitor: Competitor }) {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span className="text-4xl font-heading font-bold text-white/10">
+              <span className="text-4xl font-heading font-bold text-text-muted">
                 {competitor.first_name[0]}{competitor.last_name[0]}
               </span>
             </div>
@@ -199,17 +199,18 @@ export default function CompetitorsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input type="text" value={searchInput} onChange={e => handleSearchChange(e.target.value)}
+                  aria-label={t('competitors.searchPlaceholder')}
                   placeholder={t('competitors.searchPlaceholder')}
-                  className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                  className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
               </div>
-              <select value={beltFilter} onChange={e => setBeltFilter(e.target.value)}
+              <select aria-label={t('competitors.allBelts')} value={beltFilter} onChange={e => setBeltFilter(e.target.value)}
                 className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none">
                 <option value="">{t('competitors.allBelts')}</option>
                 {['white','blue','purple','brown','black'].map(b =>
                   <option key={b} value={b}>{t(`watch.belt.${b}`)}</option>
                 )}
               </select>
-              <select value={countryFilter} onChange={e => setCountryFilter(e.target.value)}
+              <select aria-label={t('competitors.allCountries')} value={countryFilter} onChange={e => setCountryFilter(e.target.value)}
                 className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none">
                 <option value="">{t('competitors.allCountries')}</option>
                 {countries.map(c => <option key={c} value={c}>{COUNTRY_CODE_KEYS[c] ? t(COUNTRY_CODE_KEYS[c]) : c}</option>)}
@@ -228,7 +229,7 @@ export default function CompetitorsPage() {
         </ScrollReveal>
 
         {loading ? (
-          <div className="flex items-center justify-center h-64">
+          <div className="flex items-center justify-center min-h-svh">
             <div className="w-6 h-6 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
           </div>
         ) : competitors.length === 0 ? (

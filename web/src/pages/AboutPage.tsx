@@ -35,7 +35,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-svh">
       <SEO
         title="About"
         description="Learn the story of Marianas Open, the international Brazilian Jiu-Jitsu championship built in Guam and connected to competitors across Asia-Pacific."
@@ -44,7 +44,7 @@ export default function AboutPage() {
         structuredData={[getOrganizationSchema()]}
       />
       {/* Hero */}
-      <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[60svh] min-h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithShimmer
             src={heroImage}

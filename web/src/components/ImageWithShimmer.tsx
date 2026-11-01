@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { getLocalImageSrcSet } from '../utils/responsiveImages';
 import { motion, useReducedMotion } from 'framer-motion';
 
 interface ImageWithShimmerProps {
@@ -107,11 +108,12 @@ function ImageWithShimmerInner({
         <motion.img
           ref={setImageRef}
           src={currentSrc}
+          srcSet={getLocalImageSrcSet(currentSrc)}
           alt={alt}
           loading={loading === 'lazy' ? 'eager' : loading}
           decoding={decoding}
           fetchPriority={fetchPriority}
-          sizes={sizes}
+          sizes={sizes || (getLocalImageSrcSet(currentSrc) ? '100vw' : undefined)}
           className={className}
           onLoad={() => setLoaded(true)}
           onError={() => {

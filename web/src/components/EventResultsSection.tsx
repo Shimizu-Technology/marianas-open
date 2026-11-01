@@ -424,12 +424,14 @@ export default function EventResultsSection({ eventSlug, sourceUrls }: EventResu
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  aria-label={t('results.searchPlaceholder')}
                   placeholder={t('results.searchPlaceholder')}
-                  className="w-full pl-10 pr-4 py-2.5 bg-surface border border-white/10 text-text-primary text-sm font-body placeholder:text-text-muted focus:outline-none focus:border-gold-500/40 transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 bg-surface border border-white/10 text-text-primary text-base sm:text-sm font-body placeholder:text-text-muted focus:outline-none focus:border-gold-500/40 transition-colors"
                 />
               </div>
               <div className="flex gap-2 flex-wrap">
                 <select
+                  aria-label={t('results.allBelts')}
                   value={beltFilter}
                   onChange={(e) => setBeltFilter(e.target.value)}
                   className="px-3 py-2.5 bg-surface border border-white/10 text-text-primary text-sm font-heading uppercase tracking-wider focus:outline-none focus:border-gold-500/40 appearance-none cursor-pointer"
@@ -438,6 +440,7 @@ export default function EventResultsSection({ eventSlug, sourceUrls }: EventResu
                   {filterOptions.belts.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
                 <select
+                  aria-label={t('results.allWeights')}
                   value={weightFilter}
                   onChange={(e) => setWeightFilter(e.target.value)}
                   className="px-3 py-2.5 bg-surface border border-white/10 text-text-primary text-sm font-heading uppercase tracking-wider focus:outline-none focus:border-gold-500/40 appearance-none cursor-pointer"
@@ -446,6 +449,7 @@ export default function EventResultsSection({ eventSlug, sourceUrls }: EventResu
                   {filterOptions.weights.map(w => <option key={w} value={w}>{w}</option>)}
                 </select>
                 <select
+                  aria-label={t('results.allGenders')}
                   value={genderFilter}
                   onChange={(e) => setGenderFilter(e.target.value)}
                   className="px-3 py-2.5 bg-surface border border-white/10 text-text-primary text-sm font-heading uppercase tracking-wider focus:outline-none focus:border-gold-500/40 appearance-none cursor-pointer"

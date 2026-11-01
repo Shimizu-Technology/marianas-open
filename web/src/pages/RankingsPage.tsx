@@ -114,7 +114,7 @@ export default function RankingsPage() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen pt-24 pb-20">
+      <div className="min-h-svh pt-24 pb-20">
         <SEO
           title="Rankings"
           description="View Marianas Open athlete, academy, and country rankings across belts and Gi or No-Gi competition."
@@ -158,14 +158,15 @@ export default function RankingsPage() {
                   <button
                     key={key}
                     onClick={() => setTab(key)}
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
+                    aria-pressed={tab === key}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                       tab === key
                         ? 'bg-gold-500/15 text-gold-500'
                         : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
                     }`}
                   >
                     <Icon size={16} />
-                    <span className="hidden sm:inline">{label}</span>
+                    <span>{label}</span>
                   </button>
                 ))}
               </div>
@@ -232,7 +233,7 @@ export default function RankingsPage() {
               {/* Rankings Table */}
               <div className="bg-surface border border-white/5 rounded-lg overflow-hidden">
                 {loading ? (
-                  <div className="p-12 text-center text-text-muted">
+                  <div className="min-h-svh flex flex-col items-center justify-center p-12 text-center text-text-muted">
                     <div className="w-8 h-8 border-2 border-gold-500/30 border-t-gold-500 rounded-full animate-spin mx-auto mb-3" />
                     {t('rankings.loading', 'Calculating rankings...')}
                   </div>
@@ -338,7 +339,7 @@ export default function RankingsPage() {
                           <span>/</span>
                           <span className="text-gray-400">{tier.silver}</span>
                           <span>/</span>
-                          <span className="text-amber-700">{tier.bronze}</span>
+                          <span className="text-amber-500">{tier.bronze}</span>
                         </div>
                       </div>
                     ))}
@@ -352,12 +353,12 @@ export default function RankingsPage() {
                         <span>/</span>
                         <span className="text-gray-400">9</span>
                         <span>/</span>
-                        <span className="text-amber-700">3</span>
+                        <span className="text-amber-500">3</span>
                       </div>
                     </div>
                   </div>
                   <div className="px-4 pb-4">
-                    <p className="text-[10px] text-text-muted leading-relaxed border-t border-white/5 pt-3">
+                    <p className="text-xs text-text-muted leading-relaxed border-t border-white/5 pt-3">
                       {t('rankings.formulaNote', 'Official reference: Fighter ranking points use 5-Star values; team ranking points use 4-Star values. Alone brackets and same-team one brackets follow organizer policy on the official rankings page.')}
                     </p>
                   </div>

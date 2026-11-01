@@ -4,8 +4,8 @@
   "description": "Guam's premier international Brazilian Jiu-Jitsu championship featuring qualifier events across Asia-Pacific.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#07111f",
-  "theme_color": "#07111f",
+  "background_color": "#0a0a0b",
+  "theme_color": "#0a0a0b",
   "orientation": "any",
   "scope": "/",
   "icons": [

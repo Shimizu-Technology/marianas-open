@@ -2,14 +2,19 @@
   "nav": {
     "home": "首頁",
     "events": "賽事",
-    "calendar": "Pro Series",
+    "calendar": "職業系列賽",
     "watch": "觀看",
     "about": "關於我們",
     "rankings": "排名",
     "competitors": "參賽者",
     "pastEvents": "歷屆賽事",
     "rules": "規則",
-    "toggleMenu": "切換選單"
+    "toggleMenu": "切換選單",
+    "athletes": "運動員",
+    "teams": "團隊",
+    "impact": "社會貢獻",
+    "admin": "管理",
+    "language": "語言"
   },
   "pastEvents": {
     "badge": "活動檔案",
@@ -577,5 +582,10 @@
     "loadErrorTitle": "賽事暫時無法載入",
     "loadErrorMessage": "無法載入此賽事，請再試一次。",
     "retry": "重試"
+  },
+  "search": {
+    "title": "搜尋",
+    "close": "關閉搜尋",
+    "placeholder": "搜尋運動員、學院、賽事..."
   }
 }

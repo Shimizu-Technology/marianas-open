@@ -1,7 +1,4 @@
-import { createContext, useContext, useEffect } from 'react'
-import type { ReactNode } from 'react'
-import { useAuth } from '@clerk/clerk-react'
-import { setAuthTokenGetter } from '../services/api'
+import { createContext, useContext, type ReactNode } from 'react'
 
 interface AuthContextType {
   isClerkEnabled: boolean
@@ -10,71 +7,22 @@ interface AuthContextType {
   userId: string | null
 }
 
-const AuthContext = createContext<AuthContextType>({
+const anonymousAuth: AuthContextType = {
   isClerkEnabled: false,
   isSignedIn: false,
-  isLoading: true,
+  isLoading: false,
   userId: null,
-})
+}
+
+const AuthContext = createContext<AuthContextType>(anonymousAuth)
 
 export function useAuthContext() {
   return useContext(AuthContext)
 }
 
-function ClerkAuthProvider({ children }: { children: ReactNode }) {
-  const { getToken, isLoaded, isSignedIn, userId } = useAuth()
-
-  useEffect(() => {
-    setAuthTokenGetter(async (options) => {
-      try {
-        return await getToken({ skipCache: options?.skipCache })
-      } catch {
-        return null
-      }
-    })
-  }, [getToken])
-
-  return (
-    <AuthContext.Provider
-      value={{
-        isClerkEnabled: true,
-        isSignedIn: isSignedIn ?? false,
-        isLoading: !isLoaded,
-        userId: userId ?? null,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
-}
-
-function NoAuthProvider({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    setAuthTokenGetter(async () => null)
-  }, [])
-
-  return (
-    <AuthContext.Provider
-      value={{
-        isClerkEnabled: false,
-        isSignedIn: false,
-        isLoading: false,
-        userId: null,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
-}
-
-interface AuthProviderProps {
+export function AuthProvider({ children, value = anonymousAuth }: {
   children: ReactNode
-  isClerkEnabled: boolean
-}
-
-export function AuthProvider({ children, isClerkEnabled }: AuthProviderProps) {
-  if (isClerkEnabled) {
-    return <ClerkAuthProvider>{children}</ClerkAuthProvider>
-  }
-  return <NoAuthProvider>{children}</NoAuthProvider>
+  value?: AuthContextType
+}) {
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

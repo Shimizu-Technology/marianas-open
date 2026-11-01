@@ -3,7 +3,6 @@ import { initMonitoring } from './monitoring'
 import { installPreloadRecovery } from './utils/preloadRecovery'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ClerkProvider } from '@clerk/clerk-react'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider } from './contexts/AuthContext'
 import './i18n'
@@ -14,36 +13,10 @@ import { PostHogProvider } from './providers/PostHogProvider'
 initMonitoring()
 installPreloadRecovery()
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-const isClerkEnabled = Boolean(PUBLISHABLE_KEY && PUBLISHABLE_KEY !== 'YOUR_PUBLISHABLE_KEY')
-
-if (!isClerkEnabled) {
-  console.warn('Clerk not configured — running without authentication.')
-}
-
 function Root() {
-  if (isClerkEnabled) {
-    return (
-      <ClerkProvider
-        publishableKey={PUBLISHABLE_KEY}
-        afterSignOutUrl="/"
-        signInFallbackRedirectUrl="/admin"
-        signUpFallbackRedirectUrl="/admin"
-      >
-        <HelmetProvider>
-          <AuthProvider isClerkEnabled={true}>
-            <PostHogProvider>
-              <App />
-            </PostHogProvider>
-          </AuthProvider>
-        </HelmetProvider>
-      </ClerkProvider>
-    )
-  }
-
   return (
     <HelmetProvider>
-      <AuthProvider isClerkEnabled={false}>
+      <AuthProvider>
         <PostHogProvider>
           <App />
         </PostHogProvider>

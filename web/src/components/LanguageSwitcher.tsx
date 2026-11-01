@@ -14,7 +14,7 @@ const languages = [
 ];
 
 export default function LanguageSwitcher() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -30,18 +30,22 @@ export default function LanguageSwitcher() {
   }, []);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative" onKeyDown={event => {
+      if (event.key === 'Escape') { setOpen(false); ref.current?.querySelector('button')?.focus(); }
+    }}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
-        aria-label={`Language: ${current.label}`}
+        className="pressable flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+        aria-label={`${t('nav.language')}: ${current.label}`}
+        aria-expanded={open}
+        aria-controls="language-options"
       >
         {CurrentFlag && <CurrentFlag className="w-6 h-[18px]" />}
         <ChevronDown className={`w-3.5 h-3.5 text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 bg-navy-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl py-1 min-w-[160px] z-50">
+        <div id="language-options" className="absolute right-0 top-full mt-2 bg-navy-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl py-1 min-w-[160px] z-50">
           {languages.map((lang) => {
             const Flag = flagComponents[lang.code];
             const isActive = i18n.language === lang.code;
@@ -49,7 +53,7 @@ export default function LanguageSwitcher() {
               <button
                 key={lang.code}
                 onClick={() => { i18n.changeLanguage(lang.code); setOpen(false); }}
-                className={`w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors ${
+                className={`w-full min-h-11 flex items-center gap-3 px-3 py-2 text-sm transition-colors ${
                   isActive
                     ? 'text-gold bg-white/5'
                     : 'text-text-secondary hover:text-text-primary hover:bg-white/5'

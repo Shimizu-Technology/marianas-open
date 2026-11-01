@@ -2,14 +2,19 @@
   "nav": {
     "home": "Home",
     "events": "Mga Event",
-    "calendar": "Pro Series",
+    "calendar": "Seryeng Propesyonal",
     "watch": "Panoorin",
     "about": "Tungkol Dito",
     "rankings": "Mga Ranggo",
     "competitors": "Mga Kalahok",
     "pastEvents": "Mga Nagdaang Event",
     "rules": "Mga Patakaran",
-    "toggleMenu": "I-toggle ang menu"
+    "toggleMenu": "I-toggle ang menu",
+    "athletes": "Mga Atleta",
+    "teams": "Mga Koponan",
+    "impact": "Ambag",
+    "admin": "Pamamahala",
+    "language": "Wika"
   },
   "pastEvents": {
     "badge": "Arkibo ng mga Kaganapan",
@@ -577,5 +582,10 @@
     "loadErrorTitle": "Hindi ma-load ang event",
     "loadErrorMessage": "Hindi namin ma-load ang event na ito. Pakisubukang muli.",
     "retry": "Subukan muli"
+  },
+  "search": {
+    "title": "Maghanap",
+    "close": "Isara ang paghahanap",
+    "placeholder": "Maghanap ng mga atleta, akademya, at kaganapan..."
   }
 }

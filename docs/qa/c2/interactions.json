@@ -1,0 +1,22 @@
+[
+  {
+    "width": 390,
+    "search": "passed",
+    "focus": "passed",
+    "scroll": "passed",
+    "resultNavigation": "passed",
+    "publicClerkAbsent": "passed",
+    "adminEntry": "passed",
+    "mobile": "passed"
+  },
+  {
+    "width": 1440,
+    "search": "passed",
+    "focus": "passed",
+    "scroll": "passed",
+    "resultNavigation": "passed",
+    "publicClerkAbsent": "passed",
+    "adminEntry": "passed",
+    "mobile": "not_applicable"
+  }
+]

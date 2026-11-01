@@ -51,7 +51,7 @@ function MetricCard({ metric, index }: { metric: ImpactMetric; index: number }) 
           <div className={`p-2 rounded-lg ${metric.highlight ? 'bg-gold/15 text-gold' : 'bg-white/5 text-text-secondary'}`}>
             <Icon className="w-4 h-4" />
           </div>
-          <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${catColor}`}>
+          <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${catColor}`}>
             {CATEGORY_LABELS[metric.category] || metric.category}
           </span>
         </div>

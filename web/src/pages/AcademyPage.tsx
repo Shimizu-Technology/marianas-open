@@ -17,7 +17,7 @@ const BELT_STYLES: Record<string, { bg: string; text: string; ring: string }> = 
 function BeltBadge({ rank }: { rank: string }) {
   const s = BELT_STYLES[rank] || BELT_STYLES.white;
   return (
-    <span className={`inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${s.bg} ${s.text} ring-1 ${s.ring}`}>
+    <span className={`inline-flex items-center px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider ${s.bg} ${s.text} ring-1 ${s.ring}`}>
       {rank}
     </span>
   );

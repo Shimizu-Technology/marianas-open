@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Menu, X, Shield, Search, ChevronDown } from 'lucide-react';
@@ -18,7 +18,7 @@ interface NavDropdown {
   children: { to: string; label: string }[];
 }
 
-type NavItem = { to: string; label: string } | NavDropdown;
+type NavItem = { to: string; label: string; hidden?: boolean } | NavDropdown;
 
 function isDropdown(item: NavItem): item is NavDropdown {
   return 'children' in item;
@@ -39,6 +39,8 @@ function DesktopDropdown({ item, pathname }: { item: NavDropdown; pathname: stri
     <div ref={ref} className="relative" onMouseEnter={enter} onMouseLeave={leave}>
       <button
         onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        onKeyDown={e => { if (e.key === 'Escape') setOpen(false); }}
         className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors duration-200 ${
           isActive ? 'text-gold-500' : 'text-text-secondary hover:text-text-primary'
         }`}
@@ -75,6 +77,7 @@ export default function Header() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const org = useOrg();
   const { events } = useEvents();
   const { tf } = useTranslatedField();
@@ -90,12 +93,27 @@ export default function Header() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
+        setMobileOpen(false);
         setSearchOpen(true);
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  useLayoutEffect(() => {
+    if (!mobileOpen) return;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { setMobileOpen(false); menuButtonRef.current?.focus(); }
+    };
+    document.addEventListener('keydown', dismiss);
+    return () => {
+      document.body.style.overflow = overflow;
+      document.removeEventListener('keydown', dismiss);
+    };
+  }, [mobileOpen]);
 
   const logoSrc = resolveMediaUrl(org.logo_url) || LOGO_FALLBACK;
   const currentMainEvent = getCurrentMainEvent(events);
@@ -117,14 +135,14 @@ export default function Header() {
     { to: '/about', label: t('nav.about') },
     { to: '/rules', label: t('nav.rules') },
     {
-      label: 'Athletes',
+      label: t('nav.athletes'),
       children: [
         { to: '/rankings', label: t('nav.rankings') },
         { to: '/competitors', label: t('nav.competitors') },
-        { to: '/teams', label: 'Teams' },
+        { to: '/teams', label: t('nav.teams') },
       ],
     },
-    ...(impactVisible ? [{ to: '/impact', label: 'Impact' }] : []),
+    { to: '/impact', label: t('nav.impact'), hidden: !impactVisible },
     { to: '/watch', label: t('nav.watch') },
   ];
 
@@ -141,18 +159,18 @@ export default function Header() {
       links: eventLinks,
     },
     {
-      heading: 'Athletes',
+      heading: t('nav.athletes'),
       links: [
         { to: '/rankings', label: t('nav.rankings') },
         { to: '/competitors', label: t('nav.competitors') },
-        { to: '/teams', label: 'Teams' },
+        { to: '/teams', label: t('nav.teams') },
       ],
     },
     {
       heading: null,
       links: [
         { to: '/rules', label: t('nav.rules') },
-        ...(impactVisible ? [{ to: '/impact', label: 'Impact' }] : []),
+        ...(impactVisible ? [{ to: '/impact', label: t('nav.impact') }] : []),
         { to: '/watch', label: t('nav.watch') },
       ],
     },
@@ -182,6 +200,9 @@ export default function Header() {
                 <Link
                   key={item.to}
                   to={item.to}
+                  style={item.hidden ? { visibility: 'hidden' } : undefined}
+                  aria-hidden={item.hidden || undefined}
+                  tabIndex={item.hidden ? -1 : undefined}
                   className={`text-sm font-medium tracking-wide transition-colors duration-200 ${
                     location.pathname === item.to
                       ? 'text-gold-500'
@@ -196,22 +217,25 @@ export default function Header() {
 
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setSearchOpen(true)}
-              className="text-text-secondary hover:text-text-primary transition-colors p-2 rounded-lg hover:bg-white/5"
-              aria-label="Search"
+              onClick={() => { setMobileOpen(false); setSearchOpen(true); }}
+              className="text-text-secondary hover:text-text-primary transition-colors min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg hover:bg-white/5"
+              aria-label={t('search.title')}
             >
               <Search className="w-5 h-5" />
             </button>
             <Link
               to="/admin"
-              className="hidden lg:flex text-text-muted hover:text-text-primary transition-colors p-2 rounded-lg hover:bg-white/5"
-              aria-label="Admin"
+              className="hidden lg:flex text-text-muted hover:text-text-primary transition-colors min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg hover:bg-white/5"
+              aria-label={t('nav.admin')}
             >
               <Shield className="w-4 h-4" />
             </Link>
             <LanguageSwitcher />
             <button
-              className="lg:hidden text-text-primary p-2"
+              ref={menuButtonRef}
+              className="pressable lg:hidden text-text-primary min-h-11 min-w-11 flex items-center justify-center p-2"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label={t('nav.toggleMenu', 'Toggle menu')}
             >
@@ -232,7 +256,9 @@ export default function Header() {
       >
         <div className="absolute inset-0 bg-black/40" />
         <nav
-          className="relative bg-navy-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 max-h-[calc(100vh-4rem)] overflow-y-auto"
+          id="mobile-navigation"
+          aria-label={t('nav.toggleMenu')}
+          className="relative bg-navy-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 max-h-[calc(100dvh-4rem)] overflow-y-auto"
           onClick={e => e.stopPropagation()}
         >
           {mobileGroups.map((group, gi) => (
@@ -247,7 +273,7 @@ export default function Header() {
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileOpen(false)}
-                  className={`block py-2.5 px-4 rounded-md text-sm font-medium transition-colors ${
+                  className={`block min-h-11 py-2.5 px-4 rounded-md text-sm font-medium transition-colors ${
                     location.pathname === link.to
                       ? 'text-gold-500 bg-white/5'
                       : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
@@ -258,16 +284,6 @@ export default function Header() {
               ))}
             </div>
           ))}
-          <div className="border-t border-white/5 mt-2 pt-2">
-            <Link
-              to="/admin"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 py-2.5 px-4 rounded-md text-sm font-medium text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors"
-            >
-              <Shield className="w-4 h-4" />
-              Admin
-            </Link>
-          </div>
         </nav>
       </div>
     )}

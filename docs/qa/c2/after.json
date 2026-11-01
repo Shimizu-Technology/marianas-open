@@ -1,0 +1,134 @@
+[
+  {
+    "width": 390,
+    "route": "/",
+    "cls": 0.04976019581511232,
+    "lcpMs": 4408,
+    "initialJsGzip": 248458,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/calendar",
+    "cls": 0,
+    "lcpMs": 3808,
+    "initialJsGzip": 251264,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/events/copa-de-marianas-2026",
+    "cls": 0,
+    "lcpMs": 8724,
+    "initialJsGzip": 267182,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/rankings",
+    "cls": 0.02062864024410261,
+    "lcpMs": 2616,
+    "initialJsGzip": 241066,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/competitors",
+    "cls": 0.00824423162772797,
+    "lcpMs": 2236,
+    "initialJsGzip": 239757,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/teams",
+    "cls": 0.008291106114789391,
+    "lcpMs": 2336,
+    "initialJsGzip": 238355,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/",
+    "cls": 0.058392443412288886,
+    "lcpMs": 1644,
+    "initialJsGzip": 248458,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/calendar",
+    "cls": 0.00005955021862139918,
+    "lcpMs": 608,
+    "initialJsGzip": 251264,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/events/copa-de-marianas-2026",
+    "cls": 0.00005955021862139918,
+    "lcpMs": 2136,
+    "initialJsGzip": 267182,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/rankings",
+    "cls": 0,
+    "lcpMs": 428,
+    "initialJsGzip": 241066,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/competitors",
+    "cls": 0.00005955021862139918,
+    "lcpMs": 472,
+    "initialJsGzip": 239757,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/teams",
+    "cls": 0.00005955021862139918,
+    "lcpMs": 476,
+    "initialJsGzip": 238355,
+    "seriousCriticalNodes": 0,
+    "axe": [],
+    "errors": [],
+    "overflow": false
+  }
+]

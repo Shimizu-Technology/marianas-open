@@ -2,14 +2,19 @@
   "nav": {
     "home": "首页",
     "events": "赛事",
-    "calendar": "Pro Series",
+    "calendar": "职业系列赛",
     "watch": "观看",
     "about": "关于",
     "rankings": "排名",
     "competitors": "参赛者",
     "pastEvents": "往届赛事",
     "rules": "规则",
-    "toggleMenu": "切换菜单"
+    "toggleMenu": "切换菜单",
+    "athletes": "运动员",
+    "teams": "团队",
+    "impact": "社会贡献",
+    "admin": "管理",
+    "language": "语言"
   },
   "pastEvents": {
     "badge": "赛事档案",
@@ -577,5 +582,10 @@
     "loadErrorTitle": "赛事暂时无法加载",
     "loadErrorMessage": "无法加载此赛事，请重试。",
     "retry": "重试"
+  },
+  "search": {
+    "title": "搜索",
+    "close": "关闭搜索",
+    "placeholder": "搜索运动员、学院、赛事..."
   }
 }

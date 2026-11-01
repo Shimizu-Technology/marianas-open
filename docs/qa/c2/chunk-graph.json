@@ -1,0 +1,35 @@
+{
+  "graph": [
+    {
+      "key": "index.html",
+      "file": "assets/index-Bxccb2tl.js",
+      "gzip": 62
+    },
+    {
+      "key": "_web-yfVJt45u.js",
+      "file": "assets/web-yfVJt45u.js",
+      "gzip": 117605
+    },
+    {
+      "key": "_rolldown-runtime-BWaJ3C7D.js",
+      "file": "assets/rolldown-runtime-BWaJ3C7D.js",
+      "gzip": 512
+    },
+    {
+      "key": "_react-loHflabe.js",
+      "file": "assets/react-loHflabe.js",
+      "gzip": 72206
+    },
+    {
+      "key": "_motion-C8myRp52.js",
+      "file": "assets/motion-C8myRp52.js",
+      "gzip": 44220
+    },
+    {
+      "key": "_is-prop-valid_framer-motion-BuclwEC4.js",
+      "file": "assets/is-prop-valid_framer-motion-BuclwEC4.js",
+      "gzip": 198
+    }
+  ],
+  "gzip": 234803
+}
