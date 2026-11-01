@@ -43,9 +43,9 @@ export function getOfficialResultsLinks(event: Pick<Event, 'asjjf_source_urls' |
 }
 
 export function selectHomeState(events: Event[], now = new Date()) {
-  const active = events.filter(event => ['upcoming', 'live'].includes(eventPhase(event, now)))
+  const active = events.filter(event => event.date && ['upcoming', 'live'].includes(eventPhase(event, now)))
     .sort((a, b) => Number(eventPhase(b, now) === 'live') - Number(eventPhase(a, now) === 'live') || a.date.localeCompare(b.date));
-  const completed = events.filter(event => eventPhase(event, now) === 'completed')
+  const completed = events.filter(event => event.date && eventPhase(event, now) === 'completed')
     .sort((a, b) => (b.end_date || b.date).localeCompare(a.end_date || a.date));
   const nextEvent = active[0] ?? null;
   const latestEvent = completed[0] ?? null;
@@ -59,7 +59,7 @@ export function selectHomeState(events: Event[], now = new Date()) {
 }
 
 export function isCurrentMainEvent(event: Event | null | undefined): boolean {
-  return !!event && event.is_main_event && ['upcoming', 'live'].includes(eventPhase(event));
+  return !!event && !!event.date && event.is_main_event && ['upcoming', 'live'].includes(eventPhase(event));
 }
 
 export function getCurrentMainEvent(events: Event[]): Event | null {

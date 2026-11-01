@@ -17,6 +17,18 @@ class Event < ApplicationRecord
   before_validation :normalize_ticket_sales_url
   before_validation :normalize_travel_items
   before_save :make_main_event_exclusive
+  after_save :record_status_audit
+
+  validates :slug, uniqueness: true, allow_blank: true
+  validates :slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/ }, allow_blank: true
+  validates :season_year, numericality: { only_integer: true, in: 2000..2100 }, allow_nil: true
+  validate :protect_public_slug
+
+  belongs_to :source_event, class_name: "Event", optional: true
+  has_many :rolled_over_events, class_name: "Event", foreign_key: :source_event_id, dependent: :nullify
+  has_many :event_audit_entries, dependent: :destroy
+  attr_accessor :audit_actor, :audit_action, :audit_reason, :audit_metadata
+
 
   validates :status, inclusion: { in: STATUSES }, allow_nil: true
   validates :ticket_sales_status, inclusion: { in: TICKET_SALES_STATUSES }
@@ -55,7 +67,7 @@ class Event < ApplicationRecord
     where(status: AUTO_COMPLETABLE_STATUSES)
       .where.not(date: nil)
       .where("COALESCE(end_date, date) < ?", today)
-      .update_all(status: "completed", updated_at: Time.current)
+      .find_each { |event| event.complete_if_past!(today: today) }
   end
 
   def complete_if_past!(today: Date.current)
@@ -63,7 +75,11 @@ class Event < ApplicationRecord
     return false unless date.present?
     return false unless (end_date || date) < today
 
-    update_columns(status: "completed", updated_at: Time.current)
+    with_lock do
+      return false unless status.in?(AUTO_COMPLETABLE_STATUSES) && date.present? && (end_date || date) < today
+      self.audit_action = "auto_complete"
+      update!(status: "completed")
+    end
     true
   end
 
@@ -124,8 +140,16 @@ class Event < ApplicationRecord
   # Set by PublicEventLoader in one grouped query, without loading result rows.
   attr_accessor :results_count
 
+  def admin_json
+    as_json(admin: true).merge(
+      "readiness" => EventReadiness.new(self).call,
+      "audit_entries" => event_audit_entries.order(id: :desc).limit(100).as_json
+    )
+  end
+
   def as_json(options = {})
-    super(options.merge(
+    admin = options.delete(:admin)
+    payload = super(options.merge(
       methods: [:hero_image_url, :poster_image_url, :ticket_banner_image_url, :asjjf_source_urls, :gallery_images_count, :results_count],
       include: {
         event_schedule_items: { except: [:created_at, :updated_at] },
@@ -134,9 +158,30 @@ class Event < ApplicationRecord
       },
       except: [:created_at, :updated_at]
     )).merge("event_gallery_images" => gallery_preview_images.as_json)
+    unless admin
+      payload["event_schedule_items"] = event_schedule_items.select(&:confirmed?).as_json(except: [:created_at, :updated_at])
+      payload["prize_categories"] = prize_categories.select(&:confirmed?).as_json(except: [:created_at, :updated_at])
+      payload.except!("source_event_id", "content_review_required", "asjjf_info_snapshot_id", "asjjf_info_status")
+    end
+    payload
   end
 
   private
+
+  def protect_public_slug
+    return unless persisted? && status_in_database.in?(PUBLIC_STATUSES) && slug_in_database.present? && will_save_change_to_slug?
+    errors.add(:slug, "cannot change while the event is public; unpublish it first")
+  end
+
+  def record_status_audit
+    return unless saved_change_to_status? || audit_action.present?
+    before, after = saved_change_to_status || [status, status]
+    event_audit_entries.create!(actor: audit_actor, actor_name: audit_actor&.full_name || "System",
+      action: audit_action.presence || "status_change", from_status: before, to_status: after,
+      reason: audit_reason, metadata: audit_metadata || {})
+  ensure
+    self.audit_actor = self.audit_action = self.audit_reason = self.audit_metadata = nil
+  end
 
   def normalize_asjjf_registration_urls
     ASJJF_REGISTRATION_URL_FIELDS.each do |field|

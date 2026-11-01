@@ -1,52 +1,96 @@
-import { useEffect, useState, useCallback, useMemo, useRef, useId } from 'react'
-import type { DragEvent } from 'react'
-import { CalendarDays, Plus, Pencil, Trash2, X, Loader2, Star, Clock, Trophy, Save, ChevronDown, ChevronUp, Radio, Hotel, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown, Eye, Upload, Languages, RefreshCw, Copy, UploadCloud, CheckSquare, Square, EyeOff, Tags, Ticket, MapPin } from 'lucide-react'
+import EditorSaveBar from '../../components/admin/event-editor/EditorSaveBar'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import {
+  CalendarDays,
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  Loader2,
+  Star,
+  Clock,
+  Trophy,
+  Save,
+  ChevronDown,
+  ChevronUp,
+  Radio,
+  Search,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Eye,
+  Upload,
+  Languages,
+  RefreshCw,
+  Copy,
+} from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
-import type {
-  Event,
-  EventFormData,
-  EventScheduleItem,
-  PrizeCategory,
-  EventAccommodation,
-  EventAccommodationFormData,
-  EventGalleryImage,
-  EventGalleryImageFormData,
-  EventVenueHighlight,
-  EventRegistrationStep,
-  EventRegistrationFeeSection,
-  EventRegistrationInfoItem,
-  EventTravelItem,
-  EventVisaItem,
-  EventTicketOption,
-} from '../../services/api'
-import ImageUpload from '../../components/ImageUpload'
+import type { Event, EventFormData, EventScheduleItem, PrizeCategory } from '../../services/api'
+import AccommodationsSection from '../../components/admin/event-editor/AccommodationsSection'
+import EventGallerySection from '../../components/admin/event-editor/EventGallerySection'
+import { Field } from '../../components/admin/event-editor/EditorFields'
 import { ResultsSyncBadge } from '../../components/admin/ResultsSyncCard'
-import ImageWithShimmer from '../../components/ImageWithShimmer'
 import { resolveMediaUrl } from '../../utils/images'
 import { formatDate } from '../../utils/dates'
 import { useEditingParam } from '../../hooks/useEditingParam'
-import { GALLERY_IMAGE_ACCEPT, GALLERY_IMAGE_MAX_BYTES, GALLERY_IMAGE_TYPE_LABEL, isSupportedGalleryImage, useGalleryUploads } from '../../contexts/GalleryUploadContext'
+import EventContentFields from '../../components/admin/event-editor/EventContentFields'
+import TicketsSection from '../../components/admin/event-editor/TicketsSection'
+import EditorNavigation from '../../components/admin/event-editor/EditorNavigation'
+import PublishingSection from '../../components/admin/event-editor/PublishingSection'
+import RolloverDialog from '../../components/admin/event-editor/RolloverDialog'
+import {
+  editorSections,
+  formSnapshot,
+  validateEventForm,
+  type EditorSection,
+  type SectionErrors,
+} from '../../components/admin/event-editor/editorState'
+import { discardMessage, useDirtyNavigation } from '../../components/admin/event-editor/useDirtyNavigation'
+import '../../components/admin/event-editor/editor.css'
 
 type SortField = 'name' | 'date' | 'location' | 'stars' | 'status'
 type SortDir = 'asc' | 'desc'
 
-const DEFAULT_LIVE_STREAM_URL = 'https://www.youtube.com/@themarianasopen/live';
-const GALLERY_CATEGORY_ALL = '__all__';
-const GALLERY_CATEGORY_UNCATEGORIZED = '__uncategorized__';
-const GALLERY_CATEGORY_CREATE = '__create_category__';
+const DEFAULT_LIVE_STREAM_URL = 'https://www.youtube.com/@themarianasopen/live'
 
 const emptyForm: EventFormData = {
-  name: '', slug: '', description: '', date: '', end_date: '',
-  venue_name: '', venue_address: '', city: '', country: '', country_code: '',
-  asjjf_stars: 0, is_main_event: false, prize_pool: '', prize_title: '', prize_description: '',
-  registration_url: '', registration_url_gi: '', registration_url_nogi: '',
-  ticket_sales_status: 'unavailable', ticket_sales_url: '', ticket_early_bird_ends_on: '',
-  ticket_options: [], ticket_in_person_name: '', ticket_in_person_phone: '', ticket_in_person_address: '',
-  status: 'draft', latitude: '', longitude: '',
-  live_stream_url: '', live_stream_active: false,
-  tagline: '', schedule_note: '',
+  season_year: null,
+  registration_not_open: false,
+  content_review_required: false,
+  name: '',
+  slug: '',
+  description: '',
+  date: '',
+  end_date: '',
+  venue_name: '',
+  venue_address: '',
+  city: '',
+  country: '',
+  country_code: '',
+  asjjf_stars: null,
+  is_main_event: false,
+  prize_pool: '',
+  prize_title: '',
+  prize_description: '',
+  registration_url: '',
+  registration_url_gi: '',
+  registration_url_nogi: '',
+  ticket_sales_status: 'unavailable',
+  ticket_sales_url: '',
+  ticket_early_bird_ends_on: '',
+  ticket_options: [],
+  ticket_in_person_name: '',
+  ticket_in_person_phone: '',
+  ticket_in_person_address: '',
+  status: 'draft',
+  latitude: '',
+  longitude: '',
+  live_stream_url: '',
+  live_stream_active: false,
+  tagline: '',
+  schedule_note: '',
   asjjf_event_ids: [],
   venue_highlights: [],
   registration_steps: [],
@@ -62,12 +106,24 @@ const emptyForm: EventFormData = {
 
 function eventToForm(e: Event): EventFormData {
   return {
-    name: e.name, slug: e.slug, description: e.description || '',
-    date: e.date, end_date: e.end_date || '',
-    venue_name: e.venue_name || '', venue_address: e.venue_address || '',
-    city: e.city || '', country: e.country || '', country_code: e.country_code || '',
-    asjjf_stars: e.asjjf_stars || 0, is_main_event: e.is_main_event || false,
-    prize_pool: e.prize_pool || '', prize_title: e.prize_title || '', prize_description: e.prize_description || '',
+    season_year: e.season_year ?? null,
+    registration_not_open: e.registration_not_open ?? false,
+    content_review_required: e.content_review_required ?? false,
+    name: e.name,
+    slug: e.slug,
+    description: e.description || '',
+    date: e.date || '',
+    end_date: e.end_date || '',
+    venue_name: e.venue_name || '',
+    venue_address: e.venue_address || '',
+    city: e.city || '',
+    country: e.country || '',
+    country_code: e.country_code || '',
+    asjjf_stars: e.asjjf_stars ?? null,
+    is_main_event: e.is_main_event || false,
+    prize_pool: e.prize_pool || '',
+    prize_title: e.prize_title || '',
+    prize_description: e.prize_description || '',
     registration_url: e.registration_url || '',
     registration_url_gi: e.registration_url_gi || '',
     registration_url_nogi: e.registration_url_nogi || '',
@@ -79,8 +135,10 @@ function eventToForm(e: Event): EventFormData {
     ticket_in_person_phone: e.ticket_in_person_phone || '',
     ticket_in_person_address: e.ticket_in_person_address || '',
     status: e.status || 'draft',
-    latitude: e.latitude?.toString() || '', longitude: e.longitude?.toString() || '',
-    live_stream_url: e.live_stream_url || '', live_stream_active: e.live_stream_active || false,
+    latitude: e.latitude?.toString() || '',
+    longitude: e.longitude?.toString() || '',
+    live_stream_url: e.live_stream_url || '',
+    live_stream_active: e.live_stream_active || false,
     tagline: e.tagline || '',
     schedule_note: e.schedule_note || '',
     asjjf_event_ids: e.asjjf_event_ids || [],
@@ -92,11 +150,19 @@ function eventToForm(e: Event): EventFormData {
     travel_items: e.travel_items || [],
     visa_description: e.visa_description || '',
     visa_items: e.visa_items || [],
-    event_schedule_items_attributes: e.event_schedule_items.map(s => ({
-      id: s.id, time: s.time, description: s.description, sort_order: s.sort_order,
+    event_schedule_items_attributes: e.event_schedule_items.map((s) => ({
+      id: s.id,
+      confirmed: s.confirmed ?? true,
+      time: s.time,
+      description: s.description,
+      sort_order: s.sort_order,
     })),
-    prize_categories_attributes: e.prize_categories.map(p => ({
-      id: p.id, name: p.name, amount: p.amount, sort_order: p.sort_order,
+    prize_categories_attributes: e.prize_categories.map((p) => ({
+      id: p.id,
+      confirmed: p.confirmed ?? true,
+      name: p.name,
+      amount: p.amount ?? '',
+      sort_order: p.sort_order,
     })),
     translation_status: e.translation_status,
   }
@@ -105,18 +171,63 @@ function eventToForm(e: Event): EventFormData {
 export default function EventsAdmin() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useEditingParam()
+  const [editing, setEditingParam] = useEditingParam()
+  const [activeSection, setActiveSection] = useState<EditorSection>('basics')
+  const [sectionErrors, setSectionErrors] = useState<SectionErrors>({})
+  const [resultIds, setResultIds] = useState('')
+  const [resultIdsBaseline, setResultIdsBaseline] = useState('')
+  const [baseline, setBaseline] = useState(formSnapshot(emptyForm))
+  const initializedEditor = useRef<number | 'new' | null>(null)
+  const [rollover, setRollover] = useState<{ eventId?: number } | null>(null)
+  const [childDirty, setChildDirty] = useState<Record<string, boolean>>({})
 
   const [form, setForm] = useState<EventFormData>(emptyForm)
+  const [actionBusy, setActionBusy] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    livestream: true,
+    schedule: true,
+    prizes: true,
+  })
   const [pendingHeroImage, setPendingHeroImage] = useState<File | null>(null)
+  const dirty =
+    editing !== null &&
+    (formSnapshot(form) !== baseline || pendingHeroImage !== null || resultIds !== resultIdsBaseline)
+  const anyDirty = dirty || Object.values(childDirty).some(Boolean)
+  useDirtyNavigation(anyDirty)
+  const setEditing = (value: number | 'new' | null) => {
+    if (saving || actionBusy) return
+    if (value !== editing && anyDirty && !window.confirm(discardMessage)) return
+    setEditingParam(value)
+    setError('')
+  }
+  const onHotelDirty = useCallback(
+    (value: boolean) => setChildDirty((previous) => ({ ...previous, hotels: value })),
+    []
+  )
+  const onGalleryDirty = useCallback(
+    (value: boolean) => setChildDirty((previous) => ({ ...previous, gallery: value })),
+    []
+  )
+  const selectSection = (section: EditorSection) => {
+    setExpandedSections((previous) => ({ ...previous, [section]: true }))
+    setActiveSection(section)
+    setTimeout(() => document.getElementById(`event-section-${section}`)?.focus(), 0)
+  }
+  const acceptSavedEvent = (event: Event, message: string) => {
+    setEvents((previous) => [...previous.filter((item) => item.id !== event.id), event])
+    const saved = eventToForm(event)
+    setForm(saved)
+    setBaseline(formSnapshot(saved))
+    setResultIds(saved.asjjf_event_ids.join(', '))
+    setResultIdsBaseline(saved.asjjf_event_ids.join(', '))
+    setSuccess(message)
+  }
   const heroInputRef = useRef<HTMLInputElement>(null)
   const posterInputRef = useRef<HTMLInputElement>(null)
-  const ticketBannerInputRef = useRef<HTMLInputElement>(null)
 
   const pendingHeroPreviewUrl = useMemo(
     () => (pendingHeroImage ? URL.createObjectURL(pendingHeroImage) : null),
@@ -145,29 +256,37 @@ export default function EventsAdmin() {
     }
   }, [])
 
-  useEffect(() => { loadEvents() }, [loadEvents])
+  useEffect(() => {
+    loadEvents()
+  }, [loadEvents])
 
   useEffect(() => {
     const ref = pollingGenRef
-    return () => { ref.current++ }
+    return () => {
+      ref.current++
+    }
   }, [editing])
 
   useEffect(() => {
-    if (editing === 'new') {
-      setForm(emptyForm)
-      setPendingHeroImage(null)
-    } else if (typeof editing === 'number' && events.length > 0) {
-      const event = events.find(e => e.id === editing)
-      if (event) {
-        setForm(eventToForm(event))
-        setPendingHeroImage(null)
-      }
-    }
+    // List refreshes (uploads, translations) must never rehydrate an active draft.
+    if (initializedEditor.current === editing) return
+    const selected = typeof editing === 'number' ? events.find((event) => event.id === editing) : null
+    if (typeof editing === 'number' && !selected) return
+    const next = selected ? eventToForm(selected) : emptyForm
+    initializedEditor.current = editing
+    setForm(next)
+    setBaseline(formSnapshot(next))
+    setResultIds(next.asjjf_event_ids.join(', '))
+    setResultIdsBaseline(next.asjjf_event_ids.join(', '))
+    setPendingHeroImage(null)
+    setChildDirty({})
+    setSectionErrors({})
+    setActiveSection('basics')
   }, [editing, events])
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')
+      setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))
     } else {
       setSortField(field)
       setSortDir(field === 'date' ? 'desc' : 'asc')
@@ -178,27 +297,38 @@ export default function EventsAdmin() {
     let result = events
 
     if (statusFilter !== 'all') {
-      result = result.filter(e => e.status === statusFilter)
+      result = result.filter((e) => e.status === statusFilter)
     }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
-      result = result.filter(e =>
-        e.name.toLowerCase().includes(q) ||
-        e.city?.toLowerCase().includes(q) ||
-        e.country?.toLowerCase().includes(q) ||
-        e.slug.toLowerCase().includes(q)
+      result = result.filter(
+        (e) =>
+          e.name.toLowerCase().includes(q) ||
+          e.city?.toLowerCase().includes(q) ||
+          e.country?.toLowerCase().includes(q) ||
+          e.slug.toLowerCase().includes(q)
       )
     }
 
     const sorted = [...result].sort((a, b) => {
       let cmp = 0
       switch (sortField) {
-        case 'name': cmp = a.name.localeCompare(b.name); break
-        case 'date': cmp = (a.date || '').localeCompare(b.date || ''); break
-        case 'location': cmp = `${a.city} ${a.country}`.localeCompare(`${b.city} ${b.country}`); break
-        case 'stars': cmp = (a.asjjf_stars || 0) - (b.asjjf_stars || 0); break
-        case 'status': cmp = (a.status || '').localeCompare(b.status || ''); break
+        case 'name':
+          cmp = a.name.localeCompare(b.name)
+          break
+        case 'date':
+          cmp = (a.date || '').localeCompare(b.date || '')
+          break
+        case 'location':
+          cmp = `${a.city} ${a.country}`.localeCompare(`${b.city} ${b.country}`)
+          break
+        case 'stars':
+          cmp = (a.asjjf_stars || 0) - (b.asjjf_stars || 0)
+          break
+        case 'status':
+          cmp = (a.status || '').localeCompare(b.status || '')
+          break
       }
       return sortDir === 'asc' ? cmp : -cmp
     })
@@ -208,46 +338,57 @@ export default function EventsAdmin() {
 
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = {}
-    events.forEach(e => { counts[e.status] = (counts[e.status] || 0) + 1 })
+    events.forEach((e) => {
+      counts[e.status] = (counts[e.status] || 0) + 1
+    })
     return counts
   }, [events])
 
   const handleSave = async () => {
+    const payload = {
+      ...form,
+      asjjf_event_ids: resultIds.trim() ? resultIds.split(',').map((value) => Number(value.trim())) : [],
+    }
+    const errors = validateEventForm(payload)
+    if (resultIds.trim() && !/^\s*\d+(?:\s*,\s*\d+)*\s*$/.test(resultIds))
+      errors.results = ['Enter positive ASJJF IDs separated by commas.']
+    if (!errors.results && payload.asjjf_event_ids.some((id) => !Number.isSafeInteger(id) || id < 1))
+      errors.results = ['Enter positive whole ASJJF IDs.']
+    setSectionErrors(errors)
+    const first = editorSections.find(([id]) => errors[id]?.length)?.[0]
+    if (first) {
+      selectSection(first)
+      setError('Review the highlighted sections before saving.')
+      return
+    }
     setSaving(true)
     setError('')
     try {
-      let savedEventId: number | null = null
-      if (editing === 'new') {
-        const res = await api.admin.createEvent(form)
-        savedEventId = res.event.id
-        setEditing(savedEventId)
-        let imageUploadFailed = false
-        if (pendingHeroImage && savedEventId) {
-          try {
-            await api.admin.uploadEventImage(savedEventId, pendingHeroImage)
-          } catch (imgErr) {
-            imageUploadFailed = true
-            setError(imgErr instanceof Error ? imgErr.message : 'Event created but hero image upload failed')
-          }
+      const created = editing === 'new'
+      if (!created && typeof editing !== 'number') return
+      const { event } = created
+        ? await api.admin.createEvent(payload)
+        : await api.admin.updateEvent(editing as number, payload)
+      initializedEditor.current = event.id
+      if (created) setEditingParam(event.id)
+      acceptSavedEvent(event, created ? 'Event created' : 'Event updated')
+      if (pendingHeroImage) {
+        try {
+          await api.admin.uploadEventImage(event.id, pendingHeroImage)
+          setPendingHeroImage(null)
+        } catch (imageError) {
+          setError(
+            imageError instanceof Error
+              ? `Event saved; hero upload failed: ${imageError.message}. Save to retry.`
+              : 'Event saved; hero upload failed. Save to retry.'
+          )
         }
-        if (!imageUploadFailed) setSuccess('Event created')
-        if (savedEventId && res.event.translation_status === 'pending') {
-          setForm(prev => ({ ...prev, translation_status: 'pending' }))
-          setSuccess('Event created — translating...')
-          pollTranslationStatus(savedEventId)
-        }
-      } else if (typeof editing === 'number') {
-        const res = await api.admin.updateEvent(editing, form)
-        setSuccess('Event updated')
-        if (res.event.translation_status === 'pending') {
-          setForm(prev => ({ ...prev, translation_status: 'pending' }))
-          setSuccess('Event saved — translating changes...')
-          pollTranslationStatus(editing)
       }
+      if (event.translation_status === 'pending') {
+        setSuccess('Event saved — translating changes...')
+        pollTranslationStatus(event.id)
       }
-      setPendingHeroImage(null)
       await loadEvents()
-      setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
     } finally {
@@ -267,24 +408,11 @@ export default function EventsAdmin() {
     }
   }
 
-  const handleClone = async (id: number) => {
-    try {
-      const res = await api.admin.cloneEvent(id)
-      setSuccess(`Draft clone created as "${res.event.name}". Add new dates, registration and ticket links, deadlines, accommodation booking details, and event images before publishing.`)
-      await loadEvents()
-      setForm(eventToForm(res.event))
-      setEditing(res.event.id)
-      setTimeout(() => setSuccess(''), 3000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Clone failed')
-    }
-  }
-
   const handleImageUpload = async (file: File) => {
     if (typeof editing !== 'number') return
     try {
-    await api.admin.uploadEventImage(editing, file)
-    await loadEvents()
+      await api.admin.uploadEventImage(editing, file)
+      await loadEvents()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Image upload failed')
     }
@@ -297,21 +425,26 @@ export default function EventsAdmin() {
     const generation = ++pollingGenRef.current
     setTranslating(true)
     for (let attempt = 0; attempt < 24; attempt++) {
-      await new Promise(r => setTimeout(r, 3000))
+      await new Promise((r) => setTimeout(r, 3000))
       if (generation !== pollingGenRef.current) return
       try {
         const { event: updated } = await api.admin.getEvent(eventId)
         if (updated.translation_status === 'translated' || updated.translation_status === 'failed') {
           if (generation !== pollingGenRef.current) return
           setTranslating(false)
-          setForm(prev => ({ ...prev, translation_status: updated.translation_status }))
-          setEvents(prev => prev.map(e => e.id === eventId ? { ...e, translation_status: updated.translation_status } : e))
+          setForm((prev) => ({ ...prev, translation_status: updated.translation_status }))
+          setEvents((prev) =>
+            prev.map((e) => (e.id === eventId ? { ...e, translation_status: updated.translation_status } : e))
+          )
           if (updated.translation_status === 'translated') {
             setSuccess('Translation complete!')
           } else {
             setError('Translation failed — check server logs')
           }
-          setTimeout(() => { setSuccess(''); setError('') }, 5000)
+          setTimeout(() => {
+            setSuccess('')
+            setError('')
+          }, 5000)
           return
         }
       } catch {
@@ -338,51 +471,25 @@ export default function EventsAdmin() {
   }
 
   const updateForm = <K extends keyof EventFormData>(field: K, value: EventFormData[K]) => {
-    setForm(prev => ({ ...prev, [field]: value }))
-  }
-
-  const addTicketOption = () => {
-    setForm(prev => ({
-      ...prev,
-      ticket_options: [
-        ...prev.ticket_options,
-        { label: '', description: '', early_bird_price: '', regular_price: '' },
-      ],
-    }))
-  }
-
-  const updateTicketOption = (index: number, field: keyof EventTicketOption, value: string) => {
-    setForm(prev => ({
-      ...prev,
-      ticket_options: prev.ticket_options.map((option, optionIndex) =>
-        optionIndex === index ? { ...option, [field]: value } : option
-      ),
-    }))
-  }
-
-  const removeTicketOption = (index: number) => {
-    setForm(prev => ({
-      ...prev,
-      ticket_options: prev.ticket_options.filter((_, optionIndex) => optionIndex !== index),
-    }))
+    setForm((prev) => ({ ...prev, [field]: value }))
   }
 
   const toggleSection = (key: string) => {
-    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }))
+    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
   const addScheduleItem = () => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       event_schedule_items_attributes: [
         ...prev.event_schedule_items_attributes,
-        { time: '', description: '', sort_order: prev.event_schedule_items_attributes.length },
+        { time: '', description: '', confirmed: false, sort_order: prev.event_schedule_items_attributes.length },
       ],
     }))
   }
 
-  const updateScheduleItem = (idx: number, field: keyof EventScheduleItem, value: string | number) => {
-    setForm(prev => ({
+  const updateScheduleItem = (idx: number, field: keyof EventScheduleItem, value: string | number | boolean) => {
+    setForm((prev) => ({
       ...prev,
       event_schedule_items_attributes: prev.event_schedule_items_attributes.map((item, i) =>
         i === idx ? { ...item, [field]: value } : item
@@ -391,7 +498,7 @@ export default function EventsAdmin() {
   }
 
   const removeScheduleItem = (idx: number) => {
-    setForm(prev => {
+    setForm((prev) => {
       const item = prev.event_schedule_items_attributes[idx]
       if (item.id) {
         return {
@@ -409,17 +516,17 @@ export default function EventsAdmin() {
   }
 
   const addPrizeCategory = () => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       prize_categories_attributes: [
         ...prev.prize_categories_attributes,
-        { name: '', amount: '', sort_order: prev.prize_categories_attributes.length },
+        { name: '', amount: '', confirmed: false, sort_order: prev.prize_categories_attributes.length },
       ],
     }))
   }
 
-  const updatePrizeCategory = (idx: number, field: keyof PrizeCategory, value: string | number) => {
-    setForm(prev => ({
+  const updatePrizeCategory = (idx: number, field: keyof PrizeCategory, value: string | number | boolean) => {
+    setForm((prev) => ({
       ...prev,
       prize_categories_attributes: prev.prize_categories_attributes.map((item, i) =>
         i === idx ? { ...item, [field]: value } : item
@@ -428,7 +535,7 @@ export default function EventsAdmin() {
   }
 
   const removePrizeCategory = (idx: number) => {
-    setForm(prev => {
+    setForm((prev) => {
       const item = prev.prize_categories_attributes[idx]
       if (item.id) {
         return {
@@ -445,190 +552,27 @@ export default function EventsAdmin() {
     })
   }
 
-  const addVenueHighlight = () => {
-    setForm(prev => ({
-      ...prev,
-      venue_highlights: [...prev.venue_highlights, { title: '', description: '' }],
-    }))
+  const currentEvent = typeof editing === 'number' ? events.find((e) => e.id === editing) : null
+
+  if (!loading && typeof editing === 'number' && !currentEvent) {
+    return (
+      <div className="event-admin space-y-4">
+        <p role="alert" className="text-sm text-red-300">
+          {error || 'This event could not be loaded. No edits have been saved.'}
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <button type="button" onClick={loadEvents} className="px-4 border border-white/10 text-gold">
+            Retry loading events
+          </button>
+          <button type="button" onClick={() => setEditing(null)} className="px-4 text-text-secondary">
+            Back to events
+          </button>
+        </div>
+      </div>
+    )
   }
 
-  const updateVenueHighlight = (idx: number, field: keyof EventVenueHighlight, value: string) => {
-    setForm(prev => ({
-      ...prev,
-      venue_highlights: prev.venue_highlights.map((item, i) =>
-        i === idx ? { ...item, [field]: value } : item
-      ),
-    }))
-  }
-
-  const removeVenueHighlight = (idx: number) => {
-    setForm(prev => ({
-      ...prev,
-      venue_highlights: prev.venue_highlights.filter((_, i) => i !== idx),
-    }))
-  }
-
-  const addRegistrationStep = () => {
-    setForm(prev => ({
-      ...prev,
-      registration_steps: [...prev.registration_steps, { title: '', description: '', url: '', link_label: '' }],
-    }))
-  }
-
-  const updateRegistrationStep = (idx: number, field: keyof EventRegistrationStep, value: string) => {
-    setForm(prev => ({
-      ...prev,
-      registration_steps: prev.registration_steps.map((item, i) =>
-        i === idx ? { ...item, [field]: value } : item
-      ),
-    }))
-  }
-
-  const removeRegistrationStep = (idx: number) => {
-    setForm(prev => ({
-      ...prev,
-      registration_steps: prev.registration_steps.filter((_, i) => i !== idx),
-    }))
-  }
-
-  const addRegistrationFeeSection = () => {
-    setForm(prev => ({
-      ...prev,
-      registration_fee_sections: [...prev.registration_fee_sections, { title: '', rows: [{ deadline: '', fee: '', option: '' }] }],
-    }))
-  }
-
-  const updateRegistrationFeeSection = (idx: number, field: keyof EventRegistrationFeeSection, value: string) => {
-    setForm(prev => ({
-      ...prev,
-      registration_fee_sections: prev.registration_fee_sections.map((item, i) =>
-        i === idx ? { ...item, [field]: value } : item
-      ),
-    }))
-  }
-
-  const removeRegistrationFeeSection = (idx: number) => {
-    setForm(prev => ({
-      ...prev,
-      registration_fee_sections: prev.registration_fee_sections.filter((_, i) => i !== idx),
-    }))
-  }
-
-  const addRegistrationFeeRow = (sectionIdx: number) => {
-    setForm(prev => ({
-      ...prev,
-      registration_fee_sections: prev.registration_fee_sections.map((section, i) =>
-        i === sectionIdx
-          ? { ...section, rows: [...section.rows, { deadline: '', fee: '', option: '' }] }
-          : section
-      ),
-    }))
-  }
-
-  const updateRegistrationFeeRow = (
-    sectionIdx: number,
-    rowIdx: number,
-    field: 'deadline' | 'fee' | 'option',
-    value: string
-  ) => {
-    setForm(prev => ({
-      ...prev,
-      registration_fee_sections: prev.registration_fee_sections.map((section, i) =>
-        i === sectionIdx
-          ? {
-              ...section,
-              rows: section.rows.map((row, j) => (j === rowIdx ? { ...row, [field]: value } : row)),
-            }
-          : section
-      ),
-    }))
-  }
-
-  const removeRegistrationFeeRow = (sectionIdx: number, rowIdx: number) => {
-    setForm(prev => ({
-      ...prev,
-      registration_fee_sections: prev.registration_fee_sections.map((section, i) =>
-        i === sectionIdx
-          ? { ...section, rows: section.rows.filter((_, j) => j !== rowIdx) }
-          : section
-      ),
-    }))
-  }
-
-  const addRegistrationInfoItem = () => {
-    setForm(prev => ({
-      ...prev,
-      registration_info_items: [...prev.registration_info_items, { label: '', value: '' }],
-    }))
-  }
-
-  const updateRegistrationInfoItem = (idx: number, field: keyof EventRegistrationInfoItem, value: string) => {
-    setForm(prev => ({
-      ...prev,
-      registration_info_items: prev.registration_info_items.map((item, i) =>
-        i === idx ? { ...item, [field]: value } : item
-      ),
-    }))
-  }
-
-  const removeRegistrationInfoItem = (idx: number) => {
-    setForm(prev => ({
-      ...prev,
-      registration_info_items: prev.registration_info_items.filter((_, i) => i !== idx),
-    }))
-  }
-
-  const addTravelItem = () => {
-    setForm(prev => ({
-      ...prev,
-      travel_items: [...prev.travel_items, { kind: 'info', title: '', description: '', value: '', code: '', url: '', link_label: '' }],
-    }))
-  }
-
-  const updateTravelItem = (idx: number, field: keyof EventTravelItem, value: string) => {
-    setForm(prev => ({
-      ...prev,
-      travel_items: prev.travel_items.map((item, i) =>
-        i === idx
-          ? { ...item, [field]: value, ...(field === 'kind' && value !== 'offer' ? { code: '' } : {}) }
-          : item
-      ),
-    }))
-  }
-
-  const removeTravelItem = (idx: number) => {
-    setForm(prev => ({
-      ...prev,
-      travel_items: prev.travel_items.filter((_, i) => i !== idx),
-    }))
-  }
-
-  const addVisaItem = () => {
-    setForm(prev => ({
-      ...prev,
-      visa_items: [...prev.visa_items, { title: '', description: '' }],
-    }))
-  }
-
-  const updateVisaItem = (idx: number, field: keyof EventVisaItem, value: string) => {
-    setForm(prev => ({
-      ...prev,
-      visa_items: prev.visa_items.map((item, i) =>
-        i === idx ? { ...item, [field]: value } : item
-      ),
-    }))
-  }
-
-  const removeVisaItem = (idx: number) => {
-    setForm(prev => ({
-      ...prev,
-      visa_items: prev.visa_items.filter((_, i) => i !== idx),
-    }))
-  }
-
-  const currentEvent = typeof editing === 'number' ? events.find(e => e.id === editing) : null
-
-  if (loading) {
+  if (loading || (editing !== null && initializedEditor.current !== editing)) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-6 h-6 text-gold animate-spin" />
@@ -637,23 +581,45 @@ export default function EventsAdmin() {
   }
 
   return (
-    <div>
+    <div className="event-admin">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-        <div
+        <button
+          type="button"
           className={`flex items-center gap-3 ${editing ? 'cursor-pointer group' : ''}`}
-          onClick={editing ? () => { setEditing(null); setError('') } : undefined}
+          onClick={
+            editing
+              ? () => {
+                  setEditing(null)
+                  setError('')
+                }
+              : undefined
+          }
         >
           <CalendarDays className={`w-6 h-6 text-gold ${editing ? 'group-hover:text-gold/70' : ''}`} />
-          <h1 className={`font-heading text-2xl font-bold text-text-primary ${editing ? 'group-hover:text-gold transition-colors' : ''}`}>
+          <h1
+            className={`font-heading text-2xl font-bold text-text-primary ${editing ? 'group-hover:text-gold transition-colors' : ''}`}
+          >
             Events
           </h1>
           {editing && (
-            <span className="text-xs text-text-muted group-hover:text-text-secondary transition-colors">(back to list)</span>
+            <span className="text-xs text-text-muted group-hover:text-text-secondary transition-colors">
+              (back to list)
+            </span>
           )}
-        </div>
+        </button>
         {!editing && (
           <button
-            onClick={() => { setForm(emptyForm); setEditing('new'); setError('') }}
+            type="button"
+            onClick={() => setRollover({})}
+            disabled={!events.length}
+            className="px-4 py-2 border border-white/10 text-sm text-text-secondary"
+          >
+            Prepare next season
+          </button>
+        )}
+        {!editing && (
+          <button
+            onClick={() => setEditing('new')}
             className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -668,6 +634,7 @@ export default function EventsAdmin() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
+            role="status"
             className="mb-4 px-4 py-2 bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
           >
             {success}
@@ -678,6 +645,7 @@ export default function EventsAdmin() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
+            role="alert"
             className="mb-4 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
           >
             {error}
@@ -686,11 +654,7 @@ export default function EventsAdmin() {
       </AnimatePresence>
 
       {editing !== null ? (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-surface border border-white/5"
-        >
+        <div className="bg-surface border border-white/5">
           <div className="px-4 sm:px-5 py-4 border-b border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h2 className="font-heading text-sm font-semibold text-text-primary">
               {editing === 'new' ? 'New Event' : 'Edit Event'}
@@ -698,910 +662,774 @@ export default function EventsAdmin() {
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {typeof editing === 'number' && (
                 <>
-                <Link
-                  to={`/admin/events/${editing}/results`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 transition-colors"
-                >
-                  <Trophy className="w-3.5 h-3.5" />
-                  Manage Results
-                </Link>
-                <button
-                  onClick={handleRetranslate}
-                  disabled={translating}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
-                    translating
-                      ? 'bg-blue-500/5 text-blue-400/50 cursor-wait'
-                      : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/15'
-                  }`}
-                  title="Retranslate this event and all its child records"
-                >
-                  {translating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Languages className="w-3.5 h-3.5" />}
-                  {translating ? 'Translating...' : 'Translate'}
-                </button>
-                {form.translation_status && form.translation_status !== 'untranslated' && (
-                  <span className={`flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                    form.translation_status === 'translated' ? 'bg-green-500/10 text-green-400' :
-                    form.translation_status === 'pending' ? 'bg-yellow-500/10 text-yellow-400' :
-                    form.translation_status === 'failed' ? 'bg-red-500/10 text-red-400' : 'bg-white/5 text-text-muted'
-                  }`}>
-                    {form.translation_status === 'pending' && <RefreshCw className="w-3 h-3 animate-spin" />}
-                    {form.translation_status}
-                  </span>
-                )}
+                  <Link
+                    to={`/admin/events/${editing}/results`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 transition-colors"
+                  >
+                    <Trophy className="w-3.5 h-3.5" />
+                    Manage Results
+                  </Link>
+                  <button
+                    onClick={handleRetranslate}
+                    disabled={translating}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+                      translating
+                        ? 'bg-blue-500/5 text-blue-400/50 cursor-wait'
+                        : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/15'
+                    }`}
+                    title="Retranslate this event and all its child records"
+                  >
+                    {translating ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Languages className="w-3.5 h-3.5" />
+                    )}
+                    {translating ? 'Translating...' : 'Translate'}
+                  </button>
+                  {form.translation_status && form.translation_status !== 'untranslated' && (
+                    <span
+                      className={`flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                        form.translation_status === 'translated'
+                          ? 'bg-green-500/10 text-green-400'
+                          : form.translation_status === 'pending'
+                            ? 'bg-yellow-500/10 text-yellow-400'
+                            : form.translation_status === 'failed'
+                              ? 'bg-red-500/10 text-red-400'
+                              : 'bg-white/5 text-text-muted'
+                      }`}
+                    >
+                      {form.translation_status === 'pending' && <RefreshCw className="w-3 h-3 animate-spin" />}
+                      {form.translation_status}
+                    </span>
+                  )}
                 </>
               )}
-            <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
-              <X className="w-4 h-4" />
-            </button>
+              <button
+                aria-label="Close event editor"
+                onClick={() => {
+                  setEditing(null)
+                  setError('')
+                }}
+                className="text-text-muted hover:text-text-primary"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          <div className="p-4 sm:p-5 space-y-5">
-            {/* Basic Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Name" value={form.name} onChange={v => updateForm('name', v)} />
-              <Field label="Slug" value={form.slug} onChange={v => updateForm('slug', v)} placeholder="auto-generated-if-blank" />
-              <Field label="Date" type="date" value={form.date} onChange={v => updateForm('date', v)} />
-              <Field label="End Date" type="date" value={form.end_date} onChange={v => updateForm('end_date', v)} />
-              <Field label="Venue Name" value={form.venue_name} onChange={v => updateForm('venue_name', v)} />
-              <Field label="Venue Address" value={form.venue_address} onChange={v => updateForm('venue_address', v)} />
-              <Field label="City" value={form.city} onChange={v => updateForm('city', v)} />
-              <Field label="Country" value={form.country} onChange={v => updateForm('country', v)} />
-              <Field label="Country Code" value={form.country_code} onChange={v => updateForm('country_code', v)} placeholder="GU" />
-              <SelectField
-                label="Status"
-                value={form.status}
-                onChange={v => updateForm('status', v)}
-                options={[
-                  { value: 'draft', label: 'Draft' },
-                  { value: 'upcoming', label: 'Upcoming' },
-                  { value: 'live', label: 'Live' },
-                  { value: 'completed', label: 'Completed' },
-                  { value: 'cancelled', label: 'Cancelled' },
-                ]}
-              />
-              <Field label="ASJJF Stars" type="number" value={form.asjjf_stars.toString()} onChange={v => updateForm('asjjf_stars', parseInt(v, 10) || 0)} />
-              <Field label="Prize Pool" value={form.prize_pool} onChange={v => updateForm('prize_pool', v)} placeholder="$10,000" />
-              <Field label="Prize Card Title" value={form.prize_title} onChange={v => updateForm('prize_title', v)} placeholder="e.g. Win Your Way to Guam!" />
-              <Field label="Prize Card Description" value={form.prize_description} onChange={v => updateForm('prize_description', v)} placeholder="e.g. Compete for a trip package to..." />
-              <Field label="ASJJF Event Info URL (Gi)" value={form.registration_url_gi} onChange={v => updateForm('registration_url_gi', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
-              <Field label="ASJJF Event Info URL (No-Gi)" value={form.registration_url_nogi} onChange={v => updateForm('registration_url_nogi', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
-              <Field label="ASJJF Event Info URL (Legacy)" value={form.registration_url} onChange={v => updateForm('registration_url', v)} placeholder="https://asjjf.org/main/eventInfo/..." />
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">ASJJF Event IDs (for results import)</label>
-                <input
-                  key={`${editing}-${form.asjjf_event_ids.join(',')}`}
-                  defaultValue={form.asjjf_event_ids.join(', ')}
-                  onBlur={e => {
-                    const ids = e.target.value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n > 0)
-                    updateForm('asjjf_event_ids', ids)
-                  }}
-                  placeholder="1863, 1864 (comma-separated)"
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                />
-                <p className="text-[10px] text-text-muted mt-1">Numeric IDs from asjjf.org event URLs. Gi and No-Gi are separate IDs.</p>
-              </div>
-              <Field label="Latitude" value={form.latitude} onChange={v => updateForm('latitude', v)} />
-              <Field label="Longitude" value={form.longitude} onChange={v => updateForm('longitude', v)} />
-            </div>
-
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.is_main_event}
-                  onChange={e => updateForm('is_main_event', e.target.checked)}
-                  className="accent-gold"
-                />
-                Main Event
-              </label>
-              <p className="text-[10px] text-text-muted">Controls the public championship page and homepage registration links. Selecting this automatically clears the previous main event.</p>
-            </div>
-
-            {/* Spectator Ticket Sales */}
-            <div className="border border-white/5">
-              <button
-                type="button"
-                onClick={() => toggleSection('ticketSales')}
-                className="w-full min-h-12 px-4 py-3 flex items-center justify-between text-sm font-medium text-text-primary hover:bg-white/[0.02] transition-colors"
+          {currentEvent?.source_event_id && (
+            <p className="px-4 py-2 text-sm text-text-secondary">
+              Copied from{' '}
+              <Link
+                className="inline-flex items-center text-gold"
+                to={`/admin/events?edit=${currentEvent.source_event_id}`}
               >
-                <span className="flex items-center gap-2">
-                  <Ticket className="w-4 h-4 text-gold" />
-                  Spectator Ticket Sales
-                  {form.ticket_sales_status === 'on_sale' && (
-                    <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">On sale</span>
-                  )}
-                </span>
-                {expandedSections.ticketSales ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
+                source event #{currentEvent.source_event_id}
+              </Link>
+              . Review copied content for the new season.
+            </p>
+          )}
+          <EditorNavigation active={activeSection} onSelect={selectSection} errors={sectionErrors} />
+          <fieldset disabled={saving || actionBusy} className="p-4 sm:p-5 space-y-5 min-w-0">
+            <section
+              hidden={activeSection !== 'basics'}
+              id="event-section-basics"
+              tabIndex={-1}
+              aria-label="Basics"
+              className="space-y-5 min-w-0"
+            >
+              <h2 className="font-heading text-lg font-semibold">Basics</h2>
+              {sectionErrors.basics?.length ? (
+                <ul role="alert" className="space-y-1 text-sm text-red-300">
+                  {sectionErrors.basics?.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {' '}
+                <Field label="Name" value={form.name} onChange={(v) => updateForm('name', v)} />
+                <Field
+                  disabled={!!currentEvent && currentEvent.status !== 'draft'}
+                  label="Slug"
+                  value={form.slug}
+                  onChange={(v) => updateForm('slug', v)}
+                  placeholder="auto-generated-if-blank"
+                />
+                {currentEvent && currentEvent.status !== 'draft' && (
+                  <p className="text-sm text-text-muted">Unpublish to draft to change the public slug.</p>
+                )}
+                <Field
+                  label="ASJJF Stars"
+                  type="number"
+                  value={form.asjjf_stars?.toString() ?? ''}
+                  onChange={(v) => updateForm('asjjf_stars', v.trim() ? Number(v) : null)}
+                />
+                <Field
+                  label="Season year"
+                  type="number"
+                  value={form.season_year?.toString() ?? ''}
+                  onChange={(v) => updateForm('season_year', v.trim() ? Number(v) : null)}
+                />{' '}
+                <Field
+                  label="Tagline"
+                  value={form.tagline}
+                  onChange={(v) => updateForm('tagline', v)}
+                  placeholder="The Grand Championship"
+                />
+              </div>
+              <label className="block text-sm text-text-secondary">
+                Description
+                <textarea
+                  value={form.description}
+                  onChange={(e) => updateForm('description', e.target.value)}
+                  rows={4}
+                  className="mt-2 w-full border border-white/10 bg-white/[0.03] p-3"
+                />
+              </label>{' '}
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.is_main_event}
+                    onChange={(e) => updateForm('is_main_event', e.target.checked)}
+                    className="accent-gold"
+                  />
+                  Main Event
+                </label>
+                <p className="text-[10px] text-text-muted">
+                  Controls the public championship page and homepage registration links. Selecting this automatically
+                  clears the previous main event.
+                </p>
+              </div>
+              {/* Hero Image */}
+              {(() => {
+                const heroUrl =
+                  typeof editing === 'number'
+                    ? resolveMediaUrl(currentEvent?.hero_image_url) || null
+                    : pendingHeroPreviewUrl
 
-              {expandedSections.ticketSales && (
-                <div className="p-4 sm:p-5 border-t border-white/5 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <SelectField
-                      label="Ticket Sales Status"
-                      value={form.ticket_sales_status}
-                      onChange={value => updateForm('ticket_sales_status', value as EventFormData['ticket_sales_status'])}
-                      options={[
-                        { value: 'unavailable', label: 'Unavailable / Hidden' },
-                        { value: 'on_sale', label: 'On Sale' },
-                        { value: 'sold_out', label: 'Sold Out' },
-                        { value: 'closed', label: 'Closed' },
-                      ]}
-                    />
-                    <Field
-                      label="Early Bird Ends"
-                      type="date"
-                      value={form.ticket_early_bird_ends_on}
-                      onChange={value => updateForm('ticket_early_bird_ends_on', value)}
-                    />
-                    <div className="md:col-span-2">
-                      <Field
-                        label="Official Online Ticket URL"
-                        value={form.ticket_sales_url}
-                        onChange={value => updateForm('ticket_sales_url', value)}
-                        placeholder="https://tickets.example.com/event/..."
-                      />
-                      <p className="text-[10px] text-text-muted mt-1.5">Spectator checkout only. Athlete registration remains configured in the ASJJF fields above.</p>
-                    </div>
-                  </div>
+                const handleHeroFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  if (typeof editing === 'number') {
+                    await handleImageUpload(file)
+                  } else {
+                    setPendingHeroImage(file)
+                  }
+                }
 
+                return (
                   <div className="space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <div>
-                        <h3 className="font-heading text-sm font-semibold text-text-primary">Admission Options</h3>
-                        <p className="text-[10px] text-text-muted mt-1">Prices are promotional content; checkout and service fees remain on the official ticket provider.</p>
-                      </div>
+                    <div className="flex items-center gap-4">
+                      <label
+                        className="text-xs font-medium text-text-secondary uppercase tracking-wide"
+                        htmlFor="eventsadmin-field-1"
+                      >
+                        Hero Image
+                      </label>
+                      <input
+                        id="eventsadmin-field-1"
+                        ref={heroInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleHeroFileChange}
+                        className="hidden"
+                      />
                       <button
                         type="button"
-                        onClick={addTicketOption}
-                        className="inline-flex min-h-11 items-center justify-center gap-1.5 px-3 py-2 border border-gold/30 bg-gold/5 text-gold text-xs font-medium hover:bg-gold/10 transition-colors"
+                        onClick={() => heroInputRef.current?.click()}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-text-secondary rounded transition-colors"
                       >
-                        <Plus className="w-3.5 h-3.5" /> Add Option
+                        <Upload className="w-3.5 h-3.5" />
+                        {heroUrl ? 'Change Image' : 'Upload Image'}
                       </button>
+                      {pendingHeroImage && (
+                        <button
+                          type="button"
+                          onClick={() => setPendingHeroImage(null)}
+                          className="text-text-muted hover:text-red-400 transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
-
-                    {form.ticket_options.length === 0 ? (
-                      <div className="border border-dashed border-white/10 px-4 py-6 text-center text-xs text-text-muted">
-                        No ticket options configured. The ticket button can still link to the official provider.
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {form.ticket_options.map((option, index) => (
-                          <div key={`ticket-option-${index}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_0.8fr_0.8fr_auto] gap-3 items-end border border-white/5 bg-white/[0.015] p-3">
-                            <Field label="Label" value={option.label} onChange={value => updateTicketOption(index, 'label', value)} placeholder="1-Day Child" />
-                            <Field label="Age / Note" value={option.description} onChange={value => updateTicketOption(index, 'description', value)} placeholder="4–12 yrs" />
-                            <Field label="Early Bird" type="number" value={option.early_bird_price} onChange={value => updateTicketOption(index, 'early_bird_price', value)} placeholder="17.00" />
-                            <Field label="Regular / Door" type="number" value={option.regular_price} onChange={value => updateTicketOption(index, 'regular_price', value)} placeholder="20.00" />
-                            <button
-                              type="button"
-                              onClick={() => removeTicketOption(index)}
-                              className="min-h-11 min-w-11 inline-flex items-center justify-center text-text-muted hover:text-red-400 hover:bg-red-500/5 transition-colors"
-                              aria-label={`Remove ${option.label || `ticket option ${index + 1}`}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                    {heroUrl && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <Eye className="w-3.5 h-3.5 text-text-muted" />
+                          <span className="text-[10px] text-text-muted uppercase tracking-wide">
+                            Site Preview — how it appears on the event page hero
+                          </span>
+                        </div>
+                        <div className="relative overflow-hidden border border-white/10 rounded aspect-[16/6]">
+                          <img src={heroUrl} alt="Hero preview" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-navy-900/75" />
+                          <div className="absolute inset-0 bg-linear-to-t from-navy-900 via-navy-900/50 to-transparent" />
+                          <div className="absolute bottom-3 left-4 right-4 z-10">
+                            <div className="text-gold-500 text-[10px] font-heading uppercase tracking-wider mb-1">
+                              {(form.asjjf_stars ?? 0) > 0
+                                ? `${'★'.repeat(Math.min(form.asjjf_stars ?? 0, 10))} ASJJF ${form.asjjf_stars}-STAR RANKED EVENT`
+                                : ''}
+                            </div>
+                            <div className="text-white font-heading font-black text-sm sm:text-base uppercase leading-tight">
+                              {form.name || 'Event Name'}
+                            </div>
+                            {form.tagline && (
+                              <div className="text-text-secondary text-[10px] font-heading uppercase tracking-wider mt-1">
+                                {form.tagline}
+                              </div>
+                            )}
                           </div>
-                        ))}
+                        </div>
                       </div>
                     )}
                   </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-text-muted" />
-                      <h3 className="font-heading text-sm font-semibold text-text-primary">In-Person Purchase</h3>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Field label="Location" value={form.ticket_in_person_name} onChange={value => updateForm('ticket_in_person_name', value)} placeholder="Deal Depot" />
-                      <Field label="Phone" value={form.ticket_in_person_phone} onChange={value => updateForm('ticket_in_person_phone', value)} placeholder="671-647-3325" />
-                      <div className="md:col-span-2">
-                        <Field label="Address" value={form.ticket_in_person_address} onChange={value => updateForm('ticket_in_person_address', value)} placeholder="114 East Taitano Road, Tamuning, Guam" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {typeof editing === 'number' && (
-                    <div className="space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                        <div className="flex items-center gap-2 text-xs font-medium text-text-secondary uppercase tracking-wide">
-                          <ImageIcon className="w-4 h-4 text-text-muted" /> Ticket Flyer
-                        </div>
-                        <input
-                          ref={ticketBannerInputRef}
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp"
-                          className="hidden"
-                          onChange={async event => {
-                            const file = event.target.files?.[0]
-                            if (!file || typeof editing !== 'number') return
-                            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-                              setError('Ticket flyer must be a JPEG, PNG, or WebP image')
-                              event.target.value = ''
-                              return
-                            }
-                            if (file.size > 8 * 1024 * 1024) {
-                              setError('Ticket flyer must be smaller than 8 MB')
-                              event.target.value = ''
-                              return
-                            }
-                            try {
-                              await api.admin.uploadEventTicketBanner(editing, file)
-                              await loadEvents()
-                              setSuccess('Ticket flyer updated')
-                            } catch (uploadError) {
-                              setError(uploadError instanceof Error ? uploadError.message : 'Ticket flyer upload failed')
-                            } finally {
-                              event.target.value = ''
-                            }
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => ticketBannerInputRef.current?.click()}
-                          className="inline-flex min-h-11 items-center justify-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-text-secondary transition-colors"
-                        >
-                          <Upload className="w-3.5 h-3.5" />
-                          {currentEvent?.ticket_banner_image_url ? 'Change Flyer' : 'Upload Custom Flyer'}
-                        </button>
-                        {currentEvent?.ticket_banner_image_url && (
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              if (typeof editing !== 'number') return
-                              try {
-                                await api.admin.removeEventTicketBanner(editing)
-                                await loadEvents()
-                                setSuccess('Custom ticket flyer removed')
-                              } catch (removeError) {
-                                setError(removeError instanceof Error ? removeError.message : 'Failed to remove ticket flyer')
-                              }
-                            }}
-                            className="min-h-11 px-3 text-xs text-text-muted hover:text-red-400 transition-colors"
-                          >
-                            Remove custom flyer
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-text-muted">
-                        JPEG, PNG, or WebP up to 8 MB. {form.slug === 'marianas-open-2026'
-                          ? 'The supplied 2026 flyer is used automatically until a custom flyer is uploaded.'
-                          : 'Upload the official flyer for this event. Removing it leaves this event without a ticket flyer.'}
-                      </p>
-                      {(currentEvent?.ticket_banner_image_url || form.slug === 'marianas-open-2026') && (
-                        <div className="w-40 aspect-[4/5] overflow-hidden border border-white/10 bg-navy-900">
-                          <img
-                            src={resolveMediaUrl(currentEvent?.ticket_banner_image_url) || '/images/tickets/marianas-open-2026-ticket-sales-640.jpg'}
-                            alt="Ticket flyer preview"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Live Stream */}
-            <div className="border border-white/5">
-              <button
-                type="button"
-                onClick={() => toggleSection('livestream')}
-                className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-text-primary hover:bg-white/[0.02] transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Radio className="w-4 h-4 text-text-muted" />
-                  Live Stream
-                  {form.live_stream_active && <span className="text-xs px-2 py-0.5 bg-red-500/20 text-red-400 animate-pulse">LIVE</span>}
-                </span>
-                {expandedSections.livestream ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {expandedSections.livestream && (
-                <div className="p-4 border-t border-white/5 space-y-3">
-                  <Field
-                    label="Live Stream URL"
-                    value={form.live_stream_url}
-                    onChange={v => updateForm('live_stream_url', v)}
-                    placeholder="https://www.youtube.com/@themarianasopen/live"
-                  />
-                  <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={form.live_stream_active}
-                      onChange={e => {
-                        const checked = e.target.checked;
-                        updateForm('live_stream_active', checked);
-                        if (checked && !form.live_stream_url) {
-                          updateForm('live_stream_url', DEFAULT_LIVE_STREAM_URL);
-                        }
-                      }}
-                      className="accent-gold"
-                    />
-                    <span>Stream is LIVE now</span>
-                    {form.live_stream_active && <span className="text-xs text-red-400">(Visitors will see a live banner)</span>}
-                  </label>
-                </div>
-              )}
-            </div>
-
-            {/* Accommodations (only when editing existing event) */}
-            {typeof editing === 'number' && (
-              <AccommodationsSection eventId={editing} />
-            )}
-
-            {/* Event Gallery (only when editing existing event) */}
-            {typeof editing === 'number' && (
-              <EventGallerySection eventId={editing} eventName={form.name || 'Event'} />
-            )}
-
-            <div>
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Description</label>
-              <textarea
-                value={form.description}
-                onChange={e => updateForm('description', e.target.value)}
-                rows={4}
-                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
-              />
-            </div>
-
-            <div className="border border-white/5">
-              <button
-                type="button"
-                onClick={() => toggleSection('detailContent')}
-                className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-text-primary hover:bg-white/[0.02] transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-text-muted" />
-                  Event Page Content
-                </span>
-                {expandedSections.detailContent ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {expandedSections.detailContent && (
-                <div className="p-4 border-t border-white/5 space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Field
-                      label="Tagline"
-                      value={form.tagline}
-                      onChange={v => updateForm('tagline', v)}
-                      placeholder="The Grand Championship"
-                    />
-                    <div>
-                      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Schedule Note</label>
-                      <textarea
-                        value={form.schedule_note}
-                        onChange={e => updateForm('schedule_note', e.target.value)}
-                        rows={3}
-                        className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
-                        placeholder="Official match schedule provided by the organizer..."
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Travel Description</label>
-                      <textarea
-                        value={form.travel_description}
-                        onChange={e => updateForm('travel_description', e.target.value)}
-                        rows={3}
-                        className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
-                        placeholder="Helpful travel context for this specific event."
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Visa Description</label>
-                      <textarea
-                        value={form.visa_description}
-                        onChange={e => updateForm('visa_description', e.target.value)}
-                        rows={3}
-                        className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
-                        placeholder="Visa or entry guidance for this event."
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-heading text-sm font-semibold text-text-primary">Venue Highlights</h3>
-                      <button onClick={addVenueHighlight} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
-                        <Plus className="w-3 h-3" /> Add Highlight
-                      </button>
-                    </div>
-                    {form.venue_highlights.map((item, idx) => (
-                      <div key={`venue-${idx}`} className="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-3 items-start">
-                        <input
-                          value={item.title}
-                          onChange={e => updateVenueHighlight(idx, 'title', e.target.value)}
-                          placeholder="Highlight title"
-                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <input
-                          value={item.description}
-                          onChange={e => updateVenueHighlight(idx, 'description', e.target.value)}
-                          placeholder="Highlight description"
-                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <button onClick={() => removeVenueHighlight(idx)} className="p-2 text-text-muted hover:text-red-400">
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-heading text-sm font-semibold text-text-primary">Registration Steps</h3>
-                      <button onClick={addRegistrationStep} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
-                        <Plus className="w-3 h-3" /> Add Step
-                      </button>
-                    </div>
-                    {form.registration_steps.map((item, idx) => (
-                      <div key={`registration-${idx}`} className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-white/5 p-3">
-                        <input
-                          value={item.title || ''}
-                          onChange={e => updateRegistrationStep(idx, 'title', e.target.value)}
-                          placeholder="Step title"
-                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <input
-                          value={item.link_label || ''}
-                          onChange={e => updateRegistrationStep(idx, 'link_label', e.target.value)}
-                          placeholder="Optional link label"
-                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <div className="md:col-span-2">
-                          <textarea
-                            value={item.description}
-                            onChange={e => updateRegistrationStep(idx, 'description', e.target.value)}
-                            rows={2}
-                            placeholder="Step description"
-                            className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
-                          />
-                        </div>
-                        <input
-                          value={item.url || ''}
-                          onChange={e => updateRegistrationStep(idx, 'url', e.target.value)}
-                          placeholder="Optional URL"
-                          className="md:col-span-2 w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <button onClick={() => removeRegistrationStep(idx)} className="justify-self-start p-2 text-text-muted hover:text-red-400">
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-heading text-sm font-semibold text-text-primary">Registration Fee Tables</h3>
-                      <button onClick={addRegistrationFeeSection} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
-                        <Plus className="w-3 h-3" /> Add Table
-                      </button>
-                    </div>
-                    {form.registration_fee_sections.map((section, sectionIdx) => (
-                      <div key={`fee-section-${sectionIdx}`} className="border border-white/5 p-3 space-y-3">
-                        <div className="flex items-start gap-3">
-                          <input
-                            value={section.title}
-                            onChange={e => updateRegistrationFeeSection(sectionIdx, 'title', e.target.value)}
-                            placeholder="Table title"
-                            className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                          />
-                          <button onClick={() => removeRegistrationFeeSection(sectionIdx)} className="p-2 text-text-muted hover:text-red-400">
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <div className="space-y-2">
-                          {section.rows.map((row, rowIdx) => (
-                            <div key={`fee-row-${sectionIdx}-${rowIdx}`} className="grid grid-cols-1 md:grid-cols-[1.4fr_0.9fr_1fr_auto] gap-3 items-start">
-                              <input
-                                value={row.deadline}
-                                onChange={e => updateRegistrationFeeRow(sectionIdx, rowIdx, 'deadline', e.target.value)}
-                                placeholder="Deadline"
-                                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                              />
-                              <input
-                                value={row.fee}
-                                onChange={e => updateRegistrationFeeRow(sectionIdx, rowIdx, 'fee', e.target.value)}
-                                placeholder="Fee"
-                                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                              />
-                              <input
-                                value={row.option}
-                                onChange={e => updateRegistrationFeeRow(sectionIdx, rowIdx, 'option', e.target.value)}
-                                placeholder="Division option"
-                                className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                              />
-                              <button onClick={() => removeRegistrationFeeRow(sectionIdx, rowIdx)} className="p-2 text-text-muted hover:text-red-400">
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                        <button onClick={() => addRegistrationFeeRow(sectionIdx)} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
-                          <Plus className="w-3 h-3" /> Add Row
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-heading text-sm font-semibold text-text-primary">Registration Info</h3>
-                      <button onClick={addRegistrationInfoItem} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
-                        <Plus className="w-3 h-3" /> Add Item
-                      </button>
-                    </div>
-                    {form.registration_info_items.map((item, idx) => (
-                      <div key={`registration-info-${idx}`} className="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-3 items-start">
-                        <input
-                          value={item.label}
-                          onChange={e => updateRegistrationInfoItem(idx, 'label', e.target.value)}
-                          placeholder="Label"
-                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <textarea
-                          value={item.value}
-                          onChange={e => updateRegistrationInfoItem(idx, 'value', e.target.value)}
-                          rows={2}
-                          placeholder="Value"
-                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
-                        />
-                        <button onClick={() => removeRegistrationInfoItem(idx)} className="p-2 text-text-muted hover:text-red-400">
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-heading text-sm font-semibold text-text-primary">Travel Cards</h3>
-                      <button onClick={addTravelItem} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
-                        <Plus className="w-3 h-3" /> Add Card
-                      </button>
-                    </div>
-                    {form.travel_items.map((item, idx) => (
-                      <div key={item.key || `travel-${idx}`} className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-white/10 bg-white/[0.015] p-4">
-                        <div>
-                          <label htmlFor={`travel-${idx}-kind`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Card Type</label>
-                          <select
-                            id={`travel-${idx}-kind`}
-                            value={item.kind || 'info'}
-                            onChange={e => updateTravelItem(idx, 'kind', e.target.value)}
-                            className="min-h-11 w-full bg-surface border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
-                          >
-                            <option value="info">Travel information</option>
-                            <option value="offer">Travel offer with code</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor={`travel-${idx}-title`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Title</label>
-                          <input
-                            id={`travel-${idx}-title`}
-                            value={item.title}
-                            onChange={e => updateTravelItem(idx, 'title', e.target.value)}
-                            placeholder="United Meetings Travel"
-                            className="min-h-11 w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor={`travel-${idx}-${item.kind === 'offer' ? 'code' : 'value'}`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">
-                            {item.kind === 'offer' ? 'Offer Code' : 'Optional Value'}
-                          </label>
-                          <input
-                            id={`travel-${idx}-${item.kind === 'offer' ? 'code' : 'value'}`}
-                            value={item.kind === 'offer' ? (item.code || '') : (item.value || '')}
-                            onChange={e => updateTravelItem(idx, item.kind === 'offer' ? 'code' : 'value', e.target.value)}
-                            placeholder={item.kind === 'offer' ? 'Enter the code exactly as provided' : 'Airport code or short detail'}
-                            className="min-h-11 w-full bg-white/[0.03] border border-white/10 px-3 py-2 font-mono text-sm text-text-primary placeholder:font-sans placeholder:text-text-muted focus:border-gold/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <label htmlFor={`travel-${idx}-description`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Description</label>
-                          <textarea
-                            id={`travel-${idx}-description`}
-                            value={item.description || ''}
-                            onChange={e => updateTravelItem(idx, 'description', e.target.value)}
-                            rows={2}
-                            placeholder="Card description"
-                            className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor={`travel-${idx}-url`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Destination URL</label>
-                          <input
-                            id={`travel-${idx}-url`}
-                            type="url"
-                            value={item.url || ''}
-                            onChange={e => updateTravelItem(idx, 'url', e.target.value)}
-                            placeholder="https://example.com/travel"
-                            className="min-h-11 w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor={`travel-${idx}-link-label`} className="block text-[11px] font-medium text-text-muted uppercase tracking-wide mb-1.5">Link Label</label>
-                          <input
-                            id={`travel-${idx}-link-label`}
-                            value={item.link_label || ''}
-                            onChange={e => updateTravelItem(idx, 'link_label', e.target.value)}
-                            placeholder="Search flights"
-                            className="min-h-11 w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeTravelItem(idx)}
-                          className="inline-flex min-h-11 items-center gap-2 justify-self-start px-3 text-xs font-medium text-text-muted transition-colors hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
-                        >
-                          <X className="w-4 h-4" /> Remove card
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-heading text-sm font-semibold text-text-primary">Visa Items</h3>
-                      <button onClick={addVisaItem} className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80">
-                        <Plus className="w-3 h-3" /> Add Visa Item
-                      </button>
-                    </div>
-                    {form.visa_items.map((item, idx) => (
-                      <div key={`visa-${idx}`} className="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-3 items-start">
-                        <input
-                          value={item.title}
-                          onChange={e => updateVisaItem(idx, 'title', e.target.value)}
-                          placeholder="Visa item title"
-                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <textarea
-                          value={item.description}
-                          onChange={e => updateVisaItem(idx, 'description', e.target.value)}
-                          rows={2}
-                          placeholder="Visa item description"
-                          className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
-                        />
-                        <button onClick={() => removeVisaItem(idx)} className="p-2 text-text-muted hover:text-red-400">
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Hero Image */}
-            {(() => {
-              const heroUrl = typeof editing === 'number'
-                ? resolveMediaUrl(currentEvent?.hero_image_url) || null
-                : pendingHeroPreviewUrl
-
-              const handleHeroFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                if (typeof editing === 'number') {
-                  await handleImageUpload(file)
-                } else {
-                  setPendingHeroImage(file)
-                }
-              }
-
-              return (
+                )
+              })()}
+              {/* Poster Image (for Calendar qualifying series) */}
+              {typeof editing === 'number' && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-4">
-                    <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">Hero Image</label>
-                    <input ref={heroInputRef} type="file" accept="image/*" onChange={handleHeroFileChange} className="hidden" />
+                    <label
+                      className="text-xs font-medium text-text-secondary uppercase tracking-wide"
+                      htmlFor="eventsadmin-field-2"
+                    >
+                      Poster Image
+                    </label>
+                    <input
+                      id="eventsadmin-field-2"
+                      ref={posterInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file || typeof editing !== 'number') return
+                        try {
+                          await api.admin.uploadEventPoster(editing, file)
+                          await loadEvents()
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : 'Poster upload failed')
+                        }
+                      }}
+                      className="hidden"
+                    />
                     <button
                       type="button"
-                      onClick={() => heroInputRef.current?.click()}
+                      onClick={() => posterInputRef.current?.click()}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-text-secondary rounded transition-colors"
                     >
                       <Upload className="w-3.5 h-3.5" />
-                      {heroUrl ? 'Change Image' : 'Upload Image'}
+                      {currentEvent?.poster_image_url ? 'Change Poster' : 'Upload Poster'}
                     </button>
-                    {pendingHeroImage && (
+                    {currentEvent?.poster_image_url && (
                       <button
                         type="button"
-                        onClick={() => setPendingHeroImage(null)}
-                        className="text-text-muted hover:text-red-400 transition-colors"
+                        onClick={async () => {
+                          if (typeof editing !== 'number') return
+                          try {
+                            await api.admin.removeEventPoster(editing)
+                            await loadEvents()
+                          } catch (err) {
+                            setError(err instanceof Error ? err.message : 'Failed to remove poster')
+                          }
+                        }}
+                        className="text-text-muted hover:text-red-400 transition-colors text-xs"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        Remove
                       </button>
                     )}
                   </div>
-                  {heroUrl && (
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <Eye className="w-3.5 h-3.5 text-text-muted" />
-                        <span className="text-[10px] text-text-muted uppercase tracking-wide">Site Preview — how it appears on the event page hero</span>
-                      </div>
-                      <div className="relative overflow-hidden border border-white/10 rounded aspect-[16/6]">
-                        <img src={heroUrl} alt="Hero preview" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-navy-900/75" />
-                        <div className="absolute inset-0 bg-linear-to-t from-navy-900 via-navy-900/50 to-transparent" />
-                        <div className="absolute bottom-3 left-4 right-4 z-10">
-                          <div className="text-gold-500 text-[10px] font-heading uppercase tracking-wider mb-1">
-                            {form.asjjf_stars > 0 ? `${'★'.repeat(form.asjjf_stars)} ASJJF ${form.asjjf_stars}-STAR RANKED EVENT` : ''}
-                          </div>
-                          <div className="text-white font-heading font-black text-sm sm:text-base uppercase leading-tight">
-                            {form.name || 'Event Name'}
-                          </div>
-                          {form.tagline && (
-                            <div className="text-text-secondary text-[10px] font-heading uppercase tracking-wider mt-1">{form.tagline}</div>
-                          )}
-                        </div>
-                      </div>
+                  <p className="text-[10px] text-text-muted">
+                    Promotional poster shown in the "Qualifying Series" section on the Calendar page.
+                  </p>
+                  {currentEvent?.poster_image_url && (
+                    <div className="w-32 aspect-[3/4] border border-white/10 overflow-hidden">
+                      <img
+                        src={resolveMediaUrl(currentEvent.poster_image_url) || ''}
+                        alt="Poster"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   )}
                 </div>
-              )
-            })()}
-
-            {/* Poster Image (for Calendar qualifying series) */}
-            {typeof editing === 'number' && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-4">
-                  <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">Poster Image</label>
-                  <input ref={posterInputRef} type="file" accept="image/*" onChange={async (e) => {
-                    const file = e.target.files?.[0]
-                    if (!file || typeof editing !== 'number') return
-                    try {
-                      await api.admin.uploadEventPoster(editing, file)
-                      await loadEvents()
-                    } catch (err) {
-                      setError(err instanceof Error ? err.message : 'Poster upload failed')
-                    }
-                  }} className="hidden" />
-                  <button
-                    type="button"
-                    onClick={() => posterInputRef.current?.click()}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-text-secondary rounded transition-colors"
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                    {currentEvent?.poster_image_url ? 'Change Poster' : 'Upload Poster'}
-                  </button>
-                  {currentEvent?.poster_image_url && (
+              )}
+            </section>
+            <section
+              hidden={activeSection !== 'registration'}
+              id="event-section-registration"
+              tabIndex={-1}
+              aria-label="Dates & Registration"
+              className="space-y-5 min-w-0"
+            >
+              <h2 className="font-heading text-lg font-semibold">Dates & Registration</h2>
+              {sectionErrors.registration?.length ? (
+                <ul role="alert" className="space-y-1 text-sm text-red-300">
+                  {sectionErrors.registration?.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <EventContentFields kind="registration" form={form} onChange={setForm} />
+            </section>
+            <section
+              hidden={activeSection !== 'venue'}
+              id="event-section-venue"
+              tabIndex={-1}
+              aria-label="Venue & Travel"
+              className="space-y-5 min-w-0"
+            >
+              <h2 className="font-heading text-lg font-semibold">Venue & Travel</h2>
+              {sectionErrors.venue?.length ? (
+                <ul role="alert" className="space-y-1 text-sm text-red-300">
+                  {sectionErrors.venue?.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <EventContentFields kind="venue" form={form} onChange={setForm} />
+            </section>
+            <section
+              hidden={activeSection !== 'tickets'}
+              id="event-section-tickets"
+              tabIndex={-1}
+              aria-label="Tickets"
+              className="space-y-5 min-w-0"
+            >
+              <h2 className="font-heading text-lg font-semibold">Tickets</h2>
+              {sectionErrors.tickets?.length ? (
+                <ul role="alert" className="space-y-1 text-sm text-red-300">
+                  {sectionErrors.tickets?.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <TicketsSection
+                form={form}
+                onChange={setForm}
+                event={currentEvent}
+                onReload={loadEvents}
+                onError={setError}
+                onSuccess={setSuccess}
+              />
+            </section>
+            <section
+              hidden={activeSection !== 'schedule'}
+              id="event-section-schedule"
+              tabIndex={-1}
+              aria-label="Schedule"
+              className="space-y-5 min-w-0"
+            >
+              <h2 className="font-heading text-lg font-semibold">Schedule</h2>
+              {sectionErrors.schedule?.length ? (
+                <ul role="alert" className="space-y-1 text-sm text-red-300">
+                  {sectionErrors.schedule?.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <div>
+                <label
+                  className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5"
+                  htmlFor="eventsadmin-field-3"
+                >
+                  Schedule Note
+                </label>
+                <textarea
+                  id="eventsadmin-field-3"
+                  value={form.schedule_note}
+                  onChange={(e) => updateForm('schedule_note', e.target.value)}
+                  rows={3}
+                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none resize-none"
+                  placeholder="Official match schedule provided by the organizer..."
+                />
+              </div>{' '}
+              {/* Schedule Items */}
+              <div className="border border-white/5">
+                <button
+                  type="button"
+                  onClick={() => toggleSection('schedule')}
+                  className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-text-primary hover:bg-white/[0.02] transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-text-muted" />
+                    Schedule Items ({form.event_schedule_items_attributes.filter((s) => !s._destroy).length})
+                  </span>
+                  {expandedSections.schedule ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+                {expandedSections.schedule && (
+                  <div className="p-4 border-t border-white/5 space-y-3">
+                    {form.event_schedule_items_attributes.map((item, idx) =>
+                      item._destroy ? null : (
+                        <div
+                          key={idx}
+                          className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start"
+                        >
+                          <label className="flex items-center gap-2 text-sm text-text-secondary">
+                            <input
+                              type="checkbox"
+                              checked={item.confirmed ?? true}
+                              onChange={(e) => updateScheduleItem(idx, 'confirmed', e.target.checked)}
+                            />
+                            Confirmed
+                          </label>
+                          <input
+                            aria-label="9:00 AM"
+                            value={item.time}
+                            onChange={(e) => updateScheduleItem(idx, 'time', e.target.value)}
+                            placeholder="9:00 AM"
+                            className="w-full sm:w-44 sm:shrink-0 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                          />
+                          <div className="flex gap-2 sm:gap-3 flex-1 items-start">
+                            <input
+                              aria-label="Description"
+                              value={item.description}
+                              onChange={(e) => updateScheduleItem(idx, 'description', e.target.value)}
+                              placeholder="Description"
+                              className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                            />
+                            <button
+                              aria-label={`Remove schedule row ${idx + 1}`}
+                              onClick={() => removeScheduleItem(idx)}
+                              className="p-1.5 text-text-muted hover:text-red-400"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    )}
                     <button
-                      type="button"
-                      onClick={async () => {
-                        if (typeof editing !== 'number') return
-                        try {
-                          await api.admin.removeEventPoster(editing)
-                          await loadEvents()
-                        } catch (err) {
-                          setError(err instanceof Error ? err.message : 'Failed to remove poster')
-                        }
-                      }}
-                      className="text-text-muted hover:text-red-400 transition-colors text-xs"
+                      onClick={addScheduleItem}
+                      className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80"
                     >
-                      Remove
+                      <Plus className="w-3 h-3" /> Add Schedule Item
                     </button>
-                  )}
-                </div>
-                <p className="text-[10px] text-text-muted">Promotional poster shown in the "Qualifying Series" section on the Calendar page.</p>
-                {currentEvent?.poster_image_url && (
-                  <div className="w-32 aspect-[3/4] border border-white/10 overflow-hidden">
-                    <img src={resolveMediaUrl(currentEvent.poster_image_url) || ''} alt="Poster" className="w-full h-full object-cover" />
                   </div>
                 )}
               </div>
-            )}
-
-            {/* Schedule Items */}
-            <div className="border border-white/5">
-              <button
-                type="button"
-                onClick={() => toggleSection('schedule')}
-                className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-text-primary hover:bg-white/[0.02] transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-text-muted" />
-                  Schedule Items ({form.event_schedule_items_attributes.filter(s => !s._destroy).length})
-                </span>
-                {expandedSections.schedule ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {expandedSections.schedule && (
-                <div className="p-4 border-t border-white/5 space-y-3">
-                  {form.event_schedule_items_attributes.map((item, idx) =>
-                    item._destroy ? null : (
-                      <div key={idx} className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start">
-                        <input
-                          value={item.time}
-                          onChange={e => updateScheduleItem(idx, 'time', e.target.value)}
-                          placeholder="9:00 AM"
-                          className="w-full sm:w-44 sm:shrink-0 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <div className="flex gap-2 sm:gap-3 flex-1 items-start">
+            </section>
+            <section
+              hidden={activeSection !== 'prizes'}
+              id="event-section-prizes"
+              tabIndex={-1}
+              aria-label="Prizes"
+              className="space-y-5 min-w-0"
+            >
+              <h2 className="font-heading text-lg font-semibold">Prizes</h2>
+              {sectionErrors.prizes?.length ? (
+                <ul role="alert" className="space-y-1 text-sm text-red-300">
+                  {sectionErrors.prizes?.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {' '}
+                <Field
+                  label="Prize Pool"
+                  value={form.prize_pool}
+                  onChange={(v) => updateForm('prize_pool', v)}
+                  placeholder="$10,000"
+                />
+                <Field
+                  label="Prize Card Title"
+                  value={form.prize_title}
+                  onChange={(v) => updateForm('prize_title', v)}
+                  placeholder="e.g. Win Your Way to Guam!"
+                />
+                <Field
+                  label="Prize Card Description"
+                  value={form.prize_description}
+                  onChange={(v) => updateForm('prize_description', v)}
+                  placeholder="e.g. Compete for a trip package to..."
+                />
+              </div>{' '}
+              {/* Prize Categories */}
+              <div className="border border-white/5">
+                <button
+                  type="button"
+                  onClick={() => toggleSection('prizes')}
+                  className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-text-primary hover:bg-white/[0.02] transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-text-muted" />
+                    Prize Categories ({form.prize_categories_attributes.filter((p) => !p._destroy).length})
+                  </span>
+                  {expandedSections.prizes ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+                {expandedSections.prizes && (
+                  <div className="p-4 border-t border-white/5 space-y-3">
+                    {form.prize_categories_attributes.map((item, idx) =>
+                      item._destroy ? null : (
+                        <div
+                          key={idx}
+                          className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start"
+                        >
+                          <label className="flex items-center gap-2 text-sm text-text-secondary">
+                            <input
+                              type="checkbox"
+                              checked={item.confirmed ?? true}
+                              onChange={(e) => updatePrizeCategory(idx, 'confirmed', e.target.checked)}
+                            />
+                            Confirmed
+                          </label>
                           <input
-                            value={item.description}
-                            onChange={e => updateScheduleItem(idx, 'description', e.target.value)}
-                            placeholder="Description"
+                            aria-label="Category name"
+                            value={item.name}
+                            onChange={(e) => updatePrizeCategory(idx, 'name', e.target.value)}
+                            placeholder="Category name"
                             className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
                           />
-                          <button onClick={() => removeScheduleItem(idx)} className="p-1.5 text-text-muted hover:text-red-400">
-                            <X className="w-3.5 h-3.5" />
-                          </button>
+                          <div className="flex gap-2 sm:gap-3 items-start">
+                            <input
+                              aria-label="Amount (0 if non-cash)"
+                              value={item.amount ?? ''}
+                              onChange={(e) => updatePrizeCategory(idx, 'amount', e.target.value)}
+                              placeholder="Amount (0 if non-cash)"
+                              className="w-full sm:w-28 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                            />
+                            <button
+                              aria-label={`Remove prize category ${idx + 1}`}
+                              onClick={() => removePrizeCategory(idx)}
+                              className="p-1.5 text-text-muted hover:text-red-400"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )
-                  )}
-                  <button
-                    onClick={addScheduleItem}
-                    className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80"
-                  >
-                    <Plus className="w-3 h-3" /> Add Schedule Item
-                  </button>
-                </div>
+                      )
+                    )}
+                    <button
+                      onClick={addPrizeCategory}
+                      className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80"
+                    >
+                      <Plus className="w-3 h-3" /> Add Prize Category
+                    </button>
+                  </div>
+                )}
+              </div>
+            </section>
+            <section
+              hidden={activeSection !== 'hotels'}
+              id="event-section-hotels"
+              tabIndex={-1}
+              aria-label="Hotels & Offers"
+              className="space-y-5 min-w-0"
+            >
+              <h2 className="font-heading text-lg font-semibold">Hotels & Offers</h2>
+              {sectionErrors.hotels?.length ? (
+                <ul role="alert" className="space-y-1 text-sm text-red-300">
+                  {sectionErrors.hotels?.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {typeof editing === 'number' ? (
+                <AccommodationsSection key={editing} eventId={editing} onDirtyChange={onHotelDirty} onSaved={loadEvents} />
+              ) : (
+                <p className="text-sm text-text-secondary">Save this draft to add hotels and offers.</p>
               )}
-            </div>
-
-            {/* Prize Categories */}
-            <div className="border border-white/5">
-              <button
-                type="button"
-                onClick={() => toggleSection('prizes')}
-                className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-text-primary hover:bg-white/[0.02] transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-text-muted" />
-                  Prize Categories ({form.prize_categories_attributes.filter(p => !p._destroy).length})
-                </span>
-                {expandedSections.prizes ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {expandedSections.prizes && (
-                <div className="p-4 border-t border-white/5 space-y-3">
-                  {form.prize_categories_attributes.map((item, idx) =>
-                    item._destroy ? null : (
-                      <div key={idx} className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start">
-                        <input
-                          value={item.name}
-                          onChange={e => updatePrizeCategory(idx, 'name', e.target.value)}
-                          placeholder="Category name"
-                          className="flex-1 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                        />
-                        <div className="flex gap-2 sm:gap-3 items-start">
-                          <input
-                            value={item.amount}
-                            onChange={e => updatePrizeCategory(idx, 'amount', e.target.value)}
-                            placeholder="Amount (0 if non-cash)"
-                            className="w-full sm:w-28 bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                          />
-                          <button onClick={() => removePrizeCategory(idx)} className="p-1.5 text-text-muted hover:text-red-400">
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  )}
-                  <button
-                    onClick={addPrizeCategory}
-                    className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80"
-                  >
-                    <Plus className="w-3 h-3" /> Add Prize Category
-                  </button>
-                </div>
+            </section>
+            <section
+              hidden={activeSection !== 'gallery'}
+              id="event-section-gallery"
+              tabIndex={-1}
+              aria-label="Gallery"
+              className="space-y-5 min-w-0"
+            >
+              <h2 className="font-heading text-lg font-semibold">Gallery</h2>
+              {sectionErrors.gallery?.length ? (
+                <ul role="alert" className="space-y-1 text-sm text-red-300">
+                  {sectionErrors.gallery?.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {typeof editing === 'number' ? (
+                <EventGallerySection
+                  key={editing}
+                  eventId={editing}
+                  eventName={form.name || 'Event'}
+                  onDirtyChange={onGalleryDirty}
+                />
+              ) : (
+                <p className="text-sm text-text-secondary">Save this draft to upload gallery images.</p>
               )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-              <button
-                onClick={() => { setEditing(null); setError('') }}
-                className="px-5 py-2.5 text-text-muted text-sm hover:text-text-primary transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </motion.div>
+            </section>
+            <section
+              hidden={activeSection !== 'results'}
+              id="event-section-results"
+              tabIndex={-1}
+              aria-label="Results"
+              className="space-y-5 min-w-0"
+            >
+              <h2 className="font-heading text-lg font-semibold">Results</h2>
+              {sectionErrors.results?.length ? (
+                <ul role="alert" className="space-y-1 text-sm text-red-300">
+                  {sectionErrors.results?.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <div>
+                <label
+                  className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5"
+                  htmlFor="eventsadmin-field-4"
+                >
+                  ASJJF Event IDs (for results import)
+                </label>
+                <input
+                  id="eventsadmin-field-4"
+                  aria-label="ASJJF Event IDs (for results import)"
+                  value={resultIds}
+                  onChange={(event) => setResultIds(event.target.value)}
+                  placeholder="1863, 1864 (comma-separated)"
+                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
+                />
+                <p className="text-[10px] text-text-muted mt-1">
+                  Numeric IDs from asjjf.org event URLs. Gi and No-Gi are separate IDs.
+                </p>
+              </div>
+              {typeof editing === 'number' ? (
+                <Link
+                  to={`/admin/events/${editing}/results`}
+                  className="inline-flex items-center gap-3 px-4 text-gold border border-white/10"
+                >
+                  Manage event results{' '}
+                  <ResultsSyncBadge
+                    status={currentEvent?.results_sync_status}
+                    lastCheckedAt={currentEvent?.results_last_checked_at}
+                  />
+                </Link>
+              ) : (
+                <p>Save this draft to manage results.</p>
+              )}
+            </section>
+            <section
+              hidden={activeSection !== 'publishing'}
+              id="event-section-publishing"
+              tabIndex={-1}
+              aria-label="Publishing"
+              className="space-y-5 min-w-0"
+            >
+              <h2 className="font-heading text-lg font-semibold">Publishing</h2>
+              {sectionErrors.publishing?.length ? (
+                <ul role="alert" className="space-y-1 text-sm text-red-300">
+                  {sectionErrors.publishing?.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <label className="flex items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  checked={
+                    currentEvent?.source_event_id
+                      ? !form.content_review_required
+                      : (form.content_review_required ?? false)
+                  }
+                  onChange={(e) =>
+                    updateForm(
+                      'content_review_required',
+                      currentEvent?.source_event_id ? !e.target.checked : e.target.checked
+                    )
+                  }
+                />
+                {currentEvent?.source_event_id
+                  ? 'I reviewed copied content for this season'
+                  : 'Content still needs review'}
+              </label>{' '}
+              {/* Live Stream */}
+              <div className="border border-white/5">
+                <button
+                  type="button"
+                  onClick={() => toggleSection('livestream')}
+                  className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-text-primary hover:bg-white/[0.02] transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Radio className="w-4 h-4 text-text-muted" />
+                    Live Stream
+                    {form.live_stream_active && (
+                      <span className="text-xs px-2 py-0.5 bg-red-500/20 text-red-400 animate-pulse">LIVE</span>
+                    )}
+                  </span>
+                  {expandedSections.livestream ? (
+                    <ChevronUp className="w-4 h-4" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4" />
+                  )}
+                </button>
+                {expandedSections.livestream && (
+                  <div className="p-4 border-t border-white/5 space-y-3">
+                    <Field
+                      label="Live Stream URL"
+                      value={form.live_stream_url}
+                      onChange={(v) => updateForm('live_stream_url', v)}
+                      placeholder="https://www.youtube.com/@themarianasopen/live"
+                    />
+                    <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.live_stream_active}
+                        onChange={(e) => {
+                          const checked = e.target.checked
+                          updateForm('live_stream_active', checked)
+                          if (checked && !form.live_stream_url) {
+                            updateForm('live_stream_url', DEFAULT_LIVE_STREAM_URL)
+                          }
+                        }}
+                        className="accent-gold"
+                      />
+                      <span>Stream is LIVE now</span>
+                      {form.live_stream_active && (
+                        <span className="text-xs text-red-400">(Visitors will see a live banner)</span>
+                      )}
+                    </label>
+                  </div>
+                )}
+              </div>
+              {currentEvent ? (
+                <PublishingSection
+                  key={currentEvent.id}
+                  event={currentEvent}
+                  dirty={anyDirty}
+                  onSelect={selectSection}
+                  onUpdate={acceptSavedEvent}
+                  onBusyChange={setActionBusy}
+                />
+              ) : (
+                <p className="text-sm text-text-secondary">Save the draft to see its publishing checklist.</p>
+              )}
+            </section>{' '}
+          </fieldset>
+          <EditorSaveBar>
+            <span role="status" className={`mr-auto text-sm ${anyDirty ? 'text-amber-300' : 'text-text-secondary'}`}>
+              {dirty
+                ? 'Unsaved event changes'
+                : Object.values(childDirty).some(Boolean)
+                  ? 'Unsaved hotel or gallery changes'
+                  : 'Event changes saved'}
+            </span>
+            <button
+              onClick={handleSave}
+              disabled={saving || actionBusy}
+              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+            <button
+              onClick={() => {
+                setEditing(null)
+                setError('')
+              }}
+              className="px-5 py-2.5 text-text-muted text-sm hover:text-text-primary transition-colors"
+            >
+              Cancel
+            </button>
+          </EditorSaveBar>
+        </div>
       ) : (
         /* Events Table */
         <div className="bg-surface border border-white/5 overflow-hidden">
@@ -1610,21 +1438,26 @@ export default function EventsAdmin() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
+                aria-label="Search events..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search events..."
                 className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
               />
             </div>
             <select
               value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none"
             >
               <option value="all">All statuses ({events.length})</option>
-              {Object.entries(statusCounts).sort().map(([status, count]) => (
-                <option key={status} value={status}>{status} ({count})</option>
-              ))}
+              {Object.entries(statusCounts)
+                .sort()
+                .map(([status, count]) => (
+                  <option key={status} value={status}>
+                    {status} ({count})
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -1636,9 +1469,17 @@ export default function EventsAdmin() {
             <>
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm min-w-[720px]">
-              <thead>
-                <tr className="border-b border-white/5 text-left">
-                      {([['name', 'Name'], ['date', 'Date'], ['location', 'Location'], ['stars', 'Stars'], ['status', 'Status']] as [SortField, string][]).map(([field, label]) => (
+                  <thead>
+                    <tr className="border-b border-white/5 text-left">
+                      {(
+                        [
+                          ['name', 'Name'],
+                          ['date', 'Date'],
+                          ['location', 'Location'],
+                          ['stars', 'Stars'],
+                          ['status', 'Status'],
+                        ] as [SortField, string][]
+                      ).map(([field, label]) => (
                         <th
                           key={field}
                           onClick={() => toggleSort(field)}
@@ -1647,44 +1488,67 @@ export default function EventsAdmin() {
                           <span className="inline-flex items-center gap-1">
                             {label}
                             {sortField === field ? (
-                              sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                              sortDir === 'asc' ? (
+                                <ArrowUp className="w-3 h-3" />
+                              ) : (
+                                <ArrowDown className="w-3 h-3" />
+                              )
                             ) : (
                               <ArrowUpDown className="w-3 h-3 opacity-30" />
                             )}
                           </span>
                         </th>
                       ))}
-                  <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide w-24"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                    {filteredEvents.map(event => (
-                  <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-5 py-3 text-text-primary font-medium">
-                      {event.name}
-                      <div className="mt-1"><Link to={`/admin/events/${event.id}/results`} aria-label={`Review results sync for ${event.name}`} className="inline-flex min-h-11 items-center focus-visible:outline-2 focus-visible:outline-gold"><ResultsSyncBadge status={event.results_sync_status} lastCheckedAt={event.results_last_checked_at} /></Link></div>
-                    </td>
+                      <th className="px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wide w-24"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {filteredEvents.map((event) => (
+                      <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="px-5 py-3 text-text-primary font-medium">
+                          {event.name}
+                          <div className="mt-1">
+                            <Link
+                              to={`/admin/events/${event.id}/results`}
+                              aria-label={`Review results sync for ${event.name}`}
+                              className="inline-flex min-h-11 items-center focus-visible:outline-2 focus-visible:outline-gold"
+                            >
+                              <ResultsSyncBadge
+                                status={event.results_sync_status}
+                                lastCheckedAt={event.results_last_checked_at}
+                              />
+                            </Link>
+                          </div>
+                        </td>
                         <td className="px-5 py-3 text-text-secondary whitespace-nowrap">{formatDate(event.date)}</td>
-                    <td className="px-5 py-3 text-text-secondary">{event.city}, {event.country}</td>
-                    <td className="px-5 py-3">
-                      <span className="flex items-center gap-1 text-gold">
-                        <Star className="w-3 h-3 fill-current" />
-                        {event.asjjf_stars || 0}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className={`text-xs px-2 py-0.5 ${
-                            event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
-                            event.status === 'live' ? 'bg-red-500/10 text-red-400 animate-pulse' :
-                            event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
-                            event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
-                            'bg-white/5 text-text-muted'
-                      }`}>
-                        {event.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-2">
+                        <td className="px-5 py-3 text-text-secondary">
+                          {event.city}, {event.country}
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className="flex items-center gap-1 text-gold">
+                            <Star className="w-3 h-3 fill-current" />
+                            {event.asjjf_stars ?? 'Not set'}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3">
+                          <span
+                            className={`text-xs px-2 py-0.5 ${
+                              event.status === 'upcoming'
+                                ? 'bg-gold/10 text-gold'
+                                : event.status === 'live'
+                                  ? 'bg-red-500/10 text-red-400 animate-pulse'
+                                  : event.status === 'completed'
+                                    ? 'bg-blue-500/10 text-blue-400'
+                                    : event.status === 'cancelled'
+                                      ? 'bg-red-500/10 text-red-400'
+                                      : 'bg-white/5 text-text-muted'
+                            }`}
+                          >
+                            {event.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-2">
                             <Link
                               to={`/admin/events/${event.id}/results`}
                               className="p-1.5 text-text-muted hover:text-gold transition-colors"
@@ -1692,59 +1556,76 @@ export default function EventsAdmin() {
                             >
                               <Trophy className="w-3.5 h-3.5" />
                             </Link>
-                        <button
-                          onClick={() => handleClone(event.id)}
-                          className="p-1.5 text-text-muted hover:text-blue-400 transition-colors"
-                              title="Clone Event"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
-                          className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
+                            <button
+                              onClick={() => setRollover({ eventId: event.id })}
+                              className="p-1.5 text-text-muted hover:text-blue-400 transition-colors"
+                              title="Copy for next season"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setEditing(event.id)}
+                              className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                               title="Edit"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(event.id)}
-                          className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(event.id)}
+                              className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
                               title="Delete"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
 
               <div className="md:hidden divide-y divide-white/5">
-                {filteredEvents.map(event => (
+                {filteredEvents.map((event) => (
                   <div key={event.id} className="p-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="text-sm text-text-primary font-medium">{event.name}</div>
                         <div className="text-xs text-text-secondary mt-1">{formatDate(event.date)}</div>
-                        <div className="text-xs text-text-muted mt-1">{event.city}, {event.country}</div>
-                        <Link to={`/admin/events/${event.id}/results`} aria-label={`Review results sync for ${event.name}`} className="mt-1 inline-flex min-h-11 items-center focus-visible:outline-2 focus-visible:outline-gold"><ResultsSyncBadge status={event.results_sync_status} lastCheckedAt={event.results_last_checked_at} /></Link>
+                        <div className="text-xs text-text-muted mt-1">
+                          {event.city}, {event.country}
+                        </div>
+                        <Link
+                          to={`/admin/events/${event.id}/results`}
+                          aria-label={`Review results sync for ${event.name}`}
+                          className="mt-1 inline-flex min-h-11 items-center focus-visible:outline-2 focus-visible:outline-gold"
+                        >
+                          <ResultsSyncBadge
+                            status={event.results_sync_status}
+                            lastCheckedAt={event.results_last_checked_at}
+                          />
+                        </Link>
                       </div>
-                      <span className={`text-xs px-2 py-0.5 shrink-0 ${
-                        event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
-                        event.status === 'live' ? 'bg-red-500/10 text-red-400 animate-pulse' :
-                        event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
-                        event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
-                        'bg-white/5 text-text-muted'
-                      }`}>
+                      <span
+                        className={`text-xs px-2 py-0.5 shrink-0 ${
+                          event.status === 'upcoming'
+                            ? 'bg-gold/10 text-gold'
+                            : event.status === 'live'
+                              ? 'bg-red-500/10 text-red-400 animate-pulse'
+                              : event.status === 'completed'
+                                ? 'bg-blue-500/10 text-blue-400'
+                                : event.status === 'cancelled'
+                                  ? 'bg-red-500/10 text-red-400'
+                                  : 'bg-white/5 text-text-muted'
+                        }`}
+                      >
                         {event.status}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1 text-gold text-xs">
                         <Star className="w-3 h-3 fill-current" />
-                        {event.asjjf_stars || 0} stars
+                        {event.asjjf_stars == null ? 'Stars not set' : `${event.asjjf_stars} stars`}
                       </span>
                       <div className="flex items-center gap-2">
                         <Link
@@ -1755,14 +1636,14 @@ export default function EventsAdmin() {
                           <Trophy className="w-3.5 h-3.5" />
                         </Link>
                         <button
-                          onClick={() => handleClone(event.id)}
+                          onClick={() => setRollover({ eventId: event.id })}
                           className="p-1.5 text-text-muted hover:text-blue-400 transition-colors"
-                          title="Clone Event"
+                          title="Copy for next season"
                         >
                           <Copy className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => { setForm(eventToForm(event)); setEditing(event.id); setError('') }}
+                          onClick={() => setEditing(event.id)}
                           className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                           title="Edit"
                         >
@@ -1785,6 +1666,19 @@ export default function EventsAdmin() {
         </div>
       )}
 
+      {rollover && (
+        <RolloverDialog
+          events={events}
+          initialEventId={rollover.eventId}
+          onClose={() => setRollover(null)}
+          onComplete={(copies, message) => {
+            setRollover(null)
+            setEvents((previous) => [...previous, ...copies])
+            setSuccess(message || `${copies.length} draft copies created. Review before publishing.`)
+            if (copies.length === 1) setEditingParam(copies[0].id)
+          }}
+        />
+      )}
       {/* Delete Confirmation */}
       <AnimatePresence>
         {deleteConfirm !== null && (
@@ -1799,13 +1693,11 @@ export default function EventsAdmin() {
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="bg-surface border border-white/10 p-6 max-w-sm w-full mx-4"
             >
               <h3 className="font-heading text-lg font-semibold text-text-primary mb-2">Delete Event</h3>
-              <p className="text-sm text-text-secondary mb-5">
-                Are you sure? This action cannot be undone.
-              </p>
+              <p className="text-sm text-text-secondary mb-5">Are you sure? This action cannot be undone.</p>
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setDeleteConfirm(null)}
@@ -1824,1060 +1716,6 @@ export default function EventsAdmin() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
-  )
-}
-
-function AccommodationsSection({ eventId }: { eventId: number }) {
-  const [accommodations, setAccommodations] = useState<EventAccommodation[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState<number | 'new' | null>(null)
-  const [error, setError] = useState('')
-  const [form, setForm] = useState<EventAccommodationFormData>({
-    hotel_name: '', description: '', room_types: '', rate_info: '',
-    inclusions: '', check_in_date: '', check_out_date: '',
-    booking_url: '', booking_code: '', contact_email: '', contact_phone: '',
-    sort_order: 0, active: true,
-  })
-  const [saving, setSaving] = useState(false)
-
-  const load = useCallback(async () => {
-    try {
-      const res = await api.admin.getAccommodations(eventId)
-      setAccommodations(res.accommodations)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load accommodations')
-    } finally { setLoading(false) }
-  }, [eventId])
-
-  useEffect(() => { load() }, [load])
-
-  const handleSave = async () => {
-    setSaving(true)
-    setError('')
-    try {
-      if (editing === 'new') {
-        await api.admin.createAccommodation(eventId, form)
-      } else if (typeof editing === 'number') {
-        await api.admin.updateAccommodation(eventId, editing, form)
-      }
-      setEditing(null)
-      await load()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save accommodation')
-    } finally { setSaving(false) }
-  }
-
-  const handleDelete = async (id: number) => {
-    setError('')
-    try {
-      await api.admin.deleteAccommodation(eventId, id)
-      await load()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete accommodation')
-    }
-  }
-
-  const editAccommodation = (a: EventAccommodation) => {
-    setForm({
-      hotel_name: a.hotel_name, description: a.description || '',
-      room_types: a.room_types || '', rate_info: a.rate_info || '',
-      inclusions: a.inclusions || '', check_in_date: a.check_in_date || '',
-      check_out_date: a.check_out_date || '', booking_url: a.booking_url || '',
-      booking_code: a.booking_code || '', contact_email: a.contact_email || '',
-      contact_phone: a.contact_phone || '', sort_order: a.sort_order, active: a.active,
-    })
-    setEditing(a.id)
-  }
-
-  return (
-    <div className="border border-white/5">
-      <div className="px-4 py-3 flex items-center justify-between">
-        <span className="flex items-center gap-2 text-sm font-medium text-text-primary">
-          <Hotel className="w-4 h-4 text-text-muted" />
-          Accommodations ({accommodations.length})
-        </span>
-        {editing === null && (
-          <button
-            onClick={() => {
-              setForm({ hotel_name: '', description: '', room_types: '', rate_info: '', inclusions: '', check_in_date: '', check_out_date: '', booking_url: '', booking_code: '', contact_email: '', contact_phone: '', sort_order: accommodations.length, active: true })
-              setEditing('new')
-            }}
-            className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80"
-          >
-            <Plus className="w-3 h-3" /> Add
-          </button>
-        )}
-      </div>
-
-      {error && (
-        <div className="mx-4 mb-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2">{error}</div>
-      )}
-
-      {loading ? (
-        <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-text-muted" /></div>
-      ) : (
-        <div className="border-t border-white/5">
-          {accommodations.map(a => (
-            <div key={a.id} className="px-4 py-3 flex items-center justify-between border-b border-white/5 last:border-0">
-              <div className="flex items-center gap-3">
-                {a.image_url && (
-                  <img src={resolveMediaUrl(a.image_url) || ''} alt={a.hotel_name} className="w-12 h-12 object-cover rounded" />
-                )}
-                <div>
-                  <div className="text-sm text-text-primary font-medium">{a.hotel_name}</div>
-                  <div className="text-xs text-text-muted">{a.check_in_date && a.check_out_date ? `${formatDate(a.check_in_date)} — ${formatDate(a.check_out_date)}` : 'No dates set'}</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs px-1.5 py-0.5 ${a.active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-text-muted'}`}>
-                  {a.active ? 'Active' : 'Hidden'}
-                </span>
-                <button onClick={() => editAccommodation(a)} className="p-1 text-text-muted hover:text-text-primary"><Pencil className="w-3 h-3" /></button>
-                <button onClick={() => handleDelete(a.id)} className="p-1 text-text-muted hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
-              </div>
-            </div>
-          ))}
-
-          {editing !== null && (
-            <div className="p-4 space-y-3 bg-white/[0.01]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Hotel Name *</label>
-                  <input value={form.hotel_name} onChange={e => setForm(p => ({ ...p, hotel_name: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Rate Info</label>
-                  <input value={form.rate_info} onChange={e => setForm(p => ({ ...p, rate_info: e.target.value }))} placeholder="e.g. From $89/night" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Room Types</label>
-                  <input value={form.room_types} onChange={e => setForm(p => ({ ...p, room_types: e.target.value }))} placeholder="Standard Queen, Standard Twin, Family" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Inclusions</label>
-                  <input value={form.inclusions} onChange={e => setForm(p => ({ ...p, inclusions: e.target.value }))} placeholder="Breakfast for 2, Wi-Fi" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Check-in Date</label>
-                  <input type="date" value={form.check_in_date} onChange={e => setForm(p => ({ ...p, check_in_date: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Check-out Date</label>
-                  <input type="date" value={form.check_out_date} onChange={e => setForm(p => ({ ...p, check_out_date: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Booking URL</label>
-                  <input value={form.booking_url} onChange={e => setForm(p => ({ ...p, booking_url: e.target.value }))} placeholder="https://..." className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Booking Code</label>
-                  <input value={form.booking_code} onChange={e => setForm(p => ({ ...p, booking_code: e.target.value }))} placeholder="MARIANAS2026" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Contact Email</label>
-                  <input value={form.contact_email} onChange={e => setForm(p => ({ ...p, contact_email: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Contact Phone</label>
-                  <input value={form.contact_phone} onChange={e => setForm(p => ({ ...p, contact_phone: e.target.value }))} className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Description</label>
-                <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none resize-none" />
-              </div>
-              <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
-                <input type="checkbox" checked={form.active} onChange={e => setForm(p => ({ ...p, active: e.target.checked }))} className="accent-gold" />
-                Active (visible on public site)
-              </label>
-              {typeof editing === 'number' && (
-                <ImageUpload
-                  currentUrl={resolveMediaUrl(accommodations.find(a => a.id === editing)?.image_url) || null}
-                  onUpload={async (file) => {
-                    try {
-                      await api.admin.uploadAccommodationImage(eventId, editing, file)
-                      await load()
-                    } catch (err) {
-                      setError(err instanceof Error ? err.message : 'Image upload failed')
-                    }
-                  }}
-                  label="Hotel Photo"
-                />
-              )}
-              <div className="flex gap-2">
-                <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-4 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 disabled:opacity-50">
-                  {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                  {saving ? 'Saving...' : 'Save'}
-                </button>
-                <button onClick={() => setEditing(null)} className="px-4 py-1.5 text-text-muted text-xs hover:text-text-primary">Cancel</button>
-              </div>
-            </div>
-          )}
-
-          {accommodations.length === 0 && editing === null && (
-            <div className="p-4 text-center text-text-muted text-xs">No accommodations yet.</div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-const GALLERY_ADMIN_PER_PAGE = 48
-const GALLERY_ADMIN_EAGER_IMAGE_COUNT = 8
-type GalleryDeleteConfirm =
-  | { type: 'single'; id: number; title: string }
-  | { type: 'bulk'; ids: number[] }
-
-function EventGallerySection({ eventId, eventName }: { eventId: number; eventName: string }) {
-  const [galleryImages, setGalleryImages] = useState<EventGalleryImage[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState<number | 'new' | null>(null)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [selectedIds, setSelectedIds] = useState<number[]>([])
-  const [dragActive, setDragActive] = useState(false)
-  const [uploadCaption, setUploadCaption] = useState('')
-  const [uploadCategory, setUploadCategory] = useState('')
-  const [uploadActive, setUploadActive] = useState(true)
-  const [categoryFilter, setCategoryFilter] = useState(GALLERY_CATEGORY_ALL)
-  const [bulkCategory, setBulkCategory] = useState('')
-  const [categoryOptions, setCategoryOptions] = useState<{ name: string; count: number }[]>([])
-  const [uncategorizedCount, setUncategorizedCount] = useState(0)
-  const [galleryDeleteConfirm, setGalleryDeleteConfirm] = useState<GalleryDeleteConfirm | null>(null)
-  const [page, setPage] = useState(1)
-  const [total, setTotal] = useState(0)
-  const [form, setForm] = useState<EventGalleryImageFormData>({
-    title: '',
-    alt_text: '',
-    caption: '',
-    category: '',
-    sort_order: 0,
-    active: true,
-  })
-  const [pendingFile, setPendingFile] = useState<File | null>(null)
-  const [saving, setSaving] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const uploadCategoryTouchedRef = useRef(false)
-  const { tasks, startUpload } = useGalleryUploads()
-  const completedForEvent = tasks.filter(task => task.eventId === eventId && task.status === 'complete').length
-  const visibleImageIds = useMemo(() => galleryImages.map(image => image.id), [galleryImages])
-  const allVisibleSelected = visibleImageIds.length > 0 && visibleImageIds.every(id => selectedIds.includes(id))
-  const editingImage = typeof editing === 'number' ? galleryImages.find(image => image.id === editing) || null : null
-  const totalPages = Math.max(1, Math.ceil(total / GALLERY_ADMIN_PER_PAGE))
-  const pageStart = total === 0 ? 0 : (page - 1) * GALLERY_ADMIN_PER_PAGE + 1
-  const pageEnd = Math.min(total, page * GALLERY_ADMIN_PER_PAGE)
-  const activeCategoryLabel = categoryFilter === GALLERY_CATEGORY_UNCATEGORIZED ? 'Uncategorized' : categoryFilter
-
-  const load = useCallback(async () => {
-    try {
-      const params: Record<string, string | number> = { page, per_page: GALLERY_ADMIN_PER_PAGE }
-      if (categoryFilter !== GALLERY_CATEGORY_ALL) params.category = categoryFilter
-      const res = await api.admin.getEventGalleryImages(eventId, params)
-      const lastPage = Math.max(1, Math.ceil(res.total / GALLERY_ADMIN_PER_PAGE))
-      if (page > lastPage) {
-        setGalleryImages([])
-        setCategoryOptions(res.categories || [])
-        setUncategorizedCount(res.uncategorized_count || 0)
-        setTotal(res.total)
-        setPage(lastPage)
-        return
-      }
-      setGalleryImages(res.gallery_images)
-      setCategoryOptions(res.categories || [])
-      setUncategorizedCount(res.uncategorized_count || 0)
-      setTotal(res.total)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load gallery')
-    } finally {
-      setLoading(false)
-    }
-  }, [eventId, page, categoryFilter])
-
-  useEffect(() => { load() }, [load])
-  useEffect(() => { setSelectedIds([]) }, [eventId, page, categoryFilter])
-  useEffect(() => {
-    uploadCategoryTouchedRef.current = false
-    setUploadCategory('')
-  }, [eventId])
-  useEffect(() => {
-    if (categoryFilter === GALLERY_CATEGORY_ALL || uploadCategoryTouchedRef.current) return
-    setUploadCategory(categoryFilter === GALLERY_CATEGORY_UNCATEGORIZED ? '' : categoryFilter)
-  }, [categoryFilter])
-  useEffect(() => {
-    if (completedForEvent === 0) return undefined
-    const refreshTimer = window.setTimeout(() => {
-      void load()
-    }, 750)
-    return () => window.clearTimeout(refreshTimer)
-  }, [completedForEvent, load])
-
-  const resetForm = () => {
-    setForm({
-      title: '',
-      alt_text: '',
-      caption: '',
-      category: uploadCategory,
-      sort_order: galleryImages.length,
-      active: true,
-    })
-    setPendingFile(null)
-  }
-
-  const editGalleryImage = (image: EventGalleryImage) => {
-    setForm({
-      title: image.title || '',
-      alt_text: image.alt_text || '',
-      caption: image.caption || '',
-      category: image.category || '',
-      sort_order: image.sort_order,
-      active: image.active,
-    })
-    setPendingFile(null)
-    setEditing(image.id)
-  }
-
-  const closeEditor = () => {
-    if (saving) return
-    setEditing(null)
-    setPendingFile(null)
-  }
-
-  const handleSave = async () => {
-    setSaving(true)
-    try {
-      if (editing === 'new') {
-        if (!pendingFile) return
-        const formData = new FormData()
-        formData.append('title', form.title)
-        formData.append('alt_text', form.alt_text)
-        formData.append('caption', form.caption)
-        formData.append('category', form.category)
-        formData.append('sort_order', String(form.sort_order))
-        formData.append('active', String(form.active))
-        formData.append('image', pendingFile)
-        await api.admin.createEventGalleryImage(eventId, formData)
-      } else if (typeof editing === 'number') {
-        await api.admin.updateEventGalleryImage(eventId, editing, form)
-        if (pendingFile) {
-          await api.admin.uploadEventGalleryImage(eventId, editing, pendingFile)
-        }
-      }
-      setEditing(null)
-      setPendingFile(null)
-      await load()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save gallery image')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleFiles = async (fileList: FileList | File[]) => {
-    const selectedFiles = Array.from(fileList)
-    const files = selectedFiles.filter(isSupportedGalleryImage)
-    if (files.length === 0) {
-      setError(`Choose ${GALLERY_IMAGE_TYPE_LABEL} images under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
-      return
-    }
-    if (files.length < selectedFiles.length) {
-      setError(`Skipped ${selectedFiles.length - files.length} unsupported or oversized file${selectedFiles.length - files.length === 1 ? '' : 's'}`)
-    } else {
-      setError('')
-    }
-
-    setSuccess('')
-    try {
-      await startUpload({
-        eventId,
-        eventName,
-        files,
-        active: uploadActive,
-        caption: uploadCaption,
-        category: uploadCategory,
-        startSortOrder: total,
-      })
-      setSuccess(`Queued ${files.length} image${files.length === 1 ? '' : 's'} for upload`)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to queue gallery uploads')
-    }
-  }
-
-  const toggleSelected = (id: number) => {
-    setSelectedIds(current => current.includes(id) ? current.filter(x => x !== id) : [...current, id])
-  }
-
-  const toggleVisibleSelection = () => {
-    setSelectedIds(current => {
-      if (allVisibleSelected) {
-        return current.filter(id => !visibleImageIds.includes(id))
-      }
-      return Array.from(new Set([...current, ...visibleImageIds]))
-    })
-  }
-
-  const dragHasFiles = (event: DragEvent<HTMLDivElement>) => Array.from(event.dataTransfer.types).includes('Files')
-
-  const handleGalleryDragEnter = (event: DragEvent<HTMLDivElement>) => {
-    if (!dragHasFiles(event)) return
-    event.preventDefault()
-    setDragActive(true)
-  }
-
-  const handleGalleryDragOver = (event: DragEvent<HTMLDivElement>) => {
-    if (!dragHasFiles(event)) return
-    event.preventDefault()
-    setDragActive(true)
-  }
-
-  const handleGalleryDragLeave = (event: DragEvent<HTMLDivElement>) => {
-    if (event.currentTarget.contains(event.relatedTarget as Node | null)) return
-    setDragActive(false)
-  }
-
-  const handleGalleryDrop = (event: DragEvent<HTMLDivElement>) => {
-    if (!dragHasFiles(event)) return
-    event.preventDefault()
-    setDragActive(false)
-    void handleFiles(event.dataTransfer.files)
-  }
-
-  const handleBulkActive = async (active: boolean) => {
-    if (selectedIds.length === 0) return
-    setError('')
-    try {
-      await api.admin.bulkUpdateEventGalleryImages(eventId, selectedIds, { active })
-      setSelectedIds([])
-      await load()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Bulk update failed')
-    }
-  }
-
-  const handleBulkCategory = async (category = bulkCategory) => {
-    if (selectedIds.length === 0) return
-    setError('')
-    try {
-      await api.admin.bulkUpdateEventGalleryImages(eventId, selectedIds, { category })
-      setSelectedIds([])
-      setBulkCategory('')
-      await load()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Bulk category update failed')
-    }
-  }
-
-  const requestBulkDelete = () => {
-    if (selectedIds.length === 0) return
-    setGalleryDeleteConfirm({ type: 'bulk', ids: [...selectedIds] })
-  }
-
-  const requestDelete = (image: EventGalleryImage) => {
-    setGalleryDeleteConfirm({ type: 'single', id: image.id, title: image.title || image.original_filename || 'Untitled image' })
-  }
-
-  const handleConfirmGalleryDelete = () => {
-    const pendingDelete = galleryDeleteConfirm
-    if (!pendingDelete) return
-
-    setGalleryDeleteConfirm(null)
-    if (pendingDelete.type === 'bulk') {
-      void handleBulkDelete(pendingDelete.ids)
-      return
-    }
-
-    void handleDelete(pendingDelete.id)
-  }
-
-  const handleBulkDelete = async (idsToDelete: number[]) => {
-    if (idsToDelete.length === 0) return
-    setError('')
-    const previousImages = galleryImages
-    const previousTotal = total
-
-    setGalleryImages(current => current.filter(image => !idsToDelete.includes(image.id)))
-    setTotal(current => Math.max(0, current - idsToDelete.length))
-    setSelectedIds([])
-    try {
-      await api.admin.bulkDeleteEventGalleryImages(eventId, idsToDelete)
-    } catch (err) {
-      setGalleryImages(previousImages)
-      setTotal(previousTotal)
-      setSelectedIds(idsToDelete)
-      setError(err instanceof Error ? err.message : 'Bulk delete failed')
-      return
-    }
-
-    try {
-      await load()
-    } catch (err) {
-      setError(err instanceof Error ? `Deleted, but failed to refresh gallery: ${err.message}` : 'Deleted, but failed to refresh gallery')
-    }
-  }
-
-  const handleDelete = async (id: number) => {
-    setError('')
-    const previousImages = galleryImages
-    const previousTotal = total
-    const previousSelectedIds = selectedIds
-    const previousEditing = editing
-    const previousPendingFile = pendingFile
-
-    setGalleryImages(current => current.filter(image => image.id !== id))
-    setTotal(current => Math.max(0, current - 1))
-    setSelectedIds(current => current.filter(selectedId => selectedId !== id))
-    if (editing === id) {
-      setEditing(null)
-      setPendingFile(null)
-    }
-
-    try {
-      await api.admin.deleteEventGalleryImage(eventId, id)
-    } catch (err) {
-      setGalleryImages(previousImages)
-      setTotal(previousTotal)
-      setSelectedIds(previousSelectedIds)
-      setEditing(previousEditing)
-      setPendingFile(previousPendingFile)
-      setError(err instanceof Error ? err.message : 'Failed to delete gallery image')
-      return
-    }
-
-    try {
-      await load()
-    } catch (err) {
-      setError(err instanceof Error ? `Deleted, but failed to refresh gallery: ${err.message}` : 'Deleted, but failed to refresh gallery')
-    }
-  }
-
-  return (
-    <>
-    <div
-      className={`relative border transition-colors ${dragActive ? 'border-gold/60 bg-gold/5' : 'border-white/5'}`}
-      onDragEnter={handleGalleryDragEnter}
-      onDragOver={handleGalleryDragOver}
-      onDragLeave={handleGalleryDragLeave}
-      onDrop={handleGalleryDrop}
-    >
-      {dragActive && (
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center border-2 border-dashed border-gold/70 bg-navy-950/70">
-          <div className="bg-navy-900 border border-gold/30 px-5 py-3 text-sm font-medium text-gold">
-            Drop photos to upload
-          </div>
-        </div>
-      )}
-      <div className="px-4 py-3 flex items-center justify-between">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="flex items-center gap-2 text-sm font-medium text-text-primary">
-            <ImageIcon className="w-4 h-4 text-text-muted" />
-            Event Gallery ({total})
-          </span>
-          <select
-            value={categoryFilter}
-            onChange={e => {
-              setCategoryFilter(e.target.value)
-              setPage(1)
-            }}
-            className="bg-white/[0.03] border border-white/10 px-2 py-1 text-xs text-text-secondary focus:border-gold/40 focus:outline-none"
-            aria-label="Filter gallery by album or category"
-          >
-            <option value={GALLERY_CATEGORY_ALL}>All albums/categories</option>
-            {uncategorizedCount > 0 && <option value={GALLERY_CATEGORY_UNCATEGORIZED}>Uncategorized ({uncategorizedCount})</option>}
-            {categoryOptions.filter(category => category.count > 0).map(category => (
-              <option key={category.name} value={category.name}>{category.name} ({category.count})</option>
-            ))}
-          </select>
-          {galleryImages.length > 0 && (
-            <button onClick={toggleVisibleSelection} className={`inline-flex items-center gap-1.5 border px-2 py-1 text-xs transition-colors ${allVisibleSelected ? 'border-gold/40 bg-gold/10 text-gold' : 'border-white/10 text-text-muted hover:border-gold/30 hover:text-gold'}`}>
-              {allVisibleSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-              {allVisibleSelected ? 'Clear visible' : 'Select all visible'}
-            </button>
-          )}
-        </div>
-        {editing === null && (
-          <button
-            onClick={() => {
-              resetForm()
-              setEditing('new')
-            }}
-            className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80"
-          >
-            <Plus className="w-3 h-3" /> Add
-          </button>
-        )}
-      </div>
-
-      {error && (
-        <div className="mx-4 mb-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2">{error}</div>
-      )}
-      {success && (
-        <div className="mx-4 mb-2 text-sm text-green-400 bg-green-500/10 border border-green-500/20 px-3 py-2">{success}</div>
-      )}
-      {uncategorizedCount > 0 && (
-        <div className="mx-4 mb-3 flex flex-col gap-2 border border-gold/15 bg-gold/[0.04] px-3 py-2 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between">
-          <span>{uncategorizedCount} photo{uncategorizedCount === 1 ? '' : 's'} do not have an album/category yet.</span>
-          <button
-            onClick={() => {
-              setCategoryFilter(GALLERY_CATEGORY_UNCATEGORIZED)
-              setPage(1)
-            }}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-gold hover:text-gold-400"
-          >
-            <Tags className="w-3 h-3" /> Review uncategorized
-          </button>
-        </div>
-      )}
-
-      <div className="mx-4 mb-4 grid gap-3 lg:grid-cols-[1fr_280px]">
-        <div
-          className={`border border-dashed p-5 transition-colors ${dragActive ? 'border-gold bg-gold/10' : 'border-white/10 bg-white/[0.02]'}`}
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="w-11 h-11 bg-gold/10 text-gold flex items-center justify-center shrink-0">
-              <UploadCloud className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium text-text-primary">Bulk upload tournament photos</div>
-              <div className="text-xs text-text-muted mt-1">Pick an album/category, then drop a folder selection or choose many images. Uploads continue while you move around admin.</div>
-            </div>
-            <button onClick={() => fileInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gold text-navy-900 text-xs font-heading font-semibold uppercase tracking-wider hover:bg-gold-400">
-              <Upload className="w-3.5 h-3.5" /> Choose Photos
-            </button>
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={GALLERY_IMAGE_ACCEPT}
-            multiple
-            onChange={e => { if (e.target.files) void handleFiles(e.target.files) }}
-            className="hidden"
-          />
-        </div>
-        <div className="border border-white/5 bg-white/[0.01] p-3 space-y-3">
-          <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
-            <input type="checkbox" checked={uploadActive} onChange={e => setUploadActive(e.target.checked)} className="accent-gold" />
-            Active after upload
-          </label>
-          <div>
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">Default Caption</label>
-            <input value={uploadCaption} onChange={e => setUploadCaption(e.target.value)} placeholder="Optional shared caption" className="w-full bg-white/[0.03] border border-white/10 px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-          </div>
-          <GalleryCategoryPicker
-            label="Album / Category"
-            value={uploadCategory}
-            onChange={category => {
-              uploadCategoryTouchedRef.current = true
-              setUploadCategory(category)
-            }}
-            categoryOptions={categoryOptions}
-            emptyLabel="Upload without an album"
-            helpText="Every photo in this upload will be assigned to this album/category. You can move them later."
-          />
-        </div>
-      </div>
-      {loading ? (
-        <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-text-muted" /></div>
-      ) : (
-        <div className="border-t border-white/5">
-          {galleryImages.length > 0 && (
-            <div className="flex flex-col gap-2 border-b border-white/5 bg-white/[0.015] px-4 py-3 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
-              <span>
-                Showing {pageStart}-{pageEnd} of {total}
-                {categoryFilter !== GALLERY_CATEGORY_ALL ? ` in ${activeCategoryLabel}` : ''}
-              </span>
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="border border-white/10 px-3 py-1.5 text-text-secondary hover:border-gold/30 hover:text-gold disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:text-text-secondary">Previous</button>
-                  <span>Page {page} of {totalPages}</span>
-                  <button disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))} className="border border-white/10 px-3 py-1.5 text-text-secondary hover:border-gold/30 hover:text-gold disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:text-text-secondary">Next</button>
-                </div>
-              )}
-            </div>
-          )}
-          {selectedIds.length > 0 && (
-            <div className="p-3 border-b border-white/5 bg-white/[0.02] flex flex-wrap items-center justify-between gap-3">
-              <div className="text-xs text-text-secondary">{selectedIds.length} selected</div>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="grid w-full gap-2 sm:w-auto sm:min-w-72 sm:grid-cols-[1fr_auto_auto] sm:items-end">
-                  <GalleryCategoryPicker
-                    label="Move selected to"
-                    value={bulkCategory}
-                    onChange={setBulkCategory}
-                    categoryOptions={categoryOptions}
-                    emptyLabel="Choose album/category"
-                    compact
-                  />
-                  <button
-                    onClick={() => void handleBulkCategory()}
-                    disabled={!bulkCategory.trim()}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gold bg-gold/10 hover:bg-gold/15 disabled:opacity-40"
-                  >
-                    <Tags className="w-3 h-3" /> Move
-                  </button>
-                  <button onClick={() => void handleBulkCategory('')} className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-text-muted bg-white/5 hover:text-text-primary">
-                    <X className="w-3 h-3" /> Clear album
-                  </button>
-                </div>
-                <button onClick={() => void handleBulkActive(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-green-400 bg-green-500/10 hover:bg-green-500/15"><Eye className="w-3 h-3" /> Show</button>
-                <button onClick={() => void handleBulkActive(false)} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-muted bg-white/5 hover:text-text-primary"><EyeOff className="w-3 h-3" /> Hide</button>
-                <button onClick={requestBulkDelete} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 bg-red-500/10 hover:bg-red-500/15"><Trash2 className="w-3 h-3" /> Delete</button>
-              </div>
-            </div>
-          )}
-          {galleryImages.length > 0 && (
-            <div className="grid grid-cols-1 gap-3 border-b border-white/5 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-              {galleryImages.map((image, index) => {
-                const previewUrl = resolveMediaUrl(image.thumbnail_url)
-
-                return (
-                  <div key={image.id} className={`relative border bg-white/[0.01] transition-colors ${selectedIds.includes(image.id) ? 'border-gold/70 bg-gold/[0.04]' : 'border-white/5'}`}>
-                    <button
-                      onClick={() => toggleSelected(image.id)}
-                      className={`absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center border shadow-lg transition-colors ${selectedIds.includes(image.id) ? 'border-gold bg-gold text-navy-950' : 'border-white/30 bg-navy-950/80 text-white/70 hover:border-gold/70 hover:text-gold'}`}
-                      aria-label={selectedIds.includes(image.id) ? 'Deselect image' : 'Select image'}
-                    >
-                      {selectedIds.includes(image.id) ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
-                    </button>
-                    <div className="aspect-[16/9] bg-white/[0.02] overflow-hidden">
-                      {previewUrl ? (
-                        <ImageWithShimmer
-                          src={previewUrl}
-                          alt={image.alt_text || image.title || 'Gallery image'}
-                          loading={index < GALLERY_ADMIN_EAGER_IMAGE_COUNT ? 'eager' : 'lazy'}
-                          decoding="async"
-                          fetchPriority={index < GALLERY_ADMIN_EAGER_IMAGE_COUNT ? 'high' : 'auto'}
-                          sizes="(min-width: 1536px) 23vw, (min-width: 1280px) 31vw, (min-width: 640px) 48vw, 100vw"
-                          lazyRootMargin="900px 0px"
-                          className="w-full h-full object-cover"
-                          placeholderClassName="flex items-center justify-center"
-                          placeholderContent={<ImageIcon className="w-6 h-6 text-text-muted/40" />}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                          <ImageIcon className="w-6 h-6 text-text-muted/40" />
-                          {image.status !== 'ready' && (
-                            <span className="text-xs text-text-muted">Processing preview</span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-3 flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm text-text-primary font-medium truncate">{image.title || 'Untitled image'}</div>
-                        <div className="text-xs text-text-muted truncate">
-                          Sort #{image.sort_order} · {image.status}{image.category ? ` · ${image.category}` : ''}{image.caption ? ` · ${image.caption}` : ''}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className={`text-xs px-1.5 py-0.5 ${image.active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-text-muted'}`}>
-                          {image.active ? 'Active' : 'Hidden'}
-                        </span>
-                        <button onClick={() => editGalleryImage(image)} className="p-1 text-text-muted hover:text-text-primary"><Pencil className="w-3 h-3" /></button>
-                        <button onClick={() => requestDelete(image)} className="p-1 text-text-muted hover:text-red-400" aria-label="Delete gallery image"><Trash2 className="w-3 h-3" /></button>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          {galleryImages.length === 0 && editing === null && (
-            <div className="p-4 text-center text-text-muted text-xs">
-              {categoryFilter === GALLERY_CATEGORY_ALL ? 'No gallery images yet.' : `No photos in ${activeCategoryLabel}.`}
-            </div>
-          )}
-          {totalPages > 1 && (
-            <div className="p-4 flex items-center justify-center gap-2 border-t border-white/5">
-              <button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="px-3 py-1.5 text-xs text-text-secondary bg-white/5 disabled:opacity-40">Previous</button>
-              <span className="text-xs text-text-muted">Page {page} of {totalPages}</span>
-              <button disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-xs text-text-secondary bg-white/5 disabled:opacity-40">Next</button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-    <AnimatePresence>
-      {editing !== null && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-4"
-          onClick={closeEditor}
-        >
-          <motion.div
-            initial={{ y: 24, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 24, opacity: 0 }}
-            className="flex max-h-[92vh] w-full flex-col border border-white/10 bg-navy-900 shadow-xl sm:max-w-3xl"
-            onClick={event => event.stopPropagation()}
-          >
-            <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3">
-              <div className="min-w-0">
-                <h3 className="truncate text-sm font-semibold text-text-primary">
-                  {editing === 'new' ? 'Add gallery photo' : 'Edit gallery photo'}
-                </h3>
-                {editingImage && (
-                  <p className="mt-0.5 truncate text-xs text-text-muted">
-                    {editingImage.original_filename || editingImage.title || `Photo #${editingImage.id}`}
-                  </p>
-                )}
-              </div>
-              <button onClick={closeEditor} className="shrink-0 p-1.5 text-text-muted hover:text-text-primary" aria-label="Close editor">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="overflow-y-auto p-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-[240px_1fr]">
-                <div className="space-y-3">
-                  <div className="aspect-[4/3] overflow-hidden border border-white/10 bg-white/[0.02]">
-                    {editingImage && editingImage.thumbnail_url ? (
-                      <ImageWithShimmer
-                        src={resolveMediaUrl(editingImage.thumbnail_url) || ''}
-                        alt={editingImage.alt_text || editingImage.title || 'Gallery image'}
-                        loading="eager"
-                        decoding="async"
-                        className="h-full w-full object-cover"
-                        placeholderClassName="flex items-center justify-center"
-                        placeholderContent={<ImageIcon className="h-7 w-7 text-text-muted/40" />}
-                      />
-                    ) : (
-                      <div className="flex h-full flex-col items-center justify-center gap-2 text-text-muted">
-                        <ImageIcon className="h-7 w-7 opacity-40" />
-                        <span className="text-xs">{editing === 'new' ? 'New photo' : 'Preview unavailable'}</span>
-                      </div>
-                    )}
-                  </div>
-                  <label className="flex items-center gap-2 text-sm text-text-secondary">
-                    <input type="checkbox" checked={form.active} onChange={e => setForm(p => ({ ...p, active: e.target.checked }))} className="accent-gold" />
-                    Active
-                  </label>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Title</label>
-                    <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Alt Text</label>
-                    <input value={form.alt_text} onChange={e => setForm(p => ({ ...p, alt_text: e.target.value }))} placeholder="Describe the image" className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Caption</label>
-                    <input value={form.caption} onChange={e => setForm(p => ({ ...p, caption: e.target.value }))} className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-                  </div>
-                  <GalleryCategoryPicker
-                    label="Album / Category"
-                    value={form.category}
-                    onChange={category => setForm(p => ({ ...p, category }))}
-                    categoryOptions={categoryOptions}
-                    emptyLabel="No album / category"
-                  />
-                  <div>
-                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">Sort Order</label>
-                    <input type="number" value={form.sort_order} onChange={e => setForm(p => ({ ...p, sort_order: parseInt(e.target.value, 10) || 0 }))} className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">
-                      {editing === 'new' ? 'Image File *' : 'Replace Image'}
-                    </label>
-                    <input
-                      type="file"
-                      accept={GALLERY_IMAGE_ACCEPT}
-                      onChange={e => {
-                        const file = e.target.files?.[0] || null
-                        if (file && !isSupportedGalleryImage(file)) {
-                          setError(`Choose a ${GALLERY_IMAGE_TYPE_LABEL} image under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`)
-                          setPendingFile(null)
-                          e.target.value = ''
-                          return
-                        }
-                        setPendingFile(file)
-                      }}
-                      className="w-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-text-primary file:mr-3 file:border-0 file:bg-gold/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-gold"
-                    />
-                    {pendingFile && <div className="mt-1 text-xs text-text-muted">{pendingFile.name}</div>}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-2 border-t border-white/10 px-4 py-3">
-              <button onClick={closeEditor} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">
-                Cancel
-              </button>
-              <button onClick={handleSave} disabled={saving || (editing === 'new' && !pendingFile)} className="inline-flex items-center gap-1.5 bg-gold/10 px-4 py-2 text-sm font-medium text-gold hover:bg-gold/15 disabled:opacity-50">
-                {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-    <AnimatePresence>
-      {galleryDeleteConfirm && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          onClick={() => setGalleryDeleteConfirm(null)}
-        >
-          <motion.div
-            initial={{ scale: 0.96, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.96, opacity: 0 }}
-            className="w-full max-w-sm border border-white/10 bg-navy-900 p-5 shadow-xl"
-            onClick={event => event.stopPropagation()}
-          >
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center bg-red-500/10 text-red-400">
-              <Trash2 className="h-5 w-5" />
-            </div>
-            <h3 className="text-center text-lg font-semibold text-text-primary">
-              {galleryDeleteConfirm.type === 'bulk' ? `Delete ${galleryDeleteConfirm.ids.length} photos?` : 'Delete this photo?'}
-            </h3>
-            <p className="mt-2 text-center text-sm text-text-secondary">
-              {galleryDeleteConfirm.type === 'bulk'
-                ? 'These gallery photos will be removed from the event and public gallery.'
-                : `"${galleryDeleteConfirm.title}" will be removed from the event and public gallery.`}
-            </p>
-            <div className="mt-5 flex justify-center gap-3">
-              <button onClick={() => setGalleryDeleteConfirm(null)} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">
-                Cancel
-              </button>
-              <button onClick={handleConfirmGalleryDelete} className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20">
-                Delete
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-    </>
-  )
-}
-
-function GalleryCategoryPicker({
-  label,
-  value,
-  onChange,
-  categoryOptions,
-  emptyLabel = 'No album / category',
-  helpText,
-  compact = false,
-}: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  categoryOptions: { name: string; count: number }[]
-  emptyLabel?: string
-  helpText?: string
-  compact?: boolean
-}) {
-  const [creating, setCreating] = useState(false)
-  const pickerId = useId()
-  const selectId = `${pickerId}-select`
-  const customInputId = `${pickerId}-custom`
-  const helpId = helpText ? `${pickerId}-help` : undefined
-  const knownNames = useMemo(() => new Set(categoryOptions.map(category => category.name)), [categoryOptions])
-  const trimmedValue = value.trim()
-  const isKnownValue = trimmedValue === '' || knownNames.has(trimmedValue)
-  const showingCustomInput = creating || !isKnownValue
-  const selectValue = showingCustomInput ? GALLERY_CATEGORY_CREATE : trimmedValue
-  const inputClass = compact
-    ? 'w-full bg-white/[0.03] border border-white/10 px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none'
-    : 'w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none'
-
-  useEffect(() => {
-    if (trimmedValue && knownNames.has(trimmedValue)) setCreating(false)
-  }, [knownNames, trimmedValue])
-
-  return (
-    <div>
-      <label htmlFor={selectId} className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">
-        {label}
-      </label>
-      <select
-        id={selectId}
-        value={selectValue}
-        onChange={event => {
-          const nextValue = event.target.value
-          if (nextValue === GALLERY_CATEGORY_CREATE) {
-            setCreating(true)
-            if (isKnownValue) onChange('')
-            return
-          }
-          setCreating(false)
-          onChange(nextValue)
-        }}
-        aria-describedby={helpId}
-        className={inputClass}
-      >
-        <option value="">{emptyLabel}</option>
-        {categoryOptions.map(category => (
-          <option key={category.name} value={category.name}>
-            {category.name}{category.count > 0 ? ` (${category.count})` : ' — default'}
-          </option>
-        ))}
-        <option value={GALLERY_CATEGORY_CREATE}>Create new album/category...</option>
-      </select>
-      {showingCustomInput && (
-        <input
-          id={customInputId}
-          value={value}
-          onChange={event => onChange(event.target.value)}
-          maxLength={80}
-          aria-label={`Custom ${label}`}
-          aria-describedby={helpId}
-          placeholder="e.g. Taiwan Podium"
-          className={`${inputClass} mt-2`}
-        />
-      )}
-      {showingCustomInput && trimmedValue && (
-        <p className="mt-1 text-[11px] text-gold-400/80">
-          New album/category will be created when photos are saved or uploaded.
-        </p>
-      )}
-      {helpText && <p id={helpId} className="mt-1 text-[11px] text-text-muted">{helpText}</p>}
-    </div>
-  )
-}
-
-function Field({ label, value, onChange, type = 'text', placeholder }: {
-  label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string
-}) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-      />
-    </div>
-  )
-}
-
-function SelectField({ label, value, onChange, options }: {
-  label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[]
-}) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">{label}</label>
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none"
-      >
-        {options.map(opt => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
-        ))}
-      </select>
     </div>
   )
 }

@@ -60,6 +60,7 @@ export interface EventScheduleItem {
   time: string;
   description: string;
   sort_order: number;
+  confirmed?: boolean;
   _destroy?: boolean;
   translations?: TranslationsBlob;
   translation_status?: TranslationStatus;
@@ -68,8 +69,9 @@ export interface EventScheduleItem {
 export interface PrizeCategory {
   id?: number;
   name: string;
-  amount: string;
+  amount: string | null;
   sort_order: number;
+  confirmed?: boolean;
   _destroy?: boolean;
   translations?: TranslationsBlob;
   translation_status?: TranslationStatus;
@@ -194,7 +196,46 @@ export interface EventTicketOption {
   regular_price: string;
 }
 
+export interface EventReadiness {
+  publishable: boolean;
+  completed: number;
+  total: number;
+  checks: { key: string; label: string; complete: boolean; blocking: boolean; section: string }[];
+}
+
+export interface EventAuditEntry {
+  id: number;
+  action: string;
+  actor_name: string | null;
+  from_status: string | null;
+  to_status: string | null;
+  reason: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface EventRolloverOptions {
+  target_year: number;
+  keep_tagline: boolean;
+  asjjf_event_id?: number;
+}
+
+export interface SeasonRolloverOptions {
+  source_year: number;
+  target_year: number;
+  keep_tagline: boolean;
+  asjjf_event_ids?: Record<number, number>;
+}
+
 export interface Event {
+  season_year?: number | null;
+  source_event_id?: number | null;
+  registration_not_open?: boolean;
+  content_review_required?: boolean;
+  asjjf_info_id?: number | null;
+  asjjf_info_status?: string | null;
+  readiness?: EventReadiness;
+  audit_entries?: EventAuditEntry[];
   id: number;
   name: string;
   slug: string;
@@ -208,7 +249,7 @@ export interface Event {
   country_code: string;
   latitude: number | null;
   longitude: number | null;
-  asjjf_stars: number;
+  asjjf_stars: number | null;
   is_main_event: boolean;
   registration_url: string | null;
   registration_url_gi: string | null;
@@ -405,6 +446,9 @@ export interface SiteImage {
 }
 
 export interface EventFormData {
+  season_year?: number | null;
+  registration_not_open?: boolean;
+  content_review_required?: boolean;
   name: string;
   slug: string;
   description: string;
@@ -415,7 +459,7 @@ export interface EventFormData {
   city: string;
   country: string;
   country_code: string;
-  asjjf_stars: number;
+  asjjf_stars: number | null;
   is_main_event: boolean;
   prize_pool: string;
   prize_title: string;
@@ -940,8 +984,12 @@ export const api = {
   // Public
   getSiteContents: () => fetchApi<SiteContentMap>('/api/v1/site-contents'),
   getOrganization: () => fetchApi<Organization>('/api/v1/organization'),
-  getEvents: () => fetchApi<Event[]>('/api/v1/events'),
-  getEvent: (slug: string) => fetchApi<Event>(`/api/v1/events/${slug}`),
+  // Overrides may publish an undated event. Keep public date consumers safe without inventing a date.
+  getEvents: async () => (await fetchApi<Event[]>('/api/v1/events')).map(event => ({ ...event, date: event.date || '' })),
+  getEvent: async (slug: string) => {
+    const event = await fetchApi<Event>(`/api/v1/events/${slug}`)
+    return { ...event, date: event.date || '' }
+  },
   getEventGallery: (slug: string, params?: Record<string, string | number>) => {
     const query = params ? '?' + new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString() : '';
     return fetchApi<GalleryImagesResponse>(`/api/v1/events/${slug}/gallery${query}`);
@@ -1025,8 +1073,16 @@ export const api = {
       }, true),
     deleteEvent: (id: number) =>
       fetchApi<void>(`/api/v1/admin/events/${id}`, { method: 'DELETE' }, true),
-    cloneEvent: (id: number) =>
-      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/clone`, { method: 'POST' }, true),
+    cloneEvent: (id: number, data: EventRolloverOptions) =>
+      fetchApi<{ event: Event; message: string }>(`/api/v1/admin/events/${id}/clone`, { method: 'POST', body: JSON.stringify(data) }, true),
+    rolloverEvents: (data: SeasonRolloverOptions) =>
+      fetchApi<{ events: Event[]; message: string }>('/api/v1/admin/events/rollover', { method: 'POST', body: JSON.stringify(data) }, true),
+    publishEvent: (id: number, data: { override_reason?: string; status?: 'upcoming' | 'live' | 'completed' | 'cancelled' } = {}) =>
+      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/publish`, { method: 'POST', body: JSON.stringify(data) }, true),
+    unpublishEvent: (id: number) =>
+      fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/unpublish`, { method: 'POST' }, true),
+    fillEventFromAsjjf: (id: number, asjjf_event_id: number) =>
+      fetchApi<{ event: Event; message: string }>(`/api/v1/admin/events/${id}/fill_asjjf`, { method: 'POST', body: JSON.stringify({ asjjf_event_id }) }, true),
     uploadEventImage: (id: number, file: File) => {
       const formData = new FormData();
       formData.append('image', file);

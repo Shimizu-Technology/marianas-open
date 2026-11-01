@@ -335,6 +335,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
     t.index ["event_id"], name: "index_event_asjjf_sources_on_event_id"
   end
 
+  create_table "event_audit_entries", force: :cascade do |t|
+    t.string "action", null: false
+    t.bigint "actor_id"
+    t.string "actor_name", null: false
+    t.datetime "created_at", null: false
+    t.bigint "event_id", null: false
+    t.string "from_status"
+    t.jsonb "metadata", default: {}, null: false
+    t.text "reason"
+    t.string "to_status"
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_event_audit_entries_on_actor_id"
+    t.index ["event_id"], name: "index_event_audit_entries_on_event_id"
+  end
+
   create_table "event_gallery_albums", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "event_id", null: false
@@ -476,11 +491,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
     t.index ["event_id", "division"], name: "index_event_results_on_event_id_and_division"
     t.index ["event_id", "source", "asjjf_event_id"], name: "index_event_results_on_sync_source"
     t.index ["event_id"], name: "index_event_results_on_event_id"
-    t.check_constraint "discipline IS NULL OR (discipline::text = ANY (ARRAY['gi'::character varying, 'nogi'::character varying]::text[]))", name: "event_results_discipline"
-    t.check_constraint "source::text = ANY (ARRAY['manual'::character varying, 'asjjf'::character varying]::text[])", name: "event_results_source"
+    t.check_constraint "discipline IS NULL OR (discipline::text = ANY (ARRAY['gi'::character varying::text, 'nogi'::character varying::text]))", name: "event_results_discipline"
+    t.check_constraint "source::text = ANY (ARRAY['manual'::character varying::text, 'asjjf'::character varying::text])", name: "event_results_source"
   end
 
   create_table "event_schedule_items", force: :cascade do |t|
+    t.boolean "confirmed", default: true, null: false
     t.datetime "created_at", null: false
     t.string "description"
     t.bigint "event_id", null: false
@@ -495,8 +511,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
 
   create_table "events", force: :cascade do |t|
     t.jsonb "asjjf_event_ids", default: []
+    t.bigint "asjjf_info_id"
+    t.bigint "asjjf_info_snapshot_id"
+    t.string "asjjf_info_status"
     t.integer "asjjf_stars"
     t.string "city"
+    t.boolean "content_review_required", default: false, null: false
     t.string "country"
     t.string "country_code"
     t.datetime "created_at", null: false
@@ -517,6 +537,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
     t.string "prize_title"
     t.jsonb "registration_fee_sections", default: [], null: false
     t.jsonb "registration_info_items", default: [], null: false
+    t.boolean "registration_not_open", default: false, null: false
     t.jsonb "registration_steps", default: [], null: false
     t.string "registration_url"
     t.string "registration_url_gi"
@@ -527,7 +548,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
     t.bigint "results_sync_run_id"
     t.string "results_sync_status"
     t.text "schedule_note"
+    t.integer "season_year"
     t.string "slug"
+    t.bigint "source_event_id"
     t.string "status"
     t.string "tagline"
     t.date "ticket_early_bird_ends_on"
@@ -549,6 +572,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
     t.jsonb "visa_items", default: [], null: false
     t.index ["organization_id"], name: "index_events_on_organization_id"
     t.index ["results_sync_run_id"], name: "index_events_on_results_sync_run_id"
+    t.index ["season_year"], name: "index_events_on_season_year"
+    t.index ["slug"], name: "index_events_on_slug", unique: true, where: "((slug IS NOT NULL) AND ((slug)::text <> ''::text))"
+    t.index ["source_event_id"], name: "index_events_on_source_event_id"
     t.index ["translation_status"], name: "index_events_on_translation_status"
     t.check_constraint "ticket_sales_status::text = ANY (ARRAY['unavailable'::character varying::text, 'on_sale'::character varying::text, 'sold_out'::character varying::text, 'closed'::character varying::text])", name: "events_ticket_sales_status_check"
   end
@@ -623,6 +649,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
 
   create_table "prize_categories", force: :cascade do |t|
     t.decimal "amount"
+    t.boolean "confirmed", default: true, null: false
     t.datetime "created_at", null: false
     t.bigint "event_id", null: false
     t.string "name"
@@ -877,6 +904,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
   add_foreign_key "competitors", "academies"
   add_foreign_key "event_accommodations", "events"
   add_foreign_key "event_asjjf_sources", "events"
+  add_foreign_key "event_audit_entries", "events"
+  add_foreign_key "event_audit_entries", "users", column: "actor_id", on_delete: :nullify
   add_foreign_key "event_gallery_albums", "events"
   add_foreign_key "event_gallery_images", "event_gallery_imports"
   add_foreign_key "event_gallery_images", "event_gallery_upload_batches"
@@ -889,6 +918,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
   add_foreign_key "event_results", "competitors"
   add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"
+  add_foreign_key "events", "events", column: "source_event_id", on_delete: :nullify
   add_foreign_key "events", "organizations"
   add_foreign_key "events", "results_sync_runs", on_delete: :nullify
   add_foreign_key "identity_reviews", "academies", column: "candidate_academy_id"

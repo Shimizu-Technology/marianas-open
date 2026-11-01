@@ -7,6 +7,11 @@
 # site never shows invented details. Registration windows for Manila and Taiwan
 # are omitted because ASJJF still lists provisional dates for them.
 class Add2027SeasonEvents < ActiveRecord::Migration[8.1]
+  # Keep this historical data migration independent of future Event callbacks.
+  class MigrationEvent < ActiveRecord::Base
+    self.table_name = "events"
+  end
+
   ORGANIZATION_SLUG = "marianas-open".freeze
 
   COPA_FEE_SECTIONS = [
@@ -152,10 +157,11 @@ class Add2027SeasonEvents < ActiveRecord::Migration[8.1]
 
     EVENTS.each do |attributes|
       # Never overwrite an event an administrator has already created or edited.
-      next if organization.events.exists?(slug: attributes[:slug])
+      next if MigrationEvent.exists?(organization_id: organization.id, slug: attributes[:slug])
 
-      organization.events.create!(
+      MigrationEvent.create!(
         attributes.merge(
+          organization_id: organization.id,
           status: "upcoming",
           is_main_event: false,
           ticket_sales_status: "unavailable"

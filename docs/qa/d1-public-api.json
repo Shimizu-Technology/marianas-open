@@ -1,0 +1,11 @@
+{
+  "database": "marianas_open_qa_d1",
+  "public_slug": "d1-qa-public",
+  "public_schedule": [
+    "D1 QA confirmed schedule"
+  ],
+  "public_prizes": [],
+  "draft_detail_status": 404,
+  "draft_in_listing": false,
+  "unconfirmed_rows_in_listing": false
+}

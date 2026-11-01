@@ -105,6 +105,9 @@ describe('season states', () => {
     expect(selectHomeState([past, event({ date: '2026-11-02', end_date: null })], now).kind).toBe('live');
     expect(selectHomeState([event()], now).latestResults).toBeNull();
   });
+  it('keeps undated overrides out of dated home highlights', () => {
+    expect(selectHomeState([event({ date: '', end_date: null }), event({ date: '', status: 'completed' })], now)).toMatchObject({ kind: 'empty', nextEvent: null, latestResults: null, latestGallery: null });
+  });
   it('builds deduplicated official results links from source and registration IDs only', () => {
     expect(getOfficialResultsLinks({
       asjjf_source_urls: ['https://asjjf.org/main/eventResults/1837', 'https://evil.example/main/eventInfo/999'],
