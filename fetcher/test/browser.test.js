@@ -114,3 +114,124 @@ test('challenge evidence survives a later disallowed redirect without returning 
   assert.equal(result.html, null);
   assert.equal(result.final_url, null);
 });
+
+test('third-party iframes on an ASJJF page do not trip the navigation boundary or latch a challenge', async () => {
+  const listeners = {};
+  let routeHandler, closed = 0;
+  const mainFrame = { name: 'main', parentFrame: () => null };
+  const subFrame = { name: 'facebook-iframe', parentFrame: () => mainFrame };
+  const nav = (url, frame) => ({ isNavigationRequest: () => true, method: () => 'GET', url: () => url, redirectedFrom: () => null, frame: () => frame });
+  const page = {
+    mainFrame: () => mainFrame,
+    on: (event, listener) => { listeners[event] = listener; },
+    goto: async () => {
+      const top = nav('https://asjjf.org/main/eventInfo/2258', mainFrame);
+      listeners.request(top);
+      await routeHandler({ request: () => top, continue: async () => {}, abort: async () => { throw new Error('main frame aborted'); } });
+      listeners.response({ request: () => top, status: () => 200, url: () => top.url(), headers: () => ({}), frame: () => mainFrame });
+      // Embedded third-party frames: a different host and even a 403 must be ignored.
+      const fb = nav('https://www.facebook.com/plugins/page.php', subFrame);
+      listeners.request(fb);
+      let continued = false;
+      await routeHandler({ request: () => fb, continue: async () => { continued = true; }, abort: async () => {} });
+      assert.equal(continued, true);
+      listeners.response({ request: () => fb, status: () => 403, url: () => fb.url(), headers: () => ({}), frame: () => subFrame });
+    },
+    title: async () => 'ASJJF - 2027 Guam Copa De Marianas (gi Tournament)',
+    content: async () => '<html><head><title>ASJJF - 2027 Guam Copa De Marianas (gi Tournament)</title></head><body>ok</body></html>',
+    url: () => 'https://asjjf.org/main/eventInfo/2258',
+    waitForTimeout: async () => {},
+  };
+  const launch = async () => ({ close: async () => { closed++; }, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page,
+    route: async (_pattern, handler) => { routeHandler = handler; } }) });
+  const result = await fetchPage('https://asjjf.org/main/eventInfo/2258', config, { launch });
+  assert.equal(result.outcome, 'ok');
+  assert.equal(result.http_status, 200);
+  assert.equal(result.final_url, 'https://asjjf.org/main/eventInfo/2258');
+  assert.ok(closed >= 1);
+});
+
+test('a main-frame navigation to a disallowed host is still rejected when frames are reported', async () => {
+  let requestListener;
+  const mainFrame = { parentFrame: () => null };
+  const page = { mainFrame: () => mainFrame, on: (event, listener) => { if (event === 'request') requestListener = listener; },
+    goto: async () => requestListener({ isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://evil.test/',
+      redirectedFrom: () => null, frame: () => mainFrame }) };
+  const launch = async () => ({ close: async () => {}, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async () => {} }) });
+  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_navigation/);
+});
+
+test('popup top-level navigations are bounded by the context route and extra pages are closed', async () => {
+  let routeHandler, pageListener, extraClosed = false;
+  const original = { on: () => {}, goto: async () => {}, title: async () => 'ASJJF', content: async () => '<html></html>',
+    url: () => 'https://asjjf.org/', waitForTimeout: async () => {} };
+  const popupPage = { name: 'popup' };
+  const popupFrame = { parentFrame: () => null, page: () => popupPage };
+  const nav = (url, method = 'GET', frame = popupFrame) => ({ isNavigationRequest: () => true, method: () => method,
+    url: () => url, redirectedFrom: () => null, frame: () => frame });
+  const decide = async request => {
+    let outcome;
+    await routeHandler({ request: () => request, continue: async () => { outcome = 'continue'; }, abort: async () => { outcome = 'abort'; } });
+    return outcome;
+  };
+  const launch = async () => ({ close: async () => {}, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => original,
+    on: (event, listener) => { if (event === 'page') pageListener = listener; },
+    route: async (_pattern, handler) => { routeHandler = handler; } }) });
+  await fetchPage('https://asjjf.org/', config, { launch });
+  assert.equal(await decide(nav('https://evil.test/')), 'abort');
+  assert.equal(await decide(nav('https://asjjf.org/form', 'POST')), 'abort');
+  // Popups never load at top level, even for allowed URLs.
+  assert.equal(await decide(nav('https://asjjf.org/ok')), 'abort');
+  // A frame() that throws is treated as top-level and validated.
+  const throwing = { isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://evil.test/',
+    redirectedFrom: () => null, frame: () => { throw new Error('no frame yet'); } };
+  assert.equal(await decide(throwing), 'abort');
+  // Child-frame navigations elsewhere stay allowed.
+  const child = nav('https://www.facebook.com/plugin', 'GET', { parentFrame: () => popupFrame });
+  assert.equal(await decide(child), 'continue');
+  // Any page other than the original is closed.
+  pageListener({ close: async () => { extraClosed = true; } });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(extraClosed, true);
+  pageListener(original);
+});
+
+test('a popup redirect to a disallowed host closes the browser via context-wide guards', async () => {
+  const contextListeners = {};
+  let closed = 0;
+  const popupPage = {};
+  const popupFrame = { parentFrame: () => null, page: () => popupPage };
+  const first = { isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://asjjf.org/redirect',
+    redirectedFrom: () => null, frame: () => popupFrame };
+  const hop = { isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://evil.test/',
+    redirectedFrom: () => first, frame: () => popupFrame };
+  const original = { mainFrame: () => ({ parentFrame: () => null }), on: () => {},
+    goto: async () => { contextListeners.request(hop); },
+    title: async () => 'ASJJF', content: async () => '<html></html>', url: () => 'https://asjjf.org/', waitForTimeout: async () => {} };
+  const launch = async () => ({ close: async () => { closed++; }, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => original, route: async () => {},
+    on: (event, listener) => { contextListeners[event] = listener; } }) });
+  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_navigation/);
+  assert.ok(closed >= 1);
+});
+
+test('a popup response whose frame is not available yet does not throw from the guard', async () => {
+  const contextListeners = {};
+  const unavailable = () => { throw new Error('Frame for this navigation request is not available'); };
+  const request = { isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://asjjf.org/redirect',
+    redirectedFrom: () => null, frame: unavailable };
+  const original = { mainFrame: () => ({ parentFrame: () => null }), on: () => {},
+    goto: async () => {
+      contextListeners.response({ request: () => request, status: () => 302, url: () => 'https://asjjf.org/redirect',
+        headers: () => ({ location: 'https://asjjf.org/elsewhere' }), frame: unavailable });
+    },
+    title: async () => 'ASJJF', content: async () => '<html></html>', url: () => 'https://asjjf.org/', waitForTimeout: async () => {} };
+  const launch = async () => ({ close: async () => {}, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => original, route: async () => {},
+    on: (event, listener) => { contextListeners[event] = listener; } }) });
+  const result = await fetchPage('https://asjjf.org/', config, { launch });
+  assert.equal(result.final_url, 'https://asjjf.org/');
+});
