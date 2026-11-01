@@ -72,7 +72,7 @@ module Api
 
         def merge
           target = Identity::AcademyMerge.call(source: @academy, target: Academy.find(params[:target_id]),
-            confirm: params[:confirm] == true, actor: current_user)
+            confirm: params[:confirm] == true, actor: current_user, keep: (params[:keep].present? ? params.permit(keep: {}).fetch(:keep).to_h : {}))
           render json: { academy: target.as_json }
         rescue ArgumentError, ActiveRecord::RecordInvalid => e
           render json: { error: e.message }, status: :unprocessable_entity

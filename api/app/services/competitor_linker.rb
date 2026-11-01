@@ -135,6 +135,8 @@ class CompetitorLinker
     end
 
     def name_candidates(key)
+      approved = CompetitorAlias.find_by(normalized_key: key)
+      return [ approved.competitor ] if approved
       indexed = Competitor.where(normalized_name: key).or(Competitor.where(reverse_normalized_name: key)).to_a
       legacy = Competitor.where(normalized_name: nil).select do |competitor|
         [normalize("#{competitor.first_name} #{competitor.last_name}"),

@@ -46,7 +46,7 @@ module Api
             "event_results.*, events.asjjf_stars as event_stars, " \
             "events.name as event_name, events.slug as event_slug, events.date as event_date"
           )
-          .includes(:competitor)
+          .includes(competitor: :team)
           .order("events.date DESC")
 
         if params[:result_id].present?
@@ -76,7 +76,7 @@ module Api
 
         render json: {
           competitor_name: results.first.display_competitor_name,
-          academy: most_common_value(results.map(&:academy)),
+          academy: results.first.competitor&.current_academy_name || most_common_value(results.map(&:academy)),
           country_code: most_common_value(results.map { |r| Identity::CountryCode.normalize(r.country_code) }),
           total_points: total_points,
           gold: golds,

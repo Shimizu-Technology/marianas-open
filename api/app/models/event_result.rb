@@ -50,6 +50,10 @@ class EventResult < ApplicationRecord
     competitor&.full_name || Identity::NameNormalizer.person_name(raw_competitor_name.presence || competitor_name)
   end
 
+  def display_academy_name
+    result_academy&.name || academy
+  end
+
   def as_json(options = {})
     merged_except = (Array(options[:except]) + [:created_at, :updated_at]).uniq
     super(options.merge(except: merged_except)).merge("display_competitor_name" => display_competitor_name, "country_code" => Identity::CountryCode.normalize(country_code))

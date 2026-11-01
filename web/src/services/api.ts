@@ -581,7 +581,10 @@ export interface AcademyFormData {
   unaffiliated: boolean;
 }
 
+export type IdentityMergeKeep = Record<string, 'source' | 'target'>;
+
 export interface IdentityMergePreview {
+  conflicts?: { field: string; source: unknown; target: unknown }[];
   source: { id: number; name: string };
   target: { id: number; name: string };
   results_count: number;
@@ -1164,9 +1167,9 @@ export const api = {
     // Competitors
     previewCompetitorMerge: (id: number, targetId: number) =>
       fetchApi<IdentityMergePreview>(`/api/v1/admin/competitors/${id}/merge_preview?target_id=${targetId}`, {}, true),
-    mergeCompetitor: (id: number, targetId: number, reviewToken?: string, confirmWarnings = false) =>
+    mergeCompetitor: (id: number, targetId: number, reviewToken?: string, confirmWarnings = false, keep?: IdentityMergeKeep) =>
       fetchApi<{ competitor: Competitor }>(`/api/v1/admin/competitors/${id}/merge`, {
-        method: 'POST', body: JSON.stringify({ target_id: targetId, confirm: true, confirm_warnings: confirmWarnings, review_token: reviewToken }),
+        method: 'POST', body: JSON.stringify({ target_id: targetId, confirm: true, confirm_warnings: confirmWarnings, review_token: reviewToken, keep }),
       }, true),
     getCompetitors: (params?: Record<string, string>) => {
       const query = params ? '?' + new URLSearchParams(params).toString() : '';
@@ -1194,9 +1197,9 @@ export const api = {
     // Academies
     previewAcademyMerge: (id: number, targetId: number) =>
       fetchApi<IdentityMergePreview>(`/api/v1/admin/academies/${id}/merge_preview?target_id=${targetId}`, {}, true),
-    mergeAcademy: (id: number, targetId: number) =>
+    mergeAcademy: (id: number, targetId: number, keep?: IdentityMergeKeep) =>
       fetchApi<{ academy: Academy }>(`/api/v1/admin/academies/${id}/merge`, {
-        method: 'POST', body: JSON.stringify({ target_id: targetId, confirm: true }),
+        method: 'POST', body: JSON.stringify({ target_id: targetId, confirm: true, keep }),
       }, true),
     getIdentityReviews: () => fetchApi<{ reviews: AcademyIdentityReview[] }>('/api/v1/admin/identity_reviews', {}, true),
     resolveIdentityReview: (id: number, data: { academy_id: number } | { create_new: true; confirm: true }) =>

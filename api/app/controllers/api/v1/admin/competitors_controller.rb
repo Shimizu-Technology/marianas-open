@@ -24,7 +24,7 @@ module Api
           else "COALESCE(stats.total_points, 0) #{dir}, COALESCE(stats.gold, 0) DESC"
           end
 
-          records = scope
+          records = scope.includes(:team)
             .joins(stats_join_sql)
             .select(
               "competitors.*",
@@ -89,7 +89,7 @@ module Api
         def merge
           raise ArgumentError, "A current merge preview is required" unless params[:review_token].is_a?(String) && params[:review_token].present?
           target = Identity::CompetitorMerge.call(source: @competitor, target: Competitor.find(params[:target_id]),
-            confirm: params[:confirm] == true, confirm_warnings: params[:confirm_warnings] == true, actor: current_user, review_token: params[:review_token])
+            confirm: params[:confirm] == true, confirm_warnings: params[:confirm_warnings] == true, actor: current_user, review_token: params[:review_token], keep: (params[:keep].present? ? params.permit(keep: {}).fetch(:keep).to_h : {}))
           render json: { competitor: target.as_json }
         rescue ArgumentError, ActiveRecord::RecordInvalid => e
           render json: { error: e.message }, status: :unprocessable_entity
@@ -108,12 +108,23 @@ module Api
 
         def update
           old_name = @competitor.full_name
-          if @competitor.update(competitor_params)
+          saved = false
+          Competitor.transaction do
+            Competitor.connection.execute("SELECT pg_advisory_xact_lock(184527002)")
+            @competitor.lock!
+            old_names = @competitor.identity_names
+            renamed = competitor_params.slice(:first_name, :last_name).to_h.any? { |key, value| @competitor.public_send(key) != value }
+            saved = @competitor.update(competitor_params)
+            CompetitorAlias.record_names!(competitor: @competitor, names: old_names, source: "rename", actor: current_user) if saved && renamed
+          end
+          if saved
             Rails.logger.info("[Identity] competitor_update actor=#{current_user.id} competitor=#{@competitor.id} old_name=#{old_name.inspect} new_name=#{@competitor.full_name.inspect}")
             render json: { competitor: @competitor.reload.as_json }
           else
             render json: { errors: @competitor.errors.full_messages }, status: :unprocessable_entity
           end
+        rescue ArgumentError, ActiveRecord::RecordInvalid => e
+          render json: { error: e.message }, status: :unprocessable_entity
         end
 
         def destroy
@@ -176,7 +187,7 @@ module Api
             country_code: c.country_code,
             belt_rank: c.belt_rank,
             weight_class: c.weight_class,
-            academy: c.read_attribute(:academy),
+            academy: c.current_academy_name,
             academy_id: c.academy_id,
             bio: c.bio,
             instagram_url: c.instagram_url,

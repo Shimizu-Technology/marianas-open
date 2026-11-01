@@ -137,4 +137,72 @@ class IdentityAttributionTest < ActionDispatch::IntegrationTest
     assert_equal @competitor.id, @early_result.reload.competitor_id
     assert_equal @new_gym.id, @competitor.reload.academy_id
   end
+  test "renamed athlete resolves old ASJJF names through staff aliases" do
+    patch "/api/v1/admin/competitors/#{@competitor.id}", params: { first_name: "Braydon" }, headers: @headers, as: :json
+    assert_response :success
+    assert_equal "Braydon", @competitor.reload.first_name
+    [ "Santos Braydon-Angel", "Braydon-Angel Santos" ].each do |name|
+      assert_equal @competitor, CompetitorLinker.find_or_create(name)
+    end
+    assert_equal @staff.id, CompetitorAlias.find_by!(normalized_key: "santosbraydonangel").created_by_id
+  end
+
+  test "rename and merge serialize canonical gym names across public profiles lists search rankings and results" do
+    patch "/api/v1/admin/academies/#{@new_gym.id}", params: { name: "Canonical Gym" }, headers: @headers, as: :json
+    assert_response :success
+    assert_public_gym "Canonical Gym"
+    assert_equal "New Gym", @competitor.reload[:academy]
+    Identity::AcademyMerge.call(source: @new_gym, target: @old_gym, confirm: true)
+    assert_public_gym "Old Gym"
+  end
+
+  test "merge APIs accept profile choices and previews expose conflicts" do
+    @new_gym.update!(description: "New description")
+    @old_gym.update!(description: "Old description")
+    get "/api/v1/admin/academies/#{@new_gym.id}/merge_preview", params: { target_id: @old_gym.id }, headers: @headers
+    assert_response :success
+    assert response.parsed_body["conflicts"].any? { |item| item["field"] == "description" }
+    post "/api/v1/admin/academies/#{@new_gym.id}/merge", params: { target_id: @old_gym.id, confirm: true, keep: { description: "source" } }, headers: @headers, as: :json
+    assert_response :success
+    assert_equal "New description", @old_gym.reload.description
+    duplicate = Competitor.create!(first_name: "Braydon", last_name: "Santos", bio: "Source bio")
+    @competitor.update!(bio: "Target bio")
+    get "/api/v1/admin/competitors/#{duplicate.id}/merge_preview", params: { target_id: @competitor.id }, headers: @headers
+    token = response.parsed_body["review_token"]
+    post "/api/v1/admin/competitors/#{duplicate.id}/merge", params: { target_id: @competitor.id, confirm: true, confirm_warnings: true, review_token: token, keep: { bio: "source" } }, headers: @headers, as: :json
+    assert_response :success
+    assert_equal "Source bio", @competitor.reload.bio
+  end
+
+  test "country athlete headcounts deduplicate linked IDs across raw country codes and name orders" do
+    @early_result.update_columns(country_code: "GUM", competitor_name: "Santos Braydon-Angel")
+    @late.event_results.first.update_columns(country_code: "GU", competitor_name: "Braydon-Angel Santos")
+    country = RankingCalculator.countries.find { |row| row[:country_code] == "GU" }
+    assert_equal 1, country[:athletes]
+    assert_equal 105, country[:total_points]
+    assert_equal 2, country[:gold]
+    @early_result.update_columns(competitor_id: nil)
+    @late.event_results.first.update_columns(competitor_id: nil, competitor_name: "Santos Braydon Angel")
+    assert_equal 1, RankingCalculator.countries.first[:athletes]
+  end
+
+  private
+
+  def assert_public_gym(name)
+    get "/api/v1/competitors/#{@competitor.id}"
+    assert_response :success
+    assert_equal name, response.parsed_body["academy"]
+    [ {}, { search: "Santos Braydon-Angel" } ].each do |query|
+      get "/api/v1/competitors", params: query
+      assert_equal name, response.parsed_body["competitors"].find { |row| row["id"] == @competitor.id }["academy"]
+    end
+    get "/api/v1/rankings"
+    assert_equal name, response.parsed_body["rankings"].find { |row| row["competitor_id"] == @competitor.id }["academy"]
+    get "/api/v1/rankings/competitor", params: { name: "Santos Braydon-Angel" }
+    assert_equal name, response.parsed_body["academy"]
+    get "/api/v1/events/#{@late.slug}/results"
+    result = response.parsed_body.dig(0, "results", 0)
+    assert_equal name, result["academy"]
+    assert_equal "New Gym", result["raw_academy"]
+  end
 end

@@ -170,6 +170,25 @@ class IdentityRepairTest < ActiveSupport::TestCase
     assert_equal 71001, result.reload.academy_id
   end
 
+  test "CSV repair consolidates encoded twins transactionally keeping the encoded target" do
+    Academy.find(71001).update_columns(name: "A &amp; B")
+    Academy.find(71002).update_columns(name: "A & B")
+    Tempfile.create([ "identity-twins", ".csv" ]) do |file|
+      file.write(CSV.generate do |csv|
+        csv << Identity::Repair::ACADEMY_HEADERS
+        csv << [ "Twins", "71001 71002", "A &amp; B | A & B", "MERGE_SAME_GYM", "A & B", "GU", "Verified", "high", "2", "90" ]
+      end)
+      file.flush
+      before = Academy.pluck(:id, :name)
+      preview = Identity::Repair.call(decisions: file.path, io: @io)
+      assert_equal before, Academy.pluck(:id, :name)
+      applied = Identity::Repair.call(decisions: file.path, apply: true, io: @io)
+      assert_equal preview[:projected], applied[:after]
+      assert_equal "A & B", Academy.find(71001).name
+      assert_not Academy.exists?(71002)
+    end
+  end
+
   private
 
   def repair(apply: false)

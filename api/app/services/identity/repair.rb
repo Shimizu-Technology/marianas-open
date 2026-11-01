@@ -211,9 +211,9 @@ module Identity
           academies[target_id][:name] = operation[:name]
         when :competitor_merge
           rows.each { |row| row[:competitor_id] = target_id if row[:competitor_id] == source_id }
-          people.delete(source_id)
+          source_gym = people.delete(source_id)
           latest = rows.select { |row| row[:competitor_id] == target_id }.max_by { |row| [ row[:date], row[:event_id], row[:id] ] }
-          people[target_id] = latest ? projected_gym(latest, projected_names(academies, review_links)) : nil
+          people[target_id] = latest ? projected_gym(latest, projected_names(academies, review_links)) : people[target_id] || source_gym
         end
       end
       names = projected_names(academies, review_links)

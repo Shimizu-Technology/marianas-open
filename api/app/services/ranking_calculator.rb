@@ -43,7 +43,7 @@ class RankingCalculator
         competitor_name: records.first.display_competitor_name,
         competitor_id: records.first.competitor_id,
         result_id: records.first.competitor_id ? nil : records.first.id,
-        academy: most_common(records.map(&:academy)),
+        academy: records.first.competitor&.current_academy_name || most_common(records.map(&:academy)),
         country_code: most_common(records.map { |r| Identity::CountryCode.normalize(r.country_code) }),
         total_points: total_points,
         gold: golds,
@@ -114,7 +114,7 @@ class RankingCalculator
         gold: golds,
         silver: records.count { |r| r.placement == 2 },
         bronze: records.count { |r| r.placement == 3 },
-        athletes: records.map { |r| normalize_name(r.competitor_name) }.uniq.count,
+        athletes: records.map { |r| r.competitor_id || normalize_name(r.competitor_name) }.uniq.count,
         academies: records.map { |r| normalize_name(r.academy.presence || "") }.uniq.count - 1 # subtract empty
       }
     end
@@ -131,7 +131,7 @@ class RankingCalculator
       scope = EventResult
         .joins(:event)
         .merge(Event.publicly_visible)
-        .includes(:competitor, :result_academy)
+        .includes(:result_academy, competitor: :team)
         .select(
           "event_results.*, events.asjjf_stars as event_stars, events.id as event_id, " \
           "event_results.competitor_id"

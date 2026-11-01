@@ -157,6 +157,136 @@ class IdentityMergeTest < ActiveSupport::TestCase
     assert child.valid?
   end
 
+  test "competitor merge transfers blank fields stats and photo without purging the blob" do
+    source = person(nickname: "Wave", bio: "Source bio", instagram_url: "https://example.com/kai", youtube_url: "https://example.com/video", wins: 8, losses: 2, draws: 1, gold_medals: 3)
+    target = person
+    source.photo.attach(io: StringIO.new("photo"), filename: "source.jpg", content_type: "image/jpeg")
+    blob = source.photo.blob
+    Identity::CompetitorMerge.call(source: source, target: target, confirm: true, confirm_warnings: true)
+    target.reload
+    %w[nickname bio instagram_url youtube_url wins losses draws gold_medals].each do |field|
+      assert_equal source[field], target[field], field
+    end
+    assert_equal blob.id, target.photo.blob.id
+    assert ActiveStorage::Blob.exists?(blob.id)
+    assert_empty ActiveStorage::Attachment.where(record_type: "Competitor", record_id: source.id)
+  end
+
+  test "academy merge transfers descriptive fields and logo" do
+    source = Academy.create!(name: "Source", location: "Guam", country_code: "GU", description: "Source description", website_url: "https://example.com", instagram_url: "https://example.com/ig", facebook_url: "https://example.com/fb")
+    target = Academy.create!(name: "Target")
+    source.logo.attach(io: StringIO.new("logo"), filename: "logo.png", content_type: "image/png")
+    blob_id = source.logo.blob.id
+    Identity::AcademyMerge.call(source: source, target: target, confirm: true, confirm_warnings: true)
+    target.reload
+    Identity::ProfileMerge::ACADEMY_FIELDS.reject { |field| field == "unaffiliated" }.each { |field| assert_equal source[field], target[field], field }
+    assert_equal blob_id, target.logo.blob.id
+  end
+
+  test "conflict preview and explicit source choices preserve both attachment blobs and audit discarded values" do
+    source = person(bio: "Source bio", wins: 9)
+    target = person(bio: "Target bio", wins: 5)
+    source.photo.attach(io: StringIO.new("source"), filename: "source.jpg", content_type: "image/jpeg")
+    target.photo.attach(io: StringIO.new("target"), filename: "target.jpg", content_type: "image/jpeg")
+    source_blob = source.photo.blob.id
+    target_blob = target.photo.blob.id
+    conflicts = Identity::CompetitorMerge.preview(source, target)[:conflicts].index_by { |item| item[:field] }
+    assert_equal "Source bio", conflicts.fetch("bio")[:source]
+    assert_equal target_blob, conflicts.fetch("photo")[:target][:blob_id]
+    discarded = nil
+    Competitor.transaction do
+      discarded = Identity::ProfileMerge.apply(source, target, keep: { bio: "source", photo: "source" })
+      target.save!
+    end
+    assert_equal "Source bio", target.reload.bio
+    assert_equal 5, target.wins
+    assert_equal source_blob, target.photo.blob.id
+    assert_equal({ kept: "source", value: "Target bio" }, discarded["bio"])
+    assert_equal({ kept: "target", value: 9 }, discarded["wins"])
+    assert_equal target_blob, discarded["photo"][:value][:blob_id]
+    assert ActiveStorage::Blob.exists?(source_blob)
+    assert ActiveStorage::Blob.exists?(target_blob)
+  end
+
+  test "default choices keep target and invalid choices cause no writes" do
+    source = person(bio: "Source bio")
+    target = person(bio: "Target bio")
+    assert_raises(ArgumentError) { Identity::CompetitorMerge.call(source: source, target: target, confirm: true, keep: { bio: "neither" }) }
+    assert Competitor.exists?(source.id)
+    assert_empty CompetitorAlias.all
+    Identity::CompetitorMerge.call(source: source, target: target, confirm: true, confirm_warnings: true)
+    assert_equal "Target bio", target.reload.bio
+  end
+
+  test "attachment and alias moves roll back with a failed merge" do
+    source = person(bio: "Source bio")
+    target = person
+    source.photo.attach(io: StringIO.new("photo"), filename: "photo.jpg", content_type: "image/jpeg")
+    blob_id = source.photo.blob.id
+    callback = -> { throw :abort if id == source.id }
+    Competitor.set_callback(:destroy, :before, callback)
+    begin
+      assert_raises(ActiveRecord::RecordNotDestroyed) { Identity::CompetitorMerge.call(source: source, target: target, confirm: true, confirm_warnings: true) }
+    ensure
+      Competitor.skip_callback(:destroy, :before, callback)
+    end
+    assert_equal blob_id, source.reload.photo.blob.id
+    assert_not target.reload.photo.attached?
+    assert_nil target.bio
+    assert_empty CompetitorAlias.all
+  end
+
+  test "approved merge aliases survive ASJJF reimport in both name orders" do
+    source = person(first_name: "Daniel", last_name: "Santos")
+    target = person(first_name: "Dan", last_name: "Santos")
+    medal(source, competitor_name: "Santos Daniel", raw_competitor_name: "SANTOS DANIEL")
+    actor = User.create!(email: "alias@example.com", clerk_id: "alias-staff", role: "staff")
+    Identity::CompetitorMerge.call(source: source, target: target, confirm: true, confirm_warnings: true, actor: actor)
+    %w[danielsantos santosdaniel].each do |key|
+      record = CompetitorAlias.find_by!(normalized_key: key)
+      assert_equal target.id, record.competitor_id
+      assert_equal actor.id, record.created_by_id
+      assert_equal "merge", record.source
+    end
+    [ "Santos Daniel", "Daniel Santos" ].each do |name|
+      assert_no_difference "Competitor.count" do
+        assert_equal target, CompetitorLinker.find_or_create(name)
+      end
+    end
+  end
+
+  test "existing approved aliases move to the survivor and conflicting approved identities roll back" do
+    source = person(first_name: "Daniel", last_name: "Santos")
+    target = person(first_name: "Dan", last_name: "Santos")
+    prior = CompetitorAlias.create!(competitor: source, raw_name: "Santos Danny", source: "manual")
+    Identity::CompetitorMerge.call(source: source, target: target, confirm: true, confirm_warnings: true)
+    assert_equal target.id, prior.reload.competitor_id
+    duplicate = person(first_name: "Daniel", last_name: "Santos")
+    other = person(first_name: "Different")
+    assert_raises(ArgumentError) { Identity::CompetitorMerge.call(source: duplicate, target: other, confirm: true, confirm_warnings: true) }
+    assert Competitor.exists?(duplicate.id)
+    assert_equal target.id, CompetitorAlias.find_by!(normalized_key: "danielsantos").competitor_id
+  end
+
+  test "legacy encoded academy twins merge in either direction with attachments" do
+    [ true, false ].each_with_index do |keep_encoded, index|
+      encoded = Academy.create!(name: "Temporary #{index}")
+      encoded.update_columns(name: "A &amp; B #{index}", normalized_name: nil)
+      decoded = Academy.create!(name: "Another #{index}")
+      decoded.update_columns(name: "A & B #{index}", normalized_name: nil)
+      source, target = keep_encoded ? [ decoded, encoded ] : [ encoded, decoded ]
+      blob = ActiveStorage::Blob.create_and_upload!(io: StringIO.new("logo"), filename: "logo.png", content_type: "image/png")
+      ActiveStorage::Attachment.create!(name: "logo", record: source, blob: blob)
+      blob_id = blob.id
+      result = medal(person, academy_id: source.id)
+      Identity::AcademyMerge.call(source: source, target: target, confirm: true, confirm_warnings: true)
+      assert_equal "A & B #{index}", target.reload.name
+      assert_equal blob_id, target.logo.blob.id
+      assert_equal target.id, result.reload.academy_id
+      assert_not Academy.exists?(source.id)
+    end
+  end
+
   private
 
   def person(attributes = {})

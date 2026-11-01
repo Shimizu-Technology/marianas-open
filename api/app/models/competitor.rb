@@ -1,6 +1,7 @@
 class Competitor < ApplicationRecord
   has_one_attached :photo
   has_many :event_results, dependent: :nullify
+  has_many :competitor_aliases, dependent: :destroy
   belongs_to :team, class_name: "Academy", foreign_key: "academy_id", optional: true
 
   validates :first_name, :last_name, presence: true
@@ -27,6 +28,14 @@ class Competitor < ApplicationRecord
     self.normalized_name = Identity::NameNormalizer.key("#{first_name} #{last_name}")
     self.reverse_normalized_name = Identity::NameNormalizer.key("#{last_name} #{first_name}")
     self.country_code = Identity::CountryCode.normalize(country_code)
+  end
+
+  def identity_names
+    [ "#{first_name} #{last_name}", "#{last_name} #{first_name}", full_name ]
+  end
+
+  def current_academy_name
+    team&.name || self[:academy]
   end
 
   def full_name
@@ -70,6 +79,7 @@ class Competitor < ApplicationRecord
       methods: [:full_name, :photo_url],
       except: [:created_at, :updated_at]
     ))
+    base["academy"] = current_academy_name
     return base if options[:skip_stats]
 
     stats = computed_stats

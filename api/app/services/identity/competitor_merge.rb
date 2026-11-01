@@ -8,15 +8,17 @@ module Identity
           target: { id: target.id, name: target.full_name },
           results_count: EventResult.where(competitor_id: source.id).count,
           warnings: HistoryCheck.call(source, target),
-          blocked: source.identity_separate? || target.identity_separate?
+          blocked: source.identity_separate? || target.identity_separate?,
+          conflicts: ProfileMerge.conflicts(source, target)
         }
         details.merge(review_token: verifier.generate(review_payload(details), purpose: "competitor_merge", expires_in: 15.minutes))
       end
 
-      def call(source:, target:, confirm:, confirm_warnings: false, actor: nil, review_token: nil)
+      def call(source:, target:, confirm:, confirm_warnings: false, actor: nil, review_token: nil, keep: {})
         raise ArgumentError, "Explicit confirmation is required" unless confirm == true
         validate_pair!(source, target)
         Competitor.transaction do
+          Competitor.connection.execute("SELECT pg_advisory_xact_lock(184527002)")
           records = Competitor.where(id: [ source.id, target.id ]).order(:id).lock.to_a
           raise ArgumentError, "Both athletes must still exist" unless records.size == 2
           source = records.find { |record| record.id == source.id }
@@ -31,10 +33,16 @@ module Identity
           if details[:warnings].any? && confirm_warnings != true
             raise ArgumentError, "Review and explicitly confirm history warnings: #{details[:warnings].join('; ')}"
           end
+          names = source.identity_names + EventResult.where(competitor_id: source.id).pluck(:competitor_name, :raw_competitor_name).flatten
+          names += names.reject(&:blank?).map { |name| NameNormalizer.person_parts(name).join(" ") }
+          CompetitorAlias.where(competitor_id: source.id).update_all(competitor_id: target.id)
+          CompetitorAlias.record_names!(competitor: target, names: names, source: "merge", actor: actor)
+          discarded = ProfileMerge.apply(source, target, keep: keep)
           EventResult.where(competitor_id: source.id).update_all(competitor_id: target.id)
           source.destroy!
-          target.refresh_current_academy!
-          audit = details.except(:review_token).merge(action: "identity.competitor_merge", actor_id: actor&.id)
+          target.save!
+          target.refresh_current_academy! if target.event_results.exists?
+          audit = details.except(:review_token).merge(action: "identity.competitor_merge", actor_id: actor&.id, discarded_values: discarded)
           ActiveRecord.after_all_transactions_commit { Rails.logger.info(audit.to_json) }
           target.reload
         end
@@ -47,7 +55,7 @@ module Identity
       end
 
       def review_payload(details)
-        details.slice(:source, :target, :results_count, :blocked).merge(warnings: details[:warnings].sort).deep_stringify_keys
+        details.slice(:source, :target, :results_count, :blocked, :conflicts).merge(warnings: details[:warnings].sort).deep_stringify_keys
       end
 
       def validate_pair!(source, target)

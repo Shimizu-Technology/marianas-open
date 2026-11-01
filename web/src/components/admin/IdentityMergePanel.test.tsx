@@ -36,7 +36,7 @@ it('requires a preview and count confirmation, then merges in the selected direc
   fireEvent.click(screen.getByRole('checkbox', { name: /Permanently merge Source Gym into Target Gym, moving 7 results and 3 athletes/ }))
   fireEvent.click(screen.getByRole('button', { name: 'Permanently merge records' }))
   await waitFor(() => expect(onMerged).toHaveBeenCalledWith({ id: 2, name: 'Target Gym' }))
-  expect(api.admin.mergeAcademy).toHaveBeenCalledWith(1, 2)
+  expect(api.admin.mergeAcademy).toHaveBeenCalledWith(1, 2, {})
 })
 it('requires a separate acknowledgement of competitor warnings', async () => {
   vi.mocked(api.admin.previewCompetitorMerge).mockResolvedValue({ ...preview, warnings: ['Conflicting age divisions'], athletes_count: undefined })
@@ -48,7 +48,7 @@ it('requires a separate acknowledgement of competitor warnings', async () => {
   fireEvent.click(screen.getByRole('checkbox', { name: /I reviewed every warning/ }))
   expect(disabled('Permanently merge records')).toBe(false)
   fireEvent.click(screen.getByRole('button', { name: 'Permanently merge records' }))
-  await waitFor(() => expect(api.admin.mergeCompetitor).toHaveBeenCalledWith(1, 2, undefined, true))
+  await waitFor(() => expect(api.admin.mergeCompetitor).toHaveBeenCalledWith(1, 2, undefined, true, {}))
 })
 it('never offers confirmation for a blocked competitor merge', async () => {
   vi.mocked(api.admin.previewCompetitorMerge).mockResolvedValue({ ...preview, blocked: true, warnings: ['Incompatible identities'] })
@@ -124,5 +124,19 @@ it('does not acknowledge warnings after a warning-free preview', async () => {
   await chooseTarget('Target Athlete')
   fireEvent.click(screen.getByRole('checkbox', {name: /Permanently merge/}))
   fireEvent.click(screen.getByRole('button', {name: 'Permanently merge records'}))
-  await waitFor(() => expect(api.admin.mergeCompetitor).toHaveBeenCalledWith(1, 2, 'signed-preview', false))
+  await waitFor(() => expect(api.admin.mergeCompetitor).toHaveBeenCalledWith(1, 2, 'signed-preview', false, {}))
+})
+
+it('shows attachment and field conflicts and submits each selected value', async () => {
+  vi.mocked(api.admin.previewAcademyMerge).mockResolvedValue({ ...preview, conflicts: [
+    { field: 'description', source: 'Source biography', target: 'Target biography' },
+    { field: 'logo', source: { blob_id: 1, filename: 'source.png' }, target: { blob_id: 2, filename: 'target.png' } },
+  ] })
+  render(<IdentityMergePanel kind="academies" source={{ id: 1, name: 'Source' }} onMerged={vi.fn()} />)
+  await chooseTarget()
+  expect((screen.getByRole('radio', { name: /Kept record: Target biography/ }) as HTMLInputElement).checked).toBe(true)
+  fireEvent.click(screen.getByRole('radio', { name: /Source: source.png/ }))
+  fireEvent.click(screen.getByRole('checkbox', { name: /Permanently merge/ }))
+  fireEvent.click(screen.getByRole('button', { name: 'Permanently merge records' }))
+  await waitFor(() => expect(api.admin.mergeAcademy).toHaveBeenCalledWith(1, 2, { description: 'target', logo: 'source' }))
 })

@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { api } from '../../services/api'
-import type { IdentityMergePreview } from '../../services/api'
+import type { IdentityMergeKeep, IdentityMergePreview } from '../../services/api'
 import IdentityRecordPicker, { identityButtonClass } from './IdentityRecordPicker'
 import type { IdentityKind, IdentityRecord } from './IdentityRecordPicker'
 
@@ -33,6 +33,7 @@ function MergeConfirmation({ kind, source, target, disabled, setBusy, onMerged }
   const [confirmed, setConfirmed] = useState(false)
   const [warningsConfirmed, setWarningsConfirmed] = useState(false)
   const [error, setError] = useState('')
+  const [keep, setKeep] = useState<IdentityMergeKeep>({})
   const getPreview = async () => {
     setLoading(true); setBusy(true); setError(''); setPreview(null); setConfirmed(false); setWarningsConfirmed(false)
     try {
@@ -40,6 +41,7 @@ function MergeConfirmation({ kind, source, target, disabled, setBusy, onMerged }
         ? await api.admin.previewAcademyMerge(source.id, target.id)
         : await api.admin.previewCompetitorMerge(source.id, target.id)
       if (response.source.id !== source.id || response.target.id !== target.id) throw new Error('Preview did not match the selected records. Reload the preview.')
+      setKeep(Object.fromEntries((response.conflicts ?? []).map(conflict => [conflict.field, 'target'])))
       setPreview(response)
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not load merge preview. Try again.') }
     finally { setLoading(false); setBusy(false) }
@@ -48,8 +50,8 @@ function MergeConfirmation({ kind, source, target, disabled, setBusy, onMerged }
     if (!preview || preview.blocked || disabled || !confirmed || (preview.warnings.length > 0 && !warningsConfirmed) || merging) return
     setMerging(true); setBusy(true); setError('')
     try {
-      if (kind === 'academies') await api.admin.mergeAcademy(source.id, target.id)
-      else await api.admin.mergeCompetitor(source.id, target.id, preview.review_token, warningsConfirmed)
+      if (kind === 'academies') await api.admin.mergeAcademy(source.id, target.id, keep)
+      else await api.admin.mergeCompetitor(source.id, target.id, preview.review_token, warningsConfirmed, keep)
       onMerged({ id: preview.target.id, name: preview.target.name })
     } catch (err) {
       setError(`${err instanceof Error ? err.message : 'Merge failed.'} The merge was not confirmed. Reload the preview to check the current records before trying again.`)
@@ -63,6 +65,18 @@ function MergeConfirmation({ kind, source, target, disabled, setBusy, onMerged }
       <p className="break-words"><strong className="text-text-primary">Remove:</strong> {preview.source.name} (ID {preview.source.id})</p>
       <p className="break-words"><strong className="text-text-primary">Keep:</strong> {preview.target.name} (ID {preview.target.id})</p>
       <p><strong className="text-text-primary">{preview.results_count} results</strong>{preview.athletes_count !== undefined && <> and <strong className="text-text-primary">{preview.athletes_count} athletes</strong></>} will move to the kept record. The source record will be removed. This cannot be undone here.</p>
+      {(preview.conflicts ?? []).length > 0 && <div className="min-w-0 space-y-3">
+        <p className="font-semibold text-text-primary">Choose profile values to keep</p>
+        <p>Empty fields copy from the source automatically. Conflicting values default to the kept record. Discarded values are recorded in the audit log.</p>
+        {preview.conflicts?.map(conflict => <fieldset key={conflict.field} className="min-w-0 border border-white/20 p-3">
+          <legend className="px-1 font-semibold capitalize text-text-primary">{conflict.field.replaceAll('_', ' ')}</legend>
+          {(['target', 'source'] as const).map(choice => <label key={choice} className="flex min-w-0 cursor-pointer items-start gap-3 py-2">
+            <input type="radio" name={`${id}-${conflict.field}`} value={choice} checked={keep[conflict.field] === choice}
+              disabled={disabled || merging} onChange={() => setKeep(values => ({ ...values, [conflict.field]: choice }))} className="mt-1 size-5 shrink-0 accent-gold" />
+            <span className="min-w-0 break-words [overflow-wrap:anywhere]"><strong>{choice === 'target' ? 'Kept record' : 'Source'}:</strong> {profileValue(conflict[choice])}</span>
+          </label>)}
+        </fieldset>)}
+      </div>}
       {preview.warnings.length > 0 && <div className="border border-amber-400/40 p-3">
         <p className="font-semibold text-amber-200">Review these warnings before continuing</p>
         <ul className="list-disc pl-5 space-y-1 break-words">{preview.warnings.map((warning, i) => <li key={i}>{warning}</li>)}</ul>
@@ -81,4 +95,9 @@ function MergeConfirmation({ kind, source, target, disabled, setBusy, onMerged }
       </>}
     </div>}
   </div>
+}
+
+function profileValue(value: unknown): string {
+  if (value && typeof value === 'object' && 'filename' in value) return String(value.filename)
+  return typeof value === 'object' ? JSON.stringify(value) : String(value)
 }

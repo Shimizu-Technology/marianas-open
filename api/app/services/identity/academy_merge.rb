@@ -8,11 +8,11 @@ module Identity
           target: { id: target.id, name: target.name },
           results_count: attributed_results(source).count,
           athletes_count: Competitor.where(academy_id: source.id).count,
-          warnings: [], blocked: false
+          warnings: [], blocked: false, conflicts: ProfileMerge.conflicts(source, target)
         }
       end
 
-      def call(source:, target:, confirm:, confirm_warnings: false, actor: nil)
+      def call(source:, target:, confirm:, confirm_warnings: false, actor: nil, keep: {})
         raise ArgumentError, "Explicit confirmation is required" unless confirm == true
         validate_pair!(source, target)
         Academy.transaction do
@@ -33,15 +33,18 @@ module Identity
             ancestor = ancestor.parent
           end
           result_ids = attributed_results(source).pluck(:id)
-          target.save!
-          target.update_columns(aliases: aliases)
+          discarded = ProfileMerge.apply(source, target, keep: keep)
           EventResult.where(id: result_ids).update_all(academy_id: target.id)
           Competitor.where(academy_id: source.id).update_all(academy_id: target.id, academy: target.name)
           Academy.where(parent_id: source.id).where.not(id: target.id).update_all(parent_id: target.id)
           IdentityReview.where(candidate_academy_id: source.id).update_all(candidate_academy_id: target.id)
           IdentityReview.where(resolved_academy_id: source.id).update_all(resolved_academy_id: target.id)
           source.destroy!
-          audit = details.merge(action: "identity.academy_merge", actor_id: actor&.id)
+          # The source no longer participates in duplicate validation. This also
+          # handles legacy encoded/decoded twins in either merge direction.
+          target.save!
+          target.update_columns(aliases: aliases)
+          audit = details.merge(action: "identity.academy_merge", actor_id: actor&.id, discarded_values: discarded)
           ActiveRecord.after_all_transactions_commit { Rails.logger.info(audit.to_json) }
           target.reload
         end
