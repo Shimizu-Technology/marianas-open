@@ -43,6 +43,36 @@ class AsjjfEventFactsTest < ActiveSupport::TestCase
     assert_raises(ArgumentError) { service.call(2258) }
   end
 
+  test "changing facts IDs never adds or removes independently configured results sources" do
+    @event.event_asjjf_sources.create!(asjjf_event_id: 2062, discipline: "gi", derived_from: "admin")
+    service.call(2258)
+    service.call(2259)
+    assert_equal [ 2062 ], @event.event_asjjf_sources.pluck(:asjjf_event_id)
+    assert_equal 2259, @event.reload.asjjf_info_id
+    assert_equal [ 2062 ], Asjjf::FetchPlanner.new.sources_for(@event).map(&:asjjf_event_id)
+    assert_equal [ "https://asjjf.org/main/eventInfo/2259" ], Asjjf::FetchPlanner.new.plan_event_info(@event, asjjf_id: 2259).map(&:url)
+  end
+
+  test "stale draft instances cannot overwrite facts after another request publishes" do
+    stale = Event.find(@event.id)
+    @event.update!(status: "upcoming", venue_name: "Published venue")
+    assert_raises(ArgumentError) { Asjjf::EventFacts.new(stale, actor: @user).call(2258) }
+    assert_nil @event.reload.asjjf_info_id
+    assert_equal "Published venue", @event.venue_name
+  end
+
+  test "verified prior-year registration dates permit staff publishing but changed stale text does not" do
+    saved_snapshot
+    service.call(2258)
+    assert_includes @event.registration_fee_sections.to_json, "2026"
+    assert_includes @event.registration_info_items.to_json, "2026"
+    staff = User.create!(clerk_id: "facts-staff", email: "facts-staff@example.com", role: "staff")
+    EventPublishingService.call(event: @event, actor: staff, attributes: { status: "upcoming" }, action: "publish")
+    assert_equal "upcoming", @event.reload.status
+    @event.update!(status: "draft", registration_info_items: [ { label: "Manual old deadline", value: "2026-01-01" } ])
+    assert_not EventReadiness.new(@event).call[:publishable]
+  end
+
   private
 
   def service

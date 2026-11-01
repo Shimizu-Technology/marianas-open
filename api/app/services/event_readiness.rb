@@ -51,7 +51,14 @@ class EventReadiness
 
   def stale_years
     return [] unless year
-    content = TEXT_FIELDS.map { |field| @event.public_send(field).to_json }
+    sourced = info_snapshot ? Asjjf::EventFacts.registration_fields(info_snapshot.parsed_summary).stringify_keys : {}
+    content = TEXT_FIELDS.filter_map do |field|
+      value = @event.public_send(field)
+      # Early registration can legitimately open in the preceding calendar year.
+      # Exempt only text still identical to its saved ASJJF evidence.
+      next if sourced.key?(field) && value.as_json == sourced[field].as_json
+      value.to_json
+    end
     { event_schedule_items: %w[time description], prize_categories: %w[name], event_accommodations: %w[hotel_name description rate_info inclusions room_types booking_code booking_url] }.each do |association, fields|
       content.concat(@event.public_send(association).reject(&:marked_for_destruction?).map do |row|
         row.attributes.slice(*fields).values.join(" ")
@@ -62,9 +69,14 @@ class EventReadiness
 
   def stars_sourced?
     return true if @event.asjjf_stars.nil?
-    snapshot = AsjjfSnapshot.find_by(id: @event.asjjf_info_snapshot_id, page_type: "event_info", parse_status: "parsed", outcome: "ok", asjjf_id: @event.asjjf_info_id)
-    stars = snapshot&.parsed_summary&.fetch("stars", nil)
+    return false if @event.asjjf_info_snapshot_id.blank? || @event.asjjf_info_id.blank?
+    stars = info_snapshot&.parsed_summary&.fetch("stars", nil)
     stars.present? && stars.to_i == @event.asjjf_stars
+  end
+
+  def info_snapshot
+    return @info_snapshot if defined?(@info_snapshot)
+    @info_snapshot = AsjjfSnapshot.find_by(id: @event.asjjf_info_snapshot_id, page_type: "event_info", parse_status: "parsed", outcome: "ok", asjjf_id: @event.asjjf_info_id) if @event.asjjf_info_snapshot_id.present? && @event.asjjf_info_id.present?
   end
 
   def check(key, label, complete, section)
