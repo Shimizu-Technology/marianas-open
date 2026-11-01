@@ -9,6 +9,7 @@ class EventPublishingService
   class ForbiddenOverride < StandardError; end
 
   def self.call(event:, actor:, attributes: {}, action: nil, override_reason: nil)
+    raise ArgumentError, "Override reason must be text" unless override_reason.nil? || override_reason.is_a?(String)
     Event.transaction do
       event.lock! if event.persisted?
       old_status = event.status
