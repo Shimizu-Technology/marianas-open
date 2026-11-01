@@ -61,3 +61,5 @@ bundle exec rubocop app/services/asjjf/parsers.rb app/services/asjjf/parsers tes
 ```
 
 These tests require Nokogiri and Minitest but do not boot Rails, load Active Record, or connect to a database. No servers, browsers, devices, or containers were started. No use was made of `marianas_open_test_b1`. UI, intake persistence, Rails integration, live fetching, full application gates, independent PR review, and deployment verification belong to the parent integration and were not run here. No PR, push, merge, scraper changes, or data mutations are included.
+
+Parent integration extended this slice with Dumau-host support, address lines, configurable Dumau Open/Guam matching, and team URL/category validation. Final standalone coverage is 56 tests / 3,036 assertions, zero failures/errors/skips; see `docs/ASJJF-B1-QA.md` for combined Rails/web verification and the final tested source.

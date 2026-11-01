@@ -1,6 +1,6 @@
 # B1 acceptance and verification
 
-Context (2026-11-02): `main` b6eadb3, following CI/Sentry fe9adf4. Sources: `docs/2027-PLATFORM-PLAN.md`, existing Rails scraper/admin/auth/email/job code, public captured HTML, and Brain Dump `work/shimizu-tech/marianas-open/STATUS.md` (historical product context; current behavior verified in repository). The site serves tournament athletes/fans and staff managing events/results; ASJJF is the source of truth. B1 adds intake evidence only. Main targets Render Rails + worker and Netlify React. Deployment and actual B2 transport are outside this unmerged PR.
+Context (2026-11-02): initial `main` b6eadb3, following CI/Sentry fe9adf4; refreshed and rebased onto `main` 3634aef (public/admin hardening). Sources: `docs/2027-PLATFORM-PLAN.md`, existing Rails scraper/admin/auth/email/job code, public captured HTML, and Brain Dump `work/shimizu-tech/marianas-open/STATUS.md` (historical product context; current behavior verified in repository). The site serves tournament athletes/fans and staff managing events/results; ASJJF is the source of truth. B1 adds intake evidence only. Main targets Render Rails + worker and Netlify React. Deployment and actual B2 transport are outside this unmerged PR.
 
 Acceptance: signed intake rejects invalid authentication, safely leases/retries work, pauses on challenges, stores compressed snapshots, parses the captured public page types, and supports staff check/upload/status with admin-only reset. Published results and rankings remain unchanged. Backfill is repeatable and preserves legacy IDs.
 
@@ -21,3 +21,18 @@ Browser execution used a process-local synthetic administrator (no repository au
 Local screenshot evidence (task host): `/tmp/mo-b1-evidence/event-390.png`, `event-1440.png`, `status-390.png`, `status-1440.png`. No private customer data was used. All browser tabs and server/browser processes were stopped after this phase.
 
 Independent review found and fixed redirect identity mismatch, lost ranking division intent on dedupe, and uploader deletion blocked by retained snapshots. Regression tests cover each. Integration tests also caught/fixed the reserved Active Record `errors` attribute (stored as `error_count`, exposed as `errors`), absent GET body streams, and heartbeat uniqueness validation on repeat requests.
+
+Final tested source: `2eceea75fb889d2dac2af9abe8743785cd99af06` (subsequent verification-document updates do not change application code). Post-rebase UI execution used source `86a8058`; the later changes affect fetcher-only final URL validation and team parser category validation, both covered by new request/parser regressions. Final independent scoped review confirmed both fixes without remaining material findings. CodeRabbit status is reported in the PR handoff separately; independent review does not imply a CodeRabbit approval.
+
+Final automated gate:
+
+- API: 178 runs / 3,747 assertions / zero failures or errors. One intentional skip checks that Rails is absent; the same check passes standalone.
+- Standalone parsers: 56 runs / 3,036 assertions / zero failures, errors, or skips.
+- Fresh migration rehearsal: dropped/recreated only the owned test DB, loaded the current `main` schema, ran both B1 migrations, and verified the resulting foreign keys. Full tests passed both after migration and after schema load. Backfill regressions cover repeat runs and preservation of admin discipline overrides.
+- RuboCop: 246 files clean. Brakeman: zero warnings/errors with the unchanged eight-fingerprint baseline. Bundler-audit: no vulnerabilities.
+- Web: clean install, lint, TypeScript, 42 Vitest tests, production build, and production dependency audit at the CI high-severity threshold passed. Audit retains one low and one moderate inherited production advisory; dependencies are unchanged.
+- Impeccable 4.6.0 advisory check over all changed UI source files: `[]`.
+
+Fixture counts asserted: gi 2062 93 divisions / 246 placements / 16 alone; no-gi 2063 39 / 100 / 8; female adult 36 / 77 / 11; male kids 48 / 121 / 9; calendar 85 events / eight selected Marianas events; adults teams 217 rows; gi individual index 85 divisions / 39 default rows; no-gi index 57 / 10; individual division 20401 158 rows. Copa/Tokyo each have 12 fee tiers; Manila has zero published fees. The supplied team fixture is adults; kids uses a separate request, with category validation tested through a fixture mutation until a real kids capture is available.
+
+Cleanup: all owned server/browser processes and tabs closed; viewport overrides reset; the owned `marianas_open_test_b1` database dropped and its absence verified. No shared database/server/device was stopped. The unmerged PR branch/worktree remains for the merge owner. Local evidence remains under `/tmp/mo-b1-evidence/`. Deployment, live Clerk sign-in, physical-device behavior, B2 transport, and live alert-email delivery were not run and remain outside B1 verification.
