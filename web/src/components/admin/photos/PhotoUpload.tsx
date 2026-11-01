@@ -20,7 +20,7 @@ interface Props {
 
 export default function PhotoUpload({ event, albums, settings, selectedAlbum, imports, busy, refresh, mutate }: Props) {
   const { startUpload } = useGalleryUploads();
-  const [uploadAlbum, setUploadAlbum] = useState<string | null>(null);
+  const [uploadAlbumId, setUploadAlbumId] = useState<number | null | undefined>(undefined);
   const [albumType, setAlbumType] = useState('Podium');
   const [customType, setCustomType] = useState('');
   const [caption, setCaption] = useState('');
@@ -28,7 +28,7 @@ export default function PhotoUpload({ event, albums, settings, selectedAlbum, im
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [timezone, setTimezone] = useState(settings.timezone);
-  const category = uploadAlbum ?? (selectedAlbum === '__uncategorized__' ? '' : selectedAlbum);
+  const category = uploadAlbumId === undefined ? (selectedAlbum === '__uncategorized__' ? '' : selectedAlbum) : albums.find(album => album.id === uploadAlbumId)?.name || '';
   const resolvedType = albumType === '__custom__' ? customType.trim() : albumType;
 
   async function addImages(files: File[]) {
@@ -49,7 +49,7 @@ export default function PhotoUpload({ event, albums, settings, selectedAlbum, im
     <div className="flex items-center gap-2"><Upload className="h-5 w-5 text-gold" /><h2 id="add-event-photos" className="font-heading text-lg font-semibold">Add photos</h2></div>
     <p className="mt-1 text-sm text-text-secondary">Choose an album first. Add as many photos as you need; they send in smaller groups automatically.</p>
     <div className="mt-4 grid gap-4 sm:grid-cols-2">
-      <label className="block text-sm font-medium">Upload to album<select className={`${photoInput} mt-1`} value={category} onChange={event => setUploadAlbum(event.target.value)}>
+      <label className="block text-sm font-medium">Upload to album<select className={`${photoInput} mt-1`} value={category} onChange={event => setUploadAlbumId(albums.find(album => album.name === event.target.value)?.id ?? null)}>
         <option value="">Uncategorized — organize later</option>
         {albums.map(album => <option key={album.id} value={album.name}>{album.name}</option>)}
         {category && !albums.some(album => album.name === category) && <option value={category}>{category}</option>}

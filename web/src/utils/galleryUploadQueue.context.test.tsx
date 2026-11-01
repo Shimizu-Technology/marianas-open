@@ -169,6 +169,11 @@ describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage
     expect(screen.getAllByRole('listitem')).toHaveLength(8);
     expect(document.querySelectorAll('img').length).toBeLessThanOrEqual(8);
     expect(screen.getByText('1–8 of 24')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Minimize' }));
+    expect(screen.queryByRole('list', { name: 'Upload files' })).toBeNull();
+    expect(screen.getByRole('progressbar', { name: 'Overall upload progress' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }));
+    expect(screen.getAllByRole('listitem')).toHaveLength(8);
     expect(screen.getByRole('button', { name: 'All files (24)' }).getAttribute('aria-pressed')).toBe('true');
     fireEvent.click(screen.getByRole('button', { name: 'Next files' }));
     expect(screen.getByText('9–16 of 24')).toBeTruthy();

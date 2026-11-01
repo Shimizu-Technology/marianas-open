@@ -514,6 +514,7 @@ function estimatedUploadSize(task: GalleryUploadTask, averageOptimizedRatio: num
 export function GalleryUploadStatusPanel() {
   const { tasks, activeCount, failedCount, completedCount, retryFailed, clearCompleted, concurrency, directStorageUnavailable, directStorageError, queueError } = useGalleryUploads();
   const [now, setNow] = useState(0);
+  const [minimized, setMinimized] = useState(false);
   const [fileFilter, setFileFilter] = useState<'all' | 'failed'>('all');
   const [filePage, setFilePage] = useState(0);
 
@@ -584,7 +585,7 @@ export function GalleryUploadStatusPanel() {
             {activeCount > 0 ? <Loader2 className="w-4 h-4 text-gold animate-spin" /> : <UploadCloud className="w-4 h-4 text-gold" />}
             Gallery uploads
           </div>
-          <div className="text-xs text-text-muted">{overall}%</div>
+          <div className="flex items-center gap-2 text-xs text-text-muted"><span>{overall}%</span><button type="button" aria-expanded={!minimized} aria-controls="gallery-upload-details" onClick={() => setMinimized(value => !value)} className="min-h-11 px-2 text-gold focus-visible:outline-2 focus-visible:outline-gold">{minimized ? 'Show details' : 'Minimize'}</button></div>
         </div>
         <div role="progressbar" aria-label="Overall upload progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={overall} className="mt-2 h-1.5 bg-white/5 overflow-hidden">
           <div className="h-full bg-gold transition-all" style={{ width: `${overall}%` }} />
@@ -596,7 +597,7 @@ export function GalleryUploadStatusPanel() {
           <span>{concurrency} at a time</span>
           {optimizedSavedBytes > 0 && <span>{formatBytes(optimizedSavedBytes)} saved</span>}
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-text-muted sm:grid-cols-4">
+        {!minimized && <><div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-text-muted sm:grid-cols-4">
           <div className="border border-white/5 bg-white/[0.02] px-2 py-1.5">
             <div className="uppercase tracking-wide text-text-muted/80">Transferred</div>
             <div className="mt-0.5 text-text-primary">{formatBytes(uploadedBytes)} / {formatBytes(totalBytes)}</div>
@@ -621,7 +622,9 @@ export function GalleryUploadStatusPanel() {
             Direct storage upload failed{directStorageError ? `: ${directStorageError}` : ''}. Remaining files are uploading through the API, which is usually slower.
           </div>
         )}
+        </>}
       </div>
+      <div id="gallery-upload-details" hidden={minimized}>
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 px-3 py-2">
         <div role="group" aria-label="Filter upload files" className="flex flex-wrap gap-1">
           <button type="button" aria-pressed={fileFilter === 'all'} onClick={() => { setFileFilter('all'); setFilePage(0); }} className="min-h-11 px-2 text-xs text-text-primary aria-pressed:bg-gold/10 aria-pressed:text-gold focus-visible:outline-2 focus-visible:outline-gold">
@@ -680,13 +683,14 @@ export function GalleryUploadStatusPanel() {
       {(failedCount > 0 || completedCount > 0) && (
         <div className="flex items-center justify-end gap-2 p-3">
           {failedCount > 0 && (
-            <button onClick={() => { setFilePage(0); retryFailed(); }} className="px-3 py-1.5 text-xs text-gold bg-gold/10 hover:bg-gold/15">Retry failed</button>
+            <button onClick={() => { setFilePage(0); retryFailed(); }} className="min-h-11 touch-manipulation px-3 py-1.5 text-xs text-gold bg-gold/10 hover:bg-gold/15">Retry failed</button>
           )}
           {completedCount > 0 && (
-            <button onClick={() => { setFilePage(0); clearCompleted(); }} className="px-3 py-1.5 text-xs text-text-muted hover:text-text-primary">Clear complete</button>
+            <button onClick={() => { setFilePage(0); clearCompleted(); }} className="min-h-11 touch-manipulation px-3 py-1.5 text-xs text-text-muted hover:text-text-primary">Clear complete</button>
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

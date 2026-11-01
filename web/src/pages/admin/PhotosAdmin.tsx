@@ -78,7 +78,8 @@ function EventPhotos({ event }: { event: Event }) {
     } finally { if (generation.current === currentGeneration) setLoading(false); }
   }, [event.id, page, category, q, view, filterKey]);
 
-  useEffect(() => { void load(); return () => { generation.current++; }; }, [load, taskVersion]);
+  const invalidateLoad = useCallback(() => { generation.current++; }, []);
+  useEffect(() => { void load(); return invalidateLoad; }, [load, taskVersion, invalidateLoad]);
   const processing = imports.some(item => ['pending', 'queued', 'processing', 'importing'].includes(item.status)) || photos.some(photo => ['pending', 'uploaded', 'processing'].includes(photo.status));
   useEffect(() => {
     if (!processing) return;

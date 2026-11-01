@@ -18,7 +18,7 @@ export default function ZipIntake({ eventId, options, onImported, imports }: Pro
   const controller = useRef<AbortController | null>(null);
   const running = useRef(false);
   const onImportedRef = useRef(onImported);
-  onImportedRef.current = onImported;
+  useEffect(() => { onImportedRef.current = onImported; }, [onImported]);
 
   const send = useCallback(async (record: SavedZip) => {
     if (running.current) return;
@@ -70,7 +70,8 @@ export default function ZipIntake({ eventId, options, onImported, imports }: Pro
   return <div className="space-y-3 border-t border-white/10 pt-4">
     <h3 className="flex items-center gap-2 font-medium"><Archive size={18} className="text-gold" />Have a ZIP from the team?</h3>
     <p className="text-sm text-text-secondary">Download the gigafile ZIP to your device, then choose it here. Up to 4 GB. Photos are imported one at a time; folders and non-images are skipped.</p>
-    <label className="block text-sm font-medium">ZIP file<input className={`${photoInput} mt-1 file:mr-3 file:rounded file:border-0 file:bg-surface-light file:px-3 file:py-2 file:text-text-primary`} type="file" accept=".zip,application/zip" disabled={!key || !ready || busy || !!saved} onChange={event => { const file = event.target.files?.[0]; if (file) void choose(file); event.target.value = ''; }} /></label>
+    <label className="block text-sm font-medium">ZIP file<input className={`${photoInput} mt-1 file:mr-3 file:rounded file:border-0 file:bg-surface-light file:px-3 file:py-2 file:text-text-primary`} type="file" accept=".zip,application/zip" disabled={!key || !ready || busy || !!saved || !options.album_type.trim()} onChange={event => { const file = event.target.files?.[0]; if (file) void choose(file); event.target.value = ''; }} /></label>
+    {!options.album_type.trim() && <p className="text-sm text-amber-200">Enter a custom album type above before choosing a ZIP.</p>}
     <p className="text-xs leading-5 text-text-muted">Keep this page open while sending. A locked phone can pause a transfer. Reopen Photos to resume; an interrupted ZIP transfer starts again, then continues from its saved completion checkpoint. Browser storage must have room for the ZIP.</p>
     {saved && <div className="rounded-lg border border-white/15 p-3">
       <p className="break-all text-sm font-medium">{saved.file.name}</p>

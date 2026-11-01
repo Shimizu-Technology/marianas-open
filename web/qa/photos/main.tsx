@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import '../../src/index.css';
 import PhotosAdmin from '../../src/pages/admin/PhotosAdmin';
 import AdminLayout from '../../src/layouts/AdminLayout';
+import { AuthProvider } from '../../src/contexts/AuthContext';
 import { api, type Event } from '../../src/services/api';
 import { photoIntake, type DayProposal, type IntakePhoto, type PhotoAlbum, type PhotoSettings } from '../../src/services/photoIntake';
 
@@ -49,4 +50,4 @@ photoIntake.bulkDelete = async (_id, ids) => { photos = photos.filter(photo => !
 photoIntake.proposals = async (_id, type) => ({ proposals: [{ category: `${type} Day 1`, image_ids: photos.map(photo => photo.id), date: '2027-10-23' }], unassigned_count: 3 });
 photoIntake.applyProposals = async (_id, _type, proposals: DayProposal[]) => { proposals.forEach(proposal => { photos = photos.map(photo => proposal.image_ids.includes(photo.id) ? { ...photo, category: proposal.category } : photo); }); return { updated: proposals.reduce((total, proposal) => total + proposal.image_ids.length, 0) }; };
 // No network upload endpoint is mocked: file-transfer evidence is in queue/API tests.
-createRoot(document.getElementById('root')!).render(<MemoryRouter initialEntries={['/admin/photos/7']}><Routes><Route path="/admin" element={<AdminLayout />}><Route path="photos" element={<PhotosAdmin />} /><Route path="photos/:eventId" element={<PhotosAdmin />} /></Route></Routes><p className="pointer-events-none fixed bottom-1 left-1 z-[100] rounded bg-navy-900/90 px-2 py-1 text-[10px] text-text-muted">Synthetic QA fixtures · local only</p></MemoryRouter>);
+createRoot(document.getElementById('root')!).render(<AuthProvider value={{ isClerkEnabled: true, isSignedIn: true, isLoading: false, userId: 'd4-synthetic-staff' }}><MemoryRouter initialEntries={['/admin/photos/7']}><Routes><Route path="/admin" element={<AdminLayout />}><Route path="photos" element={<PhotosAdmin />} /><Route path="photos/:eventId" element={<PhotosAdmin />} /></Route></Routes><p className="pointer-events-none fixed bottom-1 left-1 z-[100] rounded bg-navy-900/90 px-2 py-1 text-[10px] text-text-muted">Synthetic QA fixtures · local only</p></MemoryRouter></AuthProvider>);
