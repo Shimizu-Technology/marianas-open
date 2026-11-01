@@ -39,7 +39,9 @@ class ResultsSyncJobsTest < ActiveSupport::TestCase
       AsjjfFetchRequest.update_all(status: "done")
       travel 1.day
       PlanResultsSyncJob.perform_now
-      assert_equal 35, AsjjfFetchRequest.count
+      # Day 0 becomes eligible, day 1 remains daily, and catch-up remains daily.
+      # The former day-21 event has moved into the weekly window.
+      assert_equal 40, AsjjfFetchRequest.count
       travel 6.days
       PlanResultsSyncJob.perform_now
       assert events[22].reload.results_fetch_planned_at > 6.days.ago

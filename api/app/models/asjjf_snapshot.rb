@@ -8,7 +8,7 @@ class AsjjfSnapshot < ApplicationRecord
   belongs_to :uploaded_by_user, class_name: "User", optional: true
   has_many :fetch_requests, class_name: "AsjjfFetchRequest", foreign_key: :snapshot_id, dependent: :nullify
   around_save :lock_results_evidence
-  around_destroy :lock_results_evidence
+  around_destroy :lock_results_evidence, prepend: true
 
   validates :page_type, inclusion: { in: Asjjf::Url::PAGE_PATHS.keys }
   validates :outcome, inclusion: { in: %w[ok challenged error] }
