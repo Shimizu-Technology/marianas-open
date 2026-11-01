@@ -17,7 +17,13 @@ module Asjjf
       end
     end
 
-    def plan_event_info(event)
+    def plan_event_info(event, asjjf_id: nil)
+      # Facts lookup must not configure or retain B3 results sources.
+      if asjjf_id.present?
+        return event.with_lock do
+          EvidenceLock.synchronize([ asjjf_id ]) { [ enqueue("event_info", asjjf_id, "event #{event.id} information") ] }
+        end
+      end
       with_event_evidence(event) do
         sources_for(event).map { |source| enqueue("event_info", source.asjjf_event_id, "event #{event.id} information") }
       end

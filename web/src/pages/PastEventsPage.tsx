@@ -129,14 +129,14 @@ export default function PastEventsPage() {
   const events = useMemo(
     () => allEvents
       .filter((event) => eventPhase(event) === 'completed')
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+      .sort((a, b) => (b.date || '').localeCompare(a.date || '')),
     [allEvents],
   );
 
   const eventsByYear = useMemo(() => {
     const grouped: Record<number, Event[]> = {};
     for (const event of events) {
-      const year = new Date(event.date + 'T00:00:00').getFullYear();
+      const year = event.date ? new Date(event.date + 'T00:00:00').getFullYear() : event.season_year || 0;
       if (!grouped[year]) grouped[year] = [];
       grouped[year].push(event);
     }
@@ -207,7 +207,7 @@ export default function PastEventsPage() {
                   <ScrollReveal>
                     <div className="flex items-center gap-4 mb-8">
                       <h2 className="text-3xl sm:text-5xl font-heading font-black text-text-primary tabular-nums">
-                        {year}
+                        {year || t('event.date')}
                       </h2>
                       <div className="flex-1 h-px bg-gradient-to-r from-gold-500/30 to-transparent" />
                       <span className="text-sm text-text-muted font-heading uppercase tracking-wider">
@@ -264,7 +264,7 @@ export default function PastEventsPage() {
                             <div className="space-y-2">
                               <div className="flex items-center gap-2 text-sm text-text-secondary">
                                 <Calendar size={14} className="text-text-muted shrink-0" />
-                                <span>{formatEventDate(event.date, i18n.language)}</span>
+                                <span>{event.date ? formatEventDate(event.date, i18n.language) : t('event.date')}</span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-text-secondary">
                                 <MapPin size={14} className="text-text-muted shrink-0" />

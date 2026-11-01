@@ -90,7 +90,7 @@ class EventTicketSalesFlowTest < ActionDispatch::IntegrationTest
     assert_equal "https://www.united.com/en/us/meetingtravel", response.parsed_body.dig("travel_items", 0, "url")
   end
 
-  test "cloning preserves reusable admission setup but keeps the new event safely unpublished" do
+  test "cloning clears season admission prices and keeps the new event safely unpublished" do
     @event.update!(
       is_main_event: true,
       registration_url_gi: "https://asjjf.org/main/eventInfo/2062",
@@ -142,18 +142,18 @@ class EventTicketSalesFlowTest < ActionDispatch::IntegrationTest
     assert_nil clone.registration_url_gi
     assert_nil clone.registration_url_nogi
     assert_not clone.live_stream_active?
-    assert_equal "https://youtube.com/@themarianasopen/live", clone.live_stream_url
+    assert_nil clone.live_stream_url
     assert_equal "unavailable", clone.ticket_sales_status
     assert_nil clone.ticket_sales_url
     assert_nil clone.ticket_early_bird_ends_on
-    assert_equal @event.ticket_options, clone.ticket_options
-    assert_equal "Deal Depot", clone.ticket_in_person_name
-    assert_equal "671-647-3325", clone.ticket_in_person_phone
-    assert_equal "114 East Taitano Road, Tamuning, Guam", clone.ticket_in_person_address
+    assert_equal [], clone.ticket_options
+    assert_nil clone.ticket_in_person_name
+    assert_nil clone.ticket_in_person_phone
+    assert_nil clone.ticket_in_person_address
     assert_equal ["Arrival Airport"], clone.travel_items.map { |item| item["title"] }
     assert_not clone.ticket_banner_image.attached?
     assert_equal [ [ "9:00 AM", "Opening matches" ] ], clone.event_schedule_items.pluck(:time, :description)
-    assert_equal [ [ "Black Belt Absolute", 5_000.to_d ] ], clone.prize_categories.pluck(:name, :amount)
+    assert_equal [ [ "Black Belt Absolute", nil ] ], clone.prize_categories.pluck(:name, :amount)
 
     cloned_accommodation = clone.event_accommodations.find_by!(hotel_name: "Partner Hotel")
     assert_equal "Tournament rate", cloned_accommodation.description

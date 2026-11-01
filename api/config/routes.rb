@@ -50,7 +50,11 @@ Rails.application.routes.draw do
           end
         end
         resources :events do
+          collection { post :rollover }
           member do
+            post :publish
+            post :unpublish
+            post :fill_asjjf
             post :upload_image
             post :upload_poster
             delete :remove_poster

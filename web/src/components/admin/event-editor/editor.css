@@ -1,0 +1,48 @@
+.event-admin {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.event-admin :is(button, a, input:not([type='checkbox']):not([type='file']), select) {
+  min-height: 44px;
+}
+.event-admin button {
+  min-width: 44px;
+}
+.event-admin :is(input:not([type='checkbox']), select, textarea) {
+  font-size: 16px;
+  min-width: 0;
+  max-width: 100%;
+}
+.event-admin input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.event-admin label:has(input[type='checkbox']) {
+  min-height: 44px;
+}
+.event-admin :is(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid var(--color-gold, #d4af37);
+  outline-offset: 3px;
+}
+.event-admin [hidden] {
+  display: none !important;
+}
+.event-admin:has(.editor-save-bar) {
+  padding-bottom: calc(var(--editor-save-height, 112px) + 12px);
+}
+.event-admin .editor-save-bar {
+  position: fixed;
+  left: var(--editor-save-left, 16px);
+  width: var(--editor-save-width, calc(100% - 32px));
+  bottom: 0;
+  z-index: 20;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+@media (prefers-reduced-motion: reduce) {
+  .event-admin *,
+  .event-admin *::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}

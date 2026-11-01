@@ -41,7 +41,7 @@ export default function CalendarPage() {
   const pastEventsByYear = useMemo(() => {
     const grouped: Record<number, typeof pastEvents> = {};
     pastEvents.forEach(e => {
-      const year = parseDateLocalSafe(e.date).getFullYear();
+      const year = e.date ? parseDateLocalSafe(e.date).getFullYear() : e.season_year || 0;
       if (!grouped[year]) grouped[year] = [];
       grouped[year].push(e);
     });
@@ -51,6 +51,7 @@ export default function CalendarPage() {
   }, [pastEvents]);
 
   const formatEventDate = useCallback((dateStr: string, dateEndStr?: string | null) => {
+    if (!dateStr) return t('event.date');
     const locale = getDateLocale(i18n.language);
 
     const main = parseDateLocalSafe(dateStr).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' });
@@ -58,7 +59,7 @@ export default function CalendarPage() {
       return new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', year: 'numeric' }).formatRange(parseDateLocalSafe(dateStr), parseDateLocalSafe(dateEndStr));
     }
     return main;
-  }, [i18n.language]);
+  }, [i18n.language, t]);
 
   if (loading || (upcomingEvents.length === 0 && orgLoading)) {
     return (
@@ -164,7 +165,7 @@ export default function CalendarPage() {
                 </div>
               ) : pastEventsByYear.map(({ year, events: yearEvents }) => (
                 <div key={year}>
-                  <h3 className="font-heading text-xl font-bold text-text-primary mb-4 border-b border-white/5 pb-2">{year}</h3>
+                  <h3 className="font-heading text-xl font-bold text-text-primary mb-4 border-b border-white/5 pb-2">{year || t('event.date')}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {yearEvents.map((event, i) => (
                       <ScrollReveal key={event.id} delay={i * 0.08}>
@@ -382,7 +383,7 @@ function EventCard({ event, formatDate, t, isPast }: {
               </span>
             )}
             <div className="flex gap-0.5">
-              {Array.from({ length: event.asjjf_stars }).map((_, j) => (
+              {Array.from({ length: event.asjjf_stars ?? 0 }).map((_, j) => (
                 <Star key={j} size={12} className="fill-gold-500 text-gold-500" />
               ))}
             </div>

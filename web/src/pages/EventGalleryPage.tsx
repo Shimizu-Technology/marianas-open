@@ -261,7 +261,7 @@ export default function EventGalleryPage() {
                 {tf(event, 'name')}
               </h1>
               <div className="mt-5 flex flex-wrap gap-4 text-sm text-text-secondary">
-                <span className="inline-flex min-h-11 items-center gap-2"><Calendar size={14} className="text-gold-500" /> {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <span className="inline-flex min-h-11 items-center gap-2"><Calendar size={14} className="text-gold-500" /> {event.date ? parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { year: 'numeric', month: 'long', day: 'numeric' }) : t('event.date')}</span>
                 <span className="inline-flex min-h-11 items-center gap-2"><MapPin size={14} className="text-gold-500" /> {tf(event, 'city')}, {tf(event, 'country')}</span>
               </div>
             </div>
