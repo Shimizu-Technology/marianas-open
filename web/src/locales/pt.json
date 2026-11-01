@@ -251,7 +251,9 @@
     "category": {
       "gi": "Gi",
       "noGi": "No-Gi"
-    }
+    },
+    "clearFilters": "Limpar filtros",
+    "loadError": "Não foi possível carregar os vídeos. Atualize a página para tentar novamente."
   },
   "share": {
     "defaultText": "Confira o Marianas Open — Campeonato Internacional de BJJ!",

@@ -251,7 +251,9 @@
     "category": {
       "gi": "道服",
       "noGi": "无道服"
-    }
+    },
+    "clearFilters": "清除筛选条件",
+    "loadError": "无法加载视频。请刷新页面重试。"
   },
   "share": {
     "defaultText": "快来了解 Marianas Open——国际巴西柔术锦标赛！",

@@ -251,7 +251,9 @@
     "category": {
       "gi": "Gi",
       "noGi": "No-Gi"
-    }
+    },
+    "clearFilters": "フィルターをクリア",
+    "loadError": "動画を読み込めませんでした。ページを再読み込みしてお試しください。"
   },
   "share": {
     "defaultText": "Marianas Open — 国際BJJ選手権をチェック！",

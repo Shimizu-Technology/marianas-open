@@ -13,6 +13,7 @@ import SEO from '../components/SEO';
 import { YOUTUBE_CHANNEL_URL } from '../lib/seo';
 import { api } from '../services/api';
 import type { Video } from '../services/api';
+import VideoThumbnail from '../components/VideoThumbnail';
 import { useEvents } from '../hooks/useApi';
 
 const DEFAULT_LIVE_STREAM_URL = 'https://www.youtube.com/@themarianasopen/live';
@@ -61,6 +62,7 @@ export default function WatchPage() {
   const shouldReduceMotion = useReducedMotion();
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [search, setSearch] = useState('');
   const [weightFilter, setWeightFilter] = useState('');
   const [beltFilter, setBeltFilter] = useState('');
@@ -74,14 +76,16 @@ export default function WatchPage() {
   useEffect(() => {
     api.getVideos()
       .then(v => setVideos(v))
-      .catch(() => {})
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, []);
 
   const featuredVideos = useMemo(() => videos.filter(v => v.featured), [videos]);
 
   const eventNames = useMemo(() => {
-    const names = new Set(videos.map(v => v.event_name).filter(Boolean));
+    const sorted = [...videos].sort((a, b) =>
+      (b.event_date || '').localeCompare(a.event_date || '') || (b.event_name || '').localeCompare(a.event_name || '', undefined, { numeric: true }));
+    const names = new Set(sorted.map(v => v.event_name).filter(Boolean));
     return Array.from(names) as string[];
   }, [videos]);
 
@@ -311,7 +315,7 @@ export default function WatchPage() {
           {videos.length === 0 ? (
             <div className="text-center py-16">
               <Play size={48} className="mx-auto text-text-muted mb-4 opacity-30" />
-              <p className="text-text-muted text-lg">{t('watch.noVideosYet', 'No videos yet')}</p>
+              <p className="text-text-muted text-lg">{loadError ? t('watch.loadError') : t('watch.noVideosYet', 'No videos yet')}</p>
               <p className="text-text-muted text-sm mt-2">{t('watch.noVideosYetDesc', 'Check back soon for match videos and highlights.')}</p>
               <a
                 href={YOUTUBE_CHANNEL_URL}
@@ -326,6 +330,7 @@ export default function WatchPage() {
           ) : filteredVideos.length === 0 ? (
             <div className="text-center py-16 text-text-muted">
               {t('watch.noResults')}
+              <button className="block mx-auto mt-4 text-gold-400 underline" onClick={() => { setSearch(''); setWeightFilter(''); setBeltFilter(''); setEventFilter(''); setCategoryFilter(''); }}>{t('watch.clearFilters')}</button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -400,6 +405,7 @@ function FilterSelect({ value, onChange, label, allLabel, options, displayFn }: 
   return (
     <div className="relative">
       <select
+        aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="appearance-none pl-4 pr-10 py-3 bg-navy-900 border border-white/10 text-text-primary text-sm focus:outline-none focus:border-gold-500/50 transition-colors cursor-pointer"
@@ -432,9 +438,9 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
-        ) : thumbnail ? (
+        ) : (
           <>
-            <img src={thumbnail} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />
+            <VideoThumbnail src={thumbnail} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-gold-500/20 group-hover:scale-110 transition-all">
@@ -442,10 +448,6 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
               </div>
             </div>
           </>
-        ) : (
-          <div className="absolute inset-0 bg-linear-to-br from-navy-700/50 to-navy-900/80 flex items-center justify-center">
-            <Play size={20} className="text-white/30" />
-          </div>
         )}
         {expanded && (
           <button

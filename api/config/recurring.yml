@@ -36,3 +36,7 @@ plan_official_rankings:
 plan_results_sync:
   class: PlanResultsSyncJob
   schedule: every day at 3pm UTC
+
+check_video_availability:
+  class: CheckAllVideoAvailabilityJob
+  schedule: every day at 2am UTC
