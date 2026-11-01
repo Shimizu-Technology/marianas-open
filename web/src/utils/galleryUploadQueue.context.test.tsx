@@ -72,6 +72,23 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.clearAllMocks(); });
 
+// Await real IndexedDB completion checkpoints inside act instead of repeatedly
+// rendering/asserting every intermediate progress update in a large batch.
+function completedCheckpoints(expected: number) {
+  const save = GalleryUploadQueueStore.prototype.save;
+  let completed = 0;
+  let resolve!: () => void;
+  let reject!: (error: unknown) => void;
+  const done = new Promise<void>((success, failure) => { resolve = success; reject = failure; });
+  vi.spyOn(GalleryUploadQueueStore.prototype, 'save').mockImplementation(async function (this: GalleryUploadQueueStore, record, file) {
+    try {
+      await save.call(this, record, file);
+      if (record.task.status === 'complete' && ++completed === expected) resolve();
+    } catch (error) { reject(error); throw error; }
+  });
+  return done;
+}
+
 describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage)', () => {
   it('saves the files before network work and exposes quota failure without starting an upload', async () => {
     const add = IDBObjectStore.prototype.add;
@@ -120,8 +137,9 @@ describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage
     });
     render(<View />);
     const files = Array.from({ length: 101 }, (_, i) => new File(['image'], `${i}.jpg`, { type: 'image/jpeg' }));
-    await act(async () => { await queue.startUpload(options(files)); });
-    await waitFor(() => expect(queue.completedCount).toBe(101), { timeout: 25000 });
+    const completed = completedCheckpoints(101);
+    await act(async () => { await queue.startUpload(options(files)); await completed; });
+    await waitFor(() => expect(queue.completedCount).toBe(101));
     expect(api.admin.createGalleryUploadBatch).toHaveBeenCalledTimes(2);
     expect(vi.mocked(api.admin.createGalleryUploadBatch).mock.calls.map(([, input]) => input.total_files).sort((a, b) => a! - b!)).toEqual([1, 100]);
     expect(transfers).toBe(101);
@@ -189,7 +207,8 @@ describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage
     expect(screen.getByText('9–12 of 12')).toBeTruthy();
     expect(screen.getAllByRole('listitem')).toHaveLength(4);
     expect(screen.getByRole('button', { name: 'Next files' }).hasAttribute('disabled')).toBe(true);
-    fireEvent.click(screen.getByRole('button', { name: 'Retry failed' }));
+    const completed = completedCheckpoints(12);
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Retry failed' })); await completed; });
     await waitFor(() => expect(queue.completedCount).toBe(24));
     expect(api.admin.completeEventGalleryDirectUpload).toHaveBeenCalledTimes(12);
     expect(transfers).toBe(0);
@@ -217,7 +236,8 @@ describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage
     render(<View />);
     const bytes = new Uint8Array(5 * 1024 * 1024).fill(3);
     const large = new File([bytes], 'photo.png', { type: 'image/png' });
-    await act(async () => { await queue.startUpload(options([large])); });
+    const completed = completedCheckpoints(1);
+    await act(async () => { await queue.startUpload(options([large])); await completed; });
     await waitFor(() => expect(queue.completedCount).toBe(1));
     expect(reads).toBe(3);
     expect(api.admin.prepareEventGalleryDirectUpload).toHaveBeenCalledWith(1, expect.objectContaining({ byte_size: bytes.length, checksum: createHash('md5').update(bytes).digest('base64') }), expect.objectContaining({ signal: expect.anything(), isCurrent: expect.any(Function) }));

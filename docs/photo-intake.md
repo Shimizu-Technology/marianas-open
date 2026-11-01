@@ -32,6 +32,8 @@ The worker reads EXIF `DateTimeOriginal`; a ZIP entry’s recorded modification 
 
 **Default: flagged photos publish** after image processing, and appear under **Needs review**. Checks suggest possible blur, very dark/overexposed images and exact/similar duplicates; people decide what to keep. They do not identify a wrongly named fighter card or reliably judge big-screen photos.
 
+Checks and hashes are recorded during image processing. Existing ready photos are not automatically reanalyzed; duplicate comparisons require stored hashes.
+
 Staff can enable **Hold flagged photos until approved** for newly processed photos. Those photos remain hidden until approval. Approving a review hold releases it; manually hidden photos stay hidden until staff explicitly show them. Changing the setting does not silently republish earlier hidden photos.
 
 Use filename search and album/hidden/review filters, then select a page of photos to move, approve, show, hide or delete. Hide and delete require confirmation; hiding can be reversed. Album arrows change the public album order. Renaming an album updates its photos together. The **Photo library** link jumps past upload tools on a phone.
