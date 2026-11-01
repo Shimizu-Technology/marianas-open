@@ -15,12 +15,16 @@ class AsjjfFetchRequestTest < ActiveSupport::TestCase
     low = enqueue
     high = enqueue(url: "https://asjjf.org/main/eventInfo/2", priority: 10)
     assert_equal [ high.id ], AsjjfFetchRequest.lease!(fetcher_id: "a", limit: 1).map(&:id)
+    first_token = high.reload.lease_token
     high.update!(lease_expires_at: 1.second.ago)
     assert_equal [ high.id ], AsjjfFetchRequest.lease!(fetcher_id: "b", limit: 1).map(&:id)
     assert_equal 2, high.reload.attempts
+    assert_not_equal first_token, high.lease_token
+    assert_match(/\A[0-9a-f]{64}\z/, high.lease_token)
     high.update!(lease_expires_at: 1.second.ago, attempts: 5)
     assert_equal [ low.id ], AsjjfFetchRequest.lease!(fetcher_id: "c").map(&:id)
     assert_equal "failed", high.reload.status
+    assert_nil high.lease_token
   end
 
   test "validates enqueue hosts, protocols, credentials, and page paths" do

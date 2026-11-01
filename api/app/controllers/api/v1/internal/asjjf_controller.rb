@@ -14,13 +14,13 @@ module Api
           limit = params[:limit].present? ? Integer(params[:limit], 10).clamp(1, 20) : 10
           requests = AsjjfFetchRequest.lease!(fetcher_id: @fetcher_id, limit: limit)
           breaker = AsjjfSetting.breaker
-          render json: { requests: requests.map { |item| item.attributes.slice("id", "url", "page_type", "lease_expires_at") },
+          render json: { requests: requests.map { |item| item.attributes.slice("id", "url", "page_type", "lease_expires_at", "lease_token") },
             pacing_seconds: 90, paused_until: breaker.open? ? breaker.paused_until : nil }
         end
 
         def snapshots
           data = JSON.parse(@raw_body)
-          required = %w[request_id url final_url http_status fetched_at outcome html]
+          required = %w[request_id lease_token url final_url http_status fetched_at outcome html]
           raise ArgumentError, "Missing snapshot fields" unless data.is_a?(Hash) && required.all? { |key| data.key?(key) }
           snapshot = Asjjf::SnapshotIntake.call(**data.slice(*required, "error").symbolize_keys, fetcher_id: @fetcher_id)
           render json: { snapshot_id: snapshot.id, parse_status: snapshot.parse_status }, status: :created
@@ -40,7 +40,7 @@ module Api
             raise ArgumentError, "Invalid count" unless value.is_a?(Integer) && value.between?(0, 1_000_000)
             attributes[field == "errors" ? "error_count" : field] = value
           end
-          AsjjfFetcherHeartbeat.find_by!(fetcher_id: @fetcher_id).update!(attributes.merge(received_at: Time.current))
+          AsjjfFetcherHeartbeat.create_or_find_by!(fetcher_id: @fetcher_id).update!(attributes.merge(received_at: Time.current))
           head :no_content
         rescue JSON::ParserError, KeyError, TypeError => e
           invalid_payload(e)
@@ -51,10 +51,8 @@ module Api
         def authenticate_fetcher!
           secret = ENV["ASJJF_FETCHER_SECRET"]
           return head :not_found if secret.blank?
-          return head :content_too_large if request.content_length.to_i > AsjjfSnapshot::MAX_BYTES
-          @raw_body = request.body&.read(AsjjfSnapshot::MAX_BYTES + 1).to_s
+          @raw_body = request.body&.read.to_s
           request.body&.rewind
-          return head :content_too_large if @raw_body.bytesize > AsjjfSnapshot::MAX_BYTES
           @fetcher_id = request.headers["X-Asjjf-Fetcher-Id"].to_s
           timestamp = request.headers["X-Asjjf-Timestamp"].to_s
           signature = request.headers["X-Asjjf-Signature"].to_s
@@ -63,7 +61,7 @@ module Api
           message = "#{timestamp}\n#{request.request_method}\n#{request.original_fullpath}\n#{Digest::SHA256.hexdigest(@raw_body)}"
           expected = OpenSSL::HMAC.hexdigest("SHA256", secret, message)
           return head :unauthorized unless signature.match?(/\A[0-9a-f]{64}\z/) && ActiveSupport::SecurityUtils.secure_compare(expected, signature)
-          unless AsjjfFetcherHeartbeat.allow_request?(@fetcher_id)
+          unless AsjjfFetcherRateLimit.allow_request?(secret)
             response.set_header("Retry-After", "60")
             head :too_many_requests
           end

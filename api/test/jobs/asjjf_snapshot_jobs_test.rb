@@ -19,7 +19,7 @@ class AsjjfSnapshotJobsTest < ActiveSupport::TestCase
     index = requests.find { |request| request.page_type == "individual_ranking" }
     html = File.read(Rails.root.join("test/fixtures/files/asjjf/individual_ranking_227.html"))
     AsjjfFetchRequest.lease!(fetcher_id: "home")
-    snapshot = Asjjf::SnapshotIntake.call(request_id: index.id, fetcher_id: "home", url: index.url, final_url: index.url, html: html)
+    snapshot = Asjjf::SnapshotIntake.call(request_id: index.id, lease_token: index.reload.lease_token, fetcher_id: "home", url: index.url, final_url: index.url, html: html)
     assert_equal "parsed", snapshot.parse_status
     assert_equal 85, AsjjfFetchRequest.where(page_type: "individual_ranking_division").count
     ParseAsjjfSnapshotJob.perform_now(snapshot.id)
@@ -33,7 +33,7 @@ class AsjjfSnapshotJobsTest < ActiveSupport::TestCase
     assert_equal original.id, promoted.id
     assert promoted.include_divisions?
     AsjjfFetchRequest.lease!(fetcher_id: "home")
-    snapshot = Asjjf::SnapshotIntake.call(request_id: promoted.id, fetcher_id: "home", url: promoted.url, final_url: promoted.url,
+    snapshot = Asjjf::SnapshotIntake.call(request_id: promoted.id, lease_token: promoted.reload.lease_token, fetcher_id: "home", url: promoted.url, final_url: promoted.url,
       html: File.read(Rails.root.join("test/fixtures/files/asjjf/individual_ranking_227.html")))
     assert_equal "parsed", snapshot.parse_status
     assert_equal 85, AsjjfFetchRequest.where(page_type: "individual_ranking_division").count
@@ -51,8 +51,24 @@ class AsjjfSnapshotJobsTest < ActiveSupport::TestCase
   test "index-only planner and admin snapshots do not fan out" do
     request = Asjjf::FetchPlanner.new.plan_ranking(227, include_divisions: false).find { |item| item.page_type == "individual_ranking" }
     AsjjfFetchRequest.lease!(fetcher_id: "home")
-    Asjjf::SnapshotIntake.call(request_id: request.id, fetcher_id: "home", url: request.url, final_url: request.url, html: File.read(Rails.root.join("test/fixtures/files/asjjf/individual_ranking_227.html")))
+    Asjjf::SnapshotIntake.call(request_id: request.id, lease_token: request.reload.lease_token, fetcher_id: "home", url: request.url, final_url: request.url, html: File.read(Rails.root.join("test/fixtures/files/asjjf/individual_ranking_227.html")))
     assert_equal 0, AsjjfFetchRequest.where(page_type: "individual_ranking_division").count
+  end
+
+  test "oversized inflated snapshots record a parse failure without publishing data" do
+    saved = snapshot(parse_status: "pending")
+    saved.update_columns(compressed_html: Zlib::Deflate.deflate("x" * (AsjjfSnapshot::MAX_INFLATED_BYTES + 1)))
+    ParseAsjjfSnapshotJob.perform_now(saved.id)
+    assert_equal "failed", saved.reload.parse_status
+    assert_includes saved.parse_error, "InflationLimitError"
+    assert saved.parsed_at
+    assert_equal 0, EventResult.count
+  end
+
+  test "inflation permits exactly the output cap" do
+    saved = snapshot
+    saved.compressed_html = Zlib::Deflate.deflate("x" * AsjjfSnapshot::MAX_INFLATED_BYTES)
+    assert_equal AsjjfSnapshot::MAX_INFLATED_BYTES, saved.html.bytesize
   end
 
   private

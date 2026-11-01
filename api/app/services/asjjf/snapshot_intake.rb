@@ -2,26 +2,28 @@ module Asjjf
   class SnapshotIntake
     class LeaseError < StandardError; end
 
-    def self.call(url:, html:, page_type: nil, fetcher_id: nil, request_id: nil, source: "fetcher", uploaded_by_user: nil,
+    def self.call(url:, html:, page_type: nil, fetcher_id: nil, request_id: nil, lease_token: nil, source: "fetcher", uploaded_by_user: nil,
       final_url: nil, http_status: 200, fetched_at: Time.current, outcome: "ok", error: nil)
       raise ArgumentError, "Invalid outcome" unless %w[ok challenged error].include?(outcome)
-      raise ArgumentError, "HTML must be a string" unless html.is_a?(String)
-      raise ArgumentError, "HTML exceeds 2 MB" if html.bytesize > AsjjfSnapshot::MAX_BYTES
+      raise ArgumentError, "HTML must be a string" unless html.is_a?(String) || (html.nil? && outcome != "ok")
+      raise ArgumentError, "HTML exceeds 2 MB" if html && html.bytesize > AsjjfSnapshot::MAX_BYTES
       timestamp = fetched_at.is_a?(String) ? Time.iso8601(fetched_at) : fetched_at
       raise ArgumentError, "Invalid fetched_at" unless timestamp.is_a?(Time) || timestamp.is_a?(ActiveSupport::TimeWithZone)
-      raise ArgumentError, "Invalid HTTP status" unless (http_status.is_a?(Integer) && http_status.between?(100, 599)) || (http_status.nil? && outcome == "error")
+      raise ArgumentError, "Invalid HTTP status" unless (http_status.is_a?(Integer) && http_status.between?(100, 599)) || (http_status.nil? && outcome != "ok")
       Url.parse(final_url) if final_url.present?
       notify = false
       snapshot = nil
       AsjjfSetting.breaker.with_lock do
         fetch_request = AsjjfFetchRequest.find(request_id) if source == "fetcher"
         if fetch_request && (fetch_request.status != "leased" || fetch_request.leased_by != fetcher_id ||
-            fetch_request.lease_expires_at <= Time.current || fetch_request.url != url)
-          raise LeaseError, "Request must have an unexpired lease owned by this fetcher and matching URL"
+            fetch_request.lease_expires_at.nil? || fetch_request.lease_expires_at <= Time.current || fetch_request.url != url ||
+            !lease_token.is_a?(String) || fetch_request.lease_token.blank? ||
+            !ActiveSupport::SecurityUtils.secure_compare(fetch_request.lease_token, lease_token))
+          raise LeaseError, "Request must have an unexpired lease owned by this fetcher with matching URL and lease token"
         end
         page_type = fetch_request.page_type if fetch_request
         uri = Url.parse(url, page_type: page_type)
-        outcome = "challenged" if Parsers::ChallengeDetector.challenged?(html) || http_status == 403
+        outcome = "challenged" if Parsers::ChallengeDetector.challenged?(html.to_s) || http_status == 403
         outcome = "error" if outcome == "ok" && http_status != 200
         if outcome == "ok" && source == "fetcher" && final_url.blank?
           raise ArgumentError, "Successful fetcher snapshots require a final URL"
@@ -58,7 +60,7 @@ module Asjjf
           else fetch_request.attempts >= AsjjfFetchRequest::MAX_ATTEMPTS ? "failed" : "pending"
           end
           fetch_request.update!(status: status, snapshot: snapshot, completed_at: status == "done" ? Time.current : nil,
-            leased_by: nil, lease_expires_at: nil, last_error: outcome == "ok" ? nil : (error.presence || outcome).to_s.truncate(2000))
+            leased_by: nil, lease_expires_at: nil, lease_token: nil, last_error: outcome == "ok" ? nil : (error.presence || outcome).to_s.truncate(2000))
         end
       end
       ChallengeAlert.deliver(snapshot) if notify

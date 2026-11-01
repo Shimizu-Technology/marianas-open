@@ -3,6 +3,8 @@ require "digest"
 
 class AsjjfSnapshot < ApplicationRecord
   MAX_BYTES = 2.megabytes
+  MAX_INFLATED_BYTES = 10.megabytes
+  class InflationLimitError < StandardError; end
   belongs_to :uploaded_by_user, class_name: "User", optional: true
   has_many :fetch_requests, class_name: "AsjjfFetchRequest", foreign_key: :snapshot_id, dependent: :nullify
   validates :page_type, inclusion: { in: Asjjf::Url::PAGE_PATHS.keys }
@@ -20,7 +22,15 @@ class AsjjfSnapshot < ApplicationRecord
   end
 
   def html
-    Zlib::Inflate.inflate(compressed_html).force_encoding(Encoding::UTF_8)
+    output = +"".b
+    inflater = Zlib::Inflate.new
+    inflater.inflate(compressed_html) do |chunk|
+      raise InflationLimitError, "Inflated HTML exceeds 10 MiB" if output.bytesize + chunk.bytesize > MAX_INFLATED_BYTES
+      output << chunk
+    end
+    output.force_encoding(Encoding::UTF_8)
+  ensure
+    inflater&.close
   end
 
   def self.prune!(before: 120.days.ago)

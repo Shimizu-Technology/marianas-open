@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_130100) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_130200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -80,6 +80,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130100) do
     t.boolean "include_divisions", default: false, null: false
     t.text "last_error"
     t.datetime "lease_expires_at"
+    t.string "lease_token"
     t.string "leased_by"
     t.string "page_type", null: false
     t.integer "priority", default: 0, null: false
@@ -92,7 +93,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130100) do
     t.index ["lease_expires_at"], name: "index_asjjf_fetch_requests_on_lease_expires_at"
     t.index ["snapshot_id"], name: "index_asjjf_fetch_requests_on_snapshot_id"
     t.index ["status", "priority", "created_at"], name: "index_asjjf_requests_for_leasing"
-    t.index ["url"], name: "index_asjjf_requests_active_url", unique: true, where: "((status)::text = ANY ((ARRAY['pending'::character varying, 'leased'::character varying])::text[]))"
+    t.index ["url"], name: "index_asjjf_requests_active_url", unique: true, where: "((status)::text = ANY (ARRAY[('pending'::character varying)::text, ('leased'::character varying)::text]))"
   end
 
   create_table "asjjf_fetcher_heartbeats", force: :cascade do |t|
@@ -109,6 +110,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_130100) do
     t.datetime "run_started_at"
     t.datetime "updated_at", null: false
     t.index ["fetcher_id"], name: "index_asjjf_fetcher_heartbeats_on_fetcher_id", unique: true
+  end
+
+  create_table "asjjf_fetcher_rate_limits", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "credential_digest", null: false
+    t.integer "request_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.datetime "window_started_at"
+    t.index ["credential_digest"], name: "index_asjjf_fetcher_rate_limits_on_credential_digest", unique: true
   end
 
   create_table "asjjf_settings", force: :cascade do |t|

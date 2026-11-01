@@ -25,13 +25,13 @@ class AsjjfFetchRequest < ApplicationRecord
   def self.lease!(fetcher_id:, limit: 10)
     AsjjfSetting.breaker.with_lock do
       expired = where(status: "leased").where("lease_expires_at <= ?", Time.current)
-      expired.where("attempts >= ?", MAX_ATTEMPTS).update_all(status: "failed", last_error: "Lease expired; maximum attempts reached", leased_by: nil, lease_expires_at: nil, updated_at: Time.current)
-      expired.update_all(status: "pending", leased_by: nil, lease_expires_at: nil, updated_at: Time.current)
+      expired.where("attempts >= ?", MAX_ATTEMPTS).update_all(status: "failed", last_error: "Lease expired; maximum attempts reached", leased_by: nil, lease_expires_at: nil, lease_token: nil, updated_at: Time.current)
+      expired.update_all(status: "pending", leased_by: nil, lease_expires_at: nil, lease_token: nil, updated_at: Time.current)
       return [] if AsjjfSetting.breaker.open?
       where(status: "pending").where("attempts >= ?", MAX_ATTEMPTS).update_all(status: "failed", updated_at: Time.current)
       requests = where(status: "pending").order(priority: :desc, created_at: :asc, id: :asc).limit(limit.clamp(1, 20)).lock.to_a
       requests.each do |item|
-        item.update!(status: "leased", leased_by: fetcher_id, lease_expires_at: LEASE_DURATION.from_now, attempts: item.attempts + 1)
+        item.update!(status: "leased", leased_by: fetcher_id, lease_expires_at: LEASE_DURATION.from_now, lease_token: SecureRandom.hex(32), attempts: item.attempts + 1)
       end
       requests
     end
