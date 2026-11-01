@@ -65,7 +65,7 @@ module Asjjf
       end
       ChallengeAlert.deliver(snapshot) if notify
       # Run the isolated parsing job after committing intake, so parser errors never undo a saved page.
-      ParseAsjjfSnapshotJob.perform_now(snapshot.id) if snapshot.parse_status == "pending"
+      ParseAsjjfSnapshotJob.perform_now(snapshot.id)
       snapshot.reload
     end
   end

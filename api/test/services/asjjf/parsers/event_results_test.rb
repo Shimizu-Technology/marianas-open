@@ -104,3 +104,21 @@ class AsjjfEventResultsTest < AsjjfParserTest
     end
   end
 end
+
+class AsjjfResultsB3ParserTest < AsjjfParserTest
+  def test_spaced_no_gi_title_is_not_mistaken_for_gi
+    file = "event_results_2063_nogi.html"
+    html = fixture(file).gsub(/no-gi/i, "no - Gi")
+    assert_equal "nogi", parse_fixture(file, html: html)[:discipline]
+  end
+
+  def test_complete_empty_category_is_distinct_from_missing_or_broken_table
+    html = '<div class="breadcrumbs"><h1>Example (gi Tournament)</h1></div><div class="headline"><h3>Female Kids</h3></div><div class="list-table"><table></table></div>'
+    parsed = PARSERS.parse(page_type: "results_list", url: "https://asjjf.org/main/resultsList/2062?gender=FEMALE&age=KIDS", html: html)
+    assert_empty parsed[:divisions]
+    assert_equal 0, parsed[:counts][:placements]
+    [ html.sub("</table>", ""), html.sub("<table></table>", ""), html.sub("<table></table>", '<table><tr><td class="fighter-name">Lost Name</td></tr></table>') ].each do |bad|
+      assert_raises(PARSERS::ParseError) { PARSERS.parse(page_type: "results_list", url: "https://asjjf.org/main/resultsList/2062?gender=FEMALE&age=KIDS", html: bad) }
+    end
+  end
+end

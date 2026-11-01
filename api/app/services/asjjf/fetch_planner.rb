@@ -40,22 +40,30 @@ module Asjjf
     public
 
     def sources_for(event)
-      # Also accommodate source ids edited after the one-time backfill.
+      # Reconcile only derived records. Explicit administrator sources remain
+      # independent of the legacy array and registration links.
+      desired = {}
       Array(event.asjjf_event_ids).each do |id|
         next unless id.to_s.match?(/\A[1-9]\d*\z/)
-        event.event_asjjf_sources.find_or_create_by!(asjjf_event_id: id) do |source|
-          source.discipline = "unknown"
-          source.derived_from = "asjjf_event_ids"
-        end
+        desired[id.to_i] = { discipline: "unknown", derived_from: "asjjf_event_ids" }
       end
       { registration_url_gi: "gi", registration_url_nogi: "nogi" }.each do |field, discipline|
         next if event.public_send(field).blank?
         uri = Url.parse(event.public_send(field), page_type: "event_info")
-        source = event.event_asjjf_sources.find_or_initialize_by(asjjf_event_id: uri.path.split("/").last.to_i)
-        next if source.persisted? && source.derived_from == "admin"
-        source.update!(discipline: discipline, derived_from: "registration_url")
+        desired[uri.path.split("/").last.to_i] = { discipline: discipline, derived_from: "registration_url" }
       rescue ArgumentError
         next
+      end
+      event.event_asjjf_sources.where.not(derived_from: "admin").each do |source|
+        source.destroy! unless desired.key?(source.asjjf_event_id)
+      end
+      desired.each do |id, attributes|
+        source = event.event_asjjf_sources.find_or_initialize_by(asjjf_event_id: id)
+        next if source.persisted? && source.derived_from == "admin"
+        # Preserve discipline established by a saved page for an unchanged
+        # array-derived source. Removing a registration link removes its claim.
+        attributes = attributes.except(:discipline) if source.persisted? && source.derived_from == "asjjf_event_ids" && attributes[:derived_from] == "asjjf_event_ids"
+        source.update!(attributes)
       end
       event.event_asjjf_sources.reload.to_a
     end

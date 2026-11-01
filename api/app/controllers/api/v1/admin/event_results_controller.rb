@@ -34,7 +34,8 @@ module Api
 
         def create
           result = @event.event_results.new(result_params)
-          if result.save
+          saved = @event.with_lock { result.save }
+          if saved
             render json: result, status: :created
           else
             render json: { errors: result.errors.full_messages }, status: :unprocessable_entity
@@ -48,7 +49,7 @@ module Api
           created = []
           errors = []
 
-          ActiveRecord::Base.transaction do
+          @event.with_lock do
             results_data.each_with_index do |result_data, i|
               result = @event.event_results.new(
                 division: result_data[:division],
@@ -86,13 +87,13 @@ module Api
         end
 
         def destroy
-          @result.destroy
+          @event.with_lock { @result.destroy! }
           head :no_content
         end
 
         def destroy_all
           count = nil
-          EventResult.transaction do
+          @event.with_lock do
             previous_ids = @event.event_results.where.not(competitor_id: nil).distinct.pluck(:competitor_id)
             count = @event.event_results.delete_all
             Competitor.where(id: previous_ids).find_each(&:refresh_current_academy!)

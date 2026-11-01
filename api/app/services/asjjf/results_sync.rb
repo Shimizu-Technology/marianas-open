@@ -11,9 +11,10 @@ module Asjjf
     end
 
     def call(trigger: "snapshot", apply: true)
-      run = @event.with_lock do
+      run = with_evidence_lock do
         proposal = build_proposal
-        previous = @event.results_sync_runs.order(id: :desc).first
+        previous = @event.results_sync_runs.where(status: "held")
+          .where("diff_summary->>'fingerprint' = ?", proposal[:summary][:fingerprint]).order(id: :desc).first
         # Repeated evaluations of the same hold/discard are quiet and cannot
         # silently reintroduce a proposal an administrator discarded.
         if previous&.status == "held" && previous.diff_summary["fingerprint"] == proposal[:summary][:fingerprint]
@@ -35,14 +36,11 @@ module Asjjf
       notify(run)
       run
     rescue StandardError => e
-      failed = @event.results_sync_runs.create!(trigger: trigger, status: "failed", error: "#{e.class}: #{e.message}".truncate(2000))
-      @event.update_columns(results_sync_status: "failed", results_last_checked_at: Time.current)
-      ResultsAlert.deliver(failed)
-      failed
+      record_failure(e, trigger: trigger)
     end
 
     def approve!(run, user:)
-      result = @event.with_lock do
+      result = with_evidence_lock do
         run.reload
         raise InvalidReview, "This review is no longer awaiting approval" unless run.event_id == @event.id && run.status == "held" && run.discarded_at.nil?
         proposal = build_proposal
@@ -53,12 +51,17 @@ module Asjjf
         # medals, unknown provenance, or protected-row conflicts.
         raise InvalidReview, "Resolve blocking guard failures before approving" if @blocking_guards.any?
         apply_changes!
-        run.update!(status: "applied", applied_at: Time.current, approved_by: user)
+        run.update!(status: "applied", applied_at: Time.current, approved_by: user,
+          diff_summary: run.diff_summary.merge("unlinked_competitors" => @unlinked || []))
         @event.update_columns(results_sync_status: "applied", results_last_checked_at: Time.current)
         run
       end
       notify(result)
       result
+    rescue StaleReview, InvalidReview
+      raise
+    rescue StandardError => e
+      record_failure(e, trigger: "manual")
     end
 
     def discard!(run)
@@ -72,8 +75,14 @@ module Asjjf
 
     private
 
+    def with_evidence_lock(&block)
+      @event.with_lock { EvidenceLock.for_event(@event, &block) }
+    end
+
     def build_proposal
       @assembly = ResultsAssembler.new(@event).call
+      @identity_keys = {}
+      @ambiguous_relabels = []
       @existing = @event.event_results.order(:id).to_a
       @incoming = @assembly.rows.map { |attrs| EventResult.new(attrs.merge(event: @event)) }
       @added, @removed, @changed, @unchanged, @conflicts, @relabels = [], [], [], [], [], []
@@ -88,7 +97,7 @@ module Asjjf
           divisions[key][type] += 1
         end
       end
-      relabel_count = @relabels.map { |_, row| [row.asjjf_event_id, row.division_key] }.uniq.size
+      relabel_count = @relabels.map { |_, row| [ row.asjjf_event_id, row.division_key ] }.uniq.size
       messages = []
       messages << "Adds #{totals[:added]} results across #{@added.map(&:division).uniq.size} divisions" if totals[:added].positive?
       messages << "Removes #{totals[:removed]} results" if totals[:removed].positive?
@@ -96,7 +105,9 @@ module Asjjf
       messages << "Corrects #{relabel_count} divisions labeled Gi that are actually No-Gi" if relabel_count.positive?
       messages << "No changes to published results" if !changes? && @conflicts.empty?
       fingerprint = Digest::SHA256.hexdigest([
-        @assembly.snapshot_ids.sort, @event.event_asjjf_sources.order(:id).pluck(:asjjf_event_id, :discipline),
+        @assembly.evidence.sort_by { |item| item["id"] },
+        @event.attributes.slice("asjjf_event_ids", "registration_url_gi", "registration_url_nogi"),
+        @event.event_asjjf_sources.order(:id).pluck(:asjjf_event_id, :discipline),
         @existing.map { |row| row.attributes.sort.to_h }
       ].to_json)
       { summary: totals.merge(divisions: divisions.values, relabeled_divisions: relabel_count,
@@ -115,22 +126,28 @@ module Asjjf
         pending.dup.each do |row|
           candidates = pool.select { |old| matches_row?(old, row, mode) }
           next if candidates.empty?
-          next if mode != :exact && candidates.size != 1
+          # Historical double-Gi imports can contain the same athlete/place in
+          # both disciplines. Pair the exact Gi label first, then repair the
+          # remaining occurrence as No-Gi; occurrence counts retain tied rows.
+          if mode == :relabel && candidates.map { |old| identity_key(old) }.uniq.size > 1
+            @ambiguous_relabels << "Ambiguous label repair for #{row.competitor_name} in #{row.division}; review historical source attribution"
+            next
+          end
           old = candidates.first
           pool.delete(old)
           pending.delete(row)
-          pairs << [old, row]
-          @relabels << [old, row] if mode == :relabel && row.discipline == "nogi" && old.discipline == "gi"
+          pairs << [ old, row ]
+          @relabels << [ old, row ] if mode == :relabel && row.discipline == "nogi" && old.discipline == "gi"
         end
       end
       pairs.each do |old, row|
         if protected?(old)
           @conflicts << conflict(old, "Protected result matches ASJJF; kept unchanged") unless same?(old, row)
-          @unchanged << [old, row]
+          @unchanged << [ old, row ]
         elsif same?(old, row)
-          @unchanged << [old, row]
+          @unchanged << [ old, row ]
         else
-          @changed << [old, row]
+          @changed << [ old, row ]
         end
       end
       pool.each do |row|
@@ -144,18 +161,23 @@ module Asjjf
     end
 
     def matches_row?(old, row, mode)
-      old_key = old.sync_key.presence || ResultsIdentity.key(old)
-      key = ResultsIdentity.key(row)
+      old_key = old.sync_key.presence || identity_key(old)
+      key = identity_key(row)
       case mode
       when :exact
-        old_key == key || (old.source == "manual" && ResultsIdentity.key(old, source: false) == ResultsIdentity.key(row, source: false))
+        old_key == key || (old.source == "manual" && identity_key(old, source: false) == identity_key(row, source: false))
       when :legacy
         old.asjjf_event_id.nil? && (old.discipline.nil? || old.discipline == row.discipline) &&
-          ResultsIdentity.key(old, source: false, discipline: false) == ResultsIdentity.key(row, source: false, discipline: false)
+          identity_key(old, source: false, discipline: false) == identity_key(row, source: false, discipline: false)
       when :relabel
         old.source == "asjjf" && (old.asjjf_event_id.nil? || old.asjjf_event_id == row.asjjf_event_id) &&
-          ResultsIdentity.key(old, source: false, discipline: false) == ResultsIdentity.key(row, source: false, discipline: false)
+          identity_key(old, source: false, discipline: false) == identity_key(row, source: false, discipline: false)
       end
+    end
+
+    def identity_key(row, source: true, discipline: true)
+      full = @identity_keys[row.object_id] ||= ResultsIdentity.key(row)
+      (source ? [ full[0] ] : []) + (discipline ? [ full[1] ] : []) + full.drop(2)
     end
 
     def protected?(row)
@@ -171,11 +193,11 @@ module Asjjf
     end
 
     def check_guards
-      @blocking_guards = @assembly.guard_failures.dup
+      @blocking_guards = @assembly.guard_failures.dup + @ambiguous_relabels
       @incoming.each do |row|
-        @blocking_guards << "Missing placement or competitor name in #{row.division}" unless [1, 2, 3].include?(row.placement) && row.competitor_name.present?
+        @blocking_guards << "Missing placement or competitor name in #{row.division}" unless [ 1, 2, 3 ].include?(row.placement) && row.competitor_name.present?
       end
-      @incoming.group_by { |row| [row.asjjf_event_id, row.discipline, row.division_key] }.each_value do |rows|
+      @incoming.group_by { |row| [ row.asjjf_event_id, row.discipline, row.division_key ] }.each_value do |rows|
         counts = rows.map(&:placement).tally
         if counts.fetch(1, 0) != 1 || counts.fetch(2, 0) > 1 || counts.fetch(3, 0) > 2
           @blocking_guards << "Invalid medal counts in #{rows.first.division} (#{counts})"
@@ -193,6 +215,9 @@ module Asjjf
       end
       @guards = @blocking_guards.dup
       current = @existing.select { |row| row.source == "asjjf" }
+      if current.any? { |row| row.asjjf_event_id.nil? } && changes?
+        @guards << "Historical result provenance is uncertain; review the first adoption before changing or removing legacy rows"
+      end
       @guards << "ASJJF result count drops by more than 10% (#{current.size} to #{@incoming.size})" if current.any? && @incoming.size < current.size * 0.9
       current.group_by(&:asjjf_event_id).each do |id, rows|
         next if id.nil?
@@ -212,10 +237,10 @@ module Asjjf
     def apply_changes!
       previous_ids = @existing.filter_map(&:competitor_id)
       @removed.each(&:destroy!)
-      (@changed + @added.map { |row| [nil, row] }).each do |old, row|
+      (@changed + @added.map { |row| [ nil, row ] }).each do |old, row|
         target = old || @event.event_results.new
         target.assign_attributes(row.attributes.slice(*FIELDS))
-        target.sync_key = ResultsIdentity.key(row)
+        target.sync_key = identity_key(row)
         target.competitor = CompetitorLinker.find_or_create(target.competitor_name, target)
         target.save!
       end
@@ -232,6 +257,13 @@ module Asjjf
         guard_failures: @guards, applied_at: status == "applied" ? Time.current : nil)
       @event.update_columns(results_sync_status: status, results_last_checked_at: Time.current)
       run
+    end
+
+    def record_failure(error, trigger:)
+      failed = @event.results_sync_runs.create!(trigger: trigger, status: "failed", error: "#{error.class}: #{error.message}".truncate(2000))
+      @event.update_columns(results_sync_status: "failed", results_last_checked_at: Time.current)
+      ResultsAlert.deliver(failed)
+      failed
     end
 
     def notify(run)

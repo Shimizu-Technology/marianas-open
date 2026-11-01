@@ -20,8 +20,8 @@ module Api
 
         def approve
           run = @event.results_sync_runs.find(params[:run_id])
-          Asjjf::ResultsSync.new(@event).approve!(run, user: current_user)
-          render json: { run: run, status: run.status }
+          run = Asjjf::ResultsSync.new(@event).approve!(run, user: current_user)
+          render json: { run: run, status: run.status }, status: run.status == "failed" ? :unprocessable_entity : :ok
         end
 
         def discard

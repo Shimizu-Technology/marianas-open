@@ -30,7 +30,7 @@ class AddResultsSync < ActiveRecord::Migration[8.0]
       t.jsonb :diff_summary, null: false, default: {}
       t.jsonb :guard_failures, null: false, default: []
       t.datetime :applied_at
-      t.references :approved_by, foreign_key: { to_table: :users }
+      t.references :approved_by, foreign_key: { to_table: :users, on_delete: :nullify }
       t.datetime :discarded_at
       t.text :error
       t.timestamps

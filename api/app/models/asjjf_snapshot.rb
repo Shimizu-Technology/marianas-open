@@ -7,11 +7,18 @@ class AsjjfSnapshot < ApplicationRecord
   class InflationLimitError < StandardError; end
   belongs_to :uploaded_by_user, class_name: "User", optional: true
   has_many :fetch_requests, class_name: "AsjjfFetchRequest", foreign_key: :snapshot_id, dependent: :nullify
+  around_save :lock_results_evidence
+  around_destroy :lock_results_evidence
+
   validates :page_type, inclusion: { in: Asjjf::Url::PAGE_PATHS.keys }
   validates :outcome, inclusion: { in: %w[ok challenged error] }
   validates :source, inclusion: { in: %w[fetcher admin_upload] }
   validates :parse_status, inclusion: { in: %w[pending parsed failed skipped] }
   validates :byte_size, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: MAX_BYTES }
+
+  def lock_results_evidence(&block)
+    Asjjf::EvidenceLock.synchronize([asjjf_id], &block)
+  end
 
   def html=(value)
     bytes = value.to_s

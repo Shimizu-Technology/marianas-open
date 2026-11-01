@@ -9,13 +9,14 @@ class PlanResultsSyncJob < ApplicationJob
       next unless empty || (1..60).cover?(days)
       interval = days <= 21 || empty ? 1.day : 7.days
       next if event.results_fetch_planned_at && event.results_fetch_planned_at > interval.ago
-      event.with_lock do
+      planned = event.with_lock do
         next if event.results_fetch_planned_at && event.results_fetch_planned_at > interval.ago
         requests = Asjjf::FetchPlanner.new(requested_by: "PlanResultsSyncJob").plan_event_results(event)
         next if requests.empty?
         event.update_columns(results_fetch_planned_at: Time.current)
-        Asjjf::ResultsSync.new(event).call(trigger: "scheduled")
+        true
       end
+      Asjjf::ResultsSync.new(event).call(trigger: "scheduled") if planned
     end
   end
 end

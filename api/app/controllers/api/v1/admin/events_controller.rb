@@ -54,8 +54,8 @@ module Api
         def import_results
           return unless require_results_admin
           run = @event.results_sync_runs.find(params.require(:run_id))
-          Asjjf::ResultsSync.new(@event).approve!(run, user: current_user)
-          render json: { run: run, status: run.status }
+          run = Asjjf::ResultsSync.new(@event).approve!(run, user: current_user)
+          render json: { run: run, status: run.status }, status: run.status == "failed" ? :unprocessable_entity : :ok
         rescue Asjjf::ResultsSync::StaleReview, Asjjf::ResultsSync::InvalidReview => e
           render json: { error: e.message }, status: :conflict
         end
