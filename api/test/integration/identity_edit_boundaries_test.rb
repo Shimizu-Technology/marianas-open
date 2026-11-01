@@ -1,6 +1,8 @@
 require "test_helper"
+require_relative "../support/results_snapshot_fixtures"
 
 class IdentityEditBoundariesTest < ActionDispatch::IntegrationTest
+  include ResultsSnapshotFixtures
   setup do
     organization = Organization.create!(name: "Identity fixtures", slug: "identity-fixtures")
     @event = organization.events.create!(name: "Early", slug: "early", date: Date.new(2025, 1, 1), status: "completed", asjjf_stars: 3)
@@ -142,21 +144,17 @@ class IdentityEditBoundariesTest < ActionDispatch::IntegrationTest
     assert_nil person.reload.academy_id
   end
 
-  test "replacement import refreshes athletes omitted from the new results" do
+  test "snapshot sync refreshes athletes omitted from the new results" do
     person = Competitor.create!(first_name: "Kai", last_name: "River")
     early = medal(@event, person)
-    medal(@late, person)
-    original = AsjjfScraper.method(:fetch_and_parse)
-    AsjjfScraper.define_singleton_method(:fetch_and_parse) do |*|
-      [ { competitor_name: "Example Newcomer", academy: "Replacement Gym", division: "Adult Blue", belt_rank: "blue", gender: "male", age_category: "adult", placement: 1, country_code: "GUM" } ]
-    end
-    AsjjfScraper.import!(event: @late, asjjf_event_ids: [ 123 ])
+    medal(@late, person, source: "asjjf")
+    complete_snapshots(@late)
+    result = sync(@late)
+    assert_equal "held", result.status
+    @staff.update!(role: "admin")
+    result = Asjjf::ResultsSync.new(@late).approve!(result, user: @staff)
+    assert_equal "applied", result.status, result.error
     assert_equal early.academy_id, person.reload.academy_id
-    assert_equal 1, @late.event_results.count
-  ensure
-    if original
-      AsjjfScraper.define_singleton_method(:fetch_and_parse, original)
-      AsjjfScraper.singleton_class.send(:private, :fetch_and_parse)
-    end
+    assert_not @late.event_results.exists?(competitor_id: person.id)
   end
 end

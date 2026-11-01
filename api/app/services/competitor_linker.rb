@@ -14,7 +14,27 @@ class CompetitorLinker
   VALID_BELTS = %w[white blue purple brown black].freeze
   BELT_ORDER = { "white" => 0, "blue" => 1, "purple" => 2, "brown" => 3, "black" => 4 }.freeze
 
+  LEGACY_INDEX_KEY = :asjjf_competitor_legacy_index
+
   class << self
+    # A results transaction can resolve hundreds of names. Normalize historical
+    # unindexed names once; indexed names and approved aliases stay fresh on
+    # every lookup. Store ids and revalidate candidates so renames/deletions
+    # during a run cannot turn a stale cache entry into an identity match.
+    def with_legacy_name_index
+      previous = Thread.current[LEGACY_INDEX_KEY]
+      index = Hash.new { |hash, key| hash[key] = [] }
+      Competitor.where(normalized_name: nil).or(Competitor.where(reverse_normalized_name: nil)).find_each do |competitor|
+        ["#{competitor.first_name} #{competitor.last_name}", "#{competitor.last_name} #{competitor.first_name}"].each do |name|
+          index[normalize(name)] << competitor.id
+        end
+      end
+      Thread.current[LEGACY_INDEX_KEY] = index
+      yield
+    ensure
+      Thread.current[LEGACY_INDEX_KEY] = previous
+    end
+
     def link_event(event)
       link_results(event.event_results.where(competitor_id: nil))
     end
@@ -136,7 +156,17 @@ class CompetitorLinker
 
     def name_candidates(key)
       approved = Competitor.where(id: CompetitorAlias.where(normalized_key: key).select(:competitor_id)).to_a
-      (Competitor.canonical_name_matches(key) + approved).uniq(&:id)
+      index = Thread.current[LEGACY_INDEX_KEY]
+      canonical = if index
+        indexed = Competitor.where(normalized_name: key).or(Competitor.where(reverse_normalized_name: key)).to_a
+        legacy = Competitor.where(id: index.fetch(key, [])).select do |competitor|
+          ["#{competitor.first_name} #{competitor.last_name}", "#{competitor.last_name} #{competitor.first_name}"].any? { |name| normalize(name) == key }
+        end
+        indexed + legacy
+      else
+        Competitor.canonical_name_matches(key)
+      end
+      (canonical + approved).uniq(&:id)
     end
 
     def compatible_result?(competitor, sample)

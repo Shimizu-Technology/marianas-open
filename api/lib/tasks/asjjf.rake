@@ -1,97 +1,23 @@
 namespace :asjjf do
-  desc "Import results from ASJJF for all events that have asjjf_event_ids configured"
+  desc "Queue saved-snapshot results checks (no outbound HTTP)"
   task import_all: :environment do
-    events = Event.where("asjjf_event_ids IS NOT NULL AND asjjf_event_ids != '[]'")
-                  .order(date: :desc)
-    total = events.count
-
-    if total.zero?
-      puts "No events with ASJJF event IDs found."
-      exit 0
-    end
-
-    puts "Found #{total} events with ASJJF IDs.\n\n"
-
-    imported = 0
-    skipped = 0
-    failed = 0
-
-    events.each_with_index do |event, idx|
-      ids = event.asjjf_event_ids
-      prefix = "[#{idx + 1}/#{total}]"
-
-      print "#{prefix} #{event.name} (IDs: #{ids.join(', ')})... "
-
-      begin
-        result = AsjjfScraper.import!(event: event, asjjf_event_ids: ids)
-        puts "#{result[:imported]} results (#{result[:summary][:by_gender].map { |g, c| "#{c} #{g}" }.join(', ')})"
-        imported += 1
-      rescue AsjjfScraper::ScraperError => e
-        puts "SKIPPED — #{e.message}"
-        skipped += 1
-      rescue => e
-        puts "FAILED — #{e.message}"
-        failed += 1
-      end
-    end
-
-    puts "\nDone! Imported: #{imported}, Skipped: #{skipped}, Failed: #{failed}"
-  end
-
-  desc "Preview results from ASJJF for all events (dry run, no database changes)"
-  task preview_all: :environment do
-    events = Event.where("asjjf_event_ids IS NOT NULL AND asjjf_event_ids != '[]'")
-                  .order(date: :desc)
-    total = events.count
-
-    if total.zero?
-      puts "No events with ASJJF event IDs found."
-      exit 0
-    end
-
-    puts "Previewing #{total} events...\n\n"
-
-    events.each_with_index do |event, idx|
-      ids = event.asjjf_event_ids
-      prefix = "[#{idx + 1}/#{total}]"
-
-      print "#{prefix} #{event.name} (IDs: #{ids.join(', ')})... "
-
-      begin
-        result = AsjjfScraper.preview(asjjf_event_ids: ids)
-        summary = result[:summary]
-        puts "#{summary[:total]} results — #{summary[:by_gender].map { |g, c| "#{c} #{g}" }.join(', ')} — #{summary[:academies]} academies, #{summary[:countries]} countries"
-      rescue => e
-        puts "ERROR — #{e.message}"
-      end
+    Event.find_each do |event|
+      requests = Asjjf::FetchPlanner.new(requested_by: "rake asjjf:import_all").plan_event_results(event)
+      puts "#{event.slug}: #{requests.uniq(&:id).size} pages queued for the next nightly fetch" if requests.any?
     end
   end
 
-  desc "Import results from ASJJF for a single event by slug"
-  task :import, [:slug] => :environment do |_t, args|
-    slug = args[:slug]
-    unless slug
-      puts "Usage: rake asjjf:import[event-slug]"
-      exit 1
-    end
+  desc "Preview latest saved results: rake asjjf:preview[slug]"
+  task :preview, [ :slug ] => :environment do |_task, args|
+    event = Event.find_by!(slug: args[:slug])
+    run = Asjjf::ResultsSync.new(event).call(trigger: "manual", apply: false)
+    puts JSON.pretty_generate(run.as_json)
+  end
 
-    event = Event.find_by(slug: slug)
-    unless event
-      puts "Event not found: #{slug}"
-      exit 1
-    end
-
-    ids = event.asjjf_event_ids
-    if ids.blank?
-      puts "No ASJJF event IDs configured for #{event.name}"
-      exit 1
-    end
-
-    puts "Importing #{event.name} (IDs: #{ids.join(', ')})..."
-    result = AsjjfScraper.import!(event: event, asjjf_event_ids: ids)
-    puts "Imported #{result[:imported]} results"
-    puts "By gender: #{result[:summary][:by_gender].inspect}"
-    puts "By belt: #{result[:summary][:by_belt].inspect}"
-    puts "Academies: #{result[:summary][:academies]}, Countries: #{result[:summary][:countries]}"
+  desc "Queue one event: rake asjjf:import[slug] (approval is in admin)"
+  task :import, [ :slug ] => :environment do |_task, args|
+    event = Event.find_by!(slug: args[:slug])
+    requests = Asjjf::FetchPlanner.new(requested_by: "rake asjjf:import").plan_event_results(event)
+    puts "#{requests.uniq(&:id).size} pages queued for the next nightly fetch; review holds in admin"
   end
 end

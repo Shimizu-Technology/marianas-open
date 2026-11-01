@@ -10,8 +10,8 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
-function mount() {
-  return render(<MemoryRouter><AsjjfIntakePanel eventId={7} /></MemoryRouter>)
+function mount(onSnapshotSaved?: () => void) {
+  return render(<MemoryRouter><AsjjfIntakePanel eventId={7} onSnapshotSaved={onSnapshotSaved} /></MemoryRouter>)
 }
 
 function fillUpload(file = new File(['<html>Results</html>'], 'results.html', { type: 'text/html' })) {
@@ -26,9 +26,9 @@ it('queues only an intake check and explains overnight fetching and published re
   const importSpy = vi.spyOn(api.admin, 'importResults')
   mount()
   fireEvent.click(screen.getByRole('button', { name: 'Check ASJJF now' }))
-  expect(await screen.findByText("Queued. Our fetcher checks ASJJF overnight; you'll see snapshots here after it runs.")).toBeTruthy()
+  expect(await screen.findByText('Queued for the next nightly fetch at 02:30 ChST. This does not fetch ASJJF immediately.')).toBeTruthy()
   expect(api.admin.checkAsjjf).toHaveBeenCalledWith(7)
-  expect(screen.getByText(/Snapshots won't yet replace published results/)).toBeTruthy()
+  expect(screen.getByText(/Complete snapshots sync published results automatically/)).toBeTruthy()
   expect(importSpy).not.toHaveBeenCalled()
 })
 
@@ -45,12 +45,13 @@ it('allows retry after a failed check', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Check ASJJF now' }))
   expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Check unavailable')
   fireEvent.click(screen.getByRole('button', { name: 'Check ASJJF now' }))
-  expect(await screen.findByRole('status')).toHaveProperty('textContent', expect.stringContaining('Queued.'))
+  expect(await screen.findByRole('status')).toHaveProperty('textContent', expect.stringContaining('Queued for the next nightly fetch'))
   expect(screen.queryByRole('alert')).toBeNull()
 })
 
 it('uploads the exact multipart fields and reports asynchronous parsing', async () => {
-  mount()
+  const onSnapshotSaved = vi.fn()
+  mount(onSnapshotSaved)
   const file = fillUpload()
   // jsdom does not copy synthetic FileList changes into FormData; model native form serialization.
   const NativeFormData = globalThis.FormData
@@ -66,6 +67,7 @@ it('uploads the exact multipart fields and reports asynchronous parsing', async 
   expect(sent.get('file')).toBe(file)
   expect(sent.get('page_type')).toBe('event_results')
   expect(sent.get('url')).toBe('https://asjjf.org/main/eventResults/7')
+  expect(onSnapshotSaved).toHaveBeenCalledTimes(1)
 })
 
 it('rejects files that are not saved HTML before sending', async () => {

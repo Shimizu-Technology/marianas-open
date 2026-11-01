@@ -2,14 +2,15 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   Trophy, Plus, Pencil, Trash2, X, Loader2, Save,
-  ArrowLeft, Download, Upload, AlertTriangle, CheckCircle,
+  ArrowLeft, AlertTriangle, CheckCircle,
   ChevronDown, ChevronUp, Search, ExternalLink,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
-import type { Event, EventResult, EventResultFormData, ImportPreview } from '../../services/api'
+import type { Event, EventResult, EventResultFormData } from '../../services/api'
 import { formatDate } from '../../utils/dates'
 import AsjjfIntakePanel from '../../components/admin/AsjjfIntakePanel'
+import ResultsSyncCard from '../../components/admin/ResultsSyncCard'
 
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black']
 const GENDERS = ['male', 'female']
@@ -66,10 +67,7 @@ export default function EventResultsAdmin() {
   const [form, setForm] = useState<EventResultFormData>(emptyResultForm)
   const [saving, setSaving] = useState(false)
 
-  // Import state
-  const [importStep, setImportStep] = useState<'idle' | 'previewing' | 'preview' | 'importing' | 'done'>('idle')
-  const [importPreview, setImportPreview] = useState<ImportPreview | null>(null)
-  const [importError, setImportError] = useState('')
+  const [syncRevision, setSyncRevision] = useState(0)
 
   // UI state
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
@@ -119,6 +117,7 @@ export default function EventResultsAdmin() {
       }
       setEditing(null)
       setForm(emptyResultForm)
+      setSyncRevision(value => value + 1)
       await loadData()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
@@ -132,6 +131,7 @@ export default function EventResultsAdmin() {
       await api.admin.deleteEventResult(numericEventId, id)
       setDeleteConfirm(null)
       showSuccess('Result deleted')
+      setSyncRevision(value => value + 1)
       await loadData()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Delete failed')
@@ -143,39 +143,10 @@ export default function EventResultsAdmin() {
       const res = await api.admin.deleteAllEventResults(numericEventId)
       setDeleteAllConfirm(false)
       showSuccess(`Deleted ${res.deleted} results`)
+      setSyncRevision(value => value + 1)
       await loadData()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Delete all failed')
-    }
-  }
-
-  // ASJJF Import
-  const handleImportPreview = async () => {
-    setImportStep('previewing')
-    setImportError('')
-    try {
-      const preview = await api.admin.importResultsPreview(numericEventId)
-      setImportPreview(preview)
-      setImportStep('preview')
-    } catch (err) {
-      setImportError(err instanceof Error ? err.message : 'Preview failed')
-      setImportStep('idle')
-    }
-  }
-
-  const handleImportConfirm = async () => {
-    setImportStep('importing')
-    setImportError('')
-    try {
-      const result = await api.admin.importResults(numericEventId)
-      showSuccess(result.message)
-      setImportStep('done')
-      setImportPreview(null)
-      await loadData()
-      setTimeout(() => setImportStep('idle'), 2000)
-    } catch (err) {
-      setImportError(err instanceof Error ? err.message : 'Import failed')
-      setImportStep('preview')
     }
   }
 
@@ -184,6 +155,7 @@ export default function EventResultsAdmin() {
     try {
       await api.admin.updateEvent(numericEventId, { status: 'completed' })
       showSuccess('Event marked as completed')
+      setSyncRevision(value => value + 1)
       await loadData()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update event status')
@@ -300,7 +272,8 @@ export default function EventResultsAdmin() {
         )}
       </AnimatePresence>
 
-      <AsjjfIntakePanel eventId={numericEventId} />
+      <ResultsSyncCard key={`${numericEventId}-${syncRevision}`} eventId={numericEventId} onApplied={loadData} />
+      <AsjjfIntakePanel eventId={numericEventId} onSnapshotSaved={() => setSyncRevision(value => value + 1)} />
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
@@ -314,130 +287,9 @@ export default function EventResultsAdmin() {
       <div className="mb-4 p-4 bg-surface border border-white/5 text-xs text-text-secondary leading-relaxed">
         <p>
           <strong className="text-text-primary">Tournament results for this event.</strong>{' '}
-          Import results automatically from ASJJF.org using the import tool below, or add individual results manually.
-          Imported results automatically create and link competitor profiles, academy records, and update rankings.
+          Review saved ASJJF snapshots above, or add individual results manually.
+          Automatic sync preserves staff edits and holds unsafe changes for review.
         </p>
-      </div>
-
-      {/* ASJJF Import Section */}
-      <div className="mb-6 bg-surface border border-white/5 p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-start sm:items-center gap-2">
-            <Download className="w-4 h-4 text-text-muted" />
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-              <span className="text-sm font-medium text-text-primary">ASJJF Import</span>
-              <span className="text-xs text-text-muted">(Import results from asjjf.org)</span>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {importStep === 'idle' && (
-              <button
-                onClick={handleImportPreview}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 transition-colors"
-              >
-                <Upload className="w-3 h-3" />
-                Preview Import
-              </button>
-            )}
-            {importStep === 'previewing' && (
-              <span className="flex items-center gap-1.5 text-xs text-text-muted">
-                <Loader2 className="w-3 h-3 animate-spin" /> Fetching preview...
-              </span>
-            )}
-            {importStep === 'importing' && (
-              <span className="flex items-center gap-1.5 text-xs text-text-muted">
-                <Loader2 className="w-3 h-3 animate-spin" /> Importing...
-              </span>
-            )}
-            {importStep === 'done' && (
-              <span className="flex items-center gap-1.5 text-xs text-green-400">
-                <CheckCircle className="w-3 h-3" /> Import complete
-              </span>
-            )}
-          </div>
-        </div>
-
-        {importError && (
-          <div className="mt-3 px-3 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
-            {importError}
-          </div>
-        )}
-
-        {importStep === 'preview' && importPreview && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4 space-y-3">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-white/[0.03] p-3 text-center">
-                <div className="text-lg font-bold text-text-primary">{importPreview.preview.total}</div>
-                <div className="text-[10px] text-text-muted uppercase">Results to Import</div>
-              </div>
-              <div className="bg-white/[0.03] p-3 text-center">
-                <div className="text-lg font-bold text-text-primary">{Object.keys(importPreview.preview.by_belt || {}).length}</div>
-                <div className="text-[10px] text-text-muted uppercase">Belt Ranks</div>
-              </div>
-              <div className="bg-white/[0.03] p-3 text-center">
-                <div className="text-lg font-bold text-text-primary">{importPreview.preview.countries}</div>
-                <div className="text-[10px] text-text-muted uppercase">Countries</div>
-              </div>
-              <div className="bg-white/[0.03] p-3 text-center">
-                <div className="text-lg font-bold text-text-primary">{importPreview.preview.academies}</div>
-                <div className="text-[10px] text-text-muted uppercase">Academies</div>
-              </div>
-            </div>
-
-            {importPreview.existing_results_count > 0 && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                This event already has {importPreview.existing_results_count} results. Importing will replace all existing results.
-              </div>
-            )}
-
-            {importPreview.sample.length > 0 && (
-              <div>
-                <p className="text-xs text-text-muted mb-2">Sample results (first 10):</p>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b border-white/5 text-text-muted">
-                        <th className="text-left p-2">Division</th>
-                        <th className="text-left p-2">Place</th>
-                        <th className="text-left p-2">Competitor</th>
-                        <th className="text-left p-2">Academy</th>
-                        <th className="text-left p-2">Country</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {importPreview.sample.map((s, i) => (
-                        <tr key={i} className="text-text-secondary">
-                          <td className="p-2">{s.division}</td>
-                          <td className="p-2">{s.placement}</td>
-                          <td className="p-2 text-text-primary">{s.competitor_name}</td>
-                          <td className="p-2">{s.academy}</td>
-                          <td className="p-2">{s.country_code}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            <div className="flex gap-2 pt-1">
-              <button
-                onClick={handleImportConfirm}
-                className="flex items-center gap-1.5 px-4 py-2 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 transition-colors"
-              >
-                <Download className="w-3 h-3" />
-                Confirm Import
-              </button>
-              <button
-                onClick={() => { setImportStep('idle'); setImportPreview(null) }}
-                className="px-4 py-2 text-xs text-text-muted hover:text-text-primary transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </motion.div>
-        )}
       </div>
 
       {/* Data Source Info */}

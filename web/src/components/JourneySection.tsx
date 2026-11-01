@@ -18,7 +18,7 @@ import { useTranslatedField } from '../hooks/useTranslatedField';
 import ScrollReveal from './ScrollReveal';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { getRegistrationLinks } from '../utils/registrationLinks';
-import { cycleHasMainEvent, getEventCycleYear, getEventDetailsPath } from '../utils/events';
+import { cycleHasMainEvent, eventPhase, getEventCycleYear, getEventDetailsPath } from '../utils/events';
 
 type StopStatus = 'completed' | 'live' | 'next' | 'upcoming' | 'cancelled';
 
@@ -28,18 +28,7 @@ interface JourneyStop {
 }
 
 function getStopStatus(event: Event): StopStatus {
-  if (event.status === 'cancelled') return 'cancelled';
-  if (event.status === 'live') return 'live';
-  if (event.status === 'completed') return 'completed';
-
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const eventDate = parseDateLocalSafe(event.date);
-  const endDate = event.end_date ? parseDateLocalSafe(event.end_date) : eventDate;
-
-  if (endDate < today) return 'completed';
-  if (eventDate <= today && endDate >= today) return 'next';
-  return 'upcoming';
+  return eventPhase(event);
 }
 
 function StarRating({ count }: { count: number }) {
@@ -94,10 +83,10 @@ function StatusBadge({
 
   const labels: Record<StopStatus, string> = {
     completed: t('journey.completed'),
-    live: 'LIVE',
+    live: t('season.phase.live'),
     next: t('journey.next'),
     upcoming: t('journey.upcoming'),
-    cancelled: 'Cancelled',
+    cancelled: t('season.phase.cancelled'),
   };
 
   return (
@@ -132,7 +121,7 @@ function JourneyRegistrationLinks({
     ? 'bg-gold-500/80 text-navy-900 hover:bg-gold-400'
     : 'bg-navy-800 text-text-primary hover:bg-navy-700';
 
-  const buttonClass = 'inline-flex items-center justify-center gap-1 px-2.5 py-2 text-[10px] font-heading font-bold uppercase tracking-wider transition-colors';
+  const buttonClass = 'inline-flex min-h-11 items-center justify-center gap-1 px-2.5 py-2 text-[10px] font-heading font-bold uppercase tracking-wider transition-colors';
 
   return (
     <div className="mt-3 grid grid-cols-1 gap-2 border-t border-white/5 pt-3">
