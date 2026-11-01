@@ -1,0 +1,6 @@
+type,competitor_ids,names,verdict,confidence,evidence,results,history
+DUPLICATE_RECORDS,72001 72002,River Kai-Lin | River Kai Lin,SAME_PERSON,high,Anonymized hyphen import duplicate,2,Consistent histories
+DUPLICATE_RECORDS,72003 72004,Stone Alex | Stone Alex,DIFFERENT_PEOPLE_LIKELY,high,Anonymized parent and child,2,Keep separate
+DUPLICATE_RECORDS,72005 72006,Lake Ren | Lake Ren,UNCERTAIN_ASK_TEAM,low,Needs operator decision,2,Unknown identity
+DUPLICATE_RECORDS,72007 72008,Wood Mika | Wood Mika,SAME_PERSON,high,Research assertion contradicted by current histories,2,Conflicting genders
+DUPLICATE_RECORDS,72009 72010,Hill Jun | Hill Jun,SAME_PERSON,medium,Not high confidence,2,Consistent histories
