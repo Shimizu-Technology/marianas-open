@@ -14,6 +14,7 @@ class EventReadinessTest < ActiveSupport::TestCase
     checks = readiness[:checks].index_by { |item| item[:key] }
     %w[schedule prizes stale_year content_review stars].each { |key| assert_not checks[key][:complete], key }
     assert readiness[:checks].all? { |item| item[:section].present? }
+    assert_equal "publishing", checks["content_review"][:section]
     @event.event_schedule_items.first.update!(confirmed: true)
     @event.prize_categories.first.update!(confirmed: true, amount: 1000)
     @event.update!(description: "Register in 2027", content_review_required: false, asjjf_stars: nil)

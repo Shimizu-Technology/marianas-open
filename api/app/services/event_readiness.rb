@@ -19,7 +19,7 @@ class EventReadiness
       check("prizes", "Every prize row is confirmed", rows_confirmed?(:prize_categories), "prizes"),
       check("stale_year", stale_label, stale.empty?, stale.first&.fetch(:section) || "basics"),
       check("stars", "Star rating matches saved ASJJF facts or is blank", stars_sourced?, "basics"),
-      check("content_review", "Copied descriptions, travel and hotel details reviewed", !@event.content_review_required?, "venue")
+      check("content_review", "Copied descriptions, travel and hotel details reviewed", !@event.content_review_required?, "publishing")
     ]
     { publishable: checks.all? { |item| item[:complete] }, completed: checks.count { |item| item[:complete] }, total: checks.size, checks: checks }
   end
