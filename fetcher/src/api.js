@@ -2,6 +2,13 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { sign } from './signing.js';
 
 export const MAX_BODY_BYTES = 2 * 1024 * 1024;
+export class StaleLeaseError extends Error {
+  constructor() {
+    super('Stale snapshot lease (HTTP 409)');
+    this.permanent = true;
+  }
+}
+
 export class ApiClient {
   constructor(config, { fetchImpl = fetch, sleep = delay, now = Date.now, timeoutMs = 30000, retries = 3 } = {}) {
     Object.assign(this, { config, fetchImpl, sleep, now, timeoutMs, retries });
@@ -24,6 +31,7 @@ export class ApiClient {
         // Read inside the timeout/retry boundary, including network failures mid-body.
         const raw = await response.text();
         if (response.status >= 500 && response.status <= 599) throw new Error('retryable_server_error');
+        if (response.status === 409 && method === 'POST' && path === '/api/v1/internal/asjjf/snapshots') throw new StaleLeaseError();
         const expected = method === 'GET' ? 200 : path.endsWith('/snapshots') ? 201 : 204;
         if (response.status !== expected) throw Object.assign(new Error(`API HTTP ${response.status}`), { permanent: true });
         try { return raw ? JSON.parse(raw) : null; }

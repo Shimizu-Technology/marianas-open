@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { run, boundedSnapshot } from '../src/run.js';
-import { MAX_BODY_BYTES } from '../src/api.js';
+import { MAX_BODY_BYTES, ApiClient, StaleLeaseError } from '../src/api.js';
 import { loadConfig, allowedUrl } from '../src/config.js';
 const config = { maxPages: 200, maxRunMinutes: 300, jitter: 0.15, allowedHosts: ['asjjf.org', 'dumau.asjjf.org'] };
-const request = (id = 1, url = 'https://asjjf.org/main/resultsList/2062') => ({ id, url });
+const request = (id = 1, url = 'https://asjjf.org/main/resultsList/2062') => ({ id, url, lease_token: id.toString(16).padStart(64, '0') });
 const ok = { final_url: 'https://asjjf.org/main/resultsList/2062', http_status: 200, outcome: 'ok', html: '<html>日本語</html>', error: null };
 function fixture({ jobs = [request()], outcome = ok, configOverride = {}, fetchImpl } = {}) {
   const snapshots = [], beats = [], waits = [], fetched = [], logs = [];
@@ -26,6 +26,8 @@ test('leases one at a time, paces, snapshots, starts and ends heartbeat', async 
   assert.equal(f.beats[0].run_finished_at, null);
   assert.equal(f.beats[1].run_finished_at, '1970-01-01T00:01:36.750Z');
   assert.equal(f.snapshots[0].request_id, 1);
+  assert.equal(f.snapshots[0].lease_token, request(1).lease_token);
+  assert.equal(f.snapshots[1].lease_token, request(2).lease_token);
 });
 test('challenge posts evidence then stops the whole run without sleeping', async () => {
   const f = fixture({ jobs: [request(1), request(2)], outcome: { ...ok, outcome: 'challenged' } });
@@ -77,6 +79,7 @@ test('2 MB limit counts full JSON, escaped HTML and UTF-8; challenge still stops
   const f = fixture({ jobs: [request(1), request(2)], outcome: { ...huge, outcome: 'challenged' } });
   assert.equal((await f.execute()).stoppedByChallenge, true);
   assert.equal(f.snapshots[0].error, 'too_large');
+  assert.equal(f.snapshots[0].outcome, 'challenged');
 });
 test('SIGTERM aborts pacing and sends final heartbeat', async () => {
   const f = fixture({ jobs: [request(1), request(2)] });
@@ -120,4 +123,67 @@ test('page START intervals use the larger current server floor and subtract fetc
     fetchPage: async () => { starts.push(time); time += 30000; return ok; },
   });
   assert.deepEqual(starts, [0, 120000, 240000]);
+});
+
+// Keep these null-field shapes aligned with the Rails intake contract tests.
+for (const [name, result] of Object.entries({
+  network: { final_url: null, http_status: null, outcome: 'error', error: 'fetch_failed', html: null },
+  latched: { final_url: null, http_status: null, outcome: 'challenged', error: 'challenge_detected', html: null },
+  redirect: { final_url: null, http_status: 403, outcome: 'challenged', error: 'challenge_detected', html: null },
+  oversized: { final_url: 'https://asjjf.org/main/eventResults/2062', http_status: 200, outcome: 'error', error: 'too_large', html: null },
+  oversizedChallenge: { final_url: 'https://asjjf.org/main/eventResults/2062', http_status: 200, outcome: 'challenged', error: 'too_large', html: null },
+})) test(`exact snapshot envelope for ${name}`, async () => {
+  const job = request(1, 'https://asjjf.org/main/eventResults/2062');
+  const f = fixture({ jobs: [job], outcome: result });
+  await f.execute();
+  assert.deepEqual(JSON.parse(JSON.stringify(f.snapshots[0])), {
+    ...result, request_id: job.id, lease_token: job.lease_token, url: job.url,
+    fetched_at: '1970-01-01T00:00:00.000Z',
+  });
+});
+
+test('real API 409 for a stale snapshot logs and continues without retrying; auth stays fatal', async () => {
+  for (const status of [409, 401, 403]) {
+    const f = fixture({ jobs: [request(1), request(2)] });
+    const deliveries = [];
+    const client = new ApiClient({ apiBase: 'https://api.example', secret: 'test', fetcherId: 'home' }, {
+      fetchImpl: async (_, options) => {
+        deliveries.push(JSON.parse(options.body));
+        return new Response('', { status: deliveries.length === 1 ? status : 201 });
+      },
+    });
+    f.api.snapshot = data => client.snapshot(data);
+    if (status === 409) {
+      await f.execute();
+      assert.equal(deliveries.length, 2);
+      assert.equal(f.fetched.length, 2);
+      assert.ok(f.logs.some(e => e.event === 'stale_lease' && e.request_id === 1));
+      assert.ok(!f.logs.some(e => e.event === 'snapshot_saved' && e.request_id === 1));
+      assert.ok(f.logs.some(e => e.event === 'snapshot_saved' && e.request_id === 2));
+      assert.ok(!JSON.stringify(f.logs).includes(request(1).lease_token));
+    } else {
+      await assert.rejects(f.execute(), new RegExp(String(status)));
+      assert.equal(f.fetched.length, 1);
+      assert.equal(deliveries.length, 1);
+    }
+    assert.equal(f.beats.length, 2);
+  }
+});
+
+test('a stale challenged snapshot still stops the whole run', async () => {
+  const f = fixture({ jobs: [request(1), request(2)], outcome: { ...ok, outcome: 'challenged' } });
+  f.api.snapshot = async () => { throw new StaleLeaseError(); };
+  assert.equal((await f.execute()).stoppedByChallenge, true);
+  assert.equal(f.fetched.length, 1);
+  assert.ok(f.logs.some(e => e.event === 'stale_lease'));
+});
+
+test('missing or invalid lease tokens fail before browser navigation', async () => {
+  for (const lease_token of [undefined, null, '', 'old-token']) {
+    const f = fixture({ jobs: [{ ...request(), lease_token }] });
+    await assert.rejects(f.execute(), /lease token/);
+    assert.equal(f.fetched.length, 0);
+    assert.equal(f.snapshots.length, 0);
+    assert.equal(f.beats.length, 2);
+  }
 });

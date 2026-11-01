@@ -104,3 +104,19 @@ plutil -lint ops/asjjf-fetcher/com.shimizutechnology.mo-asjjf-fetcher.plist
 The Node tests require a real headed Chromium: on macOS they use installed Google Chrome; elsewhere install with `npx playwright-core install --with-deps chromium` and run under Xvfb. `FETCHER_TEST_CHROMIUM` can select an existing executable. Redirect tests start only a loopback HTTP fixture and inject its URL validator into `fetchPage`; production configuration still permits only HTTPS ASJJF hosts. Script tests prepend stub Colima/Docker commands to PATH and use a temporary state directory; they never start a VM or contact the mini. They cover TERM during start/build/run, an unresponsive build, forced-stop fallback, stale/live locks, project pruning, log retention, and overall watchdog escalation.
 
 These checks do not verify an arm64 image on the mini, Colima before console login, LaunchDaemon installation, or production API snapshot delivery. Those remain operator acceptance steps after review.
+
+## Round 2 local verification — 2026-11-02
+
+Purpose/users and scope inherit the B1/B2 pipeline contract: public ASJJF evidence for tournament staff, with no publication/import of results. Sources refreshed from fetcher README, intake docs at PR #115 head 5e888405a9ffe0bf2873d252532716f66647b610, and the current repository. Base remains main 3634aefa9f71a1b15b4d11a6e9cfa15e0b3d39b3; starting fetcher head 7562a840. Executor: agent on the MacBook Pro, Node 22.22.3 and installed headed Google Chrome. No Mac mini/Colima/container or production API execution.
+
+Affected-flow acceptance passed:
+
+- Lease items carry a fresh 64-hex token; exact snapshot envelopes echo it with all five nullable failure/challenge result shapes accepted by intake. Missing/malformed work tokens stop before browser navigation.
+- A real ApiClient snapshot 409 is not retried, logs stale_lease without snapshot_saved/token leakage, and the run processes the next item. Work/heartbeat 409 and snapshot 401/403 remain fatal. Even a stale challenged snapshot stops the run.
+- Oversized challenged HTML becomes null while preserving challenged/too_large and the stop decision. Network errors keep null status/HTML. Published GET/POST HMAC vectors are unchanged and asserted on both sides.
+- Headed Chromium against synthetic loopback pages follows permitted redirects, refuses disallowed redirects, latches transient title/markup challenges, and closes each browser. No real ASJJF request is made.
+- The stub-only runner harness passes success, TERM during start/build/run, hung build, force-stop fallback, stale/live lock, and overall watchdog escalation (nine scenarios). The first run exposed a test race: its 0.2-second build deadline could win before TERM reached the ready stub. Non-watchdog cases now use 30 seconds; hung-build retains 0.2 seconds and production defaults are unchanged. The complete harness passed after this fix.
+
+Final code gate: npm ci and **47 Node tests passed / zero failures, cancellations, or skips**; zsh syntax for runner/harness, sh syntax for entrypoint, Perl syntax, node --check on all source/test files, and plist lint passed. README contract now matches token, nullable fields, credential rate-limit, and positive start-to-start pacing behavior. No live deployment, pre-login launchd acceptance, production delivery, or end-to-end alert email was run; those remain operator/merge-owner work. Intake tests/gates and DB cleanup are recorded on #115.
+
+All owned test trees, loopback server, and Chromium instances exited. Lifecycle session: 01a198ab-0590-7c80-8ee9-454e8fd08b9e. The PR is pushed but not merged; exact head and CI snapshot are in its round-2 summary comment.

@@ -38,9 +38,16 @@ if [[ $1 == build && ( $CASE == term-build || $CASE == hung-build ) || $1 == run
 fi
 STUB
 chmod +x "$scratch/bin/"*
-export MO_FETCHER_PATH="$scratch/bin:$PATH" MO_FETCHER_CHECKOUT="$repo" MO_FETCHER_BUILD_SECONDS=0.2
+export MO_FETCHER_PATH="$scratch/bin:$PATH" MO_FETCHER_CHECKOUT="$repo" MO_FETCHER_BUILD_SECONDS=30
 for CASE in success term-start term-build term-run hung-build force-stop stale-lock live-lock; do
   export CASE MO_FETCHER_STATE_ROOT="$scratch/$CASE"
+  # Signal cases must wait for the ready marker, not race the build watchdog.
+  # Only hung-build exercises the deliberately short build deadline.
+  if [[ $CASE == hung-build ]]; then
+    export MO_FETCHER_BUILD_SECONDS=0.2
+  else
+    export MO_FETCHER_BUILD_SECONDS=30
+  fi
   mkdir -p "$MO_FETCHER_STATE_ROOT/.config/mo-asjjf-fetcher" "$MO_FETCHER_STATE_ROOT/Library/Logs/mo-asjjf-fetcher"
   config="$MO_FETCHER_STATE_ROOT/.config/mo-asjjf-fetcher"
   print 'MAX_RUN_MINUTES=0.01' > "$config/env"

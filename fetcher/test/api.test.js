@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ApiClient } from '../src/api.js';
+import { ApiClient, StaleLeaseError } from '../src/api.js';
 import { sign } from '../src/signing.js';
 const config = { apiBase: 'https://api.example', secret: 'secret', fetcherId: 'mini' };
 
@@ -45,4 +45,13 @@ test('invalid JSON is not retried; empty heartbeat response accepted', async () 
   assert.equal(count, 1);
   const heartbeat = new ApiClient(config, { fetchImpl: async () => new Response(null, { status: 204 }) });
   assert.equal(await heartbeat.heartbeat({}), null);
+});
+
+test('only snapshot POST 409 is a typed stale lease and is never retried', async () => {
+  let calls = 0;
+  const api = new ApiClient(config, { fetchImpl: async () => { calls++; return new Response('', { status: 409 }); } });
+  await assert.rejects(api.snapshot({ request_id: 1, lease_token: 'a'.repeat(64), html: null }), StaleLeaseError);
+  assert.equal(calls, 1);
+  await assert.rejects(api.heartbeat({}), error => !(error instanceof StaleLeaseError) && /409/.test(error.message));
+  assert.equal(calls, 2);
 });
