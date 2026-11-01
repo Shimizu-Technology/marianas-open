@@ -19,12 +19,30 @@ class ClerkLinkingTest < ActiveSupport::TestCase
     assert_equal @user.id, link.id
   end
 
-  test "accepted revoked and expired placeholders cannot link" do
-    %w[accepted revoked expired].each do |status|
+  test "revoked and expired placeholders cannot link" do
+    %w[revoked expired].each do |status|
       @user.update!(invitation_status: status)
       assert_nil link
       assert_equal "pending_123", @user.reload.clerk_id
     end
+  end
+
+  test "seed-shaped legacy admin with default accepted status links only once" do
+    @user.destroy!
+    @user = User.create!(email: "invite@example.com", clerk_id: "pending_admin_#{SecureRandom.uuid}", role: "admin")
+    assert_equal "accepted", @user.invitation_status
+    assert_equal @user.id, link.id
+    assert_equal "new_clerk", @user.reload.clerk_id
+    assert_nil link("replacement_clerk")
+    assert_equal @user.id, link.id
+  end
+
+  test "already-linked legacy admin keeps its identity and role" do
+    @user.update!(clerk_id: "existing_clerk", invitation_status: "accepted", role: "admin")
+    assert_equal @user.id, link("existing_clerk").id
+    assert_nil link("replacement_clerk")
+    assert_equal "admin", @user.reload.role
+    assert_equal "existing_clerk", @user.clerk_id
   end
 
   test "real clerk identity cannot be replaced even with pending status" do

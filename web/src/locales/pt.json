@@ -572,5 +572,10 @@
     "micronesia": "Micronésia",
     "marshallIslands": "Ilhas Marshall",
     "newZealand": "Nova Zelândia"
+  },
+  "eventDetail": {
+    "loadErrorTitle": "Não foi possível carregar o evento",
+    "loadErrorMessage": "Não conseguimos carregar este evento. Tente novamente.",
+    "retry": "Tentar novamente"
   }
 }

@@ -38,11 +38,11 @@ Role is stored in the `users.role` column (default: `viewer`). Admin routes requ
 
 ### How it works:
 
-1. **First admin** is created via `db/seeds.rb` using the `SEED_ADMIN_EMAIL` env var
+1. **First admins** are created via `db/seeds.rb` with explicit pending placeholder identities
 2. **Admin invites users** via the Users Admin page (`/admin/users`)
    - Creates a `User` record with email + role + placeholder `clerk_id` (`pending_<uuid>`)
-3. **Invited user signs up** through the ticket in their invitation email (`/admin?__clerk_ticket=...&__clerk_status=sign_up`). Ordinary `/admin` visits show sign-in only.
-4. **First sign-in**: `ClerkAuthenticatable` links by email only while the invitation is pending and the local Clerk ID starts with `pending_`. Accepted, expired, or revoked users cannot be re-linked to another Clerk identity.
+3. **Invited user signs up** through the ticket in their invitation email (`/admin?__clerk_ticket=...`). The optional `__clerk_status=sign_up` also works; explicit `sign_in` selects SignIn. Ordinary `/admin` visits show sign-in only.
+4. **First sign-in**: `ClerkAuthenticatable` links by email only while the local Clerk ID starts with `pending_` and the status is pending or legacy-default accepted. Explicitly expired/revoked invitations remain blocked. Once linked, a real Clerk identity can never be replaced by an email match.
 5. **Subsequent sign-ins**: Matched by `clerk_id` directly
 
 ### What happens to uninvited users:
@@ -62,12 +62,12 @@ Included in admin controllers. Key methods:
 - `authenticate_user!` — Extracts JWT from `Authorization: Bearer <token>`, verifies via JWKS, finds/creates user
 - `require_admin!` — Calls `authenticate_user!` + checks `user.admin?`
 - `require_staff!` — Calls `authenticate_user!` + checks `user.staff?`
-- `find_or_create_user` — Matches by `clerk_id` first, then by email (only for pending invitations with a placeholder Clerk ID). Returns `nil` for unknown users.
+- `find_or_create_user` — Matches by `clerk_id` first, then by email (only for pending or legacy-default accepted placeholders). Returns `nil` for unknown users.
 
 ### `ClerkAuth` Service (`app/services/clerk_auth.rb`)
 
 - Verifies JWTs using Clerk's JWKS endpoint
-- Caches JWKS for one hour; an unknown key ID triggers a refresh, limited to once per minute per cache/process
+- Caches JWKS for one hour; cache-miss fetches and unknown-key refreshes share a one-minute attempt limit per process, including failures (2-second connect and 3-second read timeouts)
 - Uses the `jwt` and `httparty` gems
 
 ### User Model (`app/models/user.rb`)

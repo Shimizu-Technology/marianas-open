@@ -97,6 +97,25 @@ class HardeningTest < ActionDispatch::IntegrationTest
     ENV["CLERK_SECRET_KEY"] = original
   end
 
+  test "admin UI invitation creates a linkable pending placeholder and preserves its role" do
+    original = ENV.delete("CLERK_SECRET_KEY")
+    post "/api/v1/admin/users", params: { email: "invite-ui@example.com", role: "staff" }, headers: @headers, as: :json
+    assert_response :created
+    invited = User.find(response.parsed_body.dig("user", "id"))
+    assert invited.invitation_pending?
+    assert invited.clerk_id.start_with?("pending_")
+    assert_equal @admin.id, invited.invited_by_id
+    auth = Class.new { include ClerkAuthenticatable }.new
+    attrs = { clerk_id: "clerk_ui_invitee", email: "INVITE-UI@example.com", first_name: "Invite", last_name: "Test" }
+    assert_equal invited.id, auth.send(:find_or_create_user, **attrs).id
+    assert_equal "accepted", invited.reload.invitation_status
+    assert_equal "staff", invited.role
+    assert_nil auth.send(:find_or_create_user, **attrs.merge(clerk_id: "clerk_replacement"))
+    assert_equal "clerk_ui_invitee", invited.reload.clerk_id
+  ensure
+    ENV["CLERK_SECRET_KEY"] = original
+  end
+
   test "viewer has no staff access" do
     viewer = User.create!(email: "viewer@example.com", clerk_id: "viewer_clerk", role: "viewer")
     get "/api/v1/admin/competitors", headers: { "Authorization" => "Bearer test_token_#{viewer.id}" }

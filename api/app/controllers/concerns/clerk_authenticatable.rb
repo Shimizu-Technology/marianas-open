@@ -99,9 +99,10 @@ module ClerkAuthenticatable
 
       if user
         user.with_lock do
-          # Both conditions are required: accepted/revoked invitations and
-          # real Clerk identities must never be replaced by an email match.
-          return nil unless user.invitation_pending? && user.clerk_id.start_with?("pending_")
+          # Legacy seeds predate invitation tracking and defaulted to accepted.
+          # A placeholder proves no Clerk identity has been linked yet; explicit
+          # revocation/expiry still blocks access. Never replace a real identity.
+          return nil unless user.clerk_id.start_with?("pending_") && %w[pending accepted].include?(user.invitation_status)
 
           attrs = { clerk_id: clerk_id, invitation_status: "accepted" }
           attrs[:first_name] = first_name if first_name.present?

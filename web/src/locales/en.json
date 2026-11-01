@@ -615,5 +615,10 @@
     "micronesia": "Micronesia",
     "marshallIslands": "Marshall Islands",
     "newZealand": "New Zealand"
+  },
+  "eventDetail": {
+    "loadErrorTitle": "Events are taking a moment",
+    "loadErrorMessage": "We couldn’t load this event. Please try again.",
+    "retry": "Try again"
   }
 }

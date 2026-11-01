@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom'
 export default function AdminSignIn() {
   const { search } = useLocation()
   const params = new URLSearchParams(search)
-  const acceptingInvite = !!params.get('__clerk_ticket') && params.get('__clerk_status') === 'sign_up'
+  const acceptingInvite = !!params.get('__clerk_ticket') && params.get('__clerk_status') !== 'sign_in'
   const appearance = {
     elements: {
       rootBox: 'mx-auto w-full max-w-sm',

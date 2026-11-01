@@ -572,5 +572,10 @@
     "micronesia": "Micronesia",
     "marshallIslands": "Marshall Islands",
     "newZealand": "New Zealand"
+  },
+  "eventDetail": {
+    "loadErrorTitle": "Hindi ma-load ang event",
+    "loadErrorMessage": "Hindi namin ma-load ang event na ito. Pakisubukang muli.",
+    "retry": "Subukan muli"
   }
 }

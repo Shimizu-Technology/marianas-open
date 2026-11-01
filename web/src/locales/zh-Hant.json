@@ -572,5 +572,10 @@
     "micronesia": "密克羅尼西亞",
     "marshallIslands": "馬紹爾群島",
     "newZealand": "紐西蘭"
+  },
+  "eventDetail": {
+    "loadErrorTitle": "賽事暫時無法載入",
+    "loadErrorMessage": "無法載入此賽事，請再試一次。",
+    "retry": "重試"
   }
 }

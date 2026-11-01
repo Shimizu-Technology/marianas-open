@@ -1,7 +1,8 @@
 // Run with PLAYWRIGHT_MODULE pointing to an existing playwright-core/index.mjs.
-// Public API access is GET-only. Admin screenshots use the local SSR Clerk stub.
+// Public API access is GET-only. Invitation routing is covered in Vitest;
+// real Clerk development verification evidence is in docs/API-PUBLIC-HARDENING-QA.md.
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const session = process.env.DEV_LIFECYCLE_SESSION;
@@ -66,20 +67,6 @@ try {
       results.push({ name: `${width}: main event fixture`, detail: current?.slug || 'no active main event; calendar redirect' });
       await page.screenshot({ path: `${out}/event-${width}.png`, fullPage: true });
     });
-    for (const flow of ['normal', 'invite']) {
-      await record(`${width}: local admin ${flow} render`, async () => {
-        await page.setContent(await readFile(`/tmp/marianas-w2-admin-${flow}.html`, 'utf8'));
-        await page.getByText('Admin access is invite-only.', { exact: false }).waitFor();
-        assert.equal(await page.locator(`[data-flow="${flow === 'normal' ? 'sign-in' : 'invite-sign-up'}"]`).count(), 1);
-        assert.equal(await page.getByText('Sign up', { exact: true }).count(), 0);
-        if (flow === 'normal') {
-          await page.getByLabel('Email address').fill('local-render@example.test');
-          assert.equal(await page.getByLabel('Email address').inputValue(), 'local-render@example.test');
-        }
-        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-        await page.screenshot({ path: `${out}/admin-${flow}-${width}.png`, fullPage: true });
-      });
-    }
     await context.close();
     // A separate context owns mocked event data; no production state changes.
     const mock = await browser.newContext({ viewport: { width, height: 900 } });
@@ -117,7 +104,14 @@ try {
       await mockedPage.goto('http://127.0.0.1:5312/events/bogus-event');
       await mockedPage.locator('main .animate-spin').waitFor();
       assert.doesNotMatch(await mockedPage.locator('main').innerText(), /October 18|Official Qualifier/);
+      await mockedPage.getByRole('alert').filter({ hasText: 'Events are taking a moment' }).waitFor();
+      assert.equal(await mockedPage.getByRole('heading', { name: '404', exact: true }).count(), 0);
+      await mockedPage.screenshot({ path: `${out}/events-error-${width}.png`, fullPage: true });
+      await mock.unroute('**/api/v1/events');
+      await mock.route('**/api/v1/events', route => route.fulfill({ json: [] }));
+      await mockedPage.getByRole('button', { name: 'Try again', exact: true }).click();
       await mockedPage.getByRole('heading', { name: '404', exact: true }).waitFor();
+      assert.equal(new URL(mockedPage.url()).pathname, '/events/bogus-event');
     });
     await mock.close();
   }

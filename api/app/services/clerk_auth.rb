@@ -52,39 +52,37 @@ class ClerkAuth
     private
 
     def load_jwks(options)
-      return fetch_jwks || { keys: [] } unless options[:kid_not_found]
-
       JWKS_REFRESH_LOCK.synchronize do
-        refresh_key = "#{JWKS_CACHE_KEY}_last_refresh"
-        if Rails.cache.read(refresh_key)
-          return Rails.cache.read(JWKS_CACHE_KEY) || { keys: [] }
-        end
+        cached = Rails.cache.read(JWKS_CACHE_KEY)
+        return cached if cached.present? && !options[:kid_not_found]
 
-        # Set before the request so repeated unknown key IDs cannot trigger
-        # an unbounded stream of refresh requests, including on failure.
+        refresh_key = "#{JWKS_CACHE_KEY}_last_refresh"
+        # Every attempt, including an initial cache miss or failed request, uses
+        # the same cooldown. The mutex keeps concurrent Puma threads from racing.
+        return cached || { keys: [] } if Rails.cache.read(refresh_key)
+
         Rails.cache.write(refresh_key, true, expires_in: JWKS_REFRESH_INTERVAL)
-        fetch_jwks(force: true) || { keys: [] }
+        fetch_jwks || cached || { keys: [] }
       end
     end
 
-    def fetch_jwks(force: false)
-      cached = Rails.cache.read(JWKS_CACHE_KEY)
-      return cached if cached.present? && !force
-
+    def fetch_jwks
       jwks_uri = jwks_url
       return nil unless jwks_uri
 
-      response = HTTParty.get(jwks_uri, timeout: 5)
+      response = HTTParty.get(jwks_uri, open_timeout: 2, read_timeout: 3)
 
       if response.success?
         jwks = response.parsed_response
+        return nil unless jwks.is_a?(Hash) && jwks["keys"].is_a?(Array)
+
         Rails.cache.write(JWKS_CACHE_KEY, jwks, expires_in: JWKS_CACHE_TTL)
         jwks
       else
         Rails.logger.error("Failed to fetch Clerk JWKS: #{response.code}")
         nil
       end
-    rescue HTTParty::Error, Timeout::Error => e
+    rescue HTTParty::Error, Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError, JSON::ParserError => e
       Rails.logger.error("Error fetching Clerk JWKS: #{e.message}")
       nil
     end

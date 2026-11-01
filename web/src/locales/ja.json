@@ -572,5 +572,10 @@
     "micronesia": "ミクロネシア連邦",
     "marshallIslands": "マーシャル諸島",
     "newZealand": "ニュージーランド"
+  },
+  "eventDetail": {
+    "loadErrorTitle": "イベントを読み込めませんでした",
+    "loadErrorMessage": "イベント情報を読み込めませんでした。もう一度お試しください。",
+    "retry": "再試行"
   }
 }

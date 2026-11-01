@@ -35,6 +35,7 @@ class ClerkAuthTest < ActiveSupport::TestCase
 
   test "unknown kid refreshes cached JWKS after rotation" do
     assert_equal "clerk_user", ClerkAuth.verify(token(@old_key))["sub"]
+    travel 61.seconds
     assert_equal "clerk_user", ClerkAuth.verify(token(@new_key))["sub"]
     assert_equal 2, @calls.size
     assert_equal "clerk_user", ClerkAuth.verify(token(@new_key))["sub"]
@@ -44,10 +45,63 @@ class ClerkAuthTest < ActiveSupport::TestCase
   test "unknown key refresh is limited and retries after cooldown" do
     unknown = JWT::JWK.new(OpenSSL::PKey::RSA.generate(2048), "unknown")
     3.times { assert_nil ClerkAuth.verify(token(unknown)) }
-    assert_equal 2, @calls.size
+    assert_equal 1, @calls.size
     travel 61.seconds do
       assert_nil ClerkAuth.verify(token(unknown))
-      assert_equal 3, @calls.size
+      assert_equal 2, @calls.size
     end
+  end
+  test "empty cache outage fails closed and throttles repeated failures" do
+    calls = @calls
+    HTTParty.define_singleton_method(:get) do |url, **options|
+      calls << url
+      raise "missing short timeouts" unless options == { open_timeout: 2, read_timeout: 3 }
+      raise Timeout::Error, "JWKS unavailable"
+    end
+    3.times { assert_nil ClerkAuth.verify(token(@old_key)) }
+    assert_equal 1, @calls.size
+    travel 61.seconds do
+      3.times { assert_nil ClerkAuth.verify(token(@old_key)) }
+      assert_equal 2, @calls.size
+    end
+  end
+
+  test "recovers from empty cache failure after cooldown" do
+    calls = @calls
+    jwks = { "keys" => [ @old_key.export ] }
+    response_class = Struct.new(:parsed_response) { def success? = true }
+    HTTParty.define_singleton_method(:get) do |url, **_options|
+      calls << url
+      raise SocketError, "DNS unavailable" if calls.size == 1
+      response_class.new(jwks)
+    end
+    assert_nil ClerkAuth.verify(token(@old_key))
+    assert_nil ClerkAuth.verify(token(@old_key))
+    assert_equal 1, @calls.size
+    travel 61.seconds do
+      assert_equal "clerk_user", ClerkAuth.verify(token(@old_key))["sub"]
+      assert_equal 2, @calls.size
+    end
+  end
+
+  test "concurrent empty cache failures make one HTTP request" do
+    calls = @calls
+    HTTParty.define_singleton_method(:get) do |url, **_options|
+      calls << url
+      sleep 0.02
+      raise Timeout::Error
+    end
+    signed = token(@old_key)
+    results = Array.new(8) { Thread.new { ClerkAuth.verify(signed) } }.map(&:value)
+    assert results.all?(&:nil?)
+    assert_equal 1, @calls.size
+  end
+
+  test "concurrent unknown keys refresh cached JWKS only once" do
+    Rails.cache.write(ClerkAuth::JWKS_CACHE_KEY, { "keys" => [ @new_key.export ] })
+    signed = token(@old_key)
+    results = Array.new(8) { Thread.new { ClerkAuth.verify(signed) } }.map(&:value)
+    assert results.all? { |result| result && result["sub"] == "clerk_user" }
+    assert_equal 1, @calls.size
   end
 end

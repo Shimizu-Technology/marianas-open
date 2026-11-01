@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { api } from '../services/api';
 import type { Event } from '../services/api';
@@ -7,6 +7,7 @@ interface EventsContextValue {
   events: Event[];
   loading: boolean;
   error: string | null;
+  retry: () => void;
 }
 
 const EventsContext = createContext<EventsContextValue | null>(null);
@@ -17,6 +18,8 @@ function errorMessage(error: unknown): string {
 }
 
 export function EventsProvider({ children }: { children: ReactNode }) {
+  const [loadVersion, setLoadVersion] = useState(0);
+  const retry = useCallback(() => setLoadVersion(version => version + 1), []);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,11 +69,11 @@ export function EventsProvider({ children }: { children: ReactNode }) {
       if (retryTimer !== undefined) window.clearTimeout(retryTimer);
       window.removeEventListener('online', retryWhenOnline);
     };
-  }, []);
+  }, [loadVersion]);
 
   const value = useMemo(
-    () => ({ events, loading, error }),
-    [events, loading, error],
+    () => ({ events, loading, error, retry }),
+    [events, loading, error, retry],
   );
 
   return (
