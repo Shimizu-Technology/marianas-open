@@ -105,6 +105,12 @@ jobs:
           cache: npm
           cache-dependency-path: fetcher/package-lock.json
       - run: npm ci
-      - run: npm test
+      - run: npx playwright-core install --with-deps chromium
+      - run: xvfb-run -a npm test
+      - name: Runner script checks
+        run: |
+          sudo apt-get install --no-install-recommends -y zsh
+          zsh -n ../ops/asjjf-fetcher/run.sh
+          zsh ../ops/asjjf-fetcher/test/run.test.zsh
       - name: Check container build
         run: docker build --platform linux/amd64 -t asjjf-fetcher:ci .

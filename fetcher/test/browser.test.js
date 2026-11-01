@@ -10,17 +10,18 @@ test('ordinary ASJJF page mentioning Cloudflare is not a challenge', () => {
   assert.equal(isChallenge({ title: 'ASJJF Results', status: 200, html: '<footer>Cloudflare</footer>' }), false);
 });
 function browserFixture({ fail = false, challenge = false } = {}) {
-  let closed = 0, listener, routeHandler, launchOptions, contextOptions;
+  let closed = 0,
+    listeners = {}, routeHandler, launchOptions, contextOptions;
   const frame = {};
   const page = {
-    on: (_, fn) => { listener = fn; }, mainFrame: () => frame,
-    goto: async () => { if (fail) throw new Error('timeout'); listener({ request: () => ({ isNavigationRequest: () => true }), frame: () => frame, status: () => challenge ? 403 : 200 }); },
+    on: (event, fn) => { listeners[event] = fn; }, mainFrame: () => frame,
+    goto: async () => { if (fail) throw new Error('timeout'); listeners.response({ url: () => 'https://asjjf.org/', request: () => ({ isNavigationRequest: () => true }), frame: () => frame, status: () => challenge ? 403 : 200 }); },
     title: async () => challenge ? 'Verify you are human' : 'ASJJF Results',
     content: async () => '<html>Results</html>', url: () => 'https://asjjf.org/main/resultsList/2062',
   };
   const browser = { close: async () => { closed++; }, newContext: async options => {
     contextOptions = options;
-    return { newPage: async () => page, route: async (_, fn) => { routeHandler = fn; } };
+    return { exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async (_, fn) => { routeHandler = fn; } };
   } };
   return { launch: async options => { launchOptions = options; return browser; },
     closed: () => closed, options: () => [launchOptions, contextOptions],
@@ -62,13 +63,54 @@ test('challenge title can clear; persistent challenge waits no more than 30 seco
     let time = 0, closed = false;
     const frame = {};
     const page = { mainFrame: () => frame,
-      on: (_, listener) => listener({ request: () => ({ isNavigationRequest: () => true }), frame: () => frame, status: () => 200 }),
+      on: (event, listener) => { if (event === 'response') listener({ url: () => 'https://asjjf.org/', request: () => ({ isNavigationRequest: () => true }), frame: () => frame, status: () => 200 }); },
       goto: async () => {}, title: async () => clears && time >= 2000 ? 'ASJJF Results' : 'Just a moment...',
       waitForTimeout: async ms => { time += ms; }, content: async () => '<html></html>', url: () => 'https://asjjf.org/' };
-    const launch = async () => ({ close: async () => { closed = true; }, newContext: async () => ({ newPage: async () => page, route: async () => {} }) });
+    const launch = async () => ({ close: async () => { closed = true; }, newContext: async () => ({ exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async () => {} }) });
     const result = await fetchPage('https://asjjf.org/', config, { launch, now: () => time });
-    assert.equal(result.outcome, clears ? 'ok' : 'challenged');
+    assert.equal(result.outcome, 'challenged');
     assert.equal(time, clears ? 2000 : 30000);
     assert.equal(closed, true);
   }
+});
+
+test('challenge status is latched across later successful navigation responses', async () => {
+  for (const status of [403, 429]) {
+    const frame = {};
+    let onResponse;
+    const page = { on: (event, listener) => { if (event === 'response') onResponse = listener; },
+      mainFrame: () => frame,
+      goto: async () => {
+        for (const code of [status, 200]) onResponse({ url: () => 'https://asjjf.org/',
+          request: () => ({ isNavigationRequest: () => true }), frame: () => frame, status: () => code });
+      },
+      title: async () => 'Results', content: async () => '<html>Results</html>', url: () => 'https://asjjf.org/' };
+    const launch = async () => ({ close: async () => {}, newContext: async () => ({
+      exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async () => {} }) });
+    assert.equal((await fetchPage('https://asjjf.org/', config, { launch })).outcome, 'challenged');
+  }
+});
+
+test('request chain rejects an earlier HTTP hop even when the final request is allowed', async () => {
+  let requestListener, closed = 0;
+  const hop = (url, previous = null) => ({ isNavigationRequest: () => true, method: () => 'GET', url: () => url, redirectedFrom: () => previous });
+  const page = { on: (event, listener) => { if (event === 'request') requestListener = listener; },
+    goto: async () => requestListener(hop('https://asjjf.org/', hop('http://asjjf.org/'))) };
+  const launch = async () => ({ close: async () => { closed++; }, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async () => {} }) });
+  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_navigation/);
+  assert.ok(closed >= 1);
+});
+
+test('challenge evidence survives a later disallowed redirect without returning HTML', async () => {
+  const listeners = {};
+  const page = { on: (event, listener) => { listeners[event] = listener; },
+    goto: async () => listeners.response({ request: () => ({ isNavigationRequest: () => true }),
+      status: () => 403, url: () => 'https://evil.test/' }) };
+  const launch = async () => ({ close: async () => {}, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async () => {} }) });
+  const result = await fetchPage('https://asjjf.org/', config, { launch });
+  assert.equal(result.outcome, 'challenged');
+  assert.equal(result.html, null);
+  assert.equal(result.final_url, null);
 });

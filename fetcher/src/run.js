@@ -14,6 +14,8 @@ export async function run(config, { api, fetchPage, signal, sleep = delay, now =
   const stats = { fetcher_version: '1.0.0', run_started_at: new Date(started).toISOString(),
     run_finished_at: null, fetched: 0, challenged: 0, errors: 0 };
   let stoppedByChallenge = false;
+  let previousStart = null;
+  let previousPacing = 90;
   const active = () => !signal?.aborted && now() < deadline && stats.fetched < config.maxPages;
   await api.heartbeat({ ...stats });
   try {
@@ -23,6 +25,15 @@ export async function run(config, { api, fetchPage, signal, sleep = delay, now =
       if (!Number.isFinite(work.pacing_seconds) || work.pacing_seconds < 90) throw new Error('Invalid server pacing (minimum 90 seconds)');
       for (const request of work.requests) {
         if (!active()) break;
+        if (previousStart !== null) {
+          const interval = Math.ceil(Math.max(90, work.pacing_seconds, previousPacing) * 1000 * (1 + config.jitter * random()));
+          const remaining = Math.max(0, previousStart + interval - now());
+          try { await sleep(Math.min(remaining, Math.max(0, deadline - now())), undefined, { signal }); }
+          catch (error) { if (!signal?.aborted) throw error; }
+          if (!active()) break;
+        }
+        previousStart = now();
+        previousPacing = work.pacing_seconds;
         let result;
         // A deadline closes the active browser as well as stopping further leases.
         const pageSignal = AbortSignal.any([AbortSignal.timeout(Math.max(1, Math.ceil(deadline - now()))),
@@ -49,9 +60,6 @@ export async function run(config, { api, fetchPage, signal, sleep = delay, now =
         log({ event: 'snapshot_saved', request_id: request.id, outcome: snapshot.outcome });
         if (challenged) { stoppedByChallenge = true; break; }
         if (!active()) break;
-        const ms = Math.round(work.pacing_seconds * 1000 * (1 + config.jitter * (2 * random() - 1)));
-        try { await sleep(Math.min(ms, Math.max(0, deadline - now())), undefined, { signal }); }
-        catch (error) { if (!signal?.aborted) throw error; }
       }
       if (stoppedByChallenge) break;
     }

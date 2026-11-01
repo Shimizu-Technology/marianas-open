@@ -22,9 +22,9 @@ test('leases one at a time, paces, snapshots, starts and ends heartbeat', async 
   const stats = await f.execute();
   assert.equal(stats.fetched, 2);
   assert.equal(f.snapshots.length, 2);
-  assert.deepEqual(f.waits, [90000, 90000]);
+  assert.deepEqual(f.waits, [96750]);
   assert.equal(f.beats[0].run_finished_at, null);
-  assert.equal(f.beats[1].run_finished_at, '1970-01-01T00:03:00.000Z');
+  assert.equal(f.beats[1].run_finished_at, '1970-01-01T00:01:36.750Z');
   assert.equal(f.snapshots[0].request_id, 1);
 });
 test('challenge posts evidence then stops the whole run without sleeping', async () => {
@@ -93,8 +93,8 @@ test('fetch error posts error; snapshot delivery failure stops further work', as
   assert.equal(g.fetched.length, 1); assert.equal(g.beats.length, 2);
 });
 test('jitter bounds and server pacing fail closed', async () => {
-  for (const [random, expected] of [[0, 76500], [1, 103500]]) {
-    const f = fixture(); f.options.random = () => random;
+  for (const [random, expected] of [[0, 90000], [1, 103500]]) {
+    const f = fixture({ jobs: [request(1), request(2)] }); f.options.random = () => random;
     await f.execute(); assert.deepEqual(f.waits, [expected]);
   }
   const f = fixture(); f.api.work = async () => ({ requests: [request()], pacing_seconds: 5 });
@@ -106,4 +106,18 @@ test('configuration validates limits, origin and allowed host subset', () => {
   for (const extra of [{ MAX_PAGES_PER_RUN: 'NaN' }, { MAX_PAGES_PER_RUN: '1.5' }, { PACING_JITTER: '1' }, { ALLOWED_HOSTS: 'evil.test' }, { ASJJF_API_BASE: 'http://api.example' }]) {
     assert.throws(() => loadConfig({ ...env, ...extra }));
   }
+});
+
+test('page START intervals use the larger current server floor and subtract fetch time', async () => {
+  let time = 0;
+  const starts = [];
+  const jobs = [request(1), request(2), request(3)];
+  await run(config, {
+    now: () => time, random: () => 0,
+    api: { work: async () => ({ requests: jobs.splice(0, 1), pacing_seconds: starts.length === 1 ? 120 : 90 }),
+      snapshot: async () => {}, heartbeat: async () => {} },
+    sleep: async ms => { time += ms; },
+    fetchPage: async () => { starts.push(time); time += 30000; return ok; },
+  });
+  assert.deepEqual(starts, [0, 120000, 240000]);
 });
