@@ -54,9 +54,7 @@ class IdentityAttributionTest < ActionDispatch::IntegrationTest
     get "/api/v1/events/#{@early.slug}/results", params: { q: "Braydon-Angel Santos" }
     assert_response :success
     assert_equal 1, response.parsed_body.size
-    get "/api/v1/rankings"
-    assert_response :success
-    assert_equal "Braydon-Angel Santos", response.parsed_body.dig("rankings", 0, "competitor_name")
+    assert_equal "Braydon-Angel Santos", RankingCalculator.individual.first[:competitor_name]
   end
 
   test "gym rename keeps old name as alias and can set location parent and unaffiliated" do
@@ -67,8 +65,7 @@ class IdentityAttributionTest < ActionDispatch::IntegrationTest
     assert_equal @old_gym, AcademyLinker.resolve("Old Gym")
     assert_equal @new_gym.id, @old_gym.parent_id
     assert @old_gym.unaffiliated
-    get "/api/v1/rankings", params: { type: "team" }
-    assert_equal "Renamed Gym", response.parsed_body["rankings"].find { |ranking| ranking["academy_id"] == @old_gym.id }["academy"]
+    assert_equal "Renamed Gym", RankingCalculator.teams.find { |ranking| ranking[:academy_id] == @old_gym.id }[:academy]
   end
 
   test "review resolution links queued result and latest gym without creating a twin" do
@@ -223,8 +220,7 @@ class IdentityAttributionTest < ActionDispatch::IntegrationTest
       get "/api/v1/competitors", params: query
       assert_equal name, response.parsed_body["competitors"].find { |row| row["id"] == @competitor.id }["academy"]
     end
-    get "/api/v1/rankings"
-    assert_equal name, response.parsed_body["rankings"].find { |row| row["competitor_id"] == @competitor.id }["academy"]
+    assert_equal name, RankingCalculator.individual.find { |row| row[:competitor_id] == @competitor.id }[:academy]
     get "/api/v1/rankings/competitor", params: { name: "Santos Braydon-Angel" }
     assert_equal name, response.parsed_body["academy"]
     get "/api/v1/events/#{@late.slug}/results"

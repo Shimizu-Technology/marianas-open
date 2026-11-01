@@ -35,7 +35,6 @@ function AcademyCard({ academy }: { academy: Academy }) {
               <span>{academy.events_competed} event{academy.events_competed !== 1 ? 's' : ''}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono text-gold font-semibold">{academy.total_points} pts</span>
               <div className="flex items-center gap-2 text-xs">
                 {academy.gold > 0 && <span className="flex items-center gap-0.5 text-yellow-400"><Medal className="w-3.5 h-3.5" />{academy.gold}</span>}
                 {academy.silver > 0 && <span className="flex items-center gap-0.5 text-gray-300"><Medal className="w-3.5 h-3.5" />{academy.silver}</span>}

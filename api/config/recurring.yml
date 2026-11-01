@@ -29,6 +29,10 @@ prune_asjjf_snapshots:
   class: PruneAsjjfSnapshotsJob
   schedule: every day at 4am
 
+plan_official_rankings:
+  class: PlanRankingSyncJob
+  schedule: every day at 11pm
+
 plan_results_sync:
   class: PlanResultsSyncJob
   schedule: every day at 3pm UTC

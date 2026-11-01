@@ -26,34 +26,6 @@ export interface CompetitorProfile {
   results: CompetitorProfileResult[];
 }
 
-export interface RankingEntry {
-  competitor_name?: string;
-  competitor_id?: number;
-  result_id?: number | null;
-  academy?: string;
-  academy_id?: number;
-  country_code?: string;
-  total_points: number;
-  gold: number;
-  silver: number;
-  bronze: number;
-  events_competed?: number;
-  results_count?: number;
-  athletes?: number;
-  academies?: number;
-}
-
-export interface RankingsResponse {
-  rankings: RankingEntry[];
-  meta: {
-    type: string;
-    formula: string;
-    note: string;
-    filters: Record<string, string>;
-    total: number;
-  };
-}
-
 // Auth token getter
 interface AuthTokenOptions {
   skipCache?: boolean;
@@ -355,6 +327,9 @@ export interface AsjjfSnapshot {
   parse_status: string;
   parse_error: string | null;
   parsed_summary: unknown;
+  ranking_apply_status?: string | null;
+  ranking_apply_error?: string | null;
+  ranking_applied_at?: string | null;
 }
 
 export interface AsjjfStatus {
@@ -1425,23 +1400,6 @@ export const api = {
     },
   },
 
-  // Rankings
-  getRankings: (params: {
-    type?: 'individual' | 'team' | 'country';
-    belt?: string;
-    gi_nogi?: string;
-    gender?: string;
-    limit?: number;
-  } = {}) => {
-    const searchParams = new URLSearchParams();
-    if (params.type) searchParams.set('type', params.type);
-    if (params.belt) searchParams.set('belt', params.belt);
-    if (params.gi_nogi) searchParams.set('gi_nogi', params.gi_nogi);
-    if (params.gender) searchParams.set('gender', params.gender);
-    if (params.limit) searchParams.set('limit', String(params.limit));
-    const qs = searchParams.toString();
-    return fetchApi<RankingsResponse>(`/api/v1/rankings${qs ? `?${qs}` : ''}`);
-  },
   getCompetitorProfile: (name: string, resultId?: string) =>
     fetchApi<CompetitorProfile>(`/api/v1/rankings/competitor?${resultId ? `result_id=${encodeURIComponent(resultId)}` : `name=${encodeURIComponent(name)}`}`),
 };

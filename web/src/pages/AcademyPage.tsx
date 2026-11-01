@@ -2,10 +2,11 @@ import CountryFlag from '../components/CountryFlag';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, MotionConfig } from 'framer-motion';
-import { ArrowLeft, Trophy, Medal, Award, Building2, Users, MapPin, Globe, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Medal, Award, Building2, Users, MapPin, Globe, ExternalLink } from 'lucide-react';
 import { api } from '../services/api';
 import type { AcademyDetail } from '../services/api';
 import SEO from '../components/SEO';
+import { useTranslation } from 'react-i18next';
 
 const BELT_STYLES: Record<string, { bg: string; text: string; ring: string }> = {
   white:  { bg: 'bg-white/90',     text: 'text-gray-900', ring: 'ring-white/30' },
@@ -26,6 +27,7 @@ function BeltBadge({ rank }: { rank: string }) {
 
 
 export default function AcademyPage() {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [academy, setAcademy] = useState<AcademyDetail | null>(null);
@@ -135,12 +137,11 @@ export default function AcademyPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-                <StatCard icon={<Trophy size={20} className="text-gold-500" />} label="Total Points" value={academy.total_points} />
-                <StatCard icon={<Medal size={20} className="text-yellow-400" />} label="Gold" value={academy.gold} />
-                <StatCard icon={<Medal size={20} className="text-gray-300" />} label="Silver" value={academy.silver} />
-                <StatCard icon={<Award size={20} className="text-amber-500" />} label="Bronze" value={academy.bronze} />
-                <StatCard icon={<Users size={20} className="text-blue-400" />} label="Athletes" value={academy.athletes.length} />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <StatCard icon={<Medal size={20} className="text-yellow-400" />} label={t('competitorProfile.gold')} value={academy.gold} />
+                <StatCard icon={<Medal size={20} className="text-gray-300" />} label={t('competitorProfile.silver')} value={academy.silver} />
+                <StatCard icon={<Award size={20} className="text-amber-500" />} label={t('competitorProfile.bronze')} value={academy.bronze} />
+                <StatCard icon={<Users size={20} className="text-blue-400" />} label={t('officialRankings.athletes')} value={academy.athletes.length} />
               </div>
 
               {academy.athletes.length > 0 && (
@@ -176,11 +177,10 @@ export default function AcademyPage() {
                               <span className="text-sm font-medium text-text-primary truncate">{athlete.full_name}</span>
                               {athlete.belt_rank && <BeltBadge rank={athlete.belt_rank} />}
                             </div>
-                            <div className="flex items-center gap-2 mt-1 text-xs text-text-muted">
-                              <span className="text-gold font-mono font-semibold">{athlete.total_points} pts</span>
-                              {athlete.gold > 0 && <span className="text-yellow-400">{athlete.gold}G</span>}
-                              {athlete.silver > 0 && <span className="text-gray-300">{athlete.silver}S</span>}
-                              {athlete.bronze > 0 && <span className="text-orange-400">{athlete.bronze}B</span>}
+                            <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-text-muted">
+                              {athlete.gold > 0 && <span className="text-yellow-400">{athlete.gold} {t('competitorProfile.gold')}</span>}
+                              {athlete.silver > 0 && <span className="text-gray-300">{athlete.silver} {t('competitorProfile.silver')}</span>}
+                              {athlete.bronze > 0 && <span className="text-orange-400">{athlete.bronze} {t('competitorProfile.bronze')}</span>}
                             </div>
                           </div>
                         </Link>

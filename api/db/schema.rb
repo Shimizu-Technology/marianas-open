@@ -126,6 +126,97 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
     t.index ["credential_digest"], name: "index_asjjf_fetcher_rate_limits_on_credential_digest", unique: true
   end
 
+  create_table "asjjf_ranking_divisions", force: :cascade do |t|
+    t.string "age_group", null: false
+    t.bigint "asjjf_division_id", null: false
+    t.bigint "asjjf_ranking_list_id", null: false
+    t.string "belt", null: false
+    t.datetime "created_at", null: false
+    t.string "gender", null: false
+    t.string "label", null: false
+    t.datetime "last_synced_at"
+    t.integer "position", null: false
+    t.bigint "source_snapshot_id"
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asjjf_ranking_list_id", "asjjf_division_id"], name: "idx_ranking_division_identity", unique: true
+    t.index ["asjjf_ranking_list_id"], name: "index_asjjf_ranking_divisions_on_asjjf_ranking_list_id"
+    t.index ["source_snapshot_id"], name: "index_asjjf_ranking_divisions_on_source_snapshot_id"
+  end
+
+  create_table "asjjf_ranking_entries", force: :cascade do |t|
+    t.bigint "academy_id"
+    t.string "academy_name"
+    t.bigint "asjjf_ranking_division_id"
+    t.bigint "asjjf_ranking_list_id", null: false
+    t.integer "bronze"
+    t.bigint "competitor_id"
+    t.string "country_code"
+    t.datetime "created_at", null: false
+    t.integer "gold"
+    t.string "name", null: false
+    t.decimal "points", precision: 14, scale: 3, null: false
+    t.integer "position", null: false
+    t.string "raw_country_code"
+    t.integer "silver"
+    t.bigint "source_snapshot_id"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id"], name: "index_asjjf_ranking_entries_on_academy_id"
+    t.index ["asjjf_ranking_division_id", "position"], name: "idx_ranking_entry_order"
+    t.index ["asjjf_ranking_division_id"], name: "index_asjjf_ranking_entries_on_asjjf_ranking_division_id"
+    t.index ["asjjf_ranking_list_id"], name: "index_asjjf_ranking_entries_on_asjjf_ranking_list_id"
+    t.index ["competitor_id"], name: "index_asjjf_ranking_entries_on_competitor_id"
+    t.index ["source_snapshot_id"], name: "index_asjjf_ranking_entries_on_source_snapshot_id"
+  end
+
+  create_table "asjjf_ranking_lists", force: :cascade do |t|
+    t.bigint "asjjf_ranking_id", null: false
+    t.bigint "asjjf_ranking_season_id", null: false
+    t.string "category", default: "adult", null: false
+    t.string "circuit", default: "Marianas Pro", null: false
+    t.datetime "created_at", null: false
+    t.string "discipline", null: false
+    t.string "kind", null: false
+    t.datetime "last_synced_at"
+    t.integer "season_year", null: false
+    t.bigint "source_snapshot_id"
+    t.string "status", default: "pending", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asjjf_ranking_season_id", "discipline", "kind", "category"], name: "idx_ranking_list_identity", unique: true
+    t.index ["asjjf_ranking_season_id"], name: "index_asjjf_ranking_lists_on_asjjf_ranking_season_id"
+    t.index ["source_snapshot_id"], name: "index_asjjf_ranking_lists_on_source_snapshot_id"
+  end
+
+  create_table "asjjf_ranking_seasons", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "current", default: false, null: false
+    t.bigint "gi_ranking_id"
+    t.datetime "last_planned_at"
+    t.datetime "last_results_imported_at"
+    t.bigint "nogi_ranking_id"
+    t.integer "season_year", null: false
+    t.bigint "team_nogi_ranking_id"
+    t.bigint "team_ranking_id"
+    t.datetime "updated_at", null: false
+    t.index ["current"], name: "index_asjjf_ranking_seasons_on_current", unique: true, where: "(current = true)"
+    t.index ["season_year"], name: "index_asjjf_ranking_seasons_on_season_year", unique: true
+  end
+
+  create_table "asjjf_ranking_suggestions", force: :cascade do |t|
+    t.bigint "asjjf_ranking_id", null: false
+    t.datetime "created_at", null: false
+    t.string "discipline", null: false
+    t.string "kind", null: false
+    t.integer "season_year", null: false
+    t.bigint "source_snapshot_id"
+    t.string "source_url", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asjjf_ranking_id", "kind"], name: "index_asjjf_ranking_suggestions_on_asjjf_ranking_id_and_kind", unique: true
+    t.index ["source_snapshot_id"], name: "index_asjjf_ranking_suggestions_on_source_snapshot_id"
+  end
+
   create_table "asjjf_settings", force: :cascade do |t|
     t.datetime "alerted_at"
     t.datetime "created_at", null: false
@@ -152,6 +243,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
     t.string "parse_status", default: "pending", null: false
     t.datetime "parsed_at"
     t.jsonb "parsed_summary", default: {}, null: false
+    t.datetime "ranking_applied_at"
+    t.text "ranking_apply_error"
+    t.string "ranking_apply_status"
     t.string "sha256", null: false
     t.string "source", null: false
     t.datetime "updated_at", null: false
@@ -767,6 +861,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "asjjf_fetch_requests", "asjjf_snapshots", column: "snapshot_id"
+  add_foreign_key "asjjf_ranking_divisions", "asjjf_ranking_lists"
+  add_foreign_key "asjjf_ranking_divisions", "asjjf_snapshots", column: "source_snapshot_id", on_delete: :nullify
+  add_foreign_key "asjjf_ranking_entries", "academies", on_delete: :nullify
+  add_foreign_key "asjjf_ranking_entries", "asjjf_ranking_divisions"
+  add_foreign_key "asjjf_ranking_entries", "asjjf_ranking_lists"
+  add_foreign_key "asjjf_ranking_entries", "asjjf_snapshots", column: "source_snapshot_id", on_delete: :nullify
+  add_foreign_key "asjjf_ranking_entries", "competitors", on_delete: :nullify
+  add_foreign_key "asjjf_ranking_lists", "asjjf_ranking_seasons"
+  add_foreign_key "asjjf_ranking_lists", "asjjf_snapshots", column: "source_snapshot_id", on_delete: :nullify
+  add_foreign_key "asjjf_ranking_suggestions", "asjjf_snapshots", column: "source_snapshot_id", on_delete: :nullify
   add_foreign_key "asjjf_snapshots", "users", column: "uploaded_by_user_id", on_delete: :nullify
   add_foreign_key "competitor_aliases", "competitors"
   add_foreign_key "competitor_aliases", "users", column: "created_by_id"

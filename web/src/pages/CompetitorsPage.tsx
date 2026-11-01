@@ -68,11 +68,6 @@ function CompetitorCard({ competitor }: { competitor: Competitor }) {
           {competitor.belt_rank && (
             <div className="absolute top-3 right-3"><BeltBadge rank={competitor.belt_rank} /></div>
           )}
-          {competitor.total_points > 0 && (
-            <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-2 py-1 text-xs font-mono text-gold font-semibold">
-              {competitor.total_points} pts
-            </div>
-          )}
         </div>
 
         <div className="p-4">

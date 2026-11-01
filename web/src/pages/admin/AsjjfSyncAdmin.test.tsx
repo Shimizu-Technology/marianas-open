@@ -4,6 +4,9 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { api, type AsjjfStatus } from '../../services/api'
 import AsjjfSyncAdmin from './AsjjfSyncAdmin'
 
+vi.mock('../../components/admin/HeldRankingSnapshots', () => ({ default: () => null }))
+vi.mock('../../components/admin/RankingSeasonSettings', () => ({ default: () => null }))
+
 const fixture: AsjjfStatus = {
   queue_counts: { pending: 2, completed: 4, failed: 1 },
   breaker: { open: true, paused_until: '2026-11-03T00:00:00Z' },

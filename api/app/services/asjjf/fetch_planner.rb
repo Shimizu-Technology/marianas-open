@@ -27,10 +27,16 @@ module Asjjf
       [ enqueue("season_calendar", season_id, "season calendar") ]
     end
 
-    def plan_ranking(ranking_id, include_divisions: true)
-      [ enqueue("individual_ranking", ranking_id, include_divisions ? "ranking with divisions" : "ranking index", include_divisions: include_divisions),
-        enqueue("team_ranking", ranking_id, "team ranking"),
-        enqueue("team_ranking", ranking_id, "kids team ranking", query: "rankType=kids") ]
+    def plan_ranking(ranking_id, include_divisions: true, include_individual: true, include_team: true)
+      requests = []
+      if include_individual
+        requests << enqueue("individual_ranking", ranking_id, include_divisions ? "ranking with divisions" : "ranking index", include_divisions: include_divisions)
+      end
+      if include_team
+        requests << enqueue("team_ranking", ranking_id, "team ranking")
+        requests << enqueue("team_ranking", ranking_id, "kids team ranking", query: "rankType=kids")
+      end
+      requests
     end
 
     private

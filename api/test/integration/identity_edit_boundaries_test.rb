@@ -51,9 +51,8 @@ class IdentityEditBoundariesTest < ActionDispatch::IntegrationTest
   test "unlinked rankings retain a per-result profile identity" do
     first = medal(@event)
     second = medal(@late)
-    get "/api/v1/rankings"
-    entries = response.parsed_body["rankings"]
-    assert_equal [ first.id, second.id ].sort, entries.map { |row| row["result_id"] }.sort
+    entries = RankingCalculator.individual
+    assert_equal [ first.id, second.id ].sort, entries.map { |row| row[:result_id] }.sort
     get "/api/v1/rankings/competitor", params: { result_id: first.id }
     assert_response :success
     assert_equal 45, response.parsed_body["total_points"]
