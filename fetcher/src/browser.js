@@ -46,11 +46,22 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
         return !frame || typeof frame.parentFrame !== 'function' || frame.parentFrame() === null;
       } catch { return true; }
     };
+    // The page that owns a request, or null when Playwright cannot tell yet.
+    const pageOf = request => {
+      try {
+        if (typeof request.frame !== 'function') return null;
+        const frame = request.frame();
+        return frame && typeof frame.page === 'function' ? frame.page() : null;
+      } catch { return null; }
+    };
     // Only the original page is ever fetched; close anything the site tries to open.
     if (typeof context.on === 'function') {
       context.on('page', extra => { if (extra !== page) void extra.close().catch(() => {}); });
     }
-    page.on('request', request => {
+    // Redirect hops never reach the route handler, so validate every top-level request
+    // and response across the whole context (any popup included) and close the browser
+    // on the first disallowed hop.
+    const guardRequest = request => {
       if (!isMainFrameNavigation(request)) return;
       try {
         for (let hop = request; hop; hop = hop.redirectedFrom()) {
@@ -58,21 +69,8 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
           if (hop.method() !== 'GET') throw new Error('disallowed_method');
         }
       } catch { rejectHop(); }
-    });
-    // Enforce the boundary before following redirects, including script navigations.
-    // Leave ordinary browser subresources alone, as in the verified probe.
-    // The fetcher itself issues only GET navigation, never in-page XHR/POST.
-    await context.route('**/*', async route => {
-      const request = route.request();
-      try {
-        if (isMainFrameNavigation(request)) {
-          validateUrl(request.url(), config.allowedHosts);
-          if (request.method() !== 'GET') return route.abort();
-        }
-        return route.continue();
-      } catch { return route.abort(); }
-    });
-    page.on('response', response => {
+    };
+    const guardResponse = response => {
       if (!isMainFrameNavigation(response.request())) return;
       if (isChallenge({ status: response.status() })) challengeSeen = true;
       try {
@@ -83,6 +81,28 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
         }
       } catch { rejectHop(); }
       if (response.frame() === page.mainFrame()) status = response.status();
+    };
+    page.on('request', guardRequest);
+    page.on('response', guardResponse);
+    if (typeof context.on === 'function') {
+      context.on('request', request => { if (pageOf(request) !== page) guardRequest(request); });
+      context.on('response', response => { if (pageOf(response.request()) !== page) guardResponse(response); });
+    }
+    // Enforce the boundary before the first hop, including script navigations. Only the
+    // original page may navigate at top level: popups are aborted before they load.
+    // Leave ordinary browser subresources alone, as in the verified probe.
+    // The fetcher itself issues only GET navigation, never in-page XHR/POST.
+    await context.route('**/*', async route => {
+      const request = route.request();
+      try {
+        if (isMainFrameNavigation(request)) {
+          const owner = pageOf(request);
+          if (owner && owner !== page) return route.abort();
+          validateUrl(request.url(), config.allowedHosts);
+          if (request.method() !== 'GET') return route.abort();
+        }
+        return route.continue();
+      } catch { return route.abort(); }
     });
     let navigationError;
     try { await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 }); }

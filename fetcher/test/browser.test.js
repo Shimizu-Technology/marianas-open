@@ -167,7 +167,8 @@ test('popup top-level navigations are bounded by the context route and extra pag
   let routeHandler, pageListener, extraClosed = false;
   const original = { on: () => {}, goto: async () => {}, title: async () => 'ASJJF', content: async () => '<html></html>',
     url: () => 'https://asjjf.org/', waitForTimeout: async () => {} };
-  const popupFrame = { parentFrame: () => null };
+  const popupPage = { name: 'popup' };
+  const popupFrame = { parentFrame: () => null, page: () => popupPage };
   const nav = (url, method = 'GET', frame = popupFrame) => ({ isNavigationRequest: () => true, method: () => method,
     url: () => url, redirectedFrom: () => null, frame: () => frame });
   const decide = async request => {
@@ -182,7 +183,8 @@ test('popup top-level navigations are bounded by the context route and extra pag
   await fetchPage('https://asjjf.org/', config, { launch });
   assert.equal(await decide(nav('https://evil.test/')), 'abort');
   assert.equal(await decide(nav('https://asjjf.org/form', 'POST')), 'abort');
-  assert.equal(await decide(nav('https://asjjf.org/ok')), 'continue');
+  // Popups never load at top level, even for allowed URLs.
+  assert.equal(await decide(nav('https://asjjf.org/ok')), 'abort');
   // A frame() that throws is treated as top-level and validated.
   const throwing = { isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://evil.test/',
     redirectedFrom: () => null, frame: () => { throw new Error('no frame yet'); } };
@@ -195,4 +197,23 @@ test('popup top-level navigations are bounded by the context route and extra pag
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(extraClosed, true);
   pageListener(original);
+});
+
+test('a popup redirect to a disallowed host closes the browser via context-wide guards', async () => {
+  const contextListeners = {};
+  let closed = 0;
+  const popupPage = {};
+  const popupFrame = { parentFrame: () => null, page: () => popupPage };
+  const first = { isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://asjjf.org/redirect',
+    redirectedFrom: () => null, frame: () => popupFrame };
+  const hop = { isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://evil.test/',
+    redirectedFrom: () => first, frame: () => popupFrame };
+  const original = { mainFrame: () => ({ parentFrame: () => null }), on: () => {},
+    goto: async () => { contextListeners.request(hop); },
+    title: async () => 'ASJJF', content: async () => '<html></html>', url: () => 'https://asjjf.org/', waitForTimeout: async () => {} };
+  const launch = async () => ({ close: async () => { closed++; }, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => original, route: async () => {},
+    on: (event, listener) => { contextListeners[event] = listener; } }) });
+  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_navigation/);
+  assert.ok(closed >= 1);
 });
