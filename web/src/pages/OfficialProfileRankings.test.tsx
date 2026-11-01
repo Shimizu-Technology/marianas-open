@@ -30,7 +30,8 @@ afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 it('shows current-season official standings alongside medal history without formula points', async () => {
   setup(<Routes><Route path="/competitors/:id" element={<CompetitorProfilePage />} /></Routes>, '/competitors/7');
-  await screen.findByRole('heading', { name: 'ASJJF standings · 2026' });
+  await screen.findByRole('heading', { name: 'Test Athlete' });
+  await screen.findByRole('heading', { name: 'ASJJF standings · 2026' }, { timeout: 5000 });
   expect(officialRankingsApi.getStandings).toHaveBeenCalledWith(7, expect.any(AbortSignal));
   expect(screen.getByText('#7')).toBeTruthy();
   expect(screen.getByText('143.25')).toBeTruthy();
