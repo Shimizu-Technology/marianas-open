@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, Image as ImageIcon, MapPin, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useTranslatedField } from '../hooks/useTranslatedField';
+import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
+import { getPublicImageLabel, isGeneratedImageName } from '../utils/gallery';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import SEO from '../components/SEO';
@@ -14,29 +18,6 @@ const EAGER_IMAGE_COUNT = 4;
 const HIGH_PRIORITY_IMAGE_COUNT = 3;
 const LARGE_PRELOAD_COUNT = 8;
 
-function formatDate(dateStr?: string) {
-  if (!dateStr) return '';
-  return new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-
-function isGeneratedImageName(value: string | null | undefined) {
-  if (!value) return false;
-  const trimmed = value.trim();
-  return /^([a-f0-9]{6,}|[0-9_-]*\d{4,}[0-9_-]*)$/i.test(trimmed);
-}
-
-function getPublicImageLabel(image: EventGalleryImage) {
-  const caption = image.caption?.trim();
-  if (caption) return caption;
-
-  const title = image.title?.trim();
-  return title && !isGeneratedImageName(title) ? title : '';
-}
-
 function preloadImage(url: string | null | undefined) {
   if (!url) return;
   const image = new Image();
@@ -46,6 +27,11 @@ function preloadImage(url: string | null | undefined) {
 
 export default function EventGalleryPage() {
   const { slug = '' } = useParams();
+  const { t, i18n } = useTranslation();
+  const { tf } = useTranslatedField();
+  const [searchParams] = useSearchParams();
+  const requestedPhotoId = searchParams.get('photo');
+  const dialogRef = useRef<HTMLDivElement>(null);
   const { events, loading: eventsLoading } = useEvents();
   const event = useMemo(
     () => events.find(candidate => candidate.slug === slug) || null,
@@ -76,6 +62,8 @@ export default function EventGalleryPage() {
         setActiveCategory('');
         setTotal(galleryResult.total);
         setPage(1);
+        const requestedIndex = galleryResult.gallery_images.findIndex(image => String(image.id) === requestedPhotoId);
+        setActiveIndex(requestedIndex >= 0 ? requestedIndex : null);
       } catch {
         if (!cancelled) {
           setImages([]);
@@ -83,7 +71,7 @@ export default function EventGalleryPage() {
           setActiveCategory('');
           setTotal(0);
           setPage(1);
-          setError('Photos could not be loaded. Please try again.');
+          setError('season.galleryError');
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -95,7 +83,7 @@ export default function EventGalleryPage() {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, requestedPhotoId]);
 
   const canLoadMore = images.length < total;
   const visibleCategories = categories.filter(category => category.count > 0);
@@ -110,14 +98,14 @@ export default function EventGalleryPage() {
     return {
       '@context': 'https://schema.org',
       '@type': 'ImageGallery',
-      name: `${event.name} Photo Gallery`,
+      name: `${event.name} — ${t('season.gallery')}`,
       about: event.name,
       image: images.slice(0, 12).map(image => {
         const src = image.thumbnail_url;
         return resolveMediaUrl(src);
       }).filter(Boolean),
     };
-  }, [event, images]);
+  }, [event, images, t]);
 
   const loadMore = async () => {
     if (!canLoadMore || loadingMore) return;
@@ -133,7 +121,7 @@ export default function EventGalleryPage() {
       setTotal(res.total);
       setPage(nextPage);
     } catch {
-      setError('More photos could not be loaded. Please try again.');
+      setError('season.galleryMoreError');
     } finally {
       setLoadingMore(false);
     }
@@ -156,7 +144,7 @@ export default function EventGalleryPage() {
       setPage(1);
     } catch {
       setActiveCategory(previousCategory);
-      setError('Photos could not be loaded. Please try again.');
+      setError('season.galleryError');
     } finally {
       setLoadingMore(false);
     }
@@ -210,6 +198,30 @@ export default function EventGalleryPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeIndex, moveLightbox]);
 
+  const lightboxOpen = activeIndex !== null && !loading && !eventsLoading;
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const dialog = dialogRef.current;
+    dialog?.querySelector<HTMLButtonElement>('button')?.focus();
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !dialog) return;
+      const controls = Array.from(dialog.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener('keydown', trapFocus);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', trapFocus);
+      if (previousFocus instanceof HTMLElement) previousFocus.focus();
+    };
+  }, [lightboxOpen]);
+
   if (loading || eventsLoading) {
     return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;
   }
@@ -217,9 +229,9 @@ export default function EventGalleryPage() {
   if (!event) {
     return (
       <div className="min-h-screen pt-32 px-4 text-center">
-        <div className="text-text-muted">Gallery not found.</div>
-        <Link to="/events/past" className="inline-flex items-center gap-2 mt-6 text-gold hover:text-gold-400">
-          <ArrowLeft size={14} /> Back to past events
+        <div className="text-text-muted">{t('season.galleryNotFound')}</div>
+        <Link to="/events/past" className="inline-flex min-h-11 items-center gap-2 mt-6 text-gold hover:text-gold-400">
+          <ArrowLeft size={14} /> {t('season.backToPast')}
         </Link>
       </div>
     );
@@ -228,8 +240,8 @@ export default function EventGalleryPage() {
   return (
     <div className="min-h-screen pt-20">
       <SEO
-        title={`${event.name} Photos`}
-        description={`Official photo gallery from ${event.name}.`}
+        title={t('season.galleryTitle', { event: tf(event, 'name') })}
+        description={t('season.galleryDescription', { event: tf(event, 'name') })}
         path={`/events/${event.slug}/gallery`}
         image={resolveMediaUrl(images[0]?.thumbnail_url) || event.hero_image_url || undefined}
         structuredData={structuredData ? [structuredData] : undefined}
@@ -237,23 +249,23 @@ export default function EventGalleryPage() {
 
       <section className="relative py-12 sm:py-16 border-b border-white/5 bg-navy-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <Link to={`/events/${event.slug}`} className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-gold transition-colors mb-8">
-            <ArrowLeft size={14} /> Back to event
+          <Link to={`/events/${event.slug}`} className="inline-flex min-h-11 items-center gap-2 text-sm text-text-muted hover:text-gold transition-colors mb-8">
+            <ArrowLeft size={14} /> {t('season.backToEvent')}
           </Link>
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-gold-500/20 bg-gold-500/5 text-gold-400 text-xs font-heading uppercase tracking-wider mb-5">
-                <ImageIcon size={13} /> Official Gallery
+              <div className="inline-flex min-h-11 items-center gap-2 px-3 py-1.5 border border-gold-500/20 bg-gold-500/5 text-gold-400 text-xs font-heading uppercase tracking-wider mb-5">
+                <ImageIcon size={13} /> {t('season.officialGallery')}
               </div>
               <h1 className="max-w-6xl break-words font-heading text-4xl sm:text-6xl font-black uppercase leading-none text-text-primary">
-                {event.name}
+                {tf(event, 'name')}
               </h1>
               <div className="mt-5 flex flex-wrap gap-4 text-sm text-text-secondary">
-                <span className="inline-flex items-center gap-2"><Calendar size={14} className="text-gold-500" /> {formatDate(event.date)}</span>
-                <span className="inline-flex items-center gap-2"><MapPin size={14} className="text-gold-500" /> {event.city}, {event.country}</span>
+                <span className="inline-flex min-h-11 items-center gap-2"><Calendar size={14} className="text-gold-500" /> {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <span className="inline-flex min-h-11 items-center gap-2"><MapPin size={14} className="text-gold-500" /> {tf(event, 'city')}, {tf(event, 'country')}</span>
               </div>
             </div>
-            <div className="text-sm text-text-muted">{total} photo{total === 1 ? '' : 's'}</div>
+            <div className="text-sm text-text-muted">{t('season.photoCount', { count: total })}</div>
           </div>
         </div>
       </section>
@@ -262,23 +274,23 @@ export default function EventGalleryPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {error && (
             <div className="mb-5 border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {error}
+              {t(error)}
             </div>
           )}
           {visibleCategories.length > 0 && (
             <div className="mb-6 space-y-3">
               <div className="flex items-center justify-between gap-4 text-xs text-text-muted">
-                <span>{activeCategory || 'All photos'}</span>
-                <span>{total} photo{total === 1 ? '' : 's'}</span>
+                <span>{activeCategory || t('season.allPhotos')}</span>
+                <span>{t('season.photoCount', { count: total })}</span>
               </div>
               <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
                 <button
                   onClick={() => void loadCategory('')}
                   aria-pressed={activeCategory === ''}
                   disabled={loadingMore}
-                  className={`shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-heading uppercase tracking-wider transition-colors disabled:opacity-60 ${activeCategory === '' ? 'border-gold bg-gold text-navy-950' : 'border-white/10 text-text-secondary hover:border-gold/40 hover:text-gold'}`}
+                  className={`min-h-11 shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-heading uppercase tracking-wider transition-colors disabled:opacity-60 ${activeCategory === '' ? 'border-gold bg-gold text-navy-950' : 'border-white/10 text-text-secondary hover:border-gold/40 hover:text-gold'}`}
                 >
-                  All
+                  {t('season.all')}
                 </button>
                 {visibleCategories.map(category => (
                   <button
@@ -286,7 +298,7 @@ export default function EventGalleryPage() {
                     onClick={() => void loadCategory(category.name)}
                     aria-pressed={activeCategory === category.name}
                     disabled={loadingMore}
-                    className={`shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-heading uppercase tracking-wider transition-colors disabled:opacity-60 ${activeCategory === category.name ? 'border-gold bg-gold text-navy-950' : 'border-white/10 text-text-secondary hover:border-gold/40 hover:text-gold'}`}
+                    className={`min-h-11 shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-heading uppercase tracking-wider transition-colors disabled:opacity-60 ${activeCategory === category.name ? 'border-gold bg-gold text-navy-950' : 'border-white/10 text-text-secondary hover:border-gold/40 hover:text-gold'}`}
                   >
                     {category.name} <span className="opacity-70">({category.count})</span>
                   </button>
@@ -295,7 +307,7 @@ export default function EventGalleryPage() {
             </div>
           )}
           {images.length === 0 ? (
-            <div className="py-24 text-center text-text-muted">No photos have been published yet.</div>
+            <div className="py-24 text-center text-text-muted">{t('season.noPhotos')}</div>
           ) : (
             <>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
@@ -306,6 +318,7 @@ export default function EventGalleryPage() {
                   return (
                     <button
                       key={image.id}
+                      aria-label={t('season.openPhoto', { number: index + 1 })}
                       onMouseEnter={() => preloadImage(resolveMediaUrl(image.large_url || image.thumbnail_url))}
                       onFocus={() => preloadImage(resolveMediaUrl(image.large_url || image.thumbnail_url))}
                       onClick={() => {
@@ -317,7 +330,7 @@ export default function EventGalleryPage() {
                       {src ? (
                         <ImageWithShimmer
                           src={src}
-                          alt={image.alt_text || image.title || event.name}
+                          alt={image.alt_text && !isGeneratedImageName(image.alt_text) ? image.alt_text : getPublicImageLabel(image) || tf(event, 'name')}
                           loading={index < EAGER_IMAGE_COUNT ? 'eager' : 'lazy'}
                           decoding="async"
                           fetchPriority={index < HIGH_PRIORITY_IMAGE_COUNT ? 'high' : 'auto'}
@@ -347,10 +360,10 @@ export default function EventGalleryPage() {
                   <button
                     onClick={() => void loadMore()}
                     disabled={loadingMore}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold text-navy-900 font-heading font-semibold text-sm uppercase tracking-wider hover:bg-gold-400 disabled:opacity-60"
+                    className="inline-flex min-h-11 items-center gap-2 px-5 py-2.5 bg-gold text-navy-900 font-heading font-semibold text-sm uppercase tracking-wider hover:bg-gold-400 disabled:opacity-60"
                   >
                     {loadingMore && <LoaderInline />}
-                    Load More
+                    {t('season.loadMore')}
                   </button>
                 </div>
               )}
@@ -360,18 +373,18 @@ export default function EventGalleryPage() {
       </section>
 
       {activeImage && (
-        <div className="fixed inset-0 z-[80] bg-black/95 p-4 sm:p-6">
-          <button onClick={() => setActiveIndex(null)} className="absolute right-3 top-3 z-20 p-2 text-white/70 hover:text-white sm:right-4 sm:top-4" aria-label="Close gallery image">
+        <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t('season.gallery')} className="fixed inset-0 z-[80] bg-black/95 p-4 sm:p-6">
+          <button onClick={() => setActiveIndex(null)} className="absolute right-3 top-3 z-20 min-h-11 min-w-11 p-2 text-white/70 hover:text-white sm:right-4 sm:top-4" aria-label={t('season.closePhoto')}>
             <X size={24} />
           </button>
-          <button disabled={activeIndex === 0} onClick={() => moveLightbox(-1)} className="absolute left-2 top-1/2 z-20 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:left-6" aria-label="Previous image">
+          <button disabled={activeIndex === 0} onClick={() => moveLightbox(-1)} className="absolute left-2 top-1/2 z-20 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:left-6" aria-label={t('season.previousPhoto')}>
             <ChevronLeft size={32} />
           </button>
           <div className="mx-auto flex h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-7xl flex-col items-center justify-center gap-3 sm:h-[calc(100dvh-3rem)] sm:w-[calc(100vw-3rem)]">
             {activeSrc ? (
               <img
                 src={activeSrc}
-                alt={activeImage.alt_text || activeImage.title || event.name}
+                alt={activeImage.alt_text && !isGeneratedImageName(activeImage.alt_text) ? activeImage.alt_text : activeLabel || tf(event, 'name')}
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
@@ -380,7 +393,7 @@ export default function EventGalleryPage() {
             ) : (
               <div className="flex min-h-0 w-full max-w-lg flex-1 flex-col items-center justify-center gap-3 border border-white/10 bg-navy-900 text-text-muted">
                 <ImageIcon className="h-8 w-8 text-gold-400/30" />
-                <span className="text-sm">Photo preview is processing.</span>
+                <span className="text-sm">{t('season.photoProcessing')}</span>
               </div>
             )}
             {activeLabel && (
@@ -389,7 +402,7 @@ export default function EventGalleryPage() {
               </div>
             )}
           </div>
-          <button disabled={activeIndex === images.length - 1} onClick={() => moveLightbox(1)} className="absolute right-2 top-1/2 z-20 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:right-6" aria-label="Next image">
+          <button disabled={activeIndex === images.length - 1} onClick={() => moveLightbox(1)} className="absolute right-2 top-1/2 z-20 -translate-y-1/2 p-2 text-white/70 hover:text-white disabled:opacity-20 sm:right-6" aria-label={t('season.nextPhoto')}>
             <ChevronRight size={32} />
           </button>
         </div>

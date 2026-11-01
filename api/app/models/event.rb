@@ -117,9 +117,12 @@ class Event < ApplicationRecord
   )
   translation_context "Marianas Open jiu-jitsu tournament events. Translate naturally for the target audience."
 
+  # Set by PublicEventLoader in one grouped query, without loading result rows.
+  attr_accessor :results_count
+
   def as_json(options = {})
     super(options.merge(
-      methods: [:hero_image_url, :poster_image_url, :ticket_banner_image_url, :asjjf_source_urls, :gallery_images_count],
+      methods: [:hero_image_url, :poster_image_url, :ticket_banner_image_url, :asjjf_source_urls, :gallery_images_count, :results_count],
       include: {
         event_schedule_items: { except: [:created_at, :updated_at] },
         prize_categories: { except: [:created_at, :updated_at] },

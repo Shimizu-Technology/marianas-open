@@ -1,0 +1,52 @@
+[
+  {
+    "width": 390,
+    "scenario": "off-season",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "scenario": "empty",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "scenario": "cancelled",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "scenario": "live",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "scenario": "summary-error",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "scenario": "off-season",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "scenario": "empty",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "scenario": "cancelled",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "scenario": "live",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "scenario": "summary-error",
+    "status": "passed"
+  }
+]

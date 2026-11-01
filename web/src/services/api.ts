@@ -76,6 +76,7 @@ export interface Organization {
   phone: string;
   website_url: string;
   instagram_url: string;
+  youtube_url?: string | null;
   facebook_url: string;
   founded_year: number;
   logo_url: string | null;
@@ -274,6 +275,7 @@ export interface Event {
   event_accommodations: EventAccommodation[];
   event_gallery_images: EventGalleryImage[];
   gallery_images_count: number;
+  results_count?: number;
   translations?: TranslationsBlob;
   translation_status?: TranslationStatus;
 }
