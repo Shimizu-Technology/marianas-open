@@ -2,7 +2,7 @@ module Identity
   # Only descriptive profile data belongs here; identity names and result-derived
   # current academy remain governed by their own merge rules.
   class ProfileMerge
-    COMPETITOR_FIELDS = %w[nickname country_code belt_rank weight_class academy academy_id bio instagram_url youtube_url wins losses draws gold_medals silver_medals bronze_medals].freeze
+    COMPETITOR_FIELDS = %w[nickname country_code belt_rank weight_class bio instagram_url youtube_url wins losses draws gold_medals silver_medals bronze_medals].freeze
     ACADEMY_FIELDS = %w[country_code location website_url instagram_url facebook_url description unaffiliated].freeze
 
     def self.fields(record)

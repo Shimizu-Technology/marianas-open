@@ -31,7 +31,9 @@ class Competitor < ApplicationRecord
   end
 
   def identity_names
-    [ "#{first_name} #{last_name}", "#{last_name} #{first_name}", full_name ]
+    names = [ "#{first_name} #{last_name}", "#{last_name} #{first_name}", full_name ]
+    names << "#{last_name} #{first_name} \"#{nickname}\"" if nickname.present?
+    names
   end
 
   def current_academy_name

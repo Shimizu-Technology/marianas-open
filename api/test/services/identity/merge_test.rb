@@ -170,6 +170,8 @@ class IdentityMergeTest < ActiveSupport::TestCase
     assert_equal blob.id, target.photo.blob.id
     assert ActiveStorage::Blob.exists?(blob.id)
     assert_empty ActiveStorage::Attachment.where(record_type: "Competitor", record_id: source.id)
+    assert_equal target.id, CompetitorAlias.find_by!(normalized_key: "riverkailinwave").competitor_id
+    assert_not CompetitorAlias.exists?(normalized_key: "waveriverkailin")
   end
 
   test "academy merge transfers descriptive fields and logo" do
@@ -285,6 +287,25 @@ class IdentityMergeTest < ActiveSupport::TestCase
       assert_equal target.id, result.reload.academy_id
       assert_not Academy.exists?(source.id)
     end
+  end
+
+  test "current gym follows latest history rather than a profile conflict choice" do
+    old_gym = Academy.create!(name: "Earlier Gym")
+    new_gym = Academy.create!(name: "Latest Gym")
+    source = person(academy_id: old_gym.id, academy: old_gym.name)
+    target = person(academy_id: new_gym.id, academy: new_gym.name)
+    fields = Identity::CompetitorMerge.preview(source, target)[:conflicts].map { |item| item[:field] }
+    assert_not_includes fields, "academy"
+    assert_not_includes fields, "academy_id"
+    earlier = @organization.events.create!(name: "Earlier", slug: "earlier", date: Date.new(2025, 1, 1))
+    medal(source, event: earlier, academy_id: old_gym.id)
+    medal(target, academy_id: new_gym.id)
+    Identity::CompetitorMerge.call(source: source, target: target, confirm: true)
+    assert_equal new_gym.id, target.reload.academy_id
+    blank = person
+    no_history = person(first_name: "Different", academy_id: old_gym.id, academy: old_gym.name)
+    Identity::CompetitorMerge.call(source: no_history, target: blank, confirm: true, confirm_warnings: true)
+    assert_equal old_gym.id, blank.reload.academy_id
   end
 
   private

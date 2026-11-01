@@ -33,12 +33,17 @@ module Identity
           if details[:warnings].any? && confirm_warnings != true
             raise ArgumentError, "Review and explicitly confirm history warnings: #{details[:warnings].join('; ')}"
           end
-          names = source.identity_names + EventResult.where(competitor_id: source.id).pluck(:competitor_name, :raw_competitor_name).flatten
-          names += names.reject(&:blank?).map { |name| NameNormalizer.person_parts(name).join(" ") }
+          raw_names = EventResult.where(competitor_id: source.id).pluck(:competitor_name, :raw_competitor_name).flatten.compact
+          names = source.identity_names + raw_names + raw_names.map { |name| NameNormalizer.person_parts(name).join(" ") }
           CompetitorAlias.where(competitor_id: source.id).update_all(competitor_id: target.id)
           CompetitorAlias.record_names!(competitor: target, names: names, source: "merge", actor: actor)
           discarded = ProfileMerge.apply(source, target, keep: keep)
           EventResult.where(competitor_id: source.id).update_all(competitor_id: target.id)
+          # A gym with result history is derived from the latest result, not a
+          # profile conflict choice. Retain a blank-profile fallback if no
+          # history exists; refresh below remains authoritative when it does.
+          target.academy_id ||= source.academy_id
+          target.academy = target.academy.presence || source.academy
           source.destroy!
           target.save!
           target.refresh_current_academy! if target.event_results.exists?
