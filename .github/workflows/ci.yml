@@ -20,7 +20,7 @@ concurrency:
 jobs:
   api:
     name: API
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16-alpine@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685
@@ -63,23 +63,11 @@ jobs:
       - name: Audit Ruby dependencies
         run: bin/bundler-audit check --update
       - name: Scan Rails application
-        shell: bash
-        run: |
-          report="${RUNNER_TEMP}/brakeman.json"
-          bin/brakeman --quiet --no-pager --format json --output "${report}" \
-            --no-exit-on-warn --no-exit-on-error
-          ruby -rjson -e '
-            report = JSON.parse(File.read(ARGV.fetch(0)))
-            errors = report["errors"] || []
-            warning_count = (report["warnings"] || []).length
-            errors.each { |error| warn "Brakeman scan error: #{error}" }
-            warn "Brakeman warnings: #{warning_count} (inherited baseline: 8)"
-            exit 1 if errors.any? || warning_count > 8
-          ' "${report}"
+        run: bin/brakeman --no-pager --exit-on-warn --exit-on-error
 
   web:
     name: Web
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: web
@@ -99,4 +87,4 @@ jobs:
       - run: npx tsc -b
       - run: npm test
       - name: Build production frontend
-        run: npx vite build
+        run: npm run build:no-translate

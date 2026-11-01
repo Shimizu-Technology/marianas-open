@@ -1,0 +1,189 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "352d624ac6cf312138a4474d475355895f6b4e7548dd0456d86253728e57daab",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/controllers/api/v1/admin/event_gallery_images_controller.rb",
+      "line": 180,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "Event.find(params[:event_id]).event_gallery_images.where(:id => Array(params[:ids]).map(&:to_i).reject(&:zero?)).update_all(params.permit(:active, :category).to_h.with_indifferent_access.merge(:updated_at => Time.current))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Api::V1::Admin::EventGalleryImagesController",
+        "method": "bulk_update"
+      },
+      "user_input": "params.permit(:active, :category).to_h.with_indifferent_access.merge(:updated_at => Time.current)",
+      "confidence": "High",
+      "cwe_id": [
+        89
+      ],
+      "note": "Inherited; tracked for security pass."
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "37d2dbd13a8b7da8e01a6bd98cb2ee288d63e8484fc9c30a9cbc777eead3f307",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/services/competitor_linker.rb",
+      "line": 79,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "Competitor.connection.execute(\"SELECT pg_advisory_xact_lock(#{(Zlib.crc32(\"competitor:#{normalize(full_name)}\") % (2 ** 31))})\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "CompetitorLinker",
+        "method": "self.find_or_create"
+      },
+      "user_input": "(Zlib.crc32(\"competitor:#{normalize(full_name)}\") % (2 ** 31))",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": "Inherited; tracked for security pass."
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "39fbaecde1e82d78b5d7ab6488ab987f5070e73ea9c5a87b1f84a2818db8f226",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/controllers/api/v1/academies_controller.rb",
+      "line": 146,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "EventResult.where(:competitor_id => competitor_ids).joins(:event).merge(Event.publicly_visible).group(:competitor_id).select(\"competitor_id\", \"COUNT(*) FILTER (WHERE placement = 1) as gold\", \"COUNT(*) FILTER (WHERE placement = 2) as silver\", \"COUNT(*) FILTER (WHERE placement = 3) as bronze\", \"#{RankingCalculator.points_sql(:placement_col => \"placement\")} as total_points\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Api::V1::AcademiesController",
+        "method": "bulk_compute_athlete_stats"
+      },
+      "user_input": "RankingCalculator.points_sql(:placement_col => \"placement\")",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": "Inherited; tracked for security pass."
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "4c5d2f9e8be8ad7584370c79e9555f919b3c6aeb459a6c6457c2e11635260a71",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/controllers/api/v1/admin/academies_controller.rb",
+      "line": 159,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "EventResult.joins(:competitor => :team).joins(:event).where(:competitors => ({ :academy_id => academy_ids })).group(\"competitors.academy_id\").select(\"competitors.academy_id\", \"COUNT(DISTINCT event_results.competitor_id) as athletes\", \"COUNT(DISTINCT event_results.event_id) as events_competed\", \"COUNT(*) FILTER (WHERE event_results.placement = 1) as gold\", \"COUNT(*) FILTER (WHERE event_results.placement = 2) as silver\", \"COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze\", \"#{RankingCalculator.points_sql} as total_points\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Api::V1::Admin::AcademiesController",
+        "method": "bulk_compute_stats"
+      },
+      "user_input": "RankingCalculator.points_sql",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": "Inherited; tracked for security pass."
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "673164ecfdf261c1df61f8e35ef309e61956bdb080f62dc5b7d386fdc73b997b",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/controllers/api/v1/admin/competitors_controller.rb",
+      "line": 191,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "EventResult.where(:competitor_id => competitor_ids).joins(:event).group(:competitor_id).select(\"competitor_id\", \"COUNT(*) as results_count\", \"COUNT(DISTINCT event_results.event_id) as events_competed\", \"COUNT(*) FILTER (WHERE placement = 1) as gold\", \"COUNT(*) FILTER (WHERE placement = 2) as silver\", \"COUNT(*) FILTER (WHERE placement = 3) as bronze\", \"#{RankingCalculator.points_sql(:placement_col => \"placement\")} as total_points\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Api::V1::Admin::CompetitorsController",
+        "method": "bulk_compute_stats"
+      },
+      "user_input": "RankingCalculator.points_sql(:placement_col => \"placement\")",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": "Inherited; tracked for security pass."
+    },
+    {
+      "warning_type": "Mass Assignment",
+      "warning_code": 105,
+      "fingerprint": "6f9993a3eb3b582b763c502253afd306ab0cd0aecc599a73ac4b0395d567c976",
+      "check_name": "PermitAttributes",
+      "message": "Potentially dangerous key allowed for mass assignment",
+      "file": "app/controllers/api/v1/admin/users_controller.rb",
+      "line": 116,
+      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
+      "code": "params.permit(:email, :role)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Api::V1::Admin::UsersController",
+        "method": "invite_params"
+      },
+      "user_input": ":role",
+      "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
+      "note": "Inherited; tracked for security pass."
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "9feda520ab94446f4e611e7d5c3fe5815465c9cb78a69bb3a6280b680f5803ce",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/controllers/api/v1/academies_controller.rb",
+      "line": 121,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "EventResult.joins(:competitor => :team).joins(:event).merge(Event.publicly_visible).where(:competitors => ({ :academy_id => academy_ids })).group(\"competitors.academy_id\").select(\"competitors.academy_id\", \"COUNT(*) as results_count\", \"COUNT(DISTINCT event_results.competitor_id) as athletes\", \"COUNT(DISTINCT event_results.event_id) as events_competed\", \"COUNT(*) FILTER (WHERE event_results.placement = 1) as gold\", \"COUNT(*) FILTER (WHERE event_results.placement = 2) as silver\", \"COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze\", \"#{RankingCalculator.points_sql} as total_points\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Api::V1::AcademiesController",
+        "method": "bulk_compute_stats"
+      },
+      "user_input": "RankingCalculator.points_sql",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": "Inherited; tracked for security pass."
+    },
+    {
+      "warning_type": "Mass Assignment",
+      "warning_code": 105,
+      "fingerprint": "c19bea1ef9e79def8a50309356c249d5139af178681edb11767517c6346f0d87",
+      "check_name": "PermitAttributes",
+      "message": "Potentially dangerous key allowed for mass assignment",
+      "file": "app/controllers/api/v1/admin/users_controller.rb",
+      "line": 112,
+      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
+      "code": "params.permit(:email, :first_name, :last_name, :role)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Api::V1::Admin::UsersController",
+        "method": "user_params"
+      },
+      "user_input": ":role",
+      "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
+      "note": "Inherited; tracked for security pass."
+    }
+  ],
+  "brakeman_version": "8.1.0"
+}

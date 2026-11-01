@@ -19,6 +19,18 @@ describe('deploy recovery', () => {
     expect(reload).not.toHaveBeenCalled()
   })
 
+  it('cancels the first preload failure and persists the reload guard', () => {
+    const uninstall = installPreloadRecovery()
+    try {
+      const event = new Event('vite:preloadError', { cancelable: true })
+      window.dispatchEvent(event)
+      expect(event.defaultPrevented).toBe(true)
+      expect(sessionStorage.getItem('marianas-open:preload-reload:test-build')).toBe('1')
+    } finally {
+      uninstall()
+    }
+  })
+
   it('does not suppress a repeated preload failure', () => {
     sessionStorage.setItem('marianas-open:preload-reload:test-build', '1')
     const uninstall = installPreloadRecovery()
