@@ -43,7 +43,7 @@ export default function HeldRankingSnapshots({ isAdmin }: { isAdmin: boolean }) 
       <SavedSummary id={snapshot.id} />
       <RankingSnapshotReview id={snapshot.id} status={snapshot.ranking_apply_status} error={snapshot.ranking_apply_error} isAdmin={isAdmin} />
     </article>)}
-    {data && data.total > data.per_page && <nav className="flex items-center justify-between gap-3" aria-label={t('officialRankings.pagination')}>
+    {data && (page > 1 || data.total > data.per_page) && <nav className="flex items-center justify-between gap-3" aria-label={t('officialRankings.pagination')}>
       <button type="button" disabled={page <= 1} className={asjjfButtonClass} onClick={() => { setData(undefined); setPage(value => value - 1) }}>{t('officialRankings.previous')}</button>
       <span className="text-sm text-text-secondary">{t('officialRankings.page', { page })}</span>
       <button type="button" disabled={page * data.per_page >= data.total} className={asjjfButtonClass} onClick={() => { setData(undefined); setPage(value => value + 1) }}>{t('officialRankings.next')}</button>
