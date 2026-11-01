@@ -10,8 +10,7 @@ class AsjjfBodyLimit
   end
 
   def call(env)
-    path = env["PATH_INFO"].to_s
-    return @app.call(env) unless path == PREFIX || path.start_with?("#{PREFIX}/")
+    return @app.call(env) unless internal_asjjf_path?(env["PATH_INFO"].to_s)
     return too_large if env["CONTENT_LENGTH"].to_i > MAX_BYTES
 
     input = env["rack.input"]
@@ -29,6 +28,19 @@ class AsjjfBodyLimit
   end
 
   private
+
+  # Scope by the same canonical path the Rails router matches on (repeated or
+  # trailing slashes collapsed, percent-encoding decoded), so variants such as
+  # "/api//v1/internal/asjjf/snapshots" cannot skip the limit. The original
+  # PATH_INFO is left untouched because the HMAC signs the path as sent.
+  def internal_asjjf_path?(raw_path)
+    decoded = Rack::Utils.unescape_path(raw_path)
+    path = ActionDispatch::Journey::Router::Utils.normalize_path(decoded)
+    path == PREFIX || path.start_with?("#{PREFIX}/")
+  rescue ArgumentError
+    # Malformed encodings are treated as in scope so they are bounded too.
+    true
+  end
 
   def too_large
     [ 413, { "content-type" => "application/json" }, [ '{"error":"Request body too large"}' ] ]

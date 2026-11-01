@@ -66,4 +66,40 @@ class AsjjfBodyLimitTest < ActiveSupport::TestCase
       assert_empty input.read_sizes
     end
   end
+
+  test "path variants the router accepts are bounded through the full Rails stack" do
+    [
+      "/api//v1/internal/asjjf/snapshots",
+      "//api/v1/internal/asjjf/snapshots",
+      "/api/v1//internal//asjjf/snapshots/",
+      "/api/v1/internal/%61sjjf/snapshots",
+      "/api/v1/internal/asjjf%2Fsnapshots"
+    ].each do |path|
+      input = TrackedInput.new("{")
+      env = Rack::MockRequest.env_for("http://example.com", method: "POST")
+      env.merge!("PATH_INFO" => path, "rack.input" => input, "CONTENT_TYPE" => "application/json",
+                 "CONTENT_LENGTH" => (AsjjfBodyLimit::MAX_BYTES + 1).to_s)
+      status, = Rails.application.call(env)
+      assert_equal 413, status, "expected #{path} to be bounded"
+      assert_empty input.read_sizes, "expected #{path} not to be read"
+
+      chunked = TrackedInput.new("{" + "x" * (AsjjfBodyLimit::MAX_BYTES * 2))
+      env = Rack::MockRequest.env_for("http://example.com", method: "POST")
+      env.merge!("PATH_INFO" => path, "rack.input" => chunked, "CONTENT_TYPE" => "application/json",
+                 "HTTP_TRANSFER_ENCODING" => "chunked")
+      status, = Rails.application.call(env)
+      assert_equal 413, status, "expected chunked #{path} to be bounded"
+      assert_equal AsjjfBodyLimit::MAX_BYTES + 1, chunked.bytes_read
+    end
+  end
+
+  test "routes outside the internal ASJJF API are untouched by the limit" do
+    seen = []
+    app = ->(env) { seen << env["PATH_INFO"]; [ 204, {}, [] ] }
+    [ "/api/v1/admin/asjjf/status", "/api/v1/internal/asjjf-other/x", "/api/v1/events" ].each do |path|
+      status, = AsjjfBodyLimit.new(app).call("PATH_INFO" => path, "CONTENT_LENGTH" => (AsjjfBodyLimit::MAX_BYTES + 1).to_s, "rack.input" => StringIO.new(""))
+      assert_equal 204, status
+    end
+    assert_equal 3, seen.size
+  end
 end
