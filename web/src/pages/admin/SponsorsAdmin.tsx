@@ -1,626 +1,562 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
-import { Handshake, Plus, Pencil, Trash2, X, Loader2, Save, ChevronUp, ChevronDown, GripVertical, Eye, Upload } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { api } from '../../services/api'
-import type { Sponsor, SponsorFormData } from '../../services/api'
-import { getSponsorLogo, resolveMediaUrl } from '../../utils/images'
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core'
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { useEditingParam } from '../../hooks/useEditingParam'
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { api, type Sponsor, type SponsorFormData, type SponsorPlacement, type Event } from "../../services/api";
+import { FeaturedSponsorBar, SponsorTiers, SponsorLogo } from "../../components/SponsorPlacements";
+import { useEditingParam } from "../../hooks/useEditingParam";
 
-const TIERS = ['presenting', 'partner', 'official', 'title', 'gold', 'silver', 'bronze', 'supporting'] as const
-const TIER_COLORS: Record<string, string> = {
-  presenting: 'text-gold',
-  partner: 'text-blue-400',
-  official: 'text-green-400',
-  title: 'text-gold',
-  gold: 'text-yellow-400',
-  silver: 'text-gray-300',
-  bronze: 'text-orange-400',
-  supporting: 'text-text-muted',
-}
+const inputClass =
+  "mt-1 min-h-11 w-full rounded border border-white/20 bg-navy-900 px-3 py-2 text-base text-text-primary focus-visible:outline-2 focus-visible:outline-gold-400";
+const buttonClass =
+  "min-h-11 rounded border border-white/20 px-4 py-2 text-sm font-medium hover:border-gold-400 focus-visible:outline-2 focus-visible:outline-gold-400 disabled:opacity-40";
+const empty: SponsorFormData = {
+  name: "",
+  tier: "official",
+  website_url: "",
+  sort_order: 0,
+  sponsor_placements_attributes: [],
+};
+const newPlacement = (): SponsorPlacement => ({
+  placement_type: "featured_bar",
+  display_tier: "official",
+  event_id: null,
+  sort_order: 0,
+  starts_on: null,
+  ends_on: null,
+  headline: "",
+  blurb: "",
+  cta_url: "",
+  video_url: "",
+});
 
-const emptyForm: SponsorFormData = { name: '', tier: 'official', website_url: '', sort_order: 0 }
-
-interface SortableSponsorRowProps {
-  sponsor: Sponsor
-  idx: number
-  total: number
-  onMove: (sponsor: Sponsor, direction: 'up' | 'down') => void
-  onEdit: (sponsor: Sponsor) => void
-  onDelete: (id: number) => void
-}
-
-function SortableSponsorRow({ sponsor, idx, total, onMove, onEdit, onDelete }: SortableSponsorRowProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: sponsor.id })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 50 : undefined,
-    position: isDragging ? 'relative' as const : undefined,
+function sponsorForm(sponsor: Sponsor): SponsorFormData {
+  return {
+    name: sponsor.name, tier: sponsor.tier, website_url: sponsor.website_url || '', sort_order: sponsor.sort_order,
+    sponsor_placements_attributes: sponsor.placements?.map(p => ({ ...p })) || [],
   }
-
-  const logoSrc = getSponsorLogo(sponsor.name, sponsor.logo_url)
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`px-5 py-3 flex items-center justify-between border-b border-white/5 last:border-b-0 ${
-        isDragging ? 'bg-gold/5 shadow-lg shadow-gold/10 ring-1 ring-gold/20' : 'bg-transparent'
-      }`}
-    >
-      <div className="flex items-center gap-3 min-w-0">
-        {/* Drag handle + mobile arrows */}
-        <div className="flex flex-col items-center gap-0.5 mr-1">
-          {/* Mobile: up arrow */}
-          <button
-            onClick={() => onMove(sponsor, 'up')}
-            disabled={idx === 0}
-            className="p-0.5 text-text-muted hover:text-gold disabled:opacity-20 disabled:cursor-not-allowed transition-colors sm:hidden"
-          >
-            <ChevronUp className="w-3.5 h-3.5" />
-          </button>
-          {/* Single drag handle — responsive sizing */}
-          <div
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 text-text-muted hover:text-gold transition-colors touch-none"
-            title="Drag to reorder"
-          >
-            <GripVertical className="w-3 h-3 sm:w-4 sm:h-4" />
-          </div>
-          {/* Mobile: down arrow */}
-          <button
-            onClick={() => onMove(sponsor, 'down')}
-            disabled={idx === total - 1}
-            className="p-0.5 text-text-muted hover:text-gold disabled:opacity-20 disabled:cursor-not-allowed transition-colors sm:hidden"
-          >
-            <ChevronDown className="w-3.5 h-3.5" />
-          </button>
-        </div>
-        {logoSrc ? (
-          <img src={logoSrc} alt={sponsor.name} className="w-8 h-8 object-contain" />
-        ) : (
-          <div className="w-8 h-8 bg-white/5 flex items-center justify-center">
-            <Handshake className="w-4 h-4 text-text-muted" />
-          </div>
-        )}
-        <div className="min-w-0">
-          <div className="text-sm text-text-primary font-medium truncate">{sponsor.name}</div>
-          {sponsor.website_url && (
-            <div className="text-xs text-text-muted truncate">{sponsor.website_url}</div>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <button
-          onClick={() => onEdit(sponsor)}
-          className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
-        >
-          <Pencil className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={() => onDelete(sponsor.id)}
-          className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
-      </div>
-    </div>
-  )
 }
 
 export default function SponsorsAdmin() {
-  const [sponsors, setSponsors] = useState<Sponsor[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useEditingParam()
-
-  const [form, setForm] = useState<SponsorFormData>(emptyForm)
-  const [pendingLogo, setPendingLogo] = useState<File | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
-  const logoInputRef = useRef<HTMLInputElement>(null)
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  )
-
-  const load = useCallback(async () => {
-    try {
-      const res = await api.admin.getSponsors()
-      setSponsors(res.sponsors)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { load() }, [load])
-
-  const nextSortOrder = useCallback(() => {
-    if (sponsors.length === 0) return 1
-    return Math.max(...sponsors.map(s => s.sort_order || 0)) + 1
-  }, [sponsors])
-
+  const { t } = useTranslation();
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [editing, setEditing] = useEditingParam();
+  const [form, setForm] = useState<SponsorFormData>(empty);
+  const [files, setFiles] = useState<{ light?: File; dark?: File }>({});
+  const [previewUrls, setPreviewUrls] = useState<{ light?: string; dark?: string }>({});
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [placementFilter, setPlacementFilter] = useState<SponsorPlacement["placement_type"]>("featured_bar");
+  const initializedEditor = useRef<number | "new" | null>(null);
+  const current = sponsors.find((s) => s.id === editing);
+  const placements = form.sponsor_placements_attributes || [];
+  const load = async () => {
+    const data = await api.admin.getSponsors();
+    setSponsors(data.sponsors);
+  };
   useEffect(() => {
-    if (editing === 'new') {
-      setForm({ ...emptyForm, sort_order: nextSortOrder() })
-      setPendingLogo(null)
-    } else if (typeof editing === 'number' && sponsors.length > 0) {
-      const sponsor = sponsors.find(s => s.id === editing)
-      if (sponsor) {
-        setForm({
-          name: sponsor.name,
-          tier: sponsor.tier,
-          website_url: sponsor.website_url || '',
-          sort_order: sponsor.sort_order || 0,
-        })
-        setPendingLogo(null)
-      }
-    }
-  }, [editing, sponsors, nextSortOrder])
-
-  const handleSave = async () => {
-    setSaving(true)
-    setError('')
-    try {
-      if (editing === 'new') {
-        const res = await api.admin.createSponsor(form)
-        if (res.sponsor?.id) {
-          setEditing(res.sponsor.id)
-        }
-        let logoUploadFailed = false
-        if (pendingLogo && res.sponsor?.id) {
-          try {
-            await api.admin.uploadSponsorLogo(res.sponsor.id, pendingLogo)
-          } catch (logoErr) {
-            logoUploadFailed = true
-            setError(logoErr instanceof Error ? logoErr.message : 'Sponsor created but logo upload failed')
-          }
-        }
-        if (!logoUploadFailed) setSuccess('Sponsor created')
-        setPendingLogo(null)
-        await load()
-      } else if (typeof editing === 'number') {
-        await api.admin.updateSponsor(editing, form)
-        setSuccess('Sponsor updated')
-        await load()
-      }
-      setPendingLogo(null)
-      setTimeout(() => setSuccess(''), 3000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleDelete = async (id: number) => {
-    try {
-      await api.admin.deleteSponsor(id)
-      setDeleteConfirm(null)
-      setSuccess('Sponsor deleted')
-      await load()
-      setTimeout(() => setSuccess(''), 3000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed')
-    }
-  }
-
-  const handleLogoUpload = async (file: File) => {
-    if (editing === 'new') {
-      setPendingLogo(file)
-      return
-    }
-    if (typeof editing !== 'number') return
-    try {
-    await api.admin.uploadSponsorLogo(editing, file)
-    await load()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Logo upload failed')
-    }
-  }
-
-  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) handleLogoUpload(file)
-    if (logoInputRef.current) logoInputRef.current.value = ''
-  }
-
-  const previewLogoUrl = useMemo(
-    () => (pendingLogo ? URL.createObjectURL(pendingLogo) : null),
-    [pendingLogo]
-  )
-
+    Promise.all([api.admin.getSponsors(), api.admin.getEvents()])
+      .then(([s, e]) => {
+        setSponsors(s.sponsors);
+        setEvents(e.events);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
   useEffect(() => {
-    return () => {
-      if (previewLogoUrl?.startsWith('blob:')) URL.revokeObjectURL(previewLogoUrl)
+    if (editing === null) {
+      initializedEditor.current = null;
+      setFiles({});
+      return;
     }
-  }, [previewLogoUrl])
-
-  const getPreviewLogoUrl = (): string | null => {
-    if (previewLogoUrl) return previewLogoUrl
-    if (typeof editing === 'number') {
-      return resolveMediaUrl(currentSponsor?.logo_url) || getSponsorLogo(form.name)
-    }
-    return getSponsorLogo(form.name)
-  }
-
-  const handleMove = async (sponsor: Sponsor, direction: 'up' | 'down') => {
-    const sameTier = sponsors
-      .filter(s => s.tier === sponsor.tier)
-      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-    const idx = sameTier.findIndex(s => s.id === sponsor.id)
-    if (idx < 0) return
-    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
-    if (swapIdx < 0 || swapIdx >= sameTier.length) return
-
-    const reordered = [...sameTier]
-    ;[reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]]
-
+    if (initializedEditor.current === editing) return;
+    if (editing === "new") setForm({ ...empty, sponsor_placements_attributes: [newPlacement()] });
+    else if (current) setForm(sponsorForm(current));
+    else return;
+    initializedEditor.current = editing;
+    setFiles({});
+  }, [editing, current]);
+  useEffect(() => {
+    const urls = {
+      light: files.light && URL.createObjectURL(files.light),
+      dark: files.dark && URL.createObjectURL(files.dark),
+    };
+    setPreviewUrls(urls);
+    return () =>
+      Object.values(urls).forEach((url) => {
+        if (url) URL.revokeObjectURL(url);
+      });
+  }, [files]);
+  const changePlacement = (index: number, update: Partial<SponsorPlacement>) =>
+    setForm((f) => ({
+      ...f,
+      sponsor_placements_attributes: f.sponsor_placements_attributes?.map((p, i) =>
+        i === index ? { ...p, ...update } : p
+      ),
+    }));
+  const previewSponsor: Sponsor = {
+    id: current?.id || 0,
+    ...form,
+    logo_url: previewUrls.light || current?.logo_url || null,
+    logo_dark_url: previewUrls.dark || current?.logo_dark_url || null,
+  };
+  const preview = placements.filter((p) => !p._destroy).map((p) => ({ ...p, sponsor: previewSponsor }));
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    setSuccess("");
     try {
-      await Promise.all(
-        reordered.map((s, i) => api.admin.updateSponsor(s.id, { sort_order: i + 1 }))
-      )
-      await load()
+      // The URL may still be transitioning when an upload fails. Use the saved
+      // identity immediately so a fast retry cannot create another sponsor.
+      const id = initializedEditor.current;
+      const data = typeof id === 'number'
+        ? await api.admin.updateSponsor(id, form)
+        : await api.admin.createSponsor(form);
+      // Keep the saved ID even if an upload fails, so retry cannot duplicate a sponsor.
+      const pending = { ...files };
+      initializedEditor.current = data.sponsor.id;
+      setForm(sponsorForm(data.sponsor));
+      setEditing(data.sponsor.id);
+      setSponsors((items) => [...items.filter((s) => s.id !== data.sponsor.id), data.sponsor]);
+      for (const variant of ["light", "dark"] as const) {
+        if (pending[variant]) {
+          await api.admin.uploadSponsorLogo(data.sponsor.id, pending[variant], variant);
+          setFiles(selected => { const remaining = { ...selected }; delete remaining[variant]; return remaining; });
+        }
+      }
+      await load();
+      setFiles({});
+      setSuccess(t("sponsorAdmin.saved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Move failed')
+      setError(err instanceof Error ? err.message : t("sponsorAdmin.saveFailed"));
+    } finally {
+      setSaving(false);
     }
-  }
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-
-    const activeId = active.id as number
-    const overId = over.id as number
-    const activeSponsor = sponsors.find(s => s.id === activeId)
-    const overSponsor = sponsors.find(s => s.id === overId)
-    if (!activeSponsor || !overSponsor) return
-    if (activeSponsor.tier !== overSponsor.tier) {
-      setError('Sponsors can only be reordered within the same tier')
-      setTimeout(() => setError(''), 2000)
-      return
-    }
-
-    const sameTier = sponsors
-      .filter(s => s.tier === activeSponsor.tier)
-      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-
-    const oldIndex = sameTier.findIndex(s => s.id === activeId)
-    const newIndex = sameTier.findIndex(s => s.id === overId)
-    if (oldIndex === newIndex) return
-
-    const reordered = [...sameTier]
-    const [moved] = reordered.splice(oldIndex, 1)
-    reordered.splice(newIndex, 0, moved)
-
-    // Optimistic update
-    const updatedSponsors = sponsors.map(s => {
-      const reorderedIdx = reordered.findIndex(r => r.id === s.id)
-      if (reorderedIdx >= 0) return { ...s, sort_order: reorderedIdx + 1 }
-      return s
-    })
-    setSponsors(updatedSponsors)
-
+  };
+  const remove = async (id: number) => {
+    setSaving(true);
+    setError("");
     try {
-      await Promise.all(
-        reordered.map((s, i) =>
-          api.admin.updateSponsor(s.id, { sort_order: i + 1 })
-        )
-      )
-      await load()
+      await api.admin.deleteSponsor(id);
+      setConfirmDelete(null);
+      if (editing === id) setEditing(null);
+      await load();
+      setSuccess(t("sponsorAdmin.deleted"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Reorder failed')
-      await load()
+      setError(err instanceof Error ? err.message : t("sponsorAdmin.saveFailed"));
+    } finally {
+      setSaving(false);
     }
-  }
-
-  const currentSponsor = typeof editing === 'number' ? sponsors.find(s => s.id === editing) : null
-
-  const sponsorsByTier = TIERS.map(tier => ({
-    tier,
-    sponsors: sponsors.filter(s => s.tier === tier).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
-  })).filter(g => g.sponsors.length > 0)
-
-  const handleEditSponsor = (sponsor: Sponsor) => {
-    setForm({
-      name: sponsor.name,
-      tier: sponsor.tier,
-      website_url: sponsor.website_url || '',
-      sort_order: sponsor.sort_order || 0,
-    })
-    setEditing(sponsor.id)
-    setError('')
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 text-gold animate-spin" />
-      </div>
+  };
+  const ordered = sponsors
+    .flatMap((s) =>
+      (s.placements || [])
+        .filter((p) => p.placement_type === placementFilter)
+        .map((p) => ({ sponsor: s, placement: p }))
     )
-  }
-
+    .sort((a, b) => a.placement.sort_order - b.placement.sort_order || (a.placement.id || 0) - (b.placement.id || 0));
+  const move = async (index: number, delta: number) => {
+    const first = ordered[index],
+      second = ordered[index + delta];
+    if (!second) return;
+    setSaving(true);
+    setError("");
+    try {
+      // Set a stable dense sequence; each request writes the sponsor's audit trail.
+      const reordered = [...ordered];
+      [reordered[index], reordered[index + delta]] = [second, first];
+      const bySponsor = new Map<number, SponsorPlacement[]>();
+      reordered.forEach((item, i) =>
+        bySponsor.set(item.sponsor.id, [
+          ...(bySponsor.get(item.sponsor.id) || []),
+          { ...item.placement, sort_order: i },
+        ])
+      );
+      for (const [id, values] of bySponsor)
+        await api.admin.updateSponsor(id, { sponsor_placements_attributes: values });
+      await load();
+      setSuccess(t("sponsorAdmin.orderSaved"));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("sponsorAdmin.saveFailed"));
+      await load();
+    } finally {
+      setSaving(false);
+    }
+  };
+  if (loading) return <p role="status">{t("sponsorAdmin.loading")}</p>;
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-        <div className="flex items-center gap-3">
-          <Handshake className="w-6 h-6 text-gold" />
-          <h1 className="font-heading text-2xl font-bold text-text-primary">Sponsors</h1>
+    <div className="max-w-6xl space-y-6">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-bold">{t("sponsorAdmin.title")}</h1>
+          <p className="mt-2 text-sm text-text-secondary">{t("sponsorAdmin.intro")}</p>
         </div>
-        {!editing && (
+        {editing === null && (
           <button
-            onClick={() => { setForm({ ...emptyForm, sort_order: nextSortOrder() }); setPendingLogo(null); setEditing('new'); setError('') }}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
+            className={buttonClass}
+            disabled={saving}
+            onClick={() => {
+              setEditing("new");
+              setError("");
+              setSuccess("");
+            }}
           >
-            <Plus className="w-4 h-4" />
-            Add Sponsor
+            {t("sponsorAdmin.add")}
           </button>
         )}
-      </div>
-
-      <AnimatePresence>
-        {success && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="mb-4 px-4 py-2 bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
-          >{success}</motion.div>
-        )}
-        {error && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="mb-4 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
-          >{error}</motion.div>
-        )}
-      </AnimatePresence>
-
+      </header>
+      {error && (
+        <p role="alert" className="rounded border border-red-400/40 p-4 text-red-300">
+          {error}
+        </p>
+      )}
+      {success && (
+        <p role="status" className="rounded border border-green-400/40 p-4 text-green-300">
+          {success}
+        </p>
+      )}
       {editing !== null ? (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-surface border border-white/5">
-          <div className="px-4 sm:px-5 py-4 border-b border-white/5 flex items-center justify-between">
-            <h2 className="font-heading text-sm font-semibold text-text-primary">
-              {editing === 'new' ? 'New Sponsor' : 'Edit Sponsor'}
-            </h2>
-            <button onClick={() => { setEditing(null); setError('') }} className="text-text-muted hover:text-text-primary">
-              <X className="w-4 h-4" />
+        <form onSubmit={save} className="space-y-6 rounded border border-white/15 bg-surface p-4 sm:p-6">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-xl font-bold">{t(editing === "new" ? "sponsorAdmin.add" : "sponsorAdmin.edit")}</h2>
+            <button type="button" className={buttonClass} disabled={saving} onClick={() => setEditing(null)}>
+              {t("sponsorAdmin.back")}
             </button>
           </div>
-          <div className="p-4 sm:p-5 space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Name</label>
-                <input
-                  value={form.name}
-                  onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Tier</label>
-                <select
-                  value={form.tier}
-                  onChange={e => setForm(prev => ({ ...prev, tier: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none"
-                >
-                  {TIERS.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Website URL</label>
-                <input
-                  value={form.website_url}
-                  onChange={e => setForm(prev => ({ ...prev, website_url: e.target.value }))}
-                  placeholder="https://"
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wide mb-1.5">Sort Order</label>
-                <input
-                  type="number"
-                  value={form.sort_order}
-                  onChange={e => setForm(prev => ({ ...prev, sort_order: parseInt(e.target.value, 10) || 0 }))}
-                  className="w-full bg-white/[0.03] border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none"
-                />
-              </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label>
+              {t("sponsorAdmin.name")}
+              <input
+                required
+                maxLength={200}
+                className={inputClass}
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </label>
+            <label>
+              {t("sponsorAdmin.website")}
+              <input
+                type="url"
+                placeholder="https://"
+                className={inputClass}
+                value={form.website_url}
+                onChange={(e) => setForm({ ...form, website_url: e.target.value })}
+              />
+            </label>
+          </div>
+          <fieldset className="space-y-3">
+            <legend className="mb-2 font-bold">{t("sponsorAdmin.logos")}</legend>
+            <p className="text-sm text-text-secondary">{t("sponsorAdmin.logoHelp")}</p>
+            <div className="grid gap-5 sm:grid-cols-2">
+              {(["light", "dark"] as const).map((variant) => (
+                <label key={variant} className="min-w-0 space-y-3 rounded border border-white/15 p-4">
+                  <span className="block">{t(`sponsorAdmin.${variant}Logo`)}</span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    className="block min-h-11 w-full text-sm file:mr-2 file:min-h-11 file:rounded file:border file:px-2"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setFiles((f) => ({ ...f, [variant]: file }));
+                    }}
+                  />
+                  <SponsorLogo
+                    key={`${variant}-${previewUrls[variant]}`}
+                    sponsor={previewSponsor}
+                    dark={variant === "dark"}
+                  />
+                </label>
+              ))}
             </div>
-
-            {/* Compact logo upload + inline preview */}
-            <div className="flex flex-wrap items-center gap-4">
-              <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoFileChange} className="hidden" />
-              <button
-                type="button"
-                onClick={() => logoInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 border border-dashed border-white/15 hover:border-gold/40 text-text-secondary hover:text-gold text-sm transition-colors"
-              >
-                <Upload className="w-4 h-4" />
-                {getPreviewLogoUrl() ? 'Change Logo' : 'Upload Logo'}
-              </button>
-              {getPreviewLogoUrl() && (
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/95 rounded flex items-center justify-center p-1">
-                    <img src={getPreviewLogoUrl()!} alt="" className="max-w-full max-h-full object-contain" />
-                  </div>
-                  <span className="text-xs text-green-400">Logo ready</span>
-                  {pendingLogo && (
+          </fieldset>
+          <fieldset className="space-y-4">
+            <legend className="mb-2 font-bold">{t("sponsorAdmin.where")}</legend>
+            {placements.map((p, index) =>
+              p._destroy ? null : (
+                <div key={p.id ?? `new-${index}`} className="space-y-4 rounded border border-white/20 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="font-bold">{t("sponsorAdmin.placementNumber", { number: index + 1 })}</h3>
                     <button
                       type="button"
-                      onClick={() => setPendingLogo(null)}
-                      className="text-text-muted hover:text-red-400 transition-colors"
+                      className={buttonClass}
+                      onClick={() => changePlacement(index, { _destroy: true })}
                     >
-                      <X className="w-3.5 h-3.5" />
+                      {t("sponsorAdmin.removePlacement")}
                     </button>
+                  </div>
+                  <label className="block">
+                    {t("sponsorAdmin.showOn")}
+                    <select
+                      className={inputClass}
+                      value={p.placement_type}
+                      onChange={(e) =>
+                        changePlacement(index, {
+                          placement_type: e.target.value as SponsorPlacement["placement_type"],
+                          event_id: null,
+                        })
+                      }
+                    >
+                      {["featured_bar", "presenting", "secondary", "official", "event"].map((type) => (
+                        <option key={type} value={type}>
+                          {t(`sponsorAdmin.locations.${type}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {p.placement_type === "event" && (
+                    <>
+                      <label className="block">
+                        {t("sponsorAdmin.eventTier")}
+                        <select
+                          className={inputClass}
+                          value={p.display_tier}
+                          onChange={(e) =>
+                            changePlacement(index, { display_tier: e.target.value as SponsorPlacement["display_tier"] })
+                          }
+                        >
+                          {["presenting", "secondary", "official"].map((tier) => (
+                            <option key={tier} value={tier}>
+                              {t(`sponsorPlacements.${tier}`)}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="block">
+                        {t("sponsorAdmin.eventScope")}
+                        <select
+                          className={inputClass}
+                          value={p.event_id || ""}
+                          onChange={(e) => changePlacement(index, { event_id: Number(e.target.value) || null })}
+                        >
+                          <option value="">{t("sponsorAdmin.allEvents")}</option>
+                          {events.map((event) => (
+                            <option key={event.id} value={event.id}>
+                              {event.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <p className="text-sm text-text-secondary">{t("sponsorAdmin.eventHelp")}</p>
+                    </>
                   )}
-                </div>
-              )}
-            </div>
-
-            {/* Site Preview */}
-            {(() => {
-              const logoPreviewSrc = getPreviewLogoUrl()
-
-              return logoPreviewSrc ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Eye className="w-3.5 h-3.5 text-text-muted" />
-                    <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">Site Preview</label>
-                    <span className="text-[10px] text-text-muted/50">— exactly how it appears on the live site</span>
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <label>
+                      {t("sponsorAdmin.start")}
+                      <input
+                        type="date"
+                        className={inputClass}
+                        value={p.starts_on || ""}
+                        onChange={(e) => changePlacement(index, { starts_on: e.target.value || null })}
+                      />
+                    </label>
+                    <label>
+                      {t("sponsorAdmin.end")}
+                      <input
+                        type="date"
+                        min={p.starts_on || undefined}
+                        className={inputClass}
+                        value={p.ends_on || ""}
+                        onChange={(e) => changePlacement(index, { ends_on: e.target.value || null })}
+                      />
+                    </label>
+                    <label>
+                      {t("sponsorAdmin.order")}
+                      <input
+                        type="number"
+                        step="1"
+                        className={inputClass}
+                        value={p.sort_order}
+                        onChange={(e) => changePlacement(index, { sort_order: Number(e.target.value) })}
+                      />
+                    </label>
                   </div>
-                  <div className="border border-white/10 rounded overflow-hidden">
-                    <div className="px-6 py-5 bg-navy-900/80">
-                      <p className="text-[10px] font-heading font-semibold uppercase tracking-[0.2em] text-text-muted text-center mb-4">
-                        Homepage
-                      </p>
-                      <div className="flex justify-center">
-                        <div className="bg-navy-900/80 border border-white/5 hover:border-gold-500/20 rounded-lg p-5 flex flex-col items-center justify-center w-48 h-36 transition-colors">
-                          <div className="bg-white/95 rounded-md px-4 py-3 flex items-center justify-center w-full h-full">
-                            <img
-                              src={logoPreviewSrc}
-                              alt={form.name || 'Logo preview'}
-                              className="max-w-full max-h-full object-contain"
-                            />
-                          </div>
-                          <p className="mt-2 text-[11px] text-text-muted font-medium truncate w-full text-center">
-                            {form.name || 'Sponsor Name'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="px-6 py-5 bg-[#0a1628]/80 border-t border-white/5">
-                      <p className="text-[10px] font-heading font-semibold uppercase tracking-[0.2em] text-text-muted text-center mb-4">
-                        Event Pages
-                      </p>
-                      <div className="flex justify-center">
-                        <div className="opacity-60 hover:opacity-100 transition-opacity duration-300 cursor-default">
-                          <img
-                            src={logoPreviewSrc}
-                            alt={form.name || 'Logo preview'}
-                            className="h-12 object-contain"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-text-muted/50 text-center">
-                    For best results, use a transparent PNG with a clear background.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Eye className="w-3.5 h-3.5 text-text-muted" />
-                    <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">Site Preview</label>
-                  </div>
-                  <div className="border border-dashed border-white/10 rounded p-6 text-center text-text-muted text-xs">
-                    Upload a logo to see how it will look on the site
+                  <p className="text-sm text-text-secondary">{t("sponsorAdmin.scheduleHelp")}</p>
+                  <label className="block">
+                    {t("sponsorAdmin.headline")}
+                    <input
+                      maxLength={200}
+                      className={inputClass}
+                      value={p.headline || ""}
+                      onChange={(e) => changePlacement(index, { headline: e.target.value })}
+                    />
+                  </label>
+                  <label className="block">
+                    {t("sponsorAdmin.blurb")}
+                    <textarea
+                      maxLength={2000}
+                      rows={3}
+                      className={inputClass}
+                      value={p.blurb || ""}
+                      onChange={(e) => changePlacement(index, { blurb: e.target.value })}
+                    />
+                  </label>
+                  <p className="text-sm text-text-secondary">{t("sponsorAdmin.translationHelp")}</p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label>
+                      {t("sponsorAdmin.video")}
+                      <input
+                        type="url"
+                        placeholder="https://"
+                        className={inputClass}
+                        value={p.video_url || ""}
+                        onChange={(e) => changePlacement(index, { video_url: e.target.value })}
+                      />
+                    </label>
+                    <label>
+                      {t("sponsorAdmin.cta")}
+                      <input
+                        type="url"
+                        placeholder="https://"
+                        className={inputClass}
+                        value={p.cta_url || ""}
+                        onChange={(e) => changePlacement(index, { cta_url: e.target.value })}
+                      />
+                    </label>
                   </div>
                 </div>
               )
-            })()}
-
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-              <button onClick={() => { setEditing(null); setError('') }} className="px-5 py-2.5 text-text-muted text-sm hover:text-text-primary">
-                Cancel
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <div className="space-y-6">
-          {sponsorsByTier.length === 0 ? (
-            <div className="bg-surface border border-white/5 p-8 text-center text-text-muted text-sm">
-              No sponsors yet. Add your first sponsor.
-            </div>
-          ) : (
-            sponsorsByTier.map(({ tier, sponsors: tierSponsors }) => (
-              <div key={tier} className="bg-surface border border-white/5">
-                  <div className="px-5 py-3 border-b border-white/5 flex items-center justify-between">
-                  <h3 className={`font-heading text-sm font-semibold uppercase tracking-wide ${TIER_COLORS[tier]}`}>
-                    {tier}
-                  </h3>
-                    <span className="text-[10px] text-text-muted/40 hidden sm:inline">drag to reorder</span>
-                </div>
-                  <SortableContext items={tierSponsors.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                        <div>
-                      {tierSponsors.map((sponsor, idx) => (
-                        <SortableSponsorRow
-                          key={sponsor.id}
-                          sponsor={sponsor}
-                          idx={idx}
-                          total={tierSponsors.length}
-                          onMove={handleMove}
-                          onEdit={handleEditSponsor}
-                          onDelete={setDeleteConfirm}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-              </div>
-            ))
-          )}
-        </div>
-        </DndContext>
-      )}
-
-      {/* Delete Confirmation */}
-      <AnimatePresence>
-        {deleteConfirm !== null && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
-            onClick={() => setDeleteConfirm(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-              onClick={e => e.stopPropagation()}
-              className="bg-surface border border-white/10 p-6 max-w-sm w-full mx-4"
+            )}
+            <button
+              type="button"
+              className={buttonClass}
+              onClick={() => setForm((f) => ({ ...f, sponsor_placements_attributes: [...placements, newPlacement()] }))}
             >
-              <h3 className="font-heading text-lg font-semibold text-text-primary mb-2">Delete Sponsor</h3>
-              <p className="text-sm text-text-secondary mb-5">Are you sure? This action cannot be undone.</p>
-              <div className="flex gap-3 justify-end">
-                <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">Cancel</button>
-                <button onClick={() => handleDelete(deleteConfirm)} className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">Delete</button>
+              {t("sponsorAdmin.addPlacement")}
+            </button>
+          </fieldset>
+          <section className="space-y-4 border-t border-white/15 pt-6" aria-label={t("sponsorAdmin.preview")}>
+            <h2 className="font-bold">{t("sponsorAdmin.preview")}</h2>
+            <p className="text-sm text-text-secondary">{t("sponsorAdmin.previewHelp")}</p>
+            <FeaturedSponsorBar placements={preview} />
+            <SponsorTiers placements={preview} />
+            <SponsorTiers placements={preview} event />
+          </section>
+          <div className="sticky bottom-0 z-10 flex gap-3 border-t border-white/20 bg-surface py-4">
+            <button className={`${buttonClass} bg-gold-500 text-navy-900`} disabled={saving}>
+              {t(saving ? "sponsorAdmin.saving" : "sponsorAdmin.save")}
+            </button>
+          </div>
+          {current?.audit_history?.length ? (
+            <section>
+              <h2 className="mb-3 font-bold">{t("sponsorAdmin.history")}</h2>
+              <ul className="space-y-2 text-sm text-text-secondary">
+                {current.audit_history.map((entry, i) => (
+                  <li key={i}>
+                    {t(`sponsorAdmin.actions.${entry.action}`, entry.action)} · {entry.actor_name} ·{" "}
+                    {new Date(entry.created_at).toLocaleString()}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+        </form>
+      ) : (
+        <>
+          <section className="space-y-3">
+            <h2 className="font-bold">{t("sponsorAdmin.allSponsors")}</h2>
+            {!sponsors.length && <p>{t("sponsorAdmin.empty")}</p>}
+            {sponsors.map((sponsor) => (
+              <div
+                key={sponsor.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded border border-white/15 bg-surface p-4"
+              >
+                <div className="min-w-0">
+                  <h3 className="break-words font-bold">{sponsor.name}</h3>
+                  <p className="text-sm text-text-secondary">
+                    {t("sponsorAdmin.placementCount", { count: sponsor.placements?.length || 0 })}
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-text-secondary">
+                    {sponsor.placements?.map((p, i) => (
+                      <li key={p.id ?? i}>
+                        {t(`sponsorAdmin.locations.${p.placement_type}`)}
+                        {p.event_id ? ` · ${events.find((e) => e.id === p.event_id)?.name || ""}` : ""}
+                        {p.starts_on || p.ends_on ? ` · ${p.starts_on || "—"} – ${p.ends_on || "—"}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    className={buttonClass}
+                    onClick={() => {
+                      setEditing(sponsor.id);
+                      setError("");
+                      setSuccess("");
+                    }}
+                  >
+                    {t("sponsorAdmin.edit")}
+                  </button>
+                  <button className={buttonClass} onClick={() => setConfirmDelete(sponsor.id)}>
+                    {t("sponsorAdmin.delete")}
+                  </button>
+                </div>
+                {confirmDelete === sponsor.id && (
+                  <div className="w-full space-y-3 border-t border-white/15 pt-4" role="alert">
+                    <p>{t("sponsorAdmin.confirmDelete", { name: sponsor.name })}</p>
+                    <button
+                      className={`${buttonClass} mr-2 text-red-300`}
+                      disabled={saving}
+                      onClick={() => remove(sponsor.id)}
+                    >
+                      {t("sponsorAdmin.deleteConfirm")}
+                    </button>
+                    <button className={buttonClass} disabled={saving} onClick={() => setConfirmDelete(null)}>
+                      {t("sponsorAdmin.cancel")}
+                    </button>
+                  </div>
+                )}
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            ))}
+          </section>
+          <section className="space-y-4 rounded border border-white/15 bg-surface p-4">
+            <h2 className="font-bold">{t("sponsorAdmin.reorder")}</h2>
+            <label className="block">
+              {t("sponsorAdmin.showOn")}
+              <select
+                className={inputClass}
+                value={placementFilter}
+                onChange={(e) => setPlacementFilter(e.target.value as SponsorPlacement["placement_type"])}
+              >
+                {["featured_bar", "presenting", "secondary", "official", "event"].map((type) => (
+                  <option key={type} value={type}>
+                    {t(`sponsorAdmin.locations.${type}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {ordered.map((item, index) => (
+              <div
+                key={item.placement.id}
+                className="flex items-center justify-between gap-2 border-t border-white/10 py-3"
+              >
+                <span className="min-w-0 break-words">{item.sponsor.name}</span>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    className={buttonClass}
+                    disabled={saving || index === 0}
+                    aria-label={t("sponsorAdmin.moveUp", { name: item.sponsor.name })}
+                    onClick={() => move(index, -1)}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    className={buttonClass}
+                    disabled={saving || index === ordered.length - 1}
+                    aria-label={t("sponsorAdmin.moveDown", { name: item.sponsor.name })}
+                    onClick={() => move(index, 1)}
+                  >
+                    ↓
+                  </button>
+                </div>
+              </div>
+            ))}
+          </section>
+        </>
+      )}
     </div>
-  )
+  );
 }

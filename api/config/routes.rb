@@ -8,6 +8,7 @@ Rails.application.routes.draw do
         get 'gallery', to: 'event_gallery_images#index'
       end
       resources :sponsors, only: [:index]
+      resources :sponsor_placements, only: [:index]
       resources :competitors, only: [:index, :show]
       resources :academies, only: [:index, :show]
       resources :videos, only: [:index, :show]
