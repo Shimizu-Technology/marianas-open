@@ -1,43 +1,43 @@
 [
   {
     "locale": "en",
-    "keys": 67,
+    "keys": 69,
     "nonempty": true,
     "interpolation_preserved": true
   },
   {
     "locale": "ja",
-    "keys": 67,
+    "keys": 69,
     "nonempty": true,
     "interpolation_preserved": true
   },
   {
     "locale": "ko",
-    "keys": 67,
+    "keys": 69,
     "nonempty": true,
     "interpolation_preserved": true
   },
   {
     "locale": "pt",
-    "keys": 67,
+    "keys": 69,
     "nonempty": true,
     "interpolation_preserved": true
   },
   {
     "locale": "tl",
-    "keys": 67,
-    "nonempty": true,
-    "interpolation_preserved": true
-  },
-  {
-    "locale": "zh",
-    "keys": 67,
+    "keys": 69,
     "nonempty": true,
     "interpolation_preserved": true
   },
   {
     "locale": "zh-Hant",
-    "keys": 67,
+    "keys": 69,
+    "nonempty": true,
+    "interpolation_preserved": true
+  },
+  {
+    "locale": "zh",
+    "keys": 69,
     "nonempty": true,
     "interpolation_preserved": true
   }

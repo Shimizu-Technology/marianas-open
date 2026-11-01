@@ -11,7 +11,7 @@ export function sponsorVideo(url: string | null | undefined) {
         ? u.pathname.slice(1)
         : u.pathname.match(/^\/(?:embed|shorts)\/([^/]+)$/)?.[1];
       if (pathId && values.length && values[0] !== pathId) return null;
-      const id = pathId || (u.pathname === "/watch" ? values[0] : undefined);
+      const id = pathId || (["/watch", "/watch/"].includes(u.pathname) ? values[0] : undefined);
       if (!id || !/^[a-zA-Z0-9_-]{11}$/.test(id)) return null;
       return {
         embed: `https://www.youtube-nocookie.com/embed/${id}`,

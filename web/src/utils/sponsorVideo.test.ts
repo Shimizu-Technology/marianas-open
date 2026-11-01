@@ -5,6 +5,7 @@ const id = "dQw4w9WgXcQ";
 it("accepts a sole watch ID and path IDs with absent or matching query v", () => {
   for (const url of [
     `https://youtube.com/watch?v=${id}`,
+    `https://youtube.com/watch/?v=${id}`,
     ...[`https://youtu.be/${id}`, `https://youtube.com/embed/${id}`, `https://youtube.com/shorts/${id}`].flatMap(path => [path, `${path}?v=${id}`]),
   ]) expect(sponsorVideo(url)?.embed).toBe(`https://www.youtube-nocookie.com/embed/${id}`);
 });
