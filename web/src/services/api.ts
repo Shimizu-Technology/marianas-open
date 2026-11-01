@@ -852,7 +852,7 @@ async function parseApiError(response: Response, fallback: string) {
   return new ApiError(typeof message === 'string' ? message : JSON.stringify(message), response.status);
 }
 
-async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
+export async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
   const buildHeaders = async (skipCache = false) => ({
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
