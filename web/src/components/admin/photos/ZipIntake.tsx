@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Archive, RotateCw, X } from 'lucide-react';
 import { enqueueZip, removeSavedZip, sendSavedZip, withZipIntakeLock, ZIP_MAX_BYTES, zipQueue, type SavedZip } from '../../../utils/zipIntake';
@@ -9,7 +9,7 @@ interface Props { eventId: number; options: ImportOptions; onImported: () => voi
 export default function ZipIntake(props: Props) {
   const { userId } = useAuth();
   const currentOwner = useRef(userId);
-  currentOwner.current = userId;
+  useLayoutEffect(() => { currentOwner.current = userId; }, [userId]);
   const isOwnerCurrent = useCallback(() => currentOwner.current === userId, [userId]);
   return <ZipIntakeSession key={userId || 'signed-out'} {...props} userId={userId} isOwnerCurrent={isOwnerCurrent} />;
 }
