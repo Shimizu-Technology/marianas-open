@@ -25,12 +25,14 @@ class Event < ApplicationRecord
   validate :travel_items_are_valid
   validate :ticket_banner_image_is_safe
 
+  belongs_to :current_results_sync_run, class_name: "ResultsSyncRun", foreign_key: :results_sync_run_id, optional: true
   belongs_to :organization
   has_many :event_schedule_items, dependent: :destroy
   has_many :prize_categories, dependent: :destroy
   has_many :videos, dependent: :nullify
   has_many :event_asjjf_sources, dependent: :destroy
   has_many :event_results, dependent: :destroy
+  has_many :results_sync_runs, dependent: :destroy
   has_many :event_accommodations, dependent: :destroy
   has_many :event_gallery_images, dependent: :destroy
   has_many :event_gallery_upload_batches, dependent: :destroy

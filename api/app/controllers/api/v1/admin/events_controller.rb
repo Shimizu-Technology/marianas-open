@@ -45,37 +45,19 @@ module Api
           head :no_content
         end
 
-        # GET /api/v1/admin/events/:id/import_results_preview
-        # Scrapes ASJJF and returns a summary without importing
+        # Compatibility endpoints: saved snapshots only, never outbound scraping.
         def import_results_preview
-          ids = resolve_asjjf_ids
-          return render json: { error: "No ASJJF event IDs configured. Set asjjf_event_ids on this event first." }, status: :unprocessable_entity if ids.empty?
-
-          result = AsjjfScraper.preview(asjjf_event_ids: ids)
-          render json: {
-            event: { id: @event.id, name: @event.name, slug: @event.slug },
-            existing_results_count: @event.event_results.count,
-            preview: result[:summary],
-            sample: result[:results].first(10).map { |r| r.slice(:division, :placement, :competitor_name, :academy, :country_code) }
-          }
-        rescue AsjjfScraper::ScraperError => e
-          render json: { error: e.message }, status: :unprocessable_entity
+          run = Asjjf::ResultsSync.new(@event).call(trigger: "manual", apply: false)
+          render json: { run: run, status: run.status }
         end
 
-        # POST /api/v1/admin/events/:id/import_results
-        # Scrapes ASJJF and imports results (replaces existing)
         def import_results
-          ids = resolve_asjjf_ids
-          return render json: { error: "No ASJJF event IDs configured. Set asjjf_event_ids on this event first." }, status: :unprocessable_entity if ids.empty?
-
-          result = AsjjfScraper.import!(event: @event, asjjf_event_ids: ids)
-          render json: {
-            message: "Successfully imported #{result[:imported]} results",
-            imported: result[:imported],
-            summary: result[:summary]
-          }
-        rescue AsjjfScraper::ScraperError => e
-          render json: { error: e.message }, status: :unprocessable_entity
+          return unless require_results_admin
+          run = @event.results_sync_runs.find(params.require(:run_id))
+          run = Asjjf::ResultsSync.new(@event).approve!(run, user: current_user)
+          render json: { run: run, status: run.status }, status: run.status == "failed" ? :unprocessable_entity : :ok
+        rescue Asjjf::ResultsSync::StaleReview, Asjjf::ResultsSync::InvalidReview => e
+          render json: { error: e.message }, status: :conflict
         end
 
         def upload_image
@@ -244,10 +226,9 @@ module Api
           )
         end
 
-        def resolve_asjjf_ids
-          # Allow passing IDs in request body or use event's stored IDs
-          ids = params[:asjjf_event_ids] || @event.asjjf_event_ids
-          Array(ids).map(&:to_i).reject(&:zero?)
+        def require_results_admin
+          require_admin!
+          !performed?
         end
 
         def reusable_travel_items

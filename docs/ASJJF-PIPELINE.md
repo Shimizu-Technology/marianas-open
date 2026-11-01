@@ -1,6 +1,6 @@
-# ASJJF snapshot pipeline (Phase B1)
+# ASJJF snapshot and results pipeline (B1 / B3)
 
-B1 stores public ASJJF pages, queues browser fetches, and parses saved HTML. It does not apply results to `event_results`, change athletes/academies, or compute/publish rankings. The existing import path is unchanged; B3 and B5 will consume the saved parser output.
+B1 stores public ASJJF pages, queues browser fetches, and parses saved HTML. B3 assembles complete results evidence, previews changes, and safely updates ASJJF results with review holds. Rankings remain a separate B5 pipeline. No Rails results importer makes outbound ASJJF requests.
 
 ## Production setup
 
@@ -102,10 +102,35 @@ Staff can view `/admin/asjjf` and use:
 - `POST /api/v1/admin/asjjf/snapshots`: multipart `file` (`.html`, at most 2 MiB), `page_type`, `url`. The same intake/parser records `source=admin_upload` and uploader identity (nullable if the user is deleted; snapshots remain). A challenge upload also opens the breaker.
 - `POST /api/v1/admin/asjjf/close_breaker`: administrator only.
 
-The event results admin page includes check/upload controls and a link to status. Uploads save evidence; they do not overwrite public results. Never upload a login/session page containing private credentials. Download public HTML from ASJJF in a regular browser when automatic fetching is unavailable. Confirm the page type and original URL, then inspect the parse status and summary. Staff cannot resume a safety pause; an administrator reviews it first.
+The event results admin page includes check/upload controls and a link to status. Results uploads save evidence and trigger evaluation. Only complete evidence passing the guards can update public results; held proposals require administrator approval. Never upload a login/session page containing private credentials. Download public HTML from ASJJF in a regular browser when automatic fetching is unavailable. Confirm the page type and original URL, then inspect the parse status and summary. Staff cannot resume a safety pause; an administrator reviews it first.
 
 ## Retention and recovery
 
 `PruneAsjjfSnapshotsJob` runs daily at 04:00 through the existing recurring Solid Queue schedule. It preserves the latest `outcome=ok` snapshot for every URL forever (including pages awaiting a parser fix) and removes other snapshots older than 120 days. Request references to pruned snapshots are nullified. The latest success is ordered by fetched time, then ID. There is no automatic deletion of queue/history/heartbeat records.
 
 To retry a parse after a parser fix: `ParseAsjjfSnapshotJob.perform_later(snapshot_id)`. It never applies published data. To resume fetching: investigate challenge evidence, reset the breaker as admin when appropriate, then requeue the event. This PR does not deploy/configure B2 or verify email delivery with a live Resend send.
+
+
+## Results synchronization (B3 and results automation in B7)
+
+Deploy migration `20261102160000` before starting the new code/worker. Existing results become `source=asjjf`; only exact `[GI] ` / `[NOGI] ` prefixes infer discipline. Unprefixed rows retain null discipline. Historical source IDs, alone-in-bracket facts, and division keys remain null until saved evidence establishes them. Any change involving these legacy rows requires an initial administrator review, because pre-B3 manual additions/corrections cannot be identified reliably. Staff can mark a curated row as edited before refreshing the review to protect it. Future admin-created results default to `source=manual`. No migration rewrites division labels, links identities, removes medals, or performs imports. Rolling back drops the added metadata/run tables; export the run audit before rollback if it is needed. The old labels remain visible until an approved repair runs.
+
+`Asjjf::ResultsAssembler.new(event).call` requires the latest attempt for all five pages per source: eventResults and all four gender/age resultsList categories. A newer failure/challenge/parser failure or unfinished planned fetch prevents falling back to older successful evidence. URLs are matched by source/category, allowing the supported ASJJF hosts and query order. The eventResults category must agree with its resultsList duplicate, which is counted once. Unknown source discipline is filled from the parsed event title; `(no - Gi Event)` is recognized. Complete empty category tables are valid; missing or malformed tables fail closed.
+
+`Asjjf::ResultsSync` compares normalized source/discipline/division/placement/name keys as a multiset (including tied bronzes). It updates matching rows in place, inserts additions, and removes only absent, unprotected ASJJF rows in one transaction. Admin edits record an immutable original sync key and `manually_edited_at`; sync never overwrites those rows or manual rows. Conflicts hold the proposal for resolution. Competitor linking uses approved aliases and ambiguity rules; unresolved identities remain unlinked and are listed in the run. Each result uses the academy normalizer/linker. Division parts and alone-in-bracket facts are retained; this work does not change ranking math or invent match bonuses.
+
+Review guards:
+
+- Incomplete evidence never applies, even with approval.
+- Unknown/mismatched discipline, category disagreement, malformed rows/divisions, invalid medal counts (>1 gold/silver or >2 bronze), protected conflicts, and projected duplicate public medals block approval until fixed.
+- Uncertain historical provenance, a total ASJJF row-count drop greater than 10%, a known source becoming empty, and the first No-Gi relabel hold for administrator review. Approval may acknowledge these count/relabel guards.
+- Ambiguous mixed-provenance repair candidates block approval instead of becoming ordinary removals/additions. Label repairs preserve matching row IDs and explicitly report how many Gi-labeled divisions are actually No-Gi. No relabel auto-applies before its first approval.
+- Approval requires the reviewed evidence, source configuration, and existing results to remain unchanged. A stale proposal must be refreshed. Discard leaves published results alone and suppresses automatic reapplication of the same proposal; new evidence creates a fresh proposal. Intervening failed evaluations do not erase the discard decision.
+
+`results_sync_runs` records the trigger, status, totals and per-division diff, missing pages, conflicts, unlinked identities, guards, snapshot IDs/fingerprint, errors and approval/discard timestamps. Events retain their latest sync status/check time and fetch planning time. The admin event results card reads `GET /api/v1/admin/events/:event_id/results_sync`; POST `results_sync/preview` reviews saved evidence without applying. POST `results_sync/:run_id/approve` and `discard` require an administrator. Existing `import_results_preview` and `import_results` routes use the same pipeline; import requires the reviewed `run_id`. Staff can preview/queue/upload but cannot approve/discard. No delete-and-replace importer remains.
+
+`PlanResultsSyncJob` runs daily at 15:00 UTC (01:00 ChST), ahead of the 02:30 ChST nightly browser fetch. Completed, non-draft/non-cancelled events fetch daily for 1–21 days after their end date, weekly for 22–60 days, and daily as catch-up when they have zero results and sources. `end_date` falls back to `date`. Planner timestamps and pending-URL deduplication avoid duplicate work. Each result snapshot parse (including failure) queues `EvaluateResultsSyncJob`, with concurrency limited to one evaluation per event and a transactional event lock. Source-scoped transaction advisory locks also serialize snapshot writes/reparsing with evaluation; review fingerprints use the exact evaluated content and source configuration. Removing a derived source ID or registration link stops future planning and invalidates prior reviews; explicit admin sources are preserved. Intermediate snapshots remain incomplete until all queued pages finish.
+
+Existing `ASJJF_ALERT_EMAILS`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` (fallback `MAILER_FROM_EMAIL`) configure alerts. First imports, new holds, and failed evaluations alert; no-change and ordinary updates stay quiet. Missing email configuration falls back to logs; delivery failure does not roll back results.
+
+Rollout: deploy schema/code, allow the next complete nightly fetch, inspect first-import runs for Marianas Open 2026, Dumau Open 2026 and Hong Kong 2026, then review the held No-Gi repairs for Korea/Taiwan/Manila 2026, Taiwan/Manila 2025 and Korea 2024. This PR does not perform production data repair. Rehearse on a database copy/Neon branch and retain a backup point before production approval. If any required page is challenged or unrecognized, keep published results and inspect the exact missing-page report; use saved-page uploads as needed.

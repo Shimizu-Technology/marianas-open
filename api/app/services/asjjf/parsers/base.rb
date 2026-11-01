@@ -54,7 +54,7 @@ module Asjjf
 
       # Discipline must come from this page's title, never its global navigation or prose.
       def discipline(label, optional: false)
-        return "nogi" if label.match?(/\bno[\s-]?gi\b/i)
+        return "nogi" if label.match?(/\bno[\s-]*gi\b/i)
         return "gi" if label.match?(/\bgi\b|jiu[\s-]?jitsu/i)
         raise ParseError, "Missing discipline in title" unless optional
       end

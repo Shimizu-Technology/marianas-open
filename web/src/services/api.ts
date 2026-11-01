@@ -262,6 +262,8 @@ export interface Event {
   asjjf_event_ids: number[];
   asjjf_source_urls: string[];
   results_imported_at: string | null;
+  results_sync_status?: string | null;
+  results_last_checked_at?: string | null;
   venue_highlights: EventVenueHighlight[];
   registration_steps: EventRegistrationStep[];
   registration_fee_sections: EventRegistrationFeeSection[];
@@ -680,17 +682,51 @@ export interface EventResultFormData {
   country_code: string;
 }
 
-export interface ImportPreview {
-  event: { id: number; name: string; slug: string };
-  existing_results_count: number;
-  preview: { total: number; countries: number; academies: number; by_belt?: Record<string, number> };
-  sample: { division: string; placement: number; competitor_name: string; academy: string; country_code: string }[];
+export interface ResultsSyncCounts {
+  added: number;
+  removed: number;
+  changed: number;
+  unchanged: number;
 }
 
-export interface ImportResult {
-  message: string;
-  imported: number;
-  summary: Record<string, unknown>;
+export interface ResultsSyncDiff extends ResultsSyncCounts {
+  divisions: (ResultsSyncCounts & { division: string; asjjf_event_id: number | null })[];
+  relabeled_divisions: number;
+  messages: string[];
+  conflicts: { id: number; division: string; competitor_name: string; reason: string }[];
+  missing: string[];
+  snapshot_ids: number[];
+  fingerprint: string;
+  approvable: boolean;
+  first_import: boolean;
+  unlinked_competitors: { id: number; competitor_name: string; reason: string }[];
+}
+
+export interface ResultsSyncRun {
+  id: number;
+  event_id: number;
+  trigger: string;
+  status: 'incomplete' | 'no_changes' | 'applied' | 'held' | 'failed';
+  // Failed runs can have an empty diff when assembly did not finish.
+  diff_summary: Partial<ResultsSyncDiff>;
+  guard_failures: string[];
+  applied_at: string | null;
+  approved_by_id: number | null;
+  discarded_at: string | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ResultsSyncReviewResponse {
+  run: ResultsSyncRun;
+  status: string | null;
+}
+
+export interface ResultsSyncResponse {
+  run: ResultsSyncRun | null;
+  status: string | null;
+  last_checked_at: string | null;
 }
 
 export interface EventResultDivision {
@@ -1054,9 +1090,19 @@ export const api = {
     deleteAllEventResults: (eventId: number) =>
       fetchApi<{ deleted: number }>(`/api/v1/admin/events/${eventId}/results/destroy_all`, { method: 'DELETE' }, true),
     importResultsPreview: (eventId: number) =>
-      fetchApi<ImportPreview>(`/api/v1/admin/events/${eventId}/import_results_preview`, {}, true),
-    importResults: (eventId: number) =>
-      fetchApi<ImportResult>(`/api/v1/admin/events/${eventId}/import_results`, { method: 'POST' }, true),
+      fetchApi<ResultsSyncReviewResponse>(`/api/v1/admin/events/${eventId}/import_results_preview`, {}, true),
+    importResults: (eventId: number, runId: number) =>
+      fetchApi<ResultsSyncReviewResponse>(`/api/v1/admin/events/${eventId}/import_results`, {
+        method: 'POST', body: JSON.stringify({ run_id: runId }),
+      }, true),
+    getResultsSync: (eventId: number) =>
+      fetchApi<ResultsSyncResponse>(`/api/v1/admin/events/${eventId}/results_sync`, {}, true),
+    previewResultsSync: (eventId: number) =>
+      fetchApi<ResultsSyncResponse>(`/api/v1/admin/events/${eventId}/results_sync/preview`, { method: 'POST' }, true),
+    approveResultsSync: (eventId: number, runId: number) =>
+      fetchApi<ResultsSyncReviewResponse>(`/api/v1/admin/events/${eventId}/results_sync/${runId}/approve`, { method: 'POST' }, true),
+    discardResultsSync: (eventId: number, runId: number) =>
+      fetchApi<ResultsSyncReviewResponse>(`/api/v1/admin/events/${eventId}/results_sync/${runId}/discard`, { method: 'POST' }, true),
 
     retranslateEvent: (eventId: number) =>
       fetchApi<{ message: string; event: Event }>(`/api/v1/admin/events/${eventId}/retranslate`, { method: 'POST' }, true),

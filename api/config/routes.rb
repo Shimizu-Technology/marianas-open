@@ -51,6 +51,10 @@ Rails.application.routes.draw do
             post :retranslate
             post :clone
           end
+          get 'results_sync', to: 'results_sync_runs#show'
+          post 'results_sync/preview', to: 'results_sync_runs#preview'
+          post 'results_sync/:run_id/approve', to: 'results_sync_runs#approve'
+          post 'results_sync/:run_id/discard', to: 'results_sync_runs#discard'
           resources :event_results, only: [:index, :create, :update, :destroy], path: 'results' do
             collection do
               post :bulk_create

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -297,18 +297,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_150000) do
     t.string "academy"
     t.bigint "academy_id"
     t.string "age_category"
+    t.boolean "alone_in_bracket"
+    t.bigint "asjjf_event_id"
     t.string "belt_rank"
     t.bigint "competitor_id"
     t.string "competitor_name", null: false
     t.string "country_code"
     t.datetime "created_at", null: false
+    t.string "discipline"
     t.string "division", null: false
+    t.string "division_key"
     t.bigint "event_id", null: false
     t.string "gender"
+    t.datetime "manually_edited_at"
     t.text "notes"
     t.integer "placement", null: false
     t.string "raw_competitor_name"
+    t.string "source", default: "manual", null: false
     t.string "submission_method"
+    t.jsonb "sync_key"
     t.datetime "updated_at", null: false
     t.string "weight_class"
     t.index ["academy_id"], name: "index_event_results_on_academy_id"
@@ -316,7 +323,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_150000) do
     t.index ["competitor_name"], name: "index_event_results_on_competitor_name"
     t.index ["event_id", "belt_rank"], name: "index_event_results_on_event_id_and_belt_rank"
     t.index ["event_id", "division"], name: "index_event_results_on_event_id_and_division"
+    t.index ["event_id", "source", "asjjf_event_id"], name: "index_event_results_on_sync_source"
     t.index ["event_id"], name: "index_event_results_on_event_id"
+    t.check_constraint "discipline IS NULL OR (discipline::text = ANY (ARRAY['gi'::character varying, 'nogi'::character varying]::text[]))", name: "event_results_discipline"
+    t.check_constraint "source::text = ANY (ARRAY['manual'::character varying, 'asjjf'::character varying]::text[])", name: "event_results_source"
   end
 
   create_table "event_schedule_items", force: :cascade do |t|
@@ -358,7 +368,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_150000) do
     t.string "registration_url"
     t.string "registration_url_gi"
     t.string "registration_url_nogi"
+    t.datetime "results_fetch_planned_at"
     t.datetime "results_imported_at"
+    t.datetime "results_last_checked_at"
+    t.bigint "results_sync_run_id"
+    t.string "results_sync_status"
     t.text "schedule_note"
     t.string "slug"
     t.string "status"
@@ -381,6 +395,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_150000) do
     t.text "visa_description"
     t.jsonb "visa_items", default: [], null: false
     t.index ["organization_id"], name: "index_events_on_organization_id"
+    t.index ["results_sync_run_id"], name: "index_events_on_results_sync_run_id"
     t.index ["translation_status"], name: "index_events_on_translation_status"
     t.check_constraint "ticket_sales_status::text = ANY (ARRAY['unavailable'::character varying::text, 'on_sale'::character varying::text, 'sold_out'::character varying::text, 'closed'::character varying::text])", name: "events_ticket_sales_status_check"
   end
@@ -464,6 +479,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_150000) do
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_prize_categories_on_event_id"
     t.index ["translation_status"], name: "index_prize_categories_on_translation_status"
+  end
+
+  create_table "results_sync_runs", force: :cascade do |t|
+    t.datetime "applied_at"
+    t.bigint "approved_by_id"
+    t.datetime "created_at", null: false
+    t.jsonb "diff_summary", default: {}, null: false
+    t.datetime "discarded_at"
+    t.text "error"
+    t.bigint "event_id", null: false
+    t.jsonb "guard_failures", default: [], null: false
+    t.string "status", null: false
+    t.string "trigger", null: false
+    t.datetime "updated_at", null: false
+    t.index ["approved_by_id"], name: "index_results_sync_runs_on_approved_by_id"
+    t.index ["event_id", "created_at"], name: "index_results_sync_runs_on_event_id_and_created_at"
+    t.index ["event_id"], name: "index_results_sync_runs_on_event_id"
   end
 
   create_table "site_contents", force: :cascade do |t|
@@ -690,9 +722,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_150000) do
   add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"
   add_foreign_key "events", "organizations"
+  add_foreign_key "events", "results_sync_runs", on_delete: :nullify
   add_foreign_key "identity_reviews", "academies", column: "candidate_academy_id"
   add_foreign_key "identity_reviews", "academies", column: "resolved_academy_id"
   add_foreign_key "prize_categories", "events"
+  add_foreign_key "results_sync_runs", "events"
+  add_foreign_key "results_sync_runs", "users", column: "approved_by_id", on_delete: :nullify
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

@@ -10,7 +10,14 @@ module Asjjf
         raise ParseError, "Unrecognized results category" unless category.match?(/\A(?:Male|Female) (?:Adult|Kids)\z/i)
         validate_category!(category)
         complete_table!
-        headings = required(@doc.css("table thead h5"), "result divisions")
+        headings = @doc.css("table thead h5")
+        if headings.empty?
+          # Accept only a complete, genuinely empty results table (or ASJJF's
+          # explicit empty message), never an unrelated or partly parsed page.
+          table = @doc.at_css(".list-table table")
+          empty = table && (text(table).empty? || text(table).match?(/\A(?:No (?:results|records)(?: found)?[.!]?|There are no results[.!]?)\z/i))
+          raise ParseError, "Missing result divisions" unless empty && @doc.css("td.fighter-name").empty?
+        end
         divisions = headings.map do |heading|
           division = Division.parse(text(heading), weight: true)
           raise ParseError, "Division gender disagrees with category" unless division[:gender] == category.split.first.downcase

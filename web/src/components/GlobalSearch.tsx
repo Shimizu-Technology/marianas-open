@@ -45,6 +45,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
 
   useEffect(() => {
     if (!open || !query.trim()) {
+      setActiveIndex(-1);
       setResults({ competitors: [], academies: [], events: [] });
       setLoading(false);
       return;
@@ -65,6 +66,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
           .slice(0, MAX_PER_CATEGORY);
 
         if (cancelled) return;
+        setActiveIndex(-1);
         setResults({
           competitors: compRes.competitors.slice(0, MAX_PER_CATEGORY),
           academies: acadRes.academies.slice(0, MAX_PER_CATEGORY),
@@ -72,6 +74,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
         });
       } catch {
         if (cancelled) return;
+        setActiveIndex(-1);
         setResults({ competitors: [], academies: [], events: [] });
       } finally {
         if (!cancelled) setLoading(false);
@@ -119,10 +122,6 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
       navigateToResult(type, item);
     }
   };
-
-  useEffect(() => {
-    setActiveIndex(-1);
-  }, [results]);
 
   if (!open) return null;
 

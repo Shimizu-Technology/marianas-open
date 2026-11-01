@@ -7,6 +7,8 @@ class EventResult < ApplicationRecord
   after_save :refresh_current_academy
   after_destroy :refresh_current_academy
 
+  validates :source, inclusion: { in: %w[asjjf manual] }
+  validates :discipline, inclusion: { in: %w[gi nogi] }, allow_nil: true
   validates :division, presence: true
   validates :placement, presence: true, inclusion: { in: [1, 2, 3] }
   validates :competitor_name, presence: true
