@@ -88,3 +88,29 @@ jobs:
       - run: npm test
       - name: Build production frontend
         run: npm run build:no-translate
+
+  fetcher:
+    name: Fetcher
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: fetcher
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.3
+          cache: npm
+          cache-dependency-path: fetcher/package-lock.json
+      - run: npm ci
+      - run: npx playwright-core install --with-deps chromium
+      - run: xvfb-run -a npm test
+      - name: Runner script checks
+        run: |
+          sudo apt-get install --no-install-recommends -y zsh
+          zsh -n ../ops/asjjf-fetcher/run.sh
+          zsh ../ops/asjjf-fetcher/test/run.test.zsh
+      - name: Check container build
+        run: docker build --platform linux/amd64 -t asjjf-fetcher:ci .
