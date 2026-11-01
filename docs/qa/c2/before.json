@@ -1,0 +1,316 @@
+[
+  {
+    "width": 390,
+    "route": "/",
+    "cls": 0.45149752181824737,
+    "lcpMs": 4648,
+    "initialJsGzip": 383528,
+    "seriousCriticalNodes": 9,
+    "axe": [
+      {
+        "rule": "button-name",
+        "impact": "critical",
+        "nodes": 1
+      },
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 4
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/calendar",
+    "cls": 0.16019402185204737,
+    "lcpMs": 4724,
+    "initialJsGzip": 386764,
+    "seriousCriticalNodes": 11,
+    "axe": [
+      {
+        "rule": "button-name",
+        "impact": "critical",
+        "nodes": 1
+      },
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 6
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/events/copa-de-marianas-2026",
+    "cls": 0.16040135702490443,
+    "lcpMs": 9612,
+    "initialJsGzip": 400717,
+    "seriousCriticalNodes": 15,
+    "axe": [
+      {
+        "rule": "button-name",
+        "impact": "critical",
+        "nodes": 1
+      },
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 7
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      },
+      {
+        "rule": "select-name",
+        "impact": "critical",
+        "nodes": 3
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/rankings",
+    "cls": 0.5879622091782242,
+    "lcpMs": 3452,
+    "initialJsGzip": 377114,
+    "seriousCriticalNodes": 112,
+    "axe": [
+      {
+        "rule": "button-name",
+        "impact": "critical",
+        "nodes": 4
+      },
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 104
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/competitors",
+    "cls": 0.4277539162725499,
+    "lcpMs": 3396,
+    "initialJsGzip": 375965,
+    "seriousCriticalNodes": 13,
+    "axe": [
+      {
+        "rule": "button-name",
+        "impact": "critical",
+        "nodes": 1
+      },
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 6
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      },
+      {
+        "rule": "select-name",
+        "impact": "critical",
+        "nodes": 2
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/teams",
+    "cls": 0.27941208010487995,
+    "lcpMs": 2940,
+    "initialJsGzip": 374926,
+    "seriousCriticalNodes": 15,
+    "axe": [
+      {
+        "rule": "button-name",
+        "impact": "critical",
+        "nodes": 1
+      },
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 10
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/",
+    "cls": 0.39126858822753235,
+    "lcpMs": 2168,
+    "initialJsGzip": 383528,
+    "seriousCriticalNodes": 8,
+    "axe": [
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 4
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/calendar",
+    "cls": 0.082840662240655,
+    "lcpMs": 864,
+    "initialJsGzip": 386764,
+    "seriousCriticalNodes": 12,
+    "axe": [
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 8
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/events/copa-de-marianas-2026",
+    "cls": 0.08444444444444443,
+    "lcpMs": 2024,
+    "initialJsGzip": 400717,
+    "seriousCriticalNodes": 13,
+    "axe": [
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 6
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      },
+      {
+        "rule": "select-name",
+        "impact": "critical",
+        "nodes": 3
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/rankings",
+    "cls": 0.08291185548047143,
+    "lcpMs": 884,
+    "initialJsGzip": 377114,
+    "seriousCriticalNodes": 165,
+    "axe": [
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 161
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/competitors",
+    "cls": 0.2869209091542353,
+    "lcpMs": 756,
+    "initialJsGzip": 375965,
+    "seriousCriticalNodes": 26,
+    "axe": [
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 20
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      },
+      {
+        "rule": "select-name",
+        "impact": "critical",
+        "nodes": 2
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/teams",
+    "cls": 0.27737002743484224,
+    "lcpMs": 868,
+    "initialJsGzip": 374926,
+    "seriousCriticalNodes": 32,
+    "axe": [
+      {
+        "rule": "color-contrast",
+        "impact": "serious",
+        "nodes": 28
+      },
+      {
+        "rule": "link-name",
+        "impact": "serious",
+        "nodes": 4
+      }
+    ],
+    "errors": [],
+    "overflow": false
+  }
+]
