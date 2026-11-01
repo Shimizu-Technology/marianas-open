@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -241,23 +241,45 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_160000) do
     t.index ["event_id"], name: "index_event_asjjf_sources_on_event_id"
   end
 
+  create_table "event_gallery_albums", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "event_id", null: false
+    t.string "name", limit: 80, null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "name"], name: "index_event_gallery_albums_on_event_id_and_name", unique: true
+    t.index ["event_id"], name: "index_event_gallery_albums_on_event_id"
+  end
+
   create_table "event_gallery_images", force: :cascade do |t|
     t.boolean "active", default: true, null: false
+    t.string "album_type"
     t.string "alt_text"
     t.bigint "byte_size"
     t.string "caption"
+    t.string "capture_source"
+    t.string "capture_timezone"
+    t.datetime "captured_at"
     t.string "category"
+    t.string "content_sha256"
     t.string "content_type"
     t.datetime "created_at", null: false
+    t.bigint "event_gallery_import_id"
     t.bigint "event_gallery_upload_batch_id"
     t.bigint "event_id", null: false
     t.integer "height"
     t.string "original_filename"
+    t.string "perceptual_hash"
     t.datetime "processed_at"
     t.text "processing_error"
     t.integer "processing_requeue_count", default: 0, null: false
     t.datetime "processing_started_at"
     t.string "processing_token"
+    t.string "proposal_base_category"
+    t.datetime "review_analyzed_at"
+    t.jsonb "review_flags", default: [], null: false
+    t.boolean "review_held", default: false, null: false
+    t.datetime "reviewed_at"
     t.integer "sort_order", default: 0, null: false
     t.string "status", default: "ready", null: false
     t.string "title"
@@ -265,15 +287,50 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_160000) do
     t.integer "vips_variant_repair_attempts", default: 0, null: false
     t.datetime "vips_variants_repaired_at"
     t.integer "width"
+    t.index ["event_gallery_import_id"], name: "index_event_gallery_images_on_event_gallery_import_id"
     t.index ["event_gallery_upload_batch_id"], name: "index_event_gallery_images_on_upload_batch_id"
     t.index ["event_id", "active"], name: "index_event_gallery_images_on_event_id_and_active"
     t.index ["event_id", "category", "sort_order"], name: "index_event_gallery_images_on_event_category_sort"
+    t.index ["event_id", "content_sha256"], name: "gallery_images_event_content_hash", where: "(content_sha256 IS NOT NULL)"
     t.index ["event_id", "sort_order"], name: "index_event_gallery_images_on_event_id_and_sort_order"
     t.index ["event_id", "status"], name: "index_event_gallery_images_on_event_id_and_status"
     t.index ["event_id"], name: "index_event_gallery_images_on_event_id"
     t.index ["processing_token"], name: "index_event_gallery_images_on_processing_token"
     t.index ["status", "processing_started_at"], name: "index_event_gallery_images_on_status_and_processing_started_at"
     t.index ["status", "vips_variants_repaired_at", "vips_variant_repair_attempts"], name: "index_event_gallery_images_on_vips_variant_repair"
+  end
+
+  create_table "event_gallery_import_entries", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "entry_index", null: false
+    t.bigint "event_gallery_image_id"
+    t.bigint "event_gallery_import_id", null: false
+    t.string "outcome", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_gallery_image_id"], name: "index_event_gallery_import_entries_on_event_gallery_image_id"
+    t.index ["event_gallery_import_id", "entry_index"], name: "gallery_import_entries_position", unique: true
+  end
+
+  create_table "event_gallery_imports", force: :cascade do |t|
+    t.string "album_type", null: false
+    t.string "category"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.jsonb "entry_errors", default: [], null: false
+    t.bigint "event_id", null: false
+    t.string "filename", null: false
+    t.boolean "hold_flagged", default: false, null: false
+    t.integer "imported_count", default: 0, null: false
+    t.bigint "prepared_by_id", null: false
+    t.integer "processed_entries", default: 0, null: false
+    t.integer "skipped_count", default: 0, null: false
+    t.bigint "source_blob_id", null: false
+    t.string "status", default: "queued", null: false
+    t.string "timezone", null: false
+    t.integer "total_entries", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "source_blob_id"], name: "index_event_gallery_imports_on_event_id_and_source_blob_id", unique: true
+    t.index ["event_id"], name: "index_event_gallery_imports_on_event_id"
   end
 
   create_table "event_gallery_upload_batches", force: :cascade do |t|
@@ -352,6 +409,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_160000) do
     t.date "date"
     t.text "description"
     t.date "end_date"
+    t.boolean "gallery_hold_flagged", default: false, null: false
+    t.string "gallery_timezone", default: "Pacific/Guam", null: false
     t.boolean "is_main_event"
     t.decimal "latitude"
     t.boolean "live_stream_active", default: false, null: false
@@ -714,8 +773,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_160000) do
   add_foreign_key "competitors", "academies"
   add_foreign_key "event_accommodations", "events"
   add_foreign_key "event_asjjf_sources", "events"
+  add_foreign_key "event_gallery_albums", "events"
+  add_foreign_key "event_gallery_images", "event_gallery_imports"
   add_foreign_key "event_gallery_images", "event_gallery_upload_batches"
   add_foreign_key "event_gallery_images", "events"
+  add_foreign_key "event_gallery_import_entries", "event_gallery_images", on_delete: :nullify
+  add_foreign_key "event_gallery_import_entries", "event_gallery_imports"
+  add_foreign_key "event_gallery_imports", "events"
   add_foreign_key "event_gallery_upload_batches", "events"
   add_foreign_key "event_results", "academies"
   add_foreign_key "event_results", "competitors"

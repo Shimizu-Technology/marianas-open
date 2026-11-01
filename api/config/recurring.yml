@@ -32,3 +32,7 @@ prune_asjjf_snapshots:
 plan_results_sync:
   class: PlanResultsSyncJob
   schedule: every day at 3pm UTC
+
+requeue_stale_gallery_imports:
+  class: RequeueStaleGalleryImportsJob
+  schedule: every 10 minutes
