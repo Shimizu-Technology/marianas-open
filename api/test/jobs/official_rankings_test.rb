@@ -160,7 +160,9 @@ class OfficialRankingsTest < ActiveSupport::TestCase
 
   test "failed team source is unavailable until captured and never erases existing data" do
     source = snapshot("<html>Login required</html>", "team_ranking", 227)
-    ParseAsjjfSnapshotJob.perform_now(source.id)
+    assert_enqueued_with(job: ApplyRankingSnapshotJob, args: [ source.id ]) do
+      ParseAsjjfSnapshotJob.perform_now(source.id)
+    end
     ApplyRankingSnapshotJob.perform_now(source.id)
     list = @season.asjjf_ranking_lists.find_by!(kind: "team", category: "adult")
     assert_equal "unavailable", list.reload.status
