@@ -1,58 +1,174 @@
 {
   "before": {
     "presenting": [
-      "GVB (Guam Visitors Bureau)"
+      {
+        "name": "GVB (Guam Visitors Bureau)",
+        "url": "https://www.visitguam.com"
+      }
     ],
     "secondary": [
-      "Ready H2GO"
+      {
+        "name": "Ready H2GO",
+        "url": ""
+      }
     ],
     "official": [
-      "Code School of Guam",
-      "Triple J",
-      "Foody's",
-      "Deal Depot",
-      "CFPT",
-      "Fokai",
-      "Jamz Media",
-      "Cherry Media",
-      "Mannge Pops",
-      "Aloha Maid",
-      "Fence Masters",
-      "ITE",
-      "Hertz & Dollar",
-      "Stroll Guam",
-      "Boss 104",
-      "Sticky Fingers",
-      "Hotel Tano Guam"
+      {
+        "name": "Code School of Guam",
+        "url": "codeschoolofguam.com"
+      },
+      {
+        "name": "Triple J",
+        "url": null
+      },
+      {
+        "name": "Foody's",
+        "url": null
+      },
+      {
+        "name": "Deal Depot",
+        "url": null
+      },
+      {
+        "name": "CFPT",
+        "url": null
+      },
+      {
+        "name": "Fokai",
+        "url": null
+      },
+      {
+        "name": "Jamz Media",
+        "url": null
+      },
+      {
+        "name": "Cherry Media",
+        "url": null
+      },
+      {
+        "name": "Mannge Pops",
+        "url": null
+      },
+      {
+        "name": "Aloha Maid",
+        "url": null
+      },
+      {
+        "name": "Fence Masters",
+        "url": null
+      },
+      {
+        "name": "ITE",
+        "url": "https://shop.ite.net"
+      },
+      {
+        "name": "Hertz & Dollar",
+        "url": "https://www.hertz.com/us/en/location/guam/guam/gumt50"
+      },
+      {
+        "name": "Stroll Guam",
+        "url": "https://stroll.international"
+      },
+      {
+        "name": "Boss 104",
+        "url": ""
+      },
+      {
+        "name": "Sticky Fingers",
+        "url": ""
+      },
+      {
+        "name": "Hotel Tano Guam",
+        "url": "https://www.hoteltano.com"
+      }
     ]
   },
   "after": {
     "presenting": [
-      "GVB (Guam Visitors Bureau)"
+      {
+        "name": "GVB (Guam Visitors Bureau)",
+        "url": "https://www.visitguam.com"
+      }
     ],
     "secondary": [
-      "Ready H2GO"
+      {
+        "name": "Ready H2GO",
+        "url": ""
+      }
     ],
     "official": [
-      "Code School of Guam",
-      "Triple J",
-      "Foody's",
-      "Deal Depot",
-      "CFPT",
-      "Fokai",
-      "Jamz Media",
-      "Cherry Media",
-      "Mannge Pops",
-      "Aloha Maid",
-      "Fence Masters",
-      "ITE",
-      "Hertz & Dollar",
-      "Stroll Guam",
-      "Boss 104",
-      "Sticky Fingers",
-      "Hotel Tano Guam"
+      {
+        "name": "Code School of Guam",
+        "url": "codeschoolofguam.com"
+      },
+      {
+        "name": "Triple J",
+        "url": null
+      },
+      {
+        "name": "Foody's",
+        "url": null
+      },
+      {
+        "name": "Deal Depot",
+        "url": null
+      },
+      {
+        "name": "CFPT",
+        "url": null
+      },
+      {
+        "name": "Fokai",
+        "url": null
+      },
+      {
+        "name": "Jamz Media",
+        "url": null
+      },
+      {
+        "name": "Cherry Media",
+        "url": null
+      },
+      {
+        "name": "Mannge Pops",
+        "url": null
+      },
+      {
+        "name": "Aloha Maid",
+        "url": null
+      },
+      {
+        "name": "Fence Masters",
+        "url": null
+      },
+      {
+        "name": "ITE",
+        "url": "https://shop.ite.net"
+      },
+      {
+        "name": "Hertz & Dollar",
+        "url": "https://www.hertz.com/us/en/location/guam/guam/gumt50"
+      },
+      {
+        "name": "Stroll Guam",
+        "url": "https://stroll.international"
+      },
+      {
+        "name": "Boss 104",
+        "url": ""
+      },
+      {
+        "name": "Sticky Fingers",
+        "url": ""
+      },
+      {
+        "name": "Hotel Tano Guam",
+        "url": "https://www.hoteltano.com"
+      }
     ]
   },
   "unchanged": true,
-  "events": 29
+  "sponsor_records_unchanged": true,
+  "repeated_backfill_count": 39,
+  "event_2026_membership_unchanged": true
 }

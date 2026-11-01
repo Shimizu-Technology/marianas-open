@@ -166,7 +166,8 @@ it('shows a retry action instead of an empty sponsor list when initial loading f
 it('opens a legacy scheme-less website as a usable HTTPS address', async () => {
   vi.mocked(api.admin.getSponsors).mockResolvedValue({ sponsors: [{ ...sponsor, website_url: 'codeschoolofguam.com' }] });
   render(<MemoryRouter initialEntries={['/?edit=1']}><SponsorsAdmin /></MemoryRouter>);
-  expect((await screen.findByLabelText('Website (optional)') as HTMLInputElement).value).toBe('https://codeschoolofguam.com');
+  const website = await screen.findByLabelText('Website (optional)') as HTMLInputElement;
+  await waitFor(() => expect(website.value).toBe('https://codeschoolofguam.com'));
   fireEvent.click(screen.getByRole('button', { name: 'Save sponsor' }));
   await waitFor(() => expect(api.admin.updateSponsor).toHaveBeenCalledWith(1, expect.objectContaining({ website_url: 'https://codeschoolofguam.com' })));
 });

@@ -1,0 +1,46 @@
+[
+  {
+    "width": 1440,
+    "case": "home tiers, featured video keyboard/escape/focus/no autoplay, hotel CTA, no overflow",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "2026 event sponsor tiers, scoped Hotel Tano, full opacity, no overflow",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "admin editor fixture labels/previews/layout without overflow; authenticated writes covered by component tests",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "Hotel Tano excluded from a different event page (Copa 2027)",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "home tiers, featured video keyboard/escape/focus/no autoplay, hotel CTA, no overflow",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "2026 event sponsor tiers, scoped Hotel Tano, full opacity, no overflow",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "admin editor fixture labels/previews/layout without overflow; authenticated writes covered by component tests",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "Hotel Tano excluded from a different event page (Copa 2027)",
+    "status": "passed"
+  },
+  {
+    "case": "featured content remains available with standard motion preference",
+    "status": "passed"
+  }
+]
