@@ -42,7 +42,7 @@ Role is stored in the `users.role` column (default: `viewer`). Admin routes requ
 2. **Admin invites users** via the Users Admin page (`/admin/users`)
    - Creates a `User` record with email + role + placeholder `clerk_id` (`pending_<uuid>`)
 3. **Invited user signs up** through the ticket in their invitation email (`/admin?__clerk_ticket=...`). The optional `__clerk_status=sign_up` also works; explicit `sign_in` selects SignIn. Ordinary `/admin` visits show sign-in only.
-4. **First sign-in**: `ClerkAuthenticatable` links by email only while the local Clerk ID starts with `pending_` and the status is pending or legacy-default accepted. Explicitly expired/revoked invitations remain blocked. Once linked, a real Clerk identity can never be replaced by an email match.
+4. **First sign-in**: `ClerkAuthenticatable` links by email only while the local Clerk ID starts with `pending_` and the status is pending or legacy-default accepted. Before linking, the API fetches `/v1/users/{sub}` from Clerk and requires the matching email address to have `verification.status == "verified"`; JWT email claims alone cannot establish ownership. Ticket signup verifies the invited email. Explicitly expired/revoked invitations remain blocked. Once linked, a real Clerk identity can never be replaced by an email match. Backend API failure or unverified ownership returns a clear 403 without saving a link; denial logs omit identity and provider response details.
 5. **Subsequent sign-ins**: Matched by `clerk_id` directly
 
 ### What happens to uninvited users:
@@ -67,7 +67,7 @@ Included in admin controllers. Key methods:
 ### `ClerkAuth` Service (`app/services/clerk_auth.rb`)
 
 - Verifies JWTs using Clerk's JWKS endpoint
-- Caches JWKS for one hour; cache-miss fetches and unknown-key refreshes share a one-minute attempt limit per process, including failures (2-second connect and 3-second read timeouts)
+- Caches JWKS for one hour in an immutable atomic snapshot per process. Known-key verification never waits on refresh HTTP. Successful ordinary fetches do not throttle immediate key rotation; unknown-key-triggered refreshes have a separate 10-second rate limit. Failed fetches back off for one minute. Refresh is single-flight, with a 4-second overall deadline, 1-second connect / 2-second read timeouts, and a 256 KiB streamed response cap. Concurrent waiters share a 0.5-second total wait budget across JWT loader callbacks and fail closed on timeout.
 - Uses the `jwt` and `httparty` gems
 
 ### User Model (`app/models/user.rb`)

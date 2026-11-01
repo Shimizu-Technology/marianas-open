@@ -1,8 +1,17 @@
+require "timeout"
+
 class ClerkAuth
-  JWKS_CACHE_KEY = "clerk_jwks"
   JWKS_CACHE_TTL = 1.hour
-  JWKS_REFRESH_INTERVAL = 1.minute
+  JWKS_FAILURE_BACKOFF = 1.minute
+  JWKS_UNKNOWN_KID_INTERVAL = 10.seconds
+  JWKS_FETCH_TIMEOUT = 4
+  JWKS_WAIT_TIMEOUT = 0.5
+  JWKS_MAX_BYTES = 256 * 1024
+  JWKS_SNAPSHOT = Concurrent::AtomicReference.new
   JWKS_REFRESH_LOCK = Mutex.new
+  JWKS_REFRESH_DONE = ConditionVariable.new
+  EMPTY_JWKS = { "keys" => [].freeze }.freeze
+  ResponseTooLarge = Class.new(StandardError)
   TOKEN_CLOCK_SKEW_LEEWAY_SECONDS = 30
 
   class << self
@@ -23,9 +32,10 @@ class ClerkAuth
       # This leeway is clock-skew tolerance for all JWT time claims, including
       # exp/nbf/iat. Tokens that expired within this small window are accepted
       # so legitimate users are not rejected when server/client clocks differ.
+      refresh_wait_deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + JWKS_WAIT_TIMEOUT
       decode_options = {
         algorithms: [ "RS256" ],
-        jwks: ->(options) { load_jwks(options) },
+        jwks: ->(options) { load_jwks(options, deadline: refresh_wait_deadline) },
         verify_iat: true,
         leeway: TOKEN_CLOCK_SKEW_LEEWAY_SECONDS
       }
@@ -51,18 +61,57 @@ class ClerkAuth
 
     private
 
-    def load_jwks(options)
+    def load_jwks(options, deadline:)
+      # An immutable, atomically swapped snapshot keeps known keys off the
+      # refresh lock entirely, including while another thread is doing HTTP.
+      cached = cached_jwks
+      return cached if cached && !options[:kid_not_found]
+
+      refresh_jwks(options, deadline: deadline)
+    end
+
+    def cached_jwks
+      snapshot = JWKS_SNAPSHOT.get
+      snapshot[:jwks] if snapshot && snapshot[:expires_at] > Time.current
+    end
+
+    def refresh_jwks(options, deadline:)
       JWKS_REFRESH_LOCK.synchronize do
-        cached = Rails.cache.read(JWKS_CACHE_KEY)
-        return cached if cached.present? && !options[:kid_not_found]
+        while @jwks_refreshing
+          remaining = deadline - Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          return EMPTY_JWKS if remaining <= 0
 
-        refresh_key = "#{JWKS_CACHE_KEY}_last_refresh"
-        # Every attempt, including an initial cache miss or failed request, uses
-        # the same cooldown. The mutex keeps concurrent Puma threads from racing.
-        return cached || { keys: [] } if Rails.cache.read(refresh_key)
+          JWKS_REFRESH_DONE.wait(JWKS_REFRESH_LOCK, remaining)
+        end
 
-        Rails.cache.write(refresh_key, true, expires_in: JWKS_REFRESH_INTERVAL)
-        fetch_jwks || cached || { keys: [] }
+        cached = cached_jwks
+        # A completed concurrent refresh may already contain the requested key.
+        return cached if cached && (!options[:kid_not_found] || cached["keys"].any? { |key| key["kid"] == options[:kid] })
+        return cached || EMPTY_JWKS if @jwks_failure_until && @jwks_failure_until > Time.current
+        if options[:kid_not_found]
+          return cached || EMPTY_JWKS if @jwks_unknown_until && @jwks_unknown_until > Time.current
+
+          @jwks_unknown_until = JWKS_UNKNOWN_KID_INTERVAL.from_now
+        end
+        @jwks_refreshing = true
+      end
+
+      begin
+        jwks = fetch_jwks
+        JWKS_REFRESH_LOCK.synchronize do
+          if jwks
+            JWKS_SNAPSHOT.set({ jwks: jwks, expires_at: JWKS_CACHE_TTL.from_now }.freeze)
+            @jwks_failure_until = nil
+          else
+            @jwks_failure_until = JWKS_FAILURE_BACKOFF.from_now
+          end
+        end
+        jwks || cached_jwks || EMPTY_JWKS
+      ensure
+        JWKS_REFRESH_LOCK.synchronize do
+          @jwks_refreshing = false
+          JWKS_REFRESH_DONE.broadcast
+        end
       end
     end
 
@@ -70,20 +119,25 @@ class ClerkAuth
       jwks_uri = jwks_url
       return nil unless jwks_uri
 
-      response = HTTParty.get(jwks_uri, open_timeout: 2, read_timeout: 3)
+      Timeout.timeout(JWKS_FETCH_TIMEOUT) do
+        body = +""
+        response = HTTParty.get(jwks_uri, open_timeout: 1, read_timeout: 2, stream_body: true) do |fragment|
+          raise ResponseTooLarge if body.bytesize + fragment.bytesize > JWKS_MAX_BYTES
 
-      if response.success?
-        jwks = response.parsed_response
-        return nil unless jwks.is_a?(Hash) && jwks["keys"].is_a?(Array)
+          body << fragment
+        end
+        unless response.success?
+          Rails.logger.error("Failed to fetch Clerk JWKS: #{response.code}")
+          return nil
+        end
 
-        Rails.cache.write(JWKS_CACHE_KEY, jwks, expires_in: JWKS_CACHE_TTL)
+        jwks = JSON.parse(body, freeze: true)
+        return nil unless jwks.is_a?(Hash) && jwks["keys"].is_a?(Array) && jwks["keys"].all? { |key| key.is_a?(Hash) }
+
         jwks
-      else
-        Rails.logger.error("Failed to fetch Clerk JWKS: #{response.code}")
-        nil
       end
-    rescue HTTParty::Error, Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError, JSON::ParserError => e
-      Rails.logger.error("Error fetching Clerk JWKS: #{e.message}")
+    rescue HTTParty::Error, Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError, JSON::ParserError, ResponseTooLarge => e
+      Rails.logger.error("Error fetching Clerk JWKS: #{e.class}")
       nil
     end
 

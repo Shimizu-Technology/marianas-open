@@ -1,3 +1,25 @@
+# Round 3 acceptance — 2026-11-02
+
+Implementation starts from PR #112 head `3c14476d121ee38559439ef5056d08c69b944acb`, containing main `b6eadb3`. The PR branch is already checked out in a borrowed worktree, so this agent uses isolated local branch `agent/api-and-public-hardening-r3` in `/Users/leonshimizu/.t3/worktrees/marianas-open/t3-44bbcf82` and pushes HEAD explicitly to `agent/api-and-public-hardening`. No merge or deployment is authorized for this sub-agent.
+
+App brief refreshed from README.md, docs/AUTH-SYSTEM.md, the current authentication controllers/service, PR #112's round-2 evidence, and Brain-Dump `work/shimizu-tech/marianas-open/{README,STATUS}.md`. Marianas Open provides public tournament information; locally invited admin/staff users manage content. Required acceptance is verified ownership before one-time linking, immediate JWKS rotation, and cached known-key availability during refresh. Public frontend behavior is unchanged in this round.
+
+Agent-executed affected-flow API scenarios use disposable local records in `marianas_open_test_w2r3`, signed RSA JWTs for JWKS cases, and stubbed Backend API responses matching Clerk's `primary_email_address_id` / `email_addresses[].verification.status` structure. JWT verification alone is stubbed for controller linking scenarios. Provider requests, signup, and email delivery are simulated in this round; the real round-2 invitation evidence below remains historical.
+
+- **R3-1 passed:** verified primary email links a pending invitation and preserves role; ticket-verified signup without a JWT email gains admin access and persists `accepted`. Unverified primary and matching unverified secondary addresses return 403 without changing the placeholder. Backend HTTP/DNS errors fail closed. Existing real identities are preserved, including a simulated concurrent link during provider lookup. Denial logs contain no email, subject, or provider message. Tests: `ClerkLinkingTest` (11 cases), `ClerkLinkingFlowTest` (5 cases), and the existing admin-create integration scenario.
+- **R3-2 passed:** `unknown kid refreshes immediately after an ordinary successful fetch` verifies old then new signed tokens without advancing time. Unknown-key rate limiting is separate from the failure backoff; tests cover retries, cold failure/recovery, and concurrent requests.
+- **R3-3 passed:** `known kid verification completes while an unknown kid refresh is slow` verifies the cached old token before releasing the blocked refresh. `waiters fail closed within the wait bound while refresh is in flight` covers bounded waiting; slow-trickle deadline/recovery, streamed oversize rejection/backoff, and immutable snapshot tests pass. Bounds: 4 seconds overall HTTP; 1/2-second open/read; 256 KiB; 0.5-second shared waiter budget. Limits are per Puma process.
+
+Full local gate passes: schema load; **96 Rails tests / 575 assertions**, zero failures/errors/skips; **209 RuboCop files**, zero offenses; Brakeman CI flags, zero errors/active warnings with eight inherited ignores; bundler-audit, no vulnerabilities. Web `npm ci`, lint, `npx tsc -b`, **29 Vitest tests**, and `build:no-translate` pass. Production npm audit passes the CI high-severity threshold (one low / one moderate advisory remain). The existing optional libvips HEIF plugin warning remains; codec support was not tested.
+
+Initial focused execution found that two JWT loader callbacks could each wait 0.5 seconds; both now share one monotonic deadline, and the full suite passes after that fix. An initial schema command was launched from the repository root and failed; test preparation and a later explicit schema load then overlapped on the owned test database. Those attempts are superseded by the successful sequential schema-load/full-gate run. No shared database was changed.
+
+No new UI, browser, physical-device, live Clerk, deployment, or production acceptance was run in round 3. Final-head independent review and merging belong to the parent/merge owner. Lifecycle ownership uses this session's injected hook ID `01a19882-eca3-7973-8d10-65201bbdcb74`, superseding the parent session ID in the task brief. Test database cleanup, CI head/status, and final handoff are recorded in the PR round-3 comment and the local handoff.
+
+---
+
+## Round 2 historical evidence
+
 # API and public hardening acceptance
 
 ## Scope and source

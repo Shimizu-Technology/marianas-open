@@ -99,12 +99,20 @@ class HardeningTest < ActionDispatch::IntegrationTest
 
   test "admin UI invitation creates a linkable pending placeholder and preserves its role" do
     original = ENV.delete("CLERK_SECRET_KEY")
+    original_get = HTTParty.method(:get)
     post "/api/v1/admin/users", params: { email: "invite-ui@example.com", role: "staff" }, headers: @headers, as: :json
     assert_response :created
     invited = User.find(response.parsed_body.dig("user", "id"))
     assert invited.invitation_pending?
     assert invited.clerk_id.start_with?("pending_")
     assert_equal @admin.id, invited.invited_by_id
+    ENV["CLERK_SECRET_KEY"] = "sk_test_stub"
+    HTTParty.define_singleton_method(:get) do |*_args, **_options|
+      data = { "primary_email_address_id" => "primary", "email_addresses" => [
+        { "id" => "primary", "email_address" => "invite-ui@example.com", "verification" => { "status" => "verified", "strategy" => "ticket" } }
+      ] }
+      Struct.new(:parsed_response) { def success? = true }.new(data)
+    end
     auth = Class.new { include ClerkAuthenticatable }.new
     attrs = { clerk_id: "clerk_ui_invitee", email: "INVITE-UI@example.com", first_name: "Invite", last_name: "Test" }
     assert_equal invited.id, auth.send(:find_or_create_user, **attrs).id
@@ -113,6 +121,7 @@ class HardeningTest < ActionDispatch::IntegrationTest
     assert_nil auth.send(:find_or_create_user, **attrs.merge(clerk_id: "clerk_replacement"))
     assert_equal "clerk_ui_invitee", invited.reload.clerk_id
   ensure
+    HTTParty.define_singleton_method(:get, original_get)
     ENV["CLERK_SECRET_KEY"] = original
   end
 
