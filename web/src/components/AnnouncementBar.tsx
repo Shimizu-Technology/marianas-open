@@ -137,7 +137,7 @@ export default function AnnouncementBar() {
                       </p>
                     )}
                     {announcement.link_url && (
-                      <span className="inline-flex items-center gap-1 text-[11px] text-gold-400 mt-1">
+                      <span className="inline-flex items-center gap-1 text-xs text-gold-400 mt-1">
                         {announcement.link_text || 'Learn more'} <ExternalLink size={10} />
                       </span>
                     )}

@@ -9,7 +9,12 @@
     "competitors": "Competitors",
     "pastEvents": "Past Events",
     "rules": "Rules",
-    "toggleMenu": "Toggle menu"
+    "toggleMenu": "Toggle menu",
+    "athletes": "Athletes",
+    "teams": "Teams",
+    "impact": "Impact",
+    "admin": "Admin",
+    "language": "Language"
   },
   "pastEvents": {
     "badge": "Event Archive",
@@ -620,5 +625,10 @@
     "loadErrorTitle": "Events are taking a moment",
     "loadErrorMessage": "We couldn’t load this event. Please try again.",
     "retry": "Try again"
+  },
+  "search": {
+    "title": "Search",
+    "close": "Close search",
+    "placeholder": "Search competitors, academies, events..."
   }
 }

@@ -2,14 +2,19 @@
   "nav": {
     "home": "ホーム",
     "events": "大会一覧",
-    "calendar": "Pro Series",
+    "calendar": "プロシリーズ",
     "watch": "視聴",
     "about": "概要",
     "rankings": "ランキング",
     "competitors": "競技者",
     "pastEvents": "過去の大会",
     "rules": "ルール",
-    "toggleMenu": "メニューを開閉"
+    "toggleMenu": "メニューを開閉",
+    "athletes": "選手",
+    "teams": "チーム",
+    "impact": "社会貢献",
+    "admin": "管理",
+    "language": "言語"
   },
   "pastEvents": {
     "badge": "イベントアーカイブ",
@@ -577,5 +582,10 @@
     "loadErrorTitle": "イベントを読み込めませんでした",
     "loadErrorMessage": "イベント情報を読み込めませんでした。もう一度お試しください。",
     "retry": "再試行"
+  },
+  "search": {
+    "title": "検索",
+    "close": "検索を閉じる",
+    "placeholder": "選手、アカデミー、大会を検索..."
   }
 }

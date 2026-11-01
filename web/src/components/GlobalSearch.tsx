@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
+import { useModalFocus } from '../hooks/useModalFocus';
 import { useNavigate } from 'react-router-dom';
 import { Search, Users, Building2, CalendarDays, ArrowRight, X, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
@@ -21,6 +24,9 @@ const MAX_PER_CATEGORY = 5;
 
 export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useModalFocus(open, dialogRef, onClose);
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState('');
@@ -34,18 +40,18 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
       setQuery('');
       setResults({ competitors: [], academies: [], events: [] });
       setActiveIndex(-1);
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [open]);
 
   useEffect(() => {
-    if (!query.trim()) {
+    if (!open || !query.trim()) {
       setResults({ competitors: [], academies: [], events: [] });
       setLoading(false);
       return;
     }
 
     setLoading(true);
+    let cancelled = false;
     const timer = setTimeout(async () => {
       try {
         const [compRes, acadRes] = await Promise.all([
@@ -58,20 +64,22 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
           .filter(e => e.name.toLowerCase().includes(lowerQ) || e.city?.toLowerCase().includes(lowerQ) || e.country?.toLowerCase().includes(lowerQ))
           .slice(0, MAX_PER_CATEGORY);
 
+        if (cancelled) return;
         setResults({
           competitors: compRes.competitors.slice(0, MAX_PER_CATEGORY),
           academies: acadRes.academies.slice(0, MAX_PER_CATEGORY),
           events: filteredEvents,
         });
       } catch {
+        if (cancelled) return;
         setResults({ competitors: [], academies: [], events: [] });
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }, DEBOUNCE_MS);
 
-    return () => clearTimeout(timer);
-  }, [query, allEvents]);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [query, allEvents, open]);
 
   const flatItems = useCallback(() => {
     const items: { type: 'competitor' | 'academy' | 'event'; item: Competitor | Academy | Event }[] = [];
@@ -99,9 +107,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const items = flatItems();
-    if (e.key === 'Escape') {
-      onClose();
-    } else if (e.key === 'ArrowDown') {
+    if (e.key === 'ArrowDown') {
       e.preventDefault();
       setActiveIndex(prev => (prev < items.length - 1 ? prev + 1 : 0));
     } else if (e.key === 'ArrowUp') {
@@ -136,13 +142,18 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
     return 'bg-gray-500';
   };
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] sm:pt-[15vh] bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-[10svh] sm:pt-[15svh] bg-black/60 backdrop-blur-sm"
       onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('search.title')}
+        tabIndex={-1}
         className="w-full max-w-xl mx-4 bg-navy-900/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
         onKeyDown={handleKeyDown}
       >
@@ -155,19 +166,21 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
           )}
           <input
             ref={inputRef}
-            type="text"
+            type="search"
+            aria-label={t('search.title')}
+            enterKeyHint="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search competitors, academies, events..."
-            className="flex-1 bg-transparent text-text-primary placeholder:text-text-muted outline-none text-base"
+            placeholder={t('search.placeholder')}
+            className="min-w-0 flex-1 bg-transparent text-text-primary placeholder:text-text-muted outline-none text-base"
           />
-          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
+          <button aria-label={t('search.close')} onClick={onClose} className="pressable min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-text-primary transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Results */}
-        <div className="max-h-[60vh] overflow-y-auto overscroll-contain">
+        <div className="max-h-[60dvh] overflow-y-auto overscroll-contain">
           {hasQuery && !loading && !hasResults && (
             <div className="px-5 py-10 text-center text-text-muted text-sm">
               No results found for "{query}"
@@ -299,17 +312,18 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
         <div className="px-5 py-3 border-t border-white/10 flex items-center justify-between text-xs text-text-muted">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono">↑↓</kbd> navigate
+              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-xs font-mono">↑↓</kbd> navigate
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono">↵</kbd> select
+              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-xs font-mono">↵</kbd> select
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono">esc</kbd> close
+              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-xs font-mono">esc</kbd> close
             </span>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

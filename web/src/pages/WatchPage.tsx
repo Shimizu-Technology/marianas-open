@@ -457,7 +457,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
         )}
         {video.belt_rank && !expanded && (
           <div className="absolute top-2 left-2">
-            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase ${beltColors[video.belt_rank] || ''}`}>
+            <span className={`px-2 py-0.5 text-xs font-bold uppercase ${beltColors[video.belt_rank] || ''}`}>
               {t(`watch.belt.${video.belt_rank}`, video.belt_rank)}
             </span>
           </div>

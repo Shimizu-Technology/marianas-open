@@ -41,8 +41,8 @@ export default function Footer() {
                   href={org.instagram_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-gold-500 transition-colors"
-                >
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
+                 aria-label="Instagram">
                   <Instagram size={20} />
                 </a>
               )}
@@ -51,8 +51,8 @@ export default function Footer() {
                   href={org.facebook_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-gold-500 transition-colors"
-                >
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
+                 aria-label="Facebook">
                   <Facebook size={20} />
                 </a>
               )}
@@ -60,8 +60,8 @@ export default function Footer() {
                 href={YOUTUBE_CHANNEL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-text-secondary hover:text-gold-500 transition-colors"
-              >
+                className="inline-flex min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
+               aria-label="YouTube">
                 <Youtube size={20} />
               </a>
               {org.website_url && (
@@ -69,8 +69,8 @@ export default function Footer() {
                   href={org.website_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-gold-500 transition-colors"
-                >
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
+                 aria-label="Website">
                   <Globe size={20} />
                 </a>
               )}

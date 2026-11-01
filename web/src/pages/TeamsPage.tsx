@@ -112,14 +112,15 @@ export default function TeamsPage() {
             <div className="relative max-w-md mx-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                aria-label="Search academies"
                 placeholder="Search academies..."
-                className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
+                className="w-full bg-white/[0.03] border border-white/10 pl-9 pr-3 py-2 text-base sm:text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none" />
             </div>
           </div>
         </ScrollReveal>
 
         {loading ? (
-          <div className="flex items-center justify-center h-64">
+          <div className="flex items-center justify-center min-h-svh">
             <div className="w-6 h-6 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
           </div>
         ) : academies.length === 0 ? (
