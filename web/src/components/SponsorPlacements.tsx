@@ -15,7 +15,7 @@ export function SponsorLogo({ sponsor, dark = true }: { sponsor: Sponsor; dark?:
   const logo = darkLogo || getSponsorLogo(sponsor.name, sponsor.logo_url);
   return (
     <div
-      className={`flex h-24 w-40 max-w-full items-center justify-center rounded-md p-4 ${darkLogo ? "bg-navy-900" : "bg-white text-navy-900"}`}
+      className={`flex h-24 w-36 max-w-full sm:w-40 items-center justify-center rounded-md p-4 ${darkLogo ? "bg-navy-900" : "bg-white text-navy-900"}`}
     >
       {logo && failed !== logo ? (
         <img src={logo} alt={sponsor.name} onError={() => setFailed(logo)} className="h-full w-full object-contain" />
@@ -80,7 +80,7 @@ function PlacementCard({ placement }: { placement: SponsorPlacement }) {
           type="button"
           ref={trigger}
           onClick={() => setPlaying(true)}
-          className="relative flex min-h-24 w-40 items-center justify-center overflow-hidden rounded-md border border-white/20 bg-navy-900 p-3 text-sm text-white"
+          className="relative flex min-h-24 w-36 items-center sm:w-40 justify-center overflow-hidden rounded-md border border-white/20 bg-navy-900 p-3 text-sm text-white"
           aria-label={t("sponsorPlacements.watchVideo", { name: sponsor.name })}
         >
           {video.thumbnail && (

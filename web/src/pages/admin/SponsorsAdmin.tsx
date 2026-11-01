@@ -46,6 +46,8 @@ export default function SponsorsAdmin() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadVersion, setLoadVersion] = useState(0);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [placementFilter, setPlacementFilter] = useState<SponsorPlacement["placement_type"]>("featured_bar");
@@ -57,14 +59,17 @@ export default function SponsorsAdmin() {
     setSponsors(data.sponsors);
   };
   useEffect(() => {
+    setLoading(true);
+    setLoadFailed(false);
+    setError("");
     Promise.all([api.admin.getSponsors(), api.admin.getEvents()])
       .then(([s, e]) => {
         setSponsors(s.sponsors);
         setEvents(e.events);
       })
-      .catch((err) => setError(err.message))
+      .catch((err) => { setError(err.message); setLoadFailed(true); })
       .finally(() => setLoading(false));
-  }, []);
+  }, [loadVersion]);
   useEffect(() => {
     if (editing === null) {
       initializedEditor.current = null;
@@ -187,6 +192,9 @@ export default function SponsorsAdmin() {
     }
   };
   if (loading) return <p role="status">{t("sponsorAdmin.loading")}</p>;
+  if (loadFailed) return <div role="alert" className="space-y-4 rounded border border-red-400/40 p-4">
+    <p>{error}</p><button type="button" className={buttonClass} onClick={() => setLoadVersion(v => v + 1)}>{t('eventDetail.retry')}</button>
+  </div>;
   return (
     <div className="max-w-6xl space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-3">

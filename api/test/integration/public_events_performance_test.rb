@@ -99,6 +99,7 @@ class PublicEventsPerformanceTest < ActionDispatch::IntegrationTest
     12.times do |index|
       sponsor = @organization.sponsors.create!(name: "Sponsor #{index}", sort_order: index)
       sponsor.logo.attach(@blob)
+      sponsor.logo_dark.attach(@blob)
 
       site_image = SiteImage.create!(placement: "featured", title: "Feature #{index}", sort_order: index)
       site_image.image.attach(@blob)
@@ -108,7 +109,7 @@ class PublicEventsPerformanceTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_operator sponsor_queries, :<=, 3
     assert_equal 12, response.parsed_body.length
-    assert response.parsed_body.all? { |sponsor| sponsor.key?("logo_url") }
+    assert response.parsed_body.all? { |sponsor| sponsor["logo_url"].present? && sponsor["logo_dark_url"].present? }
 
     site_image_queries = count_database_queries { get "/api/v1/site-images" }
     assert_response :success

@@ -133,3 +133,31 @@ it('retains failed uploads and saved placement IDs for retry without creating du
   expect(api.admin.updateSponsor).toHaveBeenCalledWith(2, expect.objectContaining({ sponsor_placements_attributes: [expect.objectContaining({ id: 42 })] }));
   expect(await screen.findByText('Sponsor and placements saved.')).toBeTruthy();
 });
+
+it('reorders a placement with move buttons and reloads the saved order', async () => {
+  const placement = { id: 10, placement_type: 'official' as const, display_tier: 'official' as const, event_id: null, starts_on: null, ends_on: null, sort_order: 0, headline: '', blurb: '', video_url: '', cta_url: '' };
+  let list: Sponsor[] = [{ ...sponsor, placements: [placement] }, { ...sponsor, id: 2, name: 'Ready H2GO', placements: [{ ...placement, id: 20, sort_order: 1 }] }];
+  vi.mocked(api.admin.getSponsors).mockImplementation(async () => ({ sponsors: list }));
+  vi.mocked(api.admin.updateSponsor).mockImplementation(async (id, data) => {
+    list = list.map(s => s.id === id ? { ...s, placements: data.sponsor_placements_attributes } : s);
+    return { sponsor: list.find(s => s.id === id)! };
+  });
+  render(<MemoryRouter><SponsorsAdmin /></MemoryRouter>);
+  fireEvent.change(await screen.findByLabelText('Show on'), { target: { value: 'official' } });
+  expect((screen.getByRole('button', { name: 'Move Hotel Tano up' }) as HTMLButtonElement).disabled).toBe(true);
+  fireEvent.click(screen.getByRole('button', { name: 'Move Hotel Tano down' }));
+  expect(await screen.findByText('Display order saved.')).toBeTruthy();
+  expect(list.find(s => s.id === 2)?.placements?.[0].sort_order).toBe(0);
+  expect(list.find(s => s.id === 1)?.placements?.[0].sort_order).toBe(1);
+  expect((screen.getByRole('button', { name: 'Move Hotel Tano up' }) as HTMLButtonElement).disabled).toBe(false);
+});
+
+it('shows a retry action instead of an empty sponsor list when initial loading fails', async () => {
+  vi.mocked(api.admin.getSponsors).mockRejectedValueOnce(new Error('Unable to load sponsors'));
+  render(<MemoryRouter><SponsorsAdmin /></MemoryRouter>);
+  expect(await screen.findByRole('alert')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Add sponsor' })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: en.eventDetail.retry }));
+  expect(await screen.findByText('Hotel Tano')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Add sponsor' })).toBeTruthy();
+});
