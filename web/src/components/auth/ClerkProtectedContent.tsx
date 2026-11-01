@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
-import { useAuth, SignIn, SignOutButton } from '@clerk/clerk-react'
+import { useAuth, SignOutButton } from '@clerk/clerk-react'
 import { api, ApiError, setAuthTokenGetter } from '../../services/api'
 import type { UserProfile } from '../../services/api'
 import LoadingSpinner from '../LoadingSpinner'
+import AdminSignIn from './AdminSignIn'
 import { RefreshCw, ShieldX, TriangleAlert } from 'lucide-react'
 
 interface ClerkProtectedContentProps {
@@ -83,19 +84,7 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
   }
 
   if (authStatus === 'unauthorized' || !isSignedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-navy-900">
-        <SignIn
-          routing="hash"
-          appearance={{
-            elements: {
-              rootBox: 'mx-auto',
-              card: 'shadow-2xl',
-            },
-          }}
-        />
-      </div>
-    )
+    return <AdminSignIn />
   }
 
   if (authStatus === 'access_denied') {

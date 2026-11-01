@@ -8,17 +8,17 @@ module Api
           gi_nogi: params[:gi_nogi],
           gender: params[:gender],
           event_id: params[:event_id],
-          limit: (params[:limit] || 50).to_i
+          limit: pagination_limit(:limit)
         }
 
         rankings = case params[:type]
-                   when "team"
+        when "team"
                      RankingCalculator.teams(options)
-                   when "country"
+        when "country"
                      RankingCalculator.countries(options)
-                   else
+        else
                      RankingCalculator.individual(options)
-                   end
+        end
 
         render json: {
           rankings: rankings,

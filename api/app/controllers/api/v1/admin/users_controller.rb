@@ -20,6 +20,10 @@ module Api
 
         # POST /api/v1/admin/users
         def create
+          unless %w[admin staff].include?(invite_params[:role])
+            return render json: { errors: [ "Role must be admin or staff for an invitation" ] }, status: :unprocessable_entity
+          end
+
           user = User.new(invite_params)
           user.clerk_id = "pending_#{SecureRandom.uuid}"
           user.invitation_status = "pending"
@@ -47,30 +51,43 @@ module Api
 
         # PATCH /api/v1/admin/users/:id
         def update
-          if @user.update(user_params)
-            render json: { user: user_json(@user) }
-          else
-            render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+          with_admin_lock do
+            if @user.admin? && user_params.key?(:role) && user_params[:role] != "admin"
+              if User.where(role: "admin").count <= 1
+                return render json: { error: "Cannot demote the last admin user" }, status: :unprocessable_entity
+              end
+              if @user.id == current_user.id
+                return render json: { error: "Cannot demote yourself. Ask another admin to change your role." }, status: :unprocessable_entity
+              end
+            end
+
+            if @user.update(user_params)
+              render json: { user: user_json(@user) }
+            else
+              render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+            end
           end
         end
 
         # DELETE /api/v1/admin/users/:id
         def destroy
-          if @user.id == current_user.id
-            return render json: { error: "Cannot delete yourself" }, status: :unprocessable_entity
-          end
+          with_admin_lock do
+            if @user.id == current_user.id
+              return render json: { error: "Cannot delete yourself" }, status: :unprocessable_entity
+            end
 
-          if @user.admin? && User.where(role: "admin").count <= 1
-            return render json: { error: "Cannot delete the last admin user" }, status: :unprocessable_entity
-          end
+            if @user.admin? && User.where(role: "admin").count <= 1
+              return render json: { error: "Cannot delete the last admin user" }, status: :unprocessable_entity
+            end
 
-          if @user.clerk_invitation_id.present? && @user.invitation_pending?
-            service = ClerkInvitationService.new
-            service.revoke_invitation(@user.clerk_invitation_id) if service.configured?
-          end
+            if @user.clerk_invitation_id.present? && @user.invitation_pending?
+              service = ClerkInvitationService.new
+              service.revoke_invitation(@user.clerk_invitation_id) if service.configured?
+            end
 
-          @user.destroy
-          head :no_content
+            @user.destroy!
+            head :no_content
+          end
         end
 
         # POST /api/v1/admin/users/:id/resend_invitation
@@ -113,11 +130,17 @@ module Api
         end
 
         def invite_params
-          permitted = params.permit(:email, :role)
-          unless %w[admin staff].include?(permitted[:role])
-            permitted[:role] = "staff"
+          params.permit(:email, :role)
+        end
+
+        # Serialize role changes and deletions so concurrent requests cannot
+        # independently remove the remaining admins.
+        def with_admin_lock
+          User.transaction do
+            User.where(role: "admin").order(:id).lock.load
+            @user.reload
+            yield
           end
-          permitted
         end
 
         def create_clerk_invitation_and_get_url(user, ignore_existing: false)

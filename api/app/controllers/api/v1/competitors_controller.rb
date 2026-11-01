@@ -12,7 +12,8 @@ module Api
 
         total = scope.count
 
-        page = (params[:page] || 1).to_i
+        page = pagination_page
+        per_page = pagination_limit(default: PER_PAGE)
 
         records = scope
           .joins(stats_join_sql)
@@ -26,16 +27,16 @@ module Api
             "COALESCE(stats.results_count, 0) as computed_results_count"
           )
           .order(Arel.sql("COALESCE(stats.total_points, 0) DESC, COALESCE(stats.gold, 0) DESC"))
-          .offset((page - 1) * PER_PAGE)
-          .limit(PER_PAGE)
+          .offset((page - 1) * per_page)
+          .limit(per_page)
 
         data = records.map { |c| serialize_record(c) }
 
         available_countries = Competitor.joins(event_results: :event).merge(Event.publicly_visible).distinct
-          .where.not(country_code: [nil, ""])
+          .where.not(country_code: [ nil, "" ])
           .distinct.pluck(:country_code).sort
 
-        render json: { competitors: data, total: total, page: page, per_page: PER_PAGE, available_countries: available_countries }
+        render json: { competitors: data, total: total, page: page, per_page: per_page, available_countries: available_countries }
       end
 
       def show

@@ -10,6 +10,7 @@ import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EventResultsSection from '../components/EventResultsSection';
 import SEO from '../components/SEO';
+import NotFoundPage from './NotFoundPage';
 import { useEvents, useSponsors } from '../hooks/useApi';
 import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 import { useTranslatedField } from '../hooks/useTranslatedField';
@@ -232,6 +233,14 @@ export default function EventDetailPage() {
   const mainEvent = slug
     ? events.find(e => e.slug === slug) || null
     : getCurrentMainEvent(events);
+
+  if (loading) {
+    return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;
+  }
+
+  if (!mainEvent) {
+    return slug ? <NotFoundPage /> : <Navigate to="/calendar" replace />;
+  }
 
   const isCompleted = mainEvent?.status === 'completed';
 
@@ -494,17 +503,6 @@ export default function EventDetailPage() {
     window.open(urls[platform], '_blank', 'width=600,height=400');
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen pt-20">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (!slug && !mainEvent) {
-    return <Navigate to="/calendar" replace />;
-  }
 
   return (
     <div className="min-h-screen pt-20">

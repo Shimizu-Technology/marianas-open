@@ -28,9 +28,9 @@ The Marianas Open platform uses **Clerk** for authentication and a **whitelist/i
 |------|-------------|-------------|
 | `admin` | Full access | CRUD all resources, manage users, import data |
 | `staff` | Limited admin | Access admin panel, manage content (no user management) |
-| `viewer` | Read-only admin | View admin dashboard and data |
+| `viewer` | No admin access | Reserved role; read-only admin access is not implemented |
 
-Role is stored in the `users.role` column (default: `viewer`).
+Role is stored in the `users.role` column (default: `viewer`). Admin routes require staff (admin or staff); user management requires admin. Invitations must explicitly specify `admin` or `staff`; missing, viewer, and unknown roles return a 422 validation error.
 
 ## Whitelist / Invite-Only Model
 
@@ -41,8 +41,8 @@ Role is stored in the `users.role` column (default: `viewer`).
 1. **First admin** is created via `db/seeds.rb` using the `SEED_ADMIN_EMAIL` env var
 2. **Admin invites users** via the Users Admin page (`/admin/users`)
    - Creates a `User` record with email + role + placeholder `clerk_id` (`pending_<uuid>`)
-3. **Invited user signs up** via Clerk (on the `/admin` login page)
-4. **First sign-in**: `ClerkAuthenticatable` matches by email, links their real Clerk ID
+3. **Invited user signs up** through the ticket in their invitation email (`/admin?__clerk_ticket=...&__clerk_status=sign_up`). Ordinary `/admin` visits show sign-in only.
+4. **First sign-in**: `ClerkAuthenticatable` links by email only while the invitation is pending and the local Clerk ID starts with `pending_`. Accepted, expired, or revoked users cannot be re-linked to another Clerk identity.
 5. **Subsequent sign-ins**: Matched by `clerk_id` directly
 
 ### What happens to uninvited users:
@@ -62,12 +62,12 @@ Included in admin controllers. Key methods:
 - `authenticate_user!` — Extracts JWT from `Authorization: Bearer <token>`, verifies via JWKS, finds/creates user
 - `require_admin!` — Calls `authenticate_user!` + checks `user.admin?`
 - `require_staff!` — Calls `authenticate_user!` + checks `user.staff?`
-- `find_or_create_user` — Matches by `clerk_id` first, then by email (for first-time invited users). Returns `nil` for unknown users.
+- `find_or_create_user` — Matches by `clerk_id` first, then by email (only for pending invitations with a placeholder Clerk ID). Returns `nil` for unknown users.
 
 ### `ClerkAuth` Service (`app/services/clerk_auth.rb`)
 
 - Verifies JWTs using Clerk's JWKS endpoint
-- Caches JWKS keys in memory (refreshes on cache miss)
+- Caches JWKS for one hour; an unknown key ID triggers a refresh, limited to once per minute per cache/process
 - Uses the `jwt` and `httparty` gems
 
 ### User Model (`app/models/user.rb`)
@@ -143,3 +143,11 @@ Admins can:
 - No secrets stored in frontend
 - Admin routes are protected at both frontend (Clerk) and backend (JWT + role check) levels
 - Whitelist model prevents unauthorized access even if someone creates a Clerk account
+
+## Invitation URLs and production configuration
+
+Set `PUBLIC_FRONTEND_URL=https://marianasopen.com` on the API and worker. `FrontendUrl` prefers this over `FRONTEND_URL`, then the first `ALLOWED_ORIGINS` entry (whose unconfigured fallback is localhost). Never rely on CORS origin ordering for production email links. These settings are documented requirements, not verified production values.
+
+The users controller passes `FrontendUrl.admin` to `ClerkInvitationService` as `redirect_url`. Clerk returns a ticket-bearing invitation URL; `UserInviteEmailService` uses that exact URL for the email button and the configured frontend origin for the displayed admin URL and logo. Do not replace the ticket URL with a plain sign-in URL. API invitation creation needs `CLERK_SECRET_KEY`; email delivery on the worker needs `RESEND_API_KEY` and `RESEND_FROM_EMAIL` (or `MAILER_FROM_EMAIL`). Both services need the same frontend origin. The web needs `VITE_CLERK_PUBLISHABLE_KEY`; API verification needs `CLERK_JWKS_URL` and the configured issuer/audience settings. Clerk's application must permit the production `/admin` redirect.
+
+Admins cannot demote themselves or the last admin, or delete themselves/the last admin. Role changes and deletion serialize on admin rows. UsersAdmin displays the API's error message so the operator knows why a change was rejected.

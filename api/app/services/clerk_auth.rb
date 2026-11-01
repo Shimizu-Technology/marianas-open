@@ -1,6 +1,8 @@
 class ClerkAuth
   JWKS_CACHE_KEY = "clerk_jwks"
   JWKS_CACHE_TTL = 1.hour
+  JWKS_REFRESH_INTERVAL = 1.minute
+  JWKS_REFRESH_LOCK = Mutex.new
   TOKEN_CLOCK_SKEW_LEEWAY_SECONDS = 30
 
   class << self
@@ -18,15 +20,12 @@ class ClerkAuth
         return handle_dev_token(token)
       end
 
-      jwks = fetch_jwks
-      return nil if jwks.nil?
-
       # This leeway is clock-skew tolerance for all JWT time claims, including
       # exp/nbf/iat. Tokens that expired within this small window are accepted
       # so legitimate users are not rejected when server/client clocks differ.
       decode_options = {
         algorithms: [ "RS256" ],
-        jwks: jwks,
+        jwks: ->(options) { load_jwks(options) },
         verify_iat: true,
         leeway: TOKEN_CLOCK_SKEW_LEEWAY_SECONDS
       }
@@ -52,9 +51,25 @@ class ClerkAuth
 
     private
 
-    def fetch_jwks
+    def load_jwks(options)
+      return fetch_jwks || { keys: [] } unless options[:kid_not_found]
+
+      JWKS_REFRESH_LOCK.synchronize do
+        refresh_key = "#{JWKS_CACHE_KEY}_last_refresh"
+        if Rails.cache.read(refresh_key)
+          return Rails.cache.read(JWKS_CACHE_KEY) || { keys: [] }
+        end
+
+        # Set before the request so repeated unknown key IDs cannot trigger
+        # an unbounded stream of refresh requests, including on failure.
+        Rails.cache.write(refresh_key, true, expires_in: JWKS_REFRESH_INTERVAL)
+        fetch_jwks(force: true) || { keys: [] }
+      end
+    end
+
+    def fetch_jwks(force: false)
       cached = Rails.cache.read(JWKS_CACHE_KEY)
-      return cached if cached.present?
+      return cached if cached.present? && !force
 
       jwks_uri = jwks_url
       return nil unless jwks_uri

@@ -12,8 +12,8 @@ module Api
         before_action :set_gallery_image, only: [ :update, :destroy, :upload ]
 
         def index
-          per_page = [ [ params.fetch(:per_page, 100).to_i, 1 ].max, 200 ].min
-          page = [ params.fetch(:page, 1).to_i, 1 ].max
+          per_page = pagination_limit(default: 100)
+          page = pagination_page
           scope = @event.event_gallery_images.with_image_variant_records.sorted
           scope = scope.where(event_gallery_upload_batch_id: params[:batch_id]) if params[:batch_id].present?
           scope = scope.where(status: params[:status]) if params[:status].present?

@@ -98,12 +98,16 @@ module ClerkAuthenticatable
       user = User.find_by("LOWER(email) = ?", email.downcase)
 
       if user
-        attrs = { clerk_id: clerk_id }
-        attrs[:first_name] = first_name if first_name.present?
-        attrs[:last_name] = last_name if last_name.present?
-        attrs[:invitation_status] = "accepted" if user.invitation_pending?
-        user.update(attrs)
-        return user
+        user.with_lock do
+          # Both conditions are required: accepted/revoked invitations and
+          # real Clerk identities must never be replaced by an email match.
+          return nil unless user.invitation_pending? && user.clerk_id.start_with?("pending_")
+
+          attrs = { clerk_id: clerk_id, invitation_status: "accepted" }
+          attrs[:first_name] = first_name if first_name.present?
+          attrs[:last_name] = last_name if last_name.present?
+          return user if user.update(attrs)
+        end
       end
     end
 
