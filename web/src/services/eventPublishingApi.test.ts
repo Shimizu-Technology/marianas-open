@@ -40,3 +40,12 @@ it('sends authenticated rollover, publication, and ASJJF fill payloads', async (
     expect(request?.headers).toMatchObject({ Authorization: 'Bearer test-token' })
   })
 })
+
+it('keeps overridden undated public events safe without guessing a date', async () => {
+  vi.mocked(fetch).mockResolvedValueOnce({ ok: true, status: 200, json: async () => [{ id: 7, date: null, status: 'upcoming' }] } as Response)
+  const events = await api.getEvents()
+  expect(events[0].date).toBe('')
+  expect(events[0].date.slice(0, 4)).toBe('')
+  vi.mocked(fetch).mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ id: 7, date: null }) } as Response)
+  expect((await api.getEvent('undated')).date).toBe('')
+})

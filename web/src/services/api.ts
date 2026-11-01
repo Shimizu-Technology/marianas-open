@@ -976,8 +976,12 @@ export const api = {
   // Public
   getSiteContents: () => fetchApi<SiteContentMap>('/api/v1/site-contents'),
   getOrganization: () => fetchApi<Organization>('/api/v1/organization'),
-  getEvents: () => fetchApi<Event[]>('/api/v1/events'),
-  getEvent: (slug: string) => fetchApi<Event>(`/api/v1/events/${slug}`),
+  // Overrides may publish an undated event. Keep public date consumers safe without inventing a date.
+  getEvents: async () => (await fetchApi<Event[]>('/api/v1/events')).map(event => ({ ...event, date: event.date || '' })),
+  getEvent: async (slug: string) => {
+    const event = await fetchApi<Event>(`/api/v1/events/${slug}`)
+    return { ...event, date: event.date || '' }
+  },
   getEventGallery: (slug: string, params?: Record<string, string | number>) => {
     const query = params ? '?' + new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString() : '';
     return fetchApi<GalleryImagesResponse>(`/api/v1/events/${slug}/gallery${query}`);

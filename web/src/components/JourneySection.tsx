@@ -266,11 +266,11 @@ function MobileStop({
             </span>
             <span className="flex items-center gap-1">
               <Calendar size={11} />
-              {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(lang), {
+              {event.date ? parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(lang), {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric',
-              })}
+              }) : t('event.date')}
             </span>
           </div>
 
@@ -374,11 +374,11 @@ function DesktopStop({
           </div>
 
           <div className="text-[11px] text-text-muted mb-2">
-            {parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(lang), {
+            {event.date ? parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(lang), {
               month: 'short',
               day: 'numeric',
               year: 'numeric',
-            })}
+            }) : t('event.date')}
           </div>
 
           <div className="flex justify-center mb-2">
