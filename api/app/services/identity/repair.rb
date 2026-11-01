@@ -189,6 +189,7 @@ module Identity
     def project(before, operations)
       academies = Academy.all.to_h { |academy| [ academy.id, { name: academy.name, aliases: Array(academy.aliases) } ] }
       people = Competitor.pluck(:id, :academy_id).to_h
+      review_links = IdentityReview.where(status: "resolved").where.not(resolved_academy_id: nil).pluck(:normalized_name, :resolved_academy_id).to_h
       rows = EventResult.includes(:event).map do |row|
         { id: row.id, academy_id: row.academy_id, academy: row.academy, competitor_id: row.competitor_id,
          date: row.event&.date || Date.new(1, 1, 1), event_id: row.event_id,
@@ -199,9 +200,10 @@ module Identity
         target_id = operation[:target_id]
         case operation[:type]
         when :academy_merge
-          names = projected_names(academies)
+          names = projected_names(academies, review_links)
           rows.each { |row| row[:academy_id] = target_id if projected_gym(row, names) == source_id }
           people.transform_values! { |id| id == source_id ? target_id : id }
+          review_links.transform_values! { |id| id == source_id ? target_id : id }
           source = academies.delete(source_id)
           academies[target_id][:aliases] += source[:aliases] + [ source[:name] ]
         when :academy_rename
@@ -211,10 +213,10 @@ module Identity
           rows.each { |row| row[:competitor_id] = target_id if row[:competitor_id] == source_id }
           people.delete(source_id)
           latest = rows.select { |row| row[:competitor_id] == target_id }.max_by { |row| [ row[:date], row[:event_id], row[:id] ] }
-          people[target_id] = latest ? projected_gym(latest, projected_names(academies)) : nil
+          people[target_id] = latest ? projected_gym(latest, projected_names(academies, review_links)) : nil
         end
       end
-      names = projected_names(academies)
+      names = projected_names(academies, review_links)
       grouped = rows.group_by { |row| projected_gym(row, names) }
       gym_counts = people.values.tally
       per_academy = academies.to_h do |id, academy|
@@ -224,12 +226,16 @@ module Identity
       { academies: academies.size, athletes: people.size, results: before[:results], points: before[:points], per_academy: per_academy }
     end
 
-    def projected_names(academies)
+    def projected_names(academies, review_links)
       names = Hash.new { |hash, key| hash[key] = [] }
       academies.each do |id, academy|
         ([ academy[:name] ] + academy[:aliases]).each { |name| names[NameNormalizer.key(name)] << id }
       end
-      names.transform_values { |ids| ids.uniq.one? ? ids.first : nil }
+      resolved = names.transform_values { |ids| ids.uniq.one? ? ids.first : nil }
+      review_links.each do |key, id|
+        resolved[key] = id if !resolved.key?(key) && academies.key?(id)
+      end
+      resolved
     end
 
     def projected_gym(row, names)

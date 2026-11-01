@@ -153,6 +153,23 @@ class IdentityRepairTest < ActiveSupport::TestCase
     end
   end
 
+
+  test "projection and apply honor resolved review mappings even after a gym merge" do
+    result = EventResult.find_by!(competitor_id: 72002)
+    result.update_columns(academy_id: nil, academy: "Resolved Historic Label")
+    IdentityReview.create!(raw_name: result.academy, normalized_name: Identity::NameNormalizer.key(result.academy),
+      status: "resolved", resolved_academy_id: 71002)
+    with_athlete_rows([ [ "DUPLICATE_RECORDS", "72001 72002", "River Kai-Lin", "SAME_PERSON", "high", "", "2", "" ] ]) do |path|
+      report = Identity::Repair.call(athletes: path, apply: true, io: @io)
+      assert_equal report[:projected], report[:after]
+      assert_equal 71002, Competitor.find(72001).academy_id
+    end
+    report = Identity::Repair.call(decisions: Rails.root.join("test/fixtures/files/identity/decisions.csv"), apply: true, io: @io)
+    assert_equal report[:projected], report[:after]
+    assert_equal 71001, IdentityReview.last.reload.resolved_academy_id
+    assert_equal 71001, result.reload.academy_id
+  end
+
   private
 
   def repair(apply: false)

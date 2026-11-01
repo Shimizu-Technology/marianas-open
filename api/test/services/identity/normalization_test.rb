@@ -82,4 +82,11 @@ class IdentityNormalizationTest < ActiveSupport::TestCase
     end
     assert_equal academy.id, IdentityReview.last.candidate_academy_id
   end
+  test "legacy attribution and lookup honor resolved reviews without requiring an alias" do
+    academy = Academy.create!(name: "Canonical Gym")
+    IdentityReview.create!(raw_name: "Historic Review Label", normalized_name: Identity::NameNormalizer.key("Historic Review Label"),
+      status: "resolved", resolved_academy: academy)
+    assert_equal academy, AcademyLinker.resolve("Historic Review Label", create: false)
+    assert_equal academy, Identity::AcademyAttribution.name_map[Identity::NameNormalizer.key("Historic Review Label")]
+  end
 end

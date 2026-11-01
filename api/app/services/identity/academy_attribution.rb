@@ -12,7 +12,11 @@ module Identity
           map[NameNormalizer.key(name)] << academy
         end
       end
-      map.transform_values { |academies| academies.uniq(&:id).one? ? academies.first : nil }
+      resolved = map.transform_values { |academies| academies.uniq(&:id).one? ? academies.first : nil }
+      IdentityReview.where(status: "resolved").includes(:resolved_academy).find_each do |review|
+        resolved[review.normalized_name] = review.resolved_academy unless resolved.key?(review.normalized_name)
+      end
+      resolved
     end
 
     def legacy_ids
