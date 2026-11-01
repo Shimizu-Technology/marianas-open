@@ -15,7 +15,7 @@ import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSpons
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { getRegistrationLinks } from '../utils/registrationLinks';
-import { getCurrentMainEvent } from '../utils/events';
+import { formatVenueAddress, getCurrentMainEvent } from '../utils/events';
 import { usePostHog } from '../providers/PostHogProvider';
 import type { EventTicketOption, EventTravelItem } from '../services/api';
 
@@ -318,12 +318,16 @@ export default function EventDetailPage() {
   const visaItemsRaw = mainEvent ? tfa<typeof mainEvent, { title: string; description: string }>(mainEvent, 'visa_items' as keyof typeof mainEvent & string) : [];
   const visaItems = getValidItems(visaItemsRaw.length > 0 ? visaItemsRaw : mainEvent?.visa_items);
 
-  const eventTagline = eventTaglineRaw
-    || (mainEvent?.is_main_event ? t('event.tagline') : t('event.qualifierTagline', 'Official Qualifier'));
-  const asjjfRankText = t('event.asjjfRankDynamic', {
-    count: mainEvent?.asjjf_stars || 5,
-    defaultValue: `ASJJF ${mainEvent?.asjjf_stars || 5}-Star Ranked Event`,
-  });
+  // Only the main championship has a standing tagline. Other events show a tagline
+  // or star rating only when the organizers have actually published one.
+  const eventTagline = eventTaglineRaw || (mainEvent?.is_main_event ? t('event.tagline') : '');
+  const eventStars = mainEvent?.asjjf_stars && mainEvent.asjjf_stars > 0 ? mainEvent.asjjf_stars : null;
+  const asjjfRankText = eventStars
+    ? t('event.asjjfRankDynamic', {
+        count: eventStars,
+        defaultValue: `ASJJF ${eventStars}-Star Ranked Event`,
+      })
+    : t('event.asjjfSanctioned', 'ASJJF Sanctioned Event');
   const shareUrl = mainEvent?.slug
     ? `https://marianasopen.com/events/${mainEvent.slug}`
     : 'https://marianasopen.com';
@@ -540,10 +544,10 @@ export default function EventDetailPage() {
             className="max-w-4xl"
           >
             <div className="flex items-center gap-2 mb-6">
-              {mainEvent?.asjjf_stars ? Array.from({ length: mainEvent.asjjf_stars }).map((_, i) => (
+              {eventStars ? Array.from({ length: eventStars }).map((_, i) => (
                 <Star key={i} size={16} className="fill-gold-500 text-gold-500" />
               )) : null}
-              <span className="text-gold-400 text-sm font-heading ml-2 uppercase tracking-wider">
+              <span className={`text-gold-400 text-sm font-heading uppercase tracking-wider ${eventStars ? 'ml-2' : ''}`}>
                 {asjjfRankText}
               </span>
             </div>
@@ -568,9 +572,11 @@ export default function EventDetailPage() {
               )}
             </h1>
 
-            <p className="text-xl text-text-secondary font-heading uppercase tracking-wider mb-8">
-              {eventTagline}
-            </p>
+            {eventTagline ? (
+              <p className="text-xl text-text-secondary font-heading uppercase tracking-wider mb-8">
+                {eventTagline}
+              </p>
+            ) : null}
 
             <div className="flex flex-wrap gap-6 text-sm text-text-secondary">
               <div className="flex items-center gap-2">
@@ -910,7 +916,7 @@ export default function EventDetailPage() {
                   </h3>
                 </div>
                 <p className="text-text-secondary text-sm mb-4">
-                  {mainEvent ? `${mainEvent.venue_address}, ${eventCity}, ${eventCountry}` : t('event.location')}
+                  {mainEvent ? formatVenueAddress(mainEvent.venue_address, eventCity, eventCountry, { city: mainEvent.city, country: mainEvent.country }) : t('event.location')}
                 </p>
                 {displayVenueHighlights.length > 0 && (
                   <div className={`grid grid-cols-1 gap-4 mb-4 ${displayVenueHighlights.length > 1 ? 'sm:grid-cols-2' : ''}`}>
@@ -1301,8 +1307,20 @@ export default function EventDetailPage() {
                           <h4 className="font-heading text-sm font-bold uppercase tracking-[0.24em] text-gold-400 mb-3">
                             {section.title}
                           </h4>
-                          <div className="overflow-x-auto border border-white/5">
-                            <table className="w-full min-w-[540px] text-left text-sm">
+                          {/* Phones: one row per fee so the deadline, option, and price stay together. */}
+                          <ul className="sm:hidden border border-white/5 divide-y divide-white/5">
+                            {(section.rows ?? []).map((row, index) => (
+                              <li key={`${section.title}-${row.deadline}-${index}-mobile`} className="flex items-start justify-between gap-4 px-4 py-3">
+                                <div className="min-w-0">
+                                  <div className="text-sm text-text-primary">{row.deadline}</div>
+                                  <div className="text-xs text-text-secondary mt-0.5">{row.option}</div>
+                                </div>
+                                <div className="text-gold-400 font-semibold whitespace-nowrap">{row.fee}</div>
+                              </li>
+                            ))}
+                          </ul>
+                          <div className="hidden sm:block overflow-x-auto border border-white/5">
+                            <table className="w-full text-left text-sm">
                               <thead className="bg-white/[0.03]">
                                 <tr>
                                   <th className="px-4 py-3 font-heading uppercase tracking-[0.2em] text-[11px] text-text-muted">

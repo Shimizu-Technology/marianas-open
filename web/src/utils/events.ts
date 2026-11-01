@@ -33,3 +33,40 @@ export function getEventCycleYear(events: Event[]): number | null {
   if (!anchor?.date) return null;
   return Number(anchor.date.slice(0, 4)) || null;
 }
+
+/**
+ * Builds a one-line venue address without repeating the city or country when the
+ * stored street address already includes them (e.g. "303 University Dr, Mangilao, 96913, Guam").
+ */
+export function formatVenueAddress(
+  address: string | null | undefined,
+  city: string | null | undefined,
+  country: string | null | undefined,
+  canonical: { city?: string | null; country?: string | null } = {},
+): string {
+  const parts: string[] = [];
+  const base = address?.trim() ?? '';
+  if (base) parts.push(base);
+  const haystack = base.toLowerCase();
+  const mentioned = (value: string | null | undefined) =>
+    !!value?.trim() && haystack.includes(value.trim().toLowerCase());
+  // The stored address is in English, while city/country may be translated, so also
+  // check the untranslated values before appending a part.
+  for (const [display, original] of [[city, canonical.city], [country, canonical.country]] as const) {
+    const value = display?.trim();
+    if (!value) continue;
+    if (mentioned(value) || mentioned(original)) continue;
+    if (parts.some(existing => existing.toLowerCase() === value.toLowerCase())) continue;
+    parts.push(value);
+  }
+  return parts.join(', ');
+}
+
+/** True when the given season includes a published main championship event. */
+export function cycleHasMainEvent(events: Event[], cycleYear: number | null): boolean {
+  return events.some(event =>
+    event.is_main_event
+    && event.status !== 'cancelled'
+    && !!event.date
+    && (cycleYear === null || Number(event.date.slice(0, 4)) === cycleYear));
+}

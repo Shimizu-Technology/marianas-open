@@ -18,7 +18,7 @@ import { useTranslatedField } from '../hooks/useTranslatedField';
 import ScrollReveal from './ScrollReveal';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { getRegistrationLinks } from '../utils/registrationLinks';
-import { getEventCycleYear, getEventDetailsPath } from '../utils/events';
+import { cycleHasMainEvent, getEventCycleYear, getEventDetailsPath } from '../utils/events';
 
 type StopStatus = 'completed' | 'live' | 'next' | 'upcoming' | 'cancelled';
 
@@ -486,7 +486,9 @@ export default function JourneySection({ events }: { events: Event[] }) {
                 {t('journey.title')}
               </h2>
               <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-                {t('journey.subtitle')}
+                {cycleHasMainEvent(events, getEventCycleYear(events))
+                  ? t('journey.subtitle')
+                  : t('journey.subtitleSeries', 'Compete across Asia-Pacific and earn ASJJF ranking points.')}
               </p>
             </div>
           </ScrollReveal>

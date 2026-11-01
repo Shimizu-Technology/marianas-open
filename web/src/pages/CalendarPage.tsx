@@ -14,7 +14,7 @@ import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { resolveMediaUrl } from '../utils/images';
 import { getRegistrationLinks } from '../utils/registrationLinks';
-import { getEventCycleYear } from '../utils/events';
+import { cycleHasMainEvent, getEventCycleYear } from '../utils/events';
 
 // Qualifying series posters are now driven by events with poster_image_url set.
 
@@ -104,10 +104,15 @@ export default function CalendarPage() {
             </h1>
             <p className="text-text-secondary text-lg max-w-xl mx-auto mb-6">
               {cycleEventCount > 0
-                ? t('calendar.subtitleDynamic', {
-                    count: cycleEventCount,
-                    defaultValue: '{{count}} events across Asia-Pacific. One championship in Guam.',
-                  })
+                ? cycleHasMainEvent(events, cycleYear)
+                  ? t('calendar.subtitleDynamic', {
+                      count: cycleEventCount,
+                      defaultValue: '{{count}} events across Asia-Pacific. One championship in Guam.',
+                    })
+                  : t('calendar.subtitleSeriesDynamic', {
+                      count: cycleEventCount,
+                      defaultValue: '{{count}} events across Asia-Pacific.',
+                    })
                 : t('calendar.subtitle')}
             </p>
             <div className="flex items-center justify-center gap-3">
