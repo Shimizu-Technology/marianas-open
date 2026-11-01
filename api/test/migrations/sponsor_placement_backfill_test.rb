@@ -22,4 +22,21 @@ class SponsorPlacementBackfillTest < ActiveSupport::TestCase
     assert_equal event.id, hotel.sponsor_placements.find_by!(placement_type: "event").event_id
     assert_equal "https://www.hoteltano.com", hotel.sponsor_placements.find_by!(placement_type: "official").cta_url
   end
+
+  test "backfill preserves null names and does not duplicate an earlier Hotel Tano global fallback" do
+    org = Organization.create!(name: "Marianas Open", slug: "mo")
+    hotel = org.sponsors.create!(name: "Hotel Tano Guam", tier: "official")
+    unnamed = org.sponsors.create!(name: "Legacy", tier: "official")
+    unnamed.update_column(:name, nil)
+    migration = CreateSponsorPlacements.new
+    migration.backfill_placements
+    global = hotel.sponsor_placements.find_by!(placement_type: "event", event_id: nil)
+    global.update!(headline: "Staff message")
+    org.events.create!(name: "Marianas Open 2026", slug: "marianas-open-2026", date: Date.current)
+    migration.backfill_placements
+    assert_equal [ global.id ], hotel.sponsor_placements.where(placement_type: "event").ids
+    assert_equal "Staff message", global.reload.headline
+    assert_nil unnamed.reload.name
+    assert_equal 2, unnamed.sponsor_placements.count
+  end
 end

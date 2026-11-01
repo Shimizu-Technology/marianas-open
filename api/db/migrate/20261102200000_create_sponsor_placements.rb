@@ -34,7 +34,7 @@ class CreateSponsorPlacements < ActiveRecord::Migration[8.1]
     placement_class = Class.new(ActiveRecord::Base) { self.table_name = "sponsor_placements" }
     event_class = Class.new(ActiveRecord::Base) { self.table_name = "events" }
     sponsor_class.find_each do |sponsor|
-      key = sponsor.name.downcase.gsub(/[^a-z0-9]/, "")
+      key = sponsor.name.to_s.downcase.gsub(/[^a-z0-9]/, "")
       gvb = key.include?("gvb") || key.include?("guamvisitorsbureau")
       type = gvb ? "presenting" : (sponsor.tier == "presenting" ? "secondary" : "official")
       if gvb || sponsor.tier.in?(%w[presenting official])
@@ -55,6 +55,10 @@ class CreateSponsorPlacements < ActiveRecord::Migration[8.1]
       # with the requested Hotel Tano scope represented explicitly.
       hotel = [ "hoteltano", "hoteltanoguam" ].include?(key)
       event_id = hotel ? event_class.find_by(slug: "marianas-open-2026", organization_id: sponsor.organization_id)&.id : nil
+      # An earlier fallback/global placement may have been edited by staff.
+      # Keep it rather than adding a second appearance when the event is added later.
+      next if hotel && event_id && placement_class.exists?(sponsor_id: sponsor.id, placement_type: "event", event_id: nil)
+
       placement_class.find_or_create_by!(sponsor_id: sponsor.id, placement_type: "event", event_id: event_id) do |p|
         p.sort_order = sponsor.sort_order || 0
         p.display_tier = type

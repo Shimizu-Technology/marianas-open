@@ -170,5 +170,12 @@
   "unchanged": true,
   "sponsor_records_unchanged": true,
   "repeated_backfill_count": 39,
-  "event_2026_membership_unchanged": true
+  "event_2026_membership_unchanged": true,
+  "organization_scope_check": {
+    "source": "local development source of the isolated QA copy; read-only verification",
+    "sponsors": 20,
+    "distinct_sponsor_organizations": 1,
+    "sponsors_outside_2026_event_organization": 0,
+    "null_sponsor_names": 0
+  }
 }

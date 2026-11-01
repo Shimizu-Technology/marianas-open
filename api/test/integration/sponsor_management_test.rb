@@ -74,6 +74,31 @@ class SponsorManagementTest < ActionDispatch::IntegrationTest
     assert_equal [ home.id ], response.parsed_body["sponsor_placements"].map { |p| p["id"] }
   end
 
+  test "draft event placement details are private" do
+    @event.update!(status: "draft")
+    @sponsor.sponsor_placements.create!(placement_type: "event", event: @event, headline: "Not announced")
+    get "/api/v1/sponsor_placements", params: { event_id: @event.id }
+    assert_response :not_found
+  end
+
+  test "legacy logos do not block placement edits and invalid variants cannot replace logos" do
+    blob = ActiveStorage::Blob.create_and_upload!(io: StringIO.new("legacy"), filename: "legacy.svg", content_type: "image/svg+xml", identify: false)
+    ActiveStorage::Attachment.create!(record: @sponsor, name: "logo", blob: blob)
+    patch "/api/v1/admin/sponsors/#{@sponsor.id}", headers: @headers, as: :json,
+      params: { sponsor_placements_attributes: [ { placement_type: "official" } ] }
+    assert_response :success
+    assert_equal blob.id, @sponsor.reload.logo.blob.id
+    upload = Rack::Test::UploadedFile.new(Rails.root.join("test/fixtures/files/sponsor.png"), "image/png")
+    assert_no_difference "SponsorAuditLog.count" do
+      post "/api/v1/admin/sponsors/#{@sponsor.id}/upload_logo", headers: @headers, params: { logo: upload, variant: "drak" }
+      assert_response :unprocessable_entity
+    end
+    assert_equal blob.id, @sponsor.reload.logo.blob.id
+    post "/api/v1/admin/sponsors/#{@sponsor.id}/upload_logo", headers: @headers, params: { logo: upload }
+    assert_response :success
+    assert_not_equal blob.id, @sponsor.reload.logo.blob.id
+  end
+
   test "deletion retains who when and what in audit history" do
     @sponsor.sponsor_placements.create!(placement_type: "official")
     assert_difference "SponsorAuditLog.count", 1 do

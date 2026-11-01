@@ -44,6 +44,17 @@ class SponsorPlacementTest < ActiveSupport::TestCase
     end
   end
 
+  test "video validation rejects ambiguous IDs and retains supported private Vimeo URLs" do
+    placement = @sponsor.sponsor_placements.build(placement_type: "featured_bar")
+    [ "https://youtube.com/watch?v=bad&v=dQw4w9WgXcQ", "https://youtube.com/watch?v=dQw4w9WgXcQ&v=bad",
+      "https://youtube.com/embed/dQw4w9WgXcQ?v=bad", "https://player.vimeo.com/video/123?h=one&h=two", "https://player.vimeo.com/video/123?h=bad%20hash" ].each do |url|
+      placement.video_url = url
+      assert_not placement.valid?, url
+    end
+    placement.video_url = "https://player.vimeo.com/video/123?h=abc123"
+    assert placement.valid?, placement.errors.full_messages.join(", ")
+  end
+
   test "placement copy uses existing translation concern" do
     assert SponsorPlacement.include?(Translatable)
     assert_equal %w[headline blurb], SponsorPlacement.translatable_field_names

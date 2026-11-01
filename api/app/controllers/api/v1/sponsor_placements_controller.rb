@@ -4,7 +4,7 @@ module Api
       def index
         placements = SponsorPlacement.active_on.with_assets.ordered
         if params[:event_id].present?
-          event = Event.find_by!(id: params[:event_id])
+          event = Event.publicly_visible.find_by!(id: params[:event_id])
           placements = placements.where(placement_type: "event", event_id: [ nil, event.id ])
             .joins(:sponsor).where(sponsors: { organization_id: event.organization_id })
         else

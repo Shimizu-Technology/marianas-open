@@ -22,6 +22,8 @@ class Sponsor < ApplicationRecord
 
   def safe_logos
     [:logo, :logo_dark].each do |field|
+      next unless attachment_changes.key?(field.to_s)
+
       image = public_send(field)
       next unless image.attached?
 

@@ -53,15 +53,20 @@ class SponsorPlacement < ApplicationRecord
           if valid
             if uri.host.downcase.end_with?("vimeo.com")
               valid &&= uri.path.match?(%r{\A/(?:video/)?\d+\z})
+              hashes = URI.decode_www_form(uri.query.to_s).select { |key, _| key == "h" }.map(&:last)
+              valid &&= hashes.length <= 1 && hashes.all? { |hash| hash.match?(/\A[a-zA-Z0-9]+\z/) }
             else
+              ids = URI.decode_www_form(uri.query.to_s).select { |key, _| key == "v" }.map(&:last)
+              valid &&= ids.length <= 1
               video_id = if uri.host.downcase == "youtu.be"
                 uri.path.delete_prefix("/")
               elsif uri.path.in?([ "/watch", "/watch/" ])
-                URI.decode_www_form(uri.query.to_s).to_h["v"]
+                ids.first
               else
                 uri.path[%r{\A/(?:embed|shorts)/([^/]+)\z}, 1]
               end
               valid &&= video_id.to_s.match?(/\A[a-zA-Z0-9_-]{11}\z/)
+              valid &&= ids.empty? || uri.path.in?([ "/watch", "/watch/" ]) || ids.first == video_id
             end
           end
         end

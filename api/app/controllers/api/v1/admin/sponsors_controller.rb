@@ -50,7 +50,8 @@ module Api
         end
 
         def upload_logo
-          field = params[:variant] == "dark" ? :logo_dark : :logo
+          field = { "light" => :logo, "dark" => :logo_dark }[params[:variant].presence || "light"]
+          return render json: { error: "Invalid logo variant" }, status: :unprocessable_entity unless field
           return render json: { error: "No logo provided" }, status: :unprocessable_entity if params[:logo].blank?
 
           Sponsor.transaction do
