@@ -1,4 +1,4 @@
-import { fetchApi, type DirectUploadPreparation, type EventGalleryImage, type GalleryImagesResponse } from './api';
+import { fetchApi, type AuthenticatedRequestScope, type DirectUploadPreparation, type EventGalleryImage, type GalleryImagesResponse } from './api';
 
 export interface PhotoAlbum {
   id: number;
@@ -30,10 +30,10 @@ export interface PhotoImport {
 export interface DayProposal { category: string; image_ids: number[]; date: string }
 export interface ImportOptions { album_type: string; category: string; timezone: string; hold_flagged: boolean }
 
-function request<T>(eventId: number, path: string, method = 'GET', data?: unknown) {
+function request<T>(eventId: number, path: string, method = 'GET', data?: unknown, scope?: AuthenticatedRequestScope) {
   return fetchApi<T>(`/api/v1/admin/events/${eventId}/${path}`, {
-    method, ...(data === undefined ? {} : { body: JSON.stringify(data) }),
-  }, true);
+    method, ...(data === undefined ? {} : { body: JSON.stringify(data) }), signal: scope?.signal,
+  }, true, scope?.isCurrent);
 }
 export const photoIntake = {
   albums: (eventId: number) => request<{ albums: PhotoAlbum[]; settings: PhotoSettings }>(eventId, 'gallery-albums'),
@@ -44,8 +44,8 @@ export const photoIntake = {
   bulkUpdate: (eventId: number, ids: number[], data: { active?: boolean; category?: string; approve_review?: boolean }) => request<{ updated: number }>(eventId, 'gallery-images/bulk_update', 'PATCH', { ids, ...data }),
   bulkDelete: (eventId: number, ids: number[]) => request<{ deleted: number }>(eventId, 'gallery-images/bulk_destroy', 'DELETE', { ids }),
   imports: (eventId: number) => request<{ imports: PhotoImport[] }>(eventId, 'gallery-imports'),
-  prepareZip: (eventId: number, data: { filename: string; byte_size: number; checksum: string }) => request<DirectUploadPreparation>(eventId, 'gallery-imports/prepare_direct_upload', 'POST', data),
-  completeZip: (eventId: number, signed_id: string, options: ImportOptions) => request<{ import: PhotoImport }>(eventId, 'gallery-imports', 'POST', { signed_id, ...options }),
+  prepareZip: (eventId: number, data: { filename: string; byte_size: number; checksum: string }, scope?: AuthenticatedRequestScope) => request<DirectUploadPreparation>(eventId, 'gallery-imports/prepare_direct_upload', 'POST', data, scope),
+  completeZip: (eventId: number, signed_id: string, options: ImportOptions, scope?: AuthenticatedRequestScope) => request<{ import: PhotoImport }>(eventId, 'gallery-imports', 'POST', { signed_id, ...options }, scope),
   proposals: (eventId: number, album_type: string, category?: string) => request<{ proposals: DayProposal[]; unassigned_count: number }>(eventId, `gallery-day-proposals?${new URLSearchParams({ album_type, ...(category === undefined ? {} : { category }) })}`),
   applyProposals: (eventId: number, album_type: string, proposals: DayProposal[], category?: string) => request<{ updated: number }>(eventId, 'gallery-day-proposals', 'POST', { album_type, proposals, ...(category === undefined ? {} : { category }) }),
 };

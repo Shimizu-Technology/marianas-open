@@ -209,7 +209,7 @@ describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage
     await waitFor(() => expect(queue.completedCount).toBe(1));
     expect(api.admin.completeEventGalleryDirectUpload).toHaveBeenCalledWith(1, {
       signed_id: 'signed-fixture', batch_id: 8, title: '', alt_text: '', caption: 'Day 1', category: 'day-1', sort_order: 0, active: false,
-    });
+    }, expect.objectContaining({ signal: expect.anything(), isCurrent: expect.any(Function) }));
     expect(JSON.stringify(vi.mocked(api.admin.completeEventGalleryDirectUpload).mock.calls)).not.toContain(cameraFile.name);
   });
 
@@ -220,7 +220,7 @@ describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage
     await act(async () => { await queue.startUpload(options([large])); });
     await waitFor(() => expect(queue.completedCount).toBe(1));
     expect(reads).toBe(3);
-    expect(api.admin.prepareEventGalleryDirectUpload).toHaveBeenCalledWith(1, expect.objectContaining({ byte_size: bytes.length, checksum: createHash('md5').update(bytes).digest('base64') }));
+    expect(api.admin.prepareEventGalleryDirectUpload).toHaveBeenCalledWith(1, expect.objectContaining({ byte_size: bytes.length, checksum: createHash('md5').update(bytes).digest('base64') }), expect.objectContaining({ signal: expect.anything(), isCurrent: expect.any(Function) }));
     expect(imageCompression).not.toHaveBeenCalled();
   });
 
@@ -234,6 +234,6 @@ describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage
     const saved = (await store.list('clerk-a'))[0];
     expect(saved.task.fileSize).toBe(9);
     expect(await (await store.file('clerk-a', saved.id))?.text()).toBe('optimized');
-    expect(api.admin.prepareEventGalleryDirectUpload).toHaveBeenCalledWith(1, expect.objectContaining({ byte_size: 9 }));
+    expect(api.admin.prepareEventGalleryDirectUpload).toHaveBeenCalledWith(1, expect.objectContaining({ byte_size: 9 }), expect.objectContaining({ signal: expect.anything(), isCurrent: expect.any(Function) }));
   });
 });

@@ -45,7 +45,7 @@ it('retries saved completion without hashing or sending uploaded ZIP bytes again
   expect((await zipQueue.load(record.key))?.uploaded).toBe(true);
   const restored = (await zipQueue.load(record.key))!;
   expect(await sendSavedZip(restored, () => {}, new AbortController().signal)).toMatchObject({ id: 42 });
-  expect(complete).toHaveBeenLastCalledWith(8, 'signed-8', options);
+  expect(complete).toHaveBeenLastCalledWith(8, 'signed-8', options, expect.objectContaining({ signal: expect.anything(), isCurrent: expect.any(Function) }));
   expect(prepare).not.toHaveBeenCalled();
   expect(await zipQueue.load(record.key)).toBeUndefined();
 });

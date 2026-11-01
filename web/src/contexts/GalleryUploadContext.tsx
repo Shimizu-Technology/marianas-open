@@ -357,7 +357,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
             const { batch } = await api.admin.createGalleryUploadBatch(first.eventId, {
               title: `${first.eventName} photo upload`, total_files: records.length,
               total_bytes: records.reduce((sum, record) => sum + record.task.fileSize, 0),
-            });
+            }, { signal, isCurrent: current });
             return batch.id;
           },
           optimize: optimizeGalleryFile,
@@ -367,7 +367,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
             if (!current()) throw new DOMException('Upload session ended', 'AbortError');
             const prepared = await api.admin.prepareEventGalleryDirectUpload(record.task.eventId, {
               filename: file.name, byte_size: file.size, checksum: md5, content_type: file.type || 'application/octet-stream',
-            });
+            }, { signal, isCurrent: current });
             return { ...prepared, target: directUploadTargetFromUrl(prepared.direct_upload.url) };
           },
           put: (prepared, file, progress, uploadSignal) => uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, file, progress, uploadSignal),
@@ -376,7 +376,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
             const completed = await withTimeout(api.admin.completeEventGalleryDirectUpload(record.task.eventId, {
               signed_id: record.prepared!.signed_id, batch_id: record.task.batchId, title: '', alt_text: '',
               caption: record.meta.caption, category: record.meta.category, sort_order: record.meta.sortOrder, active: record.meta.active,
-            }), COMPLETE_UPLOAD_TIMEOUT_MS, 'Saving gallery record timed out. Retry to confirm the uploaded file.');
+            }, { signal, isCurrent: current }), COMPLETE_UPLOAD_TIMEOUT_MS, 'Saving gallery record timed out. Retry to confirm the uploaded file.');
             return completed.gallery_image;
           },
         }, signal, () => { void refresh(); notify(); }, updateProgress);
