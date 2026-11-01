@@ -151,6 +151,52 @@ describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage
     expect(api.admin.createGalleryUploadBatch).not.toHaveBeenCalled();
   });
 
+  it('pages through all rows, filters failures beyond the first page, and retries every failed file with bounded previews', async () => {
+    const records = Array.from({ length: 24 }, (_, index) => {
+      const id = String(index).padStart(2, '0');
+      return { file: new File(['image'], `resume-${id}.jpg`, { type: 'image/jpeg' }), record: {
+        owner: 'clerk-a', id, groupId: 'restored', lastModified: 1, optimized: true, uploaded: true,
+        prepared: { signed_id: `signed-${id}`, direct_upload: { url: 'https://storage.invalid/file', headers: {} } },
+        meta: { active: false, caption: '', category: '', sortOrder: index },
+        task: { id, eventId: 1, eventName: 'Copa', batchId: 8, fileName: `resume-${id}.jpg`, fileSize: 5, originalFileSize: 5,
+          browserPreviewable: true, progress: index >= 12 ? 90 : 100, bytesUploaded: 5, createdAt: index,
+          status: index >= 12 ? 'failed' as const : 'complete' as const, error: index >= 12 ? 'Response lost' : undefined },
+      } };
+    });
+    await store.enqueue(records);
+    render(<View />);
+    await waitFor(() => expect(queue.tasks).toHaveLength(24));
+    expect(screen.getAllByRole('listitem')).toHaveLength(8);
+    expect(document.querySelectorAll('img').length).toBeLessThanOrEqual(8);
+    expect(screen.getByText('1–8 of 24')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'All files (24)' }).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(screen.getByRole('button', { name: 'Next files' }));
+    expect(screen.getByText('9–16 of 24')).toBeTruthy();
+    expect(screen.getByText('resume-23.jpg')).toBeTruthy();
+    expect(screen.getByRole('progressbar', { name: 'resume-23.jpg upload progress' }).getAttribute('aria-valuenow')).toBe('90');
+    fireEvent.click(screen.getByRole('button', { name: 'Next files' }));
+    expect(screen.getByText('17–24 of 24')).toBeTruthy();
+    expect(screen.getByText('resume-11.jpg')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Failed only (12)' }));
+    expect(screen.getByText('1–8 of 12')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Failed only (12)' }).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(screen.getByRole('button', { name: 'Next files' }));
+    expect(screen.getByText('9–12 of 12')).toBeTruthy();
+    expect(screen.getAllByRole('listitem')).toHaveLength(4);
+    expect(screen.getByRole('button', { name: 'Next files' }).hasAttribute('disabled')).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Retry failed' }));
+    await waitFor(() => expect(queue.completedCount).toBe(24));
+    expect(api.admin.completeEventGalleryDirectUpload).toHaveBeenCalledTimes(12);
+    expect(transfers).toBe(0);
+    expect(screen.getByText('No failed files')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'All files (24)' }));
+    expect(screen.getAllByRole('listitem')).toHaveLength(8);
+    expect(document.querySelectorAll('img').length).toBeLessThanOrEqual(8);
+    fireEvent.click(screen.getByRole('button', { name: 'Clear complete' }));
+    await waitFor(() => expect(queue.tasks).toEqual([]));
+    expect(await store.file('clerk-a', '23')).toBeUndefined();
+  });
+
   it('checksums a large non-JPEG in chunks without changing the uploaded bytes', async () => {
     render(<View />);
     const bytes = new Uint8Array(5 * 1024 * 1024).fill(3);

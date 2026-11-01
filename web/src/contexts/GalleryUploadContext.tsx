@@ -518,6 +518,8 @@ function estimatedUploadSize(task: GalleryUploadTask, averageOptimizedRatio: num
 export function GalleryUploadStatusPanel() {
   const { tasks, activeCount, failedCount, completedCount, retryFailed, clearCompleted, concurrency, directStorageUnavailable, directStorageError, queueError } = useGalleryUploads();
   const [now, setNow] = useState(0);
+  const [fileFilter, setFileFilter] = useState<'all' | 'failed'>('all');
+  const [filePage, setFilePage] = useState(0);
 
   useEffect(() => {
     if (activeCount === 0) return undefined;
@@ -570,9 +572,13 @@ export function GalleryUploadStatusPanel() {
           : directTasks.length > 0
             ? 'Direct storage'
             : 'Preparing';
-  const visibleTasks = [...tasks]
-    .sort((a, b) => taskSortRank(a) - taskSortRank(b) || (a.startedAt || a.createdAt) - (b.startedAt || b.createdAt))
-    .slice(0, 8);
+  const filteredTasks = tasks.filter(task => fileFilter === 'all' || task.status === 'failed')
+    .sort((a, b) => taskSortRank(a) - taskSortRank(b) || (a.startedAt || a.createdAt) - (b.startedAt || b.createdAt));
+  const pageSize = 8;
+  const lastPage = Math.max(0, Math.ceil(filteredTasks.length / pageSize) - 1);
+  const currentPage = Math.min(filePage, lastPage);
+  const pageStart = currentPage * pageSize;
+  const visibleTasks = filteredTasks.slice(pageStart, pageStart + pageSize);
 
   return (
     <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain w-[min(460px,calc(100vw-2rem))] border border-white/10 bg-surface shadow-2xl">
@@ -584,7 +590,7 @@ export function GalleryUploadStatusPanel() {
           </div>
           <div className="text-xs text-text-muted">{overall}%</div>
         </div>
-        <div className="mt-2 h-1.5 bg-white/5 overflow-hidden">
+        <div role="progressbar" aria-label="Overall upload progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={overall} className="mt-2 h-1.5 bg-white/5 overflow-hidden">
           <div className="h-full bg-gold transition-all" style={{ width: `${overall}%` }} />
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
@@ -620,11 +626,24 @@ export function GalleryUploadStatusPanel() {
           </div>
         )}
       </div>
-      <div className="max-h-72 overflow-auto">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 px-3 py-2">
+        <div role="group" aria-label="Filter upload files" className="flex flex-wrap gap-1">
+          <button type="button" aria-pressed={fileFilter === 'all'} onClick={() => { setFileFilter('all'); setFilePage(0); }} className="min-h-11 px-2 text-xs text-text-primary aria-pressed:bg-gold/10 aria-pressed:text-gold focus-visible:outline-2 focus-visible:outline-gold">
+            All files ({tasks.length})
+          </button>
+          <button type="button" aria-pressed={fileFilter === 'failed'} onClick={() => { setFileFilter('failed'); setFilePage(0); }} className="min-h-11 px-2 text-xs text-text-primary aria-pressed:bg-gold/10 aria-pressed:text-gold focus-visible:outline-2 focus-visible:outline-gold">
+            Failed only ({failedCount})
+          </button>
+        </div>
+        <span className="text-xs text-text-muted" aria-live="polite" aria-atomic="true">
+          {filteredTasks.length ? `${pageStart + 1}–${Math.min(pageStart + pageSize, filteredTasks.length)} of ${filteredTasks.length}` : fileFilter === 'failed' ? 'No failed files' : 'No files'}
+        </span>
+      </div>
+      <div id="gallery-upload-files" role="list" aria-label={fileFilter === 'failed' ? 'Failed upload files' : 'Upload files'} className="max-h-72 overflow-auto">
         {visibleTasks.map(task => {
           const transferredForTask = task.status === 'complete' ? task.fileSize : Math.min(task.fileSize, task.bytesUploaded || 0);
           return (
-            <div key={task.id} className="flex items-center gap-3 p-3 border-b border-white/5">
+            <div key={task.id} role="listitem" className="flex items-center gap-3 p-3 border-b border-white/5">
               {task.browserPreviewable && task.previewUrl ? (
                 <img src={task.previewUrl} alt="" className="w-10 h-10 object-cover bg-white/5" />
               ) : (
@@ -634,7 +653,7 @@ export function GalleryUploadStatusPanel() {
               )}
               <div className="min-w-0 flex-1">
                 <div className="truncate text-xs text-text-primary">{task.fileName}</div>
-                <div className="mt-1 h-1 bg-white/5 overflow-hidden">
+                <div role="progressbar" aria-label={`${task.fileName} upload progress`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={task.progress} className="mt-1 h-1 bg-white/5 overflow-hidden">
                   <div className={`h-full ${task.status === 'failed' ? 'bg-red-400' : 'bg-gold'}`} style={{ width: `${task.progress}%` }} />
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-text-muted">
@@ -655,13 +674,20 @@ export function GalleryUploadStatusPanel() {
           );
         })}
       </div>
+      {filteredTasks.length > pageSize && (
+        <nav aria-label="Upload file pages" className="flex items-center justify-between gap-2 border-b border-white/5 px-3 py-1">
+          <button type="button" aria-controls="gallery-upload-files" disabled={currentPage === 0} onClick={() => setFilePage(currentPage - 1)} className="min-h-11 px-2 text-xs text-gold disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-gold">Previous files</button>
+          <span className="text-xs text-text-muted">Page {currentPage + 1} of {lastPage + 1}</span>
+          <button type="button" aria-controls="gallery-upload-files" disabled={currentPage === lastPage} onClick={() => setFilePage(currentPage + 1)} className="min-h-11 px-2 text-xs text-gold disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-gold">Next files</button>
+        </nav>
+      )}
       {(failedCount > 0 || completedCount > 0) && (
         <div className="flex items-center justify-end gap-2 p-3">
           {failedCount > 0 && (
-            <button onClick={retryFailed} className="px-3 py-1.5 text-xs text-gold bg-gold/10 hover:bg-gold/15">Retry failed</button>
+            <button onClick={() => { setFilePage(0); retryFailed(); }} className="px-3 py-1.5 text-xs text-gold bg-gold/10 hover:bg-gold/15">Retry failed</button>
           )}
           {completedCount > 0 && (
-            <button onClick={clearCompleted} className="px-3 py-1.5 text-xs text-text-muted hover:text-text-primary">Clear complete</button>
+            <button onClick={() => { setFilePage(0); clearCompleted(); }} className="px-3 py-1.5 text-xs text-text-muted hover:text-text-primary">Clear complete</button>
           )}
         </div>
       )}
