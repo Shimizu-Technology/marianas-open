@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Archive, RotateCw, X } from 'lucide-react';
-import { sendSavedZip, ZIP_MAX_BYTES, zipQueue, type SavedZip } from '../../../utils/zipIntake';
+import { enqueueZip, removeSavedZip, sendSavedZip, withZipIntakeLock, ZIP_MAX_BYTES, zipQueue, type SavedZip } from '../../../utils/zipIntake';
 import type { ImportOptions, PhotoImport } from '../../../services/photoIntake';
 import { photoButton, photoInput } from './styles';
 
 interface Props { eventId: number; options: ImportOptions; onImported: () => void; imports: PhotoImport[] }
-export default function ZipIntake({ eventId, options, onImported, imports }: Props) {
+export default function ZipIntake(props: Props) {
   const { userId } = useAuth();
+  return <ZipIntakeSession key={userId || 'signed-out'} {...props} userId={userId} />;
+}
+
+function ZipIntakeSession({ eventId, options, onImported, imports, userId }: Props & { userId: string | null | undefined }) {
   const key = userId ? `${userId}:${eventId}` : '';
   const [saved, setSaved] = useState<SavedZip | null>(null);
   const [busy, setBusy] = useState(false);
@@ -17,21 +21,21 @@ export default function ZipIntake({ eventId, options, onImported, imports }: Pro
   const [ready, setReady] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const running = useRef(false);
+  const alive = useRef(true);
   const onImportedRef = useRef(onImported);
   useEffect(() => { onImportedRef.current = onImported; }, [onImported]);
 
   const send = useCallback(async (record: SavedZip) => {
-    if (running.current) return;
+    if (running.current || !alive.current) return;
     running.current = true;
     setBusy(true); setError('');
     const abort = new AbortController();
     controller.current = abort;
     try {
-      if (!navigator.locks) throw new Error('ZIP resume requires a browser with Web Locks. Use current Safari, Chrome, Edge, or Firefox.');
-      await navigator.locks.request(`mo-zip:${record.key}`, { ifAvailable: true }, async lock => {
-        if (!lock) throw new Error('This ZIP is uploading in another tab. Return to that tab or close it, then retry.');
+      await withZipIntakeLock(record.key, async () => {
         const latest = await zipQueue.load(record.key);
-        if (!latest) return;
+        if (!latest) { setSaved(null); setStage('This ZIP was completed or removed in another tab.'); return; }
+        if (latest.id !== record.id) throw new Error('Another ZIP was saved in another tab. Reload Photos to resume it.');
         await sendSavedZip(latest, (label, percent) => { setStage(label); setProgress(percent); }, abort.signal);
         if (abort.signal.aborted) return;
         setSaved(null); setStage('ZIP received. The worker is importing your photos.');
@@ -44,27 +48,36 @@ export default function ZipIntake({ eventId, options, onImported, imports }: Pro
 
   useEffect(() => {
     let cancelled = false;
+    alive.current = true;
     if (!key) return;
     zipQueue.load(key).then(record => {
       if (cancelled) return;
       setReady(true);
       if (record) { setSaved(record); void send(record); }
     }).catch(cause => { if (!cancelled) { setError(cause instanceof Error ? cause.message : 'Could not restore ZIP.'); setReady(true); } });
-    return () => { cancelled = true; controller.current?.abort(); };
+    return () => { cancelled = true; alive.current = false; controller.current?.abort(); };
   }, [key, send]);
 
   async function choose(file: File) {
     if (!key) return;
     setError('');
     if (!file.name.toLowerCase().endsWith('.zip') || file.size <= 0 || file.size > ZIP_MAX_BYTES) { setError('Choose a non-empty .zip file up to 4 GB.'); return; }
-    const record: SavedZip = { key, eventId, file, options };
+    const record: SavedZip = { id: crypto.randomUUID(), key, eventId, file, options };
     setBusy(true);
     try {
       await navigator.storage?.persist?.().catch(() => false);
-      await zipQueue.save(record);
+      if (!alive.current) return;
+      await enqueueZip(record);
+      if (!alive.current) return;
       setSaved(record); setBusy(false);
       await send(record);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not save ZIP on this device.'); setBusy(false); }
+    } catch (cause) {
+      if (!alive.current) return;
+      const existing = await zipQueue.load(key).catch(() => undefined);
+      if (!alive.current) return;
+      if (existing) setSaved(existing);
+      setError(cause instanceof Error ? cause.message : 'Could not save ZIP on this device.'); setBusy(false);
+    }
   }
 
   return <div className="space-y-3 border-t border-white/10 pt-4">
@@ -78,7 +91,7 @@ export default function ZipIntake({ eventId, options, onImported, imports }: Pro
       <p className="mt-1 text-xs text-text-secondary">Saved on this device · Album: {saved.options.category || 'Uncategorized'} · {saved.options.timezone}</p>
       <div className="mt-2 flex flex-wrap gap-2">
         {!busy && <button className={photoButton} onClick={() => void send(saved)}><RotateCw size={16} />Retry saved ZIP</button>}
-        {!busy && <button className={photoButton} onClick={async () => { if (!window.confirm('Remove this saved ZIP from this device? Imported photos will remain.')) return; try { await zipQueue.remove(saved.key); setSaved(null); setError(''); setStage(''); } catch { setError('Could not remove the saved ZIP. Try again.'); } }}><X size={16} />Remove saved ZIP</button>}
+        {!busy && <button className={photoButton} onClick={async () => { if (!window.confirm('Remove this saved ZIP from this device? Imported photos will remain.')) return; try { await removeSavedZip(saved); setSaved(null); setError(''); setStage(''); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not remove the saved ZIP. Try again.'); } }}><X size={16} />Remove saved ZIP</button>}
       </div>
     </div>}
     {stage && <div role="status" className="text-sm text-text-secondary">{stage}{busy ? ` · ${progress}%` : ''}{busy && <progress className="mt-2 block h-2 w-full accent-gold" max={100} value={progress} aria-label={stage} />}</div>}

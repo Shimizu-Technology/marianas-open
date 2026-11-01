@@ -52,6 +52,7 @@ function EventPhotos({ event }: { event: Event }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const [loadedFilter, setLoadedFilter] = useState('');
   const filterKey = JSON.stringify([category, q, view, page]);
   const generation = useRef(0);
@@ -79,7 +80,8 @@ function EventPhotos({ event }: { event: Event }) {
   }, [event.id, page, category, q, view, filterKey]);
 
   const invalidateLoad = useCallback(() => { generation.current++; }, []);
-  useEffect(() => { void load(); return invalidateLoad; }, [load, taskVersion, invalidateLoad]);
+  const refresh = useCallback(() => { setLoading(true); setRefreshVersion(value => value + 1); }, []);
+  useEffect(() => { void load(); return invalidateLoad; }, [load, taskVersion, invalidateLoad, refreshVersion]);
   const processing = imports.some(item => ['pending', 'queued', 'processing', 'importing'].includes(item.status)) || photos.some(photo => ['pending', 'uploaded', 'processing'].includes(photo.status));
   useEffect(() => {
     if (!processing) return;
@@ -92,7 +94,7 @@ function EventPhotos({ event }: { event: Event }) {
   async function mutate(operation: () => Promise<unknown>, success: string) {
     if (busy) return;
     setBusy(true); setError(''); setMessage('');
-    try { await operation(); setMessage(success); await load(); }
+    try { await operation(); setMessage(success); refresh(); }
     catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not save. Your selection is still available; try again.'); }
     finally { setBusy(false); }
   }
@@ -114,7 +116,7 @@ function EventPhotos({ event }: { event: Event }) {
     {!settings ? loading && <p role="status" className="text-sm text-text-secondary">Loading albums and photos…</p> : <>
       <div className="grid items-start gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
         <AlbumManager eventId={event.id} albums={albums} selected={category} select={album => filters({ album })} busy={busy} mutate={mutate} />
-        <div className="min-w-0 space-y-5"><PhotoUpload key={`${event.id}:${settings.timezone}`} event={event} albums={albums} settings={settings} selectedAlbum={category} imports={imports} busy={busy} refresh={() => void load()} mutate={mutate} />
+        <div className="min-w-0 space-y-5"><PhotoUpload key={`${event.id}:${settings.timezone}`} event={event} albums={albums} settings={settings} selectedAlbum={category} imports={imports} busy={busy} refresh={refresh} mutate={mutate} />
           <PhotoGrid key={`${category}:${q}:${view}:${page}`} eventId={event.id} photos={loadedFilter === filterKey ? photos : []} albums={albums} total={loadedFilter === filterKey ? total : 0} page={page} q={q} view={view} busy={busy} loading={loading || (loadedFilter !== filterKey && !error)} filters={filters} mutate={mutate} />
         </div>
       </div>

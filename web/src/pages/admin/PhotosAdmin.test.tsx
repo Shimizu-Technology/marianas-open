@@ -136,3 +136,21 @@ it('saves explicit review hold and permits a custom day album type', async () =>
   fireEvent.click(screen.getByRole('button', { name: 'Preview day albums' }));
   await waitFor(() => expect(photoIntake.proposals).toHaveBeenCalledWith(7, 'Awards'));
 });
+
+it('refreshes the current filters when an older bulk action finishes after navigation', async () => {
+  let finish!: (value: { updated: number }) => void;
+  vi.mocked(photoIntake.bulkUpdate).mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  vi.spyOn(window, 'confirm').mockReturnValue(true);
+  mount(); await loaded();
+  fireEvent.click(screen.getByLabelText('Select DSC_1234.jpg'));
+  fireEvent.click(screen.getByRole('button', { name: 'Hide' }));
+  fireEvent.change(screen.getByRole('combobox', { name: 'Photo visibility filter' }), { target: { value: 'hidden' } });
+  await waitFor(() => expect(photoIntake.photos).toHaveBeenLastCalledWith(7, { hidden: 1, page: 1, per_page: 48 }));
+  finish({ updated: 1 });
+  await screen.findByText('1 photos hidden.');
+  await waitFor(() => {
+    expect(photoIntake.photos).toHaveBeenLastCalledWith(7, { hidden: 1, page: 1, per_page: 48 });
+    expect(screen.queryByText('Loading photos…')).toBeNull();
+    expect(screen.getByRole('combobox', { name: 'Photo visibility filter' })).toHaveProperty('value', 'hidden');
+  });
+});

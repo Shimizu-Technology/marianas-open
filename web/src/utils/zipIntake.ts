@@ -6,6 +6,7 @@ export const ZIP_MAX_BYTES = 4 * 1024 ** 3;
 const CHUNK_BYTES = 4 * 1024 ** 2;
 const DATABASE = 'marianas-photo-zip-intake-v1';
 export interface SavedZip {
+  id: string;
   key: string;
   eventId: number;
   file: File;
@@ -44,6 +45,29 @@ export const zipQueue = {
   },
   remove: (key: string) => zipStore('readwrite', store => store.delete(key)),
 };
+
+export async function withZipIntakeLock<T>(key: string, operation: () => Promise<T>): Promise<T> {
+  if (!navigator.locks) throw new Error('ZIP resume requires a browser with Web Locks. Use a current browser.');
+  return navigator.locks.request(`mo-zip:${key}`, { ifAvailable: true }, async lock => {
+    if (!lock) throw new Error('This ZIP is active in another tab. Return to that tab or close it, then retry.');
+    return operation();
+  });
+}
+
+export function enqueueZip(record: SavedZip) {
+  return withZipIntakeLock(record.key, async () => {
+    if (await zipQueue.load(record.key)) throw new Error('A saved ZIP already exists for this event. Resume or remove it before choosing another.');
+    await zipQueue.save(record);
+  });
+}
+
+export function removeSavedZip(record: SavedZip) {
+  return withZipIntakeLock(record.key, async () => {
+    const current = await zipQueue.load(record.key);
+    if (current && current.id !== record.id) throw new Error('Another ZIP was saved in another tab. Reload Photos before changing it.');
+    await zipQueue.remove(record.key);
+  });
+}
 
 function checkAbort(signal: AbortSignal) { if (signal.aborted) throw new DOMException('Upload paused', 'AbortError'); }
 function readChunk(blob: Blob): Promise<ArrayBuffer> {
