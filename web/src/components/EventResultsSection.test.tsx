@@ -20,7 +20,7 @@ it('unblocks the archive layout after a failed result fetch without claiming the
 });
 
 it('keeps published divisions when only optional summary statistics fail', async () => {
-  vi.spyOn(api, 'getEventResults').mockResolvedValue([{ division: 'Adult Black', results: [{ id: 1, placement: 1, competitor_name: 'Athlete One', academy: 'Academy' }] }] as Awaited<ReturnType<typeof api.getEventResults>>);
+  vi.spyOn(api, 'getEventResults').mockResolvedValue([{ division: 'Adult Black', results: [{ id: 1, placement: 1, competitor_name: 'Athlete One', academy: 'Academy', belt_rank: 'black' }] }] as Awaited<ReturnType<typeof api.getEventResults>>);
   vi.spyOn(api, 'getEventResultsSummary').mockRejectedValue(new Error('Summary unavailable'));
   const onReady = vi.fn();
   render(createElement(EventResultsSection, { eventSlug: 'published-results', onReady }));
