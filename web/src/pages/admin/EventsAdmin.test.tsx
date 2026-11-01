@@ -9,7 +9,7 @@ vi.mock('../../components/admin/event-editor/EventGallerySection', () => ({
   default: () => <div>Gallery fixture</div>,
 }))
 vi.mock('../../components/admin/event-editor/AccommodationsSection', () => ({
-  default: () => <div>Hotels fixture</div>,
+  default: ({ onSaved }: { onSaved?: () => Promise<void> }) => <div>Hotels fixture<button onClick={onSaved}>Save hotel fixture</button></div>,
 }))
 let saved = eventEditorFixture()
 beforeEach(() => {
@@ -210,4 +210,18 @@ it('keeps typed changes while the phone section picker moves between sections', 
   fireEvent.change(screen.getByLabelText('Event section'), { target: { value: 'basics' } })
   expect((screen.getByRole('textbox', { name: 'Name' }) as HTMLInputElement).value).toBe('Phone draft preserved')
   expect(screen.getByText('Unsaved event changes')).toBeTruthy()
+})
+
+it('refreshes saved readiness after a hotel fix without another event save', async () => {
+  saved = eventEditorFixture({ readiness: { publishable: false, completed: 0, total: 1, checks: [{ key: 'stale_year', label: 'Hotel description still says 2026', complete: false, blocking: true, section: 'hotels' }] } })
+  await editor()
+  section('Publishing')
+  expect((screen.getByRole('button', { name: 'Publish event' }) as HTMLButtonElement).disabled).toBe(true)
+  section('Hotels & Offers')
+  saved = { ...saved, readiness: { publishable: true, completed: 1, total: 1, checks: [{ key: 'stale_year', label: 'Hotel description reviewed', complete: true, blocking: true, section: 'hotels' }] } }
+  fireEvent.click(screen.getByRole('button', { name: 'Save hotel fixture' }))
+  await waitFor(() => expect(api.admin.getEvents).toHaveBeenCalledTimes(2))
+  section('Publishing')
+  expect((screen.getByRole('button', { name: 'Publish event' }) as HTMLButtonElement).disabled).toBe(false)
+  expect(api.admin.updateEvent).not.toHaveBeenCalled()
 })

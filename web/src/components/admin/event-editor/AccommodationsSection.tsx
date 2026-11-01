@@ -10,9 +10,11 @@ import { formatDate } from '../../../utils/dates'
 export default function AccommodationsSection({
   eventId,
   onDirtyChange,
+  onSaved,
 }: {
   eventId: number
   onDirtyChange?: (dirty: boolean) => void
+  onSaved?: () => Promise<void>
 }) {
   const [accommodations, setAccommodations] = useState<EventAccommodation[]>([])
   const [loading, setLoading] = useState(true)
@@ -90,6 +92,7 @@ export default function AccommodationsSection({
       }
       setEditing(null)
       await load()
+      await onSaved?.()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save accommodation')
     } finally {
@@ -102,6 +105,7 @@ export default function AccommodationsSection({
     try {
       await api.admin.deleteAccommodation(eventId, id)
       await load()
+      await onSaved?.()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete accommodation')
     }
@@ -401,6 +405,7 @@ export default function AccommodationsSection({
                     try {
                       await api.admin.uploadAccommodationImage(eventId, editing, file)
                       await load()
+                      await onSaved?.()
                     } catch (err) {
                       setError(err instanceof Error ? err.message : 'Image upload failed')
                     }

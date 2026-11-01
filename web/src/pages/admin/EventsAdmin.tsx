@@ -1226,7 +1226,7 @@ export default function EventsAdmin() {
                 </ul>
               ) : null}
               {typeof editing === 'number' ? (
-                <AccommodationsSection key={editing} eventId={editing} onDirtyChange={onHotelDirty} />
+                <AccommodationsSection key={editing} eventId={editing} onDirtyChange={onHotelDirty} onSaved={loadEvents} />
               ) : (
                 <p className="text-sm text-text-secondary">Save this draft to add hotels and offers.</p>
               )}

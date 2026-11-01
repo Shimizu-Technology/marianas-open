@@ -16,12 +16,13 @@ afterEach(() => {
 
 it('keeps a hotel draft when discard is declined, validates it and clears dirty state after save', async () => {
   const onDirty = vi.fn()
+  const onSaved = vi.fn().mockResolvedValue(undefined)
   vi.spyOn(api.admin, 'getAccommodations').mockResolvedValue({ accommodations: [] })
   vi.spyOn(api.admin, 'createAccommodation').mockResolvedValue(
     {} as Awaited<ReturnType<typeof api.admin.createAccommodation>>
   )
   vi.spyOn(window, 'confirm').mockReturnValue(false)
-  render(<AccommodationsSection eventId={7} onDirtyChange={onDirty} />)
+  render(<AccommodationsSection eventId={7} onDirtyChange={onDirty} onSaved={onSaved} />)
   await waitFor(() => expect(api.admin.getAccommodations).toHaveBeenCalled())
   fireEvent.click(screen.getByRole('button', { name: 'Add' }))
   fireEvent.change(screen.getByLabelText('Hotel Name *'), { target: { value: 'Synthetic hotel' } })
@@ -43,6 +44,7 @@ it('keeps a hotel draft when discard is declined, validates it and clears dirty 
     )
   )
   await waitFor(() => expect(onDirty).toHaveBeenLastCalledWith(false))
+  expect(onSaved).toHaveBeenCalledOnce()
 })
 
 it('loads the extracted gallery and preserves an edited caption until explicitly discarded', async () => {

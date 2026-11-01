@@ -382,7 +382,7 @@ function EventCard({ event, formatDate, t, isPast }: {
               </span>
             )}
             <div className="flex gap-0.5">
-              {Array.from({ length: event.asjjf_stars }).map((_, j) => (
+              {Array.from({ length: event.asjjf_stars ?? 0 }).map((_, j) => (
                 <Star key={j} size={12} className="fill-gold-500 text-gold-500" />
               ))}
             </div>
