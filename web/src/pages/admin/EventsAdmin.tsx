@@ -22,6 +22,7 @@ import type {
   EventTicketOption,
 } from '../../services/api'
 import ImageUpload from '../../components/ImageUpload'
+import { ResultsSyncBadge } from '../../components/admin/ResultsSyncCard'
 import ImageWithShimmer from '../../components/ImageWithShimmer'
 import { resolveMediaUrl } from '../../utils/images'
 import { formatDate } from '../../utils/dates'
@@ -1659,7 +1660,10 @@ export default function EventsAdmin() {
               <tbody className="divide-y divide-white/5">
                     {filteredEvents.map(event => (
                   <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-5 py-3 text-text-primary font-medium">{event.name}</td>
+                    <td className="px-5 py-3 text-text-primary font-medium">
+                      {event.name}
+                      <div className="mt-1"><Link to={`/admin/events/${event.id}/results`} aria-label={`Review results sync for ${event.name}`} className="inline-flex min-h-11 items-center focus-visible:outline-2 focus-visible:outline-gold"><ResultsSyncBadge status={event.results_sync_status} lastCheckedAt={event.results_last_checked_at} /></Link></div>
+                    </td>
                         <td className="px-5 py-3 text-text-secondary whitespace-nowrap">{formatDate(event.date)}</td>
                     <td className="px-5 py-3 text-text-secondary">{event.city}, {event.country}</td>
                     <td className="px-5 py-3">
@@ -1725,6 +1729,7 @@ export default function EventsAdmin() {
                         <div className="text-sm text-text-primary font-medium">{event.name}</div>
                         <div className="text-xs text-text-secondary mt-1">{formatDate(event.date)}</div>
                         <div className="text-xs text-text-muted mt-1">{event.city}, {event.country}</div>
+                        <Link to={`/admin/events/${event.id}/results`} aria-label={`Review results sync for ${event.name}`} className="mt-1 inline-flex min-h-11 items-center focus-visible:outline-2 focus-visible:outline-gold"><ResultsSyncBadge status={event.results_sync_status} lastCheckedAt={event.results_last_checked_at} /></Link>
                       </div>
                       <span className={`text-xs px-2 py-0.5 shrink-0 ${
                         event.status === 'upcoming' ? 'bg-gold/10 text-gold' :

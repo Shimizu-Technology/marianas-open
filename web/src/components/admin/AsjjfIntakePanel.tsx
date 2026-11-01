@@ -5,7 +5,7 @@ import { api } from '../../services/api'
 const fieldClass = 'mt-1 min-h-11 w-full rounded-lg border border-white/15 bg-navy-900 px-3 py-2 text-base text-text-primary focus-visible:outline-2 focus-visible:outline-gold'
 export const asjjfButtonClass = 'inline-flex min-h-11 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 px-4 py-2 text-sm font-medium text-gold hover:bg-gold/15 focus-visible:outline-2 focus-visible:outline-gold disabled:cursor-wait disabled:opacity-60'
 
-export default function AsjjfIntakePanel({ eventId }: { eventId?: number }) {
+export default function AsjjfIntakePanel({ eventId, onSnapshotSaved }: { eventId?: number; onSnapshotSaved?: () => void }) {
   const formId = useId()
   const [checking, setChecking] = useState(false)
   const [checkMessage, setCheckMessage] = useState('')
@@ -22,7 +22,7 @@ export default function AsjjfIntakePanel({ eventId }: { eventId?: number }) {
     try {
       const { queued_count } = await api.admin.checkAsjjf(eventId)
       setCheckMessage(queued_count > 0
-        ? "Queued. Our fetcher checks ASJJF overnight; you'll see snapshots here after it runs."
+        ? 'Queued for the next nightly fetch at 02:30 ChST. This does not fetch ASJJF immediately.'
         : 'No new pages queued. Check ASJJF sync for pending checks and snapshots.')
     } catch (error) {
       setCheckError(error instanceof Error ? error.message : 'Could not queue a check. Try again.')
@@ -48,6 +48,7 @@ export default function AsjjfIntakePanel({ eventId }: { eventId?: number }) {
       const result = await api.admin.uploadAsjjfSnapshot(data)
       setUploadMessage(`Snapshot #${result.snapshot_id} saved. Parse status: ${result.parse_status}. Refresh ASJJF sync to see the latest parse status and summary.`)
       form.reset()
+      onSnapshotSaved?.()
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : 'Could not upload this page. Try again.')
     } finally {
@@ -59,7 +60,7 @@ export default function AsjjfIntakePanel({ eventId }: { eventId?: number }) {
     <section aria-labelledby={`${formId}-heading`} className="mb-6 space-y-4 rounded-xl border border-white/10 bg-surface p-4 sm:p-5">
       <div>
         <h2 id={`${formId}-heading`} className="font-heading text-lg font-bold text-text-primary">ASJJF snapshots</h2>
-        <p className="mt-1 text-sm text-text-secondary">Save ASJJF pages for review. Snapshots won't yet replace published results.</p>
+        <p className="mt-1 text-sm text-text-secondary">Complete snapshots sync published results automatically. Safety holds preserve existing results when pages are missing or changes need review.</p>
         {eventId !== undefined && <Link to="/admin/asjjf" className="mt-2 inline-flex min-h-11 items-center text-sm text-gold underline underline-offset-4">View ASJJF sync status</Link>}
       </div>
       {eventId !== undefined && (
@@ -67,7 +68,7 @@ export default function AsjjfIntakePanel({ eventId }: { eventId?: number }) {
           <button type="button" onClick={checkNow} disabled={checking} className={asjjfButtonClass}>
             {checking ? 'Queuing check…' : 'Check ASJJF now'}
           </button>
-          <p className="text-sm text-text-secondary">Our fetcher checks ASJJF overnight. This queues a check for this event.</p>
+          <p className="text-sm text-text-secondary">The next nightly fetch is at 02:30 ChST. This queues a check for this event; it does not fetch ASJJF immediately.</p>
           {checkMessage && <p role="status" className="text-sm text-green-400">{checkMessage}</p>}
           {checkError && <p role="alert" className="break-words text-sm text-red-400">{checkError}</p>}
         </div>
