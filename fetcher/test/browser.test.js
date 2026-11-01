@@ -114,3 +114,51 @@ test('challenge evidence survives a later disallowed redirect without returning 
   assert.equal(result.html, null);
   assert.equal(result.final_url, null);
 });
+
+test('third-party iframes on an ASJJF page do not trip the navigation boundary or latch a challenge', async () => {
+  const listeners = {};
+  let routeHandler, closed = 0;
+  const mainFrame = { name: 'main' };
+  const subFrame = { name: 'facebook-iframe' };
+  const nav = (url, frame) => ({ isNavigationRequest: () => true, method: () => 'GET', url: () => url, redirectedFrom: () => null, frame: () => frame });
+  const page = {
+    mainFrame: () => mainFrame,
+    on: (event, listener) => { listeners[event] = listener; },
+    goto: async () => {
+      const top = nav('https://asjjf.org/main/eventInfo/2258', mainFrame);
+      listeners.request(top);
+      await routeHandler({ request: () => top, continue: async () => {}, abort: async () => { throw new Error('main frame aborted'); } });
+      listeners.response({ request: () => top, status: () => 200, url: () => top.url(), headers: () => ({}), frame: () => mainFrame });
+      // Embedded third-party frames: a different host and even a 403 must be ignored.
+      const fb = nav('https://www.facebook.com/plugins/page.php', subFrame);
+      listeners.request(fb);
+      let continued = false;
+      await routeHandler({ request: () => fb, continue: async () => { continued = true; }, abort: async () => {} });
+      assert.equal(continued, true);
+      listeners.response({ request: () => fb, status: () => 403, url: () => fb.url(), headers: () => ({}), frame: () => subFrame });
+    },
+    title: async () => 'ASJJF - 2027 Guam Copa De Marianas (gi Tournament)',
+    content: async () => '<html><head><title>ASJJF - 2027 Guam Copa De Marianas (gi Tournament)</title></head><body>ok</body></html>',
+    url: () => 'https://asjjf.org/main/eventInfo/2258',
+    waitForTimeout: async () => {},
+  };
+  const launch = async () => ({ close: async () => { closed++; }, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page,
+    route: async (_pattern, handler) => { routeHandler = handler; } }) });
+  const result = await fetchPage('https://asjjf.org/main/eventInfo/2258', config, { launch });
+  assert.equal(result.outcome, 'ok');
+  assert.equal(result.http_status, 200);
+  assert.equal(result.final_url, 'https://asjjf.org/main/eventInfo/2258');
+  assert.ok(closed >= 1);
+});
+
+test('a main-frame navigation to a disallowed host is still rejected when frames are reported', async () => {
+  let requestListener;
+  const mainFrame = {};
+  const page = { mainFrame: () => mainFrame, on: (event, listener) => { if (event === 'request') requestListener = listener; },
+    goto: async () => requestListener({ isNavigationRequest: () => true, method: () => 'GET', url: () => 'https://evil.test/',
+      redirectedFrom: () => null, frame: () => mainFrame }) };
+  const launch = async () => ({ close: async () => {}, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async () => {} }) });
+  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_navigation/);
+});

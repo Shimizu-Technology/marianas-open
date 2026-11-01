@@ -34,8 +34,18 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
       observe();
     });
     const page = await context.newPage();
+    // Only the top-level document is captured, so the host boundary and challenge
+    // status apply to main-frame navigations and their redirect chains. ASJJF pages
+    // embed third-party iframes (Facebook, Google Tag Manager); those load as in the
+    // verified probe and never affect the saved HTML.
+    const isMainFrameNavigation = request => {
+      if (!request.isNavigationRequest()) return false;
+      try {
+        return typeof request.frame !== 'function' || request.frame() === page.mainFrame();
+      } catch { return true; }
+    };
     page.on('request', request => {
-      if (!request.isNavigationRequest()) return;
+      if (!isMainFrameNavigation(request)) return;
       try {
         for (let hop = request; hop; hop = hop.redirectedFrom()) {
           validateUrl(hop.url(), config.allowedHosts);
@@ -49,7 +59,7 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
     await context.route('**/*', async route => {
       const request = route.request();
       try {
-        if (request.isNavigationRequest()) {
+        if (isMainFrameNavigation(request)) {
           validateUrl(request.url(), config.allowedHosts);
           if (request.method() !== 'GET') return route.abort();
         }
@@ -57,7 +67,7 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
       } catch { return route.abort(); }
     });
     page.on('response', response => {
-      if (!response.request().isNavigationRequest()) return;
+      if (!isMainFrameNavigation(response.request())) return;
       if (isChallenge({ status: response.status() })) challengeSeen = true;
       try {
         validateUrl(response.url(), config.allowedHosts);
