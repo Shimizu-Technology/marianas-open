@@ -4,40 +4,73 @@ module Api
       class EventsController < ApplicationController
         include ClerkAuthenticatable
 
+        rescue_from ActiveRecord::RecordInvalid do |error|
+          render json: { errors: error.record.errors.full_messages }, status: :unprocessable_entity
+        end
+        rescue_from ActiveRecord::RecordNotUnique do
+          render json: { errors: ["An event with that public URL already exists. Choose another slug."] }, status: :conflict
+        end
+        rescue_from ArgumentError do |error|
+          render json: { errors: [error.message] }, status: :unprocessable_entity
+        end
+        rescue_from EventPublishingService::NotReady do |error|
+          render json: { errors: [error.message], readiness: error.readiness }, status: :unprocessable_entity
+        end
+        rescue_from EventPublishingService::ForbiddenOverride do |error|
+          render json: { error: error.message }, status: :forbidden
+        end
+
         before_action :require_staff!
         before_action :complete_past_events, only: [:index]
-        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :upload_ticket_banner, :remove_ticket_banner, :import_results_preview, :import_results, :retranslate, :clone]
+        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :upload_ticket_banner, :remove_ticket_banner, :import_results_preview, :import_results, :retranslate, :clone, :publish, :unpublish, :fill_asjjf]
 
         def index
           org = Organization.first
           return render json: { error: "No organization configured" }, status: :unprocessable_entity unless org
           events = org.events.includes(:event_schedule_items, :prize_categories, { event_accommodations: { image_attachment: :blob } }).order(date: :desc)
-          render json: { events: events.as_json }
+          render json: { events: events.map(&:admin_json) }
         end
 
         def show
           @event.complete_if_past!
-          render json: { event: @event.as_json }
+          render json: { event: @event.admin_json }
         end
 
         def create
           org = Organization.first
           return render json: { error: "No organization found" }, status: :unprocessable_entity unless org
-
-          event = org.events.build(event_params)
-          if event.save
-            render json: { event: event.as_json }, status: :created
-          else
-            render json: { errors: event.errors.full_messages }, status: :unprocessable_entity
-          end
+          event = EventPublishingService.call(event: org.events.build, actor: current_user, attributes: event_params, override_reason: params[:override_reason])
+          render json: { event: event.admin_json }, status: :created
         end
 
         def update
-          if @event.update(event_params)
-            render json: { event: @event.reload.as_json }
-          else
-            render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
-          end
+          event = EventPublishingService.call(event: @event, actor: current_user, attributes: event_params, override_reason: params[:override_reason])
+          render json: { event: event.reload.admin_json }
+        end
+
+        def publish
+          status = params[:status].presence || "upcoming"
+          raise ArgumentError, "Choose a public event status" unless Event::PUBLIC_STATUSES.include?(status)
+          event = EventPublishingService.call(event: @event, actor: current_user, attributes: { status: status }, action: "publish", override_reason: params[:override_reason])
+          render json: { event: event.reload.admin_json }
+        end
+
+        def unpublish
+          event = EventPublishingService.call(event: @event, actor: current_user, attributes: { status: "draft", live_stream_active: false }, action: "unpublish")
+          render json: { event: event.reload.admin_json }
+        end
+
+        def fill_asjjf
+          Asjjf::EventFacts.new(@event, actor: current_user).call(params[:asjjf_event_id])
+          render json: { event: @event.reload.admin_json, message: facts_message(@event) }
+        end
+
+        def rollover
+          ids = params[:asjjf_event_ids]
+          raise ArgumentError, "ASJJF event IDs must be a mapping of source event IDs to ASJJF IDs" if ids.present? && !ids.is_a?(ActionController::Parameters)
+          events = SeasonRolloverService.call(source_year: params[:source_year], target_year: params[:target_year], actor: current_user,
+            keep_tagline: ActiveModel::Type::Boolean.new.cast(params[:keep_tagline]), asjjf_event_ids: (ids&.to_unsafe_h || {}))
+          render json: { events: events.map(&:admin_json), message: "Created #{events.size} draft events. Review all copied content before publishing." }, status: :created
         end
 
         def destroy
@@ -66,7 +99,7 @@ module Api
           end
 
           @event.hero_image.attach(params[:image])
-          render json: { event: @event.reload.as_json }
+          render json: { event: @event.reload.admin_json }
         end
 
         def upload_poster
@@ -75,12 +108,12 @@ module Api
           end
 
           @event.poster_image.attach(params[:image])
-          render json: { event: @event.reload.as_json }
+          render json: { event: @event.reload.admin_json }
         end
 
         def remove_poster
           @event.poster_image.purge if @event.poster_image.attached?
-          render json: { event: @event.reload.as_json }
+          render json: { event: @event.reload.admin_json }
         end
 
         def upload_ticket_banner
@@ -90,7 +123,7 @@ module Api
 
           @event.ticket_banner_image.attach(params[:image])
           if @event.valid?
-            render json: { event: @event.reload.as_json }
+            render json: { event: @event.reload.admin_json }
           else
             @event.ticket_banner_image.purge
             render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
@@ -99,94 +132,21 @@ module Api
 
         def remove_ticket_banner
           @event.ticket_banner_image.purge if @event.ticket_banner_image.attached?
-          render json: { event: @event.reload.as_json }
+          render json: { event: @event.reload.admin_json }
         end
 
         # POST /api/v1/admin/events/:id/retranslate
         def retranslate
           @event.retranslate!
-          render json: { message: "Translation enqueued for event and child records", event: @event.reload.as_json }
+          render json: { message: "Translation enqueued for event and child records", event: @event.reload.admin_json }
         end
 
-        # POST /api/v1/admin/events/:id/clone
+        # Compatibility endpoint now uses the same fail-closed rollover policy.
         def clone
-          new_event = @event.dup
-          new_event.assign_attributes(
-            name: "#{@event.name} (Copy)",
-            slug: nil,
-            status: "draft",
-            date: nil,
-            end_date: nil,
-            is_main_event: false,
-            results_imported_at: nil,
-            asjjf_event_ids: [],
-            registration_url: nil,
-            registration_url_gi: nil,
-            registration_url_nogi: nil,
-            live_stream_active: false,
-            ticket_sales_status: "unavailable",
-            ticket_sales_url: nil,
-            ticket_early_bird_ends_on: nil,
-            ticket_options: @event.ticket_options.deep_dup,
-            travel_items: reusable_travel_items,
-            translations: {},
-            translation_status: "untranslated"
-          )
-          new_event.slug = generate_unique_slug(new_event.name)
-
-          acc_blobs = []
-
-          ActiveRecord::Base.transaction do
-            new_event.save!
-
-            @event.event_schedule_items.each do |item|
-              new_item = item.dup
-              new_item.event = new_event
-              new_item.save!
-            end
-
-            @event.prize_categories.each do |cat|
-              new_cat = cat.dup
-              new_cat.event = new_event
-              new_cat.save!
-            end
-
-            @event.event_accommodations.each do |acc|
-              new_acc = acc.dup
-              new_acc.event = new_event
-              new_acc.check_in_date = nil
-              new_acc.check_out_date = nil
-              new_acc.booking_code = nil
-              new_acc.booking_url = nil
-              new_acc.translations = {}
-              new_acc.translation_status = "untranslated"
-              new_acc.save!
-              acc_blobs << [new_acc, acc.image.blob] if acc.image.attached?
-            end
-          end
-
-          acc_blobs.each do |new_acc, blob|
-            new_acc.image.attach(
-              io: blob.open,
-              filename: blob.filename,
-              content_type: blob.content_type
-            )
-          end
-
-          if @event.hero_image.attached?
-            blob = @event.hero_image.blob
-            new_event.hero_image.attach(
-              io: blob.open,
-              filename: blob.filename,
-              content_type: blob.content_type
-            )
-          end
-
-          render json: { event: new_event.reload.as_json }, status: :created
-        rescue ActiveRecord::RecordInvalid => e
-          render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
-        rescue ActiveRecord::RecordNotUnique
-          render json: { errors: ["An event with that slug already exists. Please try again."] }, status: :conflict
+          year = params[:target_year].presence || ((@event.season_year || @event.date&.year || Date.current.year) + 1)
+          event = EventRolloverService.call(source_event: @event, target_year: year, actor: current_user,
+            keep_tagline: ActiveModel::Type::Boolean.new.cast(params[:keep_tagline]), asjjf_event_id: params[:asjjf_event_id])
+          render json: { event: event.admin_json, message: facts_message(event) }, status: :created
         end
 
         private
@@ -203,7 +163,7 @@ module Api
 
         def event_params
           params.permit(
-            :name, :slug, :description, :date, :end_date,
+            :name, :slug, :description, :date, :end_date, :season_year, :registration_not_open, :content_review_required,
             :venue_name, :venue_address, :city, :country, :country_code,
             :asjjf_stars, :is_main_event, :prize_pool, :registration_url,
             :registration_url_gi, :registration_url_nogi,
@@ -221,8 +181,8 @@ module Api
             registration_info_items: [:label, :value],
             travel_items: [:key, :kind, :title, :description, :value, :code, :url, :link_label],
             visa_items: [:title, :description],
-            event_schedule_items_attributes: [:id, :time, :description, :sort_order, :_destroy],
-            prize_categories_attributes: [:id, :name, :amount, :sort_order, :_destroy]
+            event_schedule_items_attributes: [:id, :time, :description, :sort_order, :confirmed, :_destroy],
+            prize_categories_attributes: [:id, :name, :amount, :sort_order, :confirmed, :_destroy]
           )
         end
 
@@ -231,21 +191,12 @@ module Api
           !performed?
         end
 
-        def reusable_travel_items
-          @event.travel_items.reject do |item|
-            item.is_a?(Hash) && (item["kind"] == "offer" || item["code"].present?)
-          end.deep_dup
-        end
-
-        def generate_unique_slug(name)
-          base = name.to_s.parameterize
-          slug = base
-          counter = 1
-          while Event.exists?(slug: slug)
-            slug = "#{base}-#{counter}"
-            counter += 1
+        def facts_message(event)
+          case event.asjjf_info_status
+          when "pending" then "ASJJF snapshot is not available yet. A fetch is queued; fill facts again after the saved page is parsed. No facts were guessed."
+          when "applied" then "Dates, venue, stars, fees and deadlines filled from the saved ASJJF page. Review before publishing."
+          else "Draft created. Dates, links, prices and live state were cleared. Confirm copied schedule and prize rows before publishing."
           end
-          slug
         end
       end
     end
