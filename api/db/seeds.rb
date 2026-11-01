@@ -543,6 +543,7 @@ end
 # Admin user
 User.find_or_create_by!(email: "jerry.shimizutechnology@gmail.com") do |u|
   u.clerk_id = "pending_admin_#{SecureRandom.uuid}"
+  u.invitation_status = "pending"
   u.first_name = "Jerry"
   u.last_name = "Shimizu"
   u.role = "admin"
@@ -550,6 +551,7 @@ end
 
 User.find_or_create_by!(email: "shimizutechnology@gmail.com") do |u|
   u.clerk_id = "pending_admin_#{SecureRandom.uuid}"
+  u.invitation_status = "pending"
   u.first_name = "Leon"
   u.last_name = "Shimizu"
   u.role = "admin"

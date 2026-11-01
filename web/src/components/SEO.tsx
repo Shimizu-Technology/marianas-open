@@ -11,6 +11,8 @@ import {
   toAbsoluteUrl,
 } from '../lib/seo';
 
+import { serializeStructuredData } from '../lib/structuredData';
+
 type StructuredData = Record<string, unknown> | Record<string, unknown>[];
 
 type SEOProps = {
@@ -89,7 +91,7 @@ export default function SEO({
         <script
           key={index}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}
+          dangerouslySetInnerHTML={{ __html: serializeStructuredData(item) }}
         />
       ))}
     </Helmet>

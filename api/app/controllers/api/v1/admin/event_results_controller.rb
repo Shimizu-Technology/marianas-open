@@ -6,11 +6,11 @@ module Api
         before_action :authenticate_user!
         before_action :require_staff!
         before_action :set_event
-        before_action :set_result, only: [:update, :destroy]
+        before_action :set_result, only: [ :update, :destroy ]
 
         def index
-          page = (params[:page] || 1).to_i
-          per_page = [(params[:per_page] || 100).to_i, 200].min
+          page = pagination_page
+          per_page = pagination_limit(default: 100)
 
           base_scope = @event.event_results.order(:division, :placement)
           base_scope = base_scope.where("competitor_name ILIKE :q OR event_results.academy ILIKE :q", q: "%#{params[:search]}%") if params[:search].present?

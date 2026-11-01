@@ -28,9 +28,9 @@ The Marianas Open platform uses **Clerk** for authentication and a **whitelist/i
 |------|-------------|-------------|
 | `admin` | Full access | CRUD all resources, manage users, import data |
 | `staff` | Limited admin | Access admin panel, manage content (no user management) |
-| `viewer` | Read-only admin | View admin dashboard and data |
+| `viewer` | No admin access | Reserved role; read-only admin access is not implemented |
 
-Role is stored in the `users.role` column (default: `viewer`).
+Role is stored in the `users.role` column (default: `viewer`). Admin routes require staff (admin or staff); user management requires admin. Invitations must explicitly specify `admin` or `staff`; missing, viewer, and unknown roles return a 422 validation error.
 
 ## Whitelist / Invite-Only Model
 
@@ -38,11 +38,11 @@ Role is stored in the `users.role` column (default: `viewer`).
 
 ### How it works:
 
-1. **First admin** is created via `db/seeds.rb` using the `SEED_ADMIN_EMAIL` env var
+1. **First admins** are created via `db/seeds.rb` with explicit pending placeholder identities
 2. **Admin invites users** via the Users Admin page (`/admin/users`)
    - Creates a `User` record with email + role + placeholder `clerk_id` (`pending_<uuid>`)
-3. **Invited user signs up** via Clerk (on the `/admin` login page)
-4. **First sign-in**: `ClerkAuthenticatable` matches by email, links their real Clerk ID
+3. **Invited user signs up** through the ticket in their invitation email (`/admin?__clerk_ticket=...`). The optional `__clerk_status=sign_up` also works; explicit `sign_in` selects SignIn. Ordinary `/admin` visits show sign-in only.
+4. **First sign-in**: `ClerkAuthenticatable` links by email only while the local Clerk ID starts with `pending_` and the status is pending or legacy-default accepted. Before linking, the API fetches `/v1/users/{sub}` from Clerk and requires the matching email address to have `verification.status == "verified"`; JWT email claims alone cannot establish ownership. Ticket signup verifies the invited email. Explicitly expired/revoked invitations remain blocked. Once linked, a real Clerk identity can never be replaced by an email match. Backend API failure or unverified ownership returns a clear 403 without saving a link; denial logs omit identity and provider response details.
 5. **Subsequent sign-ins**: Matched by `clerk_id` directly
 
 ### What happens to uninvited users:
@@ -62,12 +62,12 @@ Included in admin controllers. Key methods:
 - `authenticate_user!` — Extracts JWT from `Authorization: Bearer <token>`, verifies via JWKS, finds/creates user
 - `require_admin!` — Calls `authenticate_user!` + checks `user.admin?`
 - `require_staff!` — Calls `authenticate_user!` + checks `user.staff?`
-- `find_or_create_user` — Matches by `clerk_id` first, then by email (for first-time invited users). Returns `nil` for unknown users.
+- `find_or_create_user` — Matches by `clerk_id` first, then by email (only for pending or legacy-default accepted placeholders). Returns `nil` for unknown users.
 
 ### `ClerkAuth` Service (`app/services/clerk_auth.rb`)
 
 - Verifies JWTs using Clerk's JWKS endpoint
-- Caches JWKS keys in memory (refreshes on cache miss)
+- Caches JWKS for one hour in an immutable atomic snapshot per process. Known-key verification never waits on refresh HTTP. Successful ordinary fetches do not throttle immediate key rotation; unknown-key-triggered refreshes have a separate 10-second rate limit. Failed fetches back off for one minute. Refresh is single-flight, with a 4-second overall deadline, 1-second connect / 2-second read timeouts, and a 256 KiB streamed response cap. Concurrent waiters share a 0.5-second total wait budget across JWT loader callbacks and fail closed on timeout.
 - Uses the `jwt` and `httparty` gems
 
 ### User Model (`app/models/user.rb`)
@@ -143,3 +143,11 @@ Admins can:
 - No secrets stored in frontend
 - Admin routes are protected at both frontend (Clerk) and backend (JWT + role check) levels
 - Whitelist model prevents unauthorized access even if someone creates a Clerk account
+
+## Invitation URLs and production configuration
+
+Set `PUBLIC_FRONTEND_URL=https://marianasopen.com` on the API and worker. `FrontendUrl` prefers this over `FRONTEND_URL`, then the first `ALLOWED_ORIGINS` entry (whose unconfigured fallback is localhost). Never rely on CORS origin ordering for production email links. These settings are documented requirements, not verified production values.
+
+The users controller passes `FrontendUrl.admin` to `ClerkInvitationService` as `redirect_url`. Clerk returns a ticket-bearing invitation URL; `UserInviteEmailService` uses that exact URL for the email button and the configured frontend origin for the displayed admin URL and logo. Do not replace the ticket URL with a plain sign-in URL. API invitation creation needs `CLERK_SECRET_KEY`; email delivery on the worker needs `RESEND_API_KEY` and `RESEND_FROM_EMAIL` (or `MAILER_FROM_EMAIL`). Both services need the same frontend origin. The web needs `VITE_CLERK_PUBLISHABLE_KEY`; API verification needs `CLERK_JWKS_URL` and the configured issuer/audience settings. Clerk's application must permit the production `/admin` redirect.
+
+Admins cannot demote themselves or the last admin, or delete themselves/the last admin. Role changes and deletion serialize on admin rows. UsersAdmin displays the API's error message so the operator knows why a change was rejected.

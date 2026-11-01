@@ -10,6 +10,7 @@ import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EventResultsSection from '../components/EventResultsSection';
 import SEO from '../components/SEO';
+import NotFoundPage from './NotFoundPage';
 import { useEvents, useSponsors } from '../hooks/useApi';
 import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 import { useTranslatedField } from '../hooks/useTranslatedField';
@@ -221,7 +222,7 @@ export default function EventDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const shouldReduceMotion = useReducedMotion();
   const posthog = usePostHog();
-  const { events, loading } = useEvents();
+  const { events, loading, error, retry } = useEvents();
 
   const { sponsors } = useSponsors();
   const { images: siteImages } = useSiteImages();
@@ -232,6 +233,28 @@ export default function EventDetailPage() {
   const mainEvent = slug
     ? events.find(e => e.slug === slug) || null
     : getCurrentMainEvent(events);
+
+  if (loading) {
+    return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center px-4 pt-24 pb-12">
+        <section role="alert" className="w-full max-w-lg border border-gold/20 bg-navy-800 p-6 sm:p-10 text-center rounded-xl">
+          <h1 className="font-heading text-3xl text-gold mb-4">{t('eventDetail.loadErrorTitle')}</h1>
+          <p className="text-text-secondary mb-6">{t('eventDetail.loadErrorMessage')}</p>
+          <button type="button" onClick={retry} className="min-h-11 px-6 py-3 bg-gold text-navy-900 font-semibold rounded-lg hover:bg-gold/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold">
+            {t('eventDetail.retry')}
+          </button>
+        </section>
+      </div>
+    );
+  }
+
+  if (!mainEvent) {
+    return slug ? <NotFoundPage /> : <Navigate to="/calendar" replace />;
+  }
 
   const isCompleted = mainEvent?.status === 'completed';
 
@@ -494,17 +517,6 @@ export default function EventDetailPage() {
     window.open(urls[platform], '_blank', 'width=600,height=400');
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen pt-20">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (!slug && !mainEvent) {
-    return <Navigate to="/calendar" replace />;
-  }
 
   return (
     <div className="min-h-screen pt-20">

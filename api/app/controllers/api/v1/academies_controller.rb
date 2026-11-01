@@ -11,7 +11,8 @@ module Api
 
         total = scope.count
 
-        page = (params[:page] || 1).to_i
+        page = pagination_page
+        per_page = pagination_limit(default: PER_PAGE)
 
         records = scope
           .joins(stats_join_sql)
@@ -26,17 +27,17 @@ module Api
             "COALESCE(stats.results_count, 0) as computed_results_count"
           )
           .order(Arel.sql("COALESCE(stats.total_points, 0) DESC, COALESCE(stats.gold, 0) DESC"))
-          .offset((page - 1) * PER_PAGE)
-          .limit(PER_PAGE)
+          .offset((page - 1) * per_page)
+          .limit(per_page)
 
         data = records.map { |a| serialize_from_record(a) }
 
-        render json: { academies: data, total: total, page: page, per_page: PER_PAGE }
+        render json: { academies: data, total: total, page: page, per_page: per_page }
       end
 
       def show
         academy = Academy.find_by!(slug: params[:id])
-        stats = bulk_compute_stats([academy.id])[academy.id] || empty_stats
+        stats = bulk_compute_stats([ academy.id ])[academy.id] || empty_stats
 
         athletes = academy.competitors.to_a
         athlete_ids = athletes.map(&:id)
@@ -44,7 +45,7 @@ module Api
 
         athlete_data = athletes
           .map { |c| serialize_athlete(c, athlete_stats[c.id]) }
-          .sort_by { |h| [-(h[:total_points] || 0)] }
+          .sort_by { |h| [ -(h[:total_points] || 0) ] }
 
         render json: serialize_with_stats(academy, stats).merge(
           athletes: athlete_data

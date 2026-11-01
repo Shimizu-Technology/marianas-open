@@ -520,9 +520,8 @@
       }
     },
     "badge": "Guia do competidor",
-    "rulebookLabel": "Cópia para download das regras",
-    "downloadPdf": "Baixar PDF das regras",
-    "opensExternally": "Abre o PDF das regras para download em uma nova aba.",
+    "rulebookLabel": "Livro oficial de regras da ASJJF",
+    "opensExternally": "Abre o livro oficial de regras da ASJJF em uma nova aba.",
     "eventDayTitle": "Lembretes para o dia do evento",
     "fullRulebookTitle": "Precisa do texto completo da federação?",
     "officialSourceLinkText": "Abrir regras oficiais da ASJJF",
@@ -531,14 +530,14 @@
     "contactTitle": "Dúvidas sobre as regras?",
     "footerCta": "Referências oficiais das regras:",
     "note": "Use os resumos abaixo para se preparar e, em seguida, consulte a fonte oficial das regras da ASJJF e os recursos complementares do livro de regras da SJJIF. Se um boletim do Organizador, uma nota do Chaveamento ou um anúncio oficial trouxer instruções específicas do evento, siga essas instruções no dia do evento.",
-    "rulebookCopy": "Baixe uma cópia em PDF do livro de regras da SJJIF, usado como referência complementar junto com as orientações da ASJJF.",
+    "rulebookCopy": "O Marianas Open segue as regras da ASJJF. Leia o livro oficial de regras antes de competir.",
     "eventDaySubtitle": "Os detalhes operacionais abaixo são tão importantes quanto as regras técnicas.",
     "fullRulebookSubtitle": "A ASJJF é a principal referência oficial de regras para esta série de eventos. Os materiais da SJJIF continuam disponíveis como recurso complementar do livro de regras.",
     "footerNote": "Este guia local foi criado para dar mais clareza e evitar links quebrados. Ele não substitui as orientações oficiais da ASJJF, o texto do livro de regras da SJJIF nem as instruções específicas do evento fornecidas pelo Organizador.",
     "maintenanceSubtitle": "Este guia é mantido localmente para que os competidores não sejam direcionados a páginas de regras de terceiros não confiáveis.",
     "maintenanceBody": "Se o texto da federação, os procedimentos do Organizador ou os requisitos do dia do evento mudarem, esta página deverá ser atualizada para refletir as orientações aprovadas mais recentes.",
     "contactSubtitle": "Para esclarecimentos específicos do evento, problemas de Chaveamento ou instruções do Organizador, entre em contato diretamente com a equipe do Marianas Open.",
-    "contactNote": "Use a fonte de regras da federação ou o PDF para download para consultar o texto completo das regras, mas use o contato do Organizador acima quando precisar de respostas específicas para esta série de eventos.",
+    "contactNote": "Consulte o livro oficial da ASJJF para ler as regras completas. Para dúvidas sobre esta série de eventos, entre em contato com os organizadores acima.",
     "eventDayChecklist": [
       "Leve um documento oficial de identidade com foto válido.",
       "Verifique seu Chaveamento, programação e prazo final para correções antes do dia do evento.",
@@ -573,5 +572,10 @@
     "micronesia": "Micronésia",
     "marshallIslands": "Ilhas Marshall",
     "newZealand": "Nova Zelândia"
+  },
+  "eventDetail": {
+    "loadErrorTitle": "Não foi possível carregar o evento",
+    "loadErrorMessage": "Não conseguimos carregar este evento. Tente novamente.",
+    "retry": "Tentar novamente"
   }
 }

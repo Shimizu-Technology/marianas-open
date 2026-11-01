@@ -3,8 +3,8 @@ module Api
     class EventGalleryImagesController < ApplicationController
       def index
         event = Event.publicly_visible.find_by!(slug: params[:event_slug])
-        per_page = [[params.fetch(:per_page, 48).to_i, 1].max, 96].min
-        page = [params.fetch(:page, 1).to_i, 1].max
+        per_page = pagination_limit(default: 48, maximum: 96)
+        page = pagination_page
         scope = event.event_gallery_images.active.ready.with_image_variant_records.sorted
         scope = scope.categorized_as(params[:category]) if params[:category].present?
         total = scope.count

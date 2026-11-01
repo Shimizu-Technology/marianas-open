@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Clock3,
   ExternalLink,
-  FileDown,
   Mail,
   Phone,
   Scale,
@@ -17,16 +16,6 @@ import {
 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SEO from '../components/SEO';
-
-// PDF URL is driven by the environment variable VITE_RULEBOOK_PDF_URL.
-// Set this to an S3 (or other CDN) URL in production once the compressed
-// upload is ready.  Falls back to the local public copy so dev/preview
-// always works without any additional config.
-//
-// Example .env.production:
-//   VITE_RULEBOOK_PDF_URL=https://your-bucket.s3.amazonaws.com/2018-sjjif-rulebook.pdf
-const RULEBOOK_PDF_URL =
-  import.meta.env.VITE_RULEBOOK_PDF_URL || '/files/2018-sjjif-rulebook.pdf';
 
 const ASJJF_RULES_URL = 'https://asjjf.org/main/rules?pagesType=RULE_BOOK';
 const SJJIF_RULES_URL = 'https://sjjif.com/publicPages/pages?pagesType=RULE_BOOK';
@@ -107,25 +96,25 @@ export default function RulesPage() {
               </div>
               <div className="bg-navy-900/60 border border-white/5 rounded-xl p-5">
                 <p className="text-sm font-heading font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
-                  {t('rules.rulebookLabel', 'Downloadable rules copy')}
+                  {t('rules.rulebookLabel')}
                 </p>
                 <p className="text-sm text-text-secondary leading-relaxed mb-5">
                   {t(
                     'rules.rulebookCopy',
-                    'Download a PDF copy of the SJJIF rulebook used as a supporting reference alongside ASJJF guidance.'
+                    'Marianas Open follows ASJJF rules. Read the official rulebook before competing.'
                   )}
                 </p>
                 <a
-                  href={RULEBOOK_PDF_URL}
+                  href={ASJJF_RULES_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex w-full items-center justify-center gap-2 px-4 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:opacity-90 transition-opacity"
                 >
-                  <FileDown size={16} />
-                  {t('rules.downloadPdf', 'Download rules PDF')}
+                  <ExternalLink size={16} />
+                  {t('rules.officialSourceLinkText')}
                 </a>
                 <p className="text-xs text-text-muted mt-3">
-                  {t('rules.opensExternally', 'Opens the downloadable rules PDF in a new tab.')}
+                  {t('rules.opensExternally')}
                 </p>
               </div>
             </div>
@@ -321,7 +310,7 @@ export default function RulesPage() {
                 <p className="text-sm text-text-muted">
                   {t(
                     'rules.contactNote',
-                    'Use the federation rules source or downloadable PDF for full rule language, but use the organizer contact above when you need answers specific to this event series.'
+                    'Use the official ASJJF rulebook for full rule language, but use the organizer contact above when you need answers specific to this event series.'
                   )}
                 </p>
               </div>
