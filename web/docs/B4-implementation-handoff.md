@@ -68,3 +68,9 @@ Next action: cherry-pick the implementation commit, verify backend response seri
 ## Resource disposition
 
 Lifecycle session: `01a19897-dc17-7a31-9126-fd679f715ed0`. No servers, browser tabs, simulators, emulators, or containers were started or borrowed for this work. No runtime handoff is needed. Task-created dependency/build output is removed after verification; the clean worktree and commit remain available for cherry-pick.
+
+## Integration update
+
+The combined B4 PR is https://github.com/Shimizu-Technology/marianas-open/pull/116. Final integration evidence and resource cleanup are in `docs/B4-identity-acceptance.md`. Public views were checked at measured 390px/1440px; authenticated saved-state cases remain blocked by unavailable Clerk staff authentication. Web verification now has 80 tests.
+
+The competitor preview now returns an expiring signed `review_token`. The client passes that token plus the operator's actual warning acknowledgement; changed warnings/counts/names invalidate a preview. Existing-gym review resolution now also sends `confirm: true`. Academy forms rehydrate canonical aliases and normalized fields from each successful save. Ranking links use competitor IDs, or `result_id` for unlinked rows; editable result `competitor_name` stays raw while public rendering uses a separate display value.
