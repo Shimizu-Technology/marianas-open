@@ -8,7 +8,7 @@ class Sponsor < ApplicationRecord
   accepts_nested_attributes_for :sponsor_placements, allow_destroy: true
 
   validates :name, presence: true, length: { maximum: 200 }
-  validate :safe_website
+  validate :safe_website, if: -> { new_record? || will_save_change_to_website_url? }
   validate :safe_logos
 
   def safe_website

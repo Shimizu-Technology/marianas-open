@@ -31,6 +31,20 @@ class SponsorManagementTest < ActionDispatch::IntegrationTest
     assert_equal "Updated", @sponsor.reload.name
   end
 
+  test "placement changes preserve legacy websites while new website values remain validated" do
+    @sponsor.update_column(:website_url, "codeschoolofguam.com")
+    placement = @sponsor.sponsor_placements.create!(placement_type: "official", sort_order: 1)
+    patch "/api/v1/admin/sponsors/#{@sponsor.id}", headers: @headers, as: :json,
+      params: { sponsor_placements_attributes: [ { id: placement.id, sort_order: 2 } ] }
+    assert_response :success
+    assert_equal 2, placement.reload.sort_order
+    assert_equal "codeschoolofguam.com", @sponsor.reload.website_url
+    patch "/api/v1/admin/sponsors/#{@sponsor.id}", headers: @headers, as: :json,
+      params: { website_url: "javascript:alert(1)" }
+    assert_response :unprocessable_entity
+    assert_equal "codeschoolofguam.com", @sponsor.reload.website_url
+  end
+
   test "anonymous and viewer cannot change sponsors or upload logos" do
     [ nil, { "Authorization" => "Bearer test_token_#{@viewer.id}" } ].each do |headers|
       assert_no_difference [ "Sponsor.count", "SponsorAuditLog.count" ] do

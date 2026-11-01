@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, type Sponsor, type SponsorFormData, type SponsorPlacement, type Event } from "../../services/api";
 import { FeaturedSponsorBar, SponsorTiers, SponsorLogo } from "../../components/SponsorPlacements";
+import { normalizeExternalUrl } from "../../utils/images";
 import { useEditingParam } from "../../hooks/useEditingParam";
 
 const inputClass =
@@ -30,7 +31,7 @@ const newPlacement = (): SponsorPlacement => ({
 
 function sponsorForm(sponsor: Sponsor): SponsorFormData {
   return {
-    name: sponsor.name, tier: sponsor.tier, website_url: sponsor.website_url || '', sort_order: sponsor.sort_order,
+    name: sponsor.name, tier: sponsor.tier, website_url: normalizeExternalUrl(sponsor.website_url) || sponsor.website_url || '', sort_order: sponsor.sort_order,
     sponsor_placements_attributes: sponsor.placements?.map(p => ({ ...p })) || [],
   }
 }
