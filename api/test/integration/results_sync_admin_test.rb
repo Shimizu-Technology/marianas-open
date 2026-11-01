@@ -51,6 +51,23 @@ class ResultsSyncAdminTest < ActionDispatch::IntegrationTest
     assert_empty @event.event_results
   end
 
+  test "GET preserves a discarded review after an intervening failure" do
+    reviewed = sync(@event, apply: false)
+    Asjjf::ResultsSync.new(@event).discard!(reviewed)
+    original = Asjjf::ResultsAssembler.instance_method(:call)
+    Asjjf::ResultsAssembler.define_method(:call) { raise "Transient fixture failure" }
+    assert_equal "failed", sync(@event).status
+    Asjjf::ResultsAssembler.define_method(:call, original)
+    assert_equal reviewed.id, sync(@event).id
+    get "/api/v1/admin/events/#{@event.id}/results_sync", headers: @headers
+    assert_response :success
+    assert_equal reviewed.id, response.parsed_body["run"]["id"]
+    assert response.parsed_body["run"]["discarded_at"]
+    assert_equal "held", response.parsed_body["status"]
+  ensure
+    Asjjf::ResultsAssembler.define_method(:call, original) if original
+  end
+
   test "admin edits protect source identity and future manual results default to manual" do
     assert_equal "applied", sync(@event).status
     row = @event.event_results.first

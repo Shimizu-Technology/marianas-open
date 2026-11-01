@@ -17,7 +17,7 @@ class AsjjfSnapshot < ApplicationRecord
   validates :byte_size, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: MAX_BYTES }
 
   def lock_results_evidence(&block)
-    Asjjf::EvidenceLock.synchronize([asjjf_id], &block)
+    Asjjf::EvidenceLock.synchronize([ asjjf_id ], &block)
   end
 
   def html=(value)

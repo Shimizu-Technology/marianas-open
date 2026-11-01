@@ -7,6 +7,7 @@ class ParseAsjjfSnapshotJob < ApplicationJob
       snapshot.reload
       parse_snapshot(snapshot)
     end
+    enqueue_ranking_divisions(snapshot)
   rescue StandardError => e
     snapshot&.update!(parse_status: "failed", parse_error: "#{e.class}: #{e.message}".truncate(2000), parsed_at: Time.current)
     Rails.logger.error("[ASJJF] Snapshot #{snapshot_id} parse failed: #{e.class}: #{e.message}")
@@ -28,6 +29,11 @@ class ParseAsjjfSnapshotJob < ApplicationJob
     if %w[event_info event_results].include?(snapshot.page_type) && %w[gi nogi].include?(discipline)
       EventAsjjfSource.where(asjjf_event_id: snapshot.asjjf_id, discipline: "unknown").update_all(discipline: discipline, updated_at: Time.current)
     end
+  end
+
+  def enqueue_ranking_divisions(snapshot)
+    return unless snapshot.outcome == "ok" && snapshot.parse_status == "parsed"
+    parsed = snapshot.parsed_summary
     return unless snapshot.page_type == "individual_ranking" && snapshot.fetch_requests.where(include_divisions: true).exists?
     Array(parsed[:divisions] || parsed["divisions"]).each do |division|
       id = division[:id] || division["id"] || division[:division_id] || division["division_id"]

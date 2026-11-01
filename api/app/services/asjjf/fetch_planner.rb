@@ -5,18 +5,22 @@ module Asjjf
     end
 
     def plan_event_results(event)
-      sources_for(event).flat_map do |source|
-        id = source.asjjf_event_id
-        requests = [ enqueue("event_results", id, "event #{event.id} results") ]
-        %w[MALE FEMALE].product(%w[ADULT KIDS]).each do |gender, age|
-          requests << enqueue("results_list", id, "event #{event.id} #{gender} #{age} results", query: "gender=#{gender}&age=#{age}")
+      with_event_evidence(event) do
+        sources_for(event).flat_map do |source|
+          id = source.asjjf_event_id
+          requests = [ enqueue("event_results", id, "event #{event.id} results") ]
+          %w[MALE FEMALE].product(%w[ADULT KIDS]).each do |gender, age|
+            requests << enqueue("results_list", id, "event #{event.id} #{gender} #{age} results", query: "gender=#{gender}&age=#{age}")
+          end
+          requests
         end
-        requests
       end
     end
 
     def plan_event_info(event)
-      sources_for(event).map { |source| enqueue("event_info", source.asjjf_event_id, "event #{event.id} information") }
+      with_event_evidence(event) do
+        sources_for(event).map { |source| enqueue("event_info", source.asjjf_event_id, "event #{event.id} information") }
+      end
     end
 
     def plan_season_calendar(season_id)
@@ -30,6 +34,10 @@ module Asjjf
     end
 
     private
+
+    def with_event_evidence(event, &block)
+      event.with_lock { EvidenceLock.for_event(event, &block) }
+    end
 
     def enqueue(page_type, id, reason, query: nil, include_divisions: false)
       url = Url.build(page_type, id)

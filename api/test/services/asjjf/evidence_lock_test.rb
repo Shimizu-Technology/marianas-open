@@ -10,7 +10,7 @@ class AsjjfEvidenceLockTest < ActiveSupport::TestCase
     acquired = Queue.new
     finished = Queue.new
     thread = nil
-    Asjjf::EvidenceLock.synchronize([source_id]) do
+    Asjjf::EvidenceLock.synchronize([ source_id ]) do
       thread = Thread.new do
         ActiveRecord::Base.connection_pool.with_connection do |connection|
           connection.transaction do
@@ -30,5 +30,34 @@ class AsjjfEvidenceLockTest < ActiveSupport::TestCase
   ensure
     thread&.join(10)
     AsjjfSnapshot.where(asjjf_id: source_id).destroy_all
+  end
+
+  test "new fetch planning participates in source serialization" do
+    source_id = 987654322
+    org = Organization.create!(name: "B3 lock fixture", slug: "b3-lock-fixture")
+    event = org.events.create!(name: "B3 lock fixture", slug: "b3-lock-fixture", asjjf_event_ids: [ source_id ])
+    started, finished = Queue.new, Queue.new
+    thread = nil
+    Asjjf::EvidenceLock.synchronize([ source_id ]) do
+      thread = Thread.new do
+        ActiveRecord::Base.connection_pool.with_connection do |connection|
+          connection.transaction do
+            key = connection.quote("asjjf-results-evidence:#{source_id}")
+            started << connection.select_value("SELECT pg_try_advisory_xact_lock(hashtextextended(#{key}, 0))")
+          end
+          finished << Asjjf::FetchPlanner.new.plan_event_results(Event.find(event.id)).size
+        end
+      end
+      assert_equal false, Timeout.timeout(5) { started.pop }
+      assert finished.empty?
+      assert_not AsjjfFetchRequest.where("url LIKE ?", "%/#{source_id}%").exists?
+    end
+    assert_equal 5, Timeout.timeout(10) { finished.pop }
+    thread.join
+  ensure
+    thread&.join(10)
+    AsjjfFetchRequest.where("url LIKE ?", "%/#{source_id}%").destroy_all
+    event&.destroy!
+    org&.destroy!
   end
 end

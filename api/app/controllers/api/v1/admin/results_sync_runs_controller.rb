@@ -9,7 +9,7 @@ module Api
         rescue_from Asjjf::ResultsSync::StaleReview, Asjjf::ResultsSync::InvalidReview, with: :review_error
 
         def show
-          render json: { run: @event.results_sync_runs.order(id: :desc).first,
+          render json: { run: @event.current_results_sync_run || @event.results_sync_runs.order(id: :desc).first,
             status: @event.results_sync_status, last_checked_at: @event.results_last_checked_at }
         end
 

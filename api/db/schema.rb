@@ -325,8 +325,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_160000) do
     t.index ["event_id", "division"], name: "index_event_results_on_event_id_and_division"
     t.index ["event_id", "source", "asjjf_event_id"], name: "index_event_results_on_sync_source"
     t.index ["event_id"], name: "index_event_results_on_event_id"
-    t.check_constraint "discipline IS NULL OR (discipline::text = ANY (ARRAY['gi'::character varying::text, 'nogi'::character varying::text]))", name: "event_results_discipline"
-    t.check_constraint "source::text = ANY (ARRAY['manual'::character varying::text, 'asjjf'::character varying::text])", name: "event_results_source"
+    t.check_constraint "discipline IS NULL OR (discipline::text = ANY (ARRAY['gi'::character varying, 'nogi'::character varying]::text[]))", name: "event_results_discipline"
+    t.check_constraint "source::text = ANY (ARRAY['manual'::character varying, 'asjjf'::character varying]::text[])", name: "event_results_source"
   end
 
   create_table "event_schedule_items", force: :cascade do |t|
@@ -371,6 +371,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_160000) do
     t.datetime "results_fetch_planned_at"
     t.datetime "results_imported_at"
     t.datetime "results_last_checked_at"
+    t.bigint "results_sync_run_id"
     t.string "results_sync_status"
     t.text "schedule_note"
     t.string "slug"
@@ -394,6 +395,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_160000) do
     t.text "visa_description"
     t.jsonb "visa_items", default: [], null: false
     t.index ["organization_id"], name: "index_events_on_organization_id"
+    t.index ["results_sync_run_id"], name: "index_events_on_results_sync_run_id"
     t.index ["translation_status"], name: "index_events_on_translation_status"
     t.check_constraint "ticket_sales_status::text = ANY (ARRAY['unavailable'::character varying::text, 'on_sale'::character varying::text, 'sold_out'::character varying::text, 'closed'::character varying::text])", name: "events_ticket_sales_status_check"
   end
@@ -720,11 +722,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_160000) do
   add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"
   add_foreign_key "events", "organizations"
+  add_foreign_key "events", "results_sync_runs", on_delete: :nullify
   add_foreign_key "identity_reviews", "academies", column: "candidate_academy_id"
   add_foreign_key "identity_reviews", "academies", column: "resolved_academy_id"
   add_foreign_key "prize_categories", "events"
   add_foreign_key "results_sync_runs", "events"
-  add_foreign_key "results_sync_runs", "users", column: "approved_by_id"
+  add_foreign_key "results_sync_runs", "users", column: "approved_by_id", on_delete: :nullify
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

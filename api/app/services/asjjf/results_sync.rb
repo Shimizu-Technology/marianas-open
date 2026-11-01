@@ -18,7 +18,7 @@ module Asjjf
         # Repeated evaluations of the same hold/discard are quiet and cannot
         # silently reintroduce a proposal an administrator discarded.
         if previous&.status == "held" && previous.diff_summary["fingerprint"] == proposal[:summary][:fingerprint]
-          @event.update_columns(results_sync_status: "held", results_last_checked_at: Time.current)
+          @event.update_columns(results_sync_status: "held", results_last_checked_at: Time.current, results_sync_run_id: previous.id)
           next previous
         end
         status = if !@assembly.complete?
@@ -53,7 +53,7 @@ module Asjjf
         apply_changes!
         run.update!(status: "applied", applied_at: Time.current, approved_by: user,
           diff_summary: run.diff_summary.merge("unlinked_competitors" => @unlinked || []))
-        @event.update_columns(results_sync_status: "applied", results_last_checked_at: Time.current)
+        @event.update_columns(results_sync_status: "applied", results_last_checked_at: Time.current, results_sync_run_id: run.id)
         run
       end
       notify(result)
@@ -69,6 +69,7 @@ module Asjjf
         run.reload
         raise InvalidReview, "This review is no longer awaiting approval" unless run.event_id == @event.id && run.status == "held" && run.discarded_at.nil?
         run.update!(discarded_at: Time.current)
+        @event.update_columns(results_sync_status: "held", results_sync_run_id: run.id)
       end
       run
     end
@@ -237,31 +238,38 @@ module Asjjf
     def apply_changes!
       previous_ids = @existing.filter_map(&:competitor_id)
       @removed.each(&:destroy!)
-      (@changed + @added.map { |row| [ nil, row ] }).each do |old, row|
-        target = old || @event.event_results.new
-        target.assign_attributes(row.attributes.slice(*FIELDS))
-        target.sync_key = identity_key(row)
-        target.competitor = CompetitorLinker.find_or_create(target.competitor_name, target)
-        target.save!
+      CompetitorLinker.with_legacy_name_index do
+        (@changed + @added.map { |row| [ nil, row ] }).each do |old, row|
+          target = old || @event.event_results.new
+          target.assign_attributes(row.attributes.slice(*FIELDS))
+          target.sync_key = identity_key(row)
+          target.competitor = CompetitorLinker.find_or_create(target.competitor_name, target)
+          target.save!
+        end
       end
       # Never relink protected or unchanged rows during sync.
-      unlinked = @event.event_results.where(source: "asjjf", competitor_id: nil).pluck(:id, :competitor_name)
-      @unlinked = unlinked.map { |id, name| { id: id, competitor_name: name, reason: "Ambiguous, truncated, or incompatible identity; left unlinked" } }
+      @unlinked = unlinked_report
       Competitor.where(id: previous_ids.uniq).find_each(&:refresh_current_academy!)
       @event.update_columns(results_imported_at: Time.current)
     end
 
+    def unlinked_report
+      @event.event_results.where(source: "asjjf", competitor_id: nil).pluck(:id, :competitor_name).map do |id, name|
+        { id: id, competitor_name: name, reason: "Ambiguous, truncated, or incompatible identity; left unlinked" }
+      end
+    end
+
     def record_run(status, trigger, proposal)
-      summary = proposal[:summary].merge(unlinked_competitors: @unlinked || [])
+      summary = proposal[:summary].merge(unlinked_competitors: @unlinked || unlinked_report)
       run = @event.results_sync_runs.create!(trigger: trigger, status: status, diff_summary: summary,
         guard_failures: @guards, applied_at: status == "applied" ? Time.current : nil)
-      @event.update_columns(results_sync_status: status, results_last_checked_at: Time.current)
+      @event.update_columns(results_sync_status: status, results_last_checked_at: Time.current, results_sync_run_id: run.id)
       run
     end
 
     def record_failure(error, trigger:)
       failed = @event.results_sync_runs.create!(trigger: trigger, status: "failed", error: "#{error.class}: #{error.message}".truncate(2000))
-      @event.update_columns(results_sync_status: "failed", results_last_checked_at: Time.current)
+      @event.update_columns(results_sync_status: "failed", results_last_checked_at: Time.current, results_sync_run_id: failed.id)
       ResultsAlert.deliver(failed)
       failed
     end

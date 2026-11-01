@@ -132,6 +132,9 @@ class AsjjfResultsSyncTest < ActiveSupport::TestCase
     assert_equal "applied", result.status
     assert_nil @event.event_results.find_by!(competitor_name: name).competitor_id
     assert result.diff_summary["unlinked_competitors"].any? { |row| row["competitor_name"] == name }
+    repeated = sync(@event)
+    assert_equal "no_changes", repeated.status
+    assert repeated.diff_summary["unlinked_competitors"].any? { |row| row["competitor_name"] == name }
   end
 
   test "changed metadata updates in place and absent ASJJF rows are removed" do
@@ -241,7 +244,7 @@ class AsjjfResultsSyncTest < ActiveSupport::TestCase
   end
 
   test "source configuration removal invalidates an already reviewed proposal" do
-    @event.update!(asjjf_event_ids: [2062])
+    @event.update!(asjjf_event_ids: [ 2062 ])
     complete_snapshots(@event)
     @event.event_asjjf_sources.first.update!(derived_from: "asjjf_event_ids")
     result = sync(@event, apply: false)
@@ -282,7 +285,7 @@ class AsjjfResultsSyncTest < ActiveSupport::TestCase
   end
 
   test "partial apply failure restores removals and updates for automatic and approved runs" do
-    complete_snapshots(@event, full: true)
+    complete_snapshots(@event, full: 3)
     assert_equal "applied", sync(@event).status
     @event.event_results.order(:id).limit(2).update_all(academy: "Historical academy")
     obsolete = @event.event_results.create!(source: "asjjf", asjjf_event_id: 2062, discipline: "gi", division: "[GI] Male Black Adult 18 Ultra Heavy", placement: 3, competitor_name: "Obsolete")

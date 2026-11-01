@@ -36,9 +36,11 @@ class AddResultsSync < ActiveRecord::Migration[8.0]
       t.timestamps
     end
     add_index :results_sync_runs, [ :event_id, :created_at ]
+    add_reference :events, :results_sync_run, foreign_key: { to_table: :results_sync_runs, on_delete: :nullify }
   end
 
   def down
+    remove_reference :events, :results_sync_run, foreign_key: true
     drop_table :results_sync_runs
     remove_column :events, :results_sync_status
     remove_column :events, :results_last_checked_at

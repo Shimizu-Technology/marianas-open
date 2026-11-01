@@ -2,7 +2,7 @@ module ResultsSnapshotFixtures
   def fixture_summary(file, type:, url:, full: false)
     parsed = Asjjf::Parsers.parse(page_type: type, url: url,
       html: File.read(Rails.root.join("test/fixtures/files/asjjf", file))).deep_stringify_keys
-    parsed["divisions"] = parsed["divisions"].first(1) unless full
+    parsed["divisions"] = parsed["divisions"].first(full.is_a?(Integer) ? full : 1) unless full == true
     parsed
   end
 
