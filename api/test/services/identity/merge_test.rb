@@ -145,6 +145,18 @@ class IdentityMergeTest < ActiveSupport::TestCase
     assert Competitor.exists?(source.id)
   end
 
+
+  test "merging an ancestor into a deep descendant keeps the parent tree acyclic" do
+    source = Academy.create!(name: "Ancestor gym")
+    child = Academy.create!(name: "Intermediate gym", parent: source)
+    target = Academy.create!(name: "Descendant gym", parent: child)
+    Identity::AcademyMerge.call(source: source, target: target, confirm: true)
+    assert_nil target.reload.parent_id
+    assert_equal target.id, child.reload.parent_id
+    assert target.valid?
+    assert child.valid?
+  end
+
   private
 
   def person(attributes = {})

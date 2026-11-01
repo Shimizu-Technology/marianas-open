@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_staff!
-        before_action :set_competitor, only: [ :show, :update, :destroy, :upload_photo ]
+        before_action :set_competitor, only: [ :show, :update, :destroy, :upload_photo, :merge_preview, :merge ]
 
         def index
           page = pagination_page
@@ -80,6 +80,22 @@ module Api
           render json: { competitor: data }
         end
 
+        def merge_preview
+          render json: Identity::CompetitorMerge.preview(@competitor, Competitor.find(params[:target_id]))
+        rescue ActiveRecord::RecordNotFound
+          render json: { error: "Target competitor not found" }, status: :not_found
+        end
+
+        def merge
+          target = Identity::CompetitorMerge.call(source: @competitor, target: Competitor.find(params[:target_id]),
+            confirm: params[:confirm] == true, confirm_warnings: params[:confirm_warnings] == true, actor: current_user)
+          render json: { competitor: target.as_json }
+        rescue ArgumentError, ActiveRecord::RecordInvalid => e
+          render json: { error: e.message }, status: :unprocessable_entity
+        rescue ActiveRecord::RecordNotFound
+          render json: { error: "Target competitor not found" }, status: :not_found
+        end
+
         def create
           competitor = Competitor.new(competitor_params)
           if competitor.save
@@ -90,7 +106,9 @@ module Api
         end
 
         def update
+          old_name = @competitor.full_name
           if @competitor.update(competitor_params)
+            Rails.logger.info("[Identity] competitor_update actor=#{current_user.id} competitor=#{@competitor.id} old_name=#{old_name.inspect} new_name=#{@competitor.full_name.inspect}")
             render json: { competitor: @competitor.reload.as_json }
           else
             render json: { errors: @competitor.errors.full_messages }, status: :unprocessable_entity
@@ -142,7 +160,7 @@ module Api
           params.permit(
             :first_name, :last_name, :nickname, :country_code, :belt_rank,
             :weight_class, :academy, :bio, :instagram_url, :youtube_url,
-            :wins, :losses, :draws
+            :wins, :losses, :draws, :identity_separate
           )
         end
 
@@ -152,6 +170,7 @@ module Api
             first_name: c.first_name,
             last_name: c.last_name,
             full_name: c.full_name,
+            identity_separate: c.identity_separate,
             nickname: c.nickname,
             country_code: c.country_code,
             belt_rank: c.belt_rank,

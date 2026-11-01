@@ -39,8 +39,9 @@ class AsjjfScraper
           weight_class: r[:weight_class],
           placement: r[:placement],
           competitor_name: r[:competitor_name],
+          raw_competitor_name: r[:competitor_name],
           academy: r[:academy],
-          country_code: r[:country_code],
+          country_code: Identity::CountryCode.normalize(r[:country_code]),
           created_at: Time.current,
           updated_at: Time.current
         }

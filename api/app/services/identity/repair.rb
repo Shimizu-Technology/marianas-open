@@ -77,6 +77,11 @@ module Identity
           skipped << { group: label, reason: "missing records or overlapping CSV group" }
           next
         end
+        expected_keys = row["academy_names"].to_s.split("|").map { |name| NameNormalizer.key(name.strip.sub(/\s+\[[^\]]*\]\z/, "")) }
+        if records.any? { |record| ([ record.name ] + Array(record.aliases)).none? { |name| expected_keys.include?(NameNormalizer.key(name)) } }
+          skipped << { group: label, reason: "CSV names do not match current academies; requires review" }
+          next
+        end
         ordered = ids(row["academy_ids"]).filter_map { |id| records.find { |record| record.id == id } }
         canonical = row["canonical_name"].to_s.strip
         target = ordered.find { |record| NameNormalizer.key(record.name) == NameNormalizer.key(canonical) } || ordered.first
@@ -116,6 +121,11 @@ module Identity
           next
         end
         records = Competitor.where(id: requested).order(:id).to_a
+        expected_keys = row["names"].to_s.split("|").map { |name| NameNormalizer.key(name) }
+        if records.any? { |person| [ NameNormalizer.key("#{person.first_name} #{person.last_name}"), NameNormalizer.key("#{person.last_name} #{person.first_name}") ].none? { |key| expected_keys.include?(key) } }
+          skipped << { group: label, reason: "CSV names do not match current athletes; requires review" }
+          next
+        end
         plan_athletes(records, label, operations, skipped, used)
       end
     end
@@ -200,9 +210,9 @@ module Identity
     end
 
     def snapshot
-      results = EventResult.group(:academy_id).count
+      results = AcademyAttribution.relation.group(:attributed_academy_id).count
       athletes = Competitor.group(:academy_id).count
-      points = EventResult.joins(:event).group(:academy_id).pluck(:academy_id, Arel.sql(RankingCalculator.points_sql)).to_h
+      points = AcademyAttribution.relation.joins(:event).group(:attributed_academy_id).pluck(:attributed_academy_id, Arel.sql(RankingCalculator.points_sql)).to_h
       per_academy = Academy.order(:id).to_h do |academy|
         [ academy.id, { name: academy.name, results: results.fetch(academy.id, 0),
                        athletes: athletes.fetch(academy.id, 0), points: points.fetch(academy.id, 0).to_i } ]

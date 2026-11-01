@@ -7,10 +7,27 @@ class Competitor < ApplicationRecord
   validates :belt_rank, inclusion: { in: %w[white blue purple brown black], allow_blank: true }
   validates :country_code, length: { is: 2 }, allow_blank: true
 
+  before_validation :normalize_identity
+
   scope :search_by_name, ->(query) {
-    where("first_name ILIKE :q OR last_name ILIKE :q OR CONCAT(first_name, ' ', last_name) ILIKE :q", q: "%#{query}%")
+    where("first_name ILIKE :q OR last_name ILIKE :q OR CONCAT(first_name, ' ', last_name) ILIKE :q OR CONCAT(last_name, ' ', first_name) ILIKE :q OR normalized_name LIKE :key OR reverse_normalized_name LIKE :key",
+      q: "%#{sanitize_sql_like(query)}%", key: "%#{Identity::NameNormalizer.key(query)}%")
   }
   scope :with_results, -> { where(id: EventResult.select(:competitor_id).distinct) }
+
+  def refresh_current_academy!
+    latest = event_results.joins(:event).order("events.date DESC NULLS LAST, events.id DESC, event_results.id DESC").first
+    gym = latest&.result_academy || AcademyLinker.resolve(latest&.academy, create: false)
+    update_columns(academy_id: gym&.id, academy: gym&.name || latest&.academy)
+  end
+
+  def normalize_identity
+    self.first_name = Identity::NameNormalizer.person_display(first_name)
+    self.last_name = Identity::NameNormalizer.person_display(last_name)
+    self.normalized_name = Identity::NameNormalizer.key("#{first_name} #{last_name}")
+    self.reverse_normalized_name = Identity::NameNormalizer.key("#{last_name} #{first_name}")
+    self.country_code = Identity::CountryCode.normalize(country_code)
+  end
 
   def full_name
     nickname.present? ? "#{first_name} \"#{nickname}\" #{last_name}" : "#{first_name} #{last_name}"

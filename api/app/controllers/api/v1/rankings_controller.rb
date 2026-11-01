@@ -44,7 +44,9 @@ module Api
             "event_results.*, events.asjjf_stars as event_stars, " \
             "events.name as event_name, events.slug as event_slug, events.date as event_date"
           )
-          .where("LOWER(TRIM(event_results.competitor_name)) = ?", name.downcase)
+          .includes(:competitor)
+          .where("LOWER(TRIM(event_results.competitor_name)) = :name OR competitor_id IN (:ids)",
+            name: name.downcase, ids: Competitor.search_by_name(name).select(:id))
           .order("events.date DESC")
 
         return render json: { error: "Competitor not found" }, status: :not_found if results.empty?
@@ -55,9 +57,9 @@ module Api
         bronzes = results.count { |r| r.placement == 3 }
 
         render json: {
-          competitor_name: results.first.competitor_name,
+          competitor_name: results.first.display_competitor_name,
           academy: most_common_value(results.map(&:academy)),
-          country_code: most_common_value(results.map(&:country_code)),
+          country_code: most_common_value(results.map { |r| Identity::CountryCode.normalize(r.country_code) }),
           total_points: total_points,
           gold: golds,
           silver: silvers,

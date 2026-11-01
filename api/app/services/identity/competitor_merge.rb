@@ -29,6 +29,7 @@ module Identity
           end
           EventResult.where(competitor_id: source.id).update_all(competitor_id: target.id)
           source.destroy!
+          target.refresh_current_academy!
           audit = details.merge(action: "identity.competitor_merge", actor_id: actor&.id)
           ActiveRecord.after_all_transactions_commit { Rails.logger.info(audit.to_json) }
           target.reload

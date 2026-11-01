@@ -25,7 +25,7 @@ it('uses the review queue and both resolve contracts', async () => {
   await api.admin.resolveIdentityReview(12, { create_new: true, confirm: true })
   expect(fetchMock.mock.calls[0][0]).toMatch(/\/api\/v1\/admin\/identity_reviews$/)
   expect(fetchMock.mock.calls[1][0]).toMatch(/\/api\/v1\/admin\/identity_reviews\/11\/resolve$/)
-  expect(fetchMock.mock.calls[1][1]?.body).toBe('{"academy_id":2}')
+  expect(fetchMock.mock.calls[1][1]?.body).toBe('{"academy_id":2,"confirm":true}')
   expect(fetchMock.mock.calls[2][1]?.body).toBe('{"create_new":true,"confirm":true}')
 })
 it.each([{ error: 'Cannot merge parent into child' }, { errors: ['Country is invalid', 'Name is required'] }])('surfaces API errors for %j', async body => {

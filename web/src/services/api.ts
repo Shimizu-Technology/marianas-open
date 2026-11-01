@@ -1199,7 +1199,7 @@ export const api = {
     getIdentityReviews: () => fetchApi<{ reviews: AcademyIdentityReview[] }>('/api/v1/admin/identity_reviews', {}, true),
     resolveIdentityReview: (id: number, data: { academy_id: number } | { create_new: true; confirm: true }) =>
       fetchApi<unknown>(`/api/v1/admin/identity_reviews/${id}/resolve`, {
-        method: 'POST', body: JSON.stringify(data),
+        method: 'POST', body: JSON.stringify({ ...data, confirm: true }),
       }, true),
     getAcademies: (params?: Record<string, string>) => {
       const query = params ? '?' + new URLSearchParams(params).toString() : '';

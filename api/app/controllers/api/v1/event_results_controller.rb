@@ -3,7 +3,7 @@ module Api
     class EventResultsController < ApplicationController
       def index
         event = Event.publicly_visible.find_by!(slug: params[:event_slug])
-        results = event.event_results
+        results = event.event_results.includes(:competitor, :result_academy)
 
         results = results.by_belt(params[:belt_rank]) if params[:belt_rank].present?
         results = results.by_gender(params[:gender]) if params[:gender].present?

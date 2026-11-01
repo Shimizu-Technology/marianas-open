@@ -81,13 +81,20 @@ Rails.application.routes.draw do
             post :upload_logo
           end
         end
+        resources :identity_reviews, only: [:index] do
+          post :resolve, on: :member
+        end
         resources :competitors do
           member do
+            get :merge_preview
+            post :merge
             post :upload_photo
           end
         end
         resources :academies, only: [:index, :show, :update, :destroy] do
           member do
+            get :merge_preview
+            post :merge
             post :upload_logo
           end
         end

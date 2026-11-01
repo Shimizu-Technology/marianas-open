@@ -19,8 +19,7 @@ module Api
           total = base_scope.count
 
           records = base_scope
-            .left_joins(:competitor)
-            .select("event_results.*, competitors.academy_id as linked_academy_id")
+            .select("event_results.*, event_results.academy_id as linked_academy_id")
             .offset((page - 1) * per_page)
             .limit(per_page)
 

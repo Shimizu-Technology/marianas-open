@@ -6,7 +6,7 @@ for (const [alpha2, alpha3] of Object.entries(ISO_COUNTRY_CODES)) {
   countryCodes.set(alpha3, alpha2)
 }
 // ASJJF country labels, plus Kosovo's widely used flag code.
-for (const [code, alpha2] of Object.entries({ TAI: 'TW', TPE: 'TW', KOS: 'XK', XK: 'XK' })) {
+for (const [code, alpha2] of Object.entries({ TAI: 'TW', TPE: 'TW', KOS: 'XK', XKX: 'XK', XK: 'XK' })) {
   countryCodes.set(code, alpha2)
 }
 

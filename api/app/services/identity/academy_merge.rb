@@ -6,7 +6,7 @@ module Identity
         {
           source: { id: source.id, name: source.name },
           target: { id: target.id, name: target.name },
-          results_count: EventResult.where(academy_id: source.id).count,
+          results_count: attributed_results(source).count,
           athletes_count: Competitor.where(academy_id: source.id).count,
           warnings: [], blocked: false
         }
@@ -16,6 +16,7 @@ module Identity
         raise ArgumentError, "Explicit confirmation is required" unless confirm == true
         validate_pair!(source, target)
         Academy.transaction do
+          Academy.connection.execute("SELECT pg_advisory_xact_lock(184527001)")
           # Lock in ID order so opposite merge requests cannot deadlock.
           records = Academy.where(id: [ source.id, target.id ]).order(:id).lock.to_a
           raise ArgumentError, "Both academies must still exist" unless records.size == 2
@@ -23,11 +24,19 @@ module Identity
           target = records.find { |record| record.id == target.id }
           details = preview(source, target)
           aliases = (Array(target.aliases) + Array(source.aliases) + [ source.name ]).reject(&:blank?).uniq
-          target.parent_id = source.parent_id if target.parent_id == source.id
+          ancestor = target.parent
+          while ancestor
+            if ancestor.id == source.id
+              target.parent_id = source.parent_id
+              break
+            end
+            ancestor = ancestor.parent
+          end
+          result_ids = attributed_results(source).pluck(:id)
           target.save!
           target.update_columns(aliases: aliases)
-          EventResult.where(academy_id: source.id).update_all(academy_id: target.id)
-          Competitor.where(academy_id: source.id).update_all(academy_id: target.id)
+          EventResult.where(id: result_ids).update_all(academy_id: target.id)
+          Competitor.where(academy_id: source.id).update_all(academy_id: target.id, academy: target.name)
           Academy.where(parent_id: source.id).where.not(id: target.id).update_all(parent_id: target.id)
           IdentityReview.where(candidate_academy_id: source.id).update_all(candidate_academy_id: target.id)
           IdentityReview.where(resolved_academy_id: source.id).update_all(resolved_academy_id: target.id)
@@ -39,6 +48,10 @@ module Identity
       end
 
       private
+
+      def attributed_results(source)
+        AcademyAttribution.relation.where(attributed_academy_id: source.id)
+      end
 
       def validate_pair!(source, target)
         unless source.is_a?(Academy) && target.is_a?(Academy) && source.persisted? && target.persisted? && source.id != target.id

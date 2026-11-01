@@ -14,17 +14,6 @@ class CompetitorLinker
   VALID_BELTS = %w[white blue purple brown black].freeze
   BELT_ORDER = { "white" => 0, "blue" => 1, "purple" => 2, "brown" => 3, "black" => 4 }.freeze
 
-  # ASJJF uses ISO 3166-1 alpha-3 codes; convert to alpha-2 for flags
-  COUNTRY_MAP = {
-    "GUM" => "GU", "JPN" => "JP", "PHL" => "PH", "KOR" => "KR", "BRA" => "BR",
-    "USA" => "US", "TAI" => "TW", "MNP" => "MP", "CHN" => "CN", "FRA" => "FR",
-    "PLW" => "PW", "GBR" => "GB", "CAN" => "CA", "FSM" => "FM", "PYF" => "PF",
-    "AUS" => "AU", "NZL" => "NZ", "MEX" => "MX", "SGP" => "SG", "HKG" => "HK",
-    "IND" => "IN", "THA" => "TH", "IDN" => "ID", "MYS" => "MY", "VNM" => "VN",
-    "RUS" => "RU", "DEU" => "DE", "ESP" => "ES", "ITA" => "IT", "PRT" => "PT",
-    "SWE" => "SE", "NOR" => "NO", "ARG" => "AR", "COL" => "CO", "PER" => "PE",
-  }.freeze
-
   class << self
     def link_event(event)
       link_results(event.event_results.where(competitor_id: nil))
@@ -53,11 +42,17 @@ class CompetitorLinker
 
         sample = best_sample(group)
         competitor = find_or_create(sample.competitor_name, sample)
+        next unless competitor
         created += 1 if competitor.previously_new_record?
 
-        ids = group.map(&:id)
-        EventResult.where(id: ids).update_all(competitor_id: competitor.id)
-        linked += ids.size
+        group.each do |result|
+          next if Identity::NameNormalizer.truncated?(result.competitor_name)
+          next unless compatible_result?(competitor, result)
+          result.update_columns(competitor_id: competitor.id,
+            raw_competitor_name: result.raw_competitor_name.presence || result.competitor_name,
+            country_code: normalize_country(result.country_code))
+          linked += 1
+        end
       end
 
       { created: created, linked: linked }
@@ -65,21 +60,25 @@ class CompetitorLinker
 
     def find_or_create(full_name, sample_result = nil)
       normalized = normalize(full_name)
-      return nil if normalized.blank?
+      return nil if normalized.blank? || Identity::NameNormalizer.truncated?(full_name)
 
-      competitor = find_by_name(normalized)
-      return competitor if competitor
+      candidates = name_candidates(normalized)
+      return nil if candidates.many? || candidates.any?(&:identity_separate?)
+      competitor = candidates.first
+      return compatible_result?(competitor, sample_result) ? competitor : nil if competitor
 
       first_name, last_name = split_asjjf_name(full_name)
       belt = extract_belt(sample_result)
       country = normalize_country(sample_result&.country_code)
 
       Competitor.transaction do
-        lock_key = Zlib.crc32("competitor:#{normalized}") % (2**31)
+        lock_key = 184527002
         Competitor.connection.execute("SELECT pg_advisory_xact_lock(#{lock_key})")
 
-        competitor = find_by_name(normalized)
-        return competitor if competitor
+        candidates = name_candidates(normalized)
+        return nil if candidates.many? || candidates.any?(&:identity_separate?)
+        competitor = candidates.first
+        return compatible_result?(competitor, sample_result) ? competitor : nil if competitor
 
         Competitor.create!(
           first_name: first_name,
@@ -92,10 +91,7 @@ class CompetitorLinker
     end
 
     def normalize_country(code)
-      return nil if code.blank?
-      code = code.strip.upcase
-      return code if code.length == 2
-      COUNTRY_MAP[code] || nil
+      Identity::CountryCode.normalize(code)
     end
 
     def backfill_metadata
@@ -131,27 +127,30 @@ class CompetitorLinker
     private
 
     def normalize(name)
-      name.to_s.strip.downcase.gsub(/\s+/, " ")
+      Identity::NameNormalizer.key(name)
     end
 
-    def find_by_name(normalized)
-      Competitor
-        .where(
-          "LOWER(TRIM(CONCAT(last_name, ' ', first_name))) = :name " \
-          "OR LOWER(TRIM(CONCAT(first_name, ' ', last_name))) = :name",
-          name: normalized
-        )
-        .first
-    end
-
-    # ASJJF format is "LastName FirstName" — split on first space
-    def split_asjjf_name(full_name)
-      parts = full_name.strip.split(/\s+/, 2)
-      if parts.size >= 2
-        [parts[1].titleize, parts[0].titleize]
-      else
-        [parts[0].titleize, parts[0].titleize]
+    def name_candidates(key)
+      indexed = Competitor.where(normalized_name: key).or(Competitor.where(reverse_normalized_name: key)).to_a
+      legacy = Competitor.where(normalized_name: nil).select do |competitor|
+        [normalize("#{competitor.first_name} #{competitor.last_name}"),
+          normalize("#{competitor.last_name} #{competitor.first_name}")].include?(key)
       end
+      (indexed + legacy).uniq(&:id)
+    end
+
+    def compatible_result?(competitor, sample)
+      return true unless sample
+      genders = competitor.event_results.where.not(gender: [nil, ""]).distinct.pluck(:gender)
+      return false if sample.gender.present? && genders.any? && !genders.include?(sample.gender)
+      categories = competitor.event_results.where(event_id: sample.event_id).pluck(:age_category).compact
+      kid = ->(category) { category.to_s.match?(/kid|child|infant/i) }
+      return false if sample.age_category.present? && categories.any? { |category| kid.call(category) != kid.call(sample.age_category) }
+      true
+    end
+
+    def split_asjjf_name(full_name)
+      Identity::NameNormalizer.person_parts(full_name)
     end
 
     # Pick the highest valid belt rank from all results for this competitor

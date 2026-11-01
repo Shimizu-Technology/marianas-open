@@ -5,7 +5,7 @@ module Api
         include ClerkAuthenticatable
 
         before_action :require_staff!
-        before_action :set_academy, only: [ :show, :update, :destroy, :upload_logo ]
+        before_action :set_academy, only: [ :show, :update, :destroy, :upload_logo, :merge_preview, :merge ]
 
         def index
           scope = Academy.all
@@ -46,7 +46,7 @@ module Api
         def show
           stats = bulk_compute_stats([ @academy.id ])[@academy.id] || empty_stats
 
-          athletes = @academy.competitors.order(:last_name, :first_name).map do |c|
+          athletes = Competitor.where(id: Identity::AcademyAttribution.relation.where(attributed_academy_id: @academy.id).select(:competitor_id)).order(:last_name, :first_name).map do |c|
             { id: c.id, first_name: c.first_name, last_name: c.last_name,
               full_name: c.full_name, belt_rank: c.belt_rank, country_code: c.country_code }
           end
@@ -64,8 +64,30 @@ module Api
           render json: { academy: data }
         end
 
+        def merge_preview
+          render json: Identity::AcademyMerge.preview(@academy, Academy.find(params[:target_id]))
+        rescue ActiveRecord::RecordNotFound
+          render json: { error: "Target academy not found" }, status: :not_found
+        end
+
+        def merge
+          target = Identity::AcademyMerge.call(source: @academy, target: Academy.find(params[:target_id]),
+            confirm: params[:confirm] == true, actor: current_user)
+          render json: { academy: target.as_json }
+        rescue ArgumentError, ActiveRecord::RecordInvalid => e
+          render json: { error: e.message }, status: :unprocessable_entity
+        rescue ActiveRecord::RecordNotFound
+          render json: { error: "Target academy not found" }, status: :not_found
+        end
+
         def update
-          if @academy.update(academy_params)
+          old_name = @academy.name
+          attrs = academy_params.to_h
+          if attrs["name"].present? && attrs["name"] != old_name
+            attrs["aliases"] = (Array(attrs["aliases"] || @academy.aliases) + [old_name]).uniq
+          end
+          if @academy.update(attrs)
+            Rails.logger.info("[Identity] academy_update actor=#{current_user.id} academy=#{@academy.id} old_name=#{old_name.inspect} new_name=#{@academy.name.inspect}")
             render json: { academy: @academy.reload.as_json }
           else
             render json: { errors: @academy.errors.full_messages }, status: :unprocessable_entity
@@ -89,22 +111,23 @@ module Api
         private
 
         def stats_join_sql
+          attribution = Identity::AcademyAttribution.results_sql
+          academy_id_sql = "event_results.attributed_academy_id"
           points = RankingCalculator.points_sql
           <<~SQL
             LEFT JOIN (
               SELECT
-                competitors.academy_id,
+                #{academy_id_sql} AS academy_id,
                 COUNT(DISTINCT event_results.competitor_id) as athletes,
                 COUNT(DISTINCT event_results.event_id) as events_competed,
                 COUNT(*) FILTER (WHERE event_results.placement = 1) as gold,
                 COUNT(*) FILTER (WHERE event_results.placement = 2) as silver,
                 COUNT(*) FILTER (WHERE event_results.placement = 3) as bronze,
                 #{points} as total_points
-              FROM event_results
-              INNER JOIN competitors ON competitors.id = event_results.competitor_id
+              FROM #{attribution} event_results
               INNER JOIN events ON events.id = event_results.event_id
-              WHERE competitors.academy_id IS NOT NULL
-              GROUP BY competitors.academy_id
+              WHERE #{academy_id_sql} IS NOT NULL
+              GROUP BY #{academy_id_sql}
             ) stats ON stats.academy_id = academies.id
           SQL
         end
@@ -116,7 +139,7 @@ module Api
         end
 
         def academy_params
-          params.permit(:name, :country_code, :location, :website_url, :instagram_url, :facebook_url, :description, aliases: [])
+          params.permit(:name, :country_code, :location, :website_url, :instagram_url, :facebook_url, :description, :parent_id, :unaffiliated, aliases: [])
         end
 
         def serialize_for_list(a)
@@ -131,6 +154,8 @@ module Api
             facebook_url: a.facebook_url,
             description: a.description,
             aliases: a.aliases,
+            parent_id: a.parent_id,
+            unaffiliated: a.unaffiliated,
             logo_url: a.logo_url,
             total_points: a.computed_total_points.to_i,
             gold: a.computed_gold.to_i,
@@ -144,13 +169,13 @@ module Api
         def bulk_compute_stats(academy_ids)
           return {} if academy_ids.empty?
 
-          rows = EventResult
-            .joins(competitor: :team)
-            .joins(:event)
-            .where(competitors: { academy_id: academy_ids })
-            .group("competitors.academy_id")
+          attributed_column = Identity::AcademyAttribution.id_sql
+          rows = Identity::AcademyAttribution.relation
+              .joins(:event)
+            .where(attributed_academy_id: academy_ids)
+            .group(attributed_column)
             .select(
-              "competitors.academy_id",
+              "#{attributed_column} AS academy_id",
               "COUNT(DISTINCT event_results.competitor_id) as athletes",
               "COUNT(DISTINCT event_results.event_id) as events_competed",
               "COUNT(*) FILTER (WHERE event_results.placement = 1) as gold",

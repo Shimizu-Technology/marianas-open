@@ -1,5 +1,6 @@
 require "test_helper"
 require "tempfile"
+require "csv"
 
 class IdentityRepairTest < ActiveSupport::TestCase
   setup do
@@ -128,6 +129,17 @@ class IdentityRepairTest < ActiveSupport::TestCase
   ensure
     %w[DECISIONS ATHLETES APPLY].each { |key| ENV.delete(key) }
     previous&.each { |key, value| ENV[key] = value }
+  end
+
+
+  test "stale CSV IDs whose names no longer match are skipped without writes" do
+    Competitor.find(72002).update!(last_name: "Unrelated")
+    Academy.find(71002).update!(name: "Unrelated Gym")
+    report = repair(apply: true)
+    assert Competitor.exists?(72002)
+    assert Academy.exists?(71002)
+    assert report[:skipped].any? { |row| row[:reason].include?("CSV names do not match current academies") }
+    assert report[:skipped].any? { |row| row[:reason].include?("CSV names do not match current athletes") }
   end
 
   private
