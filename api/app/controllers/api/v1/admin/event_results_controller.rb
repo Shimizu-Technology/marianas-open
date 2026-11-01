@@ -73,7 +73,12 @@ module Api
         end
 
         def update
-          if @result.update(result_params)
+          saved = @event.with_lock do
+            @result.lock!
+            @result.sync_key ||= Asjjf::ResultsIdentity.key(@result) if @result.source == "asjjf"
+            @result.update(result_params.merge(manually_edited_at: Time.current))
+          end
+          if saved
             render json: @result
           else
             render json: { errors: @result.errors.full_messages }, status: :unprocessable_entity

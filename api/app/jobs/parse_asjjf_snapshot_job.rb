@@ -19,5 +19,11 @@ class ParseAsjjfSnapshotJob < ApplicationJob
   rescue StandardError => e
     snapshot&.update!(parse_status: "failed", parse_error: "#{e.class}: #{e.message}".truncate(2000), parsed_at: Time.current)
     Rails.logger.error("[ASJJF] Snapshot #{snapshot_id} parse failed: #{e.class}: #{e.message}")
+  ensure
+    if snapshot && %w[event_results results_list].include?(snapshot.page_type)
+      EventAsjjfSource.where(asjjf_event_id: snapshot.asjjf_id).pluck(:event_id).uniq.each do |event_id|
+        EvaluateResultsSyncJob.perform_later(event_id)
+      end
+    end
   end
 end

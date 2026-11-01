@@ -5,7 +5,7 @@ module Asjjf
     end
 
     def plan_event_results(event)
-      sources(event).flat_map do |source|
+      sources_for(event).flat_map do |source|
         id = source.asjjf_event_id
         requests = [ enqueue("event_results", id, "event #{event.id} results") ]
         %w[MALE FEMALE].product(%w[ADULT KIDS]).each do |gender, age|
@@ -16,7 +16,7 @@ module Asjjf
     end
 
     def plan_event_info(event)
-      sources(event).map { |source| enqueue("event_info", source.asjjf_event_id, "event #{event.id} information") }
+      sources_for(event).map { |source| enqueue("event_info", source.asjjf_event_id, "event #{event.id} information") }
     end
 
     def plan_season_calendar(season_id)
@@ -37,7 +37,9 @@ module Asjjf
       AsjjfFetchRequest.enqueue!(url: url, page_type: page_type, reason: reason, requested_by: @requested_by, include_divisions: include_divisions)
     end
 
-    def sources(event)
+    public
+
+    def sources_for(event)
       # Also accommodate source ids edited after the one-time backfill.
       Array(event.asjjf_event_ids).each do |id|
         next unless id.to_s.match?(/\A[1-9]\d*\z/)

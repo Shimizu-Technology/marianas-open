@@ -1,0 +1,244 @@
+require "digest"
+
+module Asjjf
+  class ResultsSync
+    class StaleReview < StandardError; end
+    class InvalidReview < StandardError; end
+    FIELDS = %w[source asjjf_event_id discipline division division_key gender belt_rank age_category weight_class placement competitor_name academy country_code alone_in_bracket].freeze
+
+    def initialize(event)
+      @event = event
+    end
+
+    def call(trigger: "snapshot", apply: true)
+      run = @event.with_lock do
+        proposal = build_proposal
+        previous = @event.results_sync_runs.order(id: :desc).first
+        # Repeated evaluations of the same hold/discard are quiet and cannot
+        # silently reintroduce a proposal an administrator discarded.
+        if previous&.status == "held" && previous.diff_summary["fingerprint"] == proposal[:summary][:fingerprint]
+          @event.update_columns(results_sync_status: "held", results_last_checked_at: Time.current)
+          next previous
+        end
+        status = if !@assembly.complete?
+          "incomplete"
+        elsif @guards.any? || (!apply && changes?)
+          "held"
+        elsif changes?
+          apply_changes!
+          "applied"
+        else
+          "no_changes"
+        end
+        record_run(status, trigger, proposal)
+      end
+      notify(run)
+      run
+    rescue StandardError => e
+      failed = @event.results_sync_runs.create!(trigger: trigger, status: "failed", error: "#{e.class}: #{e.message}".truncate(2000))
+      @event.update_columns(results_sync_status: "failed", results_last_checked_at: Time.current)
+      ResultsAlert.deliver(failed)
+      failed
+    end
+
+    def approve!(run, user:)
+      result = @event.with_lock do
+        run.reload
+        raise InvalidReview, "This review is no longer awaiting approval" unless run.event_id == @event.id && run.status == "held" && run.discarded_at.nil?
+        proposal = build_proposal
+        unless @assembly.complete? && proposal[:summary][:fingerprint] == run.diff_summary["fingerprint"]
+          raise StaleReview, "Results or snapshots changed. Refresh the preview before approving."
+        end
+        # Approval can acknowledge a relabel or a count drop, never malformed
+        # medals, unknown provenance, or protected-row conflicts.
+        raise InvalidReview, "Resolve blocking guard failures before approving" if @blocking_guards.any?
+        apply_changes!
+        run.update!(status: "applied", applied_at: Time.current, approved_by: user)
+        @event.update_columns(results_sync_status: "applied", results_last_checked_at: Time.current)
+        run
+      end
+      notify(result)
+      result
+    end
+
+    def discard!(run)
+      @event.with_lock do
+        run.reload
+        raise InvalidReview, "This review is no longer awaiting approval" unless run.event_id == @event.id && run.status == "held" && run.discarded_at.nil?
+        run.update!(discarded_at: Time.current)
+      end
+      run
+    end
+
+    private
+
+    def build_proposal
+      @assembly = ResultsAssembler.new(@event).call
+      @existing = @event.event_results.order(:id).to_a
+      @incoming = @assembly.rows.map { |attrs| EventResult.new(attrs.merge(event: @event)) }
+      @added, @removed, @changed, @unchanged, @conflicts, @relabels = [], [], [], [], [], []
+      match_rows
+      check_guards
+      totals = { added: @added.size, removed: @removed.size, changed: @changed.size, unchanged: @unchanged.size }
+      divisions = {}
+      { added: @added, removed: @removed, changed: @changed.map(&:last), unchanged: @unchanged.map(&:last) }.each do |type, rows|
+        rows.each do |row|
+          key = "#{row.asjjf_event_id}:#{row.discipline}:#{ResultsIdentity.division_key(row.division)}"
+          divisions[key] ||= { division: row.division, asjjf_event_id: row.asjjf_event_id, added: 0, removed: 0, changed: 0, unchanged: 0 }
+          divisions[key][type] += 1
+        end
+      end
+      relabel_count = @relabels.map { |_, row| [row.asjjf_event_id, row.division_key] }.uniq.size
+      messages = []
+      messages << "Adds #{totals[:added]} results across #{@added.map(&:division).uniq.size} divisions" if totals[:added].positive?
+      messages << "Removes #{totals[:removed]} results" if totals[:removed].positive?
+      messages << "Updates #{totals[:changed]} results" if totals[:changed].positive?
+      messages << "Corrects #{relabel_count} divisions labeled Gi that are actually No-Gi" if relabel_count.positive?
+      messages << "No changes to published results" if !changes? && @conflicts.empty?
+      fingerprint = Digest::SHA256.hexdigest([
+        @assembly.snapshot_ids.sort, @event.event_asjjf_sources.order(:id).pluck(:asjjf_event_id, :discipline),
+        @existing.map { |row| row.attributes.sort.to_h }
+      ].to_json)
+      { summary: totals.merge(divisions: divisions.values, relabeled_divisions: relabel_count,
+          messages: messages, conflicts: @conflicts, missing: @assembly.missing,
+          snapshot_ids: @assembly.snapshot_ids, fingerprint: fingerprint, approvable: @assembly.complete? && @blocking_guards.empty?,
+          first_import: @existing.none? { |row| row.source == "asjjf" }) }
+    end
+
+    def match_rows
+      pool = @existing.dup
+      pending = @incoming.dup
+      pairs = []
+      # Exact provenance first, then conservative unique legacy matches, then
+      # label-only repairs. Arrays preserve tied bronze and duplicate-name rows.
+      [ :exact, :legacy, :relabel ].each do |mode|
+        pending.dup.each do |row|
+          candidates = pool.select { |old| matches_row?(old, row, mode) }
+          next if candidates.empty?
+          next if mode != :exact && candidates.size != 1
+          old = candidates.first
+          pool.delete(old)
+          pending.delete(row)
+          pairs << [old, row]
+          @relabels << [old, row] if mode == :relabel && row.discipline == "nogi" && old.discipline == "gi"
+        end
+      end
+      pairs.each do |old, row|
+        if protected?(old)
+          @conflicts << conflict(old, "Protected result matches ASJJF; kept unchanged") unless same?(old, row)
+          @unchanged << [old, row]
+        elsif same?(old, row)
+          @unchanged << [old, row]
+        else
+          @changed << [old, row]
+        end
+      end
+      pool.each do |row|
+        if protected?(row)
+          @conflicts << conflict(row, "Protected result is absent from ASJJF; kept unchanged") if row.source == "asjjf"
+        else
+          @removed << row
+        end
+      end
+      @added = pending
+    end
+
+    def matches_row?(old, row, mode)
+      old_key = old.sync_key.presence || ResultsIdentity.key(old)
+      key = ResultsIdentity.key(row)
+      case mode
+      when :exact
+        old_key == key || (old.source == "manual" && ResultsIdentity.key(old, source: false) == ResultsIdentity.key(row, source: false))
+      when :legacy
+        old.asjjf_event_id.nil? && (old.discipline.nil? || old.discipline == row.discipline) &&
+          ResultsIdentity.key(old, source: false, discipline: false) == ResultsIdentity.key(row, source: false, discipline: false)
+      when :relabel
+        old.source == "asjjf" && (old.asjjf_event_id.nil? || old.asjjf_event_id == row.asjjf_event_id) &&
+          ResultsIdentity.key(old, source: false, discipline: false) == ResultsIdentity.key(row, source: false, discipline: false)
+      end
+    end
+
+    def protected?(row)
+      row.source == "manual" || row.manually_edited_at.present?
+    end
+
+    def same?(old, row)
+      FIELDS.all? { |field| old.public_send(field) == row.public_send(field) }
+    end
+
+    def conflict(row, reason)
+      { id: row.id, division: row.division, competitor_name: row.competitor_name, reason: reason }
+    end
+
+    def check_guards
+      @blocking_guards = @assembly.guard_failures.dup
+      @incoming.each do |row|
+        @blocking_guards << "Missing placement or competitor name in #{row.division}" unless [1, 2, 3].include?(row.placement) && row.competitor_name.present?
+      end
+      @incoming.group_by { |row| [row.asjjf_event_id, row.discipline, row.division_key] }.each_value do |rows|
+        counts = rows.map(&:placement).tally
+        if counts.fetch(1, 0) != 1 || counts.fetch(2, 0) > 1 || counts.fetch(3, 0) > 2
+          @blocking_guards << "Invalid medal counts in #{rows.first.division} (#{counts})"
+        end
+      end
+      @blocking_guards << "#{@conflicts.size} protected result conflicts require resolution" if @conflicts.any?
+      # Also protect public display from collisions with manually curated medals.
+      projected = @existing.select { |row| protected?(row) } + @incoming.reject do |row|
+        (@unchanged + @changed).any? { |old, incoming| incoming.equal?(row) && protected?(old) }
+      end
+      projected.group_by(&:division).each do |division, rows|
+        if rows.count { |row| row.placement == 1 } > 1 || rows.count { |row| row.placement == 2 } > 1 || rows.count { |row| row.placement == 3 } > 2
+          @blocking_guards << "Published division would have duplicate medals: #{division}"
+        end
+      end
+      @guards = @blocking_guards.dup
+      current = @existing.select { |row| row.source == "asjjf" }
+      @guards << "ASJJF result count drops by more than 10% (#{current.size} to #{@incoming.size})" if current.any? && @incoming.size < current.size * 0.9
+      current.group_by(&:asjjf_event_id).each do |id, rows|
+        next if id.nil?
+        @guards << "Source #{id} returned zero results (previously #{rows.size})" if @incoming.none? { |row| row.asjjf_event_id == id }
+      end
+      if @relabels.any? && !@event.results_sync_runs.where(status: "applied").where.not(approved_by_id: nil).where("(diff_summary->>'relabeled_divisions')::integer > 0").exists?
+        @guards << "First No-Gi relabel requires administrator approval"
+      end
+      @guards.uniq!
+      @blocking_guards.uniq!
+    end
+
+    def changes?
+      @added.any? || @removed.any? || @changed.any?
+    end
+
+    def apply_changes!
+      previous_ids = @existing.filter_map(&:competitor_id)
+      @removed.each(&:destroy!)
+      (@changed + @added.map { |row| [nil, row] }).each do |old, row|
+        target = old || @event.event_results.new
+        target.assign_attributes(row.attributes.slice(*FIELDS))
+        target.sync_key = ResultsIdentity.key(row)
+        target.competitor = CompetitorLinker.find_or_create(target.competitor_name, target)
+        target.save!
+      end
+      # Never relink protected or unchanged rows during sync.
+      unlinked = @event.event_results.where(source: "asjjf", competitor_id: nil).pluck(:id, :competitor_name)
+      @unlinked = unlinked.map { |id, name| { id: id, competitor_name: name, reason: "Ambiguous, truncated, or incompatible identity; left unlinked" } }
+      Competitor.where(id: previous_ids.uniq).find_each(&:refresh_current_academy!)
+      @event.update_columns(results_imported_at: Time.current)
+    end
+
+    def record_run(status, trigger, proposal)
+      summary = proposal[:summary].merge(unlinked_competitors: @unlinked || [])
+      run = @event.results_sync_runs.create!(trigger: trigger, status: status, diff_summary: summary,
+        guard_failures: @guards, applied_at: status == "applied" ? Time.current : nil)
+      @event.update_columns(results_sync_status: status, results_last_checked_at: Time.current)
+      run
+    end
+
+    def notify(run)
+      return unless run.previously_new_record? || run.saved_change_to_status?
+      if run.status == "held" || (run.status == "applied" && run.diff_summary["first_import"])
+        ResultsAlert.deliver(run)
+      end
+    end
+  end
+end

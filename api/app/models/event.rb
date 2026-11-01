@@ -31,6 +31,7 @@ class Event < ApplicationRecord
   has_many :videos, dependent: :nullify
   has_many :event_asjjf_sources, dependent: :destroy
   has_many :event_results, dependent: :destroy
+  has_many :results_sync_runs, dependent: :destroy
   has_many :event_accommodations, dependent: :destroy
   has_many :event_gallery_images, dependent: :destroy
   has_many :event_gallery_upload_batches, dependent: :destroy
