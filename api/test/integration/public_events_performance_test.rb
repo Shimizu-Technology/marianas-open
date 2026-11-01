@@ -96,6 +96,8 @@ class PublicEventsPerformanceTest < ActionDispatch::IntegrationTest
   end
 
   test "sponsor and site image responses preload their attachments" do
+    previous_host = Rails.application.routes.default_url_options[:host]
+    Rails.application.routes.default_url_options[:host] = "www.example.com"
     12.times do |index|
       sponsor = @organization.sponsors.create!(name: "Sponsor #{index}", sort_order: index)
       sponsor.logo.attach(@blob)
@@ -116,6 +118,8 @@ class PublicEventsPerformanceTest < ActionDispatch::IntegrationTest
     assert_operator site_image_queries, :<=, 3
     assert_equal 12, response.parsed_body.fetch("site_images").length
     assert response.parsed_body.fetch("site_images").all? { |image| image.key?("image_url") }
+  ensure
+    Rails.application.routes.default_url_options[:host] = previous_host
   end
 
   private
