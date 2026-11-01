@@ -6,6 +6,8 @@ class EventReadiness
   end
 
   def call
+    stale = stale_references
+    stale_label = stale.empty? ? "Text has no references to another season" : "Review old season text: #{stale.map { |item| "#{item[:label]} (#{item[:years].join(', ')})" }.join('; ')}"
     checks = [
       check("name", "Event name is set", @event.name.present?, "basics"),
       check("slug", "Public URL is present and unique", unique_slug?, "basics"),
@@ -15,7 +17,7 @@ class EventReadiness
       check("registration", "Registration link or ‘not open yet’ is set", registration_ready?, "dates"),
       check("schedule", "Every schedule row is confirmed", rows_confirmed?(:event_schedule_items), "schedule"),
       check("prizes", "Every prize row is confirmed", rows_confirmed?(:prize_categories), "prizes"),
-      check("stale_year", "Text has no references to another season", stale_years.empty?, "basics"),
+      check("stale_year", stale_label, stale.empty?, stale.first&.fetch(:section) || "basics"),
       check("stars", "Star rating matches saved ASJJF facts or is blank", stars_sourced?, "basics"),
       check("content_review", "Copied descriptions, travel and hotel details reviewed", !@event.content_review_required?, "venue")
     ]
@@ -49,7 +51,7 @@ class EventReadiness
     @event.public_send(association).reject(&:marked_for_destruction?).all?(&:confirmed?)
   end
 
-  def stale_years
+  def stale_references
     return [] unless year
     sourced = info_snapshot ? Asjjf::EventFacts.registration_fields(info_snapshot.parsed_summary).stringify_keys : {}
     content = TEXT_FIELDS.filter_map do |field|
@@ -57,14 +59,29 @@ class EventReadiness
       # Early registration can legitimately open in the preceding calendar year.
       # Exempt only text still identical to its saved ASJJF evidence.
       next if sourced.key?(field) && value.as_json == sourced[field].as_json
-      value.to_json
+      [ field.humanize, text_section(field), value.to_json ]
     end
     { event_schedule_items: %w[time description], prize_categories: %w[name], event_accommodations: %w[hotel_name description rate_info inclusions room_types booking_code booking_url] }.each do |association, fields|
+      section = { event_schedule_items: "schedule", prize_categories: "prizes", event_accommodations: "hotels" }.fetch(association)
       content.concat(@event.public_send(association).reject(&:marked_for_destruction?).map do |row|
-        row.attributes.slice(*fields).values.join(" ")
+        [ association.to_s.humanize, section, row.attributes.slice(*fields).values.join(" ") ]
       end)
     end
-    content.join(" ").scan(/\b20\d{2}\b/).uniq.reject { |value| value.to_i == year }
+    content.filter_map do |label, section, text|
+      years = text.scan(/\b20\d{2}\b/).uniq.reject { |value| value.to_i == year }
+      { label: label, section: section, years: years } if years.any?
+    end
+  end
+
+  def text_section(field)
+    case field
+    when /\Aregistration/ then "dates"
+    when /\Aticket/ then "tickets"
+    when /\A(travel|visa|venue|city|country)/ then "venue"
+    when /\Aschedule/ then "schedule"
+    when /\Aprize/ then "prizes"
+    else "basics"
+    end
   end
 
   def stars_sourced?
