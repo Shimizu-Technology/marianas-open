@@ -262,9 +262,10 @@ interface EventResultsSectionProps {
   eventSlug: string;
   sourceUrls?: string[];
   importedAt?: string | null;
+  onReady?: (eventSlug: string) => void;
 }
 
-export default function EventResultsSection({ eventSlug, sourceUrls }: EventResultsSectionProps) {
+export default function EventResultsSection({ eventSlug, sourceUrls, onReady }: EventResultsSectionProps) {
   const { t } = useTranslation();
   const [results, setResults] = useState<EventResultDivision[]>([]);
   const [summary, setSummary] = useState<EventResultsSummary | null>(null);
@@ -279,19 +280,24 @@ export default function EventResultsSection({ eventSlug, sourceUrls }: EventResu
   const [weightFilter, setWeightFilter] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setError(false);
     Promise.all([
-      api.getEventResults(eventSlug).catch(() => []),
-      api.getEventResultsSummary(eventSlug).catch(() => null),
+      api.getEventResults(eventSlug),
+      api.getEventResultsSummary(eventSlug),
     ]).then(([res, sum]) => {
+      if (cancelled) return;
       setResults(res);
       setSummary(sum);
-      // Auto-expand first 3 divisions
-      const first3 = res.slice(0, 3).map(d => d.division);
-      setOpenDivisions(new Set(first3));
-    }).catch(() => setError(true)).finally(() => setLoading(false));
-  }, [eventSlug]);
+      setOpenDivisions(new Set(res.slice(0, 3).map(d => d.division)));
+    }).catch(() => { if (!cancelled) setError(true); }).finally(() => {
+      if (cancelled) return;
+      setLoading(false);
+      onReady?.(eventSlug);
+    });
+    return () => { cancelled = true; };
+  }, [eventSlug, onReady]);
 
   // Derive filter options from results
   const filterOptions = useMemo(() => {
@@ -363,7 +369,7 @@ export default function EventResultsSection({ eventSlug, sourceUrls }: EventResu
     return (
       <div className="py-16 text-center">
         <Trophy size={32} className="text-text-muted mx-auto mb-4" />
-        <p className="text-text-muted text-sm">{t('results.noResults')}</p>
+        <p className="text-text-muted text-sm">{t(error ? 'season.resultsUnavailable' : 'results.noResults')}</p>
       </div>
     );
   }

@@ -21,8 +21,10 @@ class PublicEventLoader
     events = @scope.includes(*EVENT_INCLUDES).to_a
     return events if events.empty?
 
+    results_by_event = EventResult.where(event_id: events.map(&:id)).group(:event_id).count
     previews_by_event = gallery_previews(events.map(&:id)).group_by(&:event_id)
     events.each do |event|
+      event.results_count = results_by_event.fetch(event.id, 0)
       previews = previews_by_event.fetch(event.id, [])
       event.preload_public_gallery(
         count: previews.first&.public_gallery_images_count.to_i,

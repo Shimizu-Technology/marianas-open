@@ -8,6 +8,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import SEO from '../components/SEO';
 import type { Event } from '../services/api';
+import { eventPhase, hasEventResults } from '../utils/events';
+import { useResultCounts } from '../hooks/useResultCounts';
 import { useEvents } from '../hooks/useApi';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { resolveMediaUrl } from '../utils/images';
@@ -122,10 +124,11 @@ export default function PastEventsPage() {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const { tf } = useTranslatedField();
-  const { events: allEvents, loading } = useEvents();
+  const { events: publishedEvents, loading } = useEvents();
+  const { events: allEvents, loading: countsLoading } = useResultCounts(publishedEvents);
   const events = useMemo(
     () => allEvents
-      .filter((event) => event.status === 'completed')
+      .filter((event) => eventPhase(event) === 'completed')
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
     [allEvents],
   );
@@ -142,7 +145,7 @@ export default function PastEventsPage() {
       .sort((a, b) => b.year - a.year);
   }, [events]);
 
-  if (loading) {
+  if (loading || countsLoading) {
     return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;
   }
 
@@ -272,15 +275,15 @@ export default function PastEventsPage() {
                                 <span>{tf(event, 'city')}, {tf(event, 'country')}</span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3 pt-1">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1">
                               <div className="flex items-center gap-1 text-xs text-gold-500/70 group-hover:text-gold-400 transition-colors">
                                 <span className="font-heading uppercase tracking-wider">{t('pastEvents.viewDetails')}</span>
                                 <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
                               </div>
-                              {event.status === 'completed' && (
+                              {eventPhase(event) === 'completed' && (
                                 <div className="flex items-center gap-1 px-2 py-0.5 bg-gold-500/10 border border-gold-500/20 text-gold-400 text-xs font-heading uppercase tracking-wider">
                                   <Medal size={10} />
-                                  <span>{t('results.viewResults')}</span>
+                                  <span>{t(hasEventResults(event) ? 'results.viewResults' : event.results_count === 0 ? 'season.resultsPending' : 'season.resultsUnavailableShort')}</span>
                                 </div>
                               )}
                             </div>

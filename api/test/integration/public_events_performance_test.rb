@@ -18,6 +18,9 @@ class PublicEventsPerformanceTest < ActionDispatch::IntegrationTest
       )
     end
 
+    @events.first.event_results.create!(division: "Adult black", placement: 1, competitor_name: "Athlete One")
+    @events.first.event_results.create!(division: "Adult black", placement: 2, competitor_name: "Athlete Two")
+
     @blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new(PNG_BYTES),
       filename: "event.png",
@@ -50,9 +53,11 @@ class PublicEventsPerformanceTest < ActionDispatch::IntegrationTest
     query_count = count_database_queries { get "/api/v1/events" }
 
     assert_response :success
-    assert_operator query_count, :<=, 16
+    assert_operator query_count, :<=, 17
 
     event = response.parsed_body.find { |item| item["id"] == @events.first.id }
+    assert_equal 2, event["results_count"]
+    assert_equal 0, response.parsed_body.find { |item| item["id"] == @events.last.id }["results_count"]
     assert_equal 10, event["gallery_images_count"]
     assert_equal 8, event["event_gallery_images"].length
     assert_equal (1..8).to_a, event["event_gallery_images"].map { |image| image["sort_order"] }
@@ -66,7 +71,8 @@ class PublicEventsPerformanceTest < ActionDispatch::IntegrationTest
     query_count = count_database_queries { get "/api/v1/events/#{@events.first.slug}" }
 
     assert_response :success
-    assert_operator query_count, :<=, 16
+    assert_operator query_count, :<=, 17
+    assert_equal 2, response.parsed_body["results_count"]
     assert_equal 10, response.parsed_body["gallery_images_count"]
     assert_equal 8, response.parsed_body["event_gallery_images"].length
   end

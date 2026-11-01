@@ -11,7 +11,11 @@ import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
-import { getCurrentMainEvent } from '../utils/events';
+import { eventPhase, getCurrentMainEvent, getEventCycleYear, selectHomeState } from '../utils/events';
+import { useResultCounts } from '../hooks/useResultCounts';
+import { useTranslatedField } from '../hooks/useTranslatedField';
+import { getRegistrationLinks } from '../utils/registrationLinks';
+import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { getOrganizationSchema, getWebsiteSchema } from '../lib/seo';
 
 function normalizeSponsorKey(name: string) {
@@ -259,6 +263,8 @@ export default function HomePage() {
         </motion.div>
       </section>
 
+      <SeasonOverview events={events} loading={eventsLoading} />
+
       {/* Featured section — editorial asymmetric layout */}
       <section className="py-24 sm:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -327,8 +333,8 @@ export default function HomePage() {
       </section>
 
       {/* Journey Section */}
-      {!eventsLoading && events.length > 0 && (
-        <JourneySection events={events} />
+      {!eventsLoading && events.some(event => ['upcoming', 'live'].includes(eventPhase(event))) && (
+        <JourneySection events={events.filter(event => Number(event.date.slice(0, 4)) === getEventCycleYear(events))} />
       )}
 
       {/* Official Partners — logo strip */}
@@ -554,5 +560,53 @@ export default function HomePage() {
         </div>
       </section>
     </div>
+  );
+}
+
+
+function SeasonOverview({ events: publishedEvents, loading }: { events: import('../services/api').Event[]; loading: boolean }) {
+  const { t, i18n } = useTranslation();
+  const { tf } = useTranslatedField();
+  const { events, loading: countsLoading } = useResultCounts(publishedEvents, !publishedEvents.some(event => ['upcoming', 'live'].includes(eventPhase(event))));
+  const state = selectHomeState(events);
+  const event = state.nextEvent;
+  const links = getRegistrationLinks(event);
+  const registrations = links.hasDirect
+    ? [{ href: links.gi, label: t('calendar.registerGi') }, { href: links.nogi, label: t('calendar.registerNogi') }]
+    : [{ href: links.legacy, label: t('calendar.register') }];
+  const buttonClass = 'inline-flex min-h-11 items-center justify-center gap-2 px-5 py-3 text-sm font-heading font-semibold text-gold-300 border border-gold-500/30 hover:bg-gold-500/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400';
+  return (
+    <section className="min-h-[32rem] sm:min-h-96 border-y border-gold-500/15 bg-surface/50 py-12 sm:py-16" aria-busy={loading || countsLoading}>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        {loading || countsLoading ? <div className="h-64" /> : event ? (
+          <ScrollReveal>
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+              <div className="min-w-0">
+                <p className="mb-3 text-sm font-heading font-semibold uppercase tracking-wider text-gold-400">{t(state.kind === 'live' ? 'season.phase.live' : 'season.nextEvent')}</p>
+                <h2 className="max-w-3xl break-words font-heading text-3xl font-bold text-text-primary sm:text-4xl">{tf(event, 'name')}</h2>
+                <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-text-secondary">
+                  <span className="inline-flex items-center gap-2"><Calendar size={16} className="text-gold-400" />{parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { year: 'numeric', month: 'long', day: 'numeric' })}{event.end_date && event.end_date !== event.date ? ` – ${parseDateLocalSafe(event.end_date).toLocaleDateString(getDateLocale(i18n.language), { month: 'long', day: 'numeric' })}` : ''}</span>
+                  <span>{tf(event, 'city')}, {tf(event, 'country')}</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row lg:max-w-sm lg:flex-col">
+                {registrations.filter(link => link.href).map(link => <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className={`${buttonClass} bg-gold-500 text-navy-900 hover:bg-gold-400`}>{link.label}<ExternalLink size={14} /></a>)}
+                <Link to={`/events/${event.slug}`} className={buttonClass}>{t('calendar.details')}<ArrowRight size={14} /></Link>
+              </div>
+            </div>
+          </ScrollReveal>
+        ) : (
+          <ScrollReveal>
+            <h2 className="font-heading text-3xl font-bold text-text-primary sm:text-4xl">{state.seasonYear ? t('season.seasonComplete', { year: state.seasonYear }) : t('calendar.noUpcomingEvents')}</h2>
+            <p className="mt-4 max-w-2xl text-text-secondary">{t('season.nextSeasonNote')}</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {state.latestResults && <Link to={`/events/${state.latestResults.slug}#results`} className={buttonClass}>{t('season.latestResults')}</Link>}
+              {state.latestGallery && <Link to={`/events/${state.latestGallery.slug}/gallery`} className={buttonClass}>{t('season.latestGallery')}</Link>}
+              <Link to="/events/past" className={buttonClass}>{t('nav.pastEvents')}<ArrowRight size={14} /></Link>
+            </div>
+          </ScrollReveal>
+        )}
+      </div>
+    </section>
   );
 }

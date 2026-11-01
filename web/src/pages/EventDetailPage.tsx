@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -16,7 +16,10 @@ import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSpons
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { getRegistrationLinks } from '../utils/registrationLinks';
-import { formatVenueAddress, getCurrentMainEvent } from '../utils/events';
+import { eventPhase, formatVenueAddress, getCurrentMainEvent, getOfficialResultsLinks, hasEventResults } from '../utils/events';
+import { getPublicImageLabel, isGeneratedImageName } from '../utils/gallery';
+import { getDateLocale } from '../utils/dateLocale';
+import { useResultCounts } from '../hooks/useResultCounts';
 import { usePostHog } from '../providers/PostHogProvider';
 import type { EventTicketOption, EventTravelItem } from '../services/api';
 
@@ -218,7 +221,7 @@ function TravelItemCard({
 }
 
 export default function EventDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const shouldReduceMotion = useReducedMotion();
   const posthog = usePostHog();
@@ -229,12 +232,16 @@ export default function EventDetailPage() {
 
   const { tf, tfa } = useTranslatedField();
 
-  // If slug provided, show that event; otherwise show main event
-  const mainEvent = slug
-    ? events.find(e => e.slug === slug) || null
-    : getCurrentMainEvent(events);
+  const selectedEvents = useMemo(() => {
+    const selected = slug ? events.find(e => e.slug === slug) : getCurrentMainEvent(events);
+    return selected ? [selected] : [];
+  }, [events, slug]);
+  const { events: countedEvents, loading: resultsLoading } = useResultCounts(selectedEvents);
+  const mainEvent = countedEvents[0] ?? null;
+  const [readyResultsSlug, setReadyResultsSlug] = useState<string | null>(null);
+  const onResultsReady = useCallback((eventSlug: string) => setReadyResultsSlug(eventSlug), []);
 
-  if (loading) {
+  if (loading || resultsLoading) {
     return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;
   }
 
@@ -256,7 +263,11 @@ export default function EventDetailPage() {
     return slug ? <NotFoundPage /> : <Navigate to="/calendar" replace />;
   }
 
-  const isCompleted = mainEvent?.status === 'completed';
+  const phase = eventPhase(mainEvent);
+  const isCompleted = phase === 'completed';
+  const isCancelled = phase === 'cancelled';
+  const isClosed = isCompleted || isCancelled;
+  const officialResultsLinks = getOfficialResultsLinks(mainEvent);
 
   // Translated dynamic fields (fall back to English original when translation unavailable)
   const eventName = tf(mainEvent, 'name') || mainEvent?.name || '';
@@ -343,7 +354,7 @@ export default function EventDetailPage() {
 
   // Only the main championship has a standing tagline. Other events show a tagline
   // or star rating only when the organizers have actually published one.
-  const eventTagline = eventTaglineRaw || (mainEvent?.is_main_event ? t('event.tagline') : '');
+  const eventTagline = isClosed ? '' : eventTaglineRaw;
   const eventStars = mainEvent?.asjjf_stars && mainEvent.asjjf_stars > 0 ? mainEvent.asjjf_stars : null;
   const asjjfRankText = eventStars
     ? t('event.asjjfRankDynamic', {
@@ -365,7 +376,7 @@ export default function EventDetailPage() {
       }))
     : [];
   const registrationLinks = getRegistrationLinks(mainEvent);
-  const isRegistrationClosed = mainEvent?.status === 'completed' || mainEvent?.status === 'cancelled';
+  const isRegistrationClosed = isClosed;
   const canShowRegistrationActions = !isRegistrationClosed && registrationLinks.hasAny;
   const canShowRegistrationSection = !isRegistrationClosed && (displayRegistrationSteps.length > 0 || registrationLinks.hasAny);
   const ticketSalesUrl = normalizeExternalUrl(mainEvent?.ticket_sales_url);
@@ -412,9 +423,10 @@ export default function EventDetailPage() {
     .filter(({ image, src }) => image.active && src)
     .sort((a, b) => a.image.sort_order - b.image.sort_order)
     .map(({ image, src }) => ({
+      id: image.id,
       src: src || '',
-      alt: image.alt_text || image.title || t('event.galleryMatch'),
-      caption: image.caption || image.title || '',
+      alt: image.alt_text && !isGeneratedImageName(image.alt_text) ? image.alt_text : getPublicImageLabel(image) || eventName,
+      caption: getPublicImageLabel(image),
     }));
   const galleryImagesCount = mainEvent?.gallery_images_count ?? galleryImages.length;
 
@@ -424,12 +436,9 @@ export default function EventDetailPage() {
     const opts: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' };
     if (event.end_date && event.end_date !== event.date) {
       const end = new Date(event.end_date + 'T00:00:00');
-      if (start.getMonth() === end.getMonth()) {
-        return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}–${end.getDate()}, ${start.getFullYear()}`;
-      }
-      return `${start.toLocaleDateString('en-US', opts)} – ${end.toLocaleDateString('en-US', opts)}`;
+      return new Intl.DateTimeFormat(getDateLocale(i18n.language), opts).formatRange(start, end);
     }
-    return start.toLocaleDateString('en-US', opts);
+    return start.toLocaleDateString(getDateLocale(i18n.language), opts);
   };
   const shareText = mainEvent
     ? `${eventName} — ${formatEventDate(mainEvent)} — ${eventVenueName}`
@@ -445,9 +454,11 @@ export default function EventDetailPage() {
   const seoTitle = mainEvent
     ? `${eventName} ${formatEventDate(mainEvent)}`
     : 'Event Details';
-  const seoDescription = mainEvent
-    ? `${eventName} takes place at ${eventVenueName} in ${eventCity}, ${eventCountry} on ${formatEventDate(mainEvent)}.`
-    : 'Official Marianas Open event details, schedule, venue information, registration, and results.';
+  const seoDescription = isCompleted
+    ? t('season.eventRecap', { event: eventName, date: formatEventDate(mainEvent), city: eventCity, country: eventCountry })
+    : isCancelled
+      ? `${eventName}. ${t('season.cancelledDescription')}`
+      : `${eventName} takes place at ${eventVenueName} in ${eventCity}, ${eventCountry} on ${formatEventDate(mainEvent)}.`;
   const eventSchema = mainEvent ? {
     '@context': 'https://schema.org',
     '@type': 'SportsEvent',
@@ -456,9 +467,9 @@ export default function EventDetailPage() {
     startDate: mainEvent.date,
     endDate: mainEvent.end_date || mainEvent.date,
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-    eventStatus: mainEvent.status === 'completed'
+    eventStatus: isCompleted
       ? 'https://schema.org/EventCompleted'
-      : mainEvent.status === 'cancelled'
+      : isCancelled
         ? 'https://schema.org/EventCancelled'
         : 'https://schema.org/EventScheduled',
     image: heroImageUrl ? [heroImageUrl] : undefined,
@@ -518,8 +529,51 @@ export default function EventDetailPage() {
   };
 
 
+  const gallerySection = galleryImages.length > 0 ? (
+      <section id="gallery" className="py-10 sm:py-14" aria-label={t('season.gallery')}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-heading font-semibold uppercase tracking-[0.24em] text-gold-400">
+                {t('season.gallery')}
+              </p>
+              {galleryImagesCount > galleryImages.length && (
+                <p className="mt-1 text-xs text-text-muted">
+                  {t('season.galleryPreview', { shown: galleryImages.length, count: galleryImagesCount })}
+                </p>
+              )}
+            </div>
+            {mainEvent && (
+              <Link to={`/events/${mainEvent.slug}/gallery`} className="inline-flex min-h-11 items-center gap-2 text-sm text-gold-400 hover:text-gold-300">
+                {t('season.viewAllPhotos')} <ExternalLink size={12} />
+              </Link>
+            )}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {galleryImages.map((img, i) => (
+              <ScrollReveal key={i} delay={i * 0.08}>
+                <Link to={`/events/${mainEvent.slug}/gallery?photo=${img.id}`} className="relative block overflow-hidden aspect-[3/2] border border-white/5 group focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400">
+                  <ImageWithShimmer src={img.src} alt={img.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {img.caption && (
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-900/90 to-transparent p-3">
+                      <div className="text-xs text-text-secondary truncate">{img.caption}</div>
+                    </div>
+                  )}
+                </Link>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+      ) : null;
+
+
+
+  const awaitingResults = isCompleted && hasEventResults(mainEvent) && readyResultsSlug !== mainEvent.slug;
   return (
-    <div className="min-h-screen pt-20">
+    <>
+    {awaitingResults && <div className="min-h-screen pt-20"><LoadingSpinner /></div>}
+    <div className={`min-h-screen pt-20 ${awaitingResults ? 'hidden' : ''}`}>
       <SEO
         title={seoTitle}
         description={seoDescription}
@@ -564,6 +618,9 @@ export default function EventDetailPage() {
               </span>
             </div>
 
+            <p className={`mb-5 inline-flex items-center border px-3 py-2 text-sm font-heading font-semibold uppercase tracking-wider ${isCancelled ? 'border-red-400/40 text-red-200' : 'border-gold-500/30 text-gold-300'}`}>
+              {t(`season.phase.${phase}`)}
+            </p>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] mb-6">
               {mainEvent ? (
                 <>
@@ -599,7 +656,7 @@ export default function EventDetailPage() {
                 <MapPin size={16} className="text-gold-500" />
                 {mainEvent ? `${eventVenueName}` : t('event.venue')}
               </div>
-              {(hasCashPrizes || hasTripPackages || prizePoolDisplay) && (
+              {!isClosed && (hasCashPrizes || hasTripPackages || prizePoolDisplay) && (
               <div className="flex items-center gap-2">
                 <Trophy size={16} className="text-gold-500" />
                 {hasCashPrizes ? (prizePoolDisplay || t('event.totalPrizePool')) : hasTripPackages ? t('event.tripPackages', 'Trip Packages to Guam') : prizePoolDisplay}
@@ -666,9 +723,9 @@ export default function EventDetailPage() {
                 className="mt-8 inline-flex items-center gap-2 border border-gold-500/30 bg-gold-500/10 px-5 py-3 text-sm font-heading font-semibold uppercase tracking-wider text-gold-300 transition-colors hover:border-gold-400/60 hover:bg-gold-500/15 hover:text-gold-200"
               >
                 <ImageIcon size={16} />
-                View Photo Gallery
+                {t('season.viewGallery')}
                 <span className="text-text-muted normal-case tracking-normal">
-                  {galleryImagesCount} photo{galleryImagesCount === 1 ? '' : 's'}
+                  {t('season.photoCount', { count: galleryImagesCount })}
                 </span>
               </Link>
             )}
@@ -676,6 +733,46 @@ export default function EventDetailPage() {
         </div>
       </section>
 
+      {isCompleted && (
+        <>
+          <div id="results" className="min-h-72 scroll-mt-24">
+            {hasEventResults(mainEvent) ? (
+              <EventResultsSection eventSlug={mainEvent.slug} sourceUrls={officialResultsLinks} importedAt={mainEvent.results_imported_at} onReady={onResultsReady} />
+            ) : (
+              <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+                <div className="border border-gold-500/20 bg-surface p-6 sm:p-8">
+                  <Trophy size={24} className="mb-4 text-gold-400" />
+                  <h2 className="font-heading text-2xl font-bold text-text-primary">{t('results.title')}</h2>
+                  <p className="mt-3 max-w-2xl text-text-secondary">{t(mainEvent.results_count === 0 ? 'season.resultsFinalizing' : 'season.resultsUnavailable')}</p>
+                  {officialResultsLinks.length > 0 && (
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      {officialResultsLinks.map((url, index) => (
+                        <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 border border-gold-500/30 px-4 py-2 text-sm text-gold-300 hover:bg-gold-500/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400">
+                          {t('season.officialResults')}{officialResultsLinks.length > 1 ? ` (${index + 1})` : ''}<ExternalLink size={14} />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+          </div>
+          {gallerySection}
+          <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+            <h2 className="font-heading text-2xl font-bold text-text-primary">{t('season.recap')}</h2>
+            <p className="mt-3 max-w-3xl text-text-secondary leading-relaxed">{t('season.eventRecap', { event: eventName, date: formatEventDate(mainEvent), city: eventCity, country: eventCountry })}</p>
+            {eventVenueName && <p className="mt-3 text-sm text-text-secondary">{eventVenueName}</p>}
+            <Link to="/events/past" className="mt-4 inline-flex min-h-11 items-center text-sm text-gold-300 hover:text-gold-200">{t('nav.pastEvents')}</Link>
+          </section>
+        </>
+      )}
+      {isCancelled && (
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <p className="max-w-2xl text-text-secondary">{t('season.cancelledDescription')}</p>
+          <Link to="/calendar" className="mt-5 inline-flex min-h-11 items-center border border-gold-500/30 px-5 py-3 text-sm text-gold-300 hover:bg-gold-500/10">{t('hero.learnMore')}</Link>
+        </section>
+      )}
+      {!isClosed && <>
       {canShowTicketSection && (
         <section id="spectator-tickets" className="relative overflow-hidden border-y border-gold-500/15 bg-surface/35 py-20 sm:py-28">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_30%,rgba(226,178,68,0.10),transparent_34%)]" />
@@ -847,7 +944,7 @@ export default function EventDetailPage() {
             </ScrollReveal>
 
             {/* Prize Pool / Trip Packages — only render when prize data exists */}
-            {(hasCashPrizes || hasTripPackages || prizePoolDisplay) && (
+            {!isClosed && (hasCashPrizes || hasTripPackages || prizePoolDisplay) && (
             <ScrollReveal delay={0.1}>
               <div className="bg-gradient-to-br from-gold-500/10 to-transparent border border-gold-500/20 p-8 h-full">
                 <Trophy size={24} className="text-gold-500 mb-4" />
@@ -862,7 +959,7 @@ export default function EventDetailPage() {
                       {eventPrizeTitle?.trim() || t('event.winYourWay', 'Win Your Way to Guam!')}
                     </div>
                     <div className={`text-sm text-text-secondary ${hasPrizeBreakdown ? 'mb-6' : ''}`}>
-                      {eventPrizeDescription?.trim() || t('event.tripPackageDesc', `Compete for a trip package to the Marianas Open International Championship — ${prizePoolDisplay || '$50,000'} cash prize pool!`)}
+                      {eventPrizeDescription?.trim()}
                     </div>
                   </>
                 ) : (
@@ -1056,9 +1153,9 @@ export default function EventDetailPage() {
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.dates', 'Dates')}</span>
                               <span className="text-text-secondary">
-                                {new Date(acc.check_in_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                {new Date(acc.check_in_date + 'T00:00:00').toLocaleDateString(getDateLocale(i18n.language), { month: 'short', day: 'numeric' })}
                                 {' — '}
-                                {new Date(acc.check_out_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                {new Date(acc.check_out_date + 'T00:00:00').toLocaleDateString(getDateLocale(i18n.language), { month: 'short', day: 'numeric', year: 'numeric' })}
                               </span>
                             </div>
                           )}
@@ -1153,9 +1250,9 @@ export default function EventDetailPage() {
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.dates', 'Dates')}</span>
                               <span className="text-text-secondary">
-                                {new Date(acc.check_in_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                {new Date(acc.check_in_date + 'T00:00:00').toLocaleDateString(getDateLocale(i18n.language), { month: 'short', day: 'numeric' })}
                                 {' — '}
-                                {new Date(acc.check_out_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                {new Date(acc.check_out_date + 'T00:00:00').toLocaleDateString(getDateLocale(i18n.language), { month: 'short', day: 'numeric', year: 'numeric' })}
                               </span>
                             </div>
                           )}
@@ -1449,44 +1546,9 @@ export default function EventDetailPage() {
       </section>
       )}
 
-      {/* Photo Gallery Strip — only when gallery images exist */}
-      {galleryImages.length > 0 && (
-      <section className="py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-heading font-semibold uppercase tracking-[0.24em] text-gold-400">
-                Photo Gallery
-              </p>
-              {galleryImagesCount > galleryImages.length && (
-                <p className="mt-1 text-xs text-text-muted">
-                  Showing {galleryImages.length} of {galleryImagesCount} photos
-                </p>
-              )}
-            </div>
-            {mainEvent && (
-              <Link to={`/events/${mainEvent.slug}/gallery`} className="inline-flex items-center gap-2 text-xs text-gold-400 hover:text-gold-300">
-                View all photos <ExternalLink size={12} />
-              </Link>
-            )}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {galleryImages.map((img, i) => (
-              <ScrollReveal key={i} delay={i * 0.08}>
-                <div className="relative overflow-hidden aspect-[3/2] border border-white/5 group">
-                  <ImageWithShimmer src={img.src} alt={img.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  {img.caption && (
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-900/90 to-transparent p-3">
-                      <div className="text-xs text-text-secondary truncate">{img.caption}</div>
-                    </div>
-                  )}
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-      )}
+      </>}
+
+      {!isClosed && gallerySection}
 
       {/* Official Sponsors — from database */}
       {sponsors.length > 0 && (
@@ -1536,15 +1598,6 @@ export default function EventDetailPage() {
       </section>
       )}
 
-      {/* Results Section — only for completed events */}
-      {isCompleted && mainEvent && (
-        <EventResultsSection
-          eventSlug={mainEvent.slug}
-          sourceUrls={mainEvent.asjjf_source_urls}
-          importedAt={mainEvent.results_imported_at}
-        />
-      )}
-
       {/* Share */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
@@ -1568,5 +1621,6 @@ export default function EventDetailPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }

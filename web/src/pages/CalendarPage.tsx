@@ -8,13 +8,13 @@ import SocialShare from '../components/SocialShare';
 import QRShare from '../components/QRShare';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SEO from '../components/SEO';
-import { useEvents } from '../hooks/useApi';
+import { useEvents, useOrganization } from '../hooks/useApi';
 import type { Event } from '../services/api';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { useTranslatedField } from '../hooks/useTranslatedField';
-import { resolveMediaUrl } from '../utils/images';
+import { resolveMediaUrl, normalizeExternalUrl } from '../utils/images';
 import { getRegistrationLinks } from '../utils/registrationLinks';
-import { cycleHasMainEvent, getEventCycleYear } from '../utils/events';
+import { cycleHasMainEvent, eventPhase, getEventCycleYear } from '../utils/events';
 
 // Qualifying series posters are now driven by events with poster_image_url set.
 
@@ -23,20 +23,21 @@ export default function CalendarPage() {
   const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
   const { events, loading } = useEvents();
+  const { org, loading: orgLoading } = useOrganization();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const cycleYear = getEventCycleYear(events);
   const cycleEventCount = cycleYear === null
     ? events.length
     : events.filter(event => Number(event.date.slice(0, 4)) === cycleYear).length;
 
-  const upcomingEvents = useMemo(() => events.filter(e => e.status !== 'completed' && e.status !== 'cancelled'), [events]);
+  const upcomingEvents = useMemo(() => events.filter(e => ['upcoming', 'live'].includes(eventPhase(e))), [events]);
   const cancelledEvents = useMemo(() => events.filter(e => e.status === 'cancelled'), [events]);
   const posterEvents = useMemo(() =>
     events
-      .filter(e => e.poster_image_url && !e.is_main_event)
+      .filter(e => e.poster_image_url && !e.is_main_event && eventPhase(e) !== 'cancelled' && Number(e.date.slice(0, 4)) === cycleYear && upcomingEvents.length > 0)
       .sort((a, b) => parseDateLocalSafe(a.date).getTime() - parseDateLocalSafe(b.date).getTime()),
-  [events]);
-  const pastEvents = useMemo(() => events.filter(e => e.status === 'completed'), [events]);
+  [events, cycleYear, upcomingEvents.length]);
+  const pastEvents = useMemo(() => events.filter(e => eventPhase(e) === 'completed'), [events]);
   const pastEventsByYear = useMemo(() => {
     const grouped: Record<number, typeof pastEvents> = {};
     pastEvents.forEach(e => {
@@ -54,13 +55,12 @@ export default function CalendarPage() {
 
     const main = parseDateLocalSafe(dateStr).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' });
     if (dateEndStr) {
-      const end = parseDateLocalSafe(dateEndStr).toLocaleDateString(locale, { day: 'numeric' });
-      return `${main} – ${end}`;
+      return new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', year: 'numeric' }).formatRange(parseDateLocalSafe(dateStr), parseDateLocalSafe(dateEndStr));
     }
     return main;
   }, [i18n.language]);
 
-  if (loading) {
+  if (loading || (upcomingEvents.length === 0 && orgLoading)) {
     return (
       <div className="min-h-screen pt-20">
         <LoadingSpinner />
@@ -68,8 +68,11 @@ export default function CalendarPage() {
     );
   }
 
-  const todayLocal = new Date();
-  todayLocal.setHours(0, 0, 0, 0);
+  const latestGallery = [...pastEvents].sort((a, b) => b.date.localeCompare(a.date)).find(event => event.gallery_images_count > 0);
+  const followLinks = [
+    { href: normalizeExternalUrl(org?.instagram_url), name: 'Instagram' },
+    { href: normalizeExternalUrl(org?.youtube_url), name: 'YouTube' },
+  ].filter(link => link.href);
 
   return (
     <div className="min-h-screen pt-20">
@@ -183,15 +186,11 @@ export default function CalendarPage() {
                 <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-text-secondary">
                   {t('calendar.noUpcomingEventsDescription', 'The next event cycle will appear here as soon as the organizers publish it.')}
                 </p>
-                {pastEvents.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('past')}
-                    className="mt-6 min-h-11 border border-gold-500/30 px-5 py-2.5 font-heading text-xs font-bold uppercase tracking-wider text-gold-400 transition-colors hover:bg-gold-500/10 hover:text-gold-300"
-                  >
-                    {t('calendar.pastResults', 'Past Results')}
-                  </button>
-                )}
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
+                  <Link to="/events/past" className="inline-flex min-h-11 items-center border border-gold-500/30 px-5 py-3 text-sm text-gold-300 hover:bg-gold-500/10">{t('calendar.pastResults')}</Link>
+                  {latestGallery && <Link to={`/events/${latestGallery.slug}/gallery`} className="inline-flex min-h-11 items-center border border-gold-500/30 px-5 py-3 text-sm text-gold-300 hover:bg-gold-500/10">{t('season.latestGallery')}</Link>}
+                </div>
+                {followLinks.length > 0 && <div className="mt-4 flex flex-wrap justify-center gap-3">{followLinks.map(link => <a key={link.name} href={link.href!} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:text-gold-300">{t('season.followOn', { platform: link.name })}<ExternalLink size={14} /></a>)}</div>}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -239,8 +238,7 @@ export default function CalendarPage() {
 
             <div className={`grid grid-cols-1 gap-4 ${posterEvents.length === 1 ? 'sm:grid-cols-1 max-w-sm' : posterEvents.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
               {posterEvents.map((event, i) => {
-                const posterDateLocal = parseDateLocalSafe(event.date);
-                const isPastPoster = posterDateLocal < todayLocal;
+                const isPastPoster = eventPhase(event) === 'completed';
                 const posterSrc = resolveMediaUrl(event.poster_image_url);
                 const registrationLinks = getRegistrationLinks(event);
 
@@ -294,7 +292,7 @@ export default function CalendarPage() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center gap-1 text-[10px] text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
+                                    className="inline-flex min-h-11 items-center gap-1 text-xs text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
                                   >
                                     Gi <ExternalLink size={8} />
                                   </a>
@@ -305,7 +303,7 @@ export default function CalendarPage() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center gap-1 text-[10px] text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
+                                    className="inline-flex min-h-11 items-center gap-1 text-xs text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
                                   >
                                     No-Gi <ExternalLink size={8} />
                                   </a>
@@ -317,9 +315,9 @@ export default function CalendarPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="inline-flex items-center gap-1 text-[10px] text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
+                                className="inline-flex min-h-11 items-center gap-1 text-xs text-gold-400 font-heading uppercase tracking-wider hover:text-gold-300"
                               >
-                                Register <ExternalLink size={8} />
+                                {t('calendar.register')} <ExternalLink size={8} />
                               </a>
                             )}
                           </div>
@@ -344,7 +342,7 @@ function EventCard({ event, formatDate, t, isPast }: {
   isPast?: boolean;
 }) {
   const { tf } = useTranslatedField();
-  const isLive = event.status === 'live';
+  const isLive = eventPhase(event) === 'live';
   const isCancelled = event.status === 'cancelled';
   const registrationLinks = getRegistrationLinks(event);
   const detailsPath = `/events/${event.slug}`;
@@ -370,12 +368,12 @@ function EventCard({ event, formatDate, t, isPast }: {
             {isLive && (
               <span className="flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase bg-red-500/15 text-red-400 border border-red-500/30 animate-pulse">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                Live
+                {t('season.phase.live')}
               </span>
             )}
             {isCancelled && (
               <span className="px-2 py-0.5 text-[10px] font-bold uppercase bg-red-500/10 text-red-400/70 border border-red-500/15">
-                Cancelled
+                {t('season.phase.cancelled')}
               </span>
             )}
             {isPast && !isCancelled && (
