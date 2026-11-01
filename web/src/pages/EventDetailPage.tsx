@@ -916,7 +916,7 @@ export default function EventDetailPage() {
                   </h3>
                 </div>
                 <p className="text-text-secondary text-sm mb-4">
-                  {mainEvent ? formatVenueAddress(mainEvent.venue_address, eventCity, eventCountry) : t('event.location')}
+                  {mainEvent ? formatVenueAddress(mainEvent.venue_address, eventCity, eventCountry, { city: mainEvent.city, country: mainEvent.country }) : t('event.location')}
                 </p>
                 {displayVenueHighlights.length > 0 && (
                   <div className={`grid grid-cols-1 gap-4 mb-4 ${displayVenueHighlights.length > 1 ? 'sm:grid-cols-2' : ''}`}>

@@ -84,7 +84,9 @@ function CountryFlag({ code, className = 'w-5 h-4' }: { code: string; className?
   }
 }
 
-function StarRating({ stars }: { stars: number }) {
+function StarRating({ stars }: { stars: number | null | undefined }) {
+  // An unpublished rating is not a zero rating, so show nothing rather than empty stars.
+  if (!stars || stars <= 0) return null;
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: 5 }, (_, i) => (

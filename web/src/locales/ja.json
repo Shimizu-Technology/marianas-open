@@ -165,6 +165,8 @@
   "calendar": {
     "title": "Guam Pro Series 2026",
     "subtitle": "アジア太平洋で7大会。決戦の舞台はグアム。",
+    "subtitleDynamic": "アジア太平洋各地で{{count}}大会、そしてグアムでのチャンピオンシップ。",
+    "subtitleSeriesDynamic": "アジア太平洋各地で{{count}}大会。",
     "mapTitle": "シリーズを追う",
     "mapSubtitle": "地域予選から国際舞台へ――アジア各地で戦い、Marianas Openへの出場権をつかみましょう。",
     "register": "登録する",
@@ -438,6 +440,7 @@
     "badge": "Pro Seriesサーキット",
     "title": "その軌跡をたどる",
     "subtitle": "アジア太平洋各地で競技し、ランキングポイントを獲得して、グアムで開催されるグランドチャンピオンシップへの出場資格を手にしましょう。",
+    "subtitleSeries": "アジア太平洋各地で競技し、ASJJFランキングポイントを獲得しましょう。",
     "grandChampionship": "グランドチャンピオンシップ",
     "completed": "終了",
     "next": "次",

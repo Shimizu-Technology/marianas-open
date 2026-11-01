@@ -165,6 +165,8 @@
   "calendar": {
     "title": "Guam Pro Series 2026",
     "subtitle": "亞太地區 7 場賽事，最終於關島迎來總冠軍賽。",
+    "subtitleDynamic": "亞太地區{{count}}場賽事，關島一場總冠軍賽。",
+    "subtitleSeriesDynamic": "亞太地區{{count}}場賽事。",
     "mapTitle": "見證征程",
     "mapSubtitle": "從地方資格賽一路邁向國際舞台——征戰亞洲，贏得 Marianas Open 參賽資格。",
     "register": "報名",
@@ -438,6 +440,7 @@
     "badge": "Pro Series 巡迴賽",
     "title": "追蹤晉級之路",
     "subtitle": "參加遍及亞太地區的賽事，累積排名積分，爭取關島總冠軍賽資格。",
+    "subtitleSeries": "參加遍及亞太地區的賽事，累積ASJJF排名積分。",
     "grandChampionship": "總冠軍賽",
     "completed": "已完成",
     "next": "下一站",

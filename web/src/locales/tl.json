@@ -165,6 +165,8 @@
   "calendar": {
     "title": "Guam Pro Series 2026",
     "subtitle": "7 event sa buong Asia-Pacific. Isang kampeonato sa Guam.",
+    "subtitleDynamic": "{{count}} na event sa buong Asia-Pacific. Isang kampeonato sa Guam.",
+    "subtitleSeriesDynamic": "{{count}} na event sa buong Asia-Pacific.",
     "mapTitle": "Sundan ang Paglalakbay",
     "mapSubtitle": "Mula sa mga lokal na qualifier hanggang sa internasyonal na entablado — makipagkumpitensya sa buong Asya at makuha ang iyong puwesto sa Marianas Open.",
     "register": "Magparehistro",
@@ -438,6 +440,7 @@
     "badge": "Sirkito ng Pro Series",
     "title": "Sundan ang Paglalakbay",
     "subtitle": "Makipagkumpitensya sa buong Asia-Pacific. Mag-ipon ng mga puntos sa ranggo. Magkuwalipika para sa Kampeonato ng Kampeon sa Guam.",
+    "subtitleSeries": "Makipagkumpitensya sa buong Asia-Pacific at mag-ipon ng mga puntos sa ranggo ng ASJJF.",
     "grandChampionship": "Kampeonato ng Kampeon",
     "completed": "Natapos na",
     "next": "Susunod",

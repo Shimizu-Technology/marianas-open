@@ -42,17 +42,31 @@ export function formatVenueAddress(
   address: string | null | undefined,
   city: string | null | undefined,
   country: string | null | undefined,
+  canonical: { city?: string | null; country?: string | null } = {},
 ): string {
   const parts: string[] = [];
   const base = address?.trim() ?? '';
   if (base) parts.push(base);
   const haystack = base.toLowerCase();
-  for (const part of [city, country]) {
-    const value = part?.trim();
+  const mentioned = (value: string | null | undefined) =>
+    !!value?.trim() && haystack.includes(value.trim().toLowerCase());
+  // The stored address is in English, while city/country may be translated, so also
+  // check the untranslated values before appending a part.
+  for (const [display, original] of [[city, canonical.city], [country, canonical.country]] as const) {
+    const value = display?.trim();
     if (!value) continue;
-    if (haystack.includes(value.toLowerCase())) continue;
+    if (mentioned(value) || mentioned(original)) continue;
     if (parts.some(existing => existing.toLowerCase() === value.toLowerCase())) continue;
     parts.push(value);
   }
   return parts.join(', ');
+}
+
+/** True when the given season includes a published main championship event. */
+export function cycleHasMainEvent(events: Event[], cycleYear: number | null): boolean {
+  return events.some(event =>
+    event.is_main_event
+    && event.status !== 'cancelled'
+    && !!event.date
+    && (cycleYear === null || Number(event.date.slice(0, 4)) === cycleYear));
 }
