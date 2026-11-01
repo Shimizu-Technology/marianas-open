@@ -7,6 +7,9 @@ import { CheckCircle2, Loader2, UploadCloud, XCircle } from 'lucide-react';
 import { api } from '../services/api';
 import type { EventGalleryImage } from '../services/api';
 import { isBrowserPreviewableImage } from '../utils/images';
+import { useAuthContext } from './AuthContext';
+import { GalleryUploadQueueStore, GALLERY_QUEUE_BATCH_SIZE, drainGalleryUploadQueue, withGalleryUploadLock } from '../utils/galleryUploadQueue';
+import type { DurableGalleryUpload } from '../utils/galleryUploadQueue';
 
 type UploadStatus = 'queued' | 'optimizing' | 'hashing' | 'preparing' | 'uploading' | 'saving' | 'complete' | 'failed';
 type UploadMode = 'direct' | 'server';
@@ -59,6 +62,8 @@ interface GalleryUploadContextValue {
   startUpload: (options: StartUploadOptions) => Promise<void>;
   retryFailed: () => void;
   clearCompleted: () => void;
+  queueError?: string;
+  isRestoring: boolean;
 }
 
 const GalleryUploadContext = createContext<GalleryUploadContextValue | null>(null);
@@ -99,19 +104,28 @@ function isBrowserPreviewableGalleryFile(file: File | undefined) {
   return isBrowserPreviewableImage(file.type);
 }
 
-function checksum(file: File) {
+function checksum(file: File, signal: AbortSignal) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => {
-      const buffer = reader.result;
-      if (!(buffer instanceof ArrayBuffer)) {
-        reject(new Error('Could not read image data'));
-        return;
-      }
-      resolve(window.btoa(SparkMD5.ArrayBuffer.hash(buffer, true)));
+    const hash = new SparkMD5.ArrayBuffer();
+    const chunkSize = 2 * 1024 * 1024;
+    let offset = 0;
+    const fail = () => { hash.destroy(); reject(new Error('Could not read image data')); };
+    const read = () => {
+      if (signal.aborted) { hash.destroy(); reject(new DOMException('Upload session ended', 'AbortError')); return; }
+      reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
     };
-    reader.onerror = () => reject(new Error('Could not read image data'));
-    reader.readAsArrayBuffer(file);
+    reader.onload = () => {
+      if (!(reader.result instanceof ArrayBuffer)) { fail(); return; }
+      hash.append(reader.result);
+      offset += reader.result.byteLength;
+      if (offset < file.size) { read(); return; }
+      const md5 = window.btoa(hash.end(true));
+      hash.destroy();
+      resolve(md5);
+    };
+    reader.onerror = fail;
+    read();
   });
 }
 
@@ -138,6 +152,7 @@ async function optimizeGalleryFile(file: File, originalFileSize: number, onProgr
       maxWidthOrHeight: OPTIMIZATION_MAX_DIMENSION,
       initialQuality: OPTIMIZATION_INITIAL_QUALITY,
       fileType: 'image/jpeg',
+      preserveExif: true,
       useWebWorker: true,
       libURL: imageCompressionWorkerUrl,
       onProgress: (progress: number) => onProgress(Math.max(0, Math.min(1, progress / 100))),
@@ -188,19 +203,24 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string)
   });
 }
 
-function uploadToStorage(url: string, headers: Record<string, string>, file: File, onProgress: (progress: number) => void) {
+function uploadToStorage(url: string, headers: Record<string, string>, file: File, onProgress: (progress: number) => void, signal: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
+    const abort = () => xhr.abort();
+    const finish = (error?: Error) => {
+      signal.removeEventListener('abort', abort);
+      if (error) reject(error); else resolve();
+    };
+    if (signal.aborted) { reject(new DOMException('Upload session ended', 'AbortError')); return; }
     xhr.open('PUT', url);
+    xhr.timeout = 120_000;
     Object.entries(headers).forEach(([key, value]) => xhr.setRequestHeader(key, value));
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) onProgress(event.loaded / event.total);
-    };
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) resolve();
-      else reject(new Error(`Storage upload failed (${xhr.status})`));
-    };
-    xhr.onerror = () => reject(new Error('Storage upload failed before reaching the bucket'));
+    xhr.upload.onprogress = event => { if (event.lengthComputable) onProgress(event.loaded / event.total); };
+    xhr.onload = () => finish(xhr.status >= 200 && xhr.status < 300 ? undefined : new Error(`Storage upload failed (${xhr.status}). Retry to renew the upload link.`));
+    xhr.onerror = () => finish(new Error('Storage upload failed. Check your connection and retry.'));
+    xhr.ontimeout = () => finish(new Error('Storage upload timed out. Keep this page open and retry.'));
+    xhr.onabort = () => finish(new DOMException('Upload session ended', 'AbortError'));
+    signal.addEventListener('abort', abort, { once: true });
     xhr.send(file);
   });
 }
@@ -253,357 +273,209 @@ function statusLabel(task: GalleryUploadTask) {
   }
 }
 
-async function uploadThroughServer(
-  task: GalleryUploadTask,
-  file: File,
-  meta: { active: boolean; caption: string; category: string; sortOrder: number },
-  onProgress?: (progress: number) => void
-) {
-  const title = titleFromFilename(file.name);
-  const formData = new FormData();
-  formData.append('image', file);
-  formData.append('batch_id', String(task.batchId));
-  formData.append('title', title);
-  formData.append('alt_text', title);
-  formData.append('caption', meta.caption);
-  formData.append('category', meta.category);
-  formData.append('sort_order', String(meta.sortOrder));
-  formData.append('active', String(meta.active));
-  return api.admin.createEventGalleryImage(task.eventId, formData, onProgress);
-}
+const queueStore = new GalleryUploadQueueStore();
 
 export function GalleryUploadProvider({ children }: { children: ReactNode }) {
-  const [tasks, setTasks] = useState<GalleryUploadTask[]>([]);
-  const [directStorageUnavailable, setDirectStorageUnavailable] = useState(false);
-  const [directStorageError, setDirectStorageError] = useState<string | undefined>(undefined);
-  const tasksRef = useRef<GalleryUploadTask[]>([]);
-  const fileMapRef = useRef(new Map<string, File>());
-  const metaMapRef = useRef(new Map<string, { active: boolean; caption: string; category: string; sortOrder: number }>());
-  const runningRef = useRef(0);
-  const directStorageUnavailableRef = useRef(false);
-  const directStorageErrorRef = useRef<string | undefined>(undefined);
-  const processQueueRef = useRef<() => void>(() => undefined);
-  const batchTotalUpdateTimersRef = useRef(new Map<number, number>());
-  const lastBatchTotalBytesRef = useRef(new Map<number, number>());
-
-  const setTasksSynced = useCallback((updater: (current: GalleryUploadTask[]) => GalleryUploadTask[]) => {
-    const next = updater(tasksRef.current);
-    tasksRef.current = next;
-    setTasks(next);
-  }, []);
+  const auth = useAuthContext();
+  const owner = !auth.isLoading && auth.isSignedIn ? auth.userId : null;
+  const ownerRef = useRef(owner);
+  ownerRef.current = owner;
+  const [state, setState] = useState<{ owner: string | null; tasks: GalleryUploadTask[] }>({ owner: null, tasks: [] });
+  const [queueError, setQueueError] = useState<string>();
+  const [isRestoring, setIsRestoring] = useState(true);
+  const wakeRef = useRef<() => void>(() => undefined);
+  const notifyRef = useRef<() => void>(() => undefined);
+  const refreshRef = useRef<() => Promise<void>>(async () => undefined);
+  const sessionRef = useRef<{ owner: string; signal: AbortSignal } | null>(null);
 
   useEffect(() => {
-    tasksRef.current = tasks;
-  }, [tasks]);
-
-  useEffect(() => {
-    const files = fileMapRef.current;
-    const metas = metaMapRef.current;
-    const batchTotalTimers = batchTotalUpdateTimersRef.current;
-    const lastBatchTotalBytes = lastBatchTotalBytesRef.current;
-
-    return () => {
-      tasksRef.current.forEach(task => URL.revokeObjectURL(task.previewUrl));
-      batchTotalTimers.forEach(timer => window.clearTimeout(timer));
-      batchTotalTimers.clear();
-      lastBatchTotalBytes.clear();
-      files.clear();
-      metas.clear();
+    const controller = new AbortController();
+    const { signal } = controller;
+    const previews = new Map<string, string>();
+    let refreshing: Promise<void> | undefined;
+    let refreshAgain = false;
+    let notifyTimer: number | undefined;
+    let busy = false;
+    const current = () => !signal.aborted && ownerRef.current === owner;
+    const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('marianas-gallery-upload-queue') : undefined;
+    const notify = () => {
+      if (!channel || notifyTimer !== undefined) return;
+      notifyTimer = window.setTimeout(() => { notifyTimer = undefined; if (current()) channel.postMessage({ owner }); }, 100);
     };
-  }, []);
-
-  const updateTask = useCallback((id: string, updates: Partial<GalleryUploadTask>) => {
-    setTasksSynced(current => current.map(task => task.id === id ? { ...task, ...updates } : task));
-  }, [setTasksSynced]);
-
-  const markDirectStorageUnavailable = useCallback((reason: string) => {
-    directStorageUnavailableRef.current = true;
-    directStorageErrorRef.current = reason;
-    setDirectStorageUnavailable(true);
-    setDirectStorageError(reason);
-  }, []);
-
-  const scheduleBatchTotalBytesUpdate = useCallback((eventId: number, batchId: number) => {
-    const existingTimer = batchTotalUpdateTimersRef.current.get(batchId);
-    if (existingTimer) window.clearTimeout(existingTimer);
-
-    const timer = window.setTimeout(async () => {
-      batchTotalUpdateTimersRef.current.delete(batchId);
-      const totalBytes = tasksRef.current
-        .filter(task => task.batchId === batchId)
-        .reduce((sum, task) => sum + task.fileSize, 0);
-      if (totalBytes <= 0 || lastBatchTotalBytesRef.current.get(batchId) === totalBytes) return;
-
-      lastBatchTotalBytesRef.current.set(batchId, totalBytes);
+    const readAndRender = async () => {
+      if (!owner || !current()) return;
       try {
-        await api.admin.updateGalleryUploadBatch(eventId, batchId, { total_bytes: totalBytes });
-      } catch (error) {
-        console.warn('[GalleryUpload] Failed to update optimized batch byte total', error);
-      }
-    }, 1000);
-
-    batchTotalUpdateTimersRef.current.set(batchId, timer);
-  }, []);
-
-  const updateUploadProgress = useCallback((taskId: string, fileSize: number, progress: number, progressStart: number, progressSpan: number) => {
-    const normalizedProgress = Math.max(0, Math.min(1, progress));
-    updateTask(taskId, {
-      bytesUploaded: Math.round(fileSize * normalizedProgress),
-      progress: Math.max(progressStart, Math.round(progressStart + normalizedProgress * progressSpan)),
-    });
-  }, [updateTask]);
-
-  const processTask = useCallback(async (task: GalleryUploadTask) => {
-    try {
-      const file = fileMapRef.current.get(task.id);
-      const meta = metaMapRef.current.get(task.id);
-      if (!file || !meta) throw new Error('Upload task is missing its file data');
-
-      const originalFileSize = task.originalFileSize || file.size;
-      let uploadFile = file;
-
-      updateTask(task.id, { status: 'optimizing', progress: 2, bytesUploaded: 0, optimizationError: undefined, error: undefined });
-      const optimized = await optimizeGalleryFile(file, originalFileSize, progress => {
-        updateTask(task.id, { progress: Math.max(2, Math.round(2 + progress * 16)) });
-      });
-      uploadFile = optimized.file;
-      fileMapRef.current.set(task.id, uploadFile);
-      const optimizedFileSize = uploadFile.size < originalFileSize ? uploadFile.size : undefined;
-      updateTask(task.id, {
-        fileSize: uploadFile.size,
-        optimizedFileSize,
-        optimizationError: optimized.error,
-        progress: 18,
-      });
-      if (optimizedFileSize) scheduleBatchTotalBytesUpdate(task.eventId, task.batchId);
-
-      if (directStorageUnavailableRef.current) {
-        const fallbackReason = directStorageErrorRef.current;
-        updateTask(task.id, {
-          status: 'uploading',
-          uploadMode: 'server',
-          directUploadTarget: undefined,
-          progress: 20,
-          bytesUploaded: 0,
-          uploadStartedAt: Date.now(),
-          fallbackReason,
-          error: undefined,
-        });
-        const completed = await uploadThroughServer(task, uploadFile, meta, progress => updateUploadProgress(task.id, uploadFile.size, progress, 20, 65));
-        updateTask(task.id, {
-          status: 'complete',
-          progress: 100,
-          bytesUploaded: uploadFile.size,
-          completedAt: Date.now(),
-          galleryImage: completed.gallery_image,
-          error: undefined,
-        });
-        return;
-      }
-
-      updateTask(task.id, { status: 'hashing', progress: 20, bytesUploaded: 0, error: undefined });
-      const md5 = await checksum(uploadFile);
-
-      updateTask(task.id, { status: 'preparing', uploadMode: 'direct', directUploadTarget: undefined, progress: 24 });
-      const prepared = await api.admin.prepareEventGalleryDirectUpload(task.eventId, {
-        filename: uploadFile.name,
-        byte_size: uploadFile.size,
-        checksum: md5,
-        content_type: uploadFile.type || 'application/octet-stream',
-      });
-
-      let completed: { gallery_image: EventGalleryImage };
-      const directUploadTarget = directUploadTargetFromUrl(prepared.direct_upload.url);
-      updateTask(task.id, { status: 'uploading', uploadMode: 'direct', directUploadTarget, progress: 30, bytesUploaded: 0, uploadStartedAt: Date.now() });
-      try {
-        await uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, uploadFile, progress => updateUploadProgress(task.id, uploadFile.size, progress, 30, 55));
-      } catch (storageError) {
-        const fallbackReason = storageError instanceof Error ? storageError.message : 'Storage upload failed';
-        markDirectStorageUnavailable(fallbackReason);
-        updateTask(task.id, {
-          status: 'uploading',
-          uploadMode: 'server',
-          directUploadTarget: undefined,
-          progress: 20,
-          bytesUploaded: 0,
-          uploadStartedAt: Date.now(),
-          fallbackReason,
-          error: undefined,
-        });
-        completed = await uploadThroughServer(task, uploadFile, meta, progress => updateUploadProgress(task.id, uploadFile.size, progress, 20, 65));
-        updateTask(task.id, {
-          status: 'complete',
-          progress: 100,
-          bytesUploaded: uploadFile.size,
-          completedAt: Date.now(),
-          galleryImage: completed.gallery_image,
-          error: undefined,
-        });
-        return;
-      }
-
-      updateTask(task.id, { status: 'saving', progress: 90, bytesUploaded: uploadFile.size, error: undefined });
-      completed = await withTimeout(api.admin.completeEventGalleryDirectUpload(task.eventId, {
-        signed_id: prepared.signed_id,
-        batch_id: task.batchId,
-        title: titleFromFilename(uploadFile.name),
-        alt_text: titleFromFilename(uploadFile.name),
-        caption: meta.caption,
-        category: meta.category,
-        sort_order: meta.sortOrder,
-        active: meta.active,
-      }), COMPLETE_UPLOAD_TIMEOUT_MS, 'Saving gallery record timed out. Retry to confirm the uploaded file.');
-      updateTask(task.id, {
-        status: 'complete',
-        progress: 100,
-        bytesUploaded: uploadFile.size,
-        completedAt: Date.now(),
-        galleryImage: completed.gallery_image,
-        error: undefined,
-      });
-    } catch (error) {
-      updateTask(task.id, {
-        status: 'failed',
-        progress: 0,
-        bytesUploaded: 0,
-        error: error instanceof Error ? error.message : 'Upload failed',
-      });
-    } finally {
-      runningRef.current -= 1;
-      processQueueRef.current();
-    }
-  }, [markDirectStorageUnavailable, scheduleBatchTotalBytesUpdate, updateTask, updateUploadProgress]);
-
-  const processQueue = useCallback(() => {
-    const available = Math.max(0, CONCURRENCY - runningRef.current);
-    if (available === 0) return;
-
-    const next = tasksRef.current
-      .filter(task => task.status === 'queued')
-      .slice(0, available);
-    if (next.length === 0) return;
-
-    const claimedIds = new Set(next.map(task => task.id));
-    const startedAt = Date.now();
-    runningRef.current += next.length;
-    setTasksSynced(current => current.map(task => (
-      claimedIds.has(task.id)
-        ? {
-            ...task,
-            status: 'optimizing',
-            progress: 2,
-            bytesUploaded: 0,
-            startedAt,
-            completedAt: undefined,
-            uploadMode: undefined,
-            directUploadTarget: undefined,
-            uploadStartedAt: undefined,
-            fallbackReason: undefined,
-            error: undefined,
+        const records = await queueStore.list(owner);
+        if (!current()) return;
+        // Only the visible preview set needs file blobs in memory. All other bytes stay on disk.
+        const visible = [...records].sort((a, b) => taskSortRank({ ...a.task, previewUrl: '' }) - taskSortRank({ ...b.task, previewUrl: '' }) || (a.task.startedAt || a.task.createdAt) - (b.task.startedAt || b.task.createdAt)).slice(0, 8);
+        const previewIds = new Set(visible.map(record => record.id));
+        for (const [id, url] of previews) {
+          if (!previewIds.has(id)) { URL.revokeObjectURL(url); previews.delete(id); }
+        }
+        for (const record of visible) {
+          if (!previews.has(record.id) && record.task.browserPreviewable) {
+            const file = await queueStore.file(owner, record.id);
+            if (!current()) return;
+            if (file) previews.set(record.id, URL.createObjectURL(file));
           }
-        : task
-    )));
-
-    next.forEach(task => {
-      void processTask({ ...task, status: 'optimizing', progress: 2, bytesUploaded: 0, startedAt });
-    });
-  }, [processTask, setTasksSynced]);
-  processQueueRef.current = processQueue;
+        }
+        if (!current()) return;
+        setState(previous => {
+          const previousById = new Map(previous.owner === owner ? previous.tasks.map(task => [task.id, task]) : []);
+          return {
+            owner,
+            tasks: records.map(record => {
+              const old = previousById.get(record.id);
+              const liveProgress = old?.status === record.task.status && ['uploading', 'optimizing'].includes(old.status) && old.progress > record.task.progress;
+              return { ...record.task, previewUrl: previews.get(record.id) || '', ...(liveProgress ? { progress: old.progress, bytesUploaded: old.bytesUploaded } : {}) };
+            }),
+          };
+        });
+      } catch (error) {
+        if (current()) setQueueError(error instanceof Error ? error.message : 'Could not restore saved uploads');
+      } finally { if (current()) setIsRestoring(false); }
+    };
+    const refresh = async () => {
+      if (!owner || !current()) return;
+      if (refreshing) { refreshAgain = true; return refreshing; }
+      refreshing = (async () => {
+        do { refreshAgain = false; await readAndRender(); } while (refreshAgain && current());
+      })().finally(() => { refreshing = undefined; });
+      return refreshing;
+    };
+    const updateProgress = (id: string, update: Partial<GalleryUploadTask>) => {
+      if (current()) setState(previous => previous.owner === owner ? { ...previous, tasks: previous.tasks.map(task => task.id === id ? { ...task, ...update } : task) } : previous);
+    };
+    const wake = () => {
+      if (!owner || !current() || busy || !navigator.onLine) return;
+      busy = true;
+      void withGalleryUploadLock(owner, signal, async () => {
+        if (!current()) return;
+        await refresh();
+        await drainGalleryUploadQueue(queueStore, owner, {
+          batch: async records => {
+            if (!current()) throw new DOMException('Upload session ended', 'AbortError');
+            const first = records[0].task;
+            const { batch } = await api.admin.createGalleryUploadBatch(first.eventId, {
+              title: `${first.eventName} photo upload`, total_files: records.length,
+              total_bytes: records.reduce((sum, record) => sum + record.task.fileSize, 0),
+            });
+            return batch.id;
+          },
+          optimize: optimizeGalleryFile,
+          prepare: async (record, file) => {
+            updateProgress(record.id, { status: 'hashing', progress: 20 });
+            const md5 = await checksum(file, signal);
+            if (!current()) throw new DOMException('Upload session ended', 'AbortError');
+            const prepared = await api.admin.prepareEventGalleryDirectUpload(record.task.eventId, {
+              filename: file.name, byte_size: file.size, checksum: md5, content_type: file.type || 'application/octet-stream',
+            });
+            return { ...prepared, target: directUploadTargetFromUrl(prepared.direct_upload.url) };
+          },
+          put: (prepared, file, progress, uploadSignal) => uploadToStorage(prepared.direct_upload.url, prepared.direct_upload.headers, file, progress, uploadSignal),
+          complete: async record => {
+            if (!current()) throw new DOMException('Upload session ended', 'AbortError');
+            const title = titleFromFilename(record.task.fileName);
+            const completed = await withTimeout(api.admin.completeEventGalleryDirectUpload(record.task.eventId, {
+              signed_id: record.prepared!.signed_id, batch_id: record.task.batchId, title, alt_text: title,
+              caption: record.meta.caption, category: record.meta.category, sort_order: record.meta.sortOrder, active: record.meta.active,
+            }), COMPLETE_UPLOAD_TIMEOUT_MS, 'Saving gallery record timed out. Retry to confirm the uploaded file.');
+            return completed.gallery_image;
+          },
+        }, signal, () => { void refresh(); notify(); }, updateProgress);
+      }).catch(error => {
+        if (current()) setQueueError(error instanceof Error ? error.message : 'Could not resume saved uploads');
+      }).finally(() => { busy = false; });
+    };
+    sessionRef.current = owner ? { owner, signal } : null;
+    refreshRef.current = refresh;
+    wakeRef.current = wake;
+    notifyRef.current = notify;
+    setQueueError(undefined);
+    setIsRestoring(Boolean(owner));
+    void refresh();
+    wake();
+    const interval = window.setInterval(() => { void refresh(); wake(); }, 3000);
+    const resume = () => { void refresh(); wake(); };
+    window.addEventListener('online', resume);
+    window.addEventListener('pageshow', resume);
+    document.addEventListener('visibilitychange', resume);
+    if (channel) channel.onmessage = event => { if (event.data?.owner === owner) resume(); };
+    return () => {
+      controller.abort();
+      window.clearInterval(interval);
+      window.removeEventListener('online', resume);
+      window.removeEventListener('pageshow', resume);
+      document.removeEventListener('visibilitychange', resume);
+      if (notifyTimer !== undefined) window.clearTimeout(notifyTimer);
+      channel?.close();
+      previews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [owner]);
 
   const startUpload = useCallback(async ({ eventId, eventName, files, active, caption, category, startSortOrder }: StartUploadOptions) => {
+    const session = sessionRef.current;
+    if (!owner || !session || session.owner !== owner || session.signal.aborted) throw new Error('Sign in before starting a resumable upload.');
+    if (!navigator.locks) throw new Error('Resumable uploads require a browser with Web Locks support. Update your browser and try again.');
     const imageFiles = files.filter(isSupportedGalleryImage);
-    if (imageFiles.length === 0) return;
-
-    const totalBytes = imageFiles.reduce((sum, file) => sum + file.size, 0);
-    const { batch } = await api.admin.createGalleryUploadBatch(eventId, {
-      title: `${eventName} photo upload`,
-      total_files: imageFiles.length,
-      total_bytes: totalBytes,
-    });
-
-    lastBatchTotalBytesRef.current.set(batch.id, totalBytes);
-
+    if (!imageFiles.length) return;
+    const records: { record: DurableGalleryUpload; file: File }[] = [];
     const createdAt = Date.now();
-    const newTasks = imageFiles.map((file, index) => {
-      const id = `${batch.id}-${createdAt}-${index}-${crypto.randomUUID()}`;
-      fileMapRef.current.set(id, file);
-      metaMapRef.current.set(id, { active, caption, category, sortOrder: startSortOrder + index });
-      return {
-        id,
-        eventId,
-        eventName,
-        batchId: batch.id,
-        fileName: file.name,
-        fileSize: file.size,
-        originalFileSize: file.size,
-        previewUrl: URL.createObjectURL(file),
-        browserPreviewable: isBrowserPreviewableGalleryFile(file),
-        progress: 0,
-        bytesUploaded: 0,
-        createdAt,
-        status: 'queued' as UploadStatus,
-      };
-    });
-
-    setTasksSynced(current => [...newTasks, ...current]);
-    window.setTimeout(processQueue, 0);
-  }, [processQueue, setTasksSynced]);
+    for (let offset = 0; offset < imageFiles.length; offset += GALLERY_QUEUE_BATCH_SIZE) {
+      const groupId = crypto.randomUUID();
+      imageFiles.slice(offset, offset + GALLERY_QUEUE_BATCH_SIZE).forEach((file, index) => {
+        const id = crypto.randomUUID();
+        records.push({ file, record: {
+          owner, id, groupId, lastModified: file.lastModified,
+          meta: { active, caption, category, sortOrder: startSortOrder + offset + index },
+          task: { id, eventId, eventName, batchId: 0, fileName: file.name, fileSize: file.size, originalFileSize: file.size,
+            browserPreviewable: isBrowserPreviewableGalleryFile(file), progress: 0, bytesUploaded: 0, createdAt, status: 'queued' },
+        } });
+      });
+    }
+    try { await queueStore.enqueue(records); } catch (error) {
+      if (ownerRef.current === owner) setQueueError(error instanceof Error ? error.message : 'Could not save files on this device');
+      throw error;
+    }
+    if (session.signal.aborted || ownerRef.current !== owner) return;
+    setQueueError(undefined);
+    await refreshRef.current();
+    notifyRef.current();
+    wakeRef.current();
+  }, [owner]);
 
   const retryFailed = useCallback(() => {
-    setTasksSynced(current => current.map(task => task.status === 'failed'
-      ? {
-          ...task,
-          status: 'queued',
-          progress: 0,
-          bytesUploaded: 0,
-          uploadMode: undefined,
-          directUploadTarget: undefined,
-          optimizedFileSize: task.fileSize < task.originalFileSize ? task.fileSize : undefined,
-          optimizationError: undefined,
-          uploadStartedAt: undefined,
-          startedAt: undefined,
-          completedAt: undefined,
-          fallbackReason: undefined,
-          error: undefined,
-        }
-      : task));
-    window.setTimeout(processQueue, 0);
-  }, [processQueue, setTasksSynced]);
+    if (!owner) return;
+    const session = sessionRef.current;
+    void withGalleryUploadLock(owner, session?.signal || AbortSignal.abort(), async () => {
+      if (ownerRef.current !== owner) return;
+      await queueStore.retryFailed(owner);
+    }).then(async () => {
+      if (session?.signal.aborted || ownerRef.current !== owner) return;
+      setQueueError(undefined);
+      await refreshRef.current(); notifyRef.current(); wakeRef.current();
+    }).catch(error => { if (ownerRef.current === owner) setQueueError(error.message); });
+  }, [owner]);
 
   const clearCompleted = useCallback(() => {
-    setTasksSynced(current => {
-      current.filter(task => task.status === 'complete').forEach(task => {
-        URL.revokeObjectURL(task.previewUrl);
-        fileMapRef.current.delete(task.id);
-        metaMapRef.current.delete(task.id);
-      });
-      return current.filter(task => task.status !== 'complete');
-    });
-  }, [setTasksSynced]);
+    if (!owner) return;
+    void queueStore.clearCompleted(owner).then(async () => {
+      if (ownerRef.current !== owner) return;
+      await refreshRef.current(); notifyRef.current();
+    }).catch(error => { if (ownerRef.current === owner) setQueueError(error.message); });
+  }, [owner]);
 
-  const value = useMemo(() => {
-    const activeCount = tasks.filter(task => ACTIVE_STATUSES.includes(task.status)).length;
-    const failedCount = tasks.filter(task => task.status === 'failed').length;
-    const completedCount = tasks.filter(task => task.status === 'complete').length;
-    return {
-      tasks,
-      activeCount,
-      failedCount,
-      completedCount,
-      concurrency: CONCURRENCY,
-      directStorageUnavailable,
-      directStorageError,
-      startUpload,
-      retryFailed,
-      clearCompleted,
-    };
-  }, [tasks, directStorageUnavailable, directStorageError, startUpload, retryFailed, clearCompleted]);
+  const tasks = useMemo(() => state.owner === owner ? state.tasks : [], [state, owner]);
+  const value = useMemo(() => ({
+    tasks, activeCount: tasks.filter(task => ACTIVE_STATUSES.includes(task.status)).length,
+    failedCount: tasks.filter(task => task.status === 'failed').length,
+    completedCount: tasks.filter(task => task.status === 'complete').length,
+    concurrency: CONCURRENCY, directStorageUnavailable: false, directStorageError: undefined,
+    queueError, isRestoring, startUpload, retryFailed, clearCompleted,
+  }), [tasks, queueError, isRestoring, startUpload, retryFailed, clearCompleted]);
 
-  return (
-    <GalleryUploadContext.Provider value={value}>
-      {children}
-    </GalleryUploadContext.Provider>
-  );
+  return <GalleryUploadContext.Provider value={value}>{children}</GalleryUploadContext.Provider>;
 }
 
 export function useGalleryUploads() {
@@ -644,7 +516,7 @@ function estimatedUploadSize(task: GalleryUploadTask, averageOptimizedRatio: num
 }
 
 export function GalleryUploadStatusPanel() {
-  const { tasks, activeCount, failedCount, completedCount, retryFailed, clearCompleted, concurrency, directStorageUnavailable, directStorageError } = useGalleryUploads();
+  const { tasks, activeCount, failedCount, completedCount, retryFailed, clearCompleted, concurrency, directStorageUnavailable, directStorageError, queueError } = useGalleryUploads();
   const [now, setNow] = useState(0);
 
   useEffect(() => {
@@ -655,7 +527,7 @@ export function GalleryUploadStatusPanel() {
     return () => window.clearInterval(interval);
   }, [activeCount]);
 
-  if (tasks.length === 0) return null;
+  if (tasks.length === 0 && !queueError) return null;
 
   const activeBatchIds = new Set(tasks.filter(task => ACTIVE_STATUSES.includes(task.status)).map(task => task.batchId));
   const metricTasks = activeBatchIds.size > 0 ? tasks.filter(task => activeBatchIds.has(task.batchId)) : tasks;
@@ -674,7 +546,7 @@ export function GalleryUploadStatusPanel() {
     return sum + Math.min(task.fileSize, task.bytesUploaded || 0);
   }, 0));
   const rawOverall = totalBytes > 0 ? Math.round((uploadedBytes / totalBytes) * 100) : Math.round(metricTasks.reduce((sum, task) => sum + task.progress, 0) / metricTasks.length);
-  const overall = activeCount > 0 && metricCompletedCount < metricTasks.length ? Math.min(99, rawOverall) : rawOverall;
+  const overall = metricTasks.length === 0 ? 0 : metricCompletedCount < metricTasks.length ? Math.min(99, rawOverall) : 100;
   const firstUploadStartedAt = metricTasks.reduce<number | null>((earliest, task) => {
     const timestamp = task.uploadStartedAt;
     if (!timestamp) return earliest;
@@ -703,7 +575,7 @@ export function GalleryUploadStatusPanel() {
     .slice(0, 8);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-[min(460px,calc(100vw-2rem))] border border-white/10 bg-surface shadow-2xl">
+    <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain w-[min(460px,calc(100vw-2rem))] border border-white/10 bg-surface shadow-2xl">
       <div className="p-3 border-b border-white/5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm font-medium text-text-primary">
@@ -740,6 +612,8 @@ export function GalleryUploadStatusPanel() {
             <div className={directStorageUnavailable ? 'mt-0.5 text-amber-300' : 'mt-0.5 text-text-primary'}>{modeLabel}</div>
           </div>
         </div>
+        <p className="mt-2 text-xs leading-5 text-text-muted">Files are saved on this device. Locking your phone or switching apps may pause uploads. Reopen this page and sign in to the same account to resume; uploads are not guaranteed to run in the background. If a transfer fails, tap Retry failed.</p>
+        {queueError && <p role="alert" className="mt-2 text-xs leading-5 text-red-400">{queueError}</p>}
         {directStorageUnavailable && (
           <div className="mt-2 border border-amber-400/20 bg-amber-400/10 px-2.5 py-2 text-[11px] leading-4 text-amber-200">
             Direct storage upload failed{directStorageError ? `: ${directStorageError}` : ''}. Remaining files are uploading through the API, which is usually slower.
@@ -751,7 +625,7 @@ export function GalleryUploadStatusPanel() {
           const transferredForTask = task.status === 'complete' ? task.fileSize : Math.min(task.fileSize, task.bytesUploaded || 0);
           return (
             <div key={task.id} className="flex items-center gap-3 p-3 border-b border-white/5">
-              {task.browserPreviewable ? (
+              {task.browserPreviewable && task.previewUrl ? (
                 <img src={task.previewUrl} alt="" className="w-10 h-10 object-cover bg-white/5" />
               ) : (
                 <div className="w-10 h-10 flex items-center justify-center bg-white/5 text-text-muted">
@@ -773,7 +647,7 @@ export function GalleryUploadStatusPanel() {
                   <div className="mt-1 truncate text-[11px] text-amber-300">Direct storage failed: {task.fallbackReason}; using API fallback</div>
                 )}
                 {task.optimizationError && <div className="mt-1 truncate text-[11px] text-amber-300">Optimization skipped: {task.optimizationError}; uploading original</div>}
-                {task.error && <div className="mt-1 truncate text-[11px] text-red-400">{task.error}</div>}
+                {task.error && <div className="mt-1 break-words text-[11px] text-red-400">{task.error}</div>}
               </div>
               {task.status === 'complete' && <CheckCircle2 className="w-4 h-4 text-green-400" />}
               {task.status === 'failed' && <XCircle className="w-4 h-4 text-red-400" />}
