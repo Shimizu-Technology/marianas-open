@@ -67,7 +67,7 @@ class AsjjfBodyLimitTest < ActiveSupport::TestCase
     end
   end
 
-  test "path variants the router accepts are bounded through the full Rails stack" do
+  test "router-normalized and encoded path variants are bounded before any body read" do
     [
       "/api//v1/internal/asjjf/snapshots",
       "//api/v1/internal/asjjf/snapshots",
