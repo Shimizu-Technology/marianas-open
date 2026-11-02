@@ -85,10 +85,10 @@ class ResultsSyncAdminTest < ActionDispatch::IntegrationTest
     assert_equal "Staff corrected name", row.reload.competitor_name
   end
 
-  test "viewer and anonymous cannot read preview approve or discard" do
+  test "viewer can read but cannot preview approve or discard; anonymous cannot access" do
     @user.update!(role: "viewer")
     get "/api/v1/admin/events/#{@event.id}/results_sync", headers: @headers
-    assert_response :forbidden
+    assert_response :success
     post "/api/v1/admin/events/#{@event.id}/results_sync/preview", headers: @headers
     assert_response :forbidden
     get "/api/v1/admin/events/#{@event.id}/import_results_preview"

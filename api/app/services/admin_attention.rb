@@ -96,7 +96,7 @@ class AdminAttention
   end
 
   def upcoming
-    Event.where(status: %w[draft upcoming live]).where("date >= ? OR (date IS NULL AND season_year >= ?)", @today, @today.year)
+    Event.where(status: %w[draft upcoming live]).where("date >= ? OR (date IS NULL AND (season_year IS NULL OR season_year >= ?))", @today, @today.year)
   end
 
   def event_readiness

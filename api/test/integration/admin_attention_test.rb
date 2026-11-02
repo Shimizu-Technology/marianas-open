@@ -102,9 +102,10 @@ class AdminAttentionTest < ActionDispatch::IntegrationTest
     rolled.event_schedule_items.create!(time: "09:00", description: "Start", confirmed: false)
     rolled.prize_categories.create!(name: "Prize", confirmed: false)
     no_date = event("no-date", date: nil)
+    no_year = event("no-year", date: nil, season_year: nil, status: "draft")
     event("old-draft", status: "draft", date: 1.year.ago.to_date, content_review_required: true)
     data = items.select { |item| item["key"].start_with?("event_readiness_") }
-    assert_equal [ rolled.id, no_date.id ].sort, data.map { |item| item["key"].delete_prefix("event_readiness_").to_i }.sort
+    assert_equal [ rolled.id, no_date.id, no_year.id ].sort, data.map { |item| item["key"].delete_prefix("event_readiness_").to_i }.sort
     assert_includes data.find { |item| item["key"].end_with?(rolled.id.to_s) }["explanation"], "Confirm every copied schedule row"
     assert_not_includes data.map { |item| item["key"] }, "event_readiness_#{good.id}"
   end
