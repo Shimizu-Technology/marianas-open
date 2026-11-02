@@ -45,7 +45,7 @@ function MetricCard({ metric, index }: { metric: ImpactMetric; index: number }) 
       whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay: index * 0.06 }}
-      className={`rounded-xl border transition-all duration-300 h-full ${
+      className={`rounded-xl border transition-colors duration-300 h-full ${
         metric.highlight
           ? 'bg-gradient-to-br from-gold/8 via-surface to-surface border-gold/20 hover:border-gold/40'
           : 'bg-surface border-white/5 hover:border-white/10'
@@ -56,7 +56,7 @@ function MetricCard({ metric, index }: { metric: ImpactMetric; index: number }) 
           <div className={`p-2 rounded-lg ${metric.highlight ? 'bg-gold/15 text-gold' : 'bg-white/5 text-text-secondary'}`}>
             <Icon className="w-4 h-4" />
           </div>
-          <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${catColor}`}>
+          <span className={`text-xs font-semibold  px-2 py-0.5 rounded-full ${catColor}`}>
             {t(`impact.${metric.category}`, CATEGORY_LABELS[metric.category] || metric.category)}
           </span>
         </div>
@@ -114,7 +114,7 @@ function ROICard({ roi }: { roi: ImpactROI }) {
                 transition={{ duration: 0.5 }}
                 className="text-center sm:text-left p-4 rounded-xl bg-white/[0.02] border border-white/5"
               >
-                <div className="text-xs text-text-muted font-medium uppercase tracking-wider mb-2">
+                <div className="text-xs text-text-muted font-medium mb-2">
                   {roi.investment_label || t('impact.investment')}
                 </div>
                 <div className="font-heading text-2xl sm:text-3xl font-bold text-text-primary">
@@ -131,7 +131,7 @@ function ROICard({ roi }: { roi: ImpactROI }) {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-center sm:text-left p-4 rounded-xl bg-white/[0.02] border border-white/5"
               >
-                <div className="text-xs text-text-muted font-medium uppercase tracking-wider mb-2">
+                <div className="text-xs text-text-muted font-medium mb-2">
                   {roi.economic_impact_label || t('impact.economic')}
                 </div>
                 <div className="font-heading text-2xl sm:text-3xl font-bold text-green-400">
@@ -148,7 +148,7 @@ function ROICard({ roi }: { roi: ImpactROI }) {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="text-center p-4 rounded-xl bg-gold/5 border border-gold/20"
               >
-                <div className="text-xs text-gold/70 font-medium uppercase tracking-wider mb-2">
+                <div className="text-xs text-gold/70 font-medium mb-2">
                   {t('impact.multiplier')}
                 </div>
                 <div className="font-heading text-4xl sm:text-5xl font-bold text-gold">

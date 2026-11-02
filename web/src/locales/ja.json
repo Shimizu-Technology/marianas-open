@@ -876,6 +876,7 @@
     "stars": "ASJJF {{count}}つ星大会",
     "registrationOpens": "エントリー開始：{{date}}",
     "eventInfo": "ASJJF大会情報",
-    "registrationPending": "エントリーはまだ開始していません"
+    "registrationPending": "エントリーはまだ開始していません",
+    "allEvents": "すべての大会"
   }
 }

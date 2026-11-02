@@ -876,6 +876,7 @@
     "stars": "ASJJF {{count}}星赛事",
     "registrationOpens": "报名开放日期：{{date}}",
     "eventInfo": "ASJJF赛事信息",
-    "registrationPending": "报名尚未开放"
+    "registrationPending": "报名尚未开放",
+    "allEvents": "全部赛事"
   }
 }

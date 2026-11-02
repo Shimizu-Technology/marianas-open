@@ -4,7 +4,7 @@ import { getEventHeroImage, resolveMediaUrl } from '../utils/images';
 
 /** Compare canonical names, retaining place/series words and removing edition years only. */
 export function eventSeriesName(name: string): string {
-  return name.normalize('NFKC').toLowerCase().replace(/\b(?:19|20)\d{2}\b/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+  return name.normalize('NFKC').toLowerCase().replace(/^guam\s+/, '').replace(/\b(?:19|20)\d{2}\b/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 }
 
 export function previousSeriesEdition(event: Event, events: Event[], now = new Date()): Event | null {

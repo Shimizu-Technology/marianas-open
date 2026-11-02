@@ -141,13 +141,13 @@ export default function WatchPage() {
       {/* Hero */}
       <section className="relative py-12 sm:py-16 overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-b from-navy-800 to-navy-900" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center">
+        <div className="relative z-10 public-container text-center">
           <motion.div
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.24 }}
           >
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] mb-4">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black leading-[0.9] mb-4">
               {t('watch.title')}
             </h1>
             <p className="text-text-secondary text-lg max-w-xl mx-auto mb-8">
@@ -158,7 +158,7 @@ export default function WatchPage() {
                 href={publicLink('youtube_channel_url', YOUTUBE_CHANNEL_URL)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-gold-500 text-navy-950 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors shadow-lg shadow-gold-500/20"
+                className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-gold-500 text-navy-950 font-heading font-bold text-sm hover:bg-gold-400 transition-colors shadow-lg shadow-gold-500/20"
               >
                 <Youtube size={18} />
                 {t('watch.youtubeCta', 'Visit Our YouTube Channel')}
@@ -175,7 +175,7 @@ export default function WatchPage() {
       {/* Live Stream Section */}
       {liveEvent && (
         <section id="live" className="py-8 sm:py-12 scroll-mt-28">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="public-container">
             <ScrollReveal>
               <div className="border border-white/10 bg-surface overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-navy-800/50">
@@ -184,7 +184,7 @@ export default function WatchPage() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
                     </span>
-                    <span className="text-xs font-heading font-bold uppercase tracking-widest text-red-400">
+                    <span className="text-xs font-heading font-bold text-red-400">
                       {t('watch.liveNow')}
                     </span>
                   </div>
@@ -223,7 +223,7 @@ export default function WatchPage() {
                       className="block relative aspect-video bg-navy-800 group"
                     >
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                        <div className="w-20 h-20 rounded-full bg-red-600/20 flex items-center justify-center group-hover:bg-red-600/30 group-hover:scale-110 transition-all duration-300">
+                        <div className="w-20 h-20 rounded-full bg-red-600/20 flex items-center justify-center group-hover:bg-red-600/30 group-hover:scale-110 transition-colors duration-300">
                           <Play size={36} className="text-red-400 ml-1 group-hover:text-red-300" />
                         </div>
                         <span className="text-sm text-text-muted group-hover:text-text-secondary transition-colors">
@@ -235,7 +235,7 @@ export default function WatchPage() {
                 })()}
 
                 <div className="px-5 py-4">
-                  <h2 className="text-lg sm:text-xl font-heading font-bold uppercase text-text-primary mb-1">
+                  <h2 className="text-lg sm:text-xl font-heading font-bold text-text-primary mb-1">
                     {liveEvent.name}
                   </h2>
                   <p className="text-text-muted text-sm">
@@ -251,11 +251,11 @@ export default function WatchPage() {
       {/* Featured Videos */}
       {featuredVideos.length > 0 && (
         <section id="featured-videos" className="py-10 sm:py-16 scroll-mt-28">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="public-container">
             <ScrollReveal>
               <div className="mb-8">
                 <div className="w-12 h-0.5 bg-gold-500 mb-4" />
-                <h2 className="text-2xl sm:text-3xl font-heading font-black uppercase mb-2">
+                <h2 className="text-2xl sm:text-3xl font-heading font-black mb-2">
                   {t('watch.featuredTitle', 'Featured Videos')}
                 </h2>
                 <p className="text-text-secondary max-w-2xl">
@@ -279,11 +279,11 @@ export default function WatchPage() {
       )}
 
       {/* Match Library */}
-      <section className="py-12 sm:py-20 bg-surface">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="public-section bg-surface">
+        <div className="public-container">
           <ScrollReveal>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-              <h2 className="text-2xl sm:text-3xl font-heading font-black uppercase">
+              <h2 className="text-2xl sm:text-3xl font-heading font-black">
                 {t('watch.matchLibrary')}
               </h2>
               <div className="flex items-center gap-2 text-sm text-text-muted">
@@ -323,7 +323,7 @@ export default function WatchPage() {
                 href={publicLink('youtube_channel_url', YOUTUBE_CHANNEL_URL)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-6 px-5 py-3 border border-gold-500/30 text-gold-400 font-heading font-bold uppercase tracking-wider text-sm hover:border-gold-500/60 hover:text-gold-300 transition-colors"
+                className="inline-flex items-center gap-2 mt-6 px-5 py-3 border border-gold-500/30 text-gold-400 font-heading font-bold text-sm hover:border-gold-500/60 hover:text-gold-300 transition-colors"
               >
                 <Youtube size={16} />
                 {t('watch.youtubeCta', 'Visit Our YouTube Channel')}
@@ -351,17 +351,17 @@ export default function WatchPage() {
       </section>
 
       {/* Coming Soon — Future Features */}
-      <section className="py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="public-section">
+        <div className="public-container">
           <ScrollReveal>
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-2 border border-gold-500/30 rounded-full bg-gold-500/5 mb-6">
                 <Clock size={14} className="text-gold-500" />
-                <span className="text-sm text-gold-400 font-heading uppercase tracking-wider">
+                <span className="text-sm text-gold-400 font-heading">
                   {t('watch.comingSoon')}
                 </span>
               </div>
-              <h2 className="text-3xl sm:text-5xl font-heading font-black uppercase mb-4">
+              <h2 className="text-3xl sm:text-5xl font-heading font-black mb-4">
                 {t('watch.visionTitle')}
               </h2>
               <p className="text-text-secondary text-lg max-w-2xl mx-auto">
@@ -373,13 +373,13 @@ export default function WatchPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {futureFeatures.map((feature, i) => (
               <ScrollReveal key={feature.titleKey} delay={i * 0.1}>
-                <div className="relative group bg-navy-900/50 border border-gold-500/10 hover:border-gold-500/30 p-6 transition-all duration-300 h-full">
+                <div className="relative group bg-navy-900/50 border border-gold-500/10 hover:border-gold-500/30 p-6 transition-colors duration-300 h-full">
                   <div className="absolute inset-0 bg-gold-500/3 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="relative space-y-4">
                     <div className="w-12 h-12 rounded-lg bg-gold-500/10 flex items-center justify-center">
                       <feature.icon size={24} className="text-gold-500" />
                     </div>
-                    <h3 className="font-heading font-bold text-lg uppercase">
+                    <h3 className="font-heading font-bold text-lg">
                       {t(feature.titleKey)}
                     </h3>
                     <p className="text-text-muted text-sm leading-relaxed">
@@ -429,7 +429,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
     : null;
 
   return (
-    <div className="group bg-navy-900 border border-white/5 hover:border-gold-500/20 transition-all duration-300 overflow-hidden">
+    <div className="group bg-navy-900 border border-white/5 hover:border-gold-500/20 transition-colors duration-300 overflow-hidden">
       {/* Thumbnail / Embed */}
       <div className="relative aspect-video bg-navy-800 overflow-hidden cursor-pointer" onClick={onToggle}>
         {expanded && video.youtube_video_id ? (
@@ -445,7 +445,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
             <VideoThumbnail src={thumbnail} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-gold-500/20 group-hover:scale-110 transition-all">
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-gold-500/20 group-hover:scale-110 transition-colors">
                 <Play size={20} className="text-white/60 group-hover:text-gold-500 ml-0.5 transition-colors" />
               </div>
             </div>
@@ -461,7 +461,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
         )}
         {video.belt_rank && !expanded && (
           <div className="absolute top-2 left-2">
-            <span className={`px-2 py-0.5 text-xs font-bold uppercase ${beltColors[video.belt_rank] || ''}`}>
+            <span className={`px-2 py-0.5 text-xs font-bold ${beltColors[video.belt_rank] || ''}`}>
               {t(`watch.belt.${video.belt_rank}`, video.belt_rank)}
             </span>
           </div>
@@ -496,7 +496,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
             <span className="text-xs text-text-muted">{video.event_name}</span>
           )}
           {video.category && (
-            <span className="text-xs text-text-muted uppercase">{t(`watch.category.${video.category === 'gi' ? 'gi' : 'noGi'}`, video.category)}</span>
+            <span className="text-xs text-text-muted">{t(`watch.category.${video.category === 'gi' ? 'gi' : 'noGi'}`, video.category)}</span>
           )}
         </div>
 

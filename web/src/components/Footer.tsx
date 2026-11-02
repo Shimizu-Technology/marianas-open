@@ -17,13 +17,13 @@ export default function Footer() {
 
   return (
     <footer className="bg-surface border-t border-white/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+      <div className="public-container py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <img src={logoSrc} alt={org.name} className="h-12 w-12 object-contain" />
-              <span className="font-heading font-bold text-lg uppercase tracking-wider">
+              <span className="font-heading font-bold text-lg">
                 {org.name}
               </span>
             </div>
@@ -34,7 +34,7 @@ export default function Footer() {
 
           {/* Social */}
           <div className="space-y-4">
-            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider text-gold-500">
+            <h4 className="font-heading font-semibold text-sm text-gold-500">
               {t('footer.followUs')}
             </h4>
             <div className="flex gap-4">
@@ -43,7 +43,7 @@ export default function Footer() {
                   href={org.instagram_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
+                  className="ui-button ui-button--ghost min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
                  aria-label="Instagram">
                   <Instagram size={20} />
                 </a>
@@ -53,7 +53,7 @@ export default function Footer() {
                   href={org.facebook_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
+                  className="ui-button ui-button--ghost min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
                  aria-label="Facebook">
                   <Facebook size={20} />
                 </a>
@@ -62,7 +62,7 @@ export default function Footer() {
                 href={publicLink('youtube_channel_url', YOUTUBE_CHANNEL_URL)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
+                className="ui-button ui-button--ghost min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
                aria-label="YouTube">
                 <Youtube size={20} />
               </a>
@@ -71,7 +71,7 @@ export default function Footer() {
                   href={org.website_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
+                  className="ui-button ui-button--ghost min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"
                  aria-label="Website">
                   <Globe size={20} />
                 </a>
@@ -81,7 +81,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div className="space-y-4">
-            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider text-gold-500">
+            <h4 className="font-heading font-semibold text-sm text-gold-500">
               {t('footer.contact')}
             </h4>
             {org.contact_email && (

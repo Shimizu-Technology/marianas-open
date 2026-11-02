@@ -876,6 +876,7 @@
     "stars": "ASJJF {{count}}성 대회",
     "registrationOpens": "참가 신청 시작: {{date}}",
     "eventInfo": "ASJJF 대회 정보",
-    "registrationPending": "참가 신청이 아직 시작되지 않았습니다"
+    "registrationPending": "참가 신청이 아직 시작되지 않았습니다",
+    "allEvents": "모든 대회"
   }
 }

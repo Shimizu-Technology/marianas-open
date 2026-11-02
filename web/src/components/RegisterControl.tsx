@@ -23,13 +23,14 @@ export default function RegisterControl({ event, className = '', variant = 'prim
     ? [{ href: links.gi, label: t('calendar.registerGi') }, { href: links.nogi, label: t('calendar.registerNogi') }].filter(link => link.href)
     : links.legacy ? [{ href: links.legacy, label: t('calendar.register') }] : [];
   const state = registrationState(event);
-  if (state === 'closed' || !choices.length) return null;
+  if (state === 'closed') return null;
   if (state !== 'open') {
     const date = event?.registration_opens_on;
     return <div className={`space-y-2 ${className}`}><p className="text-sm text-text-secondary" role="status">{state === 'scheduled' && date
       ? t('visualRefresh.registrationOpens', { date: parseDateLocalSafe(date).toLocaleDateString(getDateLocale(i18n.language), { year: 'numeric', month: 'long', day: 'numeric' }) })
-      : t('visualRefresh.registrationPending')}</p><Button href={links.legacy || links.gi || links.nogi} target="_blank" rel="noopener noreferrer" variant="secondary">{t('visualRefresh.eventInfo')}<ExternalLink size={16} aria-hidden="true" /></Button></div>;
+      : t('visualRefresh.registrationPending')}</p>{links.hasAny && <Button href={links.legacy || links.gi || links.nogi} target="_blank" rel="noopener noreferrer" variant="secondary">{t('visualRefresh.eventInfo')}<ExternalLink size={16} aria-hidden="true" /></Button>}</div>;
   }
+  if (!choices.length) return null;
   if (choices.length === 1) return <Button href={choices[0].href} target="_blank" rel="noopener noreferrer" variant={variant} className={className}>{choices[0].label}<ExternalLink size={16} aria-hidden="true" /></Button>;
   return <>
     <Button variant={variant} className={className} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>{t('calendar.register')}<ChevronDown size={16} aria-hidden="true" /></Button>

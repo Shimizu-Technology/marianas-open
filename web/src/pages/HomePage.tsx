@@ -1,8 +1,7 @@
 import { usePublicLinks } from '../hooks/usePublicLinks';
 import { usePublicCopy } from '../hooks/usePublicCopy';
-import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink, Handshake } from 'lucide-react';
+import { ArrowRight, Calendar, Trophy, Users, Globe, ExternalLink, Handshake, MapPin } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import JourneySection from '../components/JourneySection';
@@ -16,7 +15,10 @@ import { useSponsorPlacements } from '../hooks/useSponsorPlacements';
 import { eventPhase, getCurrentMainEvent, getEventCycleYear, selectHomeState } from '../utils/events';
 import { useResultCounts } from '../hooks/useResultCounts';
 import { useTranslatedField } from '../hooks/useTranslatedField';
-import { getRegistrationLinks } from '../utils/registrationLinks';
+import RegisterControl from '../components/RegisterControl';
+import EventStars from '../components/EventStars';
+import { eventHeroImage } from '../components/eventPresentation';
+import { Button, buttonClassName } from '../components/ui';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { getOrganizationSchema, getWebsiteSchema } from '../lib/seo';
 
@@ -56,16 +58,18 @@ const ORG_PARTNERS = [
 ] as const;
 
 export default function HomePage() {
-  const { t } = usePublicCopy();
+  const { t, i18n } = usePublicCopy();
+  const { tf } = useTranslatedField();
   const publicLink = usePublicLinks();
-  const shouldReduceMotion = useReducedMotion();
   const { events, loading: eventsLoading } = useEvents();
   const { placements, error: placementsError, retry: retryPlacements } = useSponsorPlacements();
   const { images: siteImages } = useSiteImages();
-  const { content: siteContent, t: sc, loading: siteContentLoading, hasCachedContent } = useSiteContent();
+  const { t: sc } = useSiteContent();
 
   const heroFallback = '/images/hero-podium.jpg';
-  const heroImage = getImageUrl(siteImages, 'hero', heroFallback);
+  const state = selectHomeState(events);
+  const nextEvent = state.nextEvent;
+  const heroImage = nextEvent ? eventHeroImage(nextEvent, events, getImageUrl(siteImages, 'hero', heroFallback)) : getImageUrl(siteImages, 'hero', heroFallback);
   const featuredFallbacks = [
     '/images/gallery/event-photo-4.jpg',
     '/images/gallery/event-photo-2.jpg',
@@ -84,12 +88,8 @@ export default function HomePage() {
     { value: sc('stat_prize_pool', t('stats.prizePool')), label: sc('stat_prize_pool_label', t('stats.prizePoolLabel')), icon: Trophy },
     { value: sc('stat_established', t('stats.since')), label: sc('stat_established_label', t('stats.sinceLabel')), icon: Calendar },
   ];
-  const showHeroSkeleton = siteContentLoading && !hasCachedContent && !siteContent;
   const currentMainEvent = getCurrentMainEvent(events);
   const primaryEventPath = currentMainEvent ? '/event' : '/calendar';
-  const primaryEventLabel = currentMainEvent ? t('hero.cta') : t('hero.learnMore');
-  const secondaryEventPath = currentMainEvent ? '/calendar' : '/events/past';
-  const secondaryEventLabel = currentMainEvent ? t('hero.learnMore') : t('nav.pastEvents');
 
   return (
     <div className="min-h-screen">
@@ -100,155 +100,44 @@ export default function HomePage() {
         image={heroImage}
         structuredData={[getWebsiteSchema(), getOrganizationSchema()]}
       />
-      {/* Hero */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-16 pb-8 sm:pb-16">
-        {/* Background image */}
-        <div className="absolute inset-0">
-          <ImageWithShimmer
-            src={heroImage}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-navy-900/80" />
-          <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/60 to-navy-900/40" />
-        </div>
-
-        {/* Grid pattern overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: '60px 60px',
-          }}
-        />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center">
-          {showHeroSkeleton ? (
-            <div className="animate-pulse">
-              <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 border border-gold-500/20 rounded-full bg-gold-500/5">
-                <div className="w-3.5 h-3.5 rounded-full bg-gold-500/40" />
-                <div className="h-4 w-44 rounded bg-gold-500/20" />
-              </div>
-
-              <div className="h-5 sm:h-6 w-64 max-w-full mx-auto mb-4 rounded bg-white/10" />
-
-              <div className="space-y-3 mb-8">
-                <div className="h-14 sm:h-20 lg:h-24 w-full max-w-4xl mx-auto rounded bg-white/10" />
-                <div className="h-14 sm:h-20 lg:h-24 w-3/4 max-w-3xl mx-auto rounded bg-gold-500/15" />
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-                <div className="h-14 w-56 rounded bg-gold-500/25" />
-                <div className="h-14 w-56 rounded bg-white/10" />
-              </div>
+      <section className="home-event-hero relative flex items-end overflow-hidden" aria-busy={eventsLoading}>
+        <div className="absolute inset-0"><img src={heroImage} alt="" className="w-full h-full object-cover" fetchPriority="high" decoding="async" /><div className="event-hero-scrim absolute inset-0" /></div>
+        <div className="public-container relative z-10 w-full pb-10 pt-36 sm:pb-16">
+          {eventsLoading ? <div className="h-64" /> : nextEvent ? <div className="max-w-3xl space-y-5">
+            <div className="flex flex-wrap items-center gap-3"><span className="text-gold-400 text-sm font-medium">{t(state.kind === 'live' ? 'season.phase.live' : 'season.nextEvent')}</span><EventStars stars={nextEvent.asjjf_stars} /></div>
+            <h1 className="event-hero-title">{tf(nextEvent, 'name')}</h1>
+            <div className="space-y-2 text-base sm:text-lg text-text-primary">
+              <p className="flex items-start gap-3"><Calendar size={20} className="mt-1 shrink-0 text-gold-400" />{new Intl.DateTimeFormat(getDateLocale(i18n.language), { year: 'numeric', month: 'long', day: 'numeric' }).formatRange(parseDateLocalSafe(nextEvent.date), parseDateLocalSafe(nextEvent.end_date || nextEvent.date))}</p>
+              <p className="flex items-start gap-3"><MapPin size={20} className="mt-1 shrink-0 text-gold-400" />{tf(nextEvent, 'city')}, {tf(nextEvent, 'country')}</p>
             </div>
-          ) : (
-            <>
-              <motion.div
-                initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-              >
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 mb-4 sm:mb-8 border border-gold-500/30 rounded-full bg-gold-500/5">
-                  <Star size={14} className="text-gold-500 fill-gold-500" />
-                  <span className="text-xs sm:text-sm text-gold-400 font-medium tracking-wide">
-                    {sc('hero_badge', t('hero.asjjfBadge'))}
-                  </span>
-                </div>
-              </motion.div>
-
-              <motion.p
-                className="text-text-secondary text-sm sm:text-xl tracking-[0.2em] uppercase font-heading mb-2 sm:mb-4"
-                initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.1 }}
-              >
-                {sc('hero_subtitle', t('hero.subtitle'))}
-              </motion.p>
-
-              <motion.h1
-                className="text-5xl sm:text-7xl lg:text-8xl font-heading font-black uppercase tracking-tight leading-[0.9] mb-5 sm:mb-8"
-                initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-              >
-                <span className="text-text-primary">{sc('hero_title_line1', t('hero.title').split(' ').slice(0, -1).join(' '))}</span>
-                <br />
-                <span className="bg-gradient-to-r from-gold-500 to-gold-300 bg-clip-text text-transparent">
-                  {sc('hero_title_line2', t('hero.title').split(' ').slice(-1)[0])}
-                </span>
-              </motion.h1>
-
-              <motion.div
-                className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-16"
-                initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-              >
-                <Link
-                  to={primaryEventPath}
-                  className="group inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-all duration-300"
-                >
-                  {primaryEventLabel}
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  to={secondaryEventPath}
-                  className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 border border-white/20 text-text-primary font-heading font-medium uppercase tracking-wider text-sm hover:bg-white/5 transition-all duration-300"
-                >
-                  {secondaryEventLabel}
-                </Link>
-              </motion.div>
-            </>
-          )}
-
-          {/* Stats bar */}
-          <motion.div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/5 max-w-3xl mx-auto"
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            {stats.map((stat) => (
-              <div key={stat.label} className="bg-navy-900/80 backdrop-blur-sm p-4 sm:p-6 text-center">
-                <stat.icon size={18} className="text-gold-500 mx-auto mb-2" />
-                <div className="text-2xl sm:text-3xl font-heading font-black text-text-primary">
-                  {stat.value}
-                </div>
-                <div className="text-xs text-text-muted uppercase tracking-wider mt-1">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </motion.div>
+            <div className="flex flex-col items-stretch sm:items-start sm:flex-row gap-3 pt-2"><RegisterControl event={nextEvent} /><Button to="/calendar" variant="secondary">{t('visualRefresh.allEvents')}<ArrowRight size={16} aria-hidden="true" /></Button></div>
+            <Link to={`/events/${nextEvent.slug}`} className="inline-flex min-h-11 items-center gap-2 text-sm text-gold-400">{t('calendar.details')}<ArrowRight size={16} aria-hidden="true" /></Link>
+          </div> : <div className="max-w-3xl space-y-5"><h1 className="event-hero-title">{sc('hero_title_line1', t('hero.title'))}</h1><p className="text-lg text-text-secondary">{t('season.nextSeasonNote')}</p><Button to="/events/past">{t('nav.pastEvents')}<ArrowRight size={16} aria-hidden="true" /></Button></div>}
         </div>
-
-        {/* Scroll indicator — hidden on mobile to save space */}
-        <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden sm:block"
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-        >
-          <div className="w-5 h-8 border-2 border-white/20 rounded-full flex items-start justify-center pt-1.5">
-            <div className="w-1 h-2 bg-gold-500 rounded-full" />
-          </div>
-        </motion.div>
       </section>
+      <div className="public-container grid grid-cols-2 sm:grid-cols-4 py-6 gap-4 sm:gap-6">
+        {stats.map(stat => <div key={stat.label} className="flex items-center gap-3 py-2"><stat.icon size={20} className="text-gold-400 shrink-0" /><div><div className="font-heading text-2xl sm:text-3xl font-semibold">{stat.value}</div><p className="text-sm text-text-secondary">{stat.label}</p></div></div>)}
+      </div>
       <FeaturedSponsorBar placements={placements} />
 
 
-      <SeasonOverview events={events} loading={eventsLoading} />
+      {!nextEvent && <SeasonOverview events={events} loading={eventsLoading} />}
+
+      {/* Journey Section */}
+      {!eventsLoading && events.some(event => ['upcoming', 'live'].includes(eventPhase(event))) && (
+        <JourneySection events={events.filter(event => Number(event.date.slice(0, 4)) === getEventCycleYear(events))} />
+      )}
 
       {/* Featured section — editorial asymmetric layout */}
-      <section className="py-24 sm:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="public-section">
+        <div className="public-container">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
             <ScrollReveal className="lg:col-span-5">
               <div className="space-y-6">
-                <div className="inline-block px-3 py-1 border border-gold-500/30 text-gold-500 text-xs font-heading uppercase tracking-widest">
+                <div className="inline-block px-3 py-1 border border-gold-500/30 text-gold-500 text-xs font-heading">
                   {sc('featured_badge', t('home.since2007'))}
                 </div>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black uppercase leading-tight">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black leading-tight">
                   {sc('featured_title', t('home.featuredTitle'))}
                 </h2>
                 <p className="text-text-secondary text-lg leading-relaxed">
@@ -257,9 +146,9 @@ export default function HomePage() {
                 <div className="flex gap-4 pt-4">
                   <Link
                     to={primaryEventPath}
-                    className="inline-flex items-center gap-2 text-gold-500 font-heading font-semibold text-sm uppercase tracking-wider hover:text-gold-400 transition-colors"
+                    className="inline-flex items-center gap-2 text-gold-500 font-heading font-semibold text-sm hover:text-gold-400 transition-colors"
                   >
-                    {currentMainEvent ? t('home.registerNow') : t('hero.learnMore')}
+                    {currentMainEvent ? t('calendar.details') : t('hero.learnMore')}
                     <ArrowRight size={16} />
                   </Link>
                 </div>
@@ -274,7 +163,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
                     <div className="text-3xl font-heading font-black text-gold-500">{sc('economic_impact_value', t('home.economicImpactValue'))}</div>
-                    <div className="text-xs text-text-muted uppercase tracking-wider">{sc('economic_impact_label', t('home.economicImpact'))}</div>
+                    <div className="text-xs text-text-muted">{sc('economic_impact_label', t('home.economicImpact'))}</div>
                   </div>
                 </div>
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
@@ -282,7 +171,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
                     <div className="text-3xl font-heading font-black text-text-primary">{sc('spectators_value', t('home.spectatorsValue'))}</div>
-                    <div className="text-xs text-text-muted uppercase tracking-wider">{sc('spectators_label', t('home.spectators'))}</div>
+                    <div className="text-xs text-text-muted">{sc('spectators_label', t('home.spectators'))}</div>
                   </div>
                 </div>
                 <div className="relative col-span-2 overflow-hidden border border-white/5">
@@ -291,7 +180,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-2">
                       <Globe size={18} className="text-gold-500" />
-                      <span className="text-sm text-gold-400 font-heading uppercase tracking-wider font-semibold">
+                      <span className="text-sm text-gold-400 font-heading font-semibold">
                         {sc('international_reach_title', t('home.internationalReach'))}
                       </span>
                     </div>
@@ -306,17 +195,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Journey Section */}
-      {!eventsLoading && events.some(event => ['upcoming', 'live'].includes(eventPhase(event))) && (
-        <JourneySection events={events.filter(event => Number(event.date.slice(0, 4)) === getEventCycleYear(events))} />
-      )}
-
       {/* Official Partners — logo strip */}
-      <section className="py-24 sm:py-32 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="public-section border-t border-white/5">
+        <div className="public-container">
           <ScrollReveal>
-            <div className="text-center mb-14">
-              <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted mb-2">
+            <div className="text-center mb-8">
+              <p className="text-xs font-heading font-semibold text-text-muted mb-2">
                 {t('home.partnersTitle')}
               </p>
               <div className="w-8 h-px bg-gold-500/30 mx-auto mt-3 mb-5" />
@@ -336,14 +220,14 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                   className="group flex flex-col items-center justify-between text-center h-40 sm:h-44"
                 >
-                  <div className="flex-1 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-all duration-300 group-hover:-translate-y-0.5">
+                  <div className="flex-1 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-colors duration-300 group-hover:-translate-y-0.5">
                     <img
                       src={partner.src}
                       alt={partner.name}
                       className={`${partner.heightClass} object-contain`}
                     />
                   </div>
-                  <div className="text-[10px] sm:text-[11px] font-heading font-semibold uppercase tracking-wider text-text-muted group-hover:text-text-secondary transition-colors duration-300 leading-tight mt-2">
+                  <div className="text-[10px] sm:text-[11px] font-heading font-semibold text-text-muted group-hover:text-text-secondary transition-colors duration-300 leading-tight mt-2">
                     {sc(`partner_${partner.key}_label`, partner.key === 'copademarianas' ? t('home.partnerChampionship') : partner.key === 'roadtotheopen' ? t('home.partnerSeries') : partner.label)}
                   </div>
                 </a>
@@ -354,17 +238,17 @@ export default function HomePage() {
       </section>
 
       {/* Official Sponsors Section */}
-      <section className="pt-16 sm:pt-20 pb-24 sm:pb-32 bg-surface border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="public-section bg-surface border-t border-white/5">
+        <div className="public-container">
           <ScrollReveal>
-            <div className="text-center mb-16">
+            <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 border border-gold-500/30 rounded-full bg-gold-500/5">
                 <Handshake size={14} className="text-gold-500" />
-                <span className="text-sm text-gold-400 font-medium tracking-wide">
+                <span className="text-sm text-gold-400 font-medium">
                   {t('home.sponsorsTitle')}
                 </span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-heading font-black uppercase mb-4">
+              <h2 className="text-3xl sm:text-4xl font-heading font-black mb-4">
                 {t('home.sponsorsSectionHeading')}
               </h2>
               <p className="text-text-secondary text-lg max-w-2xl mx-auto">
@@ -379,12 +263,12 @@ export default function HomePage() {
       </section>
 
       {/* Built by Shimizu Technology */}
-      <section className="py-16 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="py-10 border-t border-white/5">
+        <div className="public-container">
           <ScrollReveal>
             <div className="max-w-2xl mx-auto text-center space-y-4">
               <div className="w-12 h-px bg-gold-500/40 mx-auto" />
-              <p className="text-sm font-heading font-semibold uppercase tracking-[0.2em] text-text-muted">
+              <p className="text-sm font-heading font-semibold text-text-muted">
                 {t('shimizu.title')}
               </p>
               <p className="text-text-secondary text-sm leading-relaxed max-w-lg mx-auto">
@@ -394,7 +278,7 @@ export default function HomePage() {
                 href="https://shimizu-technology.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-gold-500 text-sm font-heading font-semibold uppercase tracking-wider hover:text-gold-400 transition-colors"
+                className="inline-flex items-center gap-2 text-gold-500 text-sm font-heading font-semibold hover:text-gold-400 transition-colors"
               >
                 {t('shimizu.cta')}
                 <ExternalLink size={14} />
@@ -409,37 +293,14 @@ export default function HomePage() {
 
 
 function SeasonOverview({ events: publishedEvents, loading }: { events: import('../services/api').Event[]; loading: boolean }) {
-  const { t, i18n } = usePublicCopy();
-  const { tf } = useTranslatedField();
+  const { t } = usePublicCopy();
   const { events, loading: countsLoading } = useResultCounts(publishedEvents, !publishedEvents.some(event => ['upcoming', 'live'].includes(eventPhase(event))));
   const state = selectHomeState(events);
-  const event = state.nextEvent;
-  const links = getRegistrationLinks(event);
-  const registrations = links.hasDirect
-    ? [{ href: links.gi, label: t('calendar.registerGi') }, { href: links.nogi, label: t('calendar.registerNogi') }]
-    : [{ href: links.legacy, label: t('calendar.register') }];
-  const buttonClass = 'inline-flex min-h-11 items-center justify-center gap-2 px-5 py-3 text-sm font-heading font-semibold text-gold-300 border border-gold-500/30 hover:bg-gold-500/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400';
+  const buttonClass = buttonClassName('secondary');
   return (
-    <section className="min-h-[32rem] sm:min-h-96 border-y border-gold-500/15 bg-surface/50 py-12 sm:py-16" aria-busy={loading || countsLoading}>
+    <section className="border-y border-gold-500/15 bg-surface/50 py-12 sm:py-16" aria-busy={loading || countsLoading}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        {loading || countsLoading ? <div className="h-64" /> : event ? (
-          <ScrollReveal>
-            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-              <div className="min-w-0">
-                <p className="mb-3 text-sm font-heading font-semibold uppercase tracking-wider text-gold-400">{t(state.kind === 'live' ? 'season.phase.live' : 'season.nextEvent')}</p>
-                <h2 className="max-w-3xl break-words font-heading text-3xl font-bold text-text-primary sm:text-4xl">{tf(event, 'name')}</h2>
-                <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-text-secondary">
-                  <span className="inline-flex items-center gap-2"><Calendar size={16} className="text-gold-400" />{parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { year: 'numeric', month: 'long', day: 'numeric' })}{event.end_date && event.end_date !== event.date ? ` – ${parseDateLocalSafe(event.end_date).toLocaleDateString(getDateLocale(i18n.language), { month: 'long', day: 'numeric' })}` : ''}</span>
-                  <span>{tf(event, 'city')}, {tf(event, 'country')}</span>
-                </div>
-              </div>
-              <div className="flex flex-col gap-3 sm:flex-row lg:max-w-sm lg:flex-col">
-                {registrations.filter(link => link.href).map(link => <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className={`${buttonClass} bg-gold-500 text-navy-900 hover:bg-gold-400`}>{link.label}<ExternalLink size={14} /></a>)}
-                <Link to={`/events/${event.slug}`} className={buttonClass}>{t('calendar.details')}<ArrowRight size={14} /></Link>
-              </div>
-            </div>
-          </ScrollReveal>
-        ) : (
+        {loading || countsLoading ? <div className="h-24" /> : (
           <ScrollReveal>
             <h2 className="font-heading text-3xl font-bold text-text-primary sm:text-4xl">{state.seasonYear ? t('season.seasonComplete', { year: state.seasonYear }) : t('calendar.noUpcomingEvents')}</h2>
             <p className="mt-4 max-w-2xl text-text-secondary">{t('season.nextSeasonNote')}</p>

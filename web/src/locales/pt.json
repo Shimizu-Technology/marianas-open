@@ -877,6 +877,7 @@
     "stars": "Evento ASJJF de {{count}} estrelas",
     "registrationOpens": "Inscrições abrem em {{date}}",
     "eventInfo": "Informações do evento na ASJJF",
-    "registrationPending": "As inscrições ainda não estão abertas"
+    "registrationPending": "As inscrições ainda não estão abertas",
+    "allEvents": "Todos os eventos"
   }
 }

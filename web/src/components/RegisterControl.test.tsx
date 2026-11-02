@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import RegisterControl from './RegisterControl';
-vi.mock('../hooks/usePublicCopy', () => ({ usePublicCopy: () => ({ i18n: { language: 'en' }, t: (key: string) => ({ 'calendar.register': 'Register', 'calendar.registerGi': 'Register (Gi)', 'calendar.registerNogi': 'Register (No-Gi)', 'visualRefresh.close': 'Close' })[key] || key }) }));
+vi.mock('../hooks/usePublicCopy', () => ({ usePublicCopy: () => ({ i18n: { language: 'en' }, t: (key: string, options?: {date?: string}) => key === 'visualRefresh.registrationOpens' ? `Registration opens ${options?.date}` : ({ 'calendar.register': 'Register', 'calendar.registerGi': 'Register (Gi)', 'calendar.registerNogi': 'Register (No-Gi)', 'visualRefresh.close': 'Close' })[key] || key }) }));
 afterEach(cleanup);
 describe('RegisterControl', () => {
   it('offers the actual Gi/No-Gi destinations from one button and restores focus on Escape', () => {
@@ -33,4 +33,17 @@ describe('RegisterControl', () => {
     expect(screen.getByRole('link').getAttribute('target')).toBe('_blank');
     rerender(<RegisterControl event={{}} />); expect(screen.queryByRole('button')).toBeNull(); expect(screen.queryByRole('link')).toBeNull();
   });
+});
+
+it('shows a localized opening notice and event-info link before the opening date', () => {
+  vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-02T00:00:00Z'));
+  const { rerender } = render(<RegisterControl event={{ registration_opens_on: '2027-01-01', registration_url_gi: 'https://asjjf.org/main/eventInfo/1', registration_url_nogi: 'https://asjjf.org/main/eventInfo/2' }} />);
+  expect(screen.getByRole('status').textContent).toBe('Registration opens January 1, 2027');
+  expect(screen.queryByRole('button', { name: 'Register' })).toBeNull();
+  expect(screen.getByRole('link').textContent).toContain('visualRefresh.eventInfo');
+  rerender(<RegisterControl event={{ registration_opens_on: null, registration_url_gi: 'https://asjjf.org/main/eventInfo/1', registration_url_nogi: 'https://asjjf.org/main/eventInfo/2' }} />);
+  expect(screen.getByRole('button', { name: 'Register' })).toBeTruthy();
+  rerender(<RegisterControl event={{ registration_opens_on: '2026-10-31', registration_not_open: true, registration_url: 'https://asjjf.org/main/eventInfo/1' }} />);
+  expect(screen.queryByRole('button', { name: 'Register' })).toBeNull();
+  vi.useRealTimers();
 });

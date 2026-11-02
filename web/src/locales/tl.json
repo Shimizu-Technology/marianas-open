@@ -876,6 +876,7 @@
     "stars": "ASJJF {{count}}-Star na Kaganapan",
     "registrationOpens": "Magbubukas ang pagpaparehistro sa {{date}}",
     "eventInfo": "Impormasyon ng kaganapan sa ASJJF",
-    "registrationPending": "Hindi pa bukas ang pagpaparehistro"
+    "registrationPending": "Hindi pa bukas ang pagpaparehistro",
+    "allEvents": "Lahat ng kaganapan"
   }
 }
