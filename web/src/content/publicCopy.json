@@ -401,18 +401,6 @@
     "label": "Subtitle series dynamic",
     "preview": "Calendar: series introduction (keep {{count}})"
   },
-  "calendar.mapTitle": {
-    "key": "calendar_mapTitle",
-    "section": "calendar",
-    "label": "Map title",
-    "preview": "Calendar: series introduction (keep {{count}})"
-  },
-  "calendar.mapSubtitle": {
-    "key": "calendar_mapSubtitle",
-    "section": "calendar",
-    "label": "Map subtitle",
-    "preview": "Calendar: series introduction (keep {{count}})"
-  },
   "impact.emptyTitle": {
     "key": "impact_emptyTitle",
     "section": "impact",
@@ -550,5 +538,29 @@
     "section": "stats",
     "label": "sinceLabel",
     "preview": "Home and About: statistics"
+  },
+  "journey.badge": {
+    "key": "journey_badge",
+    "section": "home",
+    "label": "Journey badge",
+    "preview": "Home: Follow the Journey section"
+  },
+  "journey.title": {
+    "key": "journey_title",
+    "section": "home",
+    "label": "Journey heading",
+    "preview": "Home: Follow the Journey section"
+  },
+  "journey.subtitle": {
+    "key": "journey_subtitle",
+    "section": "home",
+    "label": "Journey introduction with championship",
+    "preview": "Home: Follow the Journey section"
+  },
+  "journey.subtitleSeries": {
+    "key": "journey_subtitleSeries",
+    "section": "home",
+    "label": "Journey introduction for the series",
+    "preview": "Home: Follow the Journey section"
   }
 }

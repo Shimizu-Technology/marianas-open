@@ -24,7 +24,7 @@ Moved or connected to existing site content:
 
 - Home: hero CTA text, partner introduction/descriptions/destinations, sponsor introduction, development credit and CTA. Existing homepage hero, feature and statistic keys remain in use; About statistics now honor the same keys.
 - About: hero, story paragraphs, timeline, federation statement, photo caption, facts, signature/tagline and contact invitation. Reuses the existing `about_*` keys for previously seeded text.
-- Calendar: series introductions, including the count-dependent variants, and journey introduction. Past events: archive introduction.
+- Calendar: series introductions, including the count-dependent variants. Home: the visible journey badge, heading and introductions. Past events: archive introduction.
 - Watch: page introduction, YouTube CTA/destinations, featured introduction and future-feature descriptions.
 - Rules: page introduction, organizer guidance, rulebook introduction and contact invitation.
 - Impact/sponsorship: page/empty-state introduction, sponsor invitation, CTA and sponsorship email (retains its original `info@marianasopen.com` default).
@@ -40,7 +40,7 @@ Intentionally left in code or locale files:
 
 ## Deployment and data safety
 
-`PublicCopySeed` uses `insert_all(..., unique_by: :key)`, so existing rows, metadata and all translations are skipped intact. It bypasses callbacks and does not enqueue translation requests. New defaults include all seven locale values.
+`PublicCopySeed` uses `insert_all(..., unique_by: :key)`, so existing rows, metadata and all translations are skipped intact. It bypasses callbacks and does not enqueue translation requests. New defaults include all seven locale values and are marked translated so subsequent English edits can enqueue normal automatic translation.
 
 Render's existing pre-deploy `db:migrate` task runs the create-only seed after successful migrations. It is also available as `bin/rails site_content:seed_public_copy` and through the existing site-content seed. Never run the repository's demo `db:seed` against production: it deletes unrelated data. No schema migration or production command was run for this PR.
 

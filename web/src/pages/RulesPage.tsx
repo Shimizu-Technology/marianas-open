@@ -295,20 +295,20 @@ export default function RulesPage() {
                 </div>
               </div>
               <div className="space-y-4">
-                <a
+                {org.contact_email && <a
                   href={`mailto:${org.contact_email}`}
                   className="flex items-center gap-3 text-text-secondary hover:text-gold-500 transition-colors"
                 >
                   <Mail size={16} className="shrink-0" />
                   <span>{org.contact_email}</span>
-                </a>
-                <a
+                </a>}
+                {org.phone && <a
                   href={`tel:${org.phone.replace(/[^\d+]/g, '')}`}
                   className="flex items-center gap-3 text-text-secondary hover:text-gold-500 transition-colors"
                 >
                   <Phone size={16} className="shrink-0" />
                   <span>{org.phone}</span>
-                </a>
+                </a>}
                 <p className="text-sm text-text-muted">
                   {t(
                     'rules.contactNote',

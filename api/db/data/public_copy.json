@@ -938,34 +938,6 @@
     "value_zh_hant": "亞太地區{{count}}場賽事。"
   },
   {
-    "key": "calendar_mapTitle",
-    "section": "calendar",
-    "label": "Map title",
-    "content_type": "text",
-    "sort_order": 67,
-    "value_en": "Follow the Journey",
-    "value_ja": "シリーズを追う",
-    "value_ko": "여정을 함께하세요",
-    "value_pt": "Acompanhe a jornada",
-    "value_tl": "Sundan ang Paglalakbay",
-    "value_zh": "追踪晋级之路",
-    "value_zh_hant": "見證征程"
-  },
-  {
-    "key": "calendar_mapSubtitle",
-    "section": "calendar",
-    "label": "Map subtitle",
-    "content_type": "text",
-    "sort_order": 68,
-    "value_en": "From local qualifiers to the international stage — compete across Asia and earn your spot at the Marianas Open.",
-    "value_ja": "地域予選から国際舞台へ――アジア各地で戦い、Marianas Openへの出場権をつかみましょう。",
-    "value_ko": "지역 예선부터 국제 무대까지 — 아시아 전역에서 경쟁하며 Marianas Open 출전권을 획득하세요.",
-    "value_pt": "Das classificatórias locais ao cenário internacional — compita pela Ásia e conquiste sua vaga no Marianas Open.",
-    "value_tl": "Mula sa mga lokal na qualifier hanggang sa internasyonal na entablado — makipagkumpitensya sa buong Asya at makuha ang iyong puwesto sa Marianas Open.",
-    "value_zh": "从本地资格赛走向国际舞台——在亚洲各地参赛，赢得 Marianas Open 的参赛资格。",
-    "value_zh_hant": "從地方資格賽一路邁向國際舞台——征戰亞洲，贏得 Marianas Open 參賽資格。"
-  },
-  {
     "key": "youtube_channel_url",
     "section": "footer",
     "label": "YouTube channel URL",
@@ -1426,5 +1398,61 @@
     "value_tl": "Itinatag",
     "value_zh": "创立",
     "value_zh_hant": "創立"
+  },
+  {
+    "key": "journey_badge",
+    "section": "home",
+    "label": "Journey badge",
+    "content_type": "text",
+    "sort_order": 100,
+    "value_en": "Pro Series Circuit",
+    "value_ja": "Pro Seriesサーキット",
+    "value_ko": "프로 시리즈 서킷",
+    "value_pt": "Circuito Pro Series",
+    "value_tl": "Sirkito ng Pro Series",
+    "value_zh": "Pro Series 巡回赛",
+    "value_zh_hant": "Pro Series 巡迴賽"
+  },
+  {
+    "key": "journey_title",
+    "section": "home",
+    "label": "Journey heading",
+    "content_type": "text",
+    "sort_order": 101,
+    "value_en": "Follow the Journey",
+    "value_ja": "その軌跡をたどる",
+    "value_ko": "여정을 함께하세요",
+    "value_pt": "Acompanhe a jornada",
+    "value_tl": "Sundan ang Paglalakbay",
+    "value_zh": "见证晋级之路",
+    "value_zh_hant": "追蹤晉級之路"
+  },
+  {
+    "key": "journey_subtitle",
+    "section": "home",
+    "label": "Journey introduction with championship",
+    "content_type": "text",
+    "sort_order": 102,
+    "value_en": "Compete across Asia-Pacific. Earn ranking points. Qualify for the Grand Championship in Guam.",
+    "value_ja": "アジア太平洋各地で競技し、ランキングポイントを獲得して、グアムで開催されるグランドチャンピオンシップへの出場資格を手にしましょう。",
+    "value_ko": "아시아 태평양 전역에서 경쟁하고 랭킹 포인트를 획득해 괌에서 열리는 그랜드 챔피언십 출전 자격을 얻으세요.",
+    "value_pt": "Compita em eventos por toda a Ásia-Pacífico. Ganhe pontos no ranking. Classifique-se para o Grande Campeonato em Guam.",
+    "value_tl": "Makipagkumpitensya sa buong Asia-Pacific. Mag-ipon ng mga puntos sa ranggo. Magkuwalipika para sa Kampeonato ng Kampeon sa Guam.",
+    "value_zh": "征战亚太地区，赢取排名积分，晋级关岛总冠军赛。",
+    "value_zh_hant": "參加遍及亞太地區的賽事，累積排名積分，爭取關島總冠軍賽資格。"
+  },
+  {
+    "key": "journey_subtitleSeries",
+    "section": "home",
+    "label": "Journey introduction for the series",
+    "content_type": "text",
+    "sort_order": 103,
+    "value_en": "Compete across Asia-Pacific and earn ASJJF ranking points.",
+    "value_ja": "アジア太平洋各地で競技し、ASJJFランキングポイントを獲得しましょう。",
+    "value_ko": "아시아 태평양 전역에서 경쟁하고 ASJJF 랭킹 포인트를 획득하세요.",
+    "value_pt": "Compita por toda a Ásia-Pacífico e ganhe pontos no ranking da ASJJF.",
+    "value_tl": "Makipagkumpitensya sa buong Asya-Pasipiko at mag-ipon ng mga puntos sa ranggo ng ASJJF.",
+    "value_zh": "征战亚太地区，赢取ASJJF排名积分。",
+    "value_zh_hant": "參加遍及亞太地區的賽事，累積ASJJF排名積分。"
   }
 ]

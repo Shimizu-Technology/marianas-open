@@ -280,19 +280,19 @@ export default function AboutPage() {
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <a
+              {org.contact_email && <a
                 href={`mailto:${org.contact_email}`}
                 className="flex items-center gap-2 text-text-secondary hover:text-gold-500 transition-colors"
               >
                 <Mail size={18} />
                 {org.contact_email}
-              </a>
-              <span className="hidden sm:block text-white/10">|</span>
-              <div className="flex items-center gap-2 text-text-secondary">
+              </a>}
+              {org.contact_email && <span className="hidden sm:block text-white/10">|</span>}
+              {org.phone && <div className="flex items-center gap-2 text-text-secondary">
                 <Phone size={18} />
                 {org.phone}
-              </div>
-              <span className="hidden sm:block text-white/10">|</span>
+              </div>}
+              {org.phone && <span className="hidden sm:block text-white/10">|</span>}
               <div className="flex items-center gap-2 text-text-secondary">
                 <MapPin size={18} />
                 {sc('contact_location', 'Guam, USA')}

@@ -8,6 +8,21 @@ class PublicCopySeedTest < ActiveSupport::TestCase
     end
     entry = SiteContent.find_by!(key: "watch_subtitle")
     %w[en ja ko pt tl zh zh_hant].each { |locale| assert entry.public_send("value_#{locale}").present? }
+    assert_equal "translated", entry.translation_status
+  end
+
+  test "editing seeded English copy enqueues translation when configured" do
+    PublicCopySeed.call
+    entry = SiteContent.find_by!(key: "watch_subtitle")
+    service = Minitest::Mock.new
+    service.expect(:configured?, true)
+    GtTranslationService.stub(:new, service) do
+      assert_enqueued_with(job: TranslateSiteContentJob, args: [entry.id]) do
+        entry.update!(value_en: "Updated by staff")
+      end
+    end
+    assert_equal "pending", entry.reload.translation_status
+    service.verify
   end
 
   test "reruns preserve staff text, translations and metadata" do
