@@ -434,7 +434,14 @@
     "expandAll": "Expandir tudo",
     "collapseAll": "Recolher tudo",
     "filterResults": "Filtrar resultados",
-    "sourcedFrom": "Resultados obtidos de"
+    "sourcedFrom": "Resultados obtidos de",
+    "filters": "Filtros",
+    "closeFilters": "Fechar filtros",
+    "showResults": "Mostrar resultados",
+    "otherDivisions": "Outras divisões",
+    "placementsCount": "Colocações: {{count}}",
+    "divisionsCount": "Divisões: {{count}}",
+    "placements": "Colocações"
   },
   "competitorProfile": {
     "title": "Perfil do competidor",
@@ -879,5 +886,19 @@
     "eventInfo": "Informações do evento na ASJJF",
     "registrationPending": "As inscrições ainda não estão abertas",
     "allEvents": "Todos os eventos"
+  },
+  "galleryActions": {
+    "download": "Baixar foto",
+    "downloading": "Baixando…",
+    "share": "Compartilhar foto",
+    "copied": "Link da foto copiado",
+    "shared": "Foto compartilhada",
+    "copyManually": "Selecione e copie o link da foto abaixo.",
+    "photoLink": "Link da foto",
+    "downloaded": "Foto baixada",
+    "downloadError": "Falha no download. Tente novamente."
+  },
+  "visualB": {
+    "athleteCount": "Atletas nos resultados dos torneios: {{count}}"
   }
 }

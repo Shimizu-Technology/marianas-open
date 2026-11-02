@@ -434,7 +434,14 @@
     "expandAll": "全部展开",
     "collapseAll": "全部收起",
     "filterResults": "筛选结果",
-    "sourcedFrom": "成绩来源"
+    "sourcedFrom": "成绩来源",
+    "filters": "筛选",
+    "closeFilters": "关闭筛选",
+    "showResults": "显示结果",
+    "otherDivisions": "其他组别",
+    "placementsCount": "获奖名次：{{count}}",
+    "divisionsCount": "组别数：{{count}}",
+    "placements": "获奖记录"
   },
   "competitorProfile": {
     "title": "参赛者资料",
@@ -878,5 +885,19 @@
     "eventInfo": "ASJJF赛事信息",
     "registrationPending": "报名尚未开放",
     "allEvents": "全部赛事"
+  },
+  "galleryActions": {
+    "download": "下载照片",
+    "downloading": "下载中…",
+    "share": "分享照片",
+    "copied": "已复制照片链接",
+    "shared": "已分享照片",
+    "copyManually": "请选择并复制下方的照片链接。",
+    "photoLink": "照片链接",
+    "downloaded": "照片已下载",
+    "downloadError": "下载失败，请重试。"
+  },
+  "visualB": {
+    "athleteCount": "赛事成绩中的运动员：{{count}}"
   }
 }

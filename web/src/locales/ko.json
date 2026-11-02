@@ -434,7 +434,14 @@
     "expandAll": "모두 펼치기",
     "collapseAll": "모두 접기",
     "filterResults": "결과 필터",
-    "sourcedFrom": "결과 출처"
+    "sourcedFrom": "결과 출처",
+    "filters": "필터",
+    "closeFilters": "필터 닫기",
+    "showResults": "결과 보기",
+    "otherDivisions": "기타 부문",
+    "placementsCount": "입상 수: {{count}}",
+    "divisionsCount": "부문 수: {{count}}",
+    "placements": "입상 기록"
   },
   "competitorProfile": {
     "title": "선수 프로필",
@@ -878,5 +885,19 @@
     "eventInfo": "ASJJF 대회 정보",
     "registrationPending": "참가 신청이 아직 시작되지 않았습니다",
     "allEvents": "모든 대회"
+  },
+  "galleryActions": {
+    "download": "사진 다운로드",
+    "downloading": "다운로드 중…",
+    "share": "사진 공유",
+    "copied": "사진 링크를 복사했습니다",
+    "shared": "사진을 공유했습니다",
+    "copyManually": "아래 사진 링크를 선택하여 복사하세요.",
+    "photoLink": "사진 링크",
+    "downloaded": "사진을 다운로드했습니다",
+    "downloadError": "다운로드하지 못했습니다. 다시 시도하세요."
+  },
+  "visualB": {
+    "athleteCount": "대회 결과에 등록된 선수: {{count}}"
   }
 }

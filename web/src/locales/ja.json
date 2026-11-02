@@ -434,7 +434,14 @@
     "expandAll": "すべて展開",
     "collapseAll": "すべて折りたたむ",
     "filterResults": "結果を絞り込む",
-    "sourcedFrom": "結果の出典"
+    "sourcedFrom": "結果の出典",
+    "filters": "絞り込み",
+    "closeFilters": "絞り込みを閉じる",
+    "showResults": "結果を表示",
+    "otherDivisions": "その他の部門",
+    "placementsCount": "入賞者数：{{count}}",
+    "divisionsCount": "部門数：{{count}}",
+    "placements": "入賞記録"
   },
   "competitorProfile": {
     "title": "競技者プロフィール",
@@ -878,5 +885,19 @@
     "eventInfo": "ASJJF大会情報",
     "registrationPending": "エントリーはまだ開始していません",
     "allEvents": "すべての大会"
+  },
+  "galleryActions": {
+    "download": "写真をダウンロード",
+    "downloading": "ダウンロード中…",
+    "share": "写真を共有",
+    "copied": "写真のリンクをコピーしました",
+    "shared": "写真を共有しました",
+    "copyManually": "下の写真リンクを選択してコピーしてください。",
+    "photoLink": "写真のリンク",
+    "downloaded": "写真をダウンロードしました",
+    "downloadError": "ダウンロードできませんでした。もう一度お試しください。"
+  },
+  "visualB": {
+    "athleteCount": "大会結果に掲載されている選手：{{count}}"
   }
 }

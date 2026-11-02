@@ -434,7 +434,14 @@
     "expandAll": "I-expand Lahat",
     "collapseAll": "I-collapse Lahat",
     "filterResults": "I-filter ang mga Resulta",
-    "sourcedFrom": "Mga resulta mula sa"
+    "sourcedFrom": "Mga resulta mula sa",
+    "filters": "Mga filter",
+    "closeFilters": "Isara ang mga filter",
+    "showResults": "Ipakita ang mga resulta",
+    "otherDivisions": "Iba pang dibisyon",
+    "placementsCount": "Mga puwesto: {{count}}",
+    "divisionsCount": "Mga dibisyon: {{count}}",
+    "placements": "Mga puwesto"
   },
   "competitorProfile": {
     "title": "Profile ng Kalahok",
@@ -878,5 +885,19 @@
     "eventInfo": "Impormasyon ng kaganapan sa ASJJF",
     "registrationPending": "Hindi pa bukas ang pagpaparehistro",
     "allEvents": "Lahat ng kaganapan"
+  },
+  "galleryActions": {
+    "download": "I-download ang larawan",
+    "downloading": "Dina-download…",
+    "share": "Ibahagi ang larawan",
+    "copied": "Nakopya ang link ng larawan",
+    "shared": "Naibahagi ang larawan",
+    "copyManually": "Piliin at kopyahin ang link ng larawan sa ibaba.",
+    "photoLink": "Link ng larawan",
+    "downloaded": "Na-download ang larawan",
+    "downloadError": "Hindi na-download. Subukan ulit."
+  },
+  "visualB": {
+    "athleteCount": "Mga atleta mula sa mga resulta ng paligsahan: {{count}}"
   }
 }

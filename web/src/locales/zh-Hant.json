@@ -434,7 +434,14 @@
     "expandAll": "全部展開",
     "collapseAll": "全部收合",
     "filterResults": "篩選成績",
-    "sourcedFrom": "成績來源"
+    "sourcedFrom": "成績來源",
+    "filters": "篩選",
+    "closeFilters": "關閉篩選",
+    "showResults": "顯示結果",
+    "otherDivisions": "其他組別",
+    "placementsCount": "獲獎名次：{{count}}",
+    "divisionsCount": "組別數：{{count}}",
+    "placements": "獲獎紀錄"
   },
   "competitorProfile": {
     "title": "參賽者檔案",
@@ -878,5 +885,19 @@
     "eventInfo": "ASJJF賽事資訊",
     "registrationPending": "報名尚未開放",
     "allEvents": "所有賽事"
+  },
+  "galleryActions": {
+    "download": "下載照片",
+    "downloading": "下載中…",
+    "share": "分享照片",
+    "copied": "已複製照片連結",
+    "shared": "已分享照片",
+    "copyManually": "請選取並複製下方的照片連結。",
+    "photoLink": "照片連結",
+    "downloaded": "照片已下載",
+    "downloadError": "下載失敗，請重試。"
+  },
+  "visualB": {
+    "athleteCount": "賽事成績中的運動員：{{count}}"
   }
 }
