@@ -1,9 +1,7 @@
 module Api
   module V1
     module Admin
-      class SponsorsController < ApplicationController
-        include ClerkAuthenticatable
-        before_action :require_staff!
+      class SponsorsController < BaseController
         before_action :set_sponsor, only: [:show, :update, :destroy, :upload_logo]
         rescue_from ActiveRecord::RecordInvalid do |error|
           render json: { errors: error.record.errors.full_messages }, status: :unprocessable_entity

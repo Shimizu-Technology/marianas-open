@@ -1,3 +1,4 @@
+import { AdminWriteButton, AdminWriteForm, AdminWriteInput } from './AdminWriteControls'
 import { useId, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -65,9 +66,9 @@ export default function AsjjfIntakePanel({ eventId, onSnapshotSaved }: { eventId
       </div>
       {eventId !== undefined && (
         <div className="space-y-2">
-          <button type="button" onClick={checkNow} disabled={checking} className={asjjfButtonClass}>
+          <AdminWriteButton type="button" onClick={checkNow} disabled={checking} className={asjjfButtonClass}>
             {checking ? 'Queuing check…' : 'Check ASJJF now'}
-          </button>
+          </AdminWriteButton>
           <p className="text-sm text-text-secondary">The next nightly fetch is at 02:30 ChST. This queues a check for this event; it does not fetch ASJJF immediately.</p>
           {checkMessage && <p role="status" className="text-sm text-green-400">{checkMessage}</p>}
           {checkError && <p role="alert" className="break-words text-sm text-red-400">{checkError}</p>}
@@ -76,7 +77,7 @@ export default function AsjjfIntakePanel({ eventId, onSnapshotSaved }: { eventId
       <details className="border-t border-white/10 pt-3">
         <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-text-primary focus-visible:outline-2 focus-visible:outline-gold">Upload saved ASJJF page</summary>
         <p id={`${formId}-help`} className="mb-4 text-sm text-text-secondary">Save the ASJJF page as HTML in your browser, then upload the .html file with its original URL. Parsing may take a moment.</p>
-        <form onSubmit={upload} encType="multipart/form-data" aria-describedby={`${formId}-help`} className="space-y-4">
+        <AdminWriteForm onSubmit={upload} encType="multipart/form-data" aria-describedby={`${formId}-help`} className="space-y-4">
           <fieldset disabled={uploading} className="min-w-0 space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-sm text-text-secondary" htmlFor={`${formId}-type`}>Page type
@@ -95,13 +96,13 @@ export default function AsjjfIntakePanel({ eventId, onSnapshotSaved }: { eventId
               </label>
             </div>
             <label className="block text-sm text-text-secondary" htmlFor={`${formId}-file`}>Saved HTML file
-              <input id={`${formId}-file`} name="file" type="file" accept=".html,text/html" required className={`${fieldClass} file:mr-3 file:rounded file:border-0 file:bg-gold/10 file:px-3 file:py-1 file:text-sm file:text-gold`} />
+              <AdminWriteInput id={`${formId}-file`} name="file" type="file" accept=".html,text/html" required className={`${fieldClass} file:mr-3 file:rounded file:border-0 file:bg-gold/10 file:px-3 file:py-1 file:text-sm file:text-gold`} />
             </label>
-            <button type="submit" className={asjjfButtonClass}>{uploading ? 'Uploading…' : 'Upload saved page'}</button>
+            <AdminWriteButton type="submit" className={asjjfButtonClass}>{uploading ? 'Uploading…' : 'Upload saved page'}</AdminWriteButton>
           </fieldset>
           {uploadMessage && <p role="status" className="break-words text-sm text-green-400">{uploadMessage}</p>}
           {uploadError && <p role="alert" className="break-words text-sm text-red-400">{uploadError}</p>}
-        </form>
+        </AdminWriteForm>
       </details>
     </section>
   )

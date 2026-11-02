@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../AdminWriteControls'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { Plus, Pencil, Trash2, Loader2, Save, Hotel } from 'lucide-react'
 import { discardMessage } from './useDirtyNavigation'
@@ -139,7 +140,7 @@ export default function AccommodationsSection({
           Accommodations ({accommodations.length})
         </span>
         {editing === null && (
-          <button
+          <AdminWriteButton
             onClick={() => {
               setForm({
                 hotel_name: '',
@@ -161,7 +162,7 @@ export default function AccommodationsSection({
             className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80"
           >
             <Plus className="w-3 h-3" /> Add
-          </button>
+          </AdminWriteButton>
         )}
       </div>
 
@@ -212,13 +213,13 @@ export default function AccommodationsSection({
                 >
                   <Pencil className="w-3 h-3" />
                 </button>
-                <button
+                <AdminWriteButton
                   aria-label={`Delete hotel: ${a.hotel_name}`}
                   onClick={() => handleDelete(a.id)}
                   className="p-1 text-text-muted hover:text-red-400"
                 >
                   <Trash2 className="w-3 h-3" />
-                </button>
+                </AdminWriteButton>
               </div>
             </div>
           ))}
@@ -414,14 +415,14 @@ export default function AccommodationsSection({
                 />
               )}
               <div className="flex gap-2">
-                <button
+                <AdminWriteButton
                   onClick={handleSave}
                   disabled={saving}
                   className="flex items-center gap-1.5 px-4 py-1.5 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 disabled:opacity-50"
                 >
                   {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                   {saving ? 'Saving...' : 'Save'}
-                </button>
+                </AdminWriteButton>
                 <button
                   onClick={() => {
                     if (JSON.stringify(form) === formBaseline || window.confirm(discardMessage)) setEditing(null)

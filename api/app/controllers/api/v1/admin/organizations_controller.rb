@@ -1,9 +1,7 @@
 module Api
   module V1
     module Admin
-      class OrganizationsController < ApplicationController
-        include ClerkAuthenticatable
-
+      class OrganizationsController < BaseController
         before_action :require_admin!
         before_action :set_organization
 

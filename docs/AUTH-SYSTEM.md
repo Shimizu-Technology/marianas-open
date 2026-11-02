@@ -28,9 +28,9 @@ The Marianas Open platform uses **Clerk** for authentication and a **whitelist/i
 |------|-------------|-------------|
 | `admin` | Full access | CRUD all resources, manage users, import data |
 | `staff` | Limited admin | Access admin panel, manage content (no user management) |
-| `viewer` | No admin access | Reserved role; read-only admin access is not implemented |
+| `viewer` | Read-only admin | View shared admin pages, Needs attention and Help; no content changes, user management or settings |
 
-Role is stored in the `users.role` column (default: `viewer`). Admin routes require staff (admin or staff); user management requires admin. Invitations must explicitly specify `admin` or `staff`; missing, viewer, and unknown roles return a 422 validation error.
+Role is stored in the `users.role` column (default: `viewer`). All admin controllers inherit `Api::V1::Admin::BaseController`. It authenticates every request and blocks viewer writes centrally, before resource lookup. GET/HEAD reads are allowed, except the legacy results preview GET (it persists a run). User management and organization settings still require admin. Invites must explicitly specify `admin`, `staff` or `viewer`; missing and unknown roles return 422. Existing roles are unchanged. Admin event reads skip automatic completion for viewers, and status reads do not create default records. The frontend disables write controls and pauses saved photo/ZIP uploads for viewers; the API remains the enforcement boundary.
 
 ## Whitelist / Invite-Only Model
 
@@ -127,6 +127,7 @@ Admins can:
 | Variable | Purpose |
 |----------|---------|
 | `VITE_CLERK_PUBLISHABLE_KEY` | Clerk frontend key (for sign-in UI) |
+| `VITE_POSTHOG_DASHBOARD_URL` | Optional full PostHog project/dashboard URL, shown in Needs attention; hidden when unset. Set on the web build environment and rebuild. This is a link, independent of tracking keys. |
 
 ## Setup for New Environments
 

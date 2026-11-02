@@ -9,6 +9,7 @@ import { api } from '../services/api';
 import type { EventGalleryImage } from '../services/api';
 import { isBrowserPreviewableImage } from '../utils/images';
 import { useAuthContext } from './AuthContext';
+import { useAdminAccess } from './AdminAccessContext';
 import { GalleryUploadQueueStore, GALLERY_QUEUE_BATCH_SIZE, drainGalleryUploadQueue, withGalleryUploadLock } from '../utils/galleryUploadQueue';
 import type { DurableGalleryUpload } from '../utils/galleryUploadQueue';
 
@@ -252,7 +253,8 @@ const queueStore = new GalleryUploadQueueStore();
 
 export function GalleryUploadProvider({ children }: { children: ReactNode }) {
   const auth = useAuthContext();
-  const owner = !auth.isLoading && auth.isSignedIn ? auth.userId : null;
+  const { readOnly } = useAdminAccess();
+  const owner = !readOnly && !auth.isLoading && auth.isSignedIn ? auth.userId : null;
   const ownerRef = useRef(owner);
   ownerRef.current = owner;
   const [state, setState] = useState<{ owner: string | null; tasks: GalleryUploadTask[] }>({ owner: null, tasks: [] });

@@ -1,10 +1,11 @@
+import { AdminWriteButton } from '../../components/admin/AdminWriteControls'
 import { useEffect, useState, useCallback } from 'react'
 import { Users, Plus, Pencil, Trash2, X, Loader2, Save, UserPlus, MailPlus, Clock, CheckCircle2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import type { UserProfile } from '../../services/api'
 
-const INVITE_ROLES = ['admin', 'staff'] as const
+const INVITE_ROLES = ['admin', 'staff', 'viewer'] as const
 const EDIT_ROLES = ['admin', 'staff', 'viewer'] as const
 
 function StatusBadge({ user }: { user: UserProfile }) {
@@ -203,14 +204,14 @@ export default function UsersAdmin() {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
+              <AdminWriteButton
                 onClick={handleInvite}
                 disabled={saving || !inviteForm.email}
                 className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                 {saving ? 'Sending Invitation...' : 'Send Invitation'}
-              </button>
+              </AdminWriteButton>
               <button onClick={() => setEditing(null)} className="px-5 py-2.5 text-text-muted text-sm hover:text-text-primary">Cancel</button>
             </div>
           </div>
@@ -284,7 +285,7 @@ export default function UsersAdmin() {
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
                           {user.invitation_pending && (
-                            <button
+                            <AdminWriteButton
                               onClick={() => handleResendInvitation(user.id)}
                               disabled={resending === user.id}
                               className="p-1.5 text-amber-400 hover:text-amber-300 transition-colors disabled:opacity-50"
@@ -293,7 +294,7 @@ export default function UsersAdmin() {
                               {resending === user.id
                                 ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                 : <MailPlus className="w-3.5 h-3.5" />}
-                            </button>
+                            </AdminWriteButton>
                           )}
                           <button
                             onClick={() => { setEditRole(user.role); setEditing(user.id); setError('') }}
@@ -303,13 +304,13 @@ export default function UsersAdmin() {
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           {user.id !== currentUserId && (
-                            <button
+                            <AdminWriteButton
                               onClick={() => setDeleteConfirm(user.id)}
                               className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
                               title="Delete user"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            </AdminWriteButton>
                           )}
                         </div>
                       </td>
@@ -369,7 +370,7 @@ export default function UsersAdmin() {
                   </div>
                   <div className="flex items-center justify-end gap-2">
                     {user.invitation_pending && (
-                      <button
+                      <AdminWriteButton
                         onClick={() => handleResendInvitation(user.id)}
                         disabled={resending === user.id}
                         className="p-1.5 text-amber-400 hover:text-amber-300 transition-colors disabled:opacity-50"
@@ -378,7 +379,7 @@ export default function UsersAdmin() {
                         {resending === user.id
                           ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                           : <MailPlus className="w-3.5 h-3.5" />}
-                      </button>
+                      </AdminWriteButton>
                     )}
                     <button
                       onClick={() => { setEditRole(user.role); setEditing(user.id); setError('') }}
@@ -387,12 +388,12 @@ export default function UsersAdmin() {
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     {user.id !== currentUserId && (
-                      <button
+                      <AdminWriteButton
                         onClick={() => setDeleteConfirm(user.id)}
                         className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      </AdminWriteButton>
                     )}
                   </div>
                 </div>
@@ -423,7 +424,7 @@ export default function UsersAdmin() {
               </p>
               <div className="flex gap-3 justify-end">
                 <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">Cancel</button>
-                <button onClick={() => handleDelete(deleteConfirm)} className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">Delete</button>
+                <AdminWriteButton onClick={() => handleDelete(deleteConfirm)} className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">Delete</AdminWriteButton>
               </div>
             </motion.div>
           </motion.div>

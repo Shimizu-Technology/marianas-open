@@ -1,9 +1,7 @@
 module Api
   module V1
     module Admin
-      class AsjjfCalendarController < ApplicationController
-        include ClerkAuthenticatable
-        before_action :require_staff!
+      class AsjjfCalendarController < BaseController
         before_action :require_admin!, only: :decide
         rescue_from ArgumentError, ActiveRecord::RecordInvalid do |error|
           render json: { error: error.message }, status: :unprocessable_entity

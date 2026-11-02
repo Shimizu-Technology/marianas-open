@@ -1,10 +1,7 @@
 module Api
   module V1
     module Admin
-      class EventGalleryUploadBatchesController < ApplicationController
-        include ClerkAuthenticatable
-
-        before_action :require_staff!
+      class EventGalleryUploadBatchesController < BaseController
         before_action :set_event
         before_action :set_batch, only: [:show, :update, :destroy]
 
@@ -14,7 +11,7 @@ module Api
         end
 
         def show
-          @batch.refresh_counts!
+          @batch.refresh_counts! unless current_user.viewer?
           render json: { batch: @batch.reload.as_json }
         end
 

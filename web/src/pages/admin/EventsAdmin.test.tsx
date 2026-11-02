@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { api } from '../../services/api'
 import EventsAdmin from './EventsAdmin'
+import { AdminAccessContext } from '../../contexts/AdminAccessContext'
 import { eventEditorFixture } from '../../components/admin/event-editor/eventEditorFixtures'
 
 vi.mock('../../components/admin/event-editor/EventGallerySection', () => ({
@@ -225,6 +226,21 @@ it('refreshes saved readiness after a hotel fix without another event save', asy
   section('Publishing')
   expect((screen.getByRole('button', { name: 'Publish event' }) as HTMLButtonElement).disabled).toBe(false)
   expect(api.admin.updateEvent).not.toHaveBeenCalled()
+})
+
+it('lets a viewer inspect publishing checks but disables saving, publishing and file uploads', async () => {
+  render(<AdminAccessContext.Provider value={{ readOnly: true }}><MemoryRouter initialEntries={['/admin/events?edit=7']}><EventsAdmin /></MemoryRouter></AdminAccessContext.Provider>)
+  await screen.findByRole('textbox', { name: 'Name' })
+  fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Viewer local draft' } })
+  expect((screen.getAllByRole('button', { name: 'Save' })[0] as HTMLButtonElement).disabled).toBe(true)
+  section('Publishing')
+  expect((screen.getByRole('button', { name: /Publish event|Update public status/ }) as HTMLButtonElement).disabled).toBe(true)
+  expect((screen.getByRole('button', { name: 'Fill from ASJJF' }) as HTMLButtonElement).disabled).toBe(true)
+  expect(api.admin.updateEvent).not.toHaveBeenCalled()
+  section('Basics')
+  const files = Array.from(document.querySelectorAll<HTMLInputElement>('input[type="file"]'))
+  expect(files.length).toBeGreaterThan(0)
+  expect(files.every(input => input.disabled)).toBe(true)
 })
 
 it('opens a newly discovered calendar draft that was absent from the loaded event list', async () => {

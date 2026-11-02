@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../../components/admin/AdminWriteControls'
 import { useEffect, useState } from 'react'
 import HeldRankingSnapshots from '../../components/admin/HeldRankingSnapshots'
 import RankingSnapshotReview from '../../components/admin/RankingSnapshotReview'
@@ -91,7 +92,7 @@ export default function AsjjfSyncAdmin() {
             <p className="mt-2 text-sm text-text-primary">{status.breaker.open ? 'Paused — the circuit breaker is open.' : 'Ready — the circuit breaker is closed.'}</p>
             <p className="mt-1 text-sm text-text-secondary">Paused until: {status.breaker.paused_until ? timestamp(status.breaker.paused_until) : 'No timed pause'}</p>
             <p className="mt-2 text-sm text-text-secondary">The safety pause stops automatic checks when ASJJF needs attention.</p>
-            {isAdmin && (status.breaker.open || status.breaker.paused_until) && <button type="button" onClick={resetBreaker} disabled={resetting || loading} className={`${asjjfButtonClass} mt-3`}>{resetting ? 'Resetting…' : 'Reset safety pause'}</button>}
+            {isAdmin && (status.breaker.open || status.breaker.paused_until) && <AdminWriteButton type="button" onClick={resetBreaker} disabled={resetting || loading} className={`${asjjfButtonClass} mt-3`}>{resetting ? 'Resetting…' : 'Reset safety pause'}</AdminWriteButton>}
             {!isAdmin && status.breaker.open && <p className="mt-2 text-sm text-text-secondary">An administrator can reset this pause.</p>}
           </section>
           <section aria-labelledby="asjjf-heartbeats" className="space-y-3">

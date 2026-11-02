@@ -8,6 +8,7 @@ import {
   CalendarDays,
   FileText,
   Handshake,
+  CircleHelp,
   Image,
   LayoutDashboard,
   Megaphone,
@@ -24,6 +25,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { AdminAccessContext } from '../contexts/AdminAccessContext'
 import { api } from '../services/api'
 import { GalleryUploadProvider, GalleryUploadStatusPanel } from '../contexts/GalleryUploadContext'
 
@@ -47,7 +49,8 @@ const navSections: NavSection[] = [
   {
     label: 'Command',
     items: [
-      { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
+      { to: '/admin', icon: LayoutDashboard, label: 'Needs attention', end: true },
+      { to: '/admin/help', icon: CircleHelp, label: 'Staff help' },
     ],
   },
   {
@@ -354,6 +357,7 @@ function SidebarContent({
 
 export default function AdminLayout() {
   const [isAdmin, setIsAdmin] = useState(false)
+  const [readOnly, setReadOnly] = useState(true)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [desktopCollapsed, setDesktopCollapsed] = useState(readSidebarPreference)
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -364,7 +368,7 @@ export default function AdminLayout() {
 
     api.getCurrentUser()
       .then(({ user }) => {
-        if (!cancelled) setIsAdmin(user.is_admin)
+        if (!cancelled) { setIsAdmin(user.is_admin); setReadOnly(user.role === 'viewer') }
       })
       .catch(() => {
         if (!cancelled) setIsAdmin(false)
@@ -416,6 +420,7 @@ export default function AdminLayout() {
   const closeMobileNav = () => setMobileNavOpen(false)
 
   return (
+    <AdminAccessContext.Provider value={{ readOnly }}>
     <GalleryUploadProvider>
       <div className="min-h-screen bg-navy-900 text-text-primary">
         <header className="sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-surface/95 px-4 py-3 backdrop-blur lg:hidden">
@@ -490,6 +495,7 @@ export default function AdminLayout() {
               transition={{ duration: 0.25 }}
               className="p-4 sm:p-6 lg:p-8"
             >
+              {readOnly && <p role="status" className="mb-5 rounded-lg border border-white/15 bg-white/5 p-3 text-sm text-text-secondary">Viewer access · You can look around, but cannot make changes. Ask an administrator if you need to edit.</p>}
               <Outlet context={{ isAdmin }} />
             </motion.div>
           </main>
@@ -497,5 +503,6 @@ export default function AdminLayout() {
         <GalleryUploadStatusPanel />
       </div>
     </GalleryUploadProvider>
+    </AdminAccessContext.Provider>
   )
 }

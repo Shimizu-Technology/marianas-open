@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../AdminWriteControls'
 import { useState } from 'react'
 import { api, type Event } from '../../../services/api'
 import { Field, SelectField } from './EditorFields'
@@ -151,14 +152,14 @@ export default function RolloverDialog({
         <button type="button" disabled={busy} onClick={onClose} className="px-4 text-text-secondary">
           Cancel
         </button>
-        <button
+        <AdminWriteButton
           type="button"
           disabled={busy || !sources.length}
           onClick={submit}
           className="px-4 bg-gold/10 text-gold disabled:opacity-50"
         >
           {busy ? 'Creating drafts…' : 'Create draft copies'}
-        </button>
+        </AdminWriteButton>
       </div>
     </EditorDialog>
   )

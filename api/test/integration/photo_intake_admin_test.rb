@@ -18,7 +18,7 @@ class PhotoIntakeAdminTest < ActionDispatch::IntegrationTest
       headers = role ? @headers : {}
       %w[gallery-albums gallery-imports gallery-day-proposals].each do |path|
         get "#{@base}/#{path}", params: { album_type: "Podium" }, headers: headers
-        assert_response(role ? :forbidden : :unauthorized)
+        assert_response(role ? :success : :unauthorized)
         post "#{@base}/#{path}", params: { name: "Test" }, headers: headers, as: :json
         assert_response(role ? :forbidden : :unauthorized)
       end

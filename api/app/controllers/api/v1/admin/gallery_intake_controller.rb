@@ -1,10 +1,8 @@
 module Api
   module V1
     module Admin
-      class GalleryIntakeController < ApplicationController
-        include ClerkAuthenticatable
+      class GalleryIntakeController < BaseController
         include ActiveStorage::SetCurrent
-        before_action :require_staff!
         before_action :set_event
         rescue_from ActiveRecord::RecordNotFound do
           render json: { error: "Event or gallery record not found" }, status: :not_found

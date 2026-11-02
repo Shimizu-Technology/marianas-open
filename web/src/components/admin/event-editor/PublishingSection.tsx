@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../AdminWriteControls'
 import { useEffect, useState } from 'react'
 import { api, type Event } from '../../../services/api'
 import type { EditorSection } from './editorState'
@@ -143,7 +144,7 @@ export default function PublishingSection({
             </>
           )}
           <div className="flex flex-wrap gap-3">
-            <button
+            <AdminWriteButton
               type="button"
               onClick={() => perform('publish')}
               disabled={
@@ -153,15 +154,15 @@ export default function PublishingSection({
               className="px-4 bg-gold/10 text-gold disabled:opacity-40"
             >
               {busy ? 'Working…' : event.status === 'draft' ? 'Publish event' : 'Update public status'}
-            </button>
+            </AdminWriteButton>
             {event.status !== 'draft' && (
-              <button
+              <AdminWriteButton
                 type="button"
                 onClick={() => perform('unpublish')}
                 className="px-4 border border-white/10 text-text-secondary"
               >
                 Unpublish to draft
-              </button>
+              </AdminWriteButton>
             )}
           </div>
         </fieldset>
@@ -183,9 +184,9 @@ export default function PublishingSection({
           <p className="text-sm text-amber-300">Unpublish to draft before filling official information.</p>
         )}
         <p className="text-sm text-text-muted">Snapshot status: {event.asjjf_info_status || 'Not linked'}</p>
-        <button type="button" onClick={() => perform('fill')} className="px-4 border border-white/10 text-gold">
+        <AdminWriteButton type="button" onClick={() => perform('fill')} className="px-4 border border-white/10 text-gold">
           Fill from ASJJF
-        </button>
+        </AdminWriteButton>
       </fieldset>
       {error && (
         <p role="alert" className="text-sm text-red-300">

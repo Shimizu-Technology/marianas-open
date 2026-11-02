@@ -31,6 +31,7 @@ const AcademyPage = lazy(() => import('./pages/AcademyPage'));
 // Admin — lazy-loaded so public visitors do not download the CMS bundle.
 const AdminAuthBoundary = lazy(() => import('./components/auth/AdminAuthBoundary'));
 const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
+const AdminHelp = lazy(() => import('./pages/admin/AdminHelp'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const EventsAdmin = lazy(() => import('./pages/admin/EventsAdmin'));
 const SponsorsAdmin = lazy(() => import('./pages/admin/SponsorsAdmin'));
@@ -128,7 +129,7 @@ export default function App() {
           element={
             <Suspense fallback={<LoadingSpinner />}>
               <AdminAuthBoundary>
-                <ProtectedRoute requiredRole="staff">
+                <ProtectedRoute requiredRole="viewer">
                   <AdminLayout />
                 </ProtectedRoute>
               </AdminAuthBoundary>
@@ -136,6 +137,7 @@ export default function App() {
           }
         >
           <Route index element={<AdminDashboard />} />
+          <Route path="help" element={<AdminHelp />} />
           <Route path="events" element={<EventsAdmin />} />
           <Route path="asjjf" element={<AsjjfSyncAdmin />} />
           <Route path="photos" element={<PhotosAdmin />} />

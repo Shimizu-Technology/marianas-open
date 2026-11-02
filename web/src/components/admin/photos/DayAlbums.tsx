@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../AdminWriteControls'
 import { useState } from 'react';
 import { CalendarDays } from 'lucide-react';
 import { photoIntake, type DayProposal } from '../../../services/photoIntake';
@@ -31,9 +32,9 @@ export default function DayAlbums({ eventId, albumType, category, timezone, busy
     {proposals && valid && <div className="space-y-3">
       {proposals.length ? <ul className="space-y-2">{proposals.map(proposal => <li key={`${proposal.category}:${proposal.date}`} className="flex flex-wrap justify-between gap-1 border-b border-white/10 py-2 text-sm"><span className="break-words font-medium">{proposal.category}</span><span className="text-text-secondary">{proposal.date} · {proposal.image_ids.length} photos</span></li>)}</ul> : <p className="text-sm text-text-secondary">No dated photos are eligible for day albums yet. Wait for processing or choose an album manually.</p>}
       <p className="text-xs text-text-muted">{unassigned} photos without an eligible date. No dates are invented.</p>
-      {!!proposals.length && <button className={photoPrimaryButton} disabled={busy || loading} onClick={() => void mutate(async () => { await photoIntake.applyProposals(eventId, albumType, proposals, category); setProposals(null); }, 'Day albums applied to the confirmed photos.')}>
+      {!!proposals.length && <AdminWriteButton className={photoPrimaryButton} disabled={busy || loading} onClick={() => void mutate(async () => { await photoIntake.applyProposals(eventId, albumType, proposals, category); setProposals(null); }, 'Day albums applied to the confirmed photos.')}>
         Confirm {proposals.reduce((count, proposal) => count + proposal.image_ids.length, 0)} photo assignments
-      </button>}
+      </AdminWriteButton>}
     </div>}
     {proposals && !valid && <p className="text-xs text-text-muted">Settings changed. Preview again before confirming.</p>}
   </div>;

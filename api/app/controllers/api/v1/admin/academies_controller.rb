@@ -1,10 +1,7 @@
 module Api
   module V1
     module Admin
-      class AcademiesController < ApplicationController
-        include ClerkAuthenticatable
-
-        before_action :require_staff!
+      class AcademiesController < BaseController
         before_action :set_academy, only: [ :show, :update, :destroy, :upload_logo, :merge_preview, :merge ]
 
         def index

@@ -1,12 +1,9 @@
 module Api
   module V1
     module Admin
-      class ImpactConfigurationsController < ApplicationController
-        include ClerkAuthenticatable
-        before_action :require_staff!
-
+      class ImpactConfigurationsController < BaseController
         def show
-          config = ImpactConfiguration.current
+          config = current_user.viewer? ? (ImpactConfiguration.first || ImpactConfiguration.new) : ImpactConfiguration.current
           render json: { impact_configuration: config.as_json }
         end
 

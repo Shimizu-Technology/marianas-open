@@ -1,0 +1,36 @@
+{
+  "source": "d3de298104f21f1cbcaeb5e23791f20781bd5f48",
+  "synthetic": true,
+  "realClerk": "not_run",
+  "physicalPhone": "not_run",
+  "results": [
+    {
+      "width": 390,
+      "result": "passed",
+      "flows": [
+        "grouped items and long title",
+        "deep link",
+        "help topic and return navigation",
+        "empty with timestamp",
+        "error/retry",
+        "viewer save/publish/upload disabled"
+      ],
+      "pageErrors": [],
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1440,
+      "result": "passed",
+      "flows": [
+        "grouped items and long title",
+        "deep link",
+        "help topic and return navigation",
+        "empty with timestamp",
+        "error/retry",
+        "viewer save/publish/upload disabled"
+      ],
+      "pageErrors": [],
+      "horizontalOverflow": false
+    }
+  ]
+}

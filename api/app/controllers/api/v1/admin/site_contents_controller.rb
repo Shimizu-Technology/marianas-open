@@ -1,10 +1,7 @@
 module Api
   module V1
     module Admin
-      class SiteContentsController < ApplicationController
-        include ClerkAuthenticatable
-
-        before_action :require_staff!
+      class SiteContentsController < BaseController
         before_action :set_site_content, only: [:update, :destroy, :retranslate]
 
         def index

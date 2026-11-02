@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../../components/admin/AdminWriteControls'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Users, Pencil, Trash2, X, Loader2, Save, Search, Medal, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Trophy } from 'lucide-react'
@@ -385,11 +386,11 @@ export default function CompetitorsAdmin() {
               )}
 
               <div className="flex gap-3 pt-2">
-                <button onClick={handleSave} disabled={saving || detailLoading || !form.first_name.trim() || !form.last_name.trim() || (typeof editing === 'number' && editDetail?.id !== editing)}
+                <AdminWriteButton onClick={handleSave} disabled={saving || detailLoading || !form.first_name.trim() || !form.last_name.trim() || (typeof editing === 'number' && editDetail?.id !== editing)}
                   className="min-h-11 flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saving ? 'Saving...' : 'Save'}
-                </button>
+                </AdminWriteButton>
                 <button disabled={saving || mergeBusy} onClick={() => { setEditing(null); setError('') }} className="min-h-11 px-5 py-2.5 text-text-muted text-sm hover:text-text-primary">Cancel</button>
               </div>
             </fieldset>
@@ -483,9 +484,9 @@ export default function CompetitorsAdmin() {
                         onClick={() => { setEditing(c.id); setError('') }}
                         className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                       ><Pencil className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => setDeleteConfirm(c.id)}
+                      <AdminWriteButton onClick={() => setDeleteConfirm(c.id)}
                         className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
-                      ><Trash2 className="w-3.5 h-3.5" /></button>
+                      ><Trash2 className="w-3.5 h-3.5" /></AdminWriteButton>
                     </div>
                   </div>
                 ))}
@@ -543,7 +544,7 @@ export default function CompetitorsAdmin() {
               <p className="text-sm text-text-secondary mb-5">The competitor will be re-created next time results are imported.</p>
               <div className="flex gap-3 justify-end">
                 <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">Cancel</button>
-                <button onClick={() => handleDelete(deleteConfirm)} className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">Delete</button>
+                <AdminWriteButton onClick={() => handleDelete(deleteConfirm)} className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">Delete</AdminWriteButton>
               </div>
             </motion.div>
           </motion.div>

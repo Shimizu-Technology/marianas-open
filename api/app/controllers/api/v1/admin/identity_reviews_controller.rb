@@ -1,10 +1,7 @@
 module Api
   module V1
     module Admin
-      class IdentityReviewsController < ApplicationController
-        include ClerkAuthenticatable
-        before_action :require_staff!
-
+      class IdentityReviewsController < BaseController
         def index
           reviews = IdentityReview.where(status: "pending").includes(:candidate_academy).order(:id)
           results = EventResult.where(academy_id: nil).group(:academy).count

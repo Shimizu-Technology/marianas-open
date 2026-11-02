@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../../components/admin/AdminWriteControls'
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
@@ -235,22 +236,22 @@ export default function EventResultsAdmin() {
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           {event.status !== 'completed' && results.length > 0 && (
-            <button
+            <AdminWriteButton
               onClick={handleMarkCompleted}
               className="flex items-center justify-center gap-2 px-3 py-2 bg-green-500/10 text-green-400 text-xs font-medium hover:bg-green-500/15 transition-colors"
             >
               <CheckCircle className="w-3.5 h-3.5" />
               Mark Completed
-            </button>
+            </AdminWriteButton>
           )}
           {!editing && (
-            <button
+            <AdminWriteButton
               onClick={() => { setForm(emptyResultForm); setEditing('new') }}
               className="flex items-center justify-center gap-2 px-3 py-2 bg-gold/10 text-gold text-xs font-medium hover:bg-gold/15 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Result
-            </button>
+            </AdminWriteButton>
           )}
         </div>
       </div>
@@ -364,11 +365,11 @@ export default function EventResultsAdmin() {
                 <Field label="Age Category" value={form.age_category} onChange={v => setForm(f => ({ ...f, age_category: v }))} placeholder="e.g. adult" />
               </div>
               <div className="flex gap-3 pt-2">
-                <button onClick={handleSave} disabled={saving}
+                <AdminWriteButton onClick={handleSave} disabled={saving}
                   className="flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saving ? 'Saving...' : 'Save'}
-                </button>
+                </AdminWriteButton>
                 <button onClick={() => { setEditing(null); setError('') }}
                   className="px-5 py-2.5 text-text-muted text-sm hover:text-text-primary transition-colors">
                   Cancel
@@ -403,13 +404,13 @@ export default function EventResultsAdmin() {
             ))}
           </select>
           {results.length > 0 && (
-            <button
+            <AdminWriteButton
               onClick={() => setDeleteAllConfirm(true)}
               className="flex items-center gap-1.5 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-colors"
             >
               <Trash2 className="w-3 h-3" />
               Delete All
-            </button>
+            </AdminWriteButton>
           )}
         </div>
       )}
@@ -497,9 +498,9 @@ export default function EventResultsAdmin() {
                               <button onClick={() => editResult(result)} className="p-1 text-text-muted hover:text-text-primary transition-colors">
                                 <Pencil className="w-3 h-3" />
                               </button>
-                              <button onClick={() => setDeleteConfirm(result.id)} className="p-1 text-text-muted hover:text-red-400 transition-colors">
+                              <AdminWriteButton onClick={() => setDeleteConfirm(result.id)} className="p-1 text-text-muted hover:text-red-400 transition-colors">
                                 <Trash2 className="w-3 h-3" />
-                              </button>
+                              </AdminWriteButton>
                             </div>
                           </td>
                         </tr>
@@ -588,12 +589,12 @@ function ConfirmModal({ title, message, onConfirm, onCancel, destructive }: {
         <p className="text-sm text-text-secondary mb-5">{message}</p>
         <div className="flex gap-3 justify-end">
           <button onClick={onCancel} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">Cancel</button>
-          <button onClick={onConfirm}
+          <AdminWriteButton onClick={onConfirm}
             className={`px-4 py-2 text-sm transition-colors ${
               destructive ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
             }`}>
             {destructive ? 'Delete All' : 'Delete'}
-          </button>
+          </AdminWriteButton>
         </div>
       </motion.div>
     </motion.div>

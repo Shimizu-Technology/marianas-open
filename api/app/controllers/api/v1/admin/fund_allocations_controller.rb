@@ -1,9 +1,7 @@
 module Api
   module V1
     module Admin
-      class FundAllocationsController < ApplicationController
-        include ClerkAuthenticatable
-        before_action :require_staff!
+      class FundAllocationsController < BaseController
         before_action :set_allocation, only: [:show, :update, :destroy]
 
         def index

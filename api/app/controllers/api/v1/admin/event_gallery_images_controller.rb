@@ -1,14 +1,12 @@
 module Api
   module V1
     module Admin
-      class EventGalleryImagesController < ApplicationController
-        include ClerkAuthenticatable
+      class EventGalleryImagesController < BaseController
         include ActiveStorage::SetCurrent
 
         UploadAlreadyUsed = Class.new(StandardError)
         UNCATEGORIZED_FILTER = "__uncategorized__".freeze
 
-        before_action :require_staff!
         before_action :set_event
         before_action :set_gallery_image, only: [ :update, :destroy, :upload ]
 

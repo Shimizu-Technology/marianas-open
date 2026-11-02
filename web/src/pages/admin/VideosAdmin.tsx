@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../../components/admin/AdminWriteControls'
 import { useEffect, useState, useCallback } from 'react'
 import { Play, Plus, Pencil, Trash2, X, Loader2, Save, Star } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -41,7 +42,7 @@ export default function VideosAdmin() {
   const [videos, setVideos] = useState<Video[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [unavailableOnly, setUnavailableOnly] = useState(false)
+  const [unavailableOnly, setUnavailableOnly] = useState(() => new URLSearchParams(window.location.search).get('unavailable') === '1')
   const [checking, setChecking] = useState<number | null>(null)
   const [editing, setEditing] = useEditingParam()
 
@@ -160,13 +161,13 @@ export default function VideosAdmin() {
           <span className="text-sm text-text-muted">({videos.length})</span>
         </div>
         {!editing && (
-          <button
+          <AdminWriteButton
             onClick={() => { setForm(emptyForm); setEditing('new'); setError('') }}
             className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Video
-          </button>
+          </AdminWriteButton>
         )}
       </div>
 
@@ -347,14 +348,14 @@ export default function VideosAdmin() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button
+              <AdminWriteButton
                 onClick={handleSave}
                 disabled={saving}
                 className="flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {saving ? 'Saving...' : 'Save'}
-              </button>
+              </AdminWriteButton>
               <button onClick={() => { setEditing(null); setError('') }} className="px-5 py-2.5 text-text-muted text-sm hover:text-text-primary">
                 Cancel
               </button>
@@ -408,7 +409,7 @@ export default function VideosAdmin() {
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 shrink-0">
-                    <button disabled={checking === video.id} onClick={() => handleCheck(video.id)} className="text-xs text-gold underline disabled:opacity-50">{checking === video.id ? 'Queuing…' : 'Check now'}</button>
+                    <AdminWriteButton disabled={checking === video.id} onClick={() => handleCheck(video.id)} className="text-xs text-gold underline disabled:opacity-50">{checking === video.id ? 'Queuing…' : 'Check now'}</AdminWriteButton>
                     <button
                       onClick={() => {
                         setForm({
@@ -434,12 +435,12 @@ export default function VideosAdmin() {
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
-                    <button
+                    <AdminWriteButton
                       onClick={() => setDeleteConfirm(video.id)}
                       className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    </AdminWriteButton>
                   </div>
                 </div>
               ))}
@@ -465,7 +466,7 @@ export default function VideosAdmin() {
               <p className="text-sm text-text-secondary mb-5">Are you sure? This action cannot be undone.</p>
               <div className="flex gap-3 justify-end">
                 <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">Cancel</button>
-                <button onClick={() => handleDelete(deleteConfirm)} className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">Delete</button>
+                <AdminWriteButton onClick={() => handleDelete(deleteConfirm)} className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">Delete</AdminWriteButton>
               </div>
             </motion.div>
           </motion.div>

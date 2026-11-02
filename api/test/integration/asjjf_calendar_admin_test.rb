@@ -48,12 +48,14 @@ class AsjjfCalendarAdminTest < ActionDispatch::IntegrationTest
     assert_empty response.parsed_body["reviews"]
   end
 
-  test "viewer and anonymous cannot read or decide" do
+  test "viewer reads without deciding and anonymous cannot read or decide" do
     @user.update!(role: "viewer")
     get "/api/v1/admin/asjjf/calendar", headers: @headers
-    assert_response :forbidden
+    assert_response :success
     post decision_path, headers: @headers, params: { decision: "dismiss" }, as: :json
     assert_response :forbidden
+    assert_equal "Viewer access is read-only", response.parsed_body["error"]
+    assert_equal "pending", @review.reload.status
     get "/api/v1/admin/asjjf/calendar"
     assert_response :unauthorized
     post decision_path, params: { decision: "apply" }, as: :json

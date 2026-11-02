@@ -1101,6 +1101,7 @@ export const api = {
 
   // Admin - Events
   admin: {
+    getAttention: () => fetchApi<AdminAttention>('/api/v1/admin/attention', {}, true),
     // ASJJF intake stores snapshots only; it does not apply published results.
     getAsjjfCalendar: (page = 1) => fetchApi<AsjjfCalendarResponse>(`/api/v1/admin/asjjf/calendar?page=${page}`, {}, true),
     decideAsjjfCalendar: (id: number, decision: 'apply' | 'dismiss') =>
@@ -1520,3 +1521,11 @@ export const api = {
   getCompetitorProfile: (name: string, resultId?: string) =>
     fetchApi<CompetitorProfile>(`/api/v1/rankings/competitor?${resultId ? `result_id=${encodeURIComponent(resultId)}` : `name=${encodeURIComponent(name)}`}`),
 };
+
+export interface AdminAttention {
+  checked_at: string;
+  groups: { area: string; title: string; items: {
+    key: string; area: string; severity: 'warning' | 'error'; title: string;
+    explanation: string; count: number; href: string;
+  }[] }[];
+}

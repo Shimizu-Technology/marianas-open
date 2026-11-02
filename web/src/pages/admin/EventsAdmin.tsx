@@ -1,3 +1,4 @@
+import { AdminWriteButton, AdminWriteInput } from '../../components/admin/AdminWriteControls'
 import AsjjfCalendarPanel from '../../components/admin/AsjjfCalendarPanel'
 import EditorSaveBar from '../../components/admin/event-editor/EditorSaveBar'
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
@@ -609,23 +610,23 @@ export default function EventsAdmin() {
           )}
         </button>
         {!editing && (
-          <button
+          <AdminWriteButton
             type="button"
             onClick={() => setRollover({})}
             disabled={!events.length}
             className="px-4 py-2 border border-white/10 text-sm text-text-secondary"
           >
             Prepare next season
-          </button>
+          </AdminWriteButton>
         )}
         {!editing && (
-          <button
+          <AdminWriteButton
             onClick={() => setEditing('new')}
             className="flex items-center justify-center gap-2 px-4 py-2 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Create Event
-          </button>
+          </AdminWriteButton>
         )}
       </div>
 
@@ -672,7 +673,7 @@ export default function EventsAdmin() {
                     <Trophy className="w-3.5 h-3.5" />
                     Manage Results
                   </Link>
-                  <button
+                  <AdminWriteButton
                     onClick={handleRetranslate}
                     disabled={translating}
                     className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
@@ -688,7 +689,7 @@ export default function EventsAdmin() {
                       <Languages className="w-3.5 h-3.5" />
                     )}
                     {translating ? 'Translating...' : 'Translate'}
-                  </button>
+                  </AdminWriteButton>
                   {form.translation_status && form.translation_status !== 'untranslated' && (
                     <span
                       className={`flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
@@ -831,7 +832,7 @@ export default function EventsAdmin() {
                       >
                         Hero Image
                       </label>
-                      <input
+                      <AdminWriteInput
                         id="eventsadmin-field-1"
                         ref={heroInputRef}
                         type="file"
@@ -900,7 +901,7 @@ export default function EventsAdmin() {
                     >
                       Poster Image
                     </label>
-                    <input
+                    <AdminWriteInput
                       id="eventsadmin-field-2"
                       ref={posterInputRef}
                       type="file"
@@ -926,7 +927,7 @@ export default function EventsAdmin() {
                       {currentEvent?.poster_image_url ? 'Change Poster' : 'Upload Poster'}
                     </button>
                     {currentEvent?.poster_image_url && (
-                      <button
+                      <AdminWriteButton
                         type="button"
                         onClick={async () => {
                           if (typeof editing !== 'number') return
@@ -940,7 +941,7 @@ export default function EventsAdmin() {
                         className="text-text-muted hover:text-red-400 transition-colors text-xs"
                       >
                         Remove
-                      </button>
+                      </AdminWriteButton>
                     )}
                   </div>
                   <p className="text-[10px] text-text-muted">
@@ -1414,14 +1415,14 @@ export default function EventsAdmin() {
                   ? 'Unsaved hotel or gallery changes'
                   : 'Event changes saved'}
             </span>
-            <button
+            <AdminWriteButton
               onClick={handleSave}
               disabled={saving || actionBusy}
               className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {saving ? 'Saving...' : 'Save'}
-            </button>
+            </AdminWriteButton>
             <button
               onClick={() => {
                 setEditing(null)
@@ -1559,13 +1560,13 @@ export default function EventsAdmin() {
                             >
                               <Trophy className="w-3.5 h-3.5" />
                             </Link>
-                            <button
+                            <AdminWriteButton
                               onClick={() => setRollover({ eventId: event.id })}
                               className="p-1.5 text-text-muted hover:text-blue-400 transition-colors"
                               title="Copy for next season"
                             >
                               <Copy className="w-3.5 h-3.5" />
-                            </button>
+                            </AdminWriteButton>
                             <button
                               onClick={() => setEditing(event.id)}
                               className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
@@ -1573,13 +1574,13 @@ export default function EventsAdmin() {
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </button>
-                            <button
+                            <AdminWriteButton
                               onClick={() => setDeleteConfirm(event.id)}
                               className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
                               title="Delete"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            </AdminWriteButton>
                           </div>
                         </td>
                       </tr>
@@ -1638,13 +1639,13 @@ export default function EventsAdmin() {
                         >
                           <Trophy className="w-3.5 h-3.5" />
                         </Link>
-                        <button
+                        <AdminWriteButton
                           onClick={() => setRollover({ eventId: event.id })}
                           className="p-1.5 text-text-muted hover:text-blue-400 transition-colors"
                           title="Copy for next season"
                         >
                           <Copy className="w-3.5 h-3.5" />
-                        </button>
+                        </AdminWriteButton>
                         <button
                           onClick={() => setEditing(event.id)}
                           className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
@@ -1652,13 +1653,13 @@ export default function EventsAdmin() {
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
-                        <button
+                        <AdminWriteButton
                           onClick={() => setDeleteConfirm(event.id)}
                           className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
                           title="Delete"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        </AdminWriteButton>
                       </div>
                     </div>
                   </div>
@@ -1708,12 +1709,12 @@ export default function EventsAdmin() {
                 >
                   Cancel
                 </button>
-                <button
+                <AdminWriteButton
                   onClick={() => handleDelete(deleteConfirm)}
                   className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
                 >
                   Delete
-                </button>
+                </AdminWriteButton>
               </div>
             </motion.div>
           </motion.div>

@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../../components/admin/AdminWriteControls'
 import { useEffect, useState, useCallback } from 'react'
 import {
   BarChart3, Plus, Pencil, Trash2, X, Loader2, Save, ToggleLeft, ToggleRight,
@@ -277,13 +278,13 @@ export default function ImpactAdmin() {
           </div>
         </div>
         {tab !== 'roi' && (
-          <button
+          <AdminWriteButton
             onClick={() => { setEditing('new'); setError('') }}
             className="inline-flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold rounded-lg hover:bg-gold/20 transition-colors text-sm font-medium"
           >
             <Plus className="w-4 h-4" />
             Add {tab === 'metrics' ? 'Metric' : 'Fund Item'}
-          </button>
+          </AdminWriteButton>
         )}
       </div>
 
@@ -391,25 +392,25 @@ export default function ImpactAdmin() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <button
+                    <AdminWriteButton
                       onClick={() => handleToggleActive(m)}
                       className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                       title={m.active ? 'Deactivate' : 'Activate'}
                     >
                       {m.active ? <ToggleRight className="w-5 h-5 text-green-400" /> : <ToggleLeft className="w-5 h-5" />}
-                    </button>
+                    </AdminWriteButton>
                     <button
                       onClick={() => { setEditing(m.id); setError('') }}
                       className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
-                    <button
+                    <AdminWriteButton
                       onClick={() => setDeleteConfirm(m.id)}
                       className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </AdminWriteButton>
                   </div>
                 </div>
               </motion.div>
@@ -480,25 +481,25 @@ export default function ImpactAdmin() {
                     {f.description && <div className="text-xs text-text-muted mt-1">{f.description}</div>}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <button
+                    <AdminWriteButton
                       onClick={() => handleToggleActive(f)}
                       className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                       title={f.active ? 'Deactivate' : 'Activate'}
                     >
                       {f.active ? <ToggleRight className="w-5 h-5 text-green-400" /> : <ToggleLeft className="w-5 h-5" />}
-                    </button>
+                    </AdminWriteButton>
                     <button
                       onClick={() => { setEditing(f.id); setError('') }}
                       className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
-                    <button
+                    <AdminWriteButton
                       onClick={() => setDeleteConfirm(f.id)}
                       className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </AdminWriteButton>
                   </div>
                 </div>
               </motion.div>
@@ -654,14 +655,14 @@ export default function ImpactAdmin() {
                   ? '✓ ROI card will be visible on the public Impact page'
                   : 'ROI card is hidden until you enter an Economic Impact value'}
               </p>
-              <button
+              <AdminWriteButton
                 onClick={handleSaveRoi}
                 disabled={saving}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold rounded-lg hover:bg-gold/20 transition-colors text-sm font-medium disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {saving ? 'Saving…' : 'Save ROI Settings'}
-              </button>
+              </AdminWriteButton>
             </div>
           </div>
         </div>
@@ -842,14 +843,14 @@ export default function ImpactAdmin() {
                 >
                   Cancel
                 </button>
-                <button
+                <AdminWriteButton
                   onClick={tab === 'metrics' ? handleSaveMetric : handleSaveFund}
                   disabled={saving}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold rounded-lg hover:bg-gold/20 transition-colors text-sm font-medium disabled:opacity-50"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saving ? 'Saving…' : 'Save'}
-                </button>
+                </AdminWriteButton>
               </div>
             </motion.div>
           </motion.div>
@@ -877,12 +878,12 @@ export default function ImpactAdmin() {
                 <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">
                   Cancel
                 </button>
-                <button
+                <AdminWriteButton
                   onClick={() => handleDelete(deleteConfirm)}
                   className="px-4 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 text-sm font-medium"
                 >
                   Delete
-                </button>
+                </AdminWriteButton>
               </div>
             </motion.div>
           </motion.div>

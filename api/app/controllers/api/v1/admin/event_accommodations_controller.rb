@@ -1,10 +1,7 @@
 module Api
   module V1
     module Admin
-      class EventAccommodationsController < ApplicationController
-        include ClerkAuthenticatable
-
-        before_action :require_staff!
+      class EventAccommodationsController < BaseController
         before_action :set_event
         before_action :set_accommodation, only: [:update, :destroy, :upload]
 

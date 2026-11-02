@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
 import { api, type AsjjfCalendarResponse } from '../../services/api'
 import { asjjfButtonClass } from './AsjjfIntakePanel'
+import { AdminWriteButton } from './AdminWriteControls'
 
 function valueText(value: unknown) {
   if (value === null || value === undefined || value === '') return 'Not set'
@@ -68,7 +69,7 @@ export default function AsjjfCalendarPanel({ onChanged }: { onChanged?: () => vo
     }
   }
 
-  return <section aria-label="ASJJF calendar" aria-busy={busy} className="mb-6 min-w-0 space-y-4 rounded-xl border border-white/10 bg-surface p-4 sm:p-5">
+  return <section id="asjjf-calendar" aria-label="ASJJF calendar" aria-busy={busy} className="mb-6 min-w-0 space-y-4 rounded-xl border border-white/10 bg-surface p-4 sm:p-5">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
         <h2 className="font-heading text-lg font-bold text-text-primary">ASJJF calendar</h2>
@@ -100,8 +101,8 @@ export default function AsjjfCalendarPanel({ onChanged }: { onChanged?: () => vo
             {review.event_id && <Link className={asjjfButtonClass} onClick={onChanged} to={`/admin/events?edit=${review.event_id}`}>{review.event_status === 'draft' ? 'Open draft' : 'Open event'}</Link>}
             <a href={review.source_url} target="_blank" rel="noopener noreferrer" className={asjjfButtonClass}>ASJJF source page</a>
             {isAdmin && <>
-              {review.kind === 'change' && <button type="button" disabled={busy || !!error} onClick={() => decide(review.id, 'apply')} className={asjjfButtonClass}>Apply changes</button>}
-              <button type="button" disabled={busy || !!error} onClick={() => decide(review.id, 'dismiss')} className={asjjfButtonClass}>Dismiss</button>
+              {review.kind === 'change' && <AdminWriteButton type="button" disabled={busy || !!error} onClick={() => decide(review.id, 'apply')} className={asjjfButtonClass}>Apply changes</AdminWriteButton>}
+              <AdminWriteButton type="button" disabled={busy || !!error} onClick={() => decide(review.id, 'dismiss')} className={asjjfButtonClass}>Dismiss</AdminWriteButton>
             </>}
           </div>
           {!isAdmin && <p className="text-xs text-text-secondary">An administrator can apply or dismiss this review.</p>}

@@ -1,3 +1,4 @@
+import { AdminWriteButton, AdminWriteForm, AdminWriteInput } from '../../components/admin/AdminWriteControls'
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
@@ -226,7 +227,7 @@ export default function SponsorsAdmin() {
           <p className="mt-2 text-sm text-text-secondary">{t("sponsorAdmin.intro")}</p>
         </div>
         {editing === null && !missingTarget && (
-          <button
+          <AdminWriteButton
             className={buttonClass}
             disabled={saving}
             onClick={() => {
@@ -236,7 +237,7 @@ export default function SponsorsAdmin() {
             }}
           >
             {t("sponsorAdmin.add")}
-          </button>
+          </AdminWriteButton>
         )}
       </header>
       {!editorOpen && error && (
@@ -255,7 +256,7 @@ export default function SponsorsAdmin() {
           <button type="button" className={buttonClass} onClick={() => setEditing(null)}>{t("sponsorAdmin.back")}</button>
         </div>
       ) : editing !== null ? (
-        <form onSubmit={save} className="space-y-6 rounded border border-white/15 bg-surface p-4 sm:p-6">
+        <AdminWriteForm onSubmit={save} className="space-y-6 rounded border border-white/15 bg-surface p-4 sm:p-6">
           <fieldset disabled={saving} className="min-w-0 space-y-6">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-xl font-bold">{t(editing === "new" ? "sponsorAdmin.add" : "sponsorAdmin.edit")}</h2>
@@ -292,7 +293,7 @@ export default function SponsorsAdmin() {
               {(["light", "dark"] as const).map((variant) => (
                 <label key={variant} className="min-w-0 space-y-3 rounded border border-white/15 p-4">
                   <span className="block">{t(`sponsorAdmin.${variant}Logo`)}</span>
-                  <input
+                  <AdminWriteInput
                     type="file"
                     accept="image/png,image/jpeg,image/webp,image/gif"
                     className="block min-h-11 w-full text-sm file:mr-2 file:min-h-11 file:rounded file:border file:px-2"
@@ -473,9 +474,9 @@ export default function SponsorsAdmin() {
             <SponsorTiers placements={preview} event />
           </section>
           <div className="sticky bottom-0 z-10 min-w-0 space-y-3 border-t border-white/20 bg-surface py-4">
-            <button className={`${buttonClass} bg-gold-500 text-navy-900`} disabled={saving}>
+            <AdminWriteButton className={`${buttonClass} bg-gold-500 text-navy-900`} disabled={saving}>
               {t(saving ? "sponsorAdmin.saving" : "sponsorAdmin.save")}
-            </button>
+            </AdminWriteButton>
             {error && <p role="alert" className="min-w-0 break-words text-sm text-red-300">{error}</p>}
             {success && <p role="status" className="min-w-0 break-words text-sm text-green-300">{success}</p>}
           </div>
@@ -493,7 +494,7 @@ export default function SponsorsAdmin() {
             </section>
           ) : null}
           </fieldset>
-        </form>
+        </AdminWriteForm>
       ) : (
         <>
           <section className="space-y-3">
@@ -531,20 +532,20 @@ export default function SponsorsAdmin() {
                   >
                     {t("sponsorAdmin.edit")}
                   </button>
-                  <button className={buttonClass} disabled={saving} onClick={() => setConfirmDelete(sponsor.id)}>
+                  <AdminWriteButton className={buttonClass} disabled={saving} onClick={() => setConfirmDelete(sponsor.id)}>
                     {t("sponsorAdmin.delete")}
-                  </button>
+                  </AdminWriteButton>
                 </div>
                 {confirmDelete === sponsor.id && (
                   <div className="w-full space-y-3 border-t border-white/15 pt-4" role="alert">
                     <p>{t("sponsorAdmin.confirmDelete", { name: sponsor.name })}</p>
-                    <button
+                    <AdminWriteButton
                       className={`${buttonClass} mr-2 text-red-300`}
                       disabled={saving}
                       onClick={() => remove(sponsor.id)}
                     >
                       {t("sponsorAdmin.deleteConfirm")}
-                    </button>
+                    </AdminWriteButton>
                     <button className={buttonClass} disabled={saving} onClick={() => setConfirmDelete(null)}>
                       {t("sponsorAdmin.cancel")}
                     </button>
@@ -553,7 +554,7 @@ export default function SponsorsAdmin() {
               </div>
             ))}
           </section>
-          <section className="space-y-4 rounded border border-white/15 bg-surface p-4">
+          <section id="placements" className="space-y-4 rounded border border-white/15 bg-surface p-4">
             <h2 className="font-bold">{t("sponsorAdmin.reorder")}</h2>
             <label className="block">
               {t("sponsorAdmin.showOn")}
@@ -577,22 +578,22 @@ export default function SponsorsAdmin() {
               >
                 <span className="min-w-0 break-words">{placementLabel(item)}</span>
                 <div className="flex shrink-0 gap-2">
-                  <button
+                  <AdminWriteButton
                     className={buttonClass}
                     disabled={saving || index === 0}
                     aria-label={t("sponsorAdmin.moveUp", { name: placementLabel(item) })}
                     onClick={() => move(index, -1)}
                   >
                     ↑
-                  </button>
-                  <button
+                  </AdminWriteButton>
+                  <AdminWriteButton
                     className={buttonClass}
                     disabled={saving || index === ordered.length - 1}
                     aria-label={t("sponsorAdmin.moveDown", { name: placementLabel(item) })}
                     onClick={() => move(index, 1)}
                   >
                     ↓
-                  </button>
+                  </AdminWriteButton>
                 </div>
               </div>
             ))}

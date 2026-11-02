@@ -1,3 +1,4 @@
+import { AdminWriteButton } from './AdminWriteControls'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
 import { api, type ResultsSyncCounts, type ResultsSyncResponse } from '../../services/api'
@@ -133,16 +134,16 @@ function ResultsSyncCardContent({ eventId, onApplied }: { eventId: number; onApp
         <h2 id={headingId} className="font-heading text-lg font-bold text-text-primary">Results sync</h2>
         <p className="mt-1 text-sm text-text-secondary">Complete ASJJF snapshots sync automatically. Safety holds keep published results in place until issues are resolved or an administrator approves the review.</p>
       </div>
-      <button type="button" className={`${asjjfButtonClass} shrink-0`} disabled={!!busy} onClick={refresh}>
+      <AdminWriteButton type="button" className={`${asjjfButtonClass} shrink-0`} disabled={!!busy} onClick={refresh}>
         {busy === 'preview' ? 'Reviewing snapshots…' : 'Refresh / review saved snapshots'}
-      </button>
+      </AdminWriteButton>
     </div>
     <p className="text-sm text-text-secondary">Review uses saved pages only and does not publish changes. The next nightly fetch is at 02:30 ChST; this does not fetch ASJJF immediately.</p>
     {busy === 'load' && <p role="status" className="text-sm text-text-secondary">Loading results sync…</p>}
     {error && <div role="alert" className="space-y-2 break-words text-sm text-red-400">
       <p>{error}</p>
       {data && <p>Showing the last loaded review. It may be out of date. Refresh saved snapshots before making a decision.</p>}
-      <button type="button" disabled={!!busy} onClick={refresh} className={asjjfButtonClass}>Retry saved review</button>
+      <AdminWriteButton type="button" disabled={!!busy} onClick={refresh} className={asjjfButtonClass}>Retry saved review</AdminWriteButton>
     </div>}
     {notice && <p role="status" className="text-sm text-green-400">{notice}</p>}
     {data && <>
@@ -187,8 +188,8 @@ function ResultsSyncCardContent({ eventId, onApplied }: { eventId: number; onApp
           {!isAdmin && <p className="text-sm text-text-secondary">An administrator is needed to approve or discard this review. Staff can refresh saved snapshots and inspect the issues.</p>}
           {!approvable && <p className="text-sm text-amber-300">Approval is blocked. Resolve missing pages, blocking guard failures, or protected result conflicts, then refresh saved snapshots.</p>}
           {isAdmin && <div className="flex flex-col gap-2 sm:flex-row">
-            <button type="button" disabled={!!busy || stale || !approvable} onClick={() => decide('approve')} className={asjjfButtonClass}>{busy === 'approve' ? 'Approving…' : 'Approve review'}</button>
-            <button type="button" disabled={!!busy || stale} onClick={() => decide('discard')} className={asjjfButtonClass}>{busy === 'discard' ? 'Discarding…' : 'Discard review'}</button>
+            <AdminWriteButton type="button" disabled={!!busy || stale || !approvable} onClick={() => decide('approve')} className={asjjfButtonClass}>{busy === 'approve' ? 'Approving…' : 'Approve review'}</AdminWriteButton>
+            <AdminWriteButton type="button" disabled={!!busy || stale} onClick={() => decide('discard')} className={asjjfButtonClass}>{busy === 'discard' ? 'Discarding…' : 'Discard review'}</AdminWriteButton>
           </div>}
         </div>}
       </>}

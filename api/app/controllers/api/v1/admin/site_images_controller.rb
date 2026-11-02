@@ -1,10 +1,7 @@
 module Api
   module V1
     module Admin
-      class SiteImagesController < ApplicationController
-        include ClerkAuthenticatable
-
-        before_action :require_staff!
+      class SiteImagesController < BaseController
         before_action :set_site_image, only: [:show, :update, :destroy, :upload]
 
         def index

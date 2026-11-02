@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../../components/admin/AdminWriteControls'
 import copyEntries from '../../content/publicCopy.json';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Save, ChevronDown, ChevronRight, X, Loader2, Languages, RefreshCw } from 'lucide-react';
@@ -125,14 +126,14 @@ function SectionGroup({
                       <p className="text-xs text-text-secondary">{Object.values(copyEntries).find(item => item.key === entry.key)?.preview || 'Preview on the public page for this section. Blank translations use the site default.'}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button
+                      <AdminWriteButton
                         onClick={handleSave}
                         disabled={saving}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gold-500 text-navy-900 text-xs font-bold uppercase tracking-wider hover:bg-gold-400 transition-colors disabled:opacity-50"
                       >
                         <Save size={12} />
                         {saving ? 'Saving...' : 'Save'}
-                      </button>
+                      </AdminWriteButton>
                       <button
                         onClick={cancelEdit}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-white/10 text-text-secondary text-xs uppercase tracking-wider hover:bg-white/5 transition-colors"
@@ -223,13 +224,13 @@ function SectionGroup({
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     {(entry.translation_status === 'failed') && (
-                      <button
+                      <AdminWriteButton
                         onClick={(e) => { e.stopPropagation(); onRetranslate(entry.id); }}
                         className="p-1.5 text-amber-400 hover:text-amber-300 transition-colors"
                         title="Retry translation"
                       >
                         <RefreshCw size={14} />
-                      </button>
+                      </AdminWriteButton>
                     )}
                   </div>
                 </div>
