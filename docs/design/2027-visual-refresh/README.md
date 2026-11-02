@@ -44,7 +44,7 @@ The first opening-locales harness run hit an in-flight route cancellation during
 
 ## Automated checks and design audit
 
-The initial gate passed npm ci, lint, tsc, 71 Vitest files/373 tests and build:no-translate. A later full run caught three English casing defaults that disagreed with #130's editable-copy seeds. Those defaults were restored; organizer-authored casing remains authoritative and CSS no longer forces uppercase. Final gate results follow after the correction; the earlier failure is recorded as superseded, not reported as passing.
+The initial gate passed npm ci, lint, tsc, 71 Vitest files/373 tests and build:no-translate. A later full run caught three English casing defaults that disagreed with #130's editable-copy seeds. Those defaults were restored; organizer-authored casing remains authoritative and CSS no longer forces uppercase. The settled source `f62e47c` passed full lint, `tsc -b` and **72 Vitest files / 377 tests**. The final `e31cdcc` change restores only the original Calendar/Past Events SEO descriptions and CollectionPage structured data; its affected files passed ESLint and the three Calendar/archive tests. The production-API `build:no-translate` (including a fresh `tsc -b`) passed at `e31cdcc`. [Validation results and command logs](validation/results.json) record the exact scope. No visible UI changed after the settled-source browser checks. The earlier parity failure is superseded, not reported as passing.
 
 Impeccable 4.6.0, telemetry disabled, scanned the changed UI paths and returned `[]` (zero findings). No tool or hook was installed in the repository. [Raw result](impeccable.json).
 
@@ -63,6 +63,14 @@ Impeccable 4.6.0, telemetry disabled, scanned the changed UI paths and returned 
 
 The shared primitive prop APIs from the foundation remain stable. `PublicEventCard` adds a compact variant for the journey; calendar/archive share the photographic variant. Matching removes edition years and the later optional leading Guam prefix, retaining series/city words. It borrows only from a completed earlier edition with a published hero image. Dumau has no matching earlier image in the current public data and retains the existing generic fallback. Unpublished stars remain hidden; no rating is invented for Manila/Taiwan. Existing editable statistics remain unchanged.
 
-API/Web/Fetcher CI, Netlify preview, CodeRabbit review, combined worker integration and Leon's sign-off belong to the lead. Branch protection read returned `Branch not protected`; CI/review acceptance still applies. No production deployment was performed. Runtime cleanup and final head/PR are recorded below after execution.
+API/Web/Fetcher CI, Netlify preview, CodeRabbit review, combined worker integration and Leon's sign-off belong to the lead. Branch protection read returned `Branch not protected`; CI/review acceptance still applies. No production deployment was performed. Runtime cleanup and PR are recorded below.
 
 Taste browser measurements at 1440/768/390px show the actual next-event title replacing the generic championship headline. At 390px the main title changes from three lines to two; clipped gradient hero text is removed. The strict report still flags inherited sponsor labels, body sizes and existing photographic/section treatments. Those supporting sections retain their CMS content and brand presentation; this slice does not claim a clean whole-site Taste audit.
+
+## Final handoff
+
+PR: [Visual refresh A: design foundation, home and event pages #134](https://github.com/Shimizu-Technology/marianas-open/pull/134), registered with this T3 thread. Branch `agent/visual-refresh-a`; shared foundation `467d91824c8a24ef0d2c11235b8440049cfbd10c`; final implementation `e31cdcc6c105891601e463dd68e7f9a6cc7eddd2`. Later commits contain evidence only. Recheck the current PR head, combined changes, required CI and CodeRabbit coverage before integration. The worker has not merged or deployed and has not assessed final-head reviewer coverage.
+
+Cleanup: Vite PID **20195** on port **5361** was terminated through `dev-lifecycle cleanup --session 01a19b79-74f8-7a10-9003-f95c7936b2c3 --execute`. All task-created isolated Chrome contexts/popups/browser processes closed; the T3 preview tab was closed and released. Status reports **no active owned resources**. Removed only this worktree's `web/node_modules`, `web/dist` and `fetcher/node_modules`; rerun npm ci to reproduce. The generated sitemap was restored. Shared/baseline services were left unchanged. No runtime resource is handed off; this named worktree and source branch remain for Claude's integration.
+
+Next action for the lead: integrate worker B onto the pushed foundation/final source, rerun affected journeys after integration, inspect final CI/CodeRabbit/Netlify preview, and obtain Leon's sign-off. Dumau's generic fallback and the documented Taste brand exceptions are the only visual residuals; physical-device acceptance is not claimed.
