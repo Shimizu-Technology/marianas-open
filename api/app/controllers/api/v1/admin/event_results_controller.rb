@@ -1,10 +1,8 @@
 module Api
   module V1
     module Admin
-      class EventResultsController < ApplicationController
-        include ClerkAuthenticatable
+      class EventResultsController < BaseController
         before_action :authenticate_user!
-        before_action :require_staff!
         before_action :set_event
         before_action :set_result, only: [ :update, :destroy ]
 

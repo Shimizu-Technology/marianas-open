@@ -1,9 +1,7 @@
 module Api
   module V1
     module Admin
-      class AsjjfController < ApplicationController
-        include ClerkAuthenticatable
-        before_action :require_staff!
+      class AsjjfController < BaseController
         before_action :require_admin!, only: %i[close_breaker update_ranking_season apply_ranking]
         rescue_from ArgumentError, ActiveRecord::RecordInvalid, with: :invalid_payload
 
@@ -12,7 +10,7 @@ module Api
             heartbeats: AsjjfFetcherHeartbeat.where.not(received_at: nil).order(received_at: :desc).limit(20)
               .map { |heartbeat| heartbeat.as_json(only: %i[fetcher_id fetcher_version run_started_at run_finished_at fetched challenged received_at updated_at]).merge("errors" => heartbeat.error_count) },
             queue_counts: AsjjfFetchRequest::STATUSES.index_with { |state| AsjjfFetchRequest.where(status: state).count },
-            breaker: AsjjfSetting.state,
+            breaker: breaker_state,
             recent_snapshots: AsjjfSnapshot.order(created_at: :desc).limit(20)
               .as_json(only: %i[id url page_type source outcome fetched_at parse_status parse_error parsed_summary ranking_apply_status ranking_apply_error ranking_applied_at])
           }
@@ -88,6 +86,11 @@ module Api
         end
 
         private
+
+        def breaker_state
+          row = AsjjfSetting.find_by(key: "circuit_breaker")
+          { paused_until: row&.paused_until, reason: row&.reason, open: row&.open? || false }
+        end
 
         def invalid_payload(error)
           render json: { error: error.message }, status: :unprocessable_entity

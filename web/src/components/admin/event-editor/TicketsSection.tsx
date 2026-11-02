@@ -1,3 +1,4 @@
+import { AdminWriteInput, AdminWriteButton } from '../AdminWriteControls'
 import { useRef, useState } from 'react'
 import { Plus, Trash2, ChevronDown, ChevronUp, Ticket, MapPin, Image as ImageIcon, Upload } from 'lucide-react'
 import { api, type Event, type EventFormData, type EventTicketOption } from '../../../services/api'
@@ -210,7 +211,7 @@ export default function TicketsSection({
                   <div className="flex items-center gap-2 text-xs font-medium text-text-secondary uppercase tracking-wide">
                     <ImageIcon className="w-4 h-4 text-text-muted" /> Ticket Flyer
                   </div>
-                  <input
+                  <AdminWriteInput
                     ref={ticketBannerInputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
@@ -248,7 +249,7 @@ export default function TicketsSection({
                     {currentEvent?.ticket_banner_image_url ? 'Change Flyer' : 'Upload Custom Flyer'}
                   </button>
                   {currentEvent?.ticket_banner_image_url && (
-                    <button
+                    <AdminWriteButton
                       type="button"
                       onClick={async () => {
                         if (typeof editing !== 'number') return
@@ -263,7 +264,7 @@ export default function TicketsSection({
                       className="min-h-11 px-3 text-xs text-text-muted hover:text-red-400 transition-colors"
                     >
                       Remove custom flyer
-                    </button>
+                    </AdminWriteButton>
                   )}
                 </div>
                 <p className="text-[10px] text-text-muted">

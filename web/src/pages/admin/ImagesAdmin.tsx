@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../../components/admin/AdminWriteControls'
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Eye, EyeOff, GripVertical, X, Save, Image as ImageIcon } from 'lucide-react';
@@ -176,13 +177,13 @@ export default function ImagesAdmin() {
             Manage hero backgrounds, gallery photos, and page images
           </p>
         </div>
-        <button
+        <AdminWriteButton
           onClick={openNew}
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-gold text-navy-900 font-heading font-semibold text-sm uppercase tracking-wider hover:bg-gold-400 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Image
-        </button>
+        </AdminWriteButton>
       </div>
 
       <AnimatePresence>
@@ -266,9 +267,9 @@ export default function ImagesAdmin() {
         <div className="text-center py-16 text-text-muted">
           <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p>No images{filter !== 'all' ? ` in ${filter}` : ''}.</p>
-          <button onClick={openNew} className="text-gold text-sm mt-2 hover:underline">
+          <AdminWriteButton onClick={openNew} className="text-gold text-sm mt-2 hover:underline">
             Upload one
-          </button>
+          </AdminWriteButton>
         </div>
       )}
 
@@ -401,14 +402,14 @@ export default function ImagesAdmin() {
                 >
                   Cancel
                 </button>
-                <button
+                <AdminWriteButton
                   onClick={handleSave}
                   disabled={saving}
                   className="inline-flex items-center gap-2 px-5 py-2 bg-gold text-navy-900 font-heading font-semibold text-sm uppercase tracking-wider hover:bg-gold-400 transition-colors disabled:opacity-50"
                 >
                   <Save className="w-4 h-4" />
                   {saving ? 'Saving...' : 'Save'}
-                </button>
+                </AdminWriteButton>
               </div>
             </motion.div>
           </motion.div>
@@ -441,12 +442,12 @@ export default function ImagesAdmin() {
                 >
                   Cancel
                 </button>
-                <button
+                <AdminWriteButton
                   onClick={() => handleDelete(deleteConfirm)}
                   className="px-4 py-2 text-sm bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors"
                 >
                   Delete
-                </button>
+                </AdminWriteButton>
               </div>
             </motion.div>
           </motion.div>
@@ -517,7 +518,7 @@ function ImageGrid({
 
           {/* Actions overlay */}
           <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
+            <AdminWriteButton
               onClick={(e) => { e.stopPropagation(); onToggle(image); }}
               className="p-1.5 bg-black/60 hover:bg-black/80 transition-colors"
               title={image.active ? 'Deactivate' : 'Activate'}
@@ -527,14 +528,14 @@ function ImageGrid({
               ) : (
                 <EyeOff className="w-3.5 h-3.5 text-text-muted" />
               )}
-            </button>
-            <button
+            </AdminWriteButton>
+            <AdminWriteButton
               onClick={(e) => { e.stopPropagation(); onDelete(image.id); }}
               className="p-1.5 bg-black/60 hover:bg-red-900/80 transition-colors"
               title="Delete"
             >
               <Trash2 className="w-3.5 h-3.5 text-red-400" />
-            </button>
+            </AdminWriteButton>
           </div>
         </motion.div>
       ))}

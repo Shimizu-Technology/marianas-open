@@ -118,7 +118,7 @@ class AsjjfAdminTest < ActionDispatch::IntegrationTest
     assert_empty response.parsed_body["snapshots"]
   end
 
-  test "only admin can resume, while viewer and anonymous cannot access staff APIs" do
+  test "only admin can resume, viewers can read, and anonymous cannot access staff APIs" do
     AsjjfSetting.breaker.update!(paused_until: 12.hours.from_now)
     post "/api/v1/admin/asjjf/close_breaker", headers: @headers
     assert_response :forbidden
@@ -128,7 +128,7 @@ class AsjjfAdminTest < ActionDispatch::IntegrationTest
     assert_not AsjjfSetting.breaker.open?
     @user.update!(role: "viewer")
     get "/api/v1/admin/asjjf/status", headers: @headers
-    assert_response :forbidden
+    assert_response :success
     post "/api/v1/admin/events/#{@event.id}/asjjf_check", headers: @headers
     assert_response :forbidden
     post "/api/v1/admin/asjjf/snapshots", headers: @headers

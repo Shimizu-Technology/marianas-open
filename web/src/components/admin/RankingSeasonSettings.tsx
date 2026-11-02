@@ -1,3 +1,4 @@
+import { AdminWriteForm, AdminWriteButton } from './AdminWriteControls'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { fetchApi } from '../../services/api'
@@ -68,7 +69,7 @@ export default function RankingSeasonSettings({ isAdmin }: { isAdmin: boolean })
     {loading && <p role="status" className="mt-3 text-sm text-text-secondary">{t('rankingAdmin.loading')}</p>}
     {error && <p role="alert" className="mt-3 text-sm text-red-400">{error}</p>}
     {saved && <p role="status" className="mt-3 text-sm text-green-400">{t('rankingAdmin.saved')}</p>}
-    {!loading && <form onSubmit={save} className="mt-4 space-y-4">
+    {!loading && <AdminWriteForm onSubmit={save} className="mt-4 space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm text-text-secondary">{t('rankingAdmin.season')}
           <input type="number" min="2000" max="2100" required disabled={!isAdmin || saving} value={year} onChange={event => selectSeason(event.target.value)} list="ranking-season-years" className="mt-1 min-h-11 w-full rounded-lg border border-white/20 bg-navy-900 px-3 text-base text-text-primary" />
@@ -79,8 +80,8 @@ export default function RankingSeasonSettings({ isAdmin }: { isAdmin: boolean })
         </label>)}
       </div>
       <label className="flex min-h-11 items-center gap-3 text-sm text-text-primary"><input type="checkbox" checked={current} disabled={!isAdmin || saving} onChange={event => { setCurrent(event.target.checked); setSaved(false) }} />{t('rankingAdmin.current')}</label>
-      {isAdmin ? <button type="submit" disabled={saving || loading} className={asjjfButtonClass}>{t(saving ? 'rankingAdmin.saving' : 'rankingAdmin.save')}</button> : <p className="text-sm text-text-secondary">{t('rankingAdmin.adminOnly')}</p>}
-    </form>}
+      {isAdmin ? <AdminWriteButton type="submit" disabled={saving || loading} className={asjjfButtonClass}>{t(saving ? 'rankingAdmin.saving' : 'rankingAdmin.save')}</AdminWriteButton> : <p className="text-sm text-text-secondary">{t('rankingAdmin.adminOnly')}</p>}
+    </AdminWriteForm>}
     {suggestions.length > 0 && <div className="mt-6 border-t border-white/10 pt-4">
       <h3 className="font-semibold text-text-primary">{t('rankingAdmin.suggestions')}</h3>
       <p className="mt-1 text-sm text-text-secondary">{t('rankingAdmin.suggestionHelp')}</p>

@@ -1,9 +1,7 @@
 module Api
   module V1
     module Admin
-      class ResultsSyncRunsController < ApplicationController
-        include ClerkAuthenticatable
-        before_action :require_staff!
+      class ResultsSyncRunsController < BaseController
         before_action :require_admin!, only: %i[approve discard]
         before_action :set_event
         rescue_from Asjjf::ResultsSync::StaleReview, Asjjf::ResultsSync::InvalidReview, with: :review_error

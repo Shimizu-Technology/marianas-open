@@ -1,10 +1,7 @@
 module Api
   module V1
     module Admin
-      class CompetitorsController < ApplicationController
-        include ClerkAuthenticatable
-
-        before_action :require_staff!
+      class CompetitorsController < BaseController
         before_action :set_competitor, only: [ :show, :update, :destroy, :upload_photo, :merge_preview, :merge ]
 
         def index

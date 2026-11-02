@@ -89,7 +89,7 @@ class IdentityAttributionTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
     viewer = User.create!(email: "viewer@example.com", clerk_id: "viewer_clerk", role: "viewer")
     get "/api/v1/admin/identity_reviews", headers: { "Authorization" => "Bearer test_token_#{viewer.id}" }
-    assert_response :forbidden
+    assert_response :success
   end
   test "existing academy review resolution requires explicit confirmation" do
     AcademyLinker.resolve("New Gymm")

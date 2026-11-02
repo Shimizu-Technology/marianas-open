@@ -36,6 +36,7 @@ Rails.application.routes.draw do
 
       # Admin
       namespace :admin do
+        get "attention", to: "attention#index"
         get "asjjf/ranking_holds", to: "asjjf#ranking_holds"
         get "asjjf/snapshots/:id", to: "asjjf#snapshot"
         get "asjjf/status", to: "asjjf#status"

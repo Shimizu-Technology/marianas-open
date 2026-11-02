@@ -1,9 +1,7 @@
 module Api
   module V1
     module Admin
-      class UsersController < ApplicationController
-        include ClerkAuthenticatable
-
+      class UsersController < BaseController
         before_action :require_admin!
         before_action :set_user, only: [ :show, :update, :destroy, :resend_invitation ]
 
@@ -20,8 +18,8 @@ module Api
 
         # POST /api/v1/admin/users
         def create
-          unless %w[admin staff].include?(invite_params[:role])
-            return render json: { errors: [ "Role must be admin or staff for an invitation" ] }, status: :unprocessable_entity
+          unless User::ROLES.include?(invite_params[:role])
+            return render json: { errors: [ "Role must be admin, staff or viewer for an invitation" ] }, status: :unprocessable_entity
           end
 
           user = User.new(invite_params)

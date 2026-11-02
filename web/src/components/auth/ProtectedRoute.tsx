@@ -5,7 +5,7 @@ import LoadingSpinner from '../LoadingSpinner'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
-  requiredRole?: 'admin' | 'staff'
+  requiredRole?: 'admin' | 'staff' | 'viewer'
 }
 
 const ClerkProtectedContent = lazy(() => import('./ClerkProtectedContent'))

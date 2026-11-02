@@ -1,5 +1,7 @@
 import { galleryImageAccept, galleryImageError, isSupportedGalleryImage } from '../../../utils/galleryImagePolicy'
 import { useGalleryImagePolicy } from '../../../hooks/useGalleryImagePolicy'
+import { useAdminAccess } from '../../../contexts/AdminAccessContext'
+import { AdminWriteButton, AdminWriteInput } from '../AdminWriteControls'
 import { useEffect, useState, useCallback, useMemo, useRef, useId } from 'react'
 import type { DragEvent } from 'react'
 import {
@@ -48,6 +50,7 @@ export default function EventGallerySection({
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedIds, setSelectedIds] = useState<number[]>([])
+  const { readOnly } = useAdminAccess()
   const [dragActive, setDragActive] = useState(false)
   const [uploadCaption, setUploadCaption] = useState('')
   const [uploadCategory, setUploadCategory] = useState('')
@@ -259,13 +262,13 @@ export default function EventGallerySection({
   const dragHasFiles = (event: DragEvent<HTMLDivElement>) => Array.from(event.dataTransfer.types).includes('Files')
 
   const handleGalleryDragEnter = (event: DragEvent<HTMLDivElement>) => {
-    if (!dragHasFiles(event)) return
+    if (readOnly || !dragHasFiles(event)) return
     event.preventDefault()
     setDragActive(true)
   }
 
   const handleGalleryDragOver = (event: DragEvent<HTMLDivElement>) => {
-    if (!dragHasFiles(event)) return
+    if (readOnly || !dragHasFiles(event)) return
     event.preventDefault()
     setDragActive(true)
   }
@@ -276,7 +279,7 @@ export default function EventGallerySection({
   }
 
   const handleGalleryDrop = (event: DragEvent<HTMLDivElement>) => {
-    if (!dragHasFiles(event)) return
+    if (readOnly || !dragHasFiles(event)) return
     event.preventDefault()
     setDragActive(false)
     void handleFiles(event.dataTransfer.files)
@@ -456,7 +459,7 @@ export default function EventGallerySection({
             )}
           </div>
           {editing === null && (
-            <button
+            <AdminWriteButton
               onClick={() => {
                 resetForm()
                 setEditing('new')
@@ -464,7 +467,7 @@ export default function EventGallerySection({
               className="flex items-center gap-1.5 text-xs text-gold hover:text-gold/80"
             >
               <Plus className="w-3 h-3" /> Add
-            </button>
+            </AdminWriteButton>
           )}
         </div>
 
@@ -515,7 +518,7 @@ export default function EventGallerySection({
                 <Upload className="w-3.5 h-3.5" /> Choose Photos
               </button>
             </div>
-            <input
+            <AdminWriteInput
               ref={fileInputRef}
               type="file"
               accept={galleryImageAccept(policy)}
@@ -612,38 +615,38 @@ export default function EventGallerySection({
                       emptyLabel="Choose album/category"
                       compact
                     />
-                    <button
+                    <AdminWriteButton
                       onClick={() => void handleBulkCategory()}
                       disabled={!bulkCategory.trim()}
                       className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-gold bg-gold/10 hover:bg-gold/15 disabled:opacity-40"
                     >
                       <Tags className="w-3 h-3" /> Move
-                    </button>
-                    <button
+                    </AdminWriteButton>
+                    <AdminWriteButton
                       onClick={() => void handleBulkCategory('')}
                       className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-text-muted bg-white/5 hover:text-text-primary"
                     >
                       <X className="w-3 h-3" /> Clear album
-                    </button>
+                    </AdminWriteButton>
                   </div>
-                  <button
+                  <AdminWriteButton
                     onClick={() => void handleBulkActive(true)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-green-400 bg-green-500/10 hover:bg-green-500/15"
                   >
                     <Eye className="w-3 h-3" /> Show
-                  </button>
-                  <button
+                  </AdminWriteButton>
+                  <AdminWriteButton
                     onClick={() => void handleBulkActive(false)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-muted bg-white/5 hover:text-text-primary"
                   >
                     <EyeOff className="w-3 h-3" /> Hide
-                  </button>
-                  <button
+                  </AdminWriteButton>
+                  <AdminWriteButton
                     onClick={requestBulkDelete}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 bg-red-500/10 hover:bg-red-500/15"
                   >
                     <Trash2 className="w-3 h-3" /> Delete
-                  </button>
+                  </AdminWriteButton>
                 </div>
               </div>
             )}
@@ -715,13 +718,13 @@ export default function EventGallerySection({
                           >
                             <Pencil className="w-3 h-3" />
                           </button>
-                          <button
+                          <AdminWriteButton
                             onClick={() => requestDelete(image)}
                             className="p-1 text-text-muted hover:text-red-400"
                             aria-label="Delete gallery image"
                           >
                             <Trash2 className="w-3 h-3" />
-                          </button>
+                          </AdminWriteButton>
                         </div>
                       </div>
                     </div>
@@ -897,7 +900,7 @@ export default function EventGallerySection({
                       <label className="block text-xs font-medium uppercase tracking-wide text-text-secondary mb-1">
                         {editing === 'new' ? 'Image File *' : 'Replace Image'}
                       </label>
-                      <input
+                      <AdminWriteInput
                         type="file"
                         accept={galleryImageAccept(policy)}
                         onChange={(e) => {
@@ -923,14 +926,14 @@ export default function EventGallerySection({
                 <button onClick={closeEditor} className="px-4 py-2 text-sm text-text-muted hover:text-text-primary">
                   Cancel
                 </button>
-                <button
+                <AdminWriteButton
                   onClick={handleSave}
                   disabled={saving || (editing === 'new' && !pendingFile)}
                   className="inline-flex items-center gap-1.5 bg-gold/10 px-4 py-2 text-sm font-medium text-gold hover:bg-gold/15 disabled:opacity-50"
                 >
                   {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                   {saving ? 'Saving...' : 'Save'}
-                </button>
+                </AdminWriteButton>
               </div>
             </motion.div>
           </motion.div>
@@ -972,12 +975,12 @@ export default function EventGallerySection({
                 >
                   Cancel
                 </button>
-                <button
+                <AdminWriteButton
                   onClick={handleConfirmGalleryDelete}
                   className="px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20"
                 >
                   Delete
-                </button>
+                </AdminWriteButton>
               </div>
             </motion.div>
           </motion.div>

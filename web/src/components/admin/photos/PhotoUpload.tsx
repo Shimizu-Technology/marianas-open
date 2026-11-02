@@ -1,5 +1,6 @@
 import { galleryImageAccept, galleryImageError, isSupportedGalleryImage } from '../../../utils/galleryImagePolicy';
 import { useGalleryImagePolicy } from '../../../hooks/useGalleryImagePolicy';
+import { AdminWriteInput, AdminWriteForm, AdminWriteButton } from '../AdminWriteControls'
 import { useState } from 'react';
 import { Upload } from 'lucide-react';
 import { useGalleryUploads } from '../../../contexts/GalleryUploadContext';
@@ -59,7 +60,7 @@ export default function PhotoUpload({ event, albums, settings, selectedAlbum, im
       </select><span className="mt-1 block text-xs font-normal text-text-muted">Need another album? Use “Create album” in Albums.</span></label>
       <label className="block text-sm font-medium">Caption for this batch <span className="font-normal text-text-muted">(optional)</span><input className={`${photoInput} mt-1`} value={caption} onChange={event => setCaption(event.target.value)} placeholder="e.g. Celebrating the champions" maxLength={500} /><span className="mt-1 block text-xs font-normal text-text-muted">Shown publicly. Leave blank to show photos without a caption.</span></label>
     </div>
-    <label className="mt-4 block text-sm font-medium">Choose photos<input aria-describedby="photo-upload-help" className={`${photoInput} mt-1 file:mr-3 file:rounded file:border-0 file:bg-gold file:px-3 file:py-2 file:text-navy-900`} type="file" accept={galleryImageAccept(policy)} multiple disabled={uploading || busy} onChange={event => { const files = Array.from(event.target.files || []); if (files.length) void addImages(files); event.target.value = ''; }} /></label>
+    <label className="mt-4 block text-sm font-medium">Choose photos<AdminWriteInput aria-describedby="photo-upload-help" className={`${photoInput} mt-1 file:mr-3 file:rounded file:border-0 file:bg-gold file:px-3 file:py-2 file:text-navy-900`} type="file" accept={galleryImageAccept(policy)} multiple disabled={uploading || busy} onChange={event => { const files = Array.from(event.target.files || []); if (files.length) void addImages(files); event.target.value = ''; }} /></label>
     <p id="photo-upload-help" className="mt-2 text-xs leading-5 text-text-muted">Supported: {policy.type_label}. iPhone photos upload automatically as JPEG from the photo picker. No need to resize JPEGs first. Large JPEGs are optimized on your device. Up to 50 MB per original image. Saved uploads resume on this device when you return; keep browser storage available.</p>
     <p className="mt-3 rounded-lg border border-white/10 px-3 py-2 text-sm text-text-secondary">{settings.hold_flagged ? 'Review hold is on: newly flagged photos stay hidden until approved.' : 'Default: flagged photos publish and appear in Needs review.'}</p>
     {notice && <p role="status" className="mt-3 break-words text-sm text-green-300">{notice}</p>}
@@ -68,14 +69,14 @@ export default function PhotoUpload({ event, albums, settings, selectedAlbum, im
       <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium">Review and date settings</summary>
       <div className="mt-2 space-y-4">
         <p className="text-sm text-text-secondary"><strong className="text-text-primary">Default: flagged photos publish.</strong> Possible blur, exposure problems and duplicates appear in Needs review for a person to check.</p>
-        <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-white/10 p-3 text-sm"><input className="mt-1 h-5 w-5 shrink-0 accent-gold" type="checkbox" checked={settings.hold_flagged} disabled={busy} onChange={change => { const checked = change.target.checked; void mutate(() => photoIntake.settings(event.id, { ...settings, hold_flagged: checked }), 'Review setting saved.'); }} />
+        <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-white/10 p-3 text-sm"><AdminWriteInput className="mt-1 h-5 w-5 shrink-0 accent-gold" type="checkbox" checked={settings.hold_flagged} disabled={busy} onChange={change => { const checked = change.target.checked; void mutate(() => photoIntake.settings(event.id, { ...settings, hold_flagged: checked }), 'Review setting saved.'); }} />
           <span>Hold flagged photos until approved<span className="mt-1 block text-xs text-text-muted">Applies to newly processed photos. Hidden photos remain hidden until staff approve or show them.</span></span>
         </label>
-        <form className="space-y-2" onSubmit={form => { form.preventDefault(); void mutate(() => photoIntake.settings(event.id, { ...settings, timezone: timezone.trim() }), 'Event timezone saved.'); }}>
+        <AdminWriteForm className="space-y-2" onSubmit={form => { form.preventDefault(); void mutate(() => photoIntake.settings(event.id, { ...settings, timezone: timezone.trim() }), 'Event timezone saved.'); }}>
           <label className="block text-sm font-medium">Event timezone<input className={`${photoInput} mt-1`} list="photo-timezones" value={timezone} onChange={event => setTimezone(event.target.value)} required maxLength={100} /><datalist id="photo-timezones"><option value="Pacific/Guam" /><option value="Asia/Tokyo" /><option value="Asia/Manila" /><option value="Asia/Taipei" /><option value="Asia/Hong_Kong" /></datalist></label>
           <p className="text-xs text-text-muted">Choose the venue’s IANA timezone explicitly. Current: {settings.timezone}. Camera times without an offset are treated as local to this timezone.</p>
-          <button className={photoButton} disabled={busy || !timezone.trim()}>Save timezone</button>
-        </form>
+          <AdminWriteButton className={photoButton} disabled={busy || !timezone.trim()}>Save timezone</AdminWriteButton>
+        </AdminWriteForm>
       </div>
     </details>
     <div className="mt-4 space-y-3 border-t border-white/10 pt-4">

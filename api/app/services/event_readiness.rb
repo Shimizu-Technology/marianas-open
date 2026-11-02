@@ -1,8 +1,10 @@
 class EventReadiness
   TEXT_FIELDS = %w[name tagline description venue_name venue_address city country schedule_note prize_title prize_description travel_description visa_description venue_highlights registration_steps registration_fee_sections registration_info_items travel_items visa_items ticket_options ticket_in_person_address].freeze
 
-  def initialize(event)
+  def initialize(event, slug_ids: nil, snapshots: nil)
     @event = event
+    @slug_ids = slug_ids
+    @snapshots = snapshots
   end
 
   def call
@@ -35,7 +37,7 @@ class EventReadiness
   end
 
   def unique_slug?
-    @event.slug.present? && @event.slug.match?(/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/) && !Event.where(slug: @event.slug).where.not(id: @event.id).exists?
+    @event.slug.present? && @event.slug.match?(/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/) && (@slug_ids ? @slug_ids[@event.slug] == @event.id : !Event.where(slug: @event.slug).where.not(id: @event.id).exists?)
   end
 
   def registration_ready?
@@ -93,6 +95,7 @@ class EventReadiness
 
   def info_snapshot
     return @info_snapshot if defined?(@info_snapshot)
+    return @info_snapshot = @snapshots[[ @event.asjjf_info_snapshot_id, @event.asjjf_info_id ]] if @snapshots
     @info_snapshot = AsjjfSnapshot.find_by(id: @event.asjjf_info_snapshot_id, page_type: "event_info", parse_status: "parsed", outcome: "ok", asjjf_id: @event.asjjf_info_id) if @event.asjjf_info_snapshot_id.present? && @event.asjjf_info_id.present?
   end
 

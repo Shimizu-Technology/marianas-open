@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../../components/admin/AdminWriteControls'
 import { useEffect, useState, useCallback } from 'react'
 import { Settings, Loader2, Save, Globe, Mail, Phone } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -253,14 +254,14 @@ export default function SettingsAdmin() {
 
         {/* Save */}
         <div className="flex gap-3">
-          <button
+          <AdminWriteButton
             onClick={handleSave}
             disabled={saving}
             className="flex items-center gap-2 px-6 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saving ? 'Saving...' : 'Save Settings'}
-          </button>
+          </AdminWriteButton>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { AdminWriteForm, AdminWriteButton } from '../AdminWriteControls'
 import { useState } from 'react';
 import { ArrowDown, ArrowUp, FolderOpen, Pencil, Plus } from 'lucide-react';
 import { photoIntake, type PhotoAlbum } from '../../../services/photoIntake';
@@ -38,7 +39,7 @@ export default function AlbumManager({ eventId, albums, selected, busy, select, 
           </button>
           <button className={`${photoButton} shrink-0 px-2`} disabled={busy} aria-label={`Rename ${album.name}`} onClick={() => { setEditing(album.id); setRename(album.name); }}><Pencil size={16} /></button>
         </div>
-        {editing === album.id && <form className="space-y-2 px-2 pb-2" onSubmit={event => {
+        {editing === album.id && <AdminWriteForm className="space-y-2 px-2 pb-2" onSubmit={event => {
           event.preventDefault();
           void mutate(async () => {
             await photoIntake.updateAlbum(eventId, album.id, { name: rename.trim() });
@@ -47,15 +48,15 @@ export default function AlbumManager({ eventId, albums, selected, busy, select, 
           }, 'Album renamed.');
         }}>
           <label className="block text-sm">Album name<input autoFocus className={`${photoInput} mt-1`} value={rename} maxLength={80} required onChange={event => setRename(event.target.value)} /></label>
-          <div className="flex gap-2"><button className={photoButton} disabled={busy || !rename.trim()}>Save name</button><button type="button" className={photoButton} onClick={() => setEditing(null)}>Cancel</button></div>
-        </form>}
+          <div className="flex gap-2"><AdminWriteButton className={photoButton} disabled={busy || !rename.trim()}>Save name</AdminWriteButton><button type="button" className={photoButton} onClick={() => setEditing(null)}>Cancel</button></div>
+        </AdminWriteForm>}
         <div className="flex justify-end gap-1 border-t border-white/5 px-2 py-1">
-          <button className={`${photoButton} border-transparent bg-transparent px-2`} aria-label={`Move ${album.name} up`} disabled={busy || index === 0} onClick={() => void mutate(() => photoIntake.updateAlbum(eventId, album.id, { sort_order: index - 1 }), 'Album order saved.')}><ArrowUp size={16} /></button>
-          <button className={`${photoButton} border-transparent bg-transparent px-2`} aria-label={`Move ${album.name} down`} disabled={busy || index === albums.length - 1} onClick={() => void mutate(() => photoIntake.updateAlbum(eventId, album.id, { sort_order: index + 1 }), 'Album order saved.')}><ArrowDown size={16} /></button>
+          <AdminWriteButton className={`${photoButton} border-transparent bg-transparent px-2`} aria-label={`Move ${album.name} up`} disabled={busy || index === 0} onClick={() => void mutate(() => photoIntake.updateAlbum(eventId, album.id, { sort_order: index - 1 }), 'Album order saved.')}><ArrowUp size={16} /></AdminWriteButton>
+          <AdminWriteButton className={`${photoButton} border-transparent bg-transparent px-2`} aria-label={`Move ${album.name} down`} disabled={busy || index === albums.length - 1} onClick={() => void mutate(() => photoIntake.updateAlbum(eventId, album.id, { sort_order: index + 1 }), 'Album order saved.')}><ArrowDown size={16} /></AdminWriteButton>
         </div>
       </div>)}
     </div>
-    <form className="mt-4 space-y-2 border-t border-white/10 pt-4" onSubmit={event => {
+    <AdminWriteForm className="mt-4 space-y-2 border-t border-white/10 pt-4" onSubmit={event => {
       event.preventDefault();
       void mutate(async () => {
         await photoIntake.createAlbum(eventId, newName.trim());
@@ -64,8 +65,8 @@ export default function AlbumManager({ eventId, albums, selected, busy, select, 
     }}>
       <label className="block text-sm font-medium" htmlFor="new-photo-album">New album</label>
       <input id="new-photo-album" className={photoInput} placeholder="e.g. Podium Day 1" maxLength={80} required value={newName} onChange={event => setNewName(event.target.value)} />
-      <button className={`${photoButton} w-full`} disabled={busy || !newName.trim()}><Plus size={16} />Create album</button>
-    </form>
+      <AdminWriteButton className={`${photoButton} w-full`} disabled={busy || !newName.trim()}><Plus size={16} />Create album</AdminWriteButton>
+    </AdminWriteForm>
     </div>
   </section>;
 }

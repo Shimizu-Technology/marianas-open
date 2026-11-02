@@ -1,9 +1,7 @@
 module Api
   module V1
     module Admin
-      class EventsController < ApplicationController
-        include ClerkAuthenticatable
-
+      class EventsController < BaseController
         rescue_from ActiveRecord::RecordInvalid do |error|
           render json: { errors: error.record.errors.full_messages }, status: :unprocessable_entity
         end
@@ -20,7 +18,6 @@ module Api
           render json: { error: error.message }, status: :forbidden
         end
 
-        before_action :require_staff!
         before_action :complete_past_events, only: [:index]
         before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :upload_ticket_banner, :remove_ticket_banner, :import_results_preview, :import_results, :retranslate, :clone, :publish, :unpublish, :fill_asjjf]
 
@@ -32,7 +29,7 @@ module Api
         end
 
         def show
-          @event.complete_if_past!
+          @event.complete_if_past! unless current_user.viewer?
           render json: { event: @event.admin_json }
         end
 
@@ -152,7 +149,7 @@ module Api
         private
 
         def complete_past_events
-          Event.complete_past_events!
+          Event.complete_past_events! unless current_user.viewer?
         end
 
         def set_event

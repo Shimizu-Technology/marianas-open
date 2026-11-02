@@ -1,3 +1,4 @@
+import { AdminWriteButton } from './AdminWriteControls'
 import { useId, useState } from 'react'
 import { api } from '../../services/api'
 import type { IdentityMergeKeep, IdentityMergePreview } from '../../services/api'
@@ -90,8 +91,8 @@ function MergeConfirmation({ kind, source, target, disabled, setBusy, onMerged }
           <input id={`${id}-confirm`} type="checkbox" checked={confirmed} disabled={disabled || merging} onChange={e => setConfirmed(e.target.checked)} className="mt-1 size-5 shrink-0 accent-gold" />
           <span className="break-words">Permanently merge {preview.source.name} into {preview.target.name}, moving {preview.results_count} results{preview.athletes_count !== undefined ? ` and ${preview.athletes_count} athletes` : ''}.</span>
         </label>
-        <button type="button" disabled={disabled || merging || !confirmed || (preview.warnings.length > 0 && !warningsConfirmed)} onClick={merge}
-          className="min-h-11 w-full sm:w-auto border border-red-400/40 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-400/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-300 disabled:opacity-50 disabled:cursor-not-allowed">{merging ? 'Merging…' : 'Permanently merge records'}</button>
+        <AdminWriteButton type="button" disabled={disabled || merging || !confirmed || (preview.warnings.length > 0 && !warningsConfirmed)} onClick={merge}
+          className="min-h-11 w-full sm:w-auto border border-red-400/40 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-400/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-300 disabled:opacity-50 disabled:cursor-not-allowed">{merging ? 'Merging…' : 'Permanently merge records'}</AdminWriteButton>
       </>}
     </div>}
   </div>

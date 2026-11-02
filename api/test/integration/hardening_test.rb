@@ -77,12 +77,12 @@ class HardeningTest < ActionDispatch::IntegrationTest
   end
 
   test "invite roles are explicitly validated before saving or contacting Clerk" do
-    [ nil, "viewer", "bogus", "" ].each do |role|
+    [ nil, "bogus", "" ].each do |role|
       assert_no_difference "User.count" do
         post "/api/v1/admin/users", params: { email: "invite@example.com", role: role }, headers: @headers, as: :json
       end
       assert_response :unprocessable_entity
-      assert_equal [ "Role must be admin or staff for an invitation" ], response.parsed_body["errors"]
+      assert_equal [ "Role must be admin, staff or viewer for an invitation" ], response.parsed_body["errors"]
     end
   end
 
@@ -124,9 +124,9 @@ class HardeningTest < ActionDispatch::IntegrationTest
     ENV["CLERK_SECRET_KEY"] = original
   end
 
-  test "viewer has no staff access" do
+  test "viewer can read shared admin content" do
     viewer = User.create!(email: "viewer@example.com", clerk_id: "viewer_clerk", role: "viewer")
     get "/api/v1/admin/competitors", headers: { "Authorization" => "Bearer test_token_#{viewer.id}" }
-    assert_response :forbidden
+    assert_response :success
   end
 end

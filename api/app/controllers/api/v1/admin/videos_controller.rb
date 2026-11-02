@@ -1,10 +1,7 @@
 module Api
   module V1
     module Admin
-      class VideosController < ApplicationController
-        include ClerkAuthenticatable
-
-        before_action :require_staff!
+      class VideosController < BaseController
         before_action :set_video, only: [:show, :update, :destroy, :check_availability]
 
         def index

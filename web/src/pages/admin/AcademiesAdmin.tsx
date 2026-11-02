@@ -1,3 +1,4 @@
+import { AdminWriteButton } from '../../components/admin/AdminWriteControls'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Building2, Pencil, X, Loader2, Save, Search, Medal, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -329,11 +330,11 @@ export default function AcademiesAdmin() {
               <ImageUpload currentUrl={editDetail?.logo_url || currentAcademy?.logo_url || null} onUpload={handleLogoUpload} label="Logo" />
 
               <div className="flex gap-3 pt-2">
-                <button onClick={handleSave} disabled={saving || detailLoading || editDetail?.id !== editing || !form.name.trim()}
+                <AdminWriteButton onClick={handleSave} disabled={saving || detailLoading || editDetail?.id !== editing || !form.name.trim()}
                   className="min-h-11 flex items-center gap-2 px-5 py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors disabled:opacity-50">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saving ? 'Saving...' : 'Save'}
-                </button>
+                </AdminWriteButton>
                 <button disabled={saving || mergeBusy} onClick={() => { setEditing(null); setError('') }} className="min-h-11 px-5 py-2.5 text-text-muted text-sm hover:text-text-primary">Cancel</button>
               </div>
             </fieldset>

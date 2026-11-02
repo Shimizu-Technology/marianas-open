@@ -1,157 +1,58 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, Handshake, Users, Plus, ArrowRight, Loader2 } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { api } from '../../services/api'
-import type { Event } from '../../services/api'
-import { formatDate } from '../../utils/dates'
+import { ArrowRight, CheckCircle2, ExternalLink, RefreshCw } from 'lucide-react'
+import { api, type AdminAttention } from '../../services/api'
 
-interface Stats {
-  totalEvents: number
-  upcomingEvents: number
-  totalSponsors: number
-  totalUsers: number | null
-}
+const actionClass = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-gold hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:opacity-50'
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats>({ totalEvents: 0, upcomingEvents: 0, totalSponsors: 0, totalUsers: null })
-  const [recentEvents, setRecentEvents] = useState<Event[]>([])
+  const [data, setData] = useState<AdminAttention | null>(null)
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [attempt, setAttempt] = useState(0)
+  const refresh = useCallback(() => setAttempt(value => value + 1), [])
 
   useEffect(() => {
-    async function load() {
-      try {
-        const [eventsRes, sponsorsRes, meRes] = await Promise.all([
-          api.admin.getEvents(),
-          api.admin.getSponsors(),
-          api.getCurrentUser(),
-        ])
+    let active = true
+    api.admin.getAttention().then(result => {
+      if (active) { setData(result); setError('') }
+    }).catch(() => {
+      if (active) setError('Could not check what needs attention. Try again.')
+    }).finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [attempt])
 
-        let totalUsers: number | null = null
-        if (meRes.user.is_admin) {
-          try {
-            const usersRes = await api.getUsers()
-            totalUsers = usersRes.users.length
-          } catch {
-            totalUsers = null
-          }
-        }
+  const analyticsUrl = import.meta.env.VITE_POSTHOG_DASHBOARD_URL?.trim()
+  const total = data?.groups.reduce((sum, group) => sum + group.items.length, 0) ?? 0
+  const checked = data ? new Date(data.checked_at).toLocaleString(undefined, { timeZoneName: 'short' }) : null
 
-        const events = eventsRes.events
-        const now = new Date().toISOString().split('T')[0]
-        setStats({
-          totalEvents: events.length,
-          upcomingEvents: events.filter((e: Event) => e.date >= now).length,
-          totalSponsors: sponsorsRes.sponsors.length,
-          totalUsers,
-        })
-        setRecentEvents(events.slice(0, 5))
-      } catch (err) {
-        console.error('Failed to load dashboard:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
-  }, [])
-
-  const cards = [
-    { label: 'Total Events', value: stats.totalEvents, icon: CalendarDays, to: '/admin/events' },
-    { label: 'Upcoming', value: stats.upcomingEvents, icon: CalendarDays, to: '/admin/events' },
-    { label: 'Sponsors', value: stats.totalSponsors, icon: Handshake, to: '/admin/sponsors' },
-    ...(stats.totalUsers !== null
-      ? [{ label: 'Users', value: stats.totalUsers, icon: Users, to: '/admin/users' }]
-      : []),
-  ] as const
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 text-gold animate-spin" />
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <div className="flex items-center gap-3 mb-6 sm:mb-8">
-        <LayoutDashboard className="w-6 h-6 text-gold" />
-        <h1 className="font-heading text-2xl font-bold text-text-primary">Dashboard</h1>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-        {cards.map((card, i) => (
-          <motion.div
-            key={card.label}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-          >
-            <Link
-              to={card.to}
-              className="block bg-surface border border-white/5 p-4 sm:p-5 hover:border-white/10 transition-colors group"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <card.icon className="w-4 h-4 text-text-muted" />
-                <ArrowRight className="w-3 h-3 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="text-2xl font-heading font-bold text-text-primary">{card.value}</div>
-              <div className="text-xs text-text-muted mt-1">{card.label}</div>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6 sm:mb-8">
-        <Link
-          to="/admin/events"
-          className="flex items-center justify-center sm:justify-start gap-2 px-4 py-3 sm:py-2.5 bg-gold/10 text-gold text-sm font-medium hover:bg-gold/15 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Create Event
-        </Link>
-        <Link
-          to="/admin/sponsors"
-          className="flex items-center justify-center sm:justify-start gap-2 px-4 py-3 sm:py-2.5 bg-white/5 text-text-secondary text-sm font-medium hover:bg-white/8 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Sponsor
-        </Link>
-      </div>
-
-      {/* Recent Events */}
-      <div className="bg-surface border border-white/5">
-        <div className="px-5 py-4 border-b border-white/5">
-          <h2 className="font-heading text-sm font-semibold text-text-primary">Recent Events</h2>
-        </div>
-        {recentEvents.length === 0 ? (
-          <div className="p-8 text-center text-text-muted text-sm">No events yet</div>
-        ) : (
-          <div className="divide-y divide-white/5">
-            {recentEvents.map((event) => (
-              <div key={event.id} className="px-4 sm:px-5 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="text-sm text-text-primary font-medium">{event.name}</div>
-                  <div className="text-xs text-text-muted mt-0.5">
-                    {event.city}, {event.country} — {formatDate(event.date)}
-                  </div>
-                </div>
-                <span className={`text-xs px-2 py-0.5 self-start sm:self-auto ${
-                  event.status === 'upcoming' ? 'bg-gold/10 text-gold' :
-                  event.status === 'live' ? 'bg-red-500/10 text-red-400 animate-pulse' :
-                  event.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
-                  event.status === 'cancelled' ? 'bg-red-500/10 text-red-400' :
-                  'bg-white/5 text-text-muted'
-                }`}>
-                  {event.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+  return <div className="mx-auto max-w-6xl space-y-6">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div><p className="text-xs font-semibold uppercase tracking-widest text-gold">Team workspace</p><h1 className="mt-1 font-heading text-3xl font-bold">Needs attention</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary">Start here to see what needs a person. Open an item to review it and take the next step.</p></div>
+      <button type="button" className={actionClass} disabled={loading} onClick={() => { setLoading(true); refresh() }}><RefreshCw size={16} />{loading ? 'Checking…' : 'Check again'}</button>
     </div>
-  )
+    {error && <div role="alert" className="rounded-xl border border-red-400/40 bg-red-400/5 p-4 text-sm text-red-200"><p>{error}{data ? ' Showing the last successful check below.' : ''}</p><button type="button" className={`${actionClass} mt-3`} disabled={loading} onClick={() => { setLoading(true); refresh() }}>Try again</button></div>}
+    {loading && !data && <p role="status" className="text-sm text-text-secondary">Checking the latest saved information…</p>}
+    {data && <>
+      <p className="text-xs text-text-muted">Last checked: <time dateTime={data.checked_at}>{checked}</time>{total > 0 ? ` · ${total} ${total === 1 ? 'item' : 'items'} to review` : ''}</p>
+      {!total && <div className="flex items-start gap-3 rounded-xl border border-green-400/25 bg-green-400/5 p-5 sm:p-6"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-300" /><p className="font-medium">Nothing needs attention.</p></div>}
+      {data.groups.map(group => <section key={group.area} aria-labelledby={`attention-${group.area}`}>
+        <h2 id={`attention-${group.area}`} className="mb-3 text-lg font-semibold">{group.title}</h2>
+        <ul className="grid gap-3 xl:gap-0 xl:divide-y xl:divide-white/10 xl:overflow-hidden xl:rounded-xl xl:border xl:border-white/15">
+          {group.items.map(item => <li key={item.key} className="min-w-0 rounded-xl border border-white/15 bg-surface p-4 xl:rounded-none xl:border-0">
+            <div className="grid min-w-0 gap-3 xl:grid-cols-[6rem_minmax(0,1fr)_4rem_8rem] xl:items-start">
+              <span className={`w-fit rounded px-2 py-1 text-xs font-semibold ${item.severity === 'error' ? 'bg-red-400/10 text-red-200' : 'bg-amber-400/10 text-amber-200'}`}>{item.severity === 'error' ? 'Needs help' : 'Review'}</span>
+              <div className="min-w-0"><h3 className="break-words font-semibold [overflow-wrap:anywhere]">{item.title}</h3><p className="mt-1 break-words text-sm leading-6 text-text-secondary [overflow-wrap:anywhere]">{item.explanation}</p></div>
+              <span className="text-sm tabular-nums text-text-secondary"><strong className="font-semibold text-text-primary">{item.count}</strong><span className="xl:sr-only"> affected</span></span>
+              <Link className={actionClass} to={item.href} aria-label={`Open: ${item.title}`}>Open <ArrowRight size={16} /></Link>
+            </div>
+          </li>)}
+        </ul>
+      </section>)}
+    </>}
+    <nav aria-label="Workspace shortcuts" className="flex flex-wrap gap-3 border-t border-white/10 pt-5">
+      <Link className={actionClass} to="/admin/events">Events & Results</Link><Link className={actionClass} to="/admin/photos">Photos</Link><Link className={actionClass} to="/admin/help">Staff help</Link>
+      {analyticsUrl && <a className={actionClass} href={analyticsUrl} target="_blank" rel="noopener noreferrer">PostHog analytics dashboard <ExternalLink size={16} /></a>}
+    </nav>
+  </div>
 }

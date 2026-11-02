@@ -1,3 +1,4 @@
+import { useAdminAccess } from '../contexts/AdminAccessContext'
 import { useCallback, useState, useRef } from 'react'
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,12 +11,14 @@ interface ImageUploadProps {
 }
 
 export default function ImageUpload({ currentUrl, onUpload, label = 'Upload Image', accept = 'image/*' }: ImageUploadProps) {
+  const { readOnly } = useAdminAccess()
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFile = useCallback(async (file: File) => {
+    if (readOnly) return
     setPreview(URL.createObjectURL(file))
     setIsUploading(true)
     try {
@@ -25,7 +28,7 @@ export default function ImageUpload({ currentUrl, onUpload, label = 'Upload Imag
     } finally {
       setIsUploading(false)
     }
-  }, [onUpload])
+  }, [onUpload, readOnly])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -36,8 +39,8 @@ export default function ImageUpload({ currentUrl, onUpload, label = 'Upload Imag
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
-    setIsDragging(true)
-  }, [])
+    if (!readOnly) setIsDragging(true)
+  }, [readOnly])
 
   const handleDragLeave = useCallback(() => setIsDragging(false), [])
 
@@ -57,7 +60,8 @@ export default function ImageUpload({ currentUrl, onUpload, label = 'Upload Imag
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        onClick={() => inputRef.current?.click()}
+        onClick={() => { if (!readOnly) inputRef.current?.click() }}
+        aria-disabled={readOnly}
         className={`relative border border-dashed cursor-pointer transition-colors min-h-[120px] flex items-center justify-center ${
           isDragging ? 'border-gold bg-gold/5' : 'border-white/10 hover:border-white/20 bg-white/[0.02]'
         }`}
@@ -65,6 +69,7 @@ export default function ImageUpload({ currentUrl, onUpload, label = 'Upload Imag
         <input
           ref={inputRef}
           type="file"
+          disabled={readOnly}
           accept={accept}
           onChange={handleChange}
           className="hidden"
@@ -123,7 +128,7 @@ export default function ImageUpload({ currentUrl, onUpload, label = 'Upload Imag
               </div>
               <div className="text-center">
                 <span className="text-xs text-text-secondary">
-                  Drop file here or click to browse
+                  {readOnly ? 'Viewer access: image uploads are disabled' : 'Drop file here or click to browse'}
                 </span>
               </div>
             </motion.div>

@@ -1,3 +1,4 @@
+import { AdminWriteButton } from './AdminWriteControls'
 import { useCallback, useEffect, useId, useState } from 'react'
 import { api } from '../../services/api'
 import type { AcademyIdentityReview } from '../../services/api'
@@ -7,7 +8,7 @@ import type { IdentityRecord } from './IdentityRecordPicker'
 export default function AcademyIdentityReviewQueue({ onResolved }: { onResolved: () => void }) {
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
-  return <section className="mb-6 border border-white/15 bg-surface p-4 sm:p-5">
+  return <section id="identity-reviews" className="mb-6 border border-white/15 bg-surface p-4 sm:p-5">
     <h2 className="text-base font-semibold text-text-primary">Academy identity review</h2>
     <p className="mt-2 mb-3 text-sm text-text-secondary">Check imported names that may refer to an existing gym. Link the name to a verified gym, or approve a new distinct gym.</p>
     <button type="button" disabled={busy} aria-expanded={open} onClick={() => setOpen(value => !value)} className={identityButtonClass}>{open ? 'Hide review queue' : 'Review pending names'}</button>
@@ -86,7 +87,7 @@ function ReviewItem({ review, disabled, setBusy, onResolved }: {
           <input id={`${id}-confirm`} type="checkbox" checked={confirmed} onChange={e => setConfirmed(e.target.checked)} className="mt-1 size-5 shrink-0 accent-gold" />
           <span>I verified this identity decision and its result count.</span>
         </label>
-        <button type="button" disabled={!confirmed || disabled} onClick={resolve} className={identityButtonClass}>{saving ? 'Resolving…' : createNew ? 'Approve new distinct gym' : 'Link to selected gym'}</button>
+        <AdminWriteButton type="button" disabled={!confirmed || disabled} onClick={resolve} className={identityButtonClass}>{saving ? 'Resolving…' : createNew ? 'Approve new distinct gym' : 'Link to selected gym'}</AdminWriteButton>
       </>}
     </fieldset>
     {error && <p role="alert" className="break-words text-sm text-red-300">{error}</p>}

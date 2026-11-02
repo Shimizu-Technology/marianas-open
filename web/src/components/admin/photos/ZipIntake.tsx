@@ -1,4 +1,6 @@
+import { AdminWriteInput, AdminWriteButton } from '../AdminWriteControls'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useAdminAccess } from '../../../contexts/AdminAccessContext';
 import { useAuth } from '@clerk/clerk-react';
 import { Archive, RotateCw, X } from 'lucide-react';
 import { enqueueZip, removeSavedZip, sendSavedZip, withZipIntakeLock, ZIP_MAX_BYTES, zipQueue, type SavedZip } from '../../../utils/zipIntake';
@@ -7,7 +9,9 @@ import { photoButton, photoInput } from './styles';
 
 interface Props { eventId: number; options: ImportOptions; onImported: () => void; imports: PhotoImport[] }
 export default function ZipIntake(props: Props) {
-  const { userId } = useAuth();
+  const { userId: signedInUserId } = useAuth();
+  const { readOnly } = useAdminAccess();
+  const userId = readOnly ? null : signedInUserId;
   const currentOwner = useRef(userId);
   useLayoutEffect(() => { currentOwner.current = userId; }, [userId]);
   const isOwnerCurrent = useCallback(() => currentOwner.current === userId, [userId]);
@@ -86,21 +90,21 @@ function ZipIntakeSession({ eventId, options, onImported, imports, userId, isOwn
   return <div className="space-y-3 border-t border-white/10 pt-4">
     <h3 className="flex items-center gap-2 font-medium"><Archive size={18} className="text-gold" />Have a ZIP from the team?</h3>
     <p className="text-sm text-text-secondary">Download the gigafile ZIP to your device, then choose it here. Up to 4 GB. Photos are imported one at a time; folders and non-images are skipped.</p>
-    <label className="block text-sm font-medium">ZIP file<input className={`${photoInput} mt-1 file:mr-3 file:rounded file:border-0 file:bg-surface-light file:px-3 file:py-2 file:text-text-primary`} type="file" accept=".zip,application/zip" disabled={!key || !ready || busy || !!saved || !options.album_type.trim()} onChange={event => { const file = event.target.files?.[0]; if (file) void choose(file); event.target.value = ''; }} /></label>
+    <label className="block text-sm font-medium">ZIP file<AdminWriteInput className={`${photoInput} mt-1 file:mr-3 file:rounded file:border-0 file:bg-surface-light file:px-3 file:py-2 file:text-text-primary`} type="file" accept=".zip,application/zip" disabled={!key || !ready || busy || !!saved || !options.album_type.trim()} onChange={event => { const file = event.target.files?.[0]; if (file) void choose(file); event.target.value = ''; }} /></label>
     {!options.album_type.trim() && <p className="text-sm text-amber-200">Enter a custom album type above before choosing a ZIP.</p>}
     <p className="text-xs leading-5 text-text-muted">Keep this page open while sending. A locked phone can pause a transfer. Reopen Photos to resume; an interrupted ZIP transfer starts again, then continues from its saved completion checkpoint. Browser storage must have room for the ZIP.</p>
     {saved && <div className="rounded-lg border border-white/15 p-3">
       <p className="break-all text-sm font-medium">{saved.file.name}</p>
       <p className="mt-1 text-xs text-text-secondary">Saved on this device · Album: {saved.options.category || 'Uncategorized'} · {saved.options.timezone}</p>
       <div className="mt-2 flex flex-wrap gap-2">
-        {!busy && <button className={photoButton} onClick={() => void send(saved)}><RotateCw size={16} />Retry saved ZIP</button>}
+        {!busy && <AdminWriteButton className={photoButton} onClick={() => void send(saved)}><RotateCw size={16} />Retry saved ZIP</AdminWriteButton>}
         {!busy && <button className={photoButton} onClick={async () => { if (!window.confirm('Remove this saved ZIP from this device? Imported photos will remain.')) return; try { await removeSavedZip(saved); setSaved(null); setError(''); setStage(''); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not remove the saved ZIP. Try again.'); } }}><X size={16} />Remove saved ZIP</button>}
       </div>
     </div>}
     {stage && <div role="status" className="text-sm text-text-secondary">{stage}{busy ? ` · ${progress}%` : ''}{busy && <progress className="mt-2 block h-2 w-full accent-gold" max={100} value={progress} aria-label={stage} />}</div>}
     {error && <p role="alert" className="break-words text-sm text-red-300">{error}</p>}
     {imports.length > 0 && <div className="space-y-2">
-      <h3 className="text-sm font-medium">Recent ZIP imports</h3>
+      <h3 id="photo-imports" className="scroll-mt-20 text-sm font-medium">Recent ZIP imports</h3>
       {imports.map(item => <div key={item.id} className="rounded-lg border border-white/10 p-3 text-sm">
         <div className="flex flex-wrap justify-between gap-1"><span className="min-w-0 break-all font-medium">{item.filename}</span><span className="capitalize text-gold">{item.status.replaceAll('_', ' ')}</span></div>
         <p className="mt-1 text-text-secondary">{item.imported_count} imported · {item.skipped_count} skipped · {item.processed_entries} / {item.total_entries || '?'} entries checked</p>

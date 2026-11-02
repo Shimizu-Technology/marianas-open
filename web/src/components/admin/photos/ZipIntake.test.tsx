@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import ZipIntake from './ZipIntake';
+import { AdminAccessContext } from '../../../contexts/AdminAccessContext';
 import { enqueueZip, sendSavedZip, zipQueue, type SavedZip } from '../../../utils/zipIntake';
 
 const identity = vi.hoisted(() => ({ userId: 'staff-a' }));
@@ -48,5 +49,14 @@ it('never starts a transfer after navigating away while the selected file is bei
   await waitFor(() => expect(enqueueZip).toHaveBeenCalledTimes(1));
   mounted.unmount(); saved();
   await Promise.resolve();
+  expect(sendSavedZip).not.toHaveBeenCalled();
+});
+
+it('does not restore or send a saved ZIP for a viewer', async () => {
+  vi.mocked(zipQueue.load).mockResolvedValue(record);
+  render(<AdminAccessContext.Provider value={{ readOnly: true }}>{view()}</AdminAccessContext.Provider>);
+  await Promise.resolve();
+  expect(screen.getByLabelText('ZIP file')).toHaveProperty('disabled', true);
+  expect(zipQueue.load).not.toHaveBeenCalled();
   expect(sendSavedZip).not.toHaveBeenCalled();
 });

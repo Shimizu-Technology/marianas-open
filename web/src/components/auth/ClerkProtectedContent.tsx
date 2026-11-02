@@ -8,7 +8,7 @@ import { RefreshCw, ShieldX, TriangleAlert } from 'lucide-react'
 
 interface ClerkProtectedContentProps {
   children: React.ReactNode
-  requiredRole?: 'admin' | 'staff'
+  requiredRole?: 'admin' | 'staff' | 'viewer'
 }
 
 type AuthStatus = 'loading' | 'checking' | 'authorized' | 'unauthorized' | 'access_denied' | 'verification_error'
@@ -52,6 +52,7 @@ export default function ClerkProtectedContent({ children, requiredRole }: ClerkP
 
           if (requiredRole) {
             const hasAccess =
+              requiredRole === 'viewer' ? ['admin', 'staff', 'viewer'].includes(user.role) :
               requiredRole === 'staff' ? user.is_staff :
               requiredRole === 'admin' ? user.is_admin :
               false
