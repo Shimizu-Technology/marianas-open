@@ -1,0 +1,10 @@
+--- inspect.mjs
++++ inspect-ready.mjs
+@@ -120,6 +120,7 @@
+     const page = await browser.newPage({ width: w, height: h, dsf: 1, mobile: w < 600 });
+     await page.send('Page.addScriptToEvaluateOnNewDocument', { source: MOTION_RECORDER }).catch(() => {});
+     const how = await page.goto(url, { timeoutMs: 30000, settleMs: 600 });
++    await page.eval('new Promise(resolve => { const started = Date.now(); const timer = setInterval(() => { if (document.querySelector("input[type=search]") || Date.now() - started > 60000) { clearInterval(timer); resolve(true); } }, 100); })');
+     await sleep(600); // about 1.2s after the load event: is the title there to read yet?
+     const early = await page.eval(TITLE_SEEN).catch(() => null);
+     await page.eval('document.fonts.ready.then(() => true)').catch(() => {});

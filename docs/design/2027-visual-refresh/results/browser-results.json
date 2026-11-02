@@ -1,0 +1,436 @@
+{
+  "source": "8d713ac",
+  "observations": [
+    {
+      "id": "en-390-mo-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "en-390-hk-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "en-390-rankings",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "en-390-athlete",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "en-390-academy",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-390-teams",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-390-competitors",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-390-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "en-1440-mo-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "en-1440-hk-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "en-1440-rankings",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "en-1440-athlete",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "en-1440-academy",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-1440-teams",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-1440-competitors",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-1440-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "ja-390-mo-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "ja-390-hk-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "ja-390-rankings",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "ja-390-athlete",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "ja-390-academy",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-390-teams",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-390-competitors",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-390-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "ja-1440-mo-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "ja-1440-hk-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "ja-1440-rankings",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "ja-1440-athlete",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "ja-1440-academy",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-1440-teams",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-1440-competitors",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-1440-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "zh-Hant-390-mo-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "zh-Hant-390-hk-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "zh-Hant-390-rankings",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "zh-Hant-390-athlete",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "zh-Hant-390-academy",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-390-teams",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-390-competitors",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-390-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "zh-Hant-1440-mo-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "zh-Hant-1440-hk-results",
+      "status": "passed",
+      "source": "8d713ac"
+    },
+    {
+      "id": "zh-Hant-1440-rankings",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "zh-Hant-1440-athlete",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "zh-Hant-1440-academy",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-1440-teams",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-1440-competitors",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-1440-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    }
+  ],
+  "attempts": [
+    {
+      "id": "en-390-rankings",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-390-athlete",
+      "status": "failed",
+      "error": "locator.scrollIntoViewIfNeeded: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('heading', { name: 'Medal history' }).locator('..').locator('..').locator('a[href^=\"/events/\"]').first()\u001b[22m\n\n    at shot (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:35:60)\n    at /Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:86:260\n    at async test (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:36:32)\n    at async file:///Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:85:3",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-390-gallery",
+      "status": "failed",
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'http://127.0.0.1:5362/events/marianas-open-2026/gallery?photo=3004'\n- 'http://127.0.0.1:5362/events/marianas-open-2026/gallery?photo=3298'\n\n    at file:///Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:106:11\n    at async test (file:///Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:36:32)\n    at async file:///Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:100:3",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-1440-rankings",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-1440-athlete",
+      "status": "failed",
+      "error": "locator.scrollIntoViewIfNeeded: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('heading', { name: 'Medal history' }).locator('..').locator('..').locator('a[href^=\"/events/\"]').first()\u001b[22m\n\n    at shot (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:35:60)\n    at /Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:86:260\n    at async test (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:36:32)\n    at async file:///Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:85:3",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-1440-gallery",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-390-rankings",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-390-athlete",
+      "status": "failed",
+      "error": "locator.scrollIntoViewIfNeeded: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('heading', { name: 'メダル獲得履歴' }).locator('..').locator('..').locator('a[href^=\"/events/\"]').first()\u001b[22m\n\n    at shot (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:35:60)\n    at /Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:86:260\n    at async test (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:36:32)\n    at async file:///Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:85:3",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-390-gallery",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-1440-rankings",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-1440-athlete",
+      "status": "failed",
+      "error": "locator.scrollIntoViewIfNeeded: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('heading', { name: 'メダル獲得履歴' }).locator('..').locator('..').locator('a[href^=\"/events/\"]').first()\u001b[22m\n\n    at shot (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:35:60)\n    at /Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:86:260\n    at async test (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:36:32)\n    at async file:///Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:85:3",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-1440-gallery",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-390-rankings",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-390-athlete",
+      "status": "failed",
+      "error": "locator.scrollIntoViewIfNeeded: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('heading', { name: '獎牌紀錄' }).locator('..').locator('..').locator('a[href^=\"/events/\"]').first()\u001b[22m\n\n    at shot (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:35:60)\n    at /Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:86:260\n    at async test (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:36:32)\n    at async file:///Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:85:3",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-390-gallery",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-1440-rankings",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-1440-athlete",
+      "status": "failed",
+      "error": "locator.scrollIntoViewIfNeeded: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('heading', { name: '獎牌紀錄' }).locator('..').locator('..').locator('a[href^=\"/events/\"]').first()\u001b[22m\n\n    at shot (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:35:60)\n    at /Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:86:260\n    at async test (/Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:36:32)\n    at async file:///Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/docs/design/2027-visual-refresh/results/browser-qa.mjs:85:3",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-1440-gallery",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-390-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "en-1440-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "ja-390-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "ja-1440-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "zh-Hant-390-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "zh-Hant-1440-gallery",
+      "status": "passed",
+      "source": "98eff201164af4bc176bfd0574270db750283758"
+    },
+    {
+      "id": "en-390-mo-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-390-hk-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-1440-mo-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "en-1440-hk-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-390-mo-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-390-hk-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-1440-mo-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "ja-1440-hk-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-390-mo-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-390-hk-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-1440-mo-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    },
+    {
+      "id": "zh-Hant-1440-hk-results",
+      "status": "passed",
+      "source": "4af9d6cc7a65455c6f0cf550324b12272bac3102"
+    }
+  ],
+  "errors": [],
+  "blockedWrites": []
+}
