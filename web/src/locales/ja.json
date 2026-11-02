@@ -66,7 +66,9 @@
     "spectatorsValue": "5K+",
     "internationalReach": "国際的な展開",
     "internationalReachDesc": "韓国、日本、台湾、フィリピン、香港にパートナーがいます。アジア全域で4万部発行の雑誌にも掲載されています。",
-    "mainEvent": "メインイベント"
+    "mainEvent": "メインイベント",
+    "partnerChampionship": "国際選手権",
+    "partnerSeries": "年間プロシリーズ"
   },
   "event": {
     "title": "Guam Marianas Open 2026",
@@ -164,7 +166,28 @@
     "galleryVenue": "大会会場",
     "galleryPodium": "表彰式",
     "registrationComingSoon": "登録開始予定",
-    "officialPoster": "公式ポスター"
+    "officialPoster": "公式ポスター",
+    "date": "日程は後日発表",
+    "buySpectatorTickets": "観戦チケットを購入",
+    "registerToCompete": "選手登録",
+    "registerToCompeteGi": "選手登録（Gi）",
+    "registerToCompeteNogi": "選手登録（No-Gi）",
+    "spectatorAdmission": "観戦入場",
+    "ticketsOnSale": "チケット販売中",
+    "ticketIntro": "観戦チケットはオンラインまたは現地で購入できます。選手は別途ASJJFの登録リンクをご利用ください。",
+    "admissionOption": "入場",
+    "earlyBird": "早期割引",
+    "atTheDoor": "当日券",
+    "earlyBirdDeadline": "早期割引は{{date}}までです。",
+    "earlyBirdLimited": "早期割引は期間限定です。",
+    "inPersonPurchase": "現地で購入",
+    "buyOnlineGuamTime": "オンラインでチケットを購入",
+    "ticketsSoldOut": "チケット完売",
+    "ticketsSoldOutDescription": "この大会の観戦チケットは完売しました。選手登録は別途行われます。",
+    "ticketSalesClosed": "チケット販売終了",
+    "ticketSalesClosedDescription": "この大会の観戦チケット販売は終了しました。選手登録は別途行われます。",
+    "ticketProviderNote": "空席状況、手数料、購入条件は公式チケット販売元が定めます。",
+    "ticketFlyerAlt": "{{eventName}}公式観戦チケット販売案内"
   },
   "calendar": {
     "title": "Guam Pro Series 2026",
@@ -184,12 +207,15 @@
     "pastResults": "過去の結果",
     "noPastEvents": "過去の大会はまだありません。",
     "completed": "終了",
-    "roadToOpen": "予選シリーズ"
+    "roadToOpen": "予選シリーズ",
+    "titleDynamic": "Guam Pro Series {{year}}",
+    "noUpcomingEvents": "今後の大会はまだ発表されていません",
+    "noUpcomingEventsDescription": "主催者が発表次第、次の大会日程をこちらに掲載します。"
   },
   "watch": {
     "title": "視聴",
     "subtitle": "すべてのMarianas Open大会のライブ配信、試合のフル映像、ハイライトをご覧いただけます。",
-    "liveNow": "現在ライブ配信中",
+    "liveNow": "ライブ配信中",
     "liveDesc": "現在ライブ配信中の大会はありません。大会開催日に再度ご確認ください。",
     "upcomingStream": "次回のライブ配信",
     "matchLibrary": "試合ライブラリ",
@@ -227,7 +253,7 @@
     "featured": "注目",
     "filterCategory": "カテゴリー",
     "noVideosYet": "動画はまだありません",
-    "noVideosYetDesc": "試合動画やハイライトは近日公開予定です。",
+    "noVideosYetDesc": "試合動画やハイライトを近日公開します。",
     "vs": "vs",
     "weight": {
       "rooster": "ルースター",
@@ -253,7 +279,15 @@
       "noGi": "No-Gi"
     },
     "clearFilters": "フィルターをクリア",
-    "loadError": "動画を読み込めませんでした。ページを再読み込みしてお試しください。"
+    "loadError": "動画を読み込めませんでした。ページを再読み込みしてお試しください。",
+    "youtubeCta": "公式YouTubeチャンネルへ",
+    "watchYoutube": "YouTubeで視聴",
+    "clickYoutube": "YouTubeで視聴するにはクリック",
+    "liveTitle": "ライブ配信 - {{event}}",
+    "closeVideo": "動画を閉じる",
+    "featuredTitle": "注目の動画",
+    "featuredDesc": "Marianas Openの最新ハイライト、試合の全編、注目のシーンをご覧ください。",
+    "watchNow": "今すぐ視聴"
   },
   "share": {
     "defaultText": "Marianas Open — 国際BJJ選手権をチェック！",
@@ -265,7 +299,7 @@
     "tagline": "グアムを代表する国際ブラジリアン柔術選手権",
     "followUs": "フォロー",
     "contact": "お問い合わせ",
-    "rights": "All rights reserved.",
+    "rights": "無断転載を禁じます。",
     "builtBy": "Shimizu Technology によって構築",
     "terms": "利用規約",
     "rules": "ルール"
@@ -276,7 +310,12 @@
     "philippines": "フィリピン",
     "taiwan": "台湾",
     "southKorea": "韓国",
-    "hongKong": "香港"
+    "hongKong": "香港",
+    "back": "戻る",
+    "website": "ウェブサイト",
+    "loading": "読み込み中…",
+    "dismiss": "閉じる",
+    "cancelled": "中止"
   },
   "shimizu": {
     "title": "Shimizu Technology によって構築",
@@ -305,7 +344,27 @@
     "timeline2025": "6か国から1,300人超の競技者が参加。グアムに200万ドルの経済効果。",
     "timeline2026": "International Pro Series は、6か国7大会に拡大。",
     "contactTitle": "お問い合わせ",
-    "contactDesc": "Marianas Openについてご不明な点がありますか？お気軽に当チームまでお問い合わせください。"
+    "contactDesc": "Marianas Openについてご不明な点がありますか？お気軽に当チームまでお問い合わせください。",
+    "federation": {
+      "eyebrow": "公式説明",
+      "title": "Marianas Sports Jiu-Jitsu Federation",
+      "intro": "選手、アカデミー、パートナー、スポンサー、サポーター、そして柔術コミュニティの皆様へ：",
+      "photoAlt": "SJJIF総会で集合写真を撮る代表者たち",
+      "photoCaption": "SJJIF総会",
+      "pullQuote": "グアムから世界へ。世界からグアムへ。",
+      "factGuam": "グアムを拠点とする連盟",
+      "factIndependent": "独自の大会とプログラム",
+      "factInternational": "国際的なつながり",
+      "p1": "これまでに寄せられたご質問やお問い合わせを受け、Marianas Sports Jiu-Jitsu Federation（MSJJF）は、私たちの組織と国際的な提携関係について説明いたします。",
+      "p2": "MSJJFはグアムを拠点とする独立した柔術連盟であり、独自の大会、プログラム、パートナーシップ、国際的な提携関係を持ち、独立して運営しています。",
+      "p3": "MSJJFは、ASJJF、SJJIF、ASJJF DUMAU、SJJIF South Americaをはじめ、世界の柔術コミュニティで認められている組織、連盟、国際パートナーと提携し、つながりを持っています。",
+      "p4": "こうした関係と国際的な活動の場を通じ、MSJJFはグアムを世界の舞台へと導いてきたことを誇りに思います。私たちの島と選手を、アジアをはじめとする世界各地の一流選手、アカデミー、審判、主催者、大規模な国際大会と結びつけてきました。",
+      "p5": "Guam Marianas Openは国際的に公認されたASJJF 5つ星ランクの大会です。世界トップレベルの選手を島に迎えながら、グアムの選手が地元で国際的に認められた舞台で競う機会を提供しています。",
+      "p6": "私たちの使命は、常に一つの大会にとどまりません。選手の機会を創出し、コミュニティを強め、グアムの名を国際柔術界に広め続けることです。選手が世界各地で競技する機会を得るとともに、世界の人々にグアムで柔術を体験していただきたいと考えています。",
+      "p7": "この説明は、寄せられたご質問に対して明確で正確な情報をお伝えするためのものです。私たちはグアムの柔術コミュニティ全体と、島における競技の発展に貢献し続けるすべての方々を深く尊重しています。引き続き選手とその機会の創出に力を注ぎ、国際舞台で誇りを持ってグアムを代表してまいります。",
+      "signature": "Marianas Sports Jiu-Jitsu Federation",
+      "tagline": "グアムを世界の舞台へ"
+    }
   },
   "terms": {
     "title": "利用規約",
@@ -374,7 +433,8 @@
     "total": "合計",
     "expandAll": "すべて展開",
     "collapseAll": "すべて折りたたむ",
-    "filterResults": "結果を絞り込む"
+    "filterResults": "結果を絞り込む",
+    "sourcedFrom": "結果の出典"
   },
   "competitorProfile": {
     "title": "競技者プロフィール",
@@ -538,7 +598,14 @@
   "search": {
     "title": "検索",
     "close": "検索を閉じる",
-    "placeholder": "選手、アカデミー、大会を検索..."
+    "placeholder": "選手、アカデミー、大会を検索...",
+    "start": "入力して検索…",
+    "navigate": "移動",
+    "select": "選択",
+    "closeHint": "閉じる",
+    "none": "「{{query}}」の検索結果はありません",
+    "independent": "無所属",
+    "events": "大会"
   },
   "season": {
     "phase": {
@@ -582,7 +649,8 @@
     "closePhoto": "写真を閉じる",
     "previousPhoto": "前の写真",
     "nextPhoto": "次の写真",
-    "photoProcessing": "写真のプレビューを準備中です。"
+    "photoProcessing": "写真のプレビューを準備中です。",
+    "photoCount_one": "{{count}}枚の写真"
   },
   "officialRankings": {
     "seoTitle": "ASJJF公式ランキング",
@@ -762,5 +830,45 @@
       "uploaded_logo": "通常ロゴをアップロード済み",
       "uploaded_logo_dark": "ダーク版ロゴをアップロード済み"
     }
+  },
+  "academies": {
+    "badge": "アカデミー",
+    "title": "チームとアカデミー",
+    "summary": "Marianas Openに参加する{{count}}のアカデミー",
+    "search": "アカデミーを検索…",
+    "empty": "アカデミーが見つかりません。",
+    "missing": "アカデミーが見つかりません",
+    "noSpecified": "アカデミーが指定されていません",
+    "athletes": "選手{{count}}人",
+    "events": "{{count}}大会",
+    "more": "さらに読み込む（{{total}}件中{{shown}}件）"
+  },
+  "error": {
+    "title": "大会情報に戻りましょう。",
+    "description": "このページを読み込めませんでした。再読み込みするか、ホームにお戻りください。",
+    "reload": "再読み込み"
+  },
+  "impact": {
+    "roi": "投資対効果",
+    "costs": "大会費用と運営",
+    "generated": "地域社会への還元",
+    "multiplier": "投資対効果の倍率",
+    "perDollar": "投資1ドルあたりの効果",
+    "budget": "総予算",
+    "investment": "総投資額",
+    "economic": "経済効果",
+    "tourism": "観光",
+    "competition": "競技",
+    "community": "地域社会",
+    "emptyTitle": "インパクトレポートを近日公開",
+    "emptyDescription": "Marianas Openが島の観光、競技、経済成長にもたらす影響のデータを集計しています。公開までお待ちください。",
+    "badge": "大会インパクトレポート",
+    "title": "影響と",
+    "transparency": "透明性",
+    "description": "Marianas Openが島の観光、競技、経済成長にもたらす効果。",
+    "allocation": "資金配分",
+    "partnerTitle": "パートナーになりませんか",
+    "partnerDescription": "Marianas Openのスポンサーにご興味はありませんか。競技の発展と地域社会への貢献に、ぜひご協力ください。",
+    "contact": "お問い合わせ"
   }
 }

@@ -66,7 +66,9 @@
     "spectatorsValue": "5K+",
     "internationalReach": "국제적 네트워크",
     "internationalReachDesc": "한국, 일본, 대만, 필리핀, 홍콩의 파트너들과 함께합니다. 아시아 전역에서 발행되는 인쇄 매거진 40,000부에 소개되었습니다.",
-    "mainEvent": "메인 이벤트"
+    "mainEvent": "메인 이벤트",
+    "partnerChampionship": "국제 선수권 대회",
+    "partnerSeries": "연례 프로 시리즈"
   },
   "event": {
     "title": "Guam Marianas Open 2026",
@@ -164,7 +166,28 @@
     "galleryVenue": "대회장",
     "galleryPodium": "포디움 시상식",
     "registrationComingSoon": "등록 예정",
-    "officialPoster": "공식 포스터"
+    "officialPoster": "공식 포스터",
+    "date": "일정 추후 발표",
+    "buySpectatorTickets": "관람 티켓 구매",
+    "registerToCompete": "선수 등록",
+    "registerToCompeteGi": "선수 등록 (Gi)",
+    "registerToCompeteNogi": "선수 등록 (No-Gi)",
+    "spectatorAdmission": "관람 입장",
+    "ticketsOnSale": "티켓 판매 중",
+    "ticketIntro": "관람 티켓은 온라인 또는 현장에서 구매할 수 있습니다. 선수는 별도의 ASJJF 등록 링크를 이용해 주세요.",
+    "admissionOption": "입장",
+    "earlyBird": "조기 할인",
+    "atTheDoor": "현장 구매",
+    "earlyBirdDeadline": "조기 할인은 {{date}}에 종료됩니다.",
+    "earlyBirdLimited": "조기 할인은 한정 기간 동안 제공됩니다.",
+    "inPersonPurchase": "현장 구매",
+    "buyOnlineGuamTime": "온라인 티켓 구매",
+    "ticketsSoldOut": "티켓 매진",
+    "ticketsSoldOutDescription": "이 대회의 관람 티켓은 매진되었습니다. 선수 등록은 별도입니다.",
+    "ticketSalesClosed": "티켓 판매 종료",
+    "ticketSalesClosedDescription": "이 대회의 관람 티켓 판매가 종료되었습니다. 선수 등록은 별도입니다.",
+    "ticketProviderNote": "판매 가능 여부, 수수료 및 결제 조건은 공식 티켓 판매처에서 정합니다.",
+    "ticketFlyerAlt": "{{eventName}} 공식 관람 티켓 판매 안내"
   },
   "calendar": {
     "title": "Guam Pro Series 2026",
@@ -184,12 +207,15 @@
     "pastResults": "이전 대회 결과",
     "noPastEvents": "아직 지난 대회가 없습니다.",
     "completed": "종료",
-    "roadToOpen": "예선 시리즈"
+    "roadToOpen": "예선 시리즈",
+    "titleDynamic": "Guam Pro Series {{year}}",
+    "noUpcomingEvents": "예정된 대회가 아직 발표되지 않았습니다",
+    "noUpcomingEventsDescription": "주최 측이 발표하는 대로 다음 대회 일정이 여기에 표시됩니다."
   },
   "watch": {
     "title": "시청",
     "subtitle": "모든 Marianas Open 대회의 생중계, 전체 경기, 하이라이트를 만나보세요.",
-    "liveNow": "지금 생방송 중",
+    "liveNow": "실시간 방송 중",
     "liveDesc": "현재 생중계 중인 대회가 없습니다. 대회 당일에 다시 방문해 생중계를 확인해 주세요.",
     "upcomingStream": "다음 생중계",
     "matchLibrary": "경기 라이브러리",
@@ -227,7 +253,7 @@
     "featured": "추천",
     "filterCategory": "카테고리",
     "noVideosYet": "아직 동영상이 없습니다",
-    "noVideosYetDesc": "경기 영상과 하이라이트를 곧 확인하세요.",
+    "noVideosYetDesc": "경기 영상과 하이라이트를 곧 확인해 주세요.",
     "vs": "vs",
     "weight": {
       "rooster": "루스터",
@@ -253,7 +279,15 @@
       "noGi": "노기"
     },
     "clearFilters": "필터 초기화",
-    "loadError": "동영상을 불러오지 못했습니다. 페이지를 새로고침하여 다시 시도해 주세요."
+    "loadError": "동영상을 불러오지 못했습니다. 페이지를 새로고침하여 다시 시도해 주세요.",
+    "youtubeCta": "공식 YouTube 채널 방문",
+    "watchYoutube": "YouTube에서 시청",
+    "clickYoutube": "클릭하여 YouTube에서 시청",
+    "liveTitle": "실시간 방송 - {{event}}",
+    "closeVideo": "동영상 닫기",
+    "featuredTitle": "추천 동영상",
+    "featuredDesc": "Marianas Open 대회의 최신 하이라이트, 전체 경기 및 명장면을 시청하세요.",
+    "watchNow": "지금 시청"
   },
   "share": {
     "defaultText": "Marianas Open — 국제 BJJ 챔피언십을 만나보세요!",
@@ -276,7 +310,12 @@
     "philippines": "필리핀",
     "taiwan": "대만",
     "southKorea": "한국",
-    "hongKong": "홍콩"
+    "hongKong": "홍콩",
+    "back": "뒤로",
+    "website": "웹사이트",
+    "loading": "불러오는 중...",
+    "dismiss": "닫기",
+    "cancelled": "취소됨"
   },
   "shimizu": {
     "title": "Shimizu Technology 제작",
@@ -305,7 +344,27 @@
     "timeline2025": "6개국에서 1,300명 이상 참가. 괌에 200만 달러의 경제적 파급효과.",
     "timeline2026": "International Pro Series가 6개국 7개 대회로 확대되었습니다.",
     "contactTitle": "문의하기",
-    "contactDesc": "Marianas Open에 대해 궁금하신가요? 저희 팀에 문의해 주세요."
+    "contactDesc": "Marianas Open에 대해 궁금하신가요? 저희 팀에 문의해 주세요.",
+    "federation": {
+      "eyebrow": "공식 설명",
+      "title": "Marianas Sports Jiu-Jitsu Federation",
+      "intro": "선수, 아카데미, 파트너, 후원사, 서포터 및 주짓수 커뮤니티 여러분께:",
+      "photoAlt": "SJJIF 총회에서 함께 기념 촬영을 하는 대표단",
+      "photoCaption": "SJJIF 총회",
+      "pullQuote": "괌에서 세계로. 세계에서 괌으로.",
+      "factGuam": "괌 기반 연맹",
+      "factIndependent": "독립적인 대회 및 프로그램",
+      "factInternational": "국제적 교류",
+      "p1": "그동안 접수된 여러 질문과 문의에 답하고자 Marianas Sports Jiu-Jitsu Federation (MSJJF)은 우리 연맹의 정체성과 국제 제휴 관계에 대해 설명드립니다.",
+      "p2": "MSJJF는 괌에 기반을 둔 독립 주짓수 연맹으로, 자체 대회, 프로그램, 파트너십 및 국제 제휴 관계를 바탕으로 독립적으로 운영됩니다.",
+      "p3": "MSJJF는 ASJJF, SJJIF, ASJJF DUMAU, SJJIF South America를 비롯하여 전 세계 주짓수 커뮤니티의 공인 단체, 연맹 및 국제 파트너들과 제휴하고 교류합니다.",
+      "p4": "이러한 관계와 국제적 활동 기반을 통해 MSJJF는 괌을 세계 무대로 알리는 데 기여해 왔습니다. 우리 섬과 선수들을 아시아와 그 밖의 지역에서 활동하는 세계적인 선수, 아카데미, 심판, 주최자 및 주요 국제 대회와 연결해 온 것을 자랑스럽게 생각합니다.",
+      "p5": "Guam Marianas Open은 국제적으로 공인된 ASJJF 5성급 대회입니다. 세계적인 선수들을 우리 섬으로 맞이하는 동시에 괌 선수들이 고향에서 국제적으로 인정받는 무대에 출전할 기회를 제공합니다.",
+      "p6": "우리의 사명은 언제나 하나의 대회를 넘어섭니다. 선수들에게 기회를 만들고, 지역사회를 강화하며, 국제 주짓수 무대에서 괌의 위상을 계속 높이는 것입니다. 우리 선수들이 세계 곳곳에서 경쟁할 기회를 얻고, 세계가 괌에 와서 주짓수를 경험하기를 바랍니다.",
+      "p7": "이 설명은 접수된 질문에 명확하고 정확한 정보를 제공하기 위한 것입니다. 우리는 괌의 주짓수 커뮤니티 전체와 우리 섬에서 이 스포츠의 성장에 계속 기여하는 모든 분을 깊이 존중합니다. 앞으로도 선수들과 그들을 위한 기회 창출, 그리고 국제 무대에서 괌을 자랑스럽게 대표하는 데 집중하겠습니다.",
+      "signature": "Marianas Sports Jiu-Jitsu Federation",
+      "tagline": "세계 무대의 괌"
+    }
   },
   "terms": {
     "title": "이용약관",
@@ -323,7 +382,7 @@
     "denial": "주최자는 사유의 유무와 관계없이 단독적이고 절대적인 재량으로 잠재적 참가자의 대회 출전 등록을 거부할 권리를 이에 명시적으로 유보합니다. athlete 및/또는 참가자라는 용어는 서로 같은 의미로 사용될 수 있습니다.",
     "dispute": "본 대회 참가로 인해 발생하거나 이와 어떠한 방식으로든 관련된 분쟁이 있는 경우, 귀하는 등록 신청서를 제출함으로써 시, 주/국가 또는 연방법원에 소송을 제기할 권리와 배심 재판을 받을 권리를 이에 명시적으로 포기하는 것입니다.",
     "minor": "참가자가 미성년자인 경우, 본인은 등록 대상인 해당 미성년자의 부모 및/또는 법정대리인임을 이에 증명하며, 그 미성년자가 등록하는 본 대회에 출전하는 것에 대해 본인의 명시적인 허락을 부여했음을 확인합니다.",
-    "organizerNotice": "Fury Promotions, LLC/Marianas Open/Marianas Pro. All rights reserved."
+    "organizerNotice": "Fury Promotions, LLC/Marianas Open/Marianas Pro. 모든 권리 보유."
   },
   "competitors": {
     "badge": "선수",
@@ -374,7 +433,8 @@
     "total": "합계",
     "expandAll": "모두 펼치기",
     "collapseAll": "모두 접기",
-    "filterResults": "결과 필터"
+    "filterResults": "결과 필터",
+    "sourcedFrom": "결과 출처"
   },
   "competitorProfile": {
     "title": "선수 프로필",
@@ -394,7 +454,7 @@
     "beltRank": "벨트"
   },
   "journey": {
-    "badge": "Pro Series Circuit",
+    "badge": "프로 시리즈 서킷",
     "title": "여정을 함께하세요",
     "subtitle": "아시아 태평양 전역에서 경쟁하고 랭킹 포인트를 획득해 괌에서 열리는 그랜드 챔피언십 출전 자격을 얻으세요.",
     "subtitleSeries": "아시아 태평양 전역에서 경쟁하고 ASJJF 랭킹 포인트를 획득하세요.",
@@ -538,7 +598,14 @@
   "search": {
     "title": "검색",
     "close": "검색 닫기",
-    "placeholder": "선수, 아카데미, 대회 검색..."
+    "placeholder": "선수, 아카데미, 대회 검색...",
+    "start": "검색어를 입력하세요...",
+    "navigate": "이동",
+    "select": "선택",
+    "closeHint": "닫기",
+    "none": "\"{{query}}\"에 대한 검색 결과가 없습니다",
+    "independent": "무소속",
+    "events": "대회"
   },
   "season": {
     "phase": {
@@ -582,7 +649,8 @@
     "closePhoto": "사진 닫기",
     "previousPhoto": "이전 사진",
     "nextPhoto": "다음 사진",
-    "photoProcessing": "사진 미리보기를 준비하고 있습니다."
+    "photoProcessing": "사진 미리보기를 준비하고 있습니다.",
+    "photoCount_one": "사진 {{count}}장"
   },
   "officialRankings": {
     "seoTitle": "ASJJF 공식 랭킹",
@@ -762,5 +830,45 @@
       "uploaded_logo": "일반 로고 업로드됨",
       "uploaded_logo_dark": "어두운 배경용 로고 업로드됨"
     }
+  },
+  "academies": {
+    "badge": "아카데미",
+    "title": "팀 및 아카데미",
+    "summary": "Marianas Open 대회에 참가하는 아카데미 {{count}}곳",
+    "search": "아카데미 검색...",
+    "empty": "아카데미를 찾을 수 없습니다.",
+    "missing": "아카데미를 찾을 수 없습니다",
+    "noSpecified": "아카데미가 지정되지 않았습니다",
+    "athletes": "선수 {{count}}명",
+    "events": "대회 {{count}}개",
+    "more": "더 보기 ({{total}}개 중 {{shown}}개)"
+  },
+  "error": {
+    "title": "다시 대회 소식으로 돌아가세요.",
+    "description": "이 페이지를 불러오지 못했습니다. 새로고침하여 다시 시도하거나 홈으로 돌아가세요.",
+    "reload": "페이지 새로고침"
+  },
+  "impact": {
+    "roi": "투자 수익률",
+    "costs": "대회 비용 및 운영",
+    "generated": "지역사회를 위한 창출 가치",
+    "multiplier": "투자 수익 배수",
+    "perDollar": "투자 1달러당 수익",
+    "budget": "총예산",
+    "investment": "총투자액",
+    "economic": "경제 효과",
+    "tourism": "관광",
+    "competition": "경기",
+    "community": "지역사회",
+    "emptyTitle": "영향 보고서 공개 예정",
+    "emptyDescription": "Marianas Open이 우리 섬의 관광, 경기 및 경제 성장에 미치는 영향에 관한 데이터를 수집하고 있습니다. 곧 다시 확인해 주세요.",
+    "badge": "대회 영향 보고서",
+    "title": "영향과",
+    "transparency": "투명성",
+    "description": "Marianas Open이 우리 섬의 관광, 경기 및 경제 성장을 이끄는 방식.",
+    "allocation": "자금 배분",
+    "partnerTitle": "파트너로 함께하세요",
+    "partnerDescription": "Marianas Open 후원에 관심이 있으신가요? 스포츠의 성장과 지역사회에 긍정적인 영향을 만드는 데 함께해 주세요.",
+    "contact": "문의하기"
   }
 }

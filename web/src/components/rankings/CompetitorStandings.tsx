@@ -1,3 +1,4 @@
+import { formatNumber } from '../../utils/numbers';
 import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +9,7 @@ import RankingState from './RankingState';
 import RankingSource from './RankingSource';
 
 export default function CompetitorStandings({ competitorId }: { competitorId?: number }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const request = useCallback((signal: AbortSignal) => officialRankingsApi.getStandings(competitorId!, signal), [competitorId]);
   const standings = useRankingRequest(competitorId ? request : null);
   return <section className="mb-6 overflow-hidden rounded-xl border border-white/10 bg-surface">
@@ -31,8 +32,8 @@ export default function CompetitorStandings({ competitorId }: { competitorId?: n
                     </Link>
                   </div>
                   <dl className="flex shrink-0 gap-5 text-right">
-                    <div><dt className="text-xs text-text-secondary">{t('officialRankings.position')}</dt><dd className="text-xl font-bold tabular-nums text-gold-400">#{standing.position}</dd></div>
-                    <div><dt className="text-xs text-text-secondary">{t('officialRankings.points')}</dt><dd className="text-xl font-bold tabular-nums text-white">{standing.points}</dd></div>
+                    <div><dt className="text-xs text-text-secondary">{t('officialRankings.position')}</dt><dd className="text-xl font-bold tabular-nums text-gold-400">#{formatNumber(standing.position, i18n.language)}</dd></div>
+                    <div><dt className="text-xs text-text-secondary">{t('officialRankings.points')}</dt><dd className="text-xl font-bold tabular-nums text-white">{formatNumber(standing.points, i18n.language)}</dd></div>
                   </dl>
                 </div>
                 <RankingSource list={list} syncedAt={division.last_synced_at} />

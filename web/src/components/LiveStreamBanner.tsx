@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEvents } from '../hooks/useApi';
 
 export default function LiveStreamBanner() {
+  const { t } = useTranslation();
   const { events } = useEvents();
   const [dismissed, setDismissed] = useState(false);
 
@@ -24,20 +26,20 @@ export default function LiveStreamBanner() {
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
             </span>
             <span className="text-xs font-heading font-bold uppercase tracking-widest text-red-400">
-              Live
+              {t('watch.liveBadge')}
             </span>
           </span>
           <span className="text-sm text-text-secondary truncate group-hover:text-gold-400 transition-colors">
             {liveEvent.name}
           </span>
           <span className="hidden sm:inline text-xs uppercase tracking-wider text-gold-500 font-heading shrink-0">
-            Watch Now &rarr;
+            {t('watch.watchNow')} &rarr;
           </span>
         </Link>
         <button
           onClick={() => setDismissed(true)}
           className="shrink-0 p-1 text-text-muted hover:text-text-primary rounded transition-colors"
-          aria-label="Dismiss"
+          aria-label={t('common.dismiss')}
         >
           <X size={14} />
         </button>

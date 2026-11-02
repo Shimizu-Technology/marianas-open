@@ -1,4 +1,5 @@
-import { useTranslation } from 'react-i18next';
+import { usePublicLinks } from '../hooks/usePublicLinks';
+import { usePublicCopy } from '../hooks/usePublicCopy';
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Mail, Youtube, Phone, Globe } from 'lucide-react';
 import { YOUTUBE_CHANNEL_URL } from '../lib/seo';
@@ -8,7 +9,8 @@ import { resolveMediaUrl } from '../utils/images';
 const LOGO_FALLBACK = '/images/logos/mo-logo-white.png';
 
 export default function Footer() {
-  const { t } = useTranslation();
+  const { t } = usePublicCopy();
+  const publicLink = usePublicLinks();
   const org = useOrg();
 
   const logoSrc = resolveMediaUrl(org.logo_url) || LOGO_FALLBACK;
@@ -57,7 +59,7 @@ export default function Footer() {
                 </a>
               )}
               <a
-                href={YOUTUBE_CHANNEL_URL}
+                href={publicLink('youtube_channel_url', YOUTUBE_CHANNEL_URL)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex min-h-11 min-w-11 items-center justify-center text-text-secondary hover:text-gold-500 transition-colors"

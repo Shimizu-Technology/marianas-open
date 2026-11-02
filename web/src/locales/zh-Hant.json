@@ -66,7 +66,9 @@
     "spectatorsValue": "5K+",
     "internationalReach": "國際影響力",
     "internationalReachDesc": "在韓國、日本、Taiwan、菲律賓及香港皆有合作夥伴。並獲遍及亞洲、發行量達 40,000 本的紙本雜誌報導。",
-    "mainEvent": "主賽事"
+    "mainEvent": "主賽事",
+    "partnerChampionship": "國際錦標賽",
+    "partnerSeries": "年度職業系列賽"
   },
   "event": {
     "title": "Guam Marianas Open 2026",
@@ -164,7 +166,28 @@
     "galleryVenue": "比賽場地",
     "galleryPodium": "頒獎典禮",
     "registrationComingSoon": "報名即將開放",
-    "officialPoster": "官方海報"
+    "officialPoster": "官方海報",
+    "date": "日期待公布",
+    "buySpectatorTickets": "購買觀賽門票",
+    "registerToCompete": "報名參賽",
+    "registerToCompeteGi": "報名參賽（Gi）",
+    "registerToCompeteNogi": "報名參賽（No-Gi）",
+    "spectatorAdmission": "觀眾入場",
+    "ticketsOnSale": "門票現已開售",
+    "ticketIntro": "觀賽門票可線上或現場購買。參賽選手請使用獨立的 ASJJF 報名連結。",
+    "admissionOption": "入場",
+    "earlyBird": "早鳥優惠",
+    "atTheDoor": "現場購票",
+    "earlyBirdDeadline": "早鳥優惠將於 {{date}} 結束。",
+    "earlyBirdLimited": "早鳥優惠限時提供。",
+    "inPersonPurchase": "現場購買",
+    "buyOnlineGuamTime": "線上購票",
+    "ticketsSoldOut": "門票已售罄",
+    "ticketsSoldOutDescription": "本賽事觀賽門票已售罄。選手報名另行辦理。",
+    "ticketSalesClosed": "門票銷售已結束",
+    "ticketSalesClosedDescription": "本賽事觀賽門票銷售已結束。選手報名另行辦理。",
+    "ticketProviderNote": "餘票、服務費及結帳條款由官方票務供應商決定。",
+    "ticketFlyerAlt": "{{eventName}} 官方觀賽門票銷售海報"
   },
   "calendar": {
     "title": "Guam Pro Series 2026",
@@ -184,7 +207,10 @@
     "pastResults": "歷屆成績",
     "noPastEvents": "目前尚無歷屆賽事。",
     "completed": "已完成",
-    "roadToOpen": "資格賽系列"
+    "roadToOpen": "資格賽系列",
+    "titleDynamic": "Guam Pro Series {{year}}",
+    "noUpcomingEvents": "尚未公布即將舉行的賽事",
+    "noUpcomingEventsDescription": "主辦單位發布後，下一輪賽事安排將顯示於此處。"
   },
   "watch": {
     "title": "觀看",
@@ -227,7 +253,7 @@
     "featured": "精選",
     "filterCategory": "類別",
     "noVideosYet": "尚無影片",
-    "noVideosYetDesc": "請稍後回來查看比賽影片與精彩片段。",
+    "noVideosYetDesc": "請稍後回來觀看比賽影片及精彩片段。",
     "vs": "對戰",
     "weight": {
       "rooster": "公雞量級",
@@ -253,7 +279,15 @@
       "noGi": "No-Gi"
     },
     "clearFilters": "清除篩選條件",
-    "loadError": "無法載入影片。請重新整理頁面再試一次。"
+    "loadError": "無法載入影片。請重新整理頁面再試一次。",
+    "youtubeCta": "造訪我們的 YouTube 頻道",
+    "watchYoutube": "在 YouTube 上觀看",
+    "clickYoutube": "點擊前往 YouTube 觀看",
+    "liveTitle": "直播 - {{event}}",
+    "closeVideo": "關閉影片",
+    "featuredTitle": "精選影片",
+    "featuredDesc": "觀看 Marianas Open 賽事的最新集錦、完整比賽及精彩瞬間。",
+    "watchNow": "立即觀看"
   },
   "share": {
     "defaultText": "快來看看 Marianas Open — 國際巴西柔術錦標賽！",
@@ -265,7 +299,7 @@
     "tagline": "關島頂級國際巴西柔術錦標賽",
     "followUs": "追蹤我們",
     "contact": "聯絡我們",
-    "rights": "版權所有。",
+    "rights": "保留所有權利。",
     "builtBy": "由 Shimizu Technology 建置",
     "terms": "條款與細則",
     "rules": "規則"
@@ -276,7 +310,12 @@
     "philippines": "菲律賓",
     "taiwan": "Taiwan",
     "southKorea": "南韓",
-    "hongKong": "香港"
+    "hongKong": "香港",
+    "back": "返回",
+    "website": "網站",
+    "loading": "載入中…",
+    "dismiss": "關閉",
+    "cancelled": "已取消"
   },
   "shimizu": {
     "title": "由 Shimizu Technology 建置",
@@ -305,7 +344,27 @@
     "timeline2025": "來自 6 個國家的 1,300+ 名參賽者。為關島帶來 200 萬美元的經濟效益。",
     "timeline2026": "International Pro Series 橫跨 6 個國家，共舉辦 7 場賽事。",
     "contactTitle": "聯絡我們",
-    "contactDesc": "對 Marianas Open 有疑問嗎？歡迎聯絡我們的團隊。"
+    "contactDesc": "對 Marianas Open 有疑問嗎？歡迎聯絡我們的團隊。",
+    "federation": {
+      "eyebrow": "官方說明",
+      "title": "Marianas Sports Jiu-Jitsu Federation",
+      "intro": "致我們的運動員、道館、合作夥伴、贊助商、支持者及柔術界同仁：",
+      "photoAlt": "代表們在 SJJIF 大會上的合影",
+      "photoCaption": "SJJIF 大會",
+      "pullQuote": "從關島走向世界，讓世界來到關島。",
+      "factGuam": "總部位於關島的聯合會",
+      "factIndependent": "獨立舉辦的賽事與計畫",
+      "factInternational": "國際聯繫",
+      "p1": "針對我們收到的多項問題與詢問，Marianas Sports Jiu-Jitsu Federation（MSJJF）希望就我們的組織及國際隸屬關係作出說明。",
+      "p2": "MSJJF 是一家總部位於關島的獨立柔術聯合會，獨立營運自身的賽事、計畫、合作夥伴關係及國際聯繫。",
+      "p3": "MSJJF 與公認的國際柔術組織及聯合會保持隸屬與合作關係，包括 ASJJF、SJJIF、ASJJF DUMAU、SJJIF South America，以及全球柔術界的國際合作夥伴。",
+      "p4": "透過這些關係與我們的國際平台，MSJJF 自豪地協助關島登上世界舞台，將我們的島嶼與運動員和亞洲及其他地區的世界級選手、道館、官員、主辦單位及重大國際賽事連結起來。",
+      "p5": "Guam Marianas Open 是獲得國際認可的 ASJJF 五星級賽事，讓關島運動員能夠在家鄉參加國際認可平台上的比賽，同時歡迎世界級選手來到我們的島嶼競技。",
+      "p6": "我們的使命始終不止於一場賽事，而是為運動員創造機會、增強社區凝聚力，並持續提升關島在國際柔術界的地位。我們希望運動員有機會到世界各地參賽，也希望世界各地的人們來到關島體驗柔術。",
+      "p7": "我們發布此說明，僅為回應收到的問題，提供清晰、準確的資訊。我們十分尊重關島整個柔術界，以及所有持續為島上柔術運動發展作出貢獻的人士。我們將繼續關注運動員、我們能夠創造的機會，並自豪地在國際舞台上代表關島。",
+      "signature": "Marianas Sports Jiu-Jitsu Federation",
+      "tagline": "世界舞台上的關島"
+    }
   },
   "terms": {
     "title": "條款與細則",
@@ -374,7 +433,8 @@
     "total": "總計",
     "expandAll": "全部展開",
     "collapseAll": "全部收合",
-    "filterResults": "篩選成績"
+    "filterResults": "篩選成績",
+    "sourcedFrom": "成績來源"
   },
   "competitorProfile": {
     "title": "參賽者檔案",
@@ -538,7 +598,14 @@
   "search": {
     "title": "搜尋",
     "close": "關閉搜尋",
-    "placeholder": "搜尋運動員、學院、賽事..."
+    "placeholder": "搜尋運動員、學院、賽事...",
+    "start": "輸入內容開始搜尋…",
+    "navigate": "移動",
+    "select": "選擇",
+    "closeHint": "關閉",
+    "none": "找不到「{{query}}」的搜尋結果",
+    "independent": "無所屬道館",
+    "events": "賽事"
   },
   "season": {
     "phase": {
@@ -582,7 +649,8 @@
     "closePhoto": "關閉照片",
     "previousPhoto": "上一張照片",
     "nextPhoto": "下一張照片",
-    "photoProcessing": "照片預覽正在處理中。"
+    "photoProcessing": "照片預覽正在處理中。",
+    "photoCount_one": "{{count}} 張照片"
   },
   "officialRankings": {
     "seoTitle": "ASJJF官方排名",
@@ -762,5 +830,45 @@
       "uploaded_logo": "已上傳一般標誌",
       "uploaded_logo_dark": "已上傳深色版標誌"
     }
+  },
+  "academies": {
+    "badge": "道館",
+    "title": "隊伍與道館",
+    "summary": "{{count}} 家道館參加 Marianas Open 賽事",
+    "search": "搜尋道館…",
+    "empty": "找不到道館。",
+    "missing": "找不到道館",
+    "noSpecified": "未指定道館",
+    "athletes": "{{count}} 位運動員",
+    "events": "{{count}} 場賽事",
+    "more": "載入更多（{{shown}} / {{total}}）"
+  },
+  "error": {
+    "title": "讓我們回到賽場。",
+    "description": "無法載入此頁面。請重新載入再試一次，或返回首頁。",
+    "reload": "重新載入頁面"
+  },
+  "impact": {
+    "roi": "投資報酬",
+    "costs": "賽事成本與營運",
+    "generated": "為社區創造的價值",
+    "multiplier": "投資報酬倍數",
+    "perDollar": "每投入一美元的報酬",
+    "budget": "總預算",
+    "investment": "總投資額",
+    "economic": "經濟影響",
+    "tourism": "旅遊",
+    "competition": "競技",
+    "community": "社區",
+    "emptyTitle": "影響報告即將發布",
+    "emptyDescription": "我們正在彙整 Marianas Open 對島上社區旅遊、競技及經濟成長影響的資料。請稍後再來查看。",
+    "badge": "賽事影響報告",
+    "title": "影響與",
+    "transparency": "透明度",
+    "description": "Marianas Open 如何推動島上社區的旅遊、競技及經濟成長。",
+    "allocation": "資金分配",
+    "partnerTitle": "成為我們的合作夥伴",
+    "partnerDescription": "有興趣贊助 Marianas Open 嗎？與我們一起推動這項運動的發展，為社區帶來正面影響。",
+    "contact": "聯絡我們"
   }
 }

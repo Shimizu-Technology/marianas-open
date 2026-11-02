@@ -66,7 +66,9 @@
     "spectatorsValue": "5K+",
     "internationalReach": "国际影响力",
     "internationalReachDesc": "在韩国、日本、中国台湾地区、菲律宾和香港设有合作伙伴，并刊登于亚洲发行的 40,000 本纸质杂志。",
-    "mainEvent": "主赛事"
+    "mainEvent": "主赛事",
+    "partnerChampionship": "国际锦标赛",
+    "partnerSeries": "年度职业系列赛"
   },
   "event": {
     "title": "Guam Marianas Open 2026",
@@ -164,7 +166,28 @@
     "galleryVenue": "比赛场馆",
     "galleryPodium": "颁奖典礼",
     "registrationComingSoon": "报名即将开放",
-    "officialPoster": "官方海报"
+    "officialPoster": "官方海报",
+    "date": "日期待公布",
+    "buySpectatorTickets": "购买观赛门票",
+    "registerToCompete": "报名参赛",
+    "registerToCompeteGi": "报名参赛（Gi）",
+    "registerToCompeteNogi": "报名参赛（No-Gi）",
+    "spectatorAdmission": "观众入场",
+    "ticketsOnSale": "门票现已开售",
+    "ticketIntro": "观赛门票可在线或现场购买。参赛选手请使用单独的 ASJJF 报名链接。",
+    "admissionOption": "入场",
+    "earlyBird": "早鸟优惠",
+    "atTheDoor": "现场购票",
+    "earlyBirdDeadline": "早鸟优惠将于 {{date}} 结束。",
+    "earlyBirdLimited": "早鸟优惠限时提供。",
+    "inPersonPurchase": "现场购买",
+    "buyOnlineGuamTime": "在线购票",
+    "ticketsSoldOut": "门票已售罄",
+    "ticketsSoldOutDescription": "本赛事观赛门票已售罄。选手报名单独进行。",
+    "ticketSalesClosed": "门票销售已结束",
+    "ticketSalesClosedDescription": "本赛事观赛门票销售已结束。选手报名单独进行。",
+    "ticketProviderNote": "余票、服务费和结账条款由官方票务提供商决定。",
+    "ticketFlyerAlt": "{{eventName}} 官方观赛门票销售海报"
   },
   "calendar": {
     "title": "Guam Pro Series 2026",
@@ -184,7 +207,10 @@
     "pastResults": "往届成绩",
     "noPastEvents": "暂无往届赛事。",
     "completed": "已结束",
-    "roadToOpen": "资格系列赛"
+    "roadToOpen": "资格系列赛",
+    "titleDynamic": "Guam Pro Series {{year}}",
+    "noUpcomingEvents": "尚未公布即将举行的赛事",
+    "noUpcomingEventsDescription": "主办方发布后，下一轮赛事安排将显示在此处。"
   },
   "watch": {
     "title": "观看",
@@ -227,7 +253,7 @@
     "featured": "精选",
     "filterCategory": "组别",
     "noVideosYet": "暂无视频",
-    "noVideosYetDesc": "敬请稍后回来查看比赛视频和精彩集锦。",
+    "noVideosYetDesc": "请稍后回来观看比赛视频和精彩集锦。",
     "vs": "对阵",
     "weight": {
       "rooster": "雏鸡量级",
@@ -253,7 +279,15 @@
       "noGi": "无道服"
     },
     "clearFilters": "清除筛选条件",
-    "loadError": "无法加载视频。请刷新页面重试。"
+    "loadError": "无法加载视频。请刷新页面重试。",
+    "youtubeCta": "访问我们的 YouTube 频道",
+    "watchYoutube": "在 YouTube 上观看",
+    "clickYoutube": "点击前往 YouTube 观看",
+    "liveTitle": "直播 - {{event}}",
+    "closeVideo": "关闭视频",
+    "featuredTitle": "精选视频",
+    "featuredDesc": "观看 Marianas Open 赛事的最新集锦、完整比赛及精彩瞬间。",
+    "watchNow": "立即观看"
   },
   "share": {
     "defaultText": "快来了解 Marianas Open——国际巴西柔术锦标赛！",
@@ -276,7 +310,12 @@
     "philippines": "菲律宾",
     "taiwan": "中国台湾地区",
     "southKorea": "韩国",
-    "hongKong": "香港"
+    "hongKong": "香港",
+    "back": "返回",
+    "website": "网站",
+    "loading": "加载中…",
+    "dismiss": "关闭",
+    "cancelled": "已取消"
   },
   "shimizu": {
     "title": "由 Shimizu Technology 打造",
@@ -305,12 +344,32 @@
     "timeline2025": "来自 6 个国家的 1,300 多名参赛者，为关岛带来 200 万美元的经济影响。",
     "timeline2026": "国际 Pro Series 横跨 6 个国家，共举办 7 站赛事。",
     "contactTitle": "联系我们",
-    "contactDesc": "对 Marianas Open 有任何疑问？请联系我们的团队。"
+    "contactDesc": "对 Marianas Open 有任何疑问？请联系我们的团队。",
+    "federation": {
+      "eyebrow": "官方说明",
+      "title": "Marianas Sports Jiu-Jitsu Federation",
+      "intro": "致我们的运动员、道馆、合作伙伴、赞助商、支持者及柔术界同仁：",
+      "photoAlt": "代表们在 SJJIF 大会上的合影",
+      "photoCaption": "SJJIF 大会",
+      "pullQuote": "从关岛走向世界，让世界来到关岛。",
+      "factGuam": "总部位于关岛的联合会",
+      "factIndependent": "独立举办的赛事与项目",
+      "factInternational": "国际联系",
+      "p1": "针对我们收到的多个问题和咨询，Marianas Sports Jiu-Jitsu Federation（MSJJF）希望就我们的组织及国际隶属关系作出说明。",
+      "p2": "MSJJF 是一家总部位于关岛的独立柔术联合会，独立运营自身的赛事、项目、合作伙伴关系及国际联系。",
+      "p3": "MSJJF 与公认的国际柔术组织和联合会保持隶属及合作关系，包括 ASJJF、SJJIF、ASJJF DUMAU、SJJIF South America，以及全球柔术界的国际合作伙伴。",
+      "p4": "通过这些关系和我们的国际平台，MSJJF 自豪地帮助关岛走上世界舞台，将我们的岛屿和运动员与亚洲及其他地区的世界级选手、道馆、官员、主办方和重大国际赛事联系起来。",
+      "p5": "Guam Marianas Open 是获得国际认可的 ASJJF 五星级赛事，让关岛运动员能够在家乡参加国际认可平台上的比赛，同时欢迎世界级选手来到我们的岛屿竞技。",
+      "p6": "我们的使命始终不止于一场赛事，而是为运动员创造机会、增强社区凝聚力，并持续提升关岛在国际柔术界的地位。我们希望运动员有机会到世界各地参赛，也希望世界各地的人们来到关岛体验柔术。",
+      "p7": "我们发布此说明，仅为回应收到的问题，提供清晰、准确的信息。我们十分尊重关岛整个柔术界，以及所有持续为岛上柔术运动发展作出贡献的人士。我们将继续关注运动员、我们能够创造的机会，并自豪地在国际舞台上代表关岛。",
+      "signature": "Marianas Sports Jiu-Jitsu Federation",
+      "tagline": "世界舞台上的关岛"
+    }
   },
   "terms": {
     "title": "条款与条件",
     "lastUpdated": "根据官方报名条款",
-    "refund": "The registration fee is non-refundable.",
+    "refund": "报名费不予退还。",
     "liability": "本人特此就本人在参加或观看本赛事期间可能遭受或发生的任何及一切损害、人身伤害及损失，自行承担全部责任。",
     "injury": "本人知悉，参加本人特此报名参加的此类武术赛事，严重受伤并不少见，且存在死亡风险。本人亦知悉，如本人受伤，可能会因此毁容、残疾和/或丧失再次工作的能力。本人一经报名参加本次比赛，即表示本人同意、完全接受并自行承担本人可能遭受的任何及一切伤害责任。本人特此明确放弃本人或任何代表本人行事或经由本人主张权利之人，因本人参加本赛事和/或出现在赛事现场而遭受任何伤害，不论其性质、后果或对本人造成何种影响，而向 Fury Promotions、Marianas Open、Copa de Marianas、赛事推广方、运营方、赞助商、裁判官员、参赛者、非参赛人员或志愿者提出任何及一切索赔的权利。",
     "medical": "若本人受伤，本人授权赛事现场任何在场医疗人员采取其认为必要的任何措施，并同意就此使其免于承担责任。",
@@ -374,7 +433,8 @@
     "total": "总计",
     "expandAll": "全部展开",
     "collapseAll": "全部收起",
-    "filterResults": "筛选结果"
+    "filterResults": "筛选结果",
+    "sourcedFrom": "成绩来源"
   },
   "competitorProfile": {
     "title": "参赛者资料",
@@ -538,7 +598,14 @@
   "search": {
     "title": "搜索",
     "close": "关闭搜索",
-    "placeholder": "搜索运动员、学院、赛事..."
+    "placeholder": "搜索运动员、学院、赛事...",
+    "start": "输入内容开始搜索…",
+    "navigate": "移动",
+    "select": "选择",
+    "closeHint": "关闭",
+    "none": "未找到“{{query}}”的搜索结果",
+    "independent": "无所属道馆",
+    "events": "赛事"
   },
   "season": {
     "phase": {
@@ -582,7 +649,8 @@
     "closePhoto": "关闭照片",
     "previousPhoto": "上一张照片",
     "nextPhoto": "下一张照片",
-    "photoProcessing": "照片预览正在处理中。"
+    "photoProcessing": "照片预览正在处理中。",
+    "photoCount_one": "{{count}} 张照片"
   },
   "officialRankings": {
     "seoTitle": "ASJJF官方排名",
@@ -762,5 +830,45 @@
       "uploaded_logo": "常规标志已上传",
       "uploaded_logo_dark": "深色标志已上传"
     }
+  },
+  "academies": {
+    "badge": "道馆",
+    "title": "队伍与道馆",
+    "summary": "{{count}} 家道馆参加 Marianas Open 赛事",
+    "search": "搜索道馆…",
+    "empty": "未找到道馆。",
+    "missing": "未找到道馆",
+    "noSpecified": "未指定道馆",
+    "athletes": "{{count}} 位运动员",
+    "events": "{{count}} 场赛事",
+    "more": "加载更多（{{shown}} / {{total}}）"
+  },
+  "error": {
+    "title": "让我们回到赛场。",
+    "description": "无法加载此页面。请刷新重试，或返回首页。",
+    "reload": "刷新页面"
+  },
+  "impact": {
+    "roi": "投资回报",
+    "costs": "赛事成本与运营",
+    "generated": "为社区创造的价值",
+    "multiplier": "投资回报倍数",
+    "perDollar": "每投入一美元的回报",
+    "budget": "总预算",
+    "investment": "总投资额",
+    "economic": "经济影响",
+    "tourism": "旅游",
+    "competition": "竞技",
+    "community": "社区",
+    "emptyTitle": "影响报告即将发布",
+    "emptyDescription": "我们正在汇总 Marianas Open 对岛上社区旅游、竞技及经济增长影响的数据。请稍后再来查看。",
+    "badge": "赛事影响报告",
+    "title": "影响与",
+    "transparency": "透明度",
+    "description": "Marianas Open 如何推动岛上社区的旅游、竞技及经济增长。",
+    "allocation": "资金分配",
+    "partnerTitle": "成为我们的合作伙伴",
+    "partnerDescription": "有兴趣赞助 Marianas Open 吗？与我们一起推动这项运动的发展，为社区带来积极影响。",
+    "contact": "联系我们"
   }
 }

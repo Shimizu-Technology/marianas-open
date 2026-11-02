@@ -1,4 +1,5 @@
-import { useTranslation } from 'react-i18next';
+import { useOrg } from '../contexts/OrganizationContext';
+import { usePublicCopy } from '../hooks/usePublicCopy';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   AlertTriangle,
@@ -31,8 +32,9 @@ const SECTION_KEYS: Array<{ key: string; icon: LucideIcon }> = [
 ];
 
 export default function RulesPage() {
-  const { t } = useTranslation();
+  const { t } = usePublicCopy();
   const shouldReduceMotion = useReducedMotion();
+  const org = useOrg();
 
   const eventDayChecklist = t('rules.eventDayChecklist', {
     returnObjects: true,
@@ -294,18 +296,18 @@ export default function RulesPage() {
               </div>
               <div className="space-y-4">
                 <a
-                  href="mailto:moguam@marianasopen.com"
+                  href={`mailto:${org.contact_email}`}
                   className="flex items-center gap-3 text-text-secondary hover:text-gold-500 transition-colors"
                 >
                   <Mail size={16} className="shrink-0" />
-                  <span>moguam@marianasopen.com</span>
+                  <span>{org.contact_email}</span>
                 </a>
                 <a
-                  href="tel:+16717779044"
+                  href={`tel:${org.phone.replace(/[^\d+]/g, '')}`}
                   className="flex items-center gap-3 text-text-secondary hover:text-gold-500 transition-colors"
                 >
                   <Phone size={16} className="shrink-0" />
-                  <span>(671) 777-9044</span>
+                  <span>{org.phone}</span>
                 </a>
                 <p className="text-sm text-text-muted">
                   {t(

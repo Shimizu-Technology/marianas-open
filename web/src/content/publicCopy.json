@@ -1,0 +1,554 @@
+{
+  "hero.cta": {
+    "key": "hero_cta",
+    "section": "home",
+    "label": "Main event link text",
+    "preview": "Home: hero, partners and sponsors"
+  },
+  "hero.learnMore": {
+    "key": "hero_learnMore",
+    "section": "home",
+    "label": "Learn more",
+    "preview": "Home: hero, partners and sponsors"
+  },
+  "home.partnersTitle": {
+    "key": "home_partnersTitle",
+    "section": "home",
+    "label": "Partners title",
+    "preview": "Home: hero, partners and sponsors"
+  },
+  "home.partnersDesc": {
+    "key": "home_partnersDesc",
+    "section": "home",
+    "label": "Partners description",
+    "preview": "Home: hero, partners and sponsors"
+  },
+  "home.sponsorsTitle": {
+    "key": "home_sponsorsTitle",
+    "section": "home",
+    "label": "Sponsors title",
+    "preview": "Home: hero, partners and sponsors"
+  },
+  "home.sponsorsSectionHeading": {
+    "key": "home_sponsorsSectionHeading",
+    "section": "home",
+    "label": "Sponsors section heading",
+    "preview": "Home: hero, partners and sponsors"
+  },
+  "home.sponsorsIntro": {
+    "key": "home_sponsorsIntro",
+    "section": "home",
+    "label": "Sponsors intro",
+    "preview": "Home: hero, partners and sponsors"
+  },
+  "about.heroTitle": {
+    "key": "about_hero_title",
+    "section": "about",
+    "label": "Hero title",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.heroSubtitle": {
+    "key": "about_hero_subtitle",
+    "section": "about",
+    "label": "Hero subtitle",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.storyTitle": {
+    "key": "about_story_title",
+    "section": "about",
+    "label": "Story title",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.p1": {
+    "key": "about_p1",
+    "section": "about",
+    "label": "Paragraph 1",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.p2": {
+    "key": "about_p2",
+    "section": "about",
+    "label": "Paragraph 2",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.p3": {
+    "key": "about_p3",
+    "section": "about",
+    "label": "Paragraph 3",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.p4": {
+    "key": "about_p4",
+    "section": "about",
+    "label": "Paragraph 4",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.p5": {
+    "key": "about_p5",
+    "section": "about",
+    "label": "Paragraph 5",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.timelineTitle": {
+    "key": "about_timelineTitle",
+    "section": "about",
+    "label": "Timeline title",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.timeline2007": {
+    "key": "about_timeline2007",
+    "section": "about",
+    "label": "Timeline2007",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.timeline2015": {
+    "key": "about_timeline2015",
+    "section": "about",
+    "label": "Timeline2015",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.timeline2019": {
+    "key": "about_timeline2019",
+    "section": "about",
+    "label": "Timeline2019",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.timeline2023": {
+    "key": "about_timeline2023",
+    "section": "about",
+    "label": "Timeline2023",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.timeline2025": {
+    "key": "about_timeline2025",
+    "section": "about",
+    "label": "Timeline2025",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.timeline2026": {
+    "key": "about_timeline2026",
+    "section": "about",
+    "label": "Timeline2026",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.eyebrow": {
+    "key": "about_federation_eyebrow",
+    "section": "about",
+    "label": "Eyebrow",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.title": {
+    "key": "about_federation_title",
+    "section": "about",
+    "label": "Title",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.intro": {
+    "key": "about_federation_intro",
+    "section": "about",
+    "label": "Intro",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.photoCaption": {
+    "key": "about_federation_photoCaption",
+    "section": "about",
+    "label": "Photo caption",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.pullQuote": {
+    "key": "about_federation_pullQuote",
+    "section": "about",
+    "label": "Pull quote",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.factGuam": {
+    "key": "about_federation_factGuam",
+    "section": "about",
+    "label": "Fact guam",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.factIndependent": {
+    "key": "about_federation_factIndependent",
+    "section": "about",
+    "label": "Fact independent",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.factInternational": {
+    "key": "about_federation_factInternational",
+    "section": "about",
+    "label": "Fact international",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.p1": {
+    "key": "about_federation_p1",
+    "section": "about",
+    "label": "Paragraph 1",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.p2": {
+    "key": "about_federation_p2",
+    "section": "about",
+    "label": "Paragraph 2",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.p3": {
+    "key": "about_federation_p3",
+    "section": "about",
+    "label": "Paragraph 3",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.p4": {
+    "key": "about_federation_p4",
+    "section": "about",
+    "label": "Paragraph 4",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.p5": {
+    "key": "about_federation_p5",
+    "section": "about",
+    "label": "Paragraph 5",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.p6": {
+    "key": "about_federation_p6",
+    "section": "about",
+    "label": "Paragraph 6",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.p7": {
+    "key": "about_federation_p7",
+    "section": "about",
+    "label": "Paragraph 7",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.signature": {
+    "key": "about_federation_signature",
+    "section": "about",
+    "label": "Signature",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.federation.tagline": {
+    "key": "about_federation_tagline",
+    "section": "about",
+    "label": "Tagline",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.contactTitle": {
+    "key": "about_contactTitle",
+    "section": "about",
+    "label": "Contact title",
+    "preview": "About: story, federation statement and contact"
+  },
+  "about.contactDesc": {
+    "key": "about_contactDesc",
+    "section": "about",
+    "label": "Contact description",
+    "preview": "About: story, federation statement and contact"
+  },
+  "calendar.subtitle": {
+    "key": "calendar_subtitle",
+    "section": "calendar",
+    "label": "Subtitle",
+    "preview": "Calendar: series introduction"
+  },
+  "pastEvents.subtitle": {
+    "key": "pastEvents_subtitle",
+    "section": "past_events",
+    "label": "Subtitle",
+    "preview": "Past events: introduction"
+  },
+  "watch.subtitle": {
+    "key": "watch_subtitle",
+    "section": "watch",
+    "label": "Subtitle",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.youtubeCta": {
+    "key": "watch_youtubeCta",
+    "section": "watch",
+    "label": "Youtube cta",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.visionTitle": {
+    "key": "watch_visionTitle",
+    "section": "watch",
+    "label": "Vision title",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.comingSoonDesc": {
+    "key": "watch_comingSoonDesc",
+    "section": "watch",
+    "label": "Coming soon description",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.featureReplay": {
+    "key": "watch_featureReplay",
+    "section": "watch",
+    "label": "Feature replay",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.featureReplayDesc": {
+    "key": "watch_featureReplayDesc",
+    "section": "watch",
+    "label": "Feature replay description",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.featureSearch": {
+    "key": "watch_featureSearch",
+    "section": "watch",
+    "label": "Feature search",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.featureSearchDesc": {
+    "key": "watch_featureSearchDesc",
+    "section": "watch",
+    "label": "Feature search description",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.featureAI": {
+    "key": "watch_featureAI",
+    "section": "watch",
+    "label": "Feature ai",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.featureAIDesc": {
+    "key": "watch_featureAIDesc",
+    "section": "watch",
+    "label": "Feature aidesc",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.featureNotify": {
+    "key": "watch_featureNotify",
+    "section": "watch",
+    "label": "Feature notify",
+    "preview": "Watch: introduction and future plans"
+  },
+  "watch.featureNotifyDesc": {
+    "key": "watch_featureNotifyDesc",
+    "section": "watch",
+    "label": "Feature notify description",
+    "preview": "Watch: introduction and future plans"
+  },
+  "rules.subtitle": {
+    "key": "rules_subtitle",
+    "section": "rules",
+    "label": "Subtitle",
+    "preview": "Rules: introduction and contact"
+  },
+  "rules.intro": {
+    "key": "rules_intro",
+    "section": "rules",
+    "label": "Intro",
+    "preview": "Rules: introduction and contact"
+  },
+  "rules.note": {
+    "key": "rules_note",
+    "section": "rules",
+    "label": "Note",
+    "preview": "Rules: introduction and contact"
+  },
+  "rules.rulebookCopy": {
+    "key": "rules_rulebookCopy",
+    "section": "rules",
+    "label": "Rulebook copy",
+    "preview": "Rules: introduction and contact"
+  },
+  "rules.contactTitle": {
+    "key": "rules_contactTitle",
+    "section": "rules",
+    "label": "Contact title",
+    "preview": "Rules: introduction and contact"
+  },
+  "rules.contactSubtitle": {
+    "key": "rules_contactSubtitle",
+    "section": "rules",
+    "label": "Contact subtitle",
+    "preview": "Rules: introduction and contact"
+  },
+  "rules.contactNote": {
+    "key": "rules_contactNote",
+    "section": "rules",
+    "label": "Contact note",
+    "preview": "Rules: introduction and contact"
+  },
+  "footer.tagline": {
+    "key": "footer_tagline",
+    "section": "footer",
+    "label": "Tagline",
+    "preview": "Every public page: footer"
+  },
+  "footer.rights": {
+    "key": "footer_rights",
+    "section": "footer",
+    "label": "Rights",
+    "preview": "Every public page: footer"
+  },
+  "footer.builtBy": {
+    "key": "footer_builtBy",
+    "section": "footer",
+    "label": "Built by",
+    "preview": "Every public page: footer"
+  },
+  "calendar.subtitleDynamic": {
+    "key": "calendar_subtitleDynamic",
+    "section": "calendar",
+    "label": "Subtitle dynamic",
+    "preview": "Calendar: series introduction (keep {{count}})"
+  },
+  "calendar.subtitleSeriesDynamic": {
+    "key": "calendar_subtitleSeriesDynamic",
+    "section": "calendar",
+    "label": "Subtitle series dynamic",
+    "preview": "Calendar: series introduction (keep {{count}})"
+  },
+  "calendar.mapTitle": {
+    "key": "calendar_mapTitle",
+    "section": "calendar",
+    "label": "Map title",
+    "preview": "Calendar: series introduction (keep {{count}})"
+  },
+  "calendar.mapSubtitle": {
+    "key": "calendar_mapSubtitle",
+    "section": "calendar",
+    "label": "Map subtitle",
+    "preview": "Calendar: series introduction (keep {{count}})"
+  },
+  "impact.emptyTitle": {
+    "key": "impact_emptyTitle",
+    "section": "impact",
+    "label": "Empty title",
+    "preview": "Impact: sponsor invitation and page introduction"
+  },
+  "impact.emptyDescription": {
+    "key": "impact_emptyDescription",
+    "section": "impact",
+    "label": "Empty description",
+    "preview": "Impact: sponsor invitation and page introduction"
+  },
+  "impact.badge": {
+    "key": "impact_badge",
+    "section": "impact",
+    "label": "Badge",
+    "preview": "Impact: sponsor invitation and page introduction"
+  },
+  "impact.title": {
+    "key": "impact_title",
+    "section": "impact",
+    "label": "Title",
+    "preview": "Impact: sponsor invitation and page introduction"
+  },
+  "impact.transparency": {
+    "key": "impact_transparency",
+    "section": "impact",
+    "label": "Transparency",
+    "preview": "Impact: sponsor invitation and page introduction"
+  },
+  "impact.description": {
+    "key": "impact_description",
+    "section": "impact",
+    "label": "Description",
+    "preview": "Impact: sponsor invitation and page introduction"
+  },
+  "impact.partnerTitle": {
+    "key": "impact_partnerTitle",
+    "section": "impact",
+    "label": "Partner title",
+    "preview": "Impact: sponsor invitation and page introduction"
+  },
+  "impact.partnerDescription": {
+    "key": "impact_partnerDescription",
+    "section": "impact",
+    "label": "Partner description",
+    "preview": "Impact: sponsor invitation and page introduction"
+  },
+  "impact.contact": {
+    "key": "impact_contact",
+    "section": "impact",
+    "label": "Contact",
+    "preview": "Impact: sponsor invitation and page introduction"
+  },
+  "watch.featuredDesc": {
+    "key": "watch_featuredDesc",
+    "section": "watch",
+    "label": "Featured desc",
+    "preview": "Watch: public introduction"
+  },
+  "shimizu.title": {
+    "key": "shimizu_title",
+    "section": "home",
+    "label": "Title",
+    "preview": "Home: public introduction"
+  },
+  "shimizu.description": {
+    "key": "shimizu_description",
+    "section": "home",
+    "label": "Description",
+    "preview": "Home: public introduction"
+  },
+  "shimizu.cta": {
+    "key": "shimizu_cta",
+    "section": "home",
+    "label": "Cta",
+    "preview": "Home: public introduction"
+  },
+  "home.partnerChampionship": {
+    "key": "partner_copademarianas_label",
+    "section": "home",
+    "label": "partnerChampionship",
+    "preview": "Home: official partners"
+  },
+  "home.partnerSeries": {
+    "key": "partner_roadtotheopen_label",
+    "section": "home",
+    "label": "partnerSeries",
+    "preview": "Home: official partners"
+  },
+  "stats.competitors": {
+    "key": "stat_competitors",
+    "section": "stats",
+    "label": "Competitor count",
+    "preview": "Home and About: statistics"
+  },
+  "stats.competitorsLabel": {
+    "key": "stat_competitors_label",
+    "section": "stats",
+    "label": "competitorsLabel",
+    "preview": "Home and About: statistics"
+  },
+  "stats.countries": {
+    "key": "stat_countries",
+    "section": "stats",
+    "label": "Country count",
+    "preview": "Home and About: statistics"
+  },
+  "stats.countriesLabel": {
+    "key": "stat_countries_label",
+    "section": "stats",
+    "label": "countriesLabel",
+    "preview": "Home and About: statistics"
+  },
+  "stats.prizePool": {
+    "key": "stat_prize_pool",
+    "section": "stats",
+    "label": "Prize pool",
+    "preview": "Home and About: statistics"
+  },
+  "stats.prizePoolLabel": {
+    "key": "stat_prize_pool_label",
+    "section": "stats",
+    "label": "prizePoolLabel",
+    "preview": "Home and About: statistics"
+  },
+  "stats.since": {
+    "key": "stat_established",
+    "section": "stats",
+    "label": "Established year",
+    "preview": "Home and About: statistics"
+  },
+  "stats.sinceLabel": {
+    "key": "stat_established_label",
+    "section": "stats",
+    "label": "sinceLabel",
+    "preview": "Home and About: statistics"
+  }
+}

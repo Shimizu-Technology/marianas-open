@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { usePublicCopy } from '../hooks/usePublicCopy';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Calendar, ArrowRight, ExternalLink, Trophy, Clock } from 'lucide-react';
@@ -19,7 +19,7 @@ import { cycleHasMainEvent, eventPhase, getEventCycleYear } from '../utils/event
 // Qualifying series posters are now driven by events with poster_image_url set.
 
 export default function CalendarPage() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = usePublicCopy();
   const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
   const { events, loading } = useEvents();
@@ -204,7 +204,7 @@ export default function CalendarPage() {
             )}
             {cancelledEvents.length > 0 && (
               <div>
-                <h3 className="text-sm font-heading font-semibold text-text-muted uppercase tracking-wider mb-3">Cancelled</h3>
+                <h3 className="text-sm font-heading font-semibold text-text-muted uppercase tracking-wider mb-3">{t('common.cancelled')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {cancelledEvents.map((event, i) => (
                     <ScrollReveal key={event.id} delay={i * 0.08}>

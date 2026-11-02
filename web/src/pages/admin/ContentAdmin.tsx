@@ -1,3 +1,4 @@
+import copyEntries from '../../content/publicCopy.json';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Save, ChevronDown, ChevronRight, X, Loader2, Languages, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,6 +26,13 @@ const SECTION_LABELS: Record<string, string> = {
   stats: 'Statistics',
   featured: 'Featured Section',
   about: 'About Page',
+  home: 'Home — partners and sponsors',
+  calendar: 'Calendar',
+  past_events: 'Past events',
+  watch: 'Watch',
+  rules: 'Rules',
+  impact: 'Impact and sponsorship',
+  footer: 'Footer and social links',
   general: 'General',
 };
 
@@ -114,6 +122,7 @@ function SectionGroup({
                     <div>
                       <div className="text-sm font-medium text-text-primary">{entry.label}</div>
                       <div className="text-xs text-text-muted font-mono">{entry.key}</div>
+                      <p className="text-xs text-text-secondary">{Object.values(copyEntries).find(item => item.key === entry.key)?.preview || 'Preview on the public page for this section. Blank translations use the site default.'}</p>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -205,6 +214,7 @@ function SectionGroup({
                     <div className="flex items-center gap-3 mb-1">
                       <span className="text-sm font-medium text-text-primary">{entry.label}</span>
                       <span className="text-xs text-text-muted font-mono">{entry.key}</span>
+                      <p className="text-xs text-text-secondary">{Object.values(copyEntries).find(item => item.key === entry.key)?.preview || 'Preview on the public page for this section.'}</p>
                       <TranslationBadge status={entry.translation_status} />
                     </div>
                     <p className="text-sm text-text-secondary truncate">
@@ -326,7 +336,7 @@ export default function ContentAdmin() {
     );
   }
 
-  const sectionOrder = ['hero', 'stats', 'featured', 'about', 'general'];
+  const sectionOrder = ['hero', 'stats', 'featured', 'home', 'about', 'calendar', 'past_events', 'watch', 'rules', 'impact', 'footer', 'general'];
   const sortedSections = Object.keys(grouped).sort(
     (a, b) => (sectionOrder.indexOf(a) === -1 ? 99 : sectionOrder.indexOf(a)) - (sectionOrder.indexOf(b) === -1 ? 99 : sectionOrder.indexOf(b))
   );

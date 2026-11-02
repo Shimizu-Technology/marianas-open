@@ -66,7 +66,9 @@
     "spectatorsValue": "5K+",
     "internationalReach": "International Reach",
     "internationalReachDesc": "Partners in Korea, Japan, Taiwan, Philippines, and Hong Kong. Featured in 40,000 printed magazines across Asia.",
-    "mainEvent": "Main Event"
+    "mainEvent": "Main Event",
+    "partnerChampionship": "International Championship",
+    "partnerSeries": "Annual Pro Series"
   },
   "event": {
     "title": "Guam Marianas Open 2026",
@@ -277,7 +279,15 @@
       "noGi": "No-Gi"
     },
     "clearFilters": "Clear filters",
-    "loadError": "Videos could not be loaded. Please refresh to try again."
+    "loadError": "Videos could not be loaded. Please refresh to try again.",
+    "youtubeCta": "Visit Our YouTube Channel",
+    "watchYoutube": "Watch on YouTube",
+    "clickYoutube": "Click to watch on YouTube",
+    "liveTitle": "Live Stream - {{event}}",
+    "closeVideo": "Close video",
+    "featuredTitle": "Featured Videos",
+    "featuredDesc": "Catch the latest highlights, full matches, and standout moments from Marianas Open events.",
+    "watchNow": "Watch Now"
   },
   "share": {
     "defaultText": "Check out the Marianas Open — International BJJ Championship!",
@@ -300,7 +310,12 @@
     "philippines": "Philippines",
     "taiwan": "Taiwan",
     "southKorea": "South Korea",
-    "hongKong": "Hong Kong"
+    "hongKong": "Hong Kong",
+    "back": "Back",
+    "website": "Website",
+    "loading": "Loading...",
+    "dismiss": "Dismiss",
+    "cancelled": "Cancelled"
   },
   "shimizu": {
     "title": "Built by Shimizu Technology",
@@ -418,7 +433,8 @@
     "total": "Total",
     "expandAll": "Expand All",
     "collapseAll": "Collapse All",
-    "filterResults": "Filter Results"
+    "filterResults": "Filter Results",
+    "sourcedFrom": "Results sourced from"
   },
   "competitorProfile": {
     "title": "Competitor Profile",
@@ -582,7 +598,14 @@
   "search": {
     "title": "Search",
     "close": "Close search",
-    "placeholder": "Search competitors, academies, events..."
+    "placeholder": "Search competitors, academies, events...",
+    "start": "Start typing to search...",
+    "navigate": "navigate",
+    "select": "select",
+    "closeHint": "close",
+    "none": "No results found for \"{{query}}\"",
+    "independent": "Independent",
+    "events": "Events"
   },
   "season": {
     "phase": {
@@ -807,5 +830,45 @@
       "uploaded_logo": "Regular logo uploaded",
       "uploaded_logo_dark": "Dark logo uploaded"
     }
+  },
+  "academies": {
+    "badge": "Academies",
+    "title": "Teams & Academies",
+    "summary": "{{count}} academies competing across Marianas Open tournaments",
+    "search": "Search academies...",
+    "empty": "No academies found.",
+    "missing": "Academy not found",
+    "noSpecified": "No academy specified",
+    "athletes": "{{count}} athletes",
+    "events": "{{count}} events",
+    "more": "Load more ({{shown}} of {{total}})"
+  },
+  "error": {
+    "title": "Let’s get you back to the action.",
+    "description": "This page couldn’t load. Reload to try again, or return to the home page.",
+    "reload": "Reload page"
+  },
+  "impact": {
+    "roi": "Return on Investment",
+    "costs": "Event costs & operations",
+    "generated": "Generated for the community",
+    "multiplier": "ROI Multiplier",
+    "perDollar": "Return per dollar invested",
+    "budget": "Total Budget",
+    "investment": "Total Investment",
+    "economic": "Economic Impact",
+    "tourism": "Tourism",
+    "competition": "Competition",
+    "community": "Community",
+    "emptyTitle": "Impact Report Coming Soon",
+    "emptyDescription": "We're compiling data on how the Marianas Open impacts tourism, competition, and economic growth for our island community. Check back soon.",
+    "badge": "Event Impact Report",
+    "title": "Impact &",
+    "transparency": "Transparency",
+    "description": "How the Marianas Open drives tourism, competition, and economic growth for our island community.",
+    "allocation": "Fund Allocation",
+    "partnerTitle": "Partner With Us",
+    "partnerDescription": "Interested in sponsoring the Marianas Open? Join us in growing the sport and making a positive impact on our community.",
+    "contact": "Get in Touch"
   }
 }

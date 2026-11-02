@@ -1,3 +1,4 @@
+import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +25,7 @@ const MAX_PER_CATEGORY = 5;
 
 export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   useModalFocus(open, dialogRef, onClose);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -182,13 +183,13 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
         <div className="max-h-[60dvh] overflow-y-auto overscroll-contain">
           {hasQuery && !loading && !hasResults && (
             <div className="px-5 py-10 text-center text-text-muted text-sm">
-              No results found for "{query}"
+              {t('search.none', { query })}
             </div>
           )}
 
           {!hasQuery && !loading && (
             <div className="px-5 py-10 text-center text-text-muted text-sm">
-              Start typing to search...
+              {t('search.start')}
             </div>
           )}
 
@@ -196,7 +197,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
             <div className="py-2">
               <div className="px-5 py-2 flex items-center gap-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
                 <Users className="w-3.5 h-3.5" />
-                Competitors
+                {t('nav.competitors')}
               </div>
               {results.competitors.map((c) => {
                 runningIndex++;
@@ -221,7 +222,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                       <div className="text-sm font-medium truncate">{c.full_name}</div>
                       <div className="text-xs text-text-muted truncate flex items-center gap-1.5">
                         {c.belt_rank && <span className={`inline-block w-2 h-2 rounded-full ${beltColor(c.belt_rank)}`} />}
-                        {c.academy || 'Independent'}
+                        {c.academy || t('search.independent')}
                         {c.country_code && <span className="ml-1">{c.country_code}</span>}
                       </div>
                     </div>
@@ -236,7 +237,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
             <div className="py-2">
               <div className="px-5 py-2 flex items-center gap-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
                 <Building2 className="w-3.5 h-3.5" />
-                Academies
+                {t('academies.badge')}
               </div>
               {results.academies.map((a) => {
                 runningIndex++;
@@ -260,7 +261,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">{a.name}</div>
                       <div className="text-xs text-text-muted truncate">
-                        {a.athletes} athlete{a.athletes !== 1 ? 's' : ''}
+                        {t('academies.athletes', { count: a.athletes })}
                         {a.country_code && <span className="ml-1">· {a.country_code}</span>}
                       </div>
                     </div>
@@ -275,7 +276,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
             <div className="py-2">
               <div className="px-5 py-2 flex items-center gap-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
                 <CalendarDays className="w-3.5 h-3.5" />
-                Events
+                {t('search.events')}
               </div>
               {results.events.map((ev) => {
                 runningIndex++;
@@ -296,7 +297,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                       <div className="text-sm font-medium truncate">{ev.name}</div>
                       <div className="text-xs text-text-muted truncate">
                         {ev.city}{ev.country ? `, ${ev.country}` : ''}
-                        {ev.date && <span className="ml-1">· {new Date(ev.date).toLocaleDateString()}</span>}
+                        {ev.date && <span className="ml-1">· {parseDateLocalSafe(ev.date).toLocaleDateString(getDateLocale(i18n.language))}</span>}
                       </div>
                     </div>
                     <ArrowRight className="w-4 h-4 shrink-0 opacity-40" />
@@ -311,13 +312,13 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
         <div className="px-5 py-3 border-t border-white/10 flex items-center justify-between text-xs text-text-muted">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-xs font-mono">↑↓</kbd> navigate
+              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-xs font-mono">↑↓</kbd> {t('search.navigate')}
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-xs font-mono">↵</kbd> select
+              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-xs font-mono">↵</kbd> {t('search.select')}
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-xs font-mono">esc</kbd> close
+              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-xs font-mono">esc</kbd> {t('search.closeHint')}
             </span>
           </div>
         </div>

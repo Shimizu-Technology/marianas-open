@@ -14,7 +14,7 @@ vi.mock('../components/SocialShare', () => ({ default: () => null }));
 vi.mock('../components/QRShare', () => ({ default: () => null }));
 vi.mock('../components/ScrollReveal', () => ({ default: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 vi.mock('../hooks/useApi', () => ({ useEvents: () => ({ events: [{ name: 'No videos 2027' }] }) }));
-vi.mock('../services/api', () => ({ api: { getVideos: vi.fn() } }));
+vi.mock('../services/api', () => ({ api: { getVideos: vi.fn(), getSiteContents: vi.fn().mockResolvedValue({}) } }));
 const i18n = createInstance();
 await i18n.init({ lng: 'en', resources: { en: { translation: en } }, interpolation: { escapeValue: false } });
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
