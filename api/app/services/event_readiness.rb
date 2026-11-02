@@ -61,6 +61,9 @@ class EventReadiness
       # Early registration can legitimately open in the preceding calendar year.
       # Exempt only text still identical to its saved ASJJF evidence.
       next if sourced.key?(field) && value.as_json == sourced[field].as_json
+      # Reworded fee tables are exempt when every amount, deadline and option still
+      # matches the saved ASJJF evidence.
+      next if field == "registration_fee_sections" && info_snapshot && fees_match_evidence?(value)
       [ field.humanize, text_section(field), value.to_json ]
     end
     { event_schedule_items: %w[time description], prize_categories: %w[name], event_accommodations: %w[hotel_name description rate_info inclusions room_types booking_code booking_url] }.each do |association, fields|
@@ -73,6 +76,62 @@ class EventReadiness
       years = text.scan(/\b20\d{2}\b/).uniq.reject { |value| value.to_i == year }
       { label: label, section: section, years: years } if years.any?
     end
+  end
+
+  # Every row must be an exact, fully parsed restatement of the evidence: a known
+  # age group, one plain amount, one complete dated deadline and the same option.
+  # Anything left over (surcharges, extra years, notes, empty sections) is not
+  # exempt and stays subject to the stale-year check.
+  FEE_GROUPS = { "kid" => "kids", "kids" => "kids", "adult" => "adults", "adults" => "adults",
+                 "master" => "masters", "masters" => "masters", "juvenile" => "juveniles", "juveniles" => "juveniles" }.freeze
+
+  def fees_match_evidence?(sections)
+    sections = Array(sections).map { |section| section.to_h.stringify_keys }
+    return false if sections.empty? || sections.any? { |section| Array(section["rows"]).empty? }
+    evidence = Array(info_snapshot.parsed_summary["fees"]).map do |fee|
+      [ fee_group(fee["group"]), fee_amount(fee["amount"]), fee_iso_date(fee["until"]), fee_option(fee["division"]) ]
+    end
+    ours = sections.flat_map do |section|
+      Array(section["rows"]).map do |row|
+        row = row.to_h.stringify_keys
+        [ fee_group(section["title"]), fee_amount(row["fee"]), fee_deadline(row["deadline"]), fee_option(row["option"]) ]
+      end
+    end
+    rows_complete = (ours + evidence).none? { |row| row.any?(&:nil?) }
+    rows_complete && ours.sort_by(&:to_s) == evidence.sort_by(&:to_s)
+  end
+
+  def fee_group(title)
+    FEE_GROUPS[title.to_s.downcase.squish.delete_suffix(" prices").delete_suffix(" price").delete_suffix(" fees")]
+  end
+
+  # One amount, optionally with a currency symbol or code, and nothing else.
+  def fee_amount(value)
+    match = value.to_s.strip.match(/\A(?:[A-Z]{0,3}[$¥￥₱₩€£]|[A-Z]{3}\s)?\s*(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d+))?(?:\s[A-Z]{3})?\z/)
+    return unless match
+    BigDecimal("#{match[1].delete(',')}.#{match[2] || 0}").to_s("F").sub(/\.0\z/, "")
+  end
+
+  def fee_iso_date(value)
+    value.to_s.match?(/\A\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2})?)?\z/) ? Date.iso8601(value.to_s[0, 10]).iso8601 : nil
+  rescue Date::Error
+    nil
+  end
+
+  # "Until November 21, 2026" or "Until November 21, 2026 11:59 PM", complete and with a year.
+  def fee_deadline(value)
+    match = value.to_s.squish.match(/\A(?:until\s+)?([a-z]+)\.? (\d{1,2}), (\d{4})(?: \d{1,2}:\d{2} [ap]m)?\z/i)
+    return unless match
+    [ "%B %d %Y", "%b %d %Y" ].each do |format|
+      return Date.strptime("#{match[1]} #{match[2]} #{match[3]}", format).iso8601
+    rescue Date::Error
+      next
+    end
+    nil
+  end
+
+  def fee_option(value)
+    value.to_s.downcase.squish.presence
   end
 
   def text_section(field)

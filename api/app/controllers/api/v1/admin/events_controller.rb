@@ -19,7 +19,7 @@ module Api
         end
 
         before_action :complete_past_events, only: [:index]
-        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :upload_ticket_banner, :remove_ticket_banner, :import_results_preview, :import_results, :retranslate, :clone, :publish, :unpublish, :fill_asjjf]
+        before_action :set_event, only: [:show, :update, :destroy, :upload_image, :upload_poster, :remove_poster, :upload_ticket_banner, :remove_ticket_banner, :import_results_preview, :import_results, :retranslate, :clone, :publish, :unpublish, :fill_asjjf, :verify_asjjf]
 
         def index
           org = Organization.first
@@ -59,6 +59,11 @@ module Api
 
         def fill_asjjf
           Asjjf::EventFacts.new(@event, actor: current_user).call(params[:asjjf_event_id])
+          render json: { event: @event.reload.admin_json, message: facts_message(@event) }
+        end
+
+        def verify_asjjf
+          Asjjf::EventFacts.new(@event, actor: current_user).verify(params[:asjjf_event_id])
           render json: { event: @event.reload.admin_json, message: facts_message(@event) }
         end
 
@@ -192,6 +197,7 @@ module Api
           case event.asjjf_info_status
           when "pending" then "ASJJF snapshot is not available yet. A fetch is queued; fill facts again after the saved page is parsed. No facts were guessed."
           when "applied" then "Dates, venue, stars, fees and deadlines filled from the saved ASJJF page. Review before publishing."
+          when "verified" then "Dates and star rating match the saved ASJJF page. The event is linked to that evidence and its wording was not changed."
           else "Draft created. Dates, links, prices and live state were cleared. Confirm copied schedule and prize rows before publishing."
           end
         end
