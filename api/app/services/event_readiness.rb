@@ -78,36 +78,60 @@ class EventReadiness
     end
   end
 
+  # Every row must be an exact, fully parsed restatement of the evidence: a known
+  # age group, one plain amount, one complete dated deadline and the same option.
+  # Anything left over (surcharges, extra years, notes, empty sections) is not
+  # exempt and stays subject to the stale-year check.
+  FEE_GROUPS = { "kid" => "kids", "kids" => "kids", "adult" => "adults", "adults" => "adults",
+                 "master" => "masters", "masters" => "masters", "juvenile" => "juveniles", "juveniles" => "juveniles" }.freeze
+
   def fees_match_evidence?(sections)
+    sections = Array(sections).map { |section| section.to_h.stringify_keys }
+    return false if sections.empty? || sections.any? { |section| Array(section["rows"]).empty? }
     evidence = Array(info_snapshot.parsed_summary["fees"]).map do |fee|
-      [ fee_group(fee["group"]), fee_amount(fee["amount"].presence || fee["fee_text"]), fee_date(fee["until"]), fee_option(fee["division"]) ]
+      [ fee_group(fee["group"]), fee_amount(fee["amount"]), fee_iso_date(fee["until"]), fee_option(fee["division"]) ]
     end
-    ours = Array(sections).flat_map do |section|
-      Array(section["rows"] || section[:rows]).map do |row|
-        row = row.stringify_keys
-        [ fee_group(section["title"] || section[:title]), fee_amount(row["fee"]), fee_date(row["deadline"].to_s.sub(/\Auntil\s+/i, "")), fee_option(row["option"]) ]
+    ours = sections.flat_map do |section|
+      Array(section["rows"]).map do |row|
+        row = row.to_h.stringify_keys
+        [ fee_group(section["title"]), fee_amount(row["fee"]), fee_deadline(row["deadline"]), fee_option(row["option"]) ]
       end
     end
-    ours.any? && ours.none? { |row| row.any?(&:nil?) } && ours.sort_by(&:to_s) == evidence.sort_by(&:to_s)
+    rows_complete = (ours + evidence).none? { |row| row.any?(&:nil?) }
+    rows_complete && ours.sort_by(&:to_s) == evidence.sort_by(&:to_s)
   end
 
   def fee_group(title)
-    title.to_s.downcase[/\b(kid|adult|master|junior|teen)/, 1] || title.to_s.downcase.squish
+    FEE_GROUPS[title.to_s.downcase.squish.delete_suffix(" prices").delete_suffix(" price").delete_suffix(" fees")]
   end
 
+  # One amount, optionally with a currency symbol or code, and nothing else.
   def fee_amount(value)
-    digits = value.to_s.delete(",")[/\d+(?:\.\d+)?/]
-    digits && BigDecimal(digits).to_s("F").sub(/\.0\z/, "")
+    match = value.to_s.strip.match(/\A(?:[A-Z]{0,3}[$¥￥₱₩€£]|[A-Z]{3}\s)?\s*(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d+))?(?:\s[A-Z]{3})?\z/)
+    return unless match
+    BigDecimal("#{match[1].delete(',')}.#{match[2] || 0}").to_s("F").sub(/\.0\z/, "")
   end
 
-  def fee_date(value)
-    Date.parse(value.to_s).iso8601
+  def fee_iso_date(value)
+    value.to_s.match?(/\A\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2})?)?\z/) ? Date.iso8601(value.to_s[0, 10]).iso8601 : nil
   rescue Date::Error
     nil
   end
 
+  # "Until November 21, 2026" or "Until November 21, 2026 11:59 PM", complete and with a year.
+  def fee_deadline(value)
+    match = value.to_s.squish.match(/\A(?:until\s+)?([a-z]+)\.? (\d{1,2}), (\d{4})(?: \d{1,2}:\d{2} [ap]m)?\z/i)
+    return unless match
+    [ "%B %d %Y", "%b %d %Y" ].each do |format|
+      return Date.strptime("#{match[1]} #{match[2]} #{match[3]}", format).iso8601
+    rescue Date::Error
+      next
+    end
+    nil
+  end
+
   def fee_option(value)
-    value.to_s.downcase.squish
+    value.to_s.downcase.squish.presence
   end
 
   def text_section(field)
