@@ -2,7 +2,7 @@ import type { Event } from '../services/api';
 import { eventPhase } from '../utils/events';
 import { getEventHeroImage, resolveMediaUrl } from '../utils/images';
 
-/** Compare canonical names, retaining place/series words and removing edition years only. */
+/** Compare series/city names across edition years and the later optional Guam prefix. */
 export function eventSeriesName(name: string): string {
   return name.normalize('NFKC').toLowerCase().replace(/^guam\s+/, '').replace(/\b(?:19|20)\d{2}\b/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 }

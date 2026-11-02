@@ -47,3 +47,11 @@ it('shows a localized opening notice and event-info link before the opening date
   expect(screen.queryByRole('button', { name: 'Register' })).toBeNull();
   vi.useRealTimers();
 });
+
+it('keeps a future opening notice visible even before ASJJF URLs are published', () => {
+  vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-02T00:00:00Z'));
+  render(<RegisterControl event={{ registration_opens_on: '2027-01-01' }} />);
+  expect(screen.getByRole('status').textContent).toBe('Registration opens January 1, 2027');
+  expect(screen.queryByRole('link')).toBeNull();
+  vi.useRealTimers();
+});

@@ -388,7 +388,7 @@ export default function EventDetailPage() {
     : [];
   const registrationLinks = getRegistrationLinks(mainEvent);
   const isRegistrationClosed = isClosed;
-  const canShowRegistrationActions = !isRegistrationClosed && registrationLinks.hasAny;
+  const canShowRegistrationActions = !isRegistrationClosed && (registrationLinks.hasAny || !!mainEvent.registration_opens_on || !!mainEvent.registration_not_open);
   const registrationIsOpen = registrationState(mainEvent) === 'open' && registrationLinks.hasAny;
   const canShowRegistrationSection = !isRegistrationClosed && displayRegistrationSteps.length > 0;
   const ticketSalesUrl = normalizeExternalUrl(mainEvent?.ticket_sales_url);
