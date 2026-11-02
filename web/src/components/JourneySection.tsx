@@ -11,7 +11,7 @@ export default function JourneySection({ events }: { events: Event[] }) {
   return <section className="public-section bg-surface/40">
     <div className="public-container">
       <SectionHeading title={t('journey.title')} description={t(cycleHasMainEvent(events, year) ? 'journey.subtitle' : 'journey.subtitleSeries')} />
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">{ordered.map(event => <PublicEventCard key={event.id} event={event} events={events} />)}</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">{ordered.map(event => <PublicEventCard compact key={event.id} event={event} events={events} />)}</div>
     </div>
   </section>;
 }
