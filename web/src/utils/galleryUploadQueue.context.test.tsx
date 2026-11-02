@@ -91,7 +91,9 @@ function completedCheckpoints(expected: number) {
 
 describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage)', () => {
   it('starts files queued while the idle check is finishing without waiting for polling', async () => {
-    vi.spyOn(window, 'setInterval').mockReturnValue(0);
+    const disabledInterval = window.setInterval(() => {}, 60_000);
+    window.clearInterval(disabledInterval);
+    vi.spyOn(window, 'setInterval').mockReturnValue(disabledInterval);
     let releaseIdle!: () => void;
     let idleFinished!: () => void;
     const idlePause = new Promise<void>(resolve => { releaseIdle = resolve; });
