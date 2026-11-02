@@ -81,6 +81,21 @@ class AdminAttentionTest < ActionDispatch::IntegrationTest
     assert_equal "/admin/videos?unavailable=1", data.fetch("unavailable_videos")["href"]
   end
 
+  test "pending ASJJF calendar reviews count until decided and drafts leave once published" do
+    snapshot = AsjjfSnapshot.create!(url: "https://asjjf.org/main/eventsBySeason/381", asjjf_id: 381, page_type: "season_calendar",
+      html: "<html></html>", source: "admin_upload", outcome: "ok", fetched_at: Time.current, parse_status: "parsed")
+    draft = event("calendar-draft", status: "draft")
+    published = event("calendar-published")
+    review = ->(kind, target, status = "pending") { AsjjfCalendarReview.create!(snapshot: snapshot, event: target, kind: kind, title: target.name, fingerprint: SecureRandom.hex, status: status) }
+    review.call("new_draft", draft)
+    review.call("change", published)
+    review.call("change", published, "dismissed")
+    review.call("new_draft", published)
+    calendar = items.find { |item| item["key"] == "calendar_reviews" }
+    assert_equal 2, calendar["count"]
+    assert_equal "/admin/events#asjjf-calendar", calendar["href"]
+  end
+
   test "photos group failed and stalled imports and unreviewed flags by event" do
     e = event("photos")
     %w[failed queued processing completed].each_with_index do |status, index|

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_230000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -76,6 +76,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
     t.datetime "starts_at"
     t.string "title", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "asjjf_calendar_reviews", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "event_id"
+    t.string "fingerprint", null: false
+    t.string "kind", null: false
+    t.jsonb "new_values", default: {}, null: false
+    t.jsonb "old_values", default: {}, null: false
+    t.datetime "reviewed_at"
+    t.bigint "snapshot_id", null: false
+    t.string "status", default: "pending", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_asjjf_calendar_reviews_on_event_id"
+    t.index ["fingerprint"], name: "index_asjjf_calendar_reviews_on_fingerprint", unique: true
+    t.index ["snapshot_id"], name: "index_asjjf_calendar_reviews_on_snapshot_id"
+    t.index ["status", "id"], name: "index_asjjf_calendar_reviews_on_status_and_id"
+  end
+
+  create_table "asjjf_calendar_runs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "season_id", null: false
+    t.integer "season_year"
+    t.bigint "snapshot_id", null: false
+    t.jsonb "summary", default: {}, null: false
+    t.datetime "updated_at", null: false
+    t.index ["snapshot_id"], name: "index_asjjf_calendar_runs_on_snapshot_id", unique: true
   end
 
   create_table "asjjf_fetch_requests", force: :cascade do |t|
@@ -510,6 +538,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
   end
 
   create_table "events", force: :cascade do |t|
+    t.bigint "asjjf_calendar_snapshot_id"
     t.jsonb "asjjf_event_ids", default: []
     t.bigint "asjjf_info_id"
     t.bigint "asjjf_info_snapshot_id"
@@ -538,6 +567,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
     t.jsonb "registration_fee_sections", default: [], null: false
     t.jsonb "registration_info_items", default: [], null: false
     t.boolean "registration_not_open", default: false, null: false
+    t.date "registration_opens_on"
     t.jsonb "registration_steps", default: [], null: false
     t.string "registration_url"
     t.string "registration_url_gi"
@@ -570,6 +600,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
     t.string "venue_name"
     t.text "visa_description"
     t.jsonb "visa_items", default: [], null: false
+    t.index ["asjjf_calendar_snapshot_id"], name: "index_events_on_asjjf_calendar_snapshot_id"
     t.index ["organization_id"], name: "index_events_on_organization_id"
     t.index ["results_sync_run_id"], name: "index_events_on_results_sync_run_id"
     t.index ["season_year"], name: "index_events_on_season_year"
@@ -924,6 +955,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
   add_foreign_key "academies", "academies", column: "parent_id"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "asjjf_calendar_reviews", "asjjf_snapshots", column: "snapshot_id"
+  add_foreign_key "asjjf_calendar_reviews", "events"
+  add_foreign_key "asjjf_calendar_runs", "asjjf_snapshots", column: "snapshot_id"
   add_foreign_key "asjjf_fetch_requests", "asjjf_snapshots", column: "snapshot_id"
   add_foreign_key "asjjf_ranking_divisions", "asjjf_ranking_lists"
   add_foreign_key "asjjf_ranking_divisions", "asjjf_snapshots", column: "source_snapshot_id", on_delete: :nullify
@@ -955,6 +989,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
   add_foreign_key "event_results", "competitors"
   add_foreign_key "event_results", "events"
   add_foreign_key "event_schedule_items", "events"
+  add_foreign_key "events", "asjjf_snapshots", column: "asjjf_calendar_snapshot_id"
   add_foreign_key "events", "events", column: "source_event_id", on_delete: :nullify
   add_foreign_key "events", "organizations"
   add_foreign_key "events", "results_sync_runs", on_delete: :nullify

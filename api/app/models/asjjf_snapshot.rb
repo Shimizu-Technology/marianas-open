@@ -53,6 +53,7 @@ class AsjjfSnapshot < ApplicationRecord
     held = ranking_holds.pluck(:id)
     referenced = [ AsjjfRankingList, AsjjfRankingDivision, AsjjfRankingEntry, AsjjfRankingSuggestion ]
       .flat_map { |model| model.where.not(source_snapshot_id: nil).distinct.pluck(:source_snapshot_id) }
+    referenced += AsjjfCalendarRun.pluck(:snapshot_id) + AsjjfCalendarReview.distinct.pluck(:snapshot_id) + Event.where.not(asjjf_calendar_snapshot_id: nil).pluck(:asjjf_calendar_snapshot_id)
     where("created_at < ?", before).where.not(id: keep).where.not(id: referenced + held).find_each(&:destroy!)
   end
 end

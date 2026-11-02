@@ -4,6 +4,29 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 export type TranslationsBlob = Record<string, Record<string, unknown>>;
 export type TranslationStatus = 'untranslated' | 'pending' | 'translated' | 'failed';
 
+export interface AsjjfCalendarReview {
+  id: number;
+  kind: 'new_draft' | 'change' | 'missing' | 'ambiguous';
+  status: string;
+  title: string;
+  event_id: number | null;
+  event_status: string | null;
+  snapshot_id: number;
+  source_url: string;
+  source_checked_at: string;
+  old_values: Record<string, unknown>;
+  new_values: Record<string, unknown>;
+}
+export interface AsjjfCalendarResponse {
+  last_checked_at: string | null;
+  last_check_status: string | null;
+  source_url: string;
+  reviews: AsjjfCalendarReview[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
 export interface CompetitorProfileResult {
   event_id: number;
   event_name: string;
@@ -1080,6 +1103,9 @@ export const api = {
   admin: {
     getAttention: () => fetchApi<AdminAttention>('/api/v1/admin/attention', {}, true),
     // ASJJF intake stores snapshots only; it does not apply published results.
+    getAsjjfCalendar: (page = 1) => fetchApi<AsjjfCalendarResponse>(`/api/v1/admin/asjjf/calendar?page=${page}`, {}, true),
+    decideAsjjfCalendar: (id: number, decision: 'apply' | 'dismiss') =>
+      fetchApi<{ review: AsjjfCalendarReview }>(`/api/v1/admin/asjjf/calendar/${id}/decide`, { method: 'POST', body: JSON.stringify({ decision }) }, true),
     getAsjjfStatus: () => fetchApi<AsjjfStatus>('/api/v1/admin/asjjf/status', {}, true),
     checkAsjjf: (eventId: number) =>
       fetchApi<{ queued_count: number }>(`/api/v1/admin/events/${eventId}/asjjf_check`, { method: 'POST' }, true),

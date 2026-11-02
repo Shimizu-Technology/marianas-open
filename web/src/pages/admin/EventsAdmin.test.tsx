@@ -14,6 +14,7 @@ vi.mock('../../components/admin/event-editor/AccommodationsSection', () => ({
 }))
 let saved = eventEditorFixture()
 beforeEach(() => {
+  vi.spyOn(api.admin, 'getAsjjfCalendar').mockResolvedValue({ last_checked_at: null, last_check_status: null, source_url: 'https://asjjf.org/main/eventsBySeason/381', reviews: [], total: 0, page: 1, per_page: 25 })
   saved = eventEditorFixture()
   vi.spyOn(api.admin, 'getEvents').mockImplementation(async () => ({ events: [saved] }))
   vi.spyOn(api, 'getCurrentUser').mockResolvedValue({ user: { role: 'staff' } } as Awaited<
@@ -240,4 +241,18 @@ it('lets a viewer inspect publishing checks but disables saving, publishing and 
   const files = Array.from(document.querySelectorAll<HTMLInputElement>('input[type="file"]'))
   expect(files.length).toBeGreaterThan(0)
   expect(files.every(input => input.disabled)).toBe(true)
+})
+
+it('opens a newly discovered calendar draft that was absent from the loaded event list', async () => {
+  vi.mocked(api.admin.getEvents).mockResolvedValueOnce({ events: [] }).mockResolvedValue({ events: [saved] })
+  vi.mocked(api.admin.getAsjjfCalendar).mockResolvedValue({
+    last_checked_at: '2026-11-02T01:00:00Z', last_check_status: 'parsed', source_url: 'https://asjjf.org/main/eventsBySeason/381',
+    total: 1, page: 1, per_page: 25,
+    reviews: [{ id: 1, kind: 'new_draft', status: 'pending', title: saved.name, event_id: saved.id, event_status: 'draft', snapshot_id: 4,
+      source_url: 'https://asjjf.org/main/eventsBySeason/381', source_checked_at: '2026-11-02T01:00:00Z', old_values: {}, new_values: { date: saved.date } }],
+  })
+  render(<MemoryRouter initialEntries={['/admin/events']}><EventsAdmin /></MemoryRouter>)
+  fireEvent.click(await screen.findByRole('link', { name: 'Open draft' }))
+  await waitFor(() => expect((screen.getByRole('textbox', { name: 'Name' }) as HTMLInputElement).value).toBe(saved.name))
+  expect(api.admin.getEvents).toHaveBeenCalledTimes(2)
 })

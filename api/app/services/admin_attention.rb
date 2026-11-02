@@ -1,7 +1,7 @@
 # Read-only registry: add one source method here to extend the dashboard. Sources
 # return item hashes (or arrays), never serialize large admin resource collections.
 class AdminAttention
-  SOURCES = %i[held_results stale_results failed_fetches fetcher_pause fetcher_heartbeat identity_reviews unavailable_videos photo_imports photo_reviews event_readiness missing_registration missing_results expiring_sponsors].freeze
+  SOURCES = %i[held_results stale_results failed_fetches fetcher_pause fetcher_heartbeat identity_reviews calendar_reviews unavailable_videos photo_imports photo_reviews event_readiness missing_registration missing_results expiring_sponsors].freeze
   READINESS_ACTIONS = {
     "name" => "Set the event name", "slug" => "Choose a unique public URL", "season" => "Set the season year",
     "date" => "Set dates within this season", "venue" => "Set the venue", "registration" => "Add a registration link or mark it not open yet",
@@ -75,6 +75,13 @@ class AdminAttention
 
   def identity_reviews
     item("identity_reviews", :identities, "warning", "New academy names need a decision", "These names look like existing academies. Decide whether each is the same academy or a new one.", IdentityReview.where(status: "pending").count, "/admin/academies#identity-reviews")
+  end
+
+  def calendar_reviews
+    # Same visibility as the Events calendar panel: drafts leave once published.
+    pending = AsjjfCalendarReview.where(status: "pending")
+    pending = pending.where.not(kind: "new_draft").or(pending.where(kind: "new_draft", event_id: Event.where(status: "draft").select(:id)))
+    item("calendar_reviews", :events, "warning", "ASJJF calendar updates need review", "ASJJF listed a new event or changed details for one of ours. Review each item on the Events page, then publish, apply or dismiss it.", pending.count, "/admin/events#asjjf-calendar")
   end
 
   def unavailable_videos

@@ -42,6 +42,7 @@ class Event < ApplicationRecord
   has_many :event_schedule_items, dependent: :destroy
   has_many :prize_categories, dependent: :destroy
   has_many :videos, dependent: :nullify
+  has_many :asjjf_calendar_reviews, dependent: :nullify
   has_many :event_asjjf_sources, dependent: :destroy
   has_many :event_results, dependent: :destroy
   has_many :results_sync_runs, dependent: :destroy
@@ -161,7 +162,7 @@ class Event < ApplicationRecord
     unless admin
       payload["event_schedule_items"] = event_schedule_items.select(&:confirmed?).as_json(except: [:created_at, :updated_at])
       payload["prize_categories"] = prize_categories.select(&:confirmed?).as_json(except: [:created_at, :updated_at])
-      payload.except!("source_event_id", "content_review_required", "asjjf_info_snapshot_id", "asjjf_info_status")
+      payload.except!("asjjf_calendar_snapshot_id", "source_event_id", "content_review_required", "asjjf_info_snapshot_id", "asjjf_info_status")
     end
     payload
   end

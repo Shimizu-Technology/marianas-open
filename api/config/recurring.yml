@@ -44,3 +44,7 @@ requeue_stale_gallery_imports:
 check_video_availability:
   class: CheckAllVideoAvailabilityJob
   schedule: every day at 2am UTC
+
+plan_asjjf_calendar:
+  class: PlanAsjjfCalendarJob
+  schedule: every Monday at 2pm UTC
