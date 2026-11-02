@@ -265,7 +265,8 @@
       "heavy": "Pesado",
       "superHeavy": "Super Pesado",
       "ultraHeavy": "Pesadíssimo",
-      "openClass": "Classe Aberta"
+      "openClass": "Classe Aberta",
+      "openWeight": "Absoluto"
     },
     "belt": {
       "white": "Branca",
@@ -439,8 +440,8 @@
     "closeFilters": "Fechar filtros",
     "showResults": "Mostrar resultados",
     "otherDivisions": "Outras divisões",
-    "placementsCount": "Colocações: {{count}}",
-    "divisionsCount": "Divisões: {{count}}",
+    "placementsCount": "Colocações: {{count, number}}",
+    "divisionsCount": "Divisões: {{count, number}}",
     "placements": "Colocações"
   },
   "competitorProfile": {
@@ -848,7 +849,7 @@
     "missing": "Academia não encontrada",
     "noSpecified": "Nenhuma academia especificada",
     "athletes": "{{count}} atletas",
-    "events": "{{count}} eventos",
+    "events": "{{count, number}} eventos",
     "more": "Carregar mais ({{shown}} de {{total}})"
   },
   "error": {
@@ -899,6 +900,6 @@
     "downloadError": "Falha no download. Tente novamente."
   },
   "visualB": {
-    "athleteCount": "Atletas nos resultados dos torneios: {{count}}"
+    "athleteCount": "Atletas nos resultados dos torneios: {{count, number}}"
   }
 }

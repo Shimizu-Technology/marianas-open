@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo, useCallback, useId } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Search, ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { formatNumber } from '../utils/numbers';
+import { divisionLabel } from './rankings/divisionLabel';
+import { matchesResultSearch } from './results/resultSearch';
 import CountryFlag from './CountryFlag';
 import { Button, Card, Chip, SectionHeading } from './ui';
 import DivisionLabel from './results/DivisionLabel';
@@ -25,7 +28,7 @@ const beltOrder = [
 const medalColor = ['text-text-primary', 'text-gold-400', 'text-gray-300', 'text-orange-300'];
 
 function PlacementCard({ result, beltKnown }: { result: EventResult; beltKnown: boolean }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // #116's API serializes the canonical display name in competitor_name.
   const path = result.competitor_id
     ? `/competitors/${result.competitor_id}`
@@ -38,7 +41,7 @@ function PlacementCard({ result, beltKnown }: { result: EventResult; beltKnown: 
         >
           {result.placement <= 3
             ? t(`results.placementBadge${result.placement}`)
-            : `#${result.placement}`}
+            : `#${formatNumber(result.placement, i18n.language)}`}
         </span>
         {result.country_code && <CountryFlag code={result.country_code} />}
       </div>
@@ -52,9 +55,7 @@ function PlacementCard({ result, beltKnown }: { result: EventResult; beltKnown: 
         <p className="mt-1 break-words text-sm text-text-secondary">{result.academy}</p>
       )}
       {!beltKnown && result.belt_rank && (
-        <Chip className="mt-3">
-          {t(`watch.belt.${result.belt_rank.toLowerCase()}`, titleCase(result.belt_rank))}
-        </Chip>
+        <Chip className="mt-3">{divisionLabel(titleCase(result.belt_rank), t)}</Chip>
       )}
     </Card>
   );
@@ -109,7 +110,7 @@ function DivisionGroup({
 }
 
 function ResultsSummary({ summary }: { summary: EventResultsSummary }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (
     <div className="mb-8 space-y-4">
       <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -117,7 +118,10 @@ function ResultsSummary({ summary }: { summary: EventResultsSummary }) {
           <Card key={label} className="p-4 sm:p-5">
             <dt className="text-sm text-text-secondary">{t(`results.${label}`)}</dt>
             <dd className="mt-1 font-heading text-3xl font-semibold tabular-nums">
-              {[summary.total_results, summary.divisions, summary.countries, summary.academies][i]}
+              {formatNumber(
+                [summary.total_results, summary.divisions, summary.countries, summary.academies][i],
+                i18n.language
+              )}
             </dd>
           </Card>
         ))}
@@ -136,9 +140,11 @@ function ResultsSummary({ summary }: { summary: EventResultsSummary }) {
                 {Object.entries(summary.belt_breakdown).map(([belt, count]) => (
                   <div key={belt}>
                     <dt className="text-sm text-text-secondary">
-                      {t(`watch.belt.${belt}`, titleCase(belt))}
+                      {divisionLabel(titleCase(belt), t)}
                     </dt>
-                    <dd className="text-xl font-semibold tabular-nums">{count}</dd>
+                    <dd className="text-xl font-semibold tabular-nums">
+                      {formatNumber(count, i18n.language)}
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -152,14 +158,18 @@ function ResultsSummary({ summary }: { summary: EventResultsSummary }) {
               <ol className="space-y-4">
                 {summary.top_academies.slice(0, 10).map((academy, i) => (
                   <li key={academy.name} className="flex items-start gap-3 text-sm">
-                    <span className="w-5 shrink-0 text-text-secondary tabular-nums">{i + 1}</span>
+                    <span className="w-5 shrink-0 text-text-secondary tabular-nums">
+                      {formatNumber(i + 1, i18n.language)}
+                    </span>
                     <div className="min-w-0 flex-1">
                       <p className="break-words font-medium">{academy.name}</p>
                       <dl className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-text-secondary">
                         {(['gold', 'silver', 'bronze'] as const).map((medal, index) => (
                           <div key={medal} className={`flex gap-1 ${medalColor[index + 1]}`}>
                             <dt>{t(`competitorProfile.${medal}`)}</dt>
-                            <dd className="tabular-nums">{academy[medal]}</dd>
+                            <dd className="tabular-nums">
+                              {formatNumber(academy[medal], i18n.language)}
+                            </dd>
                           </div>
                         ))}
                       </dl>
@@ -186,7 +196,7 @@ export default function EventResultsSection({
   sourceUrls,
   onReady,
 }: EventResultsSectionProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [results, setResults] = useState<EventResultDivision[]>([]);
   const [summary, setSummary] = useState<EventResultsSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -275,10 +285,7 @@ export default function EventResultsSection({
           results: row.results.filter((result) => {
             const query = search.trim().toLocaleLowerCase();
             return (
-              (!query ||
-                `${result.competitor_name} ${result.academy || ''} ${row.division}`
-                  .toLocaleLowerCase()
-                  .includes(query)) &&
+              matchesResultSearch(query, result.competitor_name, result.academy, row.division) &&
               (!belt || result.belt_rank === belt) &&
               (!gender || result.gender === gender) &&
               (!weight || result.weight_class === weight)
@@ -358,7 +365,7 @@ export default function EventResultsSection({
             <option value="">{t(`results.${field.label}`)}</option>
             {field.options.map((value) => (
               <option value={value} key={value}>
-                {titleCase(value.replace(/_/g, ' '))}
+                {divisionLabel(titleCase(value.replace(/_/g, ' ')), t)}
               </option>
             ))}
           </select>
@@ -445,7 +452,7 @@ export default function EventResultsSection({
               <Button variant="secondary" onClick={() => setSheetOpen(true)} aria-haspopup="dialog">
                 <SlidersHorizontal size={16} aria-hidden="true" />
                 {t('results.filters')}
-                {activeCount > 0 && ` (${activeCount})`}
+                {activeCount > 0 && ` (${formatNumber(activeCount, i18n.language)})`}
               </Button>
             </div>
           </div>
@@ -476,9 +483,7 @@ export default function EventResultsSection({
                     className="flex min-h-16 w-full items-center justify-between gap-3 p-4 text-left sm:p-5"
                   >
                     <span className="font-heading text-xl font-semibold">
-                      {group.belt
-                        ? t(`watch.belt.${group.belt.toLowerCase()}`, group.belt)
-                        : t('results.otherDivisions')}
+                      {group.belt ? divisionLabel(group.belt, t) : t('results.otherDivisions')}
                       <span className="ml-3 text-sm font-normal text-text-secondary">
                         {t('results.divisionsCount', { count: group.count })}
                       </span>
@@ -502,9 +507,9 @@ export default function EventResultsSection({
                             className="flex min-h-12 w-full items-center justify-between gap-3 py-3 text-left"
                           >
                             <span className="font-medium">
-                              {age || t('results.otherDivisions')}
+                              {age ? divisionLabel(age, t) : t('results.otherDivisions')}
                               <span className="ml-2 text-sm text-text-secondary">
-                                ({rows.length})
+                                ({formatNumber(rows.length, i18n.language)})
                               </span>
                             </span>
                             <ChevronDown

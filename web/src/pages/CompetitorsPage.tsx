@@ -1,3 +1,4 @@
+import { formatNumber } from '../utils/numbers';
 import CountryFlag from '../components/CountryFlag';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,11 +36,12 @@ function BeltBadge({ rank }: { rank: string }) {
 }
 
 function MedalRow({ gold, silver, bronze }: { gold: number; silver: number; bronze: number }) {
+  const { i18n } = useTranslation();
   return (
     <div className="flex items-center gap-2 text-xs">
-      {gold > 0 && <span className="flex items-center gap-0.5 text-yellow-400 font-semibold"><Medal className="w-3.5 h-3.5" />{gold}</span>}
-      {silver > 0 && <span className="flex items-center gap-0.5 text-gray-300 font-semibold"><Medal className="w-3.5 h-3.5" />{silver}</span>}
-      {bronze > 0 && <span className="flex items-center gap-0.5 text-orange-400 font-semibold"><Medal className="w-3.5 h-3.5" />{bronze}</span>}
+      {gold > 0 && <span className="flex items-center gap-0.5 text-yellow-400 font-semibold"><Medal className="w-3.5 h-3.5" />{formatNumber(gold, i18n.language)}</span>}
+      {silver > 0 && <span className="flex items-center gap-0.5 text-gray-300 font-semibold"><Medal className="w-3.5 h-3.5" />{formatNumber(silver, i18n.language)}</span>}
+      {bronze > 0 && <span className="flex items-center gap-0.5 text-orange-400 font-semibold"><Medal className="w-3.5 h-3.5" />{formatNumber(bronze, i18n.language)}</span>}
     </div>
   );
 }
@@ -94,7 +96,7 @@ function CompetitorCard({ competitor }: { competitor: Competitor }) {
 }
 
 export default function CompetitorsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [competitors, setCompetitors] = useState<Competitor[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -203,7 +205,7 @@ export default function CompetitorsPage() {
             </div>
             {hasFilters && (
               <div className="mt-3 flex items-center gap-2">
-                <span className="text-xs text-text-muted">{total} {t('competitors.results')}</span>
+                <span className="text-xs text-text-muted">{formatNumber(total, i18n.language)} {t('competitors.results')}</span>
                 <button onClick={() => { setSearchInput(''); setSearch(''); setBeltFilter(''); setCountryFilter(''); }}
                   className="text-xs text-gold hover:text-gold/80 transition-colors">
                   {t('competitors.clearFilters')}
@@ -243,7 +245,7 @@ export default function CompetitorsPage() {
                   ) : (
                     <ChevronDown className="w-4 h-4" />
                   )}
-                  {t('academies.more', { shown: competitors.length, total })}
+                  {t('academies.more', { shown: formatNumber(competitors.length, i18n.language), total: formatNumber(total, i18n.language) })}
                 </button>
               </div>
             )}

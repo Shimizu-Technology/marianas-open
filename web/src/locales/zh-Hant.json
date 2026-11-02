@@ -265,7 +265,8 @@
       "heavy": "重量級",
       "superHeavy": "超重量級",
       "ultraHeavy": "極重量級",
-      "openClass": "無差別級"
+      "openClass": "無差別級",
+      "openWeight": "無差別級"
     },
     "belt": {
       "white": "白帶",
@@ -439,8 +440,8 @@
     "closeFilters": "關閉篩選",
     "showResults": "顯示結果",
     "otherDivisions": "其他組別",
-    "placementsCount": "獲獎名次：{{count}}",
-    "divisionsCount": "組別數：{{count}}",
+    "placementsCount": "獲獎名次：{{count, number}}",
+    "divisionsCount": "組別數：{{count, number}}",
     "placements": "獲獎紀錄"
   },
   "competitorProfile": {
@@ -847,7 +848,7 @@
     "missing": "找不到道館",
     "noSpecified": "未指定道館",
     "athletes": "{{count}} 位運動員",
-    "events": "{{count}} 場賽事",
+    "events": "{{count, number}} 場賽事",
     "more": "載入更多（{{shown}} / {{total}}）"
   },
   "error": {
@@ -898,6 +899,6 @@
     "downloadError": "下載失敗，請重試。"
   },
   "visualB": {
-    "athleteCount": "賽事成績中的運動員：{{count}}"
+    "athleteCount": "賽事成績中的運動員：{{count, number}}"
   }
 }

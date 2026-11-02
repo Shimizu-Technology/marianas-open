@@ -50,3 +50,31 @@ it.each(['final-export.jpg', '455A8210s', 'IMG_1234.JPG'])(
     expect(publicPhotoLabel({ caption, title: null } as EventGalleryImage)).toBe('');
   }
 );
+
+it('rejects filename candidates individually before selecting a useful caption or title', () => {
+  expect(
+    publicPhotoLabel({
+      caption: 'final-export.jpg',
+      title: 'Championship final',
+    } as EventGalleryImage)
+  ).toBe('Championship final');
+  expect(
+    publicPhotoLabel({
+      caption: 'Championship podium',
+      title: 'final-export.gif',
+    } as EventGalleryImage)
+  ).toBe('Championship podium');
+  expect(
+    publicPhotoLabel({
+      caption: 'final-export.heif',
+      title: 'final-export.TIFF',
+    } as EventGalleryImage)
+  ).toBe('');
+  expect(
+    publicPhotoLabel({
+      original_filename: 'Custom final.jpg',
+      caption: 'Custom final',
+      title: 'Championship final',
+    } as EventGalleryImage)
+  ).toBe('Championship final');
+});
