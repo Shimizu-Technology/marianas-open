@@ -49,11 +49,11 @@ class GalleryUploadPolicyTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "policy remains staff-only and event-scoped" do
+  test "policy requires sign-in and allows read-only viewers" do
     get "#{@base}/upload_policy"
     assert_response :unauthorized
     @user.update!(role: "viewer")
     get "#{@base}/upload_policy", headers: @headers
-    assert_response :forbidden
+    assert_response :success
   end
 end
