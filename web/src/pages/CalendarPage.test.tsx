@@ -29,7 +29,7 @@ it('shows an honest date placeholder for undated overrides in both calendar tabs
   render(<MemoryRouter><CalendarPage /></MemoryRouter>)
   expect(screen.getAllByText('Date to be announced').length).toBeGreaterThan(0)
   expect(screen.queryByText(/Invalid Date|October 18, 2026/)).toBeNull()
-  fireEvent.click(screen.getByRole('button', { name: 'Past results' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Past Results' }))
   expect(screen.getByRole('heading', { name: '2027' })).toBeTruthy()
   expect(screen.getAllByText('Date to be announced').length).toBeGreaterThan(0)
 })

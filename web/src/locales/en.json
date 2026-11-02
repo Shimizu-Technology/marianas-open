@@ -18,7 +18,7 @@
   },
   "pastEvents": {
     "badge": "Event Archive",
-    "title": "Past events",
+    "title": "Past Events",
     "subtitle": "Explore the history of the Marianas Open and Pro Series across Asia and the Pacific.",
     "noEvents": "No past events found.",
     "event": "event",
@@ -205,7 +205,7 @@
     "legendProSeries": "Pro Series",
     "legendGrandChampionship": "Grand Championship",
     "upcoming": "Upcoming",
-    "pastResults": "Past results",
+    "pastResults": "Past Results",
     "noPastEvents": "No past events yet.",
     "noUpcomingEvents": "No upcoming events announced",
     "noUpcomingEventsDescription": "The next event cycle will appear here as soon as the organizers publish it.",
@@ -455,7 +455,7 @@
   },
   "journey": {
     "badge": "Pro Series Circuit",
-    "title": "Follow the journey",
+    "title": "Follow the Journey",
     "subtitle": "Compete across Asia-Pacific. Earn ranking points. Qualify for the Grand Championship in Guam.",
     "subtitleSeries": "Compete across Asia-Pacific and earn ASJJF ranking points.",
     "grandChampionship": "Grand Championship",
