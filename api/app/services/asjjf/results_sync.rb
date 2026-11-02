@@ -113,7 +113,7 @@ module Asjjf
       ].to_json)
       { summary: totals.merge(divisions: divisions.values, relabeled_divisions: relabel_count,
           messages: messages, conflicts: @conflicts, missing: @assembly.missing,
-          snapshot_ids: @assembly.snapshot_ids, fingerprint: fingerprint, approvable: @assembly.complete? && @blocking_guards.empty?,
+          expected_pages: @assembly.expected_pages.sort_by(&:to_s), snapshot_ids: @assembly.snapshot_ids, fingerprint: fingerprint, approvable: @assembly.complete? && @blocking_guards.empty?,
           first_import: @existing.none? { |row| row.source == "asjjf" }) }
     end
 
@@ -261,8 +261,18 @@ module Asjjf
 
     def record_run(status, trigger, proposal)
       summary = proposal[:summary].merge(unlinked_competitors: @unlinked || unlinked_report)
-      run = @event.results_sync_runs.create!(trigger: trigger, status: status, diff_summary: summary,
-        guard_failures: @guards, applied_at: status == "applied" ? Time.current : nil)
+      # The event/evidence locks serialize snapshot and scheduled evaluations. Only
+      # the latest still-incomplete run can accumulate arrivals for this page set.
+      latest = @event.results_sync_runs.order(id: :desc).first if status == "incomplete"
+      if latest&.status == "incomplete" && latest.diff_summary["expected_pages"] == summary[:expected_pages]
+        summary[:evaluations] = latest.diff_summary.fetch("evaluations", 1).to_i + 1
+        latest.update!(diff_summary: summary, guard_failures: @guards, updated_at: Time.current)
+        run = latest
+      else
+        summary[:evaluations] = 1 if status == "incomplete"
+        run = @event.results_sync_runs.create!(trigger: trigger, status: status, diff_summary: summary,
+          guard_failures: @guards, applied_at: status == "applied" ? Time.current : nil)
+      end
       @event.update_columns(results_sync_status: status, results_last_checked_at: Time.current, results_sync_run_id: run.id)
       run
     end

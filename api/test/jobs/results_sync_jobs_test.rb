@@ -67,6 +67,20 @@ class ResultsSyncJobsTest < ActiveSupport::TestCase
     Asjjf::ResultsAlert.define_singleton_method(:deliver, original) if original
   end
 
+  test "scheduled and snapshot incomplete evaluations never send email" do
+    @event.event_asjjf_sources.create!(asjjf_event_id: 2062, discipline: "gi", derived_from: "admin")
+    sent = []
+    original = Asjjf::ResultsAlert.method(:deliver)
+    Asjjf::ResultsAlert.define_singleton_method(:deliver) { |run| sent << run.status }
+    PlanResultsSyncJob.perform_now
+    3.times { EvaluateResultsSyncJob.perform_now(@event.id) }
+    assert_equal 1, @event.results_sync_runs.count
+    assert_equal 4, @event.results_sync_runs.first.diff_summary["evaluations"]
+    assert_empty sent
+  ensure
+    Asjjf::ResultsAlert.define_singleton_method(:deliver, original) if original
+  end
+
   test "failed sync sends an alert and email delivery uses configured Resend recipients" do
     complete_snapshots(@event)
     original_link = CompetitorLinker.method(:find_or_create)

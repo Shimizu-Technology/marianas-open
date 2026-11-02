@@ -31,6 +31,60 @@ class AsjjfResultsSyncTest < ActiveSupport::TestCase
     assert_nil @event.reload.results_imported_at
   end
 
+  test "snapshot arrivals refresh one incomplete run until the pages can apply" do
+    pages = complete_snapshots(@event)
+    missing = pages.pop.attributes.except("id", "created_at", "updated_at")
+    AsjjfSnapshot.find_by!(url: missing["url"]).destroy!
+    arriving = pages.pop
+    arriving.update!(parse_status: "failed")
+    first = sync(@event, trigger: "scheduled")
+    assert_equal 2, first.diff_summary["missing"].size
+    checked_at = first.updated_at
+    travel 1.minute do
+      arriving.update!(parse_status: "parsed", fetched_at: Time.current)
+      assert_no_difference "ResultsSyncRun.count" do
+        refreshed = sync(@event)
+        assert_equal first.id, refreshed.id
+        assert_equal 2, refreshed.diff_summary["evaluations"]
+        assert_equal 1, refreshed.diff_summary["missing"].size
+        assert_includes refreshed.diff_summary["snapshot_ids"], arriving.id
+        assert refreshed.updated_at > checked_at
+        assert_equal "scheduled", refreshed.trigger
+      end
+    end
+    AsjjfSnapshot.create!(missing)
+    assert_difference "ResultsSyncRun.count", 1 do
+      applied = sync(@event)
+      assert_equal "applied", applied.status
+      assert_not_equal first.id, applied.id
+      assert_equal "incomplete", first.reload.status
+    end
+  end
+
+  test "changing expected sources or intervening outcomes starts another incomplete run" do
+    @event.event_asjjf_sources.create!(asjjf_event_id: 2062, discipline: "gi", derived_from: "admin")
+    first = sync(@event)
+    @event.event_asjjf_sources.create!(asjjf_event_id: 2063, discipline: "nogi", derived_from: "admin")
+    second = sync(@event)
+    assert_not_equal first.id, second.id
+    assert_equal 10, second.diff_summary["expected_pages"].size
+    @event.results_sync_runs.create!(trigger: "snapshot", status: "failed", error: "fixture")
+    assert_not_equal second.id, sync(@event).id
+  end
+
+  test "completion creates a held run and preserves its existing deduplication" do
+    pages = complete_snapshots(@event)
+    last = pages.last
+    last.update!(parse_status: "failed")
+    incomplete = sync(@event)
+    last.update!(parse_status: "parsed")
+    held = sync(@event, apply: false)
+    assert_equal "held", held.status
+    assert_not_equal incomplete.id, held.id
+    assert_equal held.id, sync(@event, apply: false).id
+    assert_equal 2, @event.results_sync_runs.count
+  end
+
   test "new failed challenged or pending evidence prevents using stale successes" do
     latest = complete_snapshots(@event).last
     %w[error challenged].each do |outcome|

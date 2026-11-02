@@ -1,10 +1,10 @@
 module Asjjf
   class ResultsAssembler
-    attr_reader :rows, :missing, :guard_failures, :snapshot_ids, :evidence
+    attr_reader :rows, :missing, :guard_failures, :snapshot_ids, :evidence, :expected_pages
 
     def initialize(event)
       @event = event
-      @rows, @missing, @guard_failures, @snapshot_ids, @evidence = [], [], [], [], []
+      @rows, @missing, @guard_failures, @snapshot_ids, @evidence, @expected_pages = [], [], [], [], [], []
     end
 
     def call
@@ -25,6 +25,7 @@ module Asjjf
         .order(fetched_at: :desc, id: :desc).to_a
       pages = [ [ "event_results", nil, nil ] ] + %w[MALE FEMALE].product(%w[ADULT KIDS]).map { |gender, age| [ "results_list", gender, age ] }
       selected = pages.filter_map do |type, gender, age|
+        @expected_pages << [ source.asjjf_event_id, type, gender, age ]
         label = "#{source.asjjf_event_id}: #{type} #{[ gender, age ].compact.join(' ')}".strip
         snapshot = snapshots.find { |item| matches?(item, type, gender, age) }
         pending = AsjjfFetchRequest.where(page_type: type, status: %w[pending leased blocked failed]).where("created_at > ?", snapshot&.created_at || Time.at(0)).any? do |request|
