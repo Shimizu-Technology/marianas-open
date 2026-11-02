@@ -83,6 +83,7 @@ Rails.application.routes.draw do
           end
           resources :event_gallery_images, only: [:index, :create, :update, :destroy], path: 'gallery-images' do
             collection do
+              get :upload_policy
               post :prepare_direct_upload
               post :complete_direct_upload
               patch :bulk_update

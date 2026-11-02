@@ -13,6 +13,7 @@ import { GalleryUploadQueueStore, GALLERY_QUEUE_STORAGE_ERROR } from './galleryU
 import imageCompression from 'browser-image-compression';
 
 vi.mock('../services/api', () => ({ api: { admin: {
+  getGalleryUploadPolicy: vi.fn(async () => ({ upload_policy: { content_types: ['image/jpeg', 'image/png', 'image/tiff'], extensions: ['.jpg', '.jpeg', '.png', '.tif', '.tiff'], type_label: 'JPEG, PNG, TIFF' } })),
   createGalleryUploadBatch: vi.fn(), prepareEventGalleryDirectUpload: vi.fn(), completeEventGalleryDirectUpload: vi.fn(),
 } } }));
 vi.mock('browser-image-compression', () => ({ default: vi.fn() }));
@@ -257,6 +258,26 @@ describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage
       signed_id: 'signed-fixture', batch_id: 8, title: '', alt_text: '', caption: 'Day 1', category: 'day-1', sort_order: 0, active: false,
     }, expect.objectContaining({ signal: expect.anything(), isCurrent: expect.any(Function) }));
     expect(JSON.stringify(vi.mocked(api.admin.completeEventGalleryDirectUpload).mock.calls)).not.toContain(cameraFile.name);
+  });
+
+  it('keeps JPEG queuing durable offline when the capability request fails', async () => {
+    vi.mocked(api.admin.getGalleryUploadPolicy).mockRejectedValueOnce(new Error('offline'));
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    render(<View />);
+    await waitFor(() => expect(queue.isRestoring).toBe(false));
+    await act(async () => { await queue.startUpload(options()); });
+    const saved = await store.list('clerk-a');
+    expect(saved).toHaveLength(1);
+    expect(saved[0].task.status).toBe('queued');
+    expect(api.admin.prepareEventGalleryDirectUpload).not.toHaveBeenCalled();
+  });
+
+  it('rejects unsupported HEIC before persisting a queue record', async () => {
+    render(<View />);
+    await waitFor(() => expect(queue.isRestoring).toBe(false));
+    await expect(queue.startUpload(options([new File(['photo'], 'phone.heic', { type: 'image/heic' })])))
+      .rejects.toThrow('This photo is HEIC');
+    expect(await store.list('clerk-a')).toHaveLength(0);
   });
 
   it('checksums a large non-JPEG in chunks without changing the uploaded bytes', async () => {

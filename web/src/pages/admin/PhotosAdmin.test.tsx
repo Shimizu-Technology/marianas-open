@@ -9,8 +9,6 @@ const { startUpload } = vi.hoisted(() => ({ startUpload: vi.fn().mockResolvedVal
 vi.mock('@clerk/clerk-react', () => ({ useAuth: () => ({ userId: 'staff-fixture' }) }));
 vi.mock('../../contexts/GalleryUploadContext', () => ({
   useGalleryUploads: () => ({ tasks: [], startUpload }),
-  GALLERY_IMAGE_ACCEPT: 'image/jpeg',
-  isSupportedGalleryImage: (file: File) => file.type === 'image/jpeg' && file.size > 0,
 }));
 vi.mock('../../utils/zipIntake', () => ({ ZIP_MAX_BYTES: 4 * 1024 ** 3, zipQueue: { load: vi.fn().mockResolvedValue(undefined), save: vi.fn(), remove: vi.fn() }, sendSavedZip: vi.fn() }));
 
@@ -20,6 +18,7 @@ const albums = [{ id: 1, name: 'Podium', sort_order: 0, count: 884, cover_url: '
 const settings = { timezone: 'Pacific/Guam', hold_flagged: false };
 beforeEach(() => {
   startUpload.mockClear();
+  vi.spyOn(api.admin, 'getGalleryUploadPolicy').mockResolvedValue({ upload_policy: { content_types: ['image/jpeg'], extensions: ['.jpg', '.jpeg'], type_label: 'JPEG' } });
   vi.spyOn(api.admin, 'getEvents').mockResolvedValue({ events: [event] });
   vi.spyOn(photoIntake, 'albums').mockResolvedValue({ albums, settings });
   vi.spyOn(photoIntake, 'photos').mockResolvedValue({ gallery_images: [photo], categories: [], total: 1, page: 1, per_page: 48 });

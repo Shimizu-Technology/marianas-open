@@ -1,3 +1,4 @@
+import { DEFAULT_GALLERY_IMAGE_POLICY } from '../../src/utils/galleryImagePolicy';
 import { createRoot } from 'react-dom/client';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import '../../src/index.css';
@@ -25,6 +26,11 @@ let photos: IntakePhoto[] = Array.from({ length: 12 }, (_, index) => ({
   review_flags: index === 2 ? ['low_sharpness', 'dark'] : index === 4 ? ['near_duplicate'] : [], reviewed_at: null,
   captured_at: '2027-10-23T02:00:00Z', capture_source: 'exif',
 }));
+api.admin.getGalleryUploadPolicy = async () => ({ upload_policy: location.search.includes('heif=1') ? {
+  content_types: [...DEFAULT_GALLERY_IMAGE_POLICY.content_types, 'image/heic', 'image/heif', 'image/avif'],
+  extensions: [...DEFAULT_GALLERY_IMAGE_POLICY.extensions, '.heic', '.heif', '.avif'],
+  type_label: 'JPEG, PNG, WebP, GIF, TIFF, HEIC, HEIF, AVIF',
+} : DEFAULT_GALLERY_IMAGE_POLICY });
 api.admin.getEvents = async () => ({ events: [event] });
 api.getCurrentUser = async () => ({ user: { is_admin: true } } as Awaited<ReturnType<typeof api.getCurrentUser>>);
 photoIntake.albums = async () => ({ albums: [...albums].sort((a, b) => a.sort_order - b.sort_order), settings });

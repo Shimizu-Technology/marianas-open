@@ -1,6 +1,8 @@
+import { galleryImageAccept, galleryImageError, isSupportedGalleryImage } from '../../../utils/galleryImagePolicy';
+import { useGalleryImagePolicy } from '../../../hooks/useGalleryImagePolicy';
 import { useState } from 'react';
 import { Upload } from 'lucide-react';
-import { GALLERY_IMAGE_ACCEPT, isSupportedGalleryImage, useGalleryUploads } from '../../../contexts/GalleryUploadContext';
+import { useGalleryUploads } from '../../../contexts/GalleryUploadContext';
 import { photoIntake, type PhotoAlbum, type PhotoImport, type PhotoSettings } from '../../../services/photoIntake';
 import { type Event } from '../../../services/api';
 import ZipIntake from './ZipIntake';
@@ -19,6 +21,7 @@ interface Props {
 }
 
 export default function PhotoUpload({ event, albums, settings, selectedAlbum, imports, busy, refresh, mutate }: Props) {
+  const policy = useGalleryImagePolicy(event.id);
   const { startUpload } = useGalleryUploads();
   const [uploadAlbumId, setUploadAlbumId] = useState<number | null | undefined>(undefined);
   const [albumType, setAlbumType] = useState('Podium');
@@ -34,10 +37,10 @@ export default function PhotoUpload({ event, albums, settings, selectedAlbum, im
   async function addImages(files: File[]) {
     if (uploading) return;
     setError(''); setNotice(''); setUploading(true);
-    const accepted = files.filter(isSupportedGalleryImage);
+    const accepted = files.filter(file => isSupportedGalleryImage(file, policy));
     const skipped = files.length - accepted.length;
     try {
-      if (!accepted.length) throw new Error('Choose supported images up to 50 MB each. JPEG, PNG, HEIC, WebP, GIF, AVIF and TIFF are supported.');
+      if (!accepted.length) throw new Error(galleryImageError(files[0], policy));
       await startUpload({ eventId: event.id, eventName: event.name, files: accepted, active: true, caption: caption.trim(), category, startSortOrder: event.gallery_images_count || 0 });
       setNotice(`${accepted.length} photos added to the upload queue${category ? ` for ${category}` : ' without an album'}.${skipped ? ` ${skipped} unsupported, empty or over-50 MB files were skipped.` : ''}`);
       refresh();
@@ -56,8 +59,8 @@ export default function PhotoUpload({ event, albums, settings, selectedAlbum, im
       </select><span className="mt-1 block text-xs font-normal text-text-muted">Need another album? Use “Create album” in Albums.</span></label>
       <label className="block text-sm font-medium">Caption for this batch <span className="font-normal text-text-muted">(optional)</span><input className={`${photoInput} mt-1`} value={caption} onChange={event => setCaption(event.target.value)} placeholder="e.g. Celebrating the champions" maxLength={500} /><span className="mt-1 block text-xs font-normal text-text-muted">Shown publicly. Leave blank to show photos without a caption.</span></label>
     </div>
-    <label className="mt-4 block text-sm font-medium">Choose photos<input aria-describedby="photo-upload-help" className={`${photoInput} mt-1 file:mr-3 file:rounded file:border-0 file:bg-gold file:px-3 file:py-2 file:text-navy-900`} type="file" accept={GALLERY_IMAGE_ACCEPT} multiple disabled={uploading || busy} onChange={event => { const files = Array.from(event.target.files || []); if (files.length) void addImages(files); event.target.value = ''; }} /></label>
-    <p id="photo-upload-help" className="mt-2 text-xs leading-5 text-text-muted">No need to resize JPEGs first. Large JPEGs are optimized on your device. Up to 50 MB per original image. Saved uploads resume on this device when you return; keep browser storage available.</p>
+    <label className="mt-4 block text-sm font-medium">Choose photos<input aria-describedby="photo-upload-help" className={`${photoInput} mt-1 file:mr-3 file:rounded file:border-0 file:bg-gold file:px-3 file:py-2 file:text-navy-900`} type="file" accept={galleryImageAccept(policy)} multiple disabled={uploading || busy} onChange={event => { const files = Array.from(event.target.files || []); if (files.length) void addImages(files); event.target.value = ''; }} /></label>
+    <p id="photo-upload-help" className="mt-2 text-xs leading-5 text-text-muted">Supported: {policy.type_label}. iPhone photos upload automatically as JPEG from the photo picker. No need to resize JPEGs first. Large JPEGs are optimized on your device. Up to 50 MB per original image. Saved uploads resume on this device when you return; keep browser storage available.</p>
     <p className="mt-3 rounded-lg border border-white/10 px-3 py-2 text-sm text-text-secondary">{settings.hold_flagged ? 'Review hold is on: newly flagged photos stay hidden until approved.' : 'Default: flagged photos publish and appear in Needs review.'}</p>
     {notice && <p role="status" className="mt-3 break-words text-sm text-green-300">{notice}</p>}
     {error && <p role="alert" className="mt-3 break-words text-sm text-red-300">{error}</p>}

@@ -1,3 +1,5 @@
+import { galleryImageAccept, galleryImageError, isSupportedGalleryImage } from '../../../utils/galleryImagePolicy'
+import { useGalleryImagePolicy } from '../../../hooks/useGalleryImagePolicy'
 import { useEffect, useState, useCallback, useMemo, useRef, useId } from 'react'
 import type { DragEvent } from 'react'
 import {
@@ -23,10 +25,6 @@ import type { EventGalleryImage, EventGalleryImageFormData } from '../../../serv
 import ImageWithShimmer from '../../ImageWithShimmer'
 import { resolveMediaUrl } from '../../../utils/images'
 import {
-  GALLERY_IMAGE_ACCEPT,
-  GALLERY_IMAGE_MAX_BYTES,
-  GALLERY_IMAGE_TYPE_LABEL,
-  isSupportedGalleryImage,
   useGalleryUploads,
 } from '../../../contexts/GalleryUploadContext'
 
@@ -43,6 +41,7 @@ export default function EventGallerySection({
   eventName: string
   onDirtyChange?: (dirty: boolean) => void
 }) {
+  const policy = useGalleryImagePolicy(eventId)
   const [galleryImages, setGalleryImages] = useState<EventGalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<number | 'new' | null>(null)
@@ -211,10 +210,10 @@ export default function EventGallerySection({
 
   const handleFiles = async (fileList: FileList | File[]) => {
     const selectedFiles = Array.from(fileList)
-    const files = selectedFiles.filter(isSupportedGalleryImage)
+    const files = selectedFiles.filter(file => isSupportedGalleryImage(file, policy))
     if (files.length === 0) {
       setError(
-        `Choose ${GALLERY_IMAGE_TYPE_LABEL} images under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`
+        galleryImageError(selectedFiles[0], policy)
       )
       return
     }
@@ -519,7 +518,7 @@ export default function EventGallerySection({
             <input
               ref={fileInputRef}
               type="file"
-              accept={GALLERY_IMAGE_ACCEPT}
+              accept={galleryImageAccept(policy)}
               multiple
               onChange={(e) => {
                 if (e.target.files) void handleFiles(e.target.files)
@@ -900,12 +899,12 @@ export default function EventGallerySection({
                       </label>
                       <input
                         type="file"
-                        accept={GALLERY_IMAGE_ACCEPT}
+                        accept={galleryImageAccept(policy)}
                         onChange={(e) => {
                           const file = e.target.files?.[0] || null
-                          if (file && !isSupportedGalleryImage(file)) {
+                          if (file && !isSupportedGalleryImage(file, policy)) {
                             setError(
-                              `Choose a ${GALLERY_IMAGE_TYPE_LABEL} image under ${Math.round(GALLERY_IMAGE_MAX_BYTES / 1024 / 1024)} MB`
+                              galleryImageError(file, policy)
                             )
                             setPendingFile(null)
                             e.target.value = ''
