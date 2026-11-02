@@ -231,7 +231,7 @@ it('lets a viewer inspect publishing checks but disables saving, publishing and 
   render(<AdminAccessContext.Provider value={{ readOnly: true }}><MemoryRouter initialEntries={['/admin/events?edit=7']}><EventsAdmin /></MemoryRouter></AdminAccessContext.Provider>)
   await screen.findByRole('textbox', { name: 'Name' })
   fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Viewer local draft' } })
-  expect((screen.getAllByRole('button', { name: 'Save', exact: true })[0] as HTMLButtonElement).disabled).toBe(true)
+  expect((screen.getAllByRole('button', { name: 'Save' })[0] as HTMLButtonElement).disabled).toBe(true)
   section('Publishing')
   expect((screen.getByRole('button', { name: /Publish event|Update public status/ }) as HTMLButtonElement).disabled).toBe(true)
   expect((screen.getByRole('button', { name: 'Fill from ASJJF' }) as HTMLButtonElement).disabled).toBe(true)
