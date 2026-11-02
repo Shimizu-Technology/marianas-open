@@ -57,3 +57,15 @@ it('shows an empty library and distinguishes load failures', async () => {
   setup();
   await screen.findByText(en.watch.loadError);
 });
+
+it('offers named playback and close buttons and omits unshipped feature promises', async () => {
+  vi.mocked(api.getVideos).mockResolvedValue([video(1, 'Copa 2026', '2026-01-01')]);
+  setup();
+  const play = await screen.findByRole('button', { name: `${en.watch.watchNow}: Match 1` });
+  fireEvent.click(play);
+  expect(document.querySelector('iframe')?.getAttribute('src')).toContain('/embed/sI5C5FpI0wQ');
+  fireEvent.click(screen.getByRole('button', { name: en.watch.closeVideo }));
+  expect(document.querySelector('iframe')).toBeNull();
+  expect(document.activeElement).toBe(screen.getByRole('button', { name: `${en.watch.watchNow}: Match 1` }));
+  expect(screen.queryByText(en.watch.visionTitle)).toBeNull();
+});

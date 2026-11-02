@@ -1,7 +1,6 @@
 import { useSiteContent } from '../hooks/useSiteContent';
 import { useOrg } from '../contexts/OrganizationContext';
 import { usePublicCopy } from '../hooks/usePublicCopy';
-import { motion, useReducedMotion } from 'framer-motion';
 import { Users, Globe, Trophy, Calendar, MapPin, Mail, Phone, ShieldCheck, Globe2 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
@@ -20,7 +19,6 @@ const timeline = [
 
 export default function AboutPage() {
   const { t } = usePublicCopy();
-  const shouldReduceMotion = useReducedMotion();
   const org = useOrg();
   const { t: sc } = useSiteContent();
   const { images: siteImages } = useSiteImages();
@@ -60,22 +58,16 @@ export default function AboutPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-transparent to-navy-900/50" />
         </div>
         <div className="relative z-10 text-center px-4">
-          <motion.h1
+          <h1
             className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4"
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.24 }}
           >
             {t('about.heroTitle')}
-          </motion.h1>
-          <motion.p
+          </h1>
+          <p
             className="text-text-secondary text-lg sm:text-xl max-w-2xl mx-auto"
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.24, delay: 0.2 }}
           >
             {t('about.heroSubtitle')}
-          </motion.p>
+          </p>
         </div>
       </section>
 
@@ -148,22 +140,14 @@ export default function AboutPage() {
             </h2>
           </ScrollReveal>
           <div className="relative">
-            {/* Vertical line */}
-            <div className="absolute left-4 sm:left-1/2 top-0 bottom-0 w-px bg-gold-500/20 -translate-x-1/2" />
-
             <div className="space-y-12">
               {timeline.map((item, i) => (
                 <ScrollReveal key={item.year} delay={i * 0.1}>
-                  <div className={`relative flex items-start gap-6 sm:gap-12 ${
-                    i % 2 === 0 ? 'sm:flex-row' : 'sm:flex-row-reverse'
-                  }`}>
-                    {/* Dot */}
-                    <div className="absolute left-4 sm:left-1/2 w-3 h-3 bg-gold-500 rounded-full -translate-x-1/2 mt-1.5 ring-4 ring-navy-900" />
-
+                  <div className="grid gap-3 sm:grid-cols-[6rem_1fr] sm:gap-8">
                     {/* Content */}
-                    <div className={`ml-10 sm:ml-0 sm:w-1/2 ${i % 2 === 0 ? 'sm:text-right sm:pr-12' : 'sm:text-left sm:pl-12'}`}>
+                    <div className="contents">
                       <span className="text-gold-500 font-heading font-bold text-lg">{item.year}</span>
-                      <p className="text-text-secondary text-sm mt-1">
+                      <p className="text-text-secondary text-base leading-relaxed">
                         {t(`about.${item.key}`)}
                       </p>
                     </div>
@@ -179,22 +163,11 @@ export default function AboutPage() {
       <section
         id="federation"
         aria-labelledby="federation-title"
-        className="relative overflow-hidden border-t border-white/5 bg-surface public-section"
+        className="relative overflow-hidden bg-surface public-section"
       >
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent"
-        />
-
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <ScrollReveal>
             <div className="mb-10 max-w-3xl sm:mb-14">
-              <div className="mb-5 flex items-center gap-3">
-                <span className="h-px w-10 bg-gold-500" aria-hidden="true" />
-                <span className="font-heading text-xs font-semibold text-gold-500">
-                  {t('about.federation.eyebrow')}
-                </span>
-              </div>
               <h2
                 id="federation-title"
                 className="font-heading text-3xl font-black tracking-tight text-text-primary sm:text-4xl lg:text-5xl"
@@ -223,7 +196,7 @@ export default function AboutPage() {
 
           <div className="mt-12 grid gap-10 lg:grid-cols-[0.8fr_1.7fr] lg:gap-16">
             <ScrollReveal delay={0.15}>
-              <aside className="border-l-2 border-gold-500 pl-6 lg:sticky lg:top-28">
+              <aside className=" lg:sticky lg:top-28">
                 <p className="font-heading text-2xl font-black leading-tight text-text-primary sm:text-3xl">
                   {t('about.federation.pullQuote')}
                 </p>
@@ -253,7 +226,7 @@ export default function AboutPage() {
                 <p>{t('about.federation.p5')}</p>
                 <p>{t('about.federation.p6')}</p>
                 <p>{t('about.federation.p7')}</p>
-                <div className="border-t border-white/10 pt-6">
+                <div className="pt-6">
                   <p className="font-heading text-sm font-bold text-text-primary">
                     {t('about.federation.signature')}
                   </p>
@@ -268,7 +241,7 @@ export default function AboutPage() {
       </section>
 
       {/* Contact */}
-      <section className="public-section bg-surface border-t border-white/5">
+      <section className="public-section bg-surface">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <ScrollReveal>
             <h2 className="font-heading text-2xl sm:text-3xl font-bold mb-4">

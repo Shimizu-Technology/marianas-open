@@ -1,7 +1,8 @@
+import { useOrg } from '../contexts/OrganizationContext';
 import { usePublicLinks } from '../hooks/usePublicLinks';
 import { usePublicCopy } from '../hooks/usePublicCopy';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, Trophy, Users, Globe, ExternalLink, Handshake, MapPin } from 'lucide-react';
+import { ArrowRight, Calendar, Trophy, Users, Globe, ExternalLink, MapPin } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import JourneySection from '../components/JourneySection';
@@ -61,6 +62,7 @@ export default function HomePage() {
   const { t, i18n } = usePublicCopy();
   const { tf } = useTranslatedField();
   const publicLink = usePublicLinks();
+  const org = useOrg();
   const { events, loading: eventsLoading } = useEvents();
   const { placements, error: placementsError, retry: retryPlacements } = useSponsorPlacements();
   const { images: siteImages } = useSiteImages();
@@ -100,10 +102,11 @@ export default function HomePage() {
         image={heroImage}
         structuredData={[getWebsiteSchema(), getOrganizationSchema()]}
       />
-      <section className="home-event-hero relative flex items-end overflow-hidden" aria-busy={eventsLoading}>
-        <div className="absolute inset-0"><img src={heroImage} alt="" className="w-full h-full object-cover" fetchPriority="high" decoding="async" /><div className="event-hero-scrim absolute inset-0" /></div>
-        <div className="public-container relative z-10 w-full pb-10 pt-36 sm:pb-16">
-          {eventsLoading ? <div className="h-64" /> : nextEvent ? <div className="max-w-3xl space-y-5">
+      <section className="home-event-hero relative flex items-start overflow-hidden" aria-busy={eventsLoading}>
+        <div className="absolute inset-0">{!eventsLoading && <img src={heroImage} alt="" className="w-full h-full object-cover" fetchPriority="high" decoding="async" />}<div className="event-hero-scrim absolute inset-0" /></div>
+        <div className="public-container relative z-10 w-full pb-8 pt-28 sm:pb-16 sm:pt-36">
+          {eventsLoading ? <div className="home-hero-content" /> : nextEvent ? <div className="home-hero-content max-w-3xl space-y-4">
+            <div className="mb-6 space-y-1"><p className="font-heading text-sm font-semibold text-gold-400">{org.name}</p><p className="max-w-xl text-base leading-relaxed text-text-primary">{sc('hero_description', t('footer.tagline'))}</p></div>
             <div className="flex flex-wrap items-center gap-3"><span className="text-gold-400 text-sm font-medium">{t(state.kind === 'live' ? 'season.phase.live' : 'season.nextEvent')}</span><EventStars stars={nextEvent.asjjf_stars} /></div>
             <h1 className="event-hero-title">{tf(nextEvent, 'name')}</h1>
             <div className="space-y-2 text-base sm:text-lg text-text-primary">
@@ -115,29 +118,16 @@ export default function HomePage() {
           </div> : <div className="max-w-3xl space-y-5"><h1 className="event-hero-title">{sc('hero_title_line1', t('hero.title').split(' ').slice(0, -1).join(' '))}{' '}{sc('hero_title_line2', t('hero.title').split(' ').slice(-1)[0])}</h1><p className="text-lg text-text-secondary">{t('season.nextSeasonNote')}</p><Button to="/events/past">{t('nav.pastEvents')}<ArrowRight size={16} aria-hidden="true" /></Button></div>}
         </div>
       </section>
-      <div className="public-container grid grid-cols-2 sm:grid-cols-4 py-6 gap-4 sm:gap-6">
-        {stats.map(stat => <div key={stat.label} className="flex items-center gap-3 py-2"><stat.icon size={20} className="text-gold-400 shrink-0" /><div><div className="font-heading text-2xl sm:text-3xl font-semibold">{stat.value}</div><p className="text-sm text-text-secondary">{stat.label}</p></div></div>)}
-      </div>
-      <FeaturedSponsorBar placements={placements} />
-
-
-      {!nextEvent && <SeasonOverview events={events} loading={eventsLoading} />}
-
-      {/* Journey Section */}
-      {!eventsLoading && events.some(event => ['upcoming', 'live'].includes(eventPhase(event))) && (
-        <JourneySection events={events.filter(event => Number(event.date.slice(0, 4)) === getEventCycleYear(events))} />
-      )}
-
       {/* Featured section — editorial asymmetric layout */}
       <section className="public-section">
         <div className="public-container">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
             <ScrollReveal className="lg:col-span-5">
               <div className="space-y-6">
-                <div className="inline-block px-3 py-1 border border-gold-500/30 text-gold-500 text-xs font-heading">
+                <div className="text-base text-gold-400 font-heading">
                   {sc('featured_badge', t('home.since2007'))}
                 </div>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black leading-tight">
+                <h2 className="text-2xl sm:text-4xl font-heading font-semibold leading-tight">
                   {sc('featured_title', t('home.featuredTitle'))}
                 </h2>
                 <p className="text-text-secondary text-lg leading-relaxed">
@@ -159,32 +149,32 @@ export default function HomePage() {
             <ScrollReveal className="lg:col-span-7" delay={0.2}>
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
-                  <ImageWithShimmer src={featuredImages[0]} fallbackSrc={featuredFallbacks[0]} alt="BJJ competition match" className="w-full h-full object-cover" />
+                  <ImageWithShimmer src={featuredImages[0]} fallbackSrc={featuredFallbacks[0]} alt="BJJ competition match" className="w-full h-full object-cover" loading="lazy" lazyRootMargin="200px 0px" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
                     <div className="text-3xl font-heading font-black text-gold-500">{sc('economic_impact_value', t('home.economicImpactValue'))}</div>
-                    <div className="text-xs text-text-muted">{sc('economic_impact_label', t('home.economicImpact'))}</div>
+                    <div className="text-sm text-text-primary">{sc('economic_impact_label', t('home.economicImpact'))}</div>
                   </div>
                 </div>
                 <div className="relative overflow-hidden border border-white/5 aspect-[4/3]">
-                  <ImageWithShimmer src={featuredImages[1]} fallbackSrc={featuredFallbacks[1]} alt="Marianas Open venue" className="w-full h-full object-cover" />
+                  <ImageWithShimmer src={featuredImages[1]} fallbackSrc={featuredFallbacks[1]} alt="Marianas Open venue" className="w-full h-full object-cover" loading="lazy" lazyRootMargin="200px 0px" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 space-y-1">
                     <div className="text-3xl font-heading font-black text-text-primary">{sc('spectators_value', t('home.spectatorsValue'))}</div>
-                    <div className="text-xs text-text-muted">{sc('spectators_label', t('home.spectators'))}</div>
+                    <div className="text-sm text-text-primary">{sc('spectators_label', t('home.spectators'))}</div>
                   </div>
                 </div>
                 <div className="relative col-span-2 overflow-hidden border border-white/5">
-                  <ImageWithShimmer src={featuredImages[2]} fallbackSrc={featuredFallbacks[2]} alt="Podium ceremony" className="w-full h-48 object-cover" />
+                  <ImageWithShimmer src={featuredImages[2]} fallbackSrc={featuredFallbacks[2]} alt="Podium ceremony" className="w-full h-48 object-cover" loading="lazy" lazyRootMargin="200px 0px" />
                   <div className="absolute inset-0 bg-gradient-to-r from-navy-900/95 via-navy-900/70 to-transparent" />
-                  <div className="absolute inset-0 p-8 flex flex-col justify-center">
+                  <div className="absolute inset-0 p-5 sm:p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-2">
                       <Globe size={18} className="text-gold-500" />
                       <span className="text-sm text-gold-400 font-heading font-semibold">
                         {sc('international_reach_title', t('home.internationalReach'))}
                       </span>
                     </div>
-                    <p className="text-text-secondary text-sm leading-relaxed max-w-md">
+                    <p className="text-text-primary text-base leading-relaxed max-w-md">
                       {sc('international_reach_desc', t('home.internationalReachDesc'))}
                     </p>
                   </div>
@@ -195,16 +185,28 @@ export default function HomePage() {
         </div>
       </section>
 
+      <div className="public-container grid grid-cols-2 sm:grid-cols-4 py-6 gap-4 sm:gap-6">
+        {stats.map(stat => <div key={stat.label} className="flex items-center gap-3 py-2"><stat.icon size={20} className="text-gold-400 shrink-0" /><div><div className="font-heading text-2xl sm:text-3xl font-semibold">{stat.value}</div><p className="text-sm text-text-secondary">{stat.label}</p></div></div>)}
+      </div>
+      <FeaturedSponsorBar placements={placements} />
+
+
+      {!nextEvent && <SeasonOverview events={events} loading={eventsLoading} />}
+
+      {/* Journey Section */}
+      {!eventsLoading && events.some(event => ['upcoming', 'live'].includes(eventPhase(event))) && (
+        <JourneySection events={events.filter(event => Number(event.date.slice(0, 4)) === getEventCycleYear(events))} />
+      )}
+
       {/* Official Partners — logo strip */}
-      <section className="public-section border-t border-white/5">
+      <section className="public-section">
         <div className="public-container">
           <ScrollReveal>
             <div className="text-center mb-8">
-              <p className="text-xs font-heading font-semibold text-text-muted mb-2">
+              <h2 className="text-2xl font-heading font-semibold text-text-primary mb-3">
                 {t('home.partnersTitle')}
-              </p>
-              <div className="w-8 h-px bg-gold-500/30 mx-auto mt-3 mb-5" />
-              <p className="text-text-secondary text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
+              </h2>
+              <p className="text-text-secondary text-base leading-relaxed max-w-2xl mx-auto">
                 {t('home.partnersDesc')}
               </p>
             </div>
@@ -220,14 +222,16 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                   className="group flex flex-col items-center justify-between text-center h-40 sm:h-44"
                 >
-                  <div className="flex-1 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-colors duration-300 group-hover:-translate-y-0.5">
+                  <div className="flex-1 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity duration-150">
                     <img
+                      loading="lazy"
+                      decoding="async"
                       src={partner.src}
                       alt={partner.name}
                       className={`${partner.heightClass} object-contain`}
                     />
                   </div>
-                  <div className="text-[10px] sm:text-[11px] font-heading font-semibold text-text-muted group-hover:text-text-secondary transition-colors duration-300 leading-tight mt-2">
+                  <div className="text-xs font-heading font-semibold text-text-muted group-hover:text-text-secondary transition-colors duration-300 leading-tight mt-2">
                     {sc(`partner_${partner.key}_label`, partner.key === 'copademarianas' ? t('home.partnerChampionship') : partner.key === 'roadtotheopen' ? t('home.partnerSeries') : partner.label)}
                   </div>
                 </a>
@@ -238,16 +242,10 @@ export default function HomePage() {
       </section>
 
       {/* Official Sponsors Section */}
-      <section className="public-section bg-surface border-t border-white/5">
+      <section className="public-section bg-surface">
         <div className="public-container">
           <ScrollReveal>
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 border border-gold-500/30 rounded-full bg-gold-500/5">
-                <Handshake size={14} className="text-gold-500" />
-                <span className="text-sm text-gold-400 font-medium">
-                  {t('home.sponsorsTitle')}
-                </span>
-              </div>
               <h2 className="text-3xl sm:text-4xl font-heading font-black mb-4">
                 {t('home.sponsorsSectionHeading')}
               </h2>
@@ -263,11 +261,10 @@ export default function HomePage() {
       </section>
 
       {/* Built by Shimizu Technology */}
-      <section className="py-10 border-t border-white/5">
+      <section className="py-10">
         <div className="public-container">
           <ScrollReveal>
             <div className="max-w-2xl mx-auto text-center space-y-4">
-              <div className="w-12 h-px bg-gold-500/40 mx-auto" />
               <p className="text-sm font-heading font-semibold text-text-muted">
                 {t('shimizu.title')}
               </p>
@@ -298,7 +295,7 @@ function SeasonOverview({ events: publishedEvents, loading }: { events: import('
   const state = selectHomeState(events);
   const buttonClass = buttonClassName('secondary');
   return (
-    <section className="border-y border-gold-500/15 bg-surface/50 py-12 sm:py-16" aria-busy={loading || countsLoading}>
+    <section className="bg-surface py-12 sm:py-16" aria-busy={loading || countsLoading}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {loading || countsLoading ? <div className="h-24" /> : (
           <ScrollReveal>

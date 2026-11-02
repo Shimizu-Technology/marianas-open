@@ -1,3 +1,5 @@
+import { createPortal } from 'react-dom';
+import { useModalFocus } from '../hooks/useModalFocus';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
@@ -34,7 +36,6 @@ import {
 const PER_PAGE = 24;
 const EAGER_IMAGE_COUNT = 4;
 const HIGH_PRIORITY_IMAGE_COUNT = 3;
-const LARGE_PRELOAD_COUNT = 8;
 
 function preloadImage(url: string | null | undefined) {
   if (!url) return;
@@ -64,6 +65,8 @@ export default function EventGalleryPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [closing, setClosing] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(true);
   const [pageSize, setPageSize] = useState(PER_PAGE);
   const [actionStatus, setActionStatus] = useState('');
   const [manualShareUrl, setManualShareUrl] = useState('');
@@ -201,18 +204,14 @@ export default function EventGalleryPage() {
   );
 
   const openLightbox = (index: number) => {
+    setClosing(false);
+    setKeyboardOpen(document.activeElement?.matches(':focus-visible') ?? false);
     setActiveIndex(index);
 
     const image = images[index];
     if (!image) return;
     preloadImage(resolveMediaUrl(image.large_url || image.thumbnail_url));
   };
-
-  useEffect(() => {
-    images.slice(0, LARGE_PRELOAD_COUNT).forEach((image) => {
-      preloadImage(resolveMediaUrl(image.large_url || image.thumbnail_url));
-    });
-  }, [images]);
 
   useEffect(() => {
     if (activeIndex === null) return;
@@ -224,8 +223,19 @@ export default function EventGalleryPage() {
     });
   }, [activeIndex, images]);
 
+  const closeLightbox = useCallback(() => {
+    setClosing(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('photo');
+    window.history.replaceState(window.history.state, '', url);
+  }, []);
   useEffect(() => {
-    if (activeIndex === null) return undefined;
+    if (!closing) return;
+    const timer = window.setTimeout(() => { setActiveIndex(null); setClosing(false); }, 160);
+    return () => window.clearTimeout(timer);
+  }, [closing]);
+  useEffect(() => {
+    if (activeIndex === null || closing) return undefined;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
@@ -234,10 +244,7 @@ export default function EventGalleryPage() {
       )
         return;
       if (event.key === 'Escape') {
-        setActiveIndex(null);
-        const url = new URL(window.location.href);
-        url.searchParams.delete('photo');
-        window.history.replaceState(window.history.state, '', url);
+        closeLightbox();
       } else if (event.key === 'ArrowLeft') {
         moveLightbox(-1);
       } else if (event.key === 'ArrowRight') {
@@ -247,38 +254,10 @@ export default function EventGalleryPage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeIndex, moveLightbox]);
+  }, [activeIndex, closing, moveLightbox, closeLightbox]);
 
-  const lightboxOpen = activeIndex !== null && !loading && !eventsLoading;
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const previousFocus = document.activeElement;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const dialog = dialogRef.current;
-    dialog?.querySelector<HTMLButtonElement>('button')?.focus();
-    const trapFocus = (event: KeyboardEvent) => {
-      if (event.key !== 'Tab' || !dialog) return;
-      const controls = Array.from(
-        dialog.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled)')
-      );
-      const first = controls[0];
-      const last = controls[controls.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first?.focus();
-      }
-    };
-    document.addEventListener('keydown', trapFocus);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', trapFocus);
-      if (previousFocus instanceof HTMLElement) previousFocus.focus();
-    };
-  }, [lightboxOpen]);
+  const lightboxOpen = activeIndex !== null && !loading && !eventsLoading && !closing;
+  useModalFocus(lightboxOpen, dialogRef, closeLightbox);
 
   useEffect(() => {
     if (!activeImage || loading) return;
@@ -289,12 +268,6 @@ export default function EventGalleryPage() {
     setManualShareUrl('');
   }, [activeImage, loading]);
 
-  const closeLightbox = () => {
-    setActiveIndex(null);
-    const url = new URL(window.location.href);
-    url.searchParams.delete('photo');
-    window.history.replaceState(window.history.state, '', url);
-  };
   const photoUrl = activeImage
     ? new URL(`/events/${slug}/gallery?photo=${activeImage.id}`, window.location.origin).href
     : '';
@@ -412,7 +385,7 @@ export default function EventGalleryPage() {
                   onClick={() => void loadCategory('')}
                   aria-pressed={activeCategory === ''}
                   disabled={loadingMore}
-                  className={`min-h-11 shrink-0 whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-heading transition-colors disabled:opacity-60 ${activeCategory === '' ? 'border-gold bg-gold text-navy-950' : 'border-white/10 text-text-secondary hover:border-gold/40 hover:text-gold'}`}
+                  className={`min-h-11 shrink-0 whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-heading transition-colors disabled:opacity-60 ${activeCategory === '' ? 'border-gold bg-gold text-navy-900' : 'border-white/10 text-text-secondary hover:border-gold/40 hover:text-gold'}`}
                 >
                   {t('season.all')}
                 </button>
@@ -422,7 +395,7 @@ export default function EventGalleryPage() {
                     onClick={() => void loadCategory(category.name)}
                     aria-pressed={activeCategory === category.name}
                     disabled={loadingMore}
-                    className={`min-h-11 shrink-0 whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-heading transition-colors disabled:opacity-60 ${activeCategory === category.name ? 'border-gold bg-gold text-navy-950' : 'border-white/10 text-text-secondary hover:border-gold/40 hover:text-gold'}`}
+                    className={`min-h-11 shrink-0 whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-heading transition-colors disabled:opacity-60 ${activeCategory === category.name ? 'border-gold bg-gold text-navy-900' : 'border-white/10 text-text-secondary hover:border-gold/40 hover:text-gold'}`}
                   >
                     {category.name} <span className="opacity-70">({category.count})</span>
                   </button>
@@ -483,7 +456,7 @@ export default function EventGalleryPage() {
                         </div>
                       )}
                       {label && (
-                        <div className="absolute inset-x-0 bottom-0 bg-navy-950/90 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute inset-x-0 bottom-0 bg-navy-900/90 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="text-sm text-text-secondary break-words">{label}</div>
                         </div>
                       )}
@@ -497,7 +470,7 @@ export default function EventGalleryPage() {
                   <button
                     onClick={() => void loadMore()}
                     disabled={loadingMore}
-                    className="inline-flex min-h-11 items-center gap-2 px-5 py-2.5 bg-gold text-navy-900 font-heading font-semibold text-sm uppercase tracking-wider hover:bg-gold-400 disabled:opacity-60"
+                    className="inline-flex min-h-11 items-center gap-2 px-5 py-2.5 bg-gold text-navy-900 font-heading font-semibold text-sm  hover:bg-gold-400 disabled:opacity-60"
                   >
                     {loadingMore && <LoaderInline />}
                     {t('season.loadMore')}
@@ -509,13 +482,14 @@ export default function EventGalleryPage() {
         </div>
       </section>
 
-      {activeImage && (
+      {activeImage && createPortal(
         <div
           ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label={t('season.gallery')}
-          className="fixed inset-0 z-[80] bg-black/95 p-4 sm:p-6"
+          className="panel-backdrop fixed inset-0 z-[80] bg-black/95 p-4 sm:p-6"
+          data-open={!closing} data-keyboard={keyboardOpen} aria-hidden={closing || undefined} inert={closing}
         >
           <button
             onClick={closeLightbox}
@@ -532,7 +506,7 @@ export default function EventGalleryPage() {
           >
             <ChevronLeft size={32} />
           </button>
-          <div className="mx-auto flex h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-7xl flex-col items-center justify-center gap-3 pb-2 pt-12 sm:h-[calc(100dvh-3rem)] sm:w-[calc(100vw-3rem)]">
+          <div className="panel-surface mx-auto flex h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-7xl flex-col items-center justify-center gap-3 pb-2 pt-12 sm:h-[calc(100dvh-3rem)] sm:w-[calc(100vw-3rem)]">
             {activeSrc ? (
               <img
                 src={activeSrc}
@@ -590,7 +564,7 @@ export default function EventGalleryPage() {
           >
             <ChevronRight size={32} />
           </button>
-        </div>
+        </div>, document.body
       )}
     </div>
   );

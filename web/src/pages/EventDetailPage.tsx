@@ -3,7 +3,6 @@ import { useSponsorPlacements } from '../hooks/useSponsorPlacements';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, useReducedMotion } from 'framer-motion';
 import { MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon, Ticket, Store, Check, Copy } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
@@ -138,15 +137,14 @@ function TravelItemCard({
 
   if (isOffer) {
     return (
-      <div className="relative h-full overflow-hidden border border-gold-500/30 bg-gradient-to-br from-gold-500/[0.12] via-navy-900 to-navy-900 p-6 sm:p-8">
-        <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-gold-500/10 blur-3xl" aria-hidden="true" />
+      <div className="relative h-full overflow-hidden bg-surface p-6 sm:p-8">
         <div className="relative">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center border border-gold-500/30 bg-gold-500/10 text-gold-400">
               <Plane size={22} aria-hidden="true" />
             </div>
             <div>
-              <div className="text-[11px] font-heading font-semibold text-gold-400">
+              <div className="text-xs font-heading font-semibold text-gold-400">
                 {t('event.travelOffer', 'Travel offer')}
               </div>
               <h3 className="font-heading text-xl font-bold text-text-primary">{item.title}</h3>
@@ -159,10 +157,10 @@ function TravelItemCard({
 
           <div className="mt-6 flex flex-col gap-4 border border-white/10 bg-black/20 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="mb-1 text-[10px] font-heading font-semibold text-text-muted">
+              <div className="mb-1 text-xs font-heading font-semibold text-text-muted">
                 {t('event.offerCode', 'Offer code')}
               </div>
-              <code className="font-mono text-xl font-bold text-gold-300 sm:text-2xl">{code}</code>
+              <code className="font-body text-xl font-bold text-gold-300 sm:text-2xl">{code}</code>
             </div>
             <button
               type="button"
@@ -233,7 +231,6 @@ export default function EventDetailPage() {
   const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const { hash } = useLocation();
-  const shouldReduceMotion = useReducedMotion();
   const posthog = usePostHog();
   const { events, loading, error, retry } = useEvents();
 
@@ -379,7 +376,7 @@ export default function EventDetailPage() {
   // Registration steps: only from API
   const displayRegistrationSteps = registrationSteps.length > 0
     ? registrationSteps.map((step, idx) => ({
-        step: String(idx + 1).padStart(2, '0'),
+        step: String(idx + 1),
         title: step.title,
         desc: step.description,
         url: step.url || '',
@@ -565,7 +562,7 @@ export default function EventDetailPage() {
             {galleryImages.map((img, i) => (
               <ScrollReveal key={i} delay={i * 0.08}>
                 <Link to={`/events/${mainEvent.slug}/gallery?photo=${img.id}`} className="relative block overflow-hidden aspect-[3/2] border border-white/5 group focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400">
-                  <ImageWithShimmer src={img.src} alt={img.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <ImageWithShimmer src={img.src} alt={img.alt} className="w-full h-full object-cover motion-safe:group-hover:scale-[1.02] transition-transform duration-200" />
                   {img.caption && (
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-900/90 to-transparent p-3">
                       <div className="text-xs text-text-secondary truncate">{img.caption}</div>
@@ -615,14 +612,11 @@ export default function EventDetailPage() {
         </div>
 
         <div className="relative z-10 public-container">
-          <motion.div
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.24 }}
+          <div
             className="max-w-4xl"
           >
             <div className="mb-5"><EventStars stars={mainEvent.asjjf_stars} /></div>
-            <p className={`mb-5 inline-flex items-center border px-3 py-2 text-sm font-heading font-semibold  ${isCancelled ? 'border-red-400/40 text-red-200' : 'border-gold-500/30 text-gold-300'}`}>
+            <p className={`mb-5 inline-flex items-center text-sm font-heading font-semibold  ${isCancelled ? 'text-red-200' : 'text-gold-300'}`}>
               {t(`season.phase.${phase}`)}
             </p>
             <h1 className="event-hero-title mb-6">{eventName}</h1>
@@ -633,7 +627,7 @@ export default function EventDetailPage() {
               </p>
             ) : null}
 
-            <div className="flex flex-wrap gap-6 text-sm text-text-secondary">
+            <div className="flex flex-wrap gap-4 text-base text-text-primary">
               <div className="flex items-center gap-2">
                 <Calendar size={16} className="text-gold-500" />
                 {formatEventDate(mainEvent)}
@@ -680,7 +674,7 @@ export default function EventDetailPage() {
                 </span>
               </Link>
             )}
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -725,12 +719,11 @@ export default function EventDetailPage() {
       )}
       {!isClosed && <>
       {canShowTicketSection && (
-        <section id="spectator-tickets" className="relative overflow-hidden border-y border-gold-500/15 bg-surface/35 public-section">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_30%,rgba(226,178,68,0.10),transparent_34%)]" />
+        <section id="spectator-tickets" className="relative overflow-hidden  bg-surface/35 public-section">
           <div className={`relative mx-auto grid grid-cols-1 gap-10 px-4 sm:px-6 ${ticketSalesAreActive && ticketFlyer ? 'max-w-7xl lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16' : 'max-w-3xl'}`}>
             {ticketSalesAreActive && ticketFlyer && (
               <ScrollReveal>
-                <div className="mx-auto max-w-xl overflow-hidden border border-gold-500/25 bg-navy-900 shadow-[0_24px_80px_rgba(0,0,0,0.35)] lg:sticky lg:top-28">
+                <div className="mx-auto max-w-xl overflow-hidden border border-gold-500/25 bg-navy-900  lg:sticky lg:top-28">
                   <img
                     src={ticketFlyer.src}
                     srcSet={ticketFlyer.srcSet}
@@ -772,7 +765,7 @@ export default function EventDetailPage() {
 
                 {ticketSalesAreActive && ticketOptions.length > 0 && (
                   <div className="mt-8 overflow-hidden border border-white/10 bg-navy-900/55">
-                    <div className="grid grid-cols-[minmax(0,1fr)_5.75rem_5.75rem] border-b border-white/10 bg-white/[0.03] px-4 py-3 text-[10px] font-heading font-bold text-text-muted sm:grid-cols-[minmax(0,1fr)_7rem_7rem] sm:px-5">
+                    <div className="grid grid-cols-[minmax(0,1fr)_5.75rem_5.75rem] border-b border-white/10 bg-white/[0.03] px-4 py-3 text-xs font-heading font-bold text-text-muted sm:grid-cols-[minmax(0,1fr)_7rem_7rem] sm:px-5">
                       <span>{t('event.admissionOption', 'Admission')}</span>
                       <span className="text-right text-gold-400">{t('event.earlyBird', 'Early Bird')}</span>
                       <span className="text-right">{t('event.atTheDoor', 'At the Door')}</span>
@@ -897,7 +890,7 @@ export default function EventDetailPage() {
             {/* Prize Pool / Trip Packages — only render when prize data exists */}
             {!isClosed && (hasCashPrizes || hasTripPackages || prizePoolDisplay) && (
             <ScrollReveal delay={0.1}>
-              <div className="bg-gradient-to-br from-gold-500/10 to-transparent border border-gold-500/20 p-8 h-full">
+              <div className="bg-surface border border-gold-500/20 p-8 h-full">
                 <Trophy size={24} className="text-gold-500 mb-4" />
                 {hasCashPrizes ? (
                   <>
@@ -958,10 +951,8 @@ export default function EventDetailPage() {
                     ))}
                   </div>
                 )}
-                <div className="relative overflow-hidden border border-white/5 aspect-[16/7]">
-                  <div className="absolute inset-0 bg-navy-800 flex flex-col items-center justify-center gap-3 z-0">
-                    <MapPin size={28} className="text-gold-500" />
-                    <p className="text-text-secondary text-sm">{mainEvent ? `${eventVenueName} · ${eventCity}, ${eventCountry}` : `${t('event.venue')} · ${t('event.location')}`}</p>
+                <div className="mt-4">
+                  <div className="space-y-3">
                     <a
                       href={mainEvent?.latitude && mainEvent?.longitude
                         ? `https://maps.google.com/?q=${mainEvent.latitude},${mainEvent.longitude}`
@@ -1019,9 +1010,7 @@ export default function EventDetailPage() {
                           ? 'relative z-10 w-full max-w-sm object-contain'
                           : 'w-full h-full object-cover'}
                       />
-                      {featuredAccommodationUsesLogo ? (
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(201,153,53,0.12),transparent_62%)]" />
-                      ) : (
+                      {!featuredAccommodationUsesLogo && (
                         <div className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-transparent to-transparent" />
                       )}
                     </div>
@@ -1029,7 +1018,7 @@ export default function EventDetailPage() {
                       <div key={src} className="relative overflow-hidden border border-white/10 bg-navy-900 min-h-[180px]">
                         <img src={src} alt="" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-navy-900/50 via-transparent to-transparent" />
-                        <div className="absolute bottom-3 left-3 text-[10px] font-heading text-white/70">
+                        <div className="absolute bottom-3 left-3 text-xs font-heading text-white/70">
                           {index === 0 ? t('event.lobbyAndExterior', 'Lobby & Exterior') : t('event.roomAndAmenities', 'Room & Amenities')}
                         </div>
                       </div>
@@ -1042,7 +1031,7 @@ export default function EventDetailPage() {
 
                   return (
                     <ScrollReveal key={acc.id} delay={0.05}>
-                      <div className="bg-surface/95 border border-gold-500/20 p-6 sm:p-8 h-full backdrop-blur-sm hover:border-gold-500/40 transition-colors duration-300">
+                      <div className="bg-surface border border-gold-500/20 p-6 sm:p-8 h-full hover:border-gold-500/40 transition-colors duration-300">
                         <Hotel size={24} className="text-gold-500 mb-4" />
                         <h3 className="font-heading font-bold text-lg text-text-primary mb-2">{tf(acc, 'hotel_name')}</h3>
 
@@ -1082,7 +1071,7 @@ export default function EventDetailPage() {
                           {acc.booking_code && (
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.promoCode', 'Code')}</span>
-                              <span className="font-mono text-gold-400 bg-gold-500/10 px-2 py-0.5">{acc.booking_code}</span>
+                              <span className="font-body text-gold-400 bg-gold-500/10 px-2 py-0.5">{acc.booking_code}</span>
                             </div>
                           )}
                           {contactEmails.length > 0 && (
@@ -1179,7 +1168,7 @@ export default function EventDetailPage() {
                           {acc.booking_code && (
                             <div className="flex gap-2">
                               <span className="text-text-muted shrink-0 w-24">{t('event.promoCode', 'Code')}</span>
-                              <span className="font-mono text-gold-400 bg-gold-500/10 px-2 py-0.5">{acc.booking_code}</span>
+                              <span className="font-body text-gold-400 bg-gold-500/10 px-2 py-0.5">{acc.booking_code}</span>
                             </div>
                           )}
                           {contactEmails.length > 0 && (
@@ -1312,13 +1301,13 @@ export default function EventDetailPage() {
                             <table className="w-full text-left text-sm">
                               <thead className="bg-white/[0.03]">
                                 <tr>
-                                  <th className="px-4 py-3 font-heading text-[11px] text-text-muted">
+                                  <th className="px-4 py-3 font-heading text-xs text-text-muted">
                                     {t('event.deadline', 'Deadline')}
                                   </th>
-                                  <th className="px-4 py-3 font-heading text-[11px] text-text-muted">
+                                  <th className="px-4 py-3 font-heading text-xs text-text-muted">
                                     {t('event.fee', 'Fee')}
                                   </th>
-                                  <th className="px-4 py-3 font-heading text-[11px] text-text-muted">
+                                  <th className="px-4 py-3 font-heading text-xs text-text-muted">
                                     {t('event.divisionOption', 'Division Option')}
                                   </th>
                                 </tr>
@@ -1353,7 +1342,7 @@ export default function EventDetailPage() {
                     <div className="space-y-3">
                       {registrationInfoItems.map((item) => (
                         <div key={`${item.label}-${item.value}`} className="border border-white/5 bg-white/[0.02] px-4 py-3">
-                          <div className="text-[11px] font-heading text-gold-400 mb-1">
+                          <div className="text-xs font-heading text-gold-400 mb-1">
                             {item.label}
                           </div>
                           <div className="text-sm text-text-secondary whitespace-pre-line">
@@ -1430,7 +1419,7 @@ export default function EventDetailPage() {
 
       {!isClosed && gallerySection}
 
-      {(sponsorPlacements.length > 0 || placementsError) && <section className="border-y border-white/5 bg-navy-900/60 px-4 py-14">
+      {(sponsorPlacements.length > 0 || placementsError) && <section className=" bg-navy-900/60 px-4 py-14">
         <div className="mx-auto max-w-7xl">
           {placementsError && <SponsorPlacementsError retry={retryPlacements} />}
           <SponsorTiers placements={sponsorPlacements} event />

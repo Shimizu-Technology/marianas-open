@@ -179,7 +179,7 @@ export default function Header() {
 
   return (
     <>
-    <header className="fixed top-0 left-0 right-0 z-50 bg-navy-900/80 backdrop-blur-xl border-b border-white/5">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-navy-900">
       <div className="public-container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -259,7 +259,7 @@ export default function Header() {
         <nav
           id="mobile-navigation"
           aria-label={t('nav.toggleMenu')}
-          className="relative bg-navy-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 max-h-[calc(100dvh-4rem)] overflow-y-auto"
+          className="relative bg-navy-900 px-4 py-3 max-h-[calc(100dvh-4rem)] overflow-y-auto"
           onClick={e => e.stopPropagation()}
         >
           {mobileGroups.map((group, gi) => (

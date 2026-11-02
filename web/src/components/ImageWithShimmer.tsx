@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { getLocalImageSrcSet } from '../utils/responsiveImages';
-import { motion, useReducedMotion } from 'framer-motion';
 
 interface ImageWithShimmerProps {
   src: string;
@@ -67,7 +66,6 @@ function ImageWithShimmerInner({
   const [didFallback, setDidFallback] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
-  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (shouldLoad || loading !== 'lazy') return undefined;
@@ -105,7 +103,7 @@ function ImageWithShimmerInner({
       )}
 
       {shouldLoad && (
-        <motion.img
+        <img
           ref={setImageRef}
           src={currentSrc}
           srcSet={getLocalImageSrcSet(currentSrc)}
@@ -114,7 +112,8 @@ function ImageWithShimmerInner({
           decoding={decoding}
           fetchPriority={fetchPriority}
           sizes={sizes || (getLocalImageSrcSet(currentSrc) ? '100vw' : undefined)}
-          className={className}
+          className={`image-reveal ${className}`}
+          style={{ opacity: loaded || fetchPriority === 'high' ? 1 : 0 }}
           onLoad={() => setLoaded(true)}
           onError={() => {
             if (fallbackSrc && !didFallback && fallbackSrc !== currentSrc) {
@@ -125,9 +124,6 @@ function ImageWithShimmerInner({
               setLoaded(true);
             }
           }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: loaded ? 1 : 0 }}
-          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.35, ease: 'easeOut' }}
         />
       )}
     </div>

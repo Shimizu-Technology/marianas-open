@@ -16,7 +16,7 @@ export default function Footer() {
   const logoSrc = resolveMediaUrl(org.logo_url) || LOGO_FALLBACK;
 
   return (
-    <footer className="bg-surface border-t border-white/5">
+    <footer className="bg-surface">
       <div className="public-container py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
@@ -105,7 +105,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-muted">
+        <div className="mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-muted">
           <p>&copy; {new Date().getFullYear()} {org.name}. {t('footer.rights')}</p>
           <div className="flex items-center gap-4">
             <Link to="/rules" className="hover:text-text-secondary transition-colors">

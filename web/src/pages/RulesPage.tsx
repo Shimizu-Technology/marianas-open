@@ -1,6 +1,5 @@
 import { useOrg } from '../contexts/OrganizationContext';
 import { usePublicCopy } from '../hooks/usePublicCopy';
-import { motion, useReducedMotion } from 'framer-motion';
 import {
   AlertTriangle,
   BookOpen,
@@ -33,7 +32,6 @@ const SECTION_KEYS: Array<{ key: string; icon: LucideIcon }> = [
 
 export default function RulesPage() {
   const { t } = usePublicCopy();
-  const shouldReduceMotion = useReducedMotion();
   const org = useOrg();
 
   const eventDayChecklist = t('rules.eventDayChecklist', {
@@ -50,20 +48,11 @@ export default function RulesPage() {
       />
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
-        <motion.div
+        <div
           className="mb-12"
-          initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 border border-gold-500/30 rounded-full bg-gold-500/5">
-            <BookOpen size={12} className="text-gold-500" />
-            <span className="text-xs text-gold-400 font-heading font-medium">
-              {t('rules.badge', 'Competitor guide')}
-            </span>
-          </div>
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-gold-500/10 rounded-lg border border-gold-500/20">
+            <div className="text-gold-500">
               <BookOpen size={24} className="text-gold-500" />
             </div>
             <h1 className="font-heading text-3xl sm:text-4xl font-bold">
@@ -76,7 +65,7 @@ export default function RulesPage() {
               'A clearer, first-party overview of the standards competitors should expect at Marianas Open events.'
             )}
           </p>
-        </motion.div>
+        </div>
 
         {/* Intro + primary CTA */}
         <ScrollReveal>
@@ -100,7 +89,7 @@ export default function RulesPage() {
                 <p className="text-sm font-heading font-semibold text-text-muted mb-3">
                   {t('rules.rulebookLabel')}
                 </p>
-                <p className="text-sm text-text-secondary leading-relaxed mb-5">
+                <p className="text-base text-text-secondary leading-relaxed mb-5">
                   {t(
                     'rules.rulebookCopy',
                     'Marianas Open follows ASJJF rules. Read the official rulebook before competing.'
@@ -133,17 +122,17 @@ export default function RulesPage() {
             }) as string[];
 
             return (
-              <ScrollReveal key={key} delay={i * 0.06}>
+              <ScrollReveal key={key} delay={i * 0.06} className={i === SECTION_KEYS.length - 1 ? 'lg:col-span-2' : undefined}>
                 <section className="bg-surface border border-white/5 rounded-2xl p-6 h-full">
                   <div className="flex items-start gap-4 mb-5">
-                    <div className="p-3 bg-gold-500/10 rounded-xl border border-gold-500/20 shrink-0">
+                    <div className="shrink-0 text-gold-500">
                       <Icon size={18} className="text-gold-500" />
                     </div>
                     <div>
                       <h2 className="font-heading text-xl font-bold text-text-primary mb-1">
                         {title}
                       </h2>
-                      <p className="text-sm text-text-secondary leading-relaxed">{description}</p>
+                      <p className="text-base text-text-secondary leading-relaxed">{description}</p>
                     </div>
                   </div>
                   <div className="space-y-3">
@@ -151,7 +140,7 @@ export default function RulesPage() {
                       items.map((item, itemIndex) => (
                         <div key={`${key}-${itemIndex}`} className="flex items-start gap-3">
                           <CheckCircle2 size={16} className="text-gold-500 shrink-0 mt-0.5" />
-                          <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
+                          <p className="text-base text-text-secondary leading-relaxed">{item}</p>
                         </div>
                       ))}
                   </div>
@@ -165,7 +154,7 @@ export default function RulesPage() {
           <ScrollReveal delay={0.28}>
             <section className="bg-surface border border-white/5 rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-5">
-                <div className="p-3 bg-gold-500/10 rounded-xl border border-gold-500/20">
+                <div className="text-gold-500">
                   <AlertTriangle size={18} className="text-gold-500" />
                 </div>
                 <div>
@@ -185,7 +174,7 @@ export default function RulesPage() {
                   eventDayChecklist.map((item, checklistIndex) => (
                     <div key={`event-day-${checklistIndex}`} className="flex items-start gap-3">
                       <CheckCircle2 size={16} className="text-gold-500 shrink-0 mt-0.5" />
-                      <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
+                      <p className="text-base text-text-secondary leading-relaxed">{item}</p>
                     </div>
                   ))}
               </div>
@@ -195,7 +184,7 @@ export default function RulesPage() {
           <ScrollReveal delay={0.34}>
             <section className="bg-surface border border-white/5 rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-5">
-                <div className="p-3 bg-gold-500/10 rounded-xl border border-gold-500/20">
+                <div className="text-gold-500">
                   <ExternalLink size={18} className="text-gold-500" />
                 </div>
                 <div>
@@ -230,7 +219,7 @@ export default function RulesPage() {
                   {t('rules.secondarySourceLinkText', 'Open SJJIF rulebook resources')}
                 </a>
               </div>
-              <p className="text-sm text-text-secondary leading-relaxed mt-4">
+              <p className="text-base text-text-secondary leading-relaxed mt-4">
                 {t(
                   'rules.footerNote',
                   'This local guide is meant to improve clarity and avoid dead-end links. It does not replace official ASJJF guidance, SJJIF rulebook language, or event-specific organizer instructions.'
@@ -244,7 +233,7 @@ export default function RulesPage() {
           <ScrollReveal delay={0.36}>
             <section className="bg-surface border border-white/5 rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-5">
-                <div className="p-3 bg-gold-500/10 rounded-xl border border-gold-500/20">
+                <div className="text-gold-500">
                   <CalendarDays size={18} className="text-gold-500" />
                 </div>
                 <div>
@@ -279,7 +268,7 @@ export default function RulesPage() {
           <ScrollReveal delay={0.4}>
             <section className="bg-surface border border-white/5 rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-5">
-                <div className="p-3 bg-gold-500/10 rounded-xl border border-gold-500/20">
+                <div className="text-gold-500">
                   <Mail size={18} className="text-gold-500" />
                 </div>
                 <div>

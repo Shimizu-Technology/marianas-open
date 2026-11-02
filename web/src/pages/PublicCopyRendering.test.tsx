@@ -15,14 +15,15 @@ import { invalidateSiteContentCache } from '../hooks/useSiteContent';
 import { api, type SiteContentMap } from '../services/api';
 
 vi.mock('../services/api', () => ({ api: { getSiteContents: vi.fn() } }));
-vi.mock('../hooks/useApi', () => ({ useEvents: () => ({ events: [], loading: false }) }));
+const eventState = vi.hoisted(() => ({ events: [] as import('../services/api').Event[], loading: false }));
+vi.mock('../hooks/useApi', () => ({ useEvents: () => eventState }));
 vi.mock('../hooks/useSponsorPlacements', () => ({ useSponsorPlacements: () => ({ placements: [], error: null, retry: vi.fn() }) }));
 vi.mock('../hooks/useResultCounts', () => ({ useResultCounts: () => ({ events: [], loading: false }) }));
 vi.mock('../components/SEO', () => ({ default: () => null }));
 vi.mock('../components/ScrollReveal', () => ({ default: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 vi.mock('../hooks/useSiteImages', () => ({ useSiteImages: () => ({ images: [] }), getImageUrl: (_images: unknown, _key: string, fallback: string) => fallback }));
 vi.mock('../contexts/OrganizationContext', () => ({ useOrg: () => ({ name: 'Marianas Open', contact_email: null, phone: null }) }));
-beforeEach(() => { vi.stubGlobal('IntersectionObserver', class { observe() {} unobserve() {} disconnect() {} }); });
+beforeEach(() => { eventState.events = []; vi.stubGlobal('IntersectionObserver', class { observe() {} unobserve() {} disconnect() {} }); });
 afterEach(() => { cleanup(); invalidateSiteContentCache(); vi.unstubAllGlobals(); });
 const values = (en: string, ja: string | null = null): SiteContentMap[string] => ({ en, ja, ko: null, pt: null, tl: null, zh: null, 'zh-Hant': null });
 async function setup(element: React.ReactNode, content: SiteContentMap, language = 'en') {
@@ -58,4 +59,15 @@ it.each(['en', 'ja'])('keeps both organizer-authored off-season hero lines in %s
 it('keeps the complete default off-season hero title without CMS overrides', async () => {
   await setup(<HomePage />, {});
   expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(en.hero.title);
+});
+
+it('keeps editable identity above the next event h1, story first, and existing stats intact', async () => {
+  eventState.events = [eventEditorFixture({ name: 'Copa 2030', date: '2030-01-30', end_date: null, is_main_event: false, status: 'upcoming' })];
+  await setup(<HomePage />, { hero_description: values('Staff championship description'), featured_title: values('Staff history'), stat_competitors: values('1,300+') });
+  expect(await screen.findByText('Staff championship description')).toBeTruthy();
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Copa 2030');
+  const hero = document.querySelector('.home-event-hero')!;
+  expect(hero.textContent?.indexOf('Staff championship description')).toBeLessThan(hero.textContent!.indexOf('Copa 2030'));
+  expect(hero.nextElementSibling?.querySelector('h2')?.textContent).toBe('Staff history');
+  expect(screen.getByText('1,300+')).toBeTruthy();
 });

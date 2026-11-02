@@ -36,7 +36,10 @@ it('traps focus, applies filters, dismisses with Escape and restores the opener 
   expect(document.activeElement).toBe(show);
   fireEvent.keyDown(show, { key: 'Tab' });
   expect(document.activeElement).toBe(close);
-  fireEvent.change(screen.getByRole('combobox', { name: 'Belt' }), { target: { value: 'black' } });
+  const beltField = screen.getByRole('combobox', { name: 'Belt' });
+  beltField.focus();
+  fireEvent.change(beltField, { target: { value: 'black' } });
+  expect(document.activeElement).toBe(beltField);
   fireEvent.keyDown(document, { key: 'Escape' });
   expect(screen.queryByRole('dialog')).toBeNull();
   expect(document.activeElement).toBe(opener);
