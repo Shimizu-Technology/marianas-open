@@ -89,7 +89,7 @@ test('SIGTERM aborts pacing and sends final heartbeat', async () => {
 });
 test('fetch error posts error; snapshot delivery failure stops further work', async () => {
   const f = fixture({ fetchImpl: async () => { throw new Error('contains private details'); } });
-  await f.execute(); assert.equal(f.snapshots[0].error, 'fetch_failed');
+  await f.execute(); assert.equal(f.snapshots[0].error, 'unknown');
   const g = fixture({ jobs: [request(1), request(2)] });
   g.api.snapshot = async () => { throw new Error('offline'); };
   await assert.rejects(g.execute(), /offline/);
@@ -137,7 +137,7 @@ for (const [name, result] of Object.entries({
   const f = fixture({ jobs: [job], outcome: result });
   await f.execute();
   assert.deepEqual(JSON.parse(JSON.stringify(f.snapshots[0])), {
-    ...result, request_id: job.id, lease_token: job.lease_token, url: job.url,
+    ...result, elapsed_ms: 0, request_id: job.id, lease_token: job.lease_token, url: job.url,
     fetched_at: '1970-01-01T00:00:00.000Z',
   });
 });
@@ -185,5 +185,24 @@ test('missing or invalid lease tokens fail before browser navigation', async () 
     assert.equal(f.fetched.length, 0);
     assert.equal(f.snapshots.length, 0);
     assert.equal(f.beats.length, 2);
+  }
+});
+
+test('fetch failures log only safe categories and elapsed time, including aborts', async () => {
+  const error = new Error('page.goto: net::ERR_CONNECTION_RESET at https://secret.test/private');
+  for (const aborted of [false, true]) {
+    const f = fixture({ fetchImpl: async () => { if (aborted) f.controller.abort(); throw error; } });
+    let tick = 0;
+    f.options.now = () => tick++;
+    await f.execute();
+    const category = aborted ? 'aborted_deadline' : 'net_ERR_CONNECTION_RESET';
+    const entry = f.logs.find(log => log.event === 'fetch_error');
+    assert.equal(entry.category, category);
+    assert.deepEqual(Object.keys(entry).sort(), ['category', 'elapsed_ms', 'event', 'request_id']);
+    assert.ok(entry.elapsed_ms > 0);
+    assert.equal(f.snapshots[0].error, category);
+    assert.ok(f.snapshots[0].elapsed_ms > 0);
+    assert.ok(!JSON.stringify(f.logs).includes('secret.test'));
+    assert.ok(!JSON.stringify(f.snapshots).includes('secret.test'));
   }
 });

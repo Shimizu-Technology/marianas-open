@@ -1,4 +1,5 @@
 import { chromium } from 'playwright-core';
+import { FetchError } from './errors.js';
 import { allowedUrl } from './config.js';
 
 export function isChallenge({ title = '', html = '', status = 0 }) {
@@ -7,19 +8,22 @@ export function isChallenge({ title = '', html = '', status = 0 }) {
 }
 
 export async function fetchPage(url, config, { signal, launch = options => chromium.launch(options), now = Date.now, validateUrl = allowedUrl } = {}) {
-  validateUrl(url, config.allowedHosts);
-  const browser = await launch({ headless: false, executablePath: config.executablePath,
+  try { validateUrl(url, config.allowedHosts); }
+  catch { throw new FetchError('boundary_violation'); }
+  let browser;
+  try { browser = await launch({ headless: false, executablePath: config.executablePath,
     // Containers generally lack the kernel facilities needed for Chromium's sandbox.
-    args: ['--no-sandbox', '--disable-dev-shm-usage'], timeout: 30000 });
+    args: ['--no-sandbox', '--disable-dev-shm-usage'], timeout: 30000 }); }
+  catch { throw new FetchError('browser_launch_failed'); }
   const stop = () => { void browser.close().catch(() => {}); };
   signal?.addEventListener('abort', stop, { once: true });
   let challengeSeen = false;
   let status = null;
+  let boundaryError;
   try {
     signal?.throwIfAborted();
     const context = await browser.newContext({ locale: 'en-US', timezoneId: 'Pacific/Guam', serviceWorkers: 'block' });
-    let boundaryError;
-    const rejectHop = () => { boundaryError = new Error('disallowed_navigation'); stop(); };
+    const rejectHop = (category = 'disallowed_redirect') => { boundaryError ||= new FetchError(category); stop(); };
     // Observe title/markup changes from document creation, including challenges that
     // disappear before DOMContentLoaded. No browser identity or fingerprint changes.
     await context.exposeBinding('reportChallenge', () => { challengeSeen = true; });
@@ -66,9 +70,9 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
       try {
         for (let hop = request; hop; hop = hop.redirectedFrom()) {
           validateUrl(hop.url(), config.allowedHosts);
-          if (hop.method() !== 'GET') throw new Error('disallowed_method');
+          if (hop.method() !== 'GET') throw new FetchError('disallowed_method');
         }
-      } catch { rejectHop(); }
+      } catch (error) { rejectHop(error instanceof FetchError ? error.category : 'disallowed_redirect'); }
     };
     const guardResponse = response => {
       if (!isMainFrameNavigation(response.request())) return;
@@ -132,7 +136,7 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
     // No HTML or final URL is returned when navigation could not be validated.
     if (challengeSeen) return { final_url: null, http_status: status, html: null,
       outcome: 'challenged', error: 'challenge_detected' };
-    throw error;
+    throw boundaryError || error;
   } finally {
     signal?.removeEventListener('abort', stop);
     await browser.close();
