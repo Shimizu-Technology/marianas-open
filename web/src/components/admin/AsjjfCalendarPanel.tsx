@@ -97,7 +97,7 @@ export default function AsjjfCalendarPanel({ onChanged }: { onChanged?: () => vo
           </dl>
           <p className="text-xs text-text-secondary">Source checked: {checkedTime(review.source_checked_at)} · Snapshot #{review.snapshot_id}</p>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            {review.event_id && <Link className={asjjfButtonClass} to={`/admin/events?edit=${review.event_id}`}>{review.event_status === 'draft' ? 'Open draft' : 'Open event'}</Link>}
+            {review.event_id && <Link className={asjjfButtonClass} onClick={onChanged} to={`/admin/events?edit=${review.event_id}`}>{review.event_status === 'draft' ? 'Open draft' : 'Open event'}</Link>}
             <a href={review.source_url} target="_blank" rel="noopener noreferrer" className={asjjfButtonClass}>ASJJF source page</a>
             {isAdmin && <>
               {review.kind === 'change' && <button type="button" disabled={busy || !!error} onClick={() => decide(review.id, 'apply')} className={asjjfButtonClass}>Apply changes</button>}
