@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { FetchError } from './errors.js';
+import { FetchError, describeRejectedUrl } from './errors.js';
 import { allowedUrl } from './config.js';
 
 export function isChallenge({ title = '', html = '', status = 0 }) {
@@ -23,7 +23,10 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
   try {
     signal?.throwIfAborted();
     const context = await browser.newContext({ locale: 'en-US', timezoneId: 'Pacific/Guam', serviceWorkers: 'block' });
-    const rejectHop = (category = 'disallowed_redirect') => { boundaryError ||= new FetchError(category); stop(); };
+    const rejectHop = (category = 'disallowed_redirect', hopUrl) => {
+      boundaryError ||= new FetchError(category, hopUrl ? describeRejectedUrl(hopUrl, config.allowedHosts) : undefined);
+      stop();
+    };
     // Observe title/markup changes from document creation, including challenges that
     // disappear before DOMContentLoaded. No browser identity or fingerprint changes.
     await context.exposeBinding('reportChallenge', () => { challengeSeen = true; });
@@ -67,23 +70,34 @@ export async function fetchPage(url, config, { signal, launch = options => chrom
     // on the first disallowed hop.
     const guardRequest = request => {
       if (!isMainFrameNavigation(request)) return;
+      let hopUrl;
       try {
         for (let hop = request; hop; hop = hop.redirectedFrom()) {
-          validateUrl(hop.url(), config.allowedHosts);
+          hopUrl = hop.url();
+          validateUrl(hopUrl, config.allowedHosts);
           if (hop.method() !== 'GET') throw new FetchError('disallowed_method');
         }
-      } catch (error) { rejectHop(error instanceof FetchError ? error.category : 'disallowed_redirect'); }
+      } catch (error) {
+        if (error instanceof FetchError) rejectHop(error.category);
+        else rejectHop('disallowed_redirect', hopUrl);
+      }
     };
     const guardResponse = response => {
       if (!isMainFrameNavigation(response.request())) return;
       if (isChallenge({ status: response.status() })) challengeSeen = true;
+      let hopUrl;
       try {
-        validateUrl(response.url(), config.allowedHosts);
+        hopUrl = response.url();
+        validateUrl(hopUrl, config.allowedHosts);
         if (response.status() >= 300 && response.status() < 400) {
           const location = response.headers().location;
-          if (location) validateUrl(new URL(location, response.url()).href, config.allowedHosts);
+          if (location) {
+            hopUrl = location;
+            hopUrl = new URL(location, response.url()).href;
+            validateUrl(hopUrl, config.allowedHosts);
+          }
         }
-      } catch { rejectHop(); }
+      } catch { rejectHop('disallowed_redirect', hopUrl); }
       try {
         if (response.frame() === page.mainFrame()) status = response.status();
       } catch { /* Early popup responses may not have a frame yet; they never set status. */ }

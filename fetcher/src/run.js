@@ -47,7 +47,8 @@ export async function run(config, { api, fetchPage, signal, sleep = delay, now =
         } catch (error) {
           // Browser exception messages can include page URLs/content. Emit only a safe category.
           const category = classifyFetchError(error, pageSignal);
-          log({ event: 'fetch_error', request_id: request.id, category, elapsed_ms: Math.max(0, now() - previousStart) });
+          log({ event: 'fetch_error', request_id: request.id, category, elapsed_ms: Math.max(0, now() - previousStart),
+            ...(error instanceof FetchError && error.detail ? { rejected: error.detail } : {}) });
           result = { final_url: null, http_status: null, outcome: 'error', error: category, html: null };
         }
         const challenged = result.outcome === 'challenged';
