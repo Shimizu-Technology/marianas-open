@@ -68,7 +68,7 @@ export default function WatchPage() {
   const [beltFilter, setBeltFilter] = useState('');
   const [eventFilter, setEventFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [expandedVideo, setExpandedVideo] = useState<number | null>(null);
+  const [expandedVideo, setExpandedVideo] = useState<string | null>(null);
   const { events } = useEvents();
   const liveEvent = events.find(e => e.live_stream_active);
   const liveStreamUrl = liveEvent?.live_stream_url || publicLink('youtube_live_url', DEFAULT_LIVE_STREAM_URL);
@@ -257,8 +257,8 @@ export default function WatchPage() {
                 <ScrollReveal key={video.id} delay={i * 0.08}>
                   <VideoCard
                     video={video}
-                    expanded={expandedVideo === video.id}
-                    onToggle={() => setExpandedVideo(expandedVideo === video.id ? null : video.id)}
+                    expanded={expandedVideo === `featured:${video.id}`}
+                    onToggle={() => setExpandedVideo(expandedVideo === `featured:${video.id}` ? null : `featured:${video.id}`)}
                   />
                 </ScrollReveal>
               ))}
@@ -329,8 +329,8 @@ export default function WatchPage() {
                 <ScrollReveal key={video.id} delay={i * 0.05}>
                   <VideoCard
                     video={video}
-                    expanded={expandedVideo === video.id}
-                    onToggle={() => setExpandedVideo(expandedVideo === video.id ? null : video.id)}
+                    expanded={expandedVideo === `library:${video.id}`}
+                    onToggle={() => setExpandedVideo(expandedVideo === `library:${video.id}` ? null : `library:${video.id}`)}
                   />
                 </ScrollReveal>
               ))}

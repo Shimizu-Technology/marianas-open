@@ -69,3 +69,15 @@ it('offers named playback and close buttons and omits unshipped feature promises
   expect(document.activeElement).toBe(screen.getByRole('button', { name: `${en.watch.watchNow}: Match 1` }));
   expect(screen.queryByText(en.watch.visionTitle)).toBeNull();
 });
+
+it('plays only the chosen card when a featured match also appears in the library', async () => {
+  vi.mocked(api.getVideos).mockResolvedValue([{ ...video(1, 'Copa 2026', '2026-01-01'), featured: true }]);
+  setup();
+  const plays = await screen.findAllByRole('button', { name: `${en.watch.watchNow}: Match 1` });
+  expect(plays).toHaveLength(2);
+  fireEvent.click(plays[0]);
+  expect(document.querySelectorAll('iframe')).toHaveLength(1);
+  expect(screen.getAllByRole('button', { name: en.watch.closeVideo })).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: en.watch.closeVideo }));
+  expect(document.querySelectorAll('iframe')).toHaveLength(0);
+});
