@@ -1,0 +1,3768 @@
+{
+  "source": "f62e47c0a071469fbd5115956090ff43f8d1c6ea",
+  "outcomes": [
+    {
+      "lang": "en",
+      "path": "/",
+      "status": "passed"
+    },
+    {
+      "lang": "en",
+      "path": "/calendar",
+      "status": "passed"
+    },
+    {
+      "lang": "en",
+      "path": "/events/copa-de-marianas-2027",
+      "status": "passed"
+    },
+    {
+      "lang": "ja",
+      "path": "/",
+      "status": "passed"
+    },
+    {
+      "lang": "ja",
+      "path": "/calendar",
+      "status": "passed"
+    },
+    {
+      "lang": "ja",
+      "path": "/events/copa-de-marianas-2027",
+      "status": "passed"
+    },
+    {
+      "lang": "ko",
+      "path": "/",
+      "status": "passed"
+    },
+    {
+      "lang": "ko",
+      "path": "/calendar",
+      "status": "passed"
+    },
+    {
+      "lang": "ko",
+      "path": "/events/copa-de-marianas-2027",
+      "status": "passed"
+    },
+    {
+      "lang": "pt",
+      "path": "/",
+      "status": "passed"
+    },
+    {
+      "lang": "pt",
+      "path": "/calendar",
+      "status": "passed"
+    },
+    {
+      "lang": "pt",
+      "path": "/events/copa-de-marianas-2027",
+      "status": "passed"
+    },
+    {
+      "lang": "tl",
+      "path": "/",
+      "status": "passed"
+    },
+    {
+      "lang": "tl",
+      "path": "/calendar",
+      "status": "passed"
+    },
+    {
+      "lang": "tl",
+      "path": "/events/copa-de-marianas-2027",
+      "status": "passed"
+    },
+    {
+      "lang": "zh",
+      "path": "/",
+      "status": "passed"
+    },
+    {
+      "lang": "zh",
+      "path": "/calendar",
+      "status": "passed"
+    },
+    {
+      "lang": "zh",
+      "path": "/events/copa-de-marianas-2027",
+      "status": "passed"
+    },
+    {
+      "lang": "zh-Hant",
+      "path": "/",
+      "status": "passed"
+    },
+    {
+      "lang": "zh-Hant",
+      "path": "/calendar",
+      "status": "passed"
+    },
+    {
+      "lang": "zh-Hant",
+      "path": "/events/copa-de-marianas-2027",
+      "status": "passed"
+    }
+  ],
+  "measurements": [
+    {
+      "source": "before",
+      "width": 1440,
+      "metrics": {
+        "viewport": {
+          "w": 1440,
+          "h": 900
+        },
+        "page": {
+          "height": 5314,
+          "screens": 5.9,
+          "words": 325,
+          "img": 29,
+          "video": 0,
+          "canvas": 0,
+          "svg": 101,
+          "sections": 10,
+          "horizontalOverflow": 0,
+          "overflowCulprits": [],
+          "uiFragments": 0,
+          "uiAbuse": false,
+          "realPictures": 4,
+          "videoCount": 0,
+          "uiPictures": 0,
+          "pictureSamples": [
+            "javsvjayo9qrhm4qxrukv83igi54",
+            "cdhmjwmc1vzl5aa4dfdf1qi8amhh",
+            "42bukl7t0lwbvg87i8u6m0shbbon",
+            "mabgqbgqo15fep3p3h0me0hg1cit"
+          ],
+          "blendText": 0,
+          "sideScrollers": 0,
+          "brokenImages": [],
+          "emoji": [],
+          "videosNoPoster": 0
+        },
+        "hero": {
+          "text": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+          "words": 3,
+          "chars": 32,
+          "lines": 2,
+          "size": 96,
+          "vw": 6.7,
+          "font": "Outfit",
+          "weight": 900,
+          "tracking": -0.025,
+          "leading": 0.9,
+          "upper": true,
+          "italic": false,
+          "mono": false,
+          "align": "center",
+          "position": "center",
+          "widthRatio": 0.66,
+          "top": 281,
+          "gradientText": true,
+          "tag": "h1",
+          "kind": "heading"
+        },
+        "h1": {
+          "text": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+          "words": 3,
+          "lines": 2,
+          "size": 96,
+          "font": "Outfit"
+        },
+        "headings": [
+          {
+            "text": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+            "words": 3,
+            "chars": 32,
+            "lines": 2,
+            "size": 96,
+            "vw": 6.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": -0.025,
+            "leading": 0.9,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.66,
+            "top": 281,
+            "gradientText": true,
+            "tag": "h1",
+            "kind": "heading"
+          },
+          {
+            "text": "1,300+",
+            "words": 1,
+            "chars": 6,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "left",
+            "widthRatio": 0.1,
+            "top": 653,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "6",
+            "words": 1,
+            "chars": 1,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.1,
+            "top": 653,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "$50K",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.1,
+            "top": 653,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "2007",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "right",
+            "widthRatio": 0.1,
+            "top": 653,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "Guam Copa de Marianas 2027",
+            "words": 5,
+            "chars": 26,
+            "lines": 1,
+            "size": 36,
+            "vw": 2.5,
+            "font": "Outfit",
+            "weight": 700,
+            "tracking": 0,
+            "leading": 1.11,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.53,
+            "top": 1022,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "THE LARGEST BJJ TOURNAMENT IN THE MARIANAS",
+            "words": 7,
+            "chars": 42,
+            "lines": 3,
+            "size": 48,
+            "vw": 3.3,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.25,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.33,
+            "top": 1477,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "$2M",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.08,
+            "top": 1594,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "5K+",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "right",
+            "widthRatio": 0.05,
+            "top": 1594,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "FOLLOW THE JOURNEY",
+            "words": 3,
+            "chars": 18,
+            "lines": 1,
+            "size": 48,
+            "vw": 3.3,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.86,
+            "top": 2171,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "OUR SPONSORS",
+            "words": 2,
+            "chars": 12,
+            "lines": 1,
+            "size": 36,
+            "vw": 2.5,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.11,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.86,
+            "top": 3560,
+            "tag": "h2",
+            "kind": "heading"
+          }
+        ],
+        "headingSummary": {
+          "count": 11,
+          "maxLines": 3,
+          "over2Lines": 1,
+          "statements": 0,
+          "centered": 7,
+          "medianWords": 1,
+          "mixedFontHeadings": 0
+        },
+        "type": {
+          "families": [
+            {
+              "family": "DM Sans",
+              "share": 0.64,
+              "mono": false
+            },
+            {
+              "family": "Outfit",
+              "share": 0.36,
+              "mono": false
+            }
+          ],
+          "familyCount": 2,
+          "sizes": [
+            10,
+            11,
+            12,
+            14,
+            16,
+            18,
+            20,
+            30,
+            36,
+            48,
+            96
+          ],
+          "sizeCount": 11,
+          "notLoaded": [],
+          "body": {
+            "font": "DM Sans",
+            "size": 14,
+            "leading": 1.63,
+            "weight": 400,
+            "tracking": 0,
+            "contrast": null
+          },
+          "measureChars": 84,
+          "max": {
+            "size": 96,
+            "vw": 6.7,
+            "font": "Outfit",
+            "text": "Brazilian Jiu-Jitsu"
+          },
+          "monoShare": 0,
+          "monoProseShare": 0,
+          "monoFamilies": [],
+          "monoSamples": [],
+          "microLabels": 17,
+          "microLabelShare": 0.106,
+          "microSamples": [
+            "Competitors",
+            "Countries",
+            "Prize Pool",
+            "Established",
+            "Up next",
+            "Since 2007"
+          ],
+          "upperShare": 0.32,
+          "centerShare": 0.66,
+          "smallText": 29
+        },
+        "eyebrows": [
+          {
+            "text": "ASJJF 5-Star Ranked Event",
+            "above": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": true,
+            "size": 14,
+            "top": 176
+          },
+          {
+            "text": "Up next",
+            "above": "Guam Copa de Marianas 2027",
+            "upper": true,
+            "tracked": true,
+            "mono": false,
+            "pill": false,
+            "size": 14,
+            "top": 990
+          },
+          {
+            "text": "Since 2007",
+            "above": "THE LARGEST BJJ TOURNAMENT IN THE MARIAN",
+            "upper": true,
+            "tracked": true,
+            "mono": false,
+            "pill": false,
+            "size": 12,
+            "top": 1427
+          },
+          {
+            "text": "Pro Series Circuit",
+            "above": "FOLLOW THE JOURNEY",
+            "upper": true,
+            "tracked": true,
+            "mono": false,
+            "pill": true,
+            "size": 12,
+            "top": 2134
+          },
+          {
+            "text": "Official Sponsors",
+            "above": "OUR SPONSORS",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": true,
+            "size": 14,
+            "top": 3507
+          }
+        ],
+        "numbered": [],
+        "color": {
+          "bodyBg": "#0a0a0b",
+          "bodyBgHsl": {
+            "h": 240,
+            "s": 0.05,
+            "l": 0.04
+          },
+          "dark": true,
+          "sectionBgs": [
+            {
+              "color": "#0a0a0b",
+              "top": 0,
+              "hsl": {
+                "h": 240,
+                "s": 0.05,
+                "l": 0.04
+              }
+            },
+            {
+              "color": "#111318",
+              "top": 3417,
+              "hsl": {
+                "h": 223,
+                "s": 0.17,
+                "l": 0.08
+              }
+            }
+          ],
+          "textColors": [
+            {
+              "color": "#9ca3af",
+              "share": 0.52
+            },
+            {
+              "color": "#ececec",
+              "share": 0.18
+            },
+            {
+              "color": "#9098a5",
+              "share": 0.18
+            },
+            {
+              "color": "#e4c06a",
+              "share": 0.07
+            },
+            {
+              "color": "#d4a843",
+              "share": 0.03
+            }
+          ],
+          "button": {
+            "bg": "#004581",
+            "hsl": {
+              "h": 208,
+              "s": 1,
+              "l": 0.25
+            },
+            "fg": "#ececec"
+          },
+          "lowContrast": []
+        },
+        "buttons": {
+          "count": 13,
+          "inHero": 2,
+          "radius": 0,
+          "height": 44,
+          "withShadow": 0,
+          "withGradient": 0,
+          "mono": 0,
+          "upper": 10,
+          "heroLabels": [
+            "EXPLORE EVENTS",
+            "PAST EVENTS"
+          ]
+        },
+        "surfaces": {
+          "shadowStatic": 0,
+          "shadowOverlay": 0,
+          "shadowSamples": [],
+          "gradients": 8,
+          "scrims": 1,
+          "gradientSamples": [
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, rgb(10, 10, 11) 0%, oklab(0.145248 0.000598863 -0.00204487 / 0.6) 50%, oklab(0.145248 ",
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%)"
+          ],
+          "gradientText": 1,
+          "hairlines": 8,
+          "hairlineSamples": [
+            "header.fixed.top-0 1440px",
+            "section.min-h-[32rem].sm:min-h-96 1440px",
+            "section.py-24.sm:py-32 1440px",
+            "section.pt-16.sm:pt-20 1440px",
+            "section.py-16.border-t 1440px"
+          ],
+          "outlinedBoxes": 7,
+          "dashed": 0,
+          "blurred": 5,
+          "roundedBoxes": 19,
+          "boxRadius": 6,
+          "squareMedia": 4,
+          "roundedMedia": 0,
+          "mediaRadius": 0,
+          "textShadow": 0,
+          "cardRows": [
+            {
+              "count": 3,
+              "iconTopped": true,
+              "rounded": false,
+              "top": 603
+            }
+          ]
+        },
+        "heroMedia": [
+          {
+            "type": "img",
+            "ratio": 1
+          }
+        ],
+        "nav": {
+          "links": 7,
+          "fixed": true,
+          "height": 65,
+          "floatingPill": false,
+          "blur": true
+        },
+        "fontsLoaded": [
+          "outfit",
+          "dm sans"
+        ]
+      },
+      "findings": [
+        {
+          "level": "FAIL",
+          "id": "headline-lines",
+          "width": 1440,
+          "message": "1 headline(s) wrap past two lines at 1440px: \"THE LARGEST BJJ TOURNAMENT IN THE MARIANAS\" → 3 lines (7 words, 48px)",
+          "fix": "Cut words first (a headline is a title, not a sentence). Then give it a wider measure. Lower the size only as a last resort and never below the scale you chose. A real statement paragraph belongs in a <p> or <blockquote> at 36px or less."
+        },
+        {
+          "level": "FAIL",
+          "id": "eyebrow",
+          "width": 1440,
+          "message": "5 eyebrow/kicker label(s) above headings: \"ASJJF 5-Star Ranked Event\" (pill) above \"BRAZILIAN JIU-JITSU CHAMPIONSHIP\"; \"Up next\" above \"Guam Copa de Marianas 2027\"; \"Since 2007\" above \"THE LARGEST BJJ TOURNAMENT IN THE MARIAN\"; \"Pro Series Circuit\" (pill) above \"FOLLOW THE JOURNEY\"; \"Official Sponsors\" (pill) above \"OUR SPONSORS\"",
+          "fix": "Delete them. If the label carried real information, fold it into the headline or the supporting sentence."
+        },
+        {
+          "level": "FAIL",
+          "id": "micro-label",
+          "width": 1440,
+          "message": "17 tiny uppercase letter-spaced labels (e.g. \"Competitors\", \"Countries\", \"Prize Pool\", \"Established\").",
+          "fix": "Use sentence-case text at a readable size, or delete the label."
+        },
+        {
+          "level": "FAIL",
+          "id": "gradient",
+          "width": 1440,
+          "message": "8 gradient fill(s): div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%) | div.absolute.inset-0 → linear-gradient(to top, rgb(10, 10, 11) 0%, oklab(0.145248 0.000598863 -0.00204487 / 0.6) 50%, oklab(0.145248  | div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+          "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility."
+        },
+        {
+          "level": "FAIL",
+          "id": "gradient-text",
+          "width": 1440,
+          "message": "1 gradient-filled text element(s).",
+          "fix": "Solid colour text."
+        },
+        {
+          "level": "FAIL",
+          "id": "hairline",
+          "width": 1440,
+          "message": "8 thin rule(s)/divider line(s): header.fixed.top-0 1440px | section.min-h-[32rem].sm:min-h-96 1440px | section.py-24.sm:py-32 1440px | section.pt-16.sm:pt-20 1440px",
+          "fix": "Delete. Separate with space, a tone change, or scale. Lines are only for real tables and form fields."
+        },
+        {
+          "level": "FAIL",
+          "id": "outlined-box",
+          "width": 1440,
+          "message": "7 boxes drawn with a 1px outline.",
+          "fix": "Define a surface by its fill (one tone step from the page) or leave the content unboxed."
+        },
+        {
+          "level": "WARN",
+          "id": "glass",
+          "width": 1440,
+          "message": "5 backdrop-blur surfaces.",
+          "fix": "One blurred sticky bar at most; glass cards are a tell."
+        },
+        {
+          "level": "FAIL",
+          "id": "icon-cards",
+          "width": 1440,
+          "message": "1 row(s) of identical cards each topped with a small icon (3 cards).",
+          "fix": "Replace with one composed section from the direction: a narrative split, a list set in large type, or real imagery per item."
+        },
+        {
+          "level": "WARN",
+          "id": "size-count",
+          "width": 1440,
+          "message": "11 different font sizes (10, 11, 12, 14, 16, 18, 20, 30, 36, 48, 96).",
+          "fix": "A page needs about five: display, heading, lead, body, small."
+        },
+        {
+          "level": "FAIL",
+          "id": "body-size",
+          "width": 1440,
+          "message": "Body text is 14px (the size most of the running text is set in).",
+          "fix": "Body copy 16–20px. Map small sizes from blueprints onto your body step."
+        },
+        {
+          "level": "WARN",
+          "id": "no-footage",
+          "width": 1440,
+          "message": "No video anywhere on the page.",
+          "fix": "Look for one honest clip with scripts/assets.mjs --video (the place, the material, the process) and use it as a muted loop with a poster frame. Defend its absence only if no clip fits the subject."
+        },
+        {
+          "level": "FAIL",
+          "id": "small-text",
+          "width": 1440,
+          "message": "29 text blocks under 13px.",
+          "fix": "Nothing meant to be read goes below 13px."
+        }
+      ]
+    },
+    {
+      "source": "before",
+      "width": 768,
+      "metrics": {
+        "viewport": {
+          "w": 768,
+          "h": 900
+        },
+        "page": {
+          "height": 6798,
+          "screens": 7.6,
+          "words": 327,
+          "img": 29,
+          "video": 0,
+          "canvas": 0,
+          "svg": 101,
+          "sections": 10,
+          "horizontalOverflow": 0,
+          "overflowCulprits": [],
+          "uiFragments": 0,
+          "uiAbuse": false,
+          "realPictures": 4,
+          "videoCount": 0,
+          "uiPictures": 0,
+          "pictureSamples": [
+            "javsvjayo9qrhm4qxrukv83igi54",
+            "cdhmjwmc1vzl5aa4dfdf1qi8amhh",
+            "42bukl7t0lwbvg87i8u6m0shbbon",
+            "mabgqbgqo15fep3p3h0me0hg1cit"
+          ],
+          "blendText": 0,
+          "sideScrollers": 0,
+          "brokenImages": [],
+          "emoji": [],
+          "videosNoPoster": 0
+        },
+        "hero": {
+          "text": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+          "words": 3,
+          "chars": 32,
+          "lines": 2,
+          "size": 72,
+          "vw": 9.4,
+          "font": "Outfit",
+          "weight": 900,
+          "tracking": -0.025,
+          "leading": 0.9,
+          "upper": true,
+          "italic": false,
+          "mono": false,
+          "align": "center",
+          "position": "center",
+          "widthRatio": 0.93,
+          "top": 302,
+          "gradientText": true,
+          "tag": "h1",
+          "kind": "heading"
+        },
+        "h1": {
+          "text": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+          "words": 3,
+          "lines": 2,
+          "size": 72,
+          "font": "Outfit"
+        },
+        "headings": [
+          {
+            "text": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+            "words": 3,
+            "chars": 32,
+            "lines": 2,
+            "size": 72,
+            "vw": 9.4,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": -0.025,
+            "leading": 0.9,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.93,
+            "top": 302,
+            "gradientText": true,
+            "tag": "h1",
+            "kind": "heading"
+          },
+          {
+            "text": "1,300+",
+            "words": 1,
+            "chars": 6,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "left",
+            "widthRatio": 0.17,
+            "top": 632,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "6",
+            "words": 1,
+            "chars": 1,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "left",
+            "widthRatio": 0.17,
+            "top": 632,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "$50K",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "right",
+            "widthRatio": 0.17,
+            "top": 632,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "2007",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "right",
+            "widthRatio": 0.17,
+            "top": 632,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "Guam Copa de Marianas 2027",
+            "words": 5,
+            "chars": 26,
+            "lines": 1,
+            "size": 36,
+            "vw": 4.7,
+            "font": "Outfit",
+            "weight": 700,
+            "tracking": 0,
+            "leading": 1.11,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 997,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "THE LARGEST BJJ TOURNAMENT IN THE MARIANAS",
+            "words": 7,
+            "chars": 42,
+            "lines": 2,
+            "size": 36,
+            "vw": 4.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.25,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 1462,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "$2M",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.15,
+            "top": 1948,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "5K+",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "right",
+            "widthRatio": 0.1,
+            "top": 1948,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "FOLLOW THE JOURNEY",
+            "words": 3,
+            "chars": 18,
+            "lines": 1,
+            "size": 48,
+            "vw": 6.3,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 2525,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "OUR SPONSORS",
+            "words": 2,
+            "chars": 12,
+            "lines": 1,
+            "size": 36,
+            "vw": 4.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.11,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 4640,
+            "tag": "h2",
+            "kind": "heading"
+          }
+        ],
+        "headingSummary": {
+          "count": 11,
+          "maxLines": 2,
+          "over2Lines": 0,
+          "statements": 0,
+          "centered": 7,
+          "medianWords": 1,
+          "mixedFontHeadings": 0
+        },
+        "type": {
+          "families": [
+            {
+              "family": "DM Sans",
+              "share": 0.64,
+              "mono": false
+            },
+            {
+              "family": "Outfit",
+              "share": 0.36,
+              "mono": false
+            }
+          ],
+          "familyCount": 2,
+          "sizes": [
+            10,
+            11,
+            12,
+            14,
+            16,
+            18,
+            20,
+            30,
+            36,
+            48,
+            72
+          ],
+          "sizeCount": 11,
+          "notLoaded": [],
+          "body": {
+            "font": "DM Sans",
+            "size": 14,
+            "leading": 1.63,
+            "weight": 400,
+            "tracking": 0,
+            "contrast": null
+          },
+          "measureChars": 84,
+          "max": {
+            "size": 72,
+            "vw": 9.4,
+            "font": "Outfit",
+            "text": "Brazilian Jiu-Jitsu"
+          },
+          "monoShare": 0,
+          "monoProseShare": 0,
+          "monoFamilies": [],
+          "monoSamples": [],
+          "microLabels": 17,
+          "microLabelShare": 0.106,
+          "microSamples": [
+            "Competitors",
+            "Countries",
+            "Prize Pool",
+            "Established",
+            "Up next",
+            "Since 2007"
+          ],
+          "upperShare": 0.32,
+          "centerShare": 0.49,
+          "smallText": 29
+        },
+        "eyebrows": [
+          {
+            "text": "Up next",
+            "above": "Guam Copa de Marianas 2027",
+            "upper": true,
+            "tracked": true,
+            "mono": false,
+            "pill": false,
+            "size": 14,
+            "top": 965
+          },
+          {
+            "text": "Since 2007",
+            "above": "THE LARGEST BJJ TOURNAMENT IN THE MARIAN",
+            "upper": true,
+            "tracked": true,
+            "mono": false,
+            "pill": false,
+            "size": 12,
+            "top": 1412
+          },
+          {
+            "text": "Pro Series Circuit",
+            "above": "FOLLOW THE JOURNEY",
+            "upper": true,
+            "tracked": true,
+            "mono": false,
+            "pill": true,
+            "size": 12,
+            "top": 2488
+          },
+          {
+            "text": "Official Sponsors",
+            "above": "OUR SPONSORS",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": true,
+            "size": 14,
+            "top": 4587
+          }
+        ],
+        "numbered": [],
+        "color": {
+          "bodyBg": "#0a0a0b",
+          "bodyBgHsl": {
+            "h": 240,
+            "s": 0.05,
+            "l": 0.04
+          },
+          "dark": true,
+          "sectionBgs": [
+            {
+              "color": "#0a0a0b",
+              "top": 0,
+              "hsl": {
+                "h": 240,
+                "s": 0.05,
+                "l": 0.04
+              }
+            },
+            {
+              "color": "#111318",
+              "top": 4497,
+              "hsl": {
+                "h": 223,
+                "s": 0.17,
+                "l": 0.08
+              }
+            }
+          ],
+          "textColors": [
+            {
+              "color": "#9ca3af",
+              "share": 0.53
+            },
+            {
+              "color": "#ececec",
+              "share": 0.18
+            },
+            {
+              "color": "#9098a5",
+              "share": 0.17
+            },
+            {
+              "color": "#e4c06a",
+              "share": 0.07
+            },
+            {
+              "color": "#d4a843",
+              "share": 0.02
+            }
+          ],
+          "button": {
+            "bg": "#004581",
+            "hsl": {
+              "h": 208,
+              "s": 1,
+              "l": 0.25
+            },
+            "fg": "#ececec"
+          },
+          "lowContrast": []
+        },
+        "buttons": {
+          "count": 13,
+          "inHero": 2,
+          "radius": 0,
+          "height": 44,
+          "withShadow": 0,
+          "withGradient": 0,
+          "mono": 0,
+          "upper": 10,
+          "heroLabels": [
+            "EXPLORE EVENTS",
+            "PAST EVENTS"
+          ]
+        },
+        "surfaces": {
+          "shadowStatic": 0,
+          "shadowOverlay": 0,
+          "shadowSamples": [],
+          "gradients": 8,
+          "scrims": 1,
+          "gradientSamples": [
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, rgb(10, 10, 11) 0%, oklab(0.145248 0.000598863 -0.00204487 / 0.6) 50%, oklab(0.145248 ",
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%)"
+          ],
+          "gradientText": 1,
+          "hairlines": 11,
+          "hairlineSamples": [
+            "header.fixed.top-0 768px",
+            "section.min-h-[32rem].sm:min-h-96 768px",
+            "div.mt-3.grid 638px",
+            "div.mt-3.grid 638px",
+            "div.mt-3.grid 638px"
+          ],
+          "outlinedBoxes": 7,
+          "dashed": 0,
+          "blurred": 5,
+          "roundedBoxes": 19,
+          "boxRadius": 6,
+          "squareMedia": 4,
+          "roundedMedia": 0,
+          "mediaRadius": 0,
+          "textShadow": 0,
+          "cardRows": [
+            {
+              "count": 3,
+              "iconTopped": true,
+              "rounded": false,
+              "top": 582
+            }
+          ]
+        },
+        "heroMedia": [
+          {
+            "type": "img",
+            "ratio": 1
+          }
+        ],
+        "nav": {
+          "links": 1,
+          "fixed": true,
+          "height": 65,
+          "floatingPill": false,
+          "blur": true
+        },
+        "fontsLoaded": [
+          "outfit",
+          "dm sans"
+        ]
+      },
+      "findings": [
+        {
+          "level": "FAIL",
+          "id": "eyebrow",
+          "width": 768,
+          "message": "4 eyebrow/kicker label(s) above headings: \"Up next\" above \"Guam Copa de Marianas 2027\"; \"Since 2007\" above \"THE LARGEST BJJ TOURNAMENT IN THE MARIAN\"; \"Pro Series Circuit\" (pill) above \"FOLLOW THE JOURNEY\"; \"Official Sponsors\" (pill) above \"OUR SPONSORS\"",
+          "fix": "Delete them. If the label carried real information, fold it into the headline or the supporting sentence."
+        },
+        {
+          "level": "FAIL",
+          "id": "micro-label",
+          "width": 768,
+          "message": "17 tiny uppercase letter-spaced labels (e.g. \"Competitors\", \"Countries\", \"Prize Pool\", \"Established\").",
+          "fix": "Use sentence-case text at a readable size, or delete the label."
+        },
+        {
+          "level": "FAIL",
+          "id": "gradient",
+          "width": 768,
+          "message": "8 gradient fill(s): div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%) | div.absolute.inset-0 → linear-gradient(to top, rgb(10, 10, 11) 0%, oklab(0.145248 0.000598863 -0.00204487 / 0.6) 50%, oklab(0.145248  | div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+          "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility."
+        },
+        {
+          "level": "FAIL",
+          "id": "gradient-text",
+          "width": 768,
+          "message": "1 gradient-filled text element(s).",
+          "fix": "Solid colour text."
+        },
+        {
+          "level": "FAIL",
+          "id": "hairline",
+          "width": 768,
+          "message": "11 thin rule(s)/divider line(s): header.fixed.top-0 768px | section.min-h-[32rem].sm:min-h-96 768px | div.mt-3.grid 638px | div.mt-3.grid 638px",
+          "fix": "Delete. Separate with space, a tone change, or scale. Lines are only for real tables and form fields."
+        },
+        {
+          "level": "FAIL",
+          "id": "outlined-box",
+          "width": 768,
+          "message": "7 boxes drawn with a 1px outline.",
+          "fix": "Define a surface by its fill (one tone step from the page) or leave the content unboxed."
+        },
+        {
+          "level": "WARN",
+          "id": "glass",
+          "width": 768,
+          "message": "5 backdrop-blur surfaces.",
+          "fix": "One blurred sticky bar at most; glass cards are a tell."
+        },
+        {
+          "level": "FAIL",
+          "id": "icon-cards",
+          "width": 768,
+          "message": "1 row(s) of identical cards each topped with a small icon (3 cards).",
+          "fix": "Replace with one composed section from the direction: a narrative split, a list set in large type, or real imagery per item."
+        },
+        {
+          "level": "WARN",
+          "id": "size-count",
+          "width": 768,
+          "message": "11 different font sizes (10, 11, 12, 14, 16, 18, 20, 30, 36, 48, 72).",
+          "fix": "A page needs about five: display, heading, lead, body, small."
+        },
+        {
+          "level": "FAIL",
+          "id": "body-size",
+          "width": 768,
+          "message": "Body text is 14px (the size most of the running text is set in).",
+          "fix": "Body copy 16–20px. Map small sizes from blueprints onto your body step."
+        },
+        {
+          "level": "FAIL",
+          "id": "small-text",
+          "width": 768,
+          "message": "29 text blocks under 13px.",
+          "fix": "Nothing meant to be read goes below 13px."
+        }
+      ]
+    },
+    {
+      "source": "before",
+      "width": 390,
+      "metrics": {
+        "viewport": {
+          "w": 390,
+          "h": 844
+        },
+        "page": {
+          "height": 7511,
+          "screens": 8.9,
+          "words": 325,
+          "img": 29,
+          "video": 0,
+          "canvas": 0,
+          "svg": 101,
+          "sections": 10,
+          "horizontalOverflow": 0,
+          "overflowCulprits": [],
+          "uiFragments": 0,
+          "uiAbuse": false,
+          "realPictures": 4,
+          "videoCount": 0,
+          "uiPictures": 0,
+          "pictureSamples": [
+            "javsvjayo9qrhm4qxrukv83igi54",
+            "cdhmjwmc1vzl5aa4dfdf1qi8amhh",
+            "42bukl7t0lwbvg87i8u6m0shbbon",
+            "mabgqbgqo15fep3p3h0me0hg1cit"
+          ],
+          "blendText": 0,
+          "sideScrollers": 0,
+          "brokenImages": [],
+          "emoji": [],
+          "videosNoPoster": 0
+        },
+        "hero": {
+          "text": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+          "words": 3,
+          "chars": 32,
+          "lines": 3,
+          "size": 48,
+          "vw": 12.3,
+          "font": "Outfit",
+          "weight": 900,
+          "tracking": -0.025,
+          "leading": 0.9,
+          "upper": true,
+          "italic": false,
+          "mono": false,
+          "align": "center",
+          "position": "center",
+          "widthRatio": 0.94,
+          "top": 219,
+          "gradientText": true,
+          "tag": "h1",
+          "kind": "heading"
+        },
+        "h1": {
+          "text": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+          "words": 3,
+          "lines": 3,
+          "size": 48,
+          "font": "Outfit"
+        },
+        "headings": [
+          {
+            "text": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+            "words": 3,
+            "chars": 32,
+            "lines": 3,
+            "size": 48,
+            "vw": 12.3,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": -0.025,
+            "leading": 0.9,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 219,
+            "gradientText": true,
+            "tag": "h1",
+            "kind": "heading"
+          },
+          {
+            "text": "1,300+",
+            "words": 1,
+            "chars": 6,
+            "lines": 1,
+            "size": 24,
+            "vw": 6.2,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.33,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "left",
+            "widthRatio": 0.39,
+            "top": 552,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "6",
+            "words": 1,
+            "chars": 1,
+            "lines": 1,
+            "size": 24,
+            "vw": 6.2,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.33,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "right",
+            "widthRatio": 0.39,
+            "top": 552,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "$50K",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 24,
+            "vw": 6.2,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.33,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "left",
+            "widthRatio": 0.39,
+            "top": 663,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "2007",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 24,
+            "vw": 6.2,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.33,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "right",
+            "widthRatio": 0.39,
+            "top": 663,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "Guam Copa de Marianas 2027",
+            "words": 5,
+            "chars": 26,
+            "lines": 2,
+            "size": 30,
+            "vw": 7.7,
+            "font": "Outfit",
+            "weight": 700,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.92,
+            "top": 925,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "THE LARGEST BJJ TOURNAMENT IN THE MARIANAS",
+            "words": 7,
+            "chars": 42,
+            "lines": 3,
+            "size": 30,
+            "vw": 7.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.25,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.92,
+            "top": 1502,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "$2M",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 7.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.3,
+            "top": 1934,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "5K+",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 7.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "right",
+            "widthRatio": 0.2,
+            "top": 1934,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "FOLLOW THE JOURNEY",
+            "words": 3,
+            "chars": 18,
+            "lines": 1,
+            "size": 30,
+            "vw": 7.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.92,
+            "top": 2447,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "OUR SPONSORS",
+            "words": 2,
+            "chars": 12,
+            "lines": 1,
+            "size": 30,
+            "vw": 7.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.92,
+            "top": 4647,
+            "tag": "h2",
+            "kind": "heading"
+          }
+        ],
+        "headingSummary": {
+          "count": 11,
+          "maxLines": 3,
+          "over2Lines": 2,
+          "statements": 0,
+          "centered": 7,
+          "medianWords": 1,
+          "mixedFontHeadings": 0
+        },
+        "type": {
+          "families": [
+            {
+              "family": "DM Sans",
+              "share": 0.64,
+              "mono": false
+            },
+            {
+              "family": "Outfit",
+              "share": 0.36,
+              "mono": false
+            }
+          ],
+          "familyCount": 2,
+          "sizes": [
+            10,
+            12,
+            14,
+            16,
+            18,
+            24,
+            30,
+            48
+          ],
+          "sizeCount": 8,
+          "notLoaded": [],
+          "body": {
+            "font": "DM Sans",
+            "size": 14,
+            "leading": 1.63,
+            "weight": 400,
+            "tracking": 0,
+            "contrast": null
+          },
+          "measureChars": 51,
+          "max": {
+            "size": 48,
+            "vw": 12.3,
+            "font": "Outfit",
+            "text": "Brazilian Jiu-Jitsu"
+          },
+          "monoShare": 0,
+          "monoProseShare": 0,
+          "monoFamilies": [],
+          "monoSamples": [],
+          "microLabels": 18,
+          "microLabelShare": 0.119,
+          "microSamples": [
+            "Guam's Premier International",
+            "Competitors",
+            "Countries",
+            "Prize Pool",
+            "Established",
+            "Up next"
+          ],
+          "upperShare": 0.31,
+          "centerShare": 0.49,
+          "smallText": 30
+        },
+        "eyebrows": [
+          {
+            "text": "Guam's Premier International",
+            "above": "BRAZILIAN JIU-JITSU CHAMPIONSHIP",
+            "upper": true,
+            "tracked": true,
+            "mono": false,
+            "pill": false,
+            "size": 14,
+            "top": 191
+          },
+          {
+            "text": "Up next",
+            "above": "Guam Copa de Marianas 2027",
+            "upper": true,
+            "tracked": true,
+            "mono": false,
+            "pill": false,
+            "size": 14,
+            "top": 893
+          },
+          {
+            "text": "Since 2007",
+            "above": "THE LARGEST BJJ TOURNAMENT IN THE MARIAN",
+            "upper": true,
+            "tracked": true,
+            "mono": false,
+            "pill": false,
+            "size": 12,
+            "top": 1452
+          },
+          {
+            "text": "Pro Series Circuit",
+            "above": "FOLLOW THE JOURNEY",
+            "upper": true,
+            "tracked": true,
+            "mono": false,
+            "pill": true,
+            "size": 12,
+            "top": 2410
+          },
+          {
+            "text": "Official Sponsors",
+            "above": "OUR SPONSORS",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": true,
+            "size": 14,
+            "top": 4594
+          }
+        ],
+        "numbered": [],
+        "color": {
+          "bodyBg": "#0a0a0b",
+          "bodyBgHsl": {
+            "h": 240,
+            "s": 0.05,
+            "l": 0.04
+          },
+          "dark": true,
+          "sectionBgs": [
+            {
+              "color": "#0a0a0b",
+              "top": 0,
+              "hsl": {
+                "h": 240,
+                "s": 0.05,
+                "l": 0.04
+              }
+            },
+            {
+              "color": "#111318",
+              "top": 4520,
+              "hsl": {
+                "h": 223,
+                "s": 0.17,
+                "l": 0.08
+              }
+            }
+          ],
+          "textColors": [
+            {
+              "color": "#9ca3af",
+              "share": 0.53
+            },
+            {
+              "color": "#ececec",
+              "share": 0.18
+            },
+            {
+              "color": "#9098a5",
+              "share": 0.17
+            },
+            {
+              "color": "#e4c06a",
+              "share": 0.07
+            },
+            {
+              "color": "#d4a843",
+              "share": 0.03
+            }
+          ],
+          "button": {
+            "bg": "#004581",
+            "hsl": {
+              "h": 208,
+              "s": 1,
+              "l": 0.25
+            },
+            "fg": "#ececec"
+          },
+          "lowContrast": []
+        },
+        "buttons": {
+          "count": 13,
+          "inHero": 2,
+          "radius": 0,
+          "height": 44,
+          "withShadow": 0,
+          "withGradient": 0,
+          "mono": 0,
+          "upper": 10,
+          "heroLabels": [
+            "EXPLORE EVENTS",
+            "PAST EVENTS"
+          ]
+        },
+        "surfaces": {
+          "shadowStatic": 0,
+          "shadowOverlay": 0,
+          "shadowSamples": [],
+          "gradients": 8,
+          "scrims": 1,
+          "gradientSamples": [
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, rgb(10, 10, 11) 0%, oklab(0.145248 0.000598863 -0.00204487 / 0.6) 50%, oklab(0.145248 ",
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%)"
+          ],
+          "gradientText": 1,
+          "hairlines": 11,
+          "hairlineSamples": [
+            "header.fixed.top-0 390px",
+            "section.min-h-[32rem].sm:min-h-96 390px",
+            "div.mt-3.grid 276px",
+            "div.mt-3.grid 276px",
+            "div.mt-3.grid 276px"
+          ],
+          "outlinedBoxes": 7,
+          "dashed": 0,
+          "blurred": 5,
+          "roundedBoxes": 0,
+          "boxRadius": 0,
+          "squareMedia": 2,
+          "roundedMedia": 0,
+          "mediaRadius": 0,
+          "textShadow": 0,
+          "cardRows": [
+            {
+              "count": 3,
+              "iconTopped": true,
+              "rounded": false,
+              "top": 510
+            }
+          ]
+        },
+        "heroMedia": [
+          {
+            "type": "img",
+            "ratio": 1
+          }
+        ],
+        "nav": {
+          "links": 1,
+          "fixed": true,
+          "height": 65,
+          "floatingPill": false,
+          "blur": true
+        },
+        "fontsLoaded": [
+          "outfit",
+          "dm sans"
+        ]
+      },
+      "findings": [
+        {
+          "level": "FAIL",
+          "id": "headline-lines",
+          "width": 390,
+          "message": "2 headline(s) wrap past two lines at 390px: \"BRAZILIAN JIU-JITSU CHAMPIONSHIP\" → 3 lines (3 words, 48px); \"THE LARGEST BJJ TOURNAMENT IN THE MARIANAS\" → 3 lines (7 words, 30px)",
+          "fix": "Cut words first (a headline is a title, not a sentence). Then give it a wider measure. Lower the size only as a last resort and never below the scale you chose. A real statement paragraph belongs in a <p> or <blockquote> at 24px or less."
+        },
+        {
+          "level": "FAIL",
+          "id": "eyebrow",
+          "width": 390,
+          "message": "5 eyebrow/kicker label(s) above headings: \"Guam's Premier International\" above \"BRAZILIAN JIU-JITSU CHAMPIONSHIP\"; \"Up next\" above \"Guam Copa de Marianas 2027\"; \"Since 2007\" above \"THE LARGEST BJJ TOURNAMENT IN THE MARIAN\"; \"Pro Series Circuit\" (pill) above \"FOLLOW THE JOURNEY\"; \"Official Sponsors\" (pill) above \"OUR SPONSORS\"",
+          "fix": "Delete them. If the label carried real information, fold it into the headline or the supporting sentence."
+        },
+        {
+          "level": "FAIL",
+          "id": "micro-label",
+          "width": 390,
+          "message": "18 tiny uppercase letter-spaced labels (e.g. \"Guam's Premier International\", \"Competitors\", \"Countries\", \"Prize Pool\").",
+          "fix": "Use sentence-case text at a readable size, or delete the label."
+        },
+        {
+          "level": "FAIL",
+          "id": "gradient",
+          "width": 390,
+          "message": "8 gradient fill(s): div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%) | div.absolute.inset-0 → linear-gradient(to top, rgb(10, 10, 11) 0%, oklab(0.145248 0.000598863 -0.00204487 / 0.6) 50%, oklab(0.145248  | div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+          "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility."
+        },
+        {
+          "level": "FAIL",
+          "id": "gradient-text",
+          "width": 390,
+          "message": "1 gradient-filled text element(s).",
+          "fix": "Solid colour text."
+        },
+        {
+          "level": "FAIL",
+          "id": "hairline",
+          "width": 390,
+          "message": "11 thin rule(s)/divider line(s): header.fixed.top-0 390px | section.min-h-[32rem].sm:min-h-96 390px | div.mt-3.grid 276px | div.mt-3.grid 276px",
+          "fix": "Delete. Separate with space, a tone change, or scale. Lines are only for real tables and form fields."
+        },
+        {
+          "level": "FAIL",
+          "id": "outlined-box",
+          "width": 390,
+          "message": "7 boxes drawn with a 1px outline.",
+          "fix": "Define a surface by its fill (one tone step from the page) or leave the content unboxed."
+        },
+        {
+          "level": "WARN",
+          "id": "glass",
+          "width": 390,
+          "message": "5 backdrop-blur surfaces.",
+          "fix": "One blurred sticky bar at most; glass cards are a tell."
+        },
+        {
+          "level": "FAIL",
+          "id": "icon-cards",
+          "width": 390,
+          "message": "1 row(s) of identical cards each topped with a small icon (3 cards).",
+          "fix": "Replace with one composed section from the direction: a narrative split, a list set in large type, or real imagery per item."
+        },
+        {
+          "level": "FAIL",
+          "id": "body-size",
+          "width": 390,
+          "message": "Body text is 14px (the size most of the running text is set in).",
+          "fix": "Body copy 16–20px. Map small sizes from blueprints onto your body step."
+        },
+        {
+          "level": "FAIL",
+          "id": "small-text",
+          "width": 390,
+          "message": "30 text blocks under 13px.",
+          "fix": "Nothing meant to be read goes below 13px."
+        }
+      ]
+    },
+    {
+      "source": "after",
+      "width": 1440,
+      "metrics": {
+        "viewport": {
+          "w": 1440,
+          "h": 900
+        },
+        "page": {
+          "height": 4138,
+          "screens": 4.6,
+          "words": 315,
+          "img": 29,
+          "video": 0,
+          "canvas": 0,
+          "svg": 64,
+          "sections": 9,
+          "horizontalOverflow": 0,
+          "overflowCulprits": [],
+          "uiFragments": 0,
+          "uiAbuse": false,
+          "realPictures": 2,
+          "videoCount": 0,
+          "uiPictures": 0,
+          "pictureSamples": [
+            "xtaover9drrgzcxgjytosasv50w6",
+            "cdhmjwmc1vzl5aa4dfdf1qi8amhh"
+          ],
+          "blendText": 0,
+          "sideScrollers": 0,
+          "brokenImages": [],
+          "emoji": [],
+          "videosNoPoster": 0
+        },
+        "hero": {
+          "text": "Guam Copa de Marianas 2027",
+          "words": 5,
+          "chars": 26,
+          "lines": 2,
+          "size": 72,
+          "vw": 5,
+          "font": "Outfit",
+          "weight": 700,
+          "tracking": -0.035,
+          "leading": 1.07,
+          "upper": false,
+          "italic": false,
+          "mono": false,
+          "align": "left",
+          "position": "left",
+          "widthRatio": 0.53,
+          "top": 238,
+          "tag": "h1",
+          "kind": "heading"
+        },
+        "h1": {
+          "text": "Guam Copa de Marianas 2027",
+          "words": 5,
+          "lines": 2,
+          "size": 72,
+          "font": "Outfit"
+        },
+        "headings": [
+          {
+            "text": "Guam Copa de Marianas 2027",
+            "words": 5,
+            "chars": 26,
+            "lines": 2,
+            "size": 72,
+            "vw": 5,
+            "font": "Outfit",
+            "weight": 700,
+            "tracking": -0.035,
+            "leading": 1.07,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.53,
+            "top": 238,
+            "tag": "h1",
+            "kind": "heading"
+          },
+          {
+            "text": "1,300+",
+            "words": 1,
+            "chars": 6,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.06,
+            "top": 712,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "6",
+            "words": 1,
+            "chars": 1,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.04,
+            "top": 712,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "$50K",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.05,
+            "top": 712,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "2007",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "right",
+            "widthRatio": 0.05,
+            "top": 712,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "Follow the Journey",
+            "words": 3,
+            "chars": 18,
+            "lines": 1,
+            "size": 40,
+            "vw": 2.8,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": -0.025,
+            "leading": 1.15,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.86,
+            "top": 864,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "The Largest BJJ Tournament in the Marianas",
+            "words": 7,
+            "chars": 42,
+            "lines": 3,
+            "size": 48,
+            "vw": 3.3,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.25,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.33,
+            "top": 1477,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "$2M",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.07,
+            "top": 1594,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "5K+",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 2.1,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "right",
+            "widthRatio": 0.04,
+            "top": 1594,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "Our Sponsors",
+            "words": 2,
+            "chars": 12,
+            "lines": 1,
+            "size": 36,
+            "vw": 2.5,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.11,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.86,
+            "top": 2528,
+            "tag": "h2",
+            "kind": "heading"
+          }
+        ],
+        "headingSummary": {
+          "count": 10,
+          "maxLines": 3,
+          "over2Lines": 1,
+          "statements": 0,
+          "centered": 1,
+          "medianWords": 1,
+          "mixedFontHeadings": 0
+        },
+        "type": {
+          "families": [
+            {
+              "family": "DM Sans",
+              "share": 0.75,
+              "mono": false
+            },
+            {
+              "family": "Outfit",
+              "share": 0.25,
+              "mono": false
+            }
+          ],
+          "familyCount": 2,
+          "sizes": [
+            11,
+            12,
+            13,
+            14,
+            16,
+            18,
+            20,
+            30,
+            36,
+            40,
+            48,
+            72
+          ],
+          "sizeCount": 12,
+          "notLoaded": [],
+          "body": {
+            "font": "DM Sans",
+            "size": 14,
+            "leading": 1.63,
+            "weight": 400,
+            "tracking": 0,
+            "contrast": null
+          },
+          "measureChars": 84,
+          "max": {
+            "size": 72,
+            "vw": 5,
+            "font": "Outfit",
+            "text": "Guam Copa de Marianas 2027"
+          },
+          "monoShare": 0,
+          "monoProseShare": 0,
+          "monoFamilies": [],
+          "monoSamples": [],
+          "microLabels": 3,
+          "microLabelShare": 0.025,
+          "microSamples": [
+            "Presenting partner",
+            "Supporting partners",
+            "Official sponsors"
+          ],
+          "upperShare": 0.03,
+          "centerShare": 0.43,
+          "smallText": 12
+        },
+        "eyebrows": [
+          {
+            "text": "Up next",
+            "above": "Guam Copa de Marianas 2027",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": false,
+            "size": 14,
+            "top": 194
+          },
+          {
+            "text": "Since 2007",
+            "above": "The Largest BJJ Tournament in the Marian",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": false,
+            "size": 12,
+            "top": 1427
+          },
+          {
+            "text": "Official Sponsors",
+            "above": "Our Sponsors",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": true,
+            "size": 14,
+            "top": 2475
+          }
+        ],
+        "numbered": [],
+        "color": {
+          "bodyBg": "#0a0a0b",
+          "bodyBgHsl": {
+            "h": 240,
+            "s": 0.05,
+            "l": 0.04
+          },
+          "dark": true,
+          "sectionBgs": [
+            {
+              "color": "#0a0a0b",
+              "top": 0,
+              "hsl": {
+                "h": 240,
+                "s": 0.05,
+                "l": 0.04
+              }
+            },
+            {
+              "color": "#111318",
+              "top": 2401,
+              "hsl": {
+                "h": 223,
+                "s": 0.17,
+                "l": 0.08
+              }
+            }
+          ],
+          "textColors": [
+            {
+              "color": "#9ca3af",
+              "share": 0.56
+            },
+            {
+              "color": "#ececec",
+              "share": 0.14
+            },
+            {
+              "color": "#9098a5",
+              "share": 0.13
+            },
+            {
+              "color": "#e4c06a",
+              "share": 0.12
+            },
+            {
+              "color": "#d4a843",
+              "share": 0.03
+            }
+          ],
+          "button": {
+            "bg": "#d4a843",
+            "hsl": {
+              "h": 42,
+              "s": 0.63,
+              "l": 0.55
+            },
+            "fg": "#0a0a0b"
+          },
+          "lowContrast": []
+        },
+        "buttons": {
+          "count": 10,
+          "inHero": 2,
+          "radius": 8,
+          "height": 48,
+          "withShadow": 0,
+          "withGradient": 0,
+          "mono": 0,
+          "upper": 0,
+          "heroLabels": [
+            "Register",
+            "All events"
+          ]
+        },
+        "surfaces": {
+          "shadowStatic": 0,
+          "shadowOverlay": 0,
+          "shadowSamples": [],
+          "gradients": 6,
+          "scrims": 1,
+          "gradientSamples": [
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%)",
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%)"
+          ],
+          "gradientText": 0,
+          "hairlines": 6,
+          "hairlineSamples": [
+            "header.fixed.top-0 1440px",
+            "section.public-section.border-t 1440px",
+            "section.public-section.bg-surface 1440px",
+            "section.py-10.border-t 1440px",
+            "footer.bg-surface.border-t 1440px"
+          ],
+          "outlinedBoxes": 7,
+          "dashed": 0,
+          "blurred": 1,
+          "roundedBoxes": 23,
+          "boxRadius": 6,
+          "squareMedia": 4,
+          "roundedMedia": 0,
+          "mediaRadius": 0,
+          "textShadow": 0,
+          "cardRows": [
+            {
+              "count": 4,
+              "iconTopped": true,
+              "rounded": true,
+              "top": 972
+            }
+          ]
+        },
+        "heroMedia": [
+          {
+            "type": "img",
+            "ratio": 0.76
+          }
+        ],
+        "nav": {
+          "links": 7,
+          "fixed": true,
+          "height": 65,
+          "floatingPill": false,
+          "blur": true
+        },
+        "fontsLoaded": [
+          "outfit",
+          "dm sans"
+        ]
+      },
+      "findings": [
+        {
+          "level": "FAIL",
+          "id": "headline-lines",
+          "width": 1440,
+          "message": "1 headline(s) wrap past two lines at 1440px: \"The Largest BJJ Tournament in the Marianas\" → 3 lines (7 words, 48px)",
+          "fix": "Cut words first (a headline is a title, not a sentence). Then give it a wider measure. Lower the size only as a last resort and never below the scale you chose. A real statement paragraph belongs in a <p> or <blockquote> at 36px or less."
+        },
+        {
+          "level": "FAIL",
+          "id": "eyebrow",
+          "width": 1440,
+          "message": "3 eyebrow/kicker label(s) above headings: \"Up next\" above \"Guam Copa de Marianas 2027\"; \"Since 2007\" above \"The Largest BJJ Tournament in the Marian\"; \"Official Sponsors\" (pill) above \"Our Sponsors\"",
+          "fix": "Delete them. If the label carried real information, fold it into the headline or the supporting sentence."
+        },
+        {
+          "level": "FAIL",
+          "id": "micro-label",
+          "width": 1440,
+          "message": "3 tiny uppercase letter-spaced labels (e.g. \"Presenting partner\", \"Supporting partners\", \"Official sponsors\").",
+          "fix": "Use sentence-case text at a readable size, or delete the label."
+        },
+        {
+          "level": "FAIL",
+          "id": "gradient",
+          "width": 1440,
+          "message": "6 gradient fill(s): div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%) | div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%) | div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+          "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility."
+        },
+        {
+          "level": "FAIL",
+          "id": "hairline",
+          "width": 1440,
+          "message": "6 thin rule(s)/divider line(s): header.fixed.top-0 1440px | section.public-section.border-t 1440px | section.public-section.bg-surface 1440px | section.py-10.border-t 1440px",
+          "fix": "Delete. Separate with space, a tone change, or scale. Lines are only for real tables and form fields."
+        },
+        {
+          "level": "FAIL",
+          "id": "outlined-box",
+          "width": 1440,
+          "message": "7 boxes drawn with a 1px outline.",
+          "fix": "Define a surface by its fill (one tone step from the page) or leave the content unboxed."
+        },
+        {
+          "level": "FAIL",
+          "id": "icon-cards",
+          "width": 1440,
+          "message": "1 row(s) of identical cards each topped with a small icon (4 cards).",
+          "fix": "Replace with one composed section from the direction: a narrative split, a list set in large type, or real imagery per item."
+        },
+        {
+          "level": "WARN",
+          "id": "size-count",
+          "width": 1440,
+          "message": "12 different font sizes (11, 12, 13, 14, 16, 18, 20, 30, 36, 40, 48, 72).",
+          "fix": "A page needs about five: display, heading, lead, body, small."
+        },
+        {
+          "level": "FAIL",
+          "id": "body-size",
+          "width": 1440,
+          "message": "Body text is 14px (the size most of the running text is set in).",
+          "fix": "Body copy 16–20px. Map small sizes from blueprints onto your body step."
+        },
+        {
+          "level": "FAIL",
+          "id": "few-pictures",
+          "width": 1440,
+          "message": "Only 2 picture(s) on the page (2 photographs, footage or raster images, 0 interface fragments). Drawings in SVG do not count.",
+          "fix": "Find real pictures of the subject's world with scripts/assets.mjs (photographs, archival images, maps, engravings, footage), download them to assets/ and give them room: a hero picture, one per section that has a subject, a full-width band. At least four, usually six to twelve."
+        },
+        {
+          "level": "WARN",
+          "id": "no-footage",
+          "width": 1440,
+          "message": "No video anywhere on the page.",
+          "fix": "Look for one honest clip with scripts/assets.mjs --video (the place, the material, the process) and use it as a muted loop with a poster frame. Defend its absence only if no clip fits the subject."
+        },
+        {
+          "level": "FAIL",
+          "id": "small-text",
+          "width": 1440,
+          "message": "12 text blocks under 13px.",
+          "fix": "Nothing meant to be read goes below 13px."
+        }
+      ]
+    },
+    {
+      "source": "after",
+      "width": 768,
+      "metrics": {
+        "viewport": {
+          "w": 768,
+          "h": 900
+        },
+        "page": {
+          "height": 5117,
+          "screens": 5.7,
+          "words": 309,
+          "img": 29,
+          "video": 0,
+          "canvas": 0,
+          "svg": 64,
+          "sections": 9,
+          "horizontalOverflow": 0,
+          "overflowCulprits": [],
+          "uiFragments": 0,
+          "uiAbuse": false,
+          "realPictures": 2,
+          "videoCount": 0,
+          "uiPictures": 0,
+          "pictureSamples": [
+            "xtaover9drrgzcxgjytosasv50w6",
+            "cdhmjwmc1vzl5aa4dfdf1qi8amhh"
+          ],
+          "blendText": 0,
+          "sideScrollers": 0,
+          "brokenImages": [],
+          "emoji": [],
+          "videosNoPoster": 0
+        },
+        "hero": {
+          "text": "Guam Copa de Marianas 2027",
+          "words": 5,
+          "chars": 26,
+          "lines": 1,
+          "size": 42.2,
+          "vw": 5.5,
+          "font": "Outfit",
+          "weight": 700,
+          "tracking": -0.035,
+          "leading": 1.07,
+          "upper": false,
+          "italic": false,
+          "mono": false,
+          "align": "left",
+          "position": "center",
+          "widthRatio": 0.94,
+          "top": 347,
+          "tag": "h1",
+          "kind": "heading"
+        },
+        "h1": {
+          "text": "Guam Copa de Marianas 2027",
+          "words": 5,
+          "lines": 1,
+          "size": 42.2,
+          "font": "Outfit"
+        },
+        "headings": [
+          {
+            "text": "Guam Copa de Marianas 2027",
+            "words": 5,
+            "chars": 26,
+            "lines": 1,
+            "size": 42.2,
+            "vw": 5.5,
+            "font": "Outfit",
+            "weight": 700,
+            "tracking": -0.035,
+            "leading": 1.07,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 347,
+            "tag": "h1",
+            "kind": "heading"
+          },
+          {
+            "text": "1,300+",
+            "words": 1,
+            "chars": 6,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.12,
+            "top": 712,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "6",
+            "words": 1,
+            "chars": 1,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.08,
+            "top": 712,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "$50K",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "right",
+            "widthRatio": 0.1,
+            "top": 712,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "2007",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "right",
+            "widthRatio": 0.1,
+            "top": 712,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "Follow the Journey",
+            "words": 3,
+            "chars": 18,
+            "lines": 1,
+            "size": 28,
+            "vw": 3.6,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": -0.025,
+            "leading": 1.15,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 864,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "The Largest BJJ Tournament in the Marianas",
+            "words": 7,
+            "chars": 42,
+            "lines": 2,
+            "size": 36,
+            "vw": 4.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.25,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 1691,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "$2M",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.13,
+            "top": 2178,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "5K+",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 3.9,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.08,
+            "top": 2178,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "Our Sponsors",
+            "words": 2,
+            "chars": 12,
+            "lines": 1,
+            "size": 36,
+            "vw": 4.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.11,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 3112,
+            "tag": "h2",
+            "kind": "heading"
+          }
+        ],
+        "headingSummary": {
+          "count": 10,
+          "maxLines": 2,
+          "over2Lines": 0,
+          "statements": 0,
+          "centered": 1,
+          "medianWords": 1,
+          "mixedFontHeadings": 0
+        },
+        "type": {
+          "families": [
+            {
+              "family": "DM Sans",
+              "share": 0.74,
+              "mono": false
+            },
+            {
+              "family": "Outfit",
+              "share": 0.26,
+              "mono": false
+            }
+          ],
+          "familyCount": 2,
+          "sizes": [
+            11,
+            12,
+            13,
+            14,
+            16,
+            18,
+            20,
+            28,
+            30,
+            36,
+            42
+          ],
+          "sizeCount": 11,
+          "notLoaded": [],
+          "body": {
+            "font": "DM Sans",
+            "size": 14,
+            "leading": 1.63,
+            "weight": 400,
+            "tracking": 0,
+            "contrast": null
+          },
+          "measureChars": 84,
+          "max": {
+            "size": 42.2,
+            "vw": 5.5,
+            "font": "Outfit",
+            "text": "Guam Copa de Marianas 2027"
+          },
+          "monoShare": 0,
+          "monoProseShare": 0,
+          "monoFamilies": [],
+          "monoSamples": [],
+          "microLabels": 3,
+          "microLabelShare": 0.026,
+          "microSamples": [
+            "Presenting partner",
+            "Supporting partners",
+            "Official sponsors"
+          ],
+          "upperShare": 0.03,
+          "centerShare": 0.43,
+          "smallText": 12
+        },
+        "eyebrows": [
+          {
+            "text": "Up next",
+            "above": "Guam Copa de Marianas 2027",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": false,
+            "size": 14,
+            "top": 303
+          },
+          {
+            "text": "Since 2007",
+            "above": "The Largest BJJ Tournament in the Marian",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": false,
+            "size": 12,
+            "top": 1641
+          },
+          {
+            "text": "Official Sponsors",
+            "above": "Our Sponsors",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": true,
+            "size": 14,
+            "top": 3059
+          }
+        ],
+        "numbered": [],
+        "color": {
+          "bodyBg": "#0a0a0b",
+          "bodyBgHsl": {
+            "h": 240,
+            "s": 0.05,
+            "l": 0.04
+          },
+          "dark": true,
+          "sectionBgs": [
+            {
+              "color": "#0a0a0b",
+              "top": 0,
+              "hsl": {
+                "h": 240,
+                "s": 0.05,
+                "l": 0.04
+              }
+            },
+            {
+              "color": "#111318",
+              "top": 2985,
+              "hsl": {
+                "h": 223,
+                "s": 0.17,
+                "l": 0.08
+              }
+            }
+          ],
+          "textColors": [
+            {
+              "color": "#9ca3af",
+              "share": 0.56
+            },
+            {
+              "color": "#ececec",
+              "share": 0.14
+            },
+            {
+              "color": "#9098a5",
+              "share": 0.13
+            },
+            {
+              "color": "#e4c06a",
+              "share": 0.13
+            },
+            {
+              "color": "#d4a843",
+              "share": 0.03
+            }
+          ],
+          "button": {
+            "bg": "#d4a843",
+            "hsl": {
+              "h": 42,
+              "s": 0.63,
+              "l": 0.55
+            },
+            "fg": "#0a0a0b"
+          },
+          "lowContrast": []
+        },
+        "buttons": {
+          "count": 10,
+          "inHero": 2,
+          "radius": 8,
+          "height": 48,
+          "withShadow": 0,
+          "withGradient": 0,
+          "mono": 0,
+          "upper": 0,
+          "heroLabels": [
+            "Register",
+            "All events"
+          ]
+        },
+        "surfaces": {
+          "shadowStatic": 0,
+          "shadowOverlay": 0,
+          "shadowSamples": [],
+          "gradients": 6,
+          "scrims": 1,
+          "gradientSamples": [
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%)",
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%)"
+          ],
+          "gradientText": 0,
+          "hairlines": 6,
+          "hairlineSamples": [
+            "header.fixed.top-0 768px",
+            "section.public-section.border-t 768px",
+            "section.public-section.bg-surface 768px",
+            "section.py-10.border-t 768px",
+            "footer.bg-surface.border-t 768px"
+          ],
+          "outlinedBoxes": 7,
+          "dashed": 0,
+          "blurred": 1,
+          "roundedBoxes": 23,
+          "boxRadius": 6,
+          "squareMedia": 4,
+          "roundedMedia": 0,
+          "mediaRadius": 0,
+          "textShadow": 0,
+          "cardRows": [
+            {
+              "count": 4,
+              "iconTopped": true,
+              "rounded": true,
+              "top": 958
+            }
+          ]
+        },
+        "heroMedia": [
+          {
+            "type": "img",
+            "ratio": 0.76
+          }
+        ],
+        "nav": {
+          "links": 1,
+          "fixed": true,
+          "height": 65,
+          "floatingPill": false,
+          "blur": true
+        },
+        "fontsLoaded": [
+          "outfit",
+          "dm sans"
+        ]
+      },
+      "findings": [
+        {
+          "level": "FAIL",
+          "id": "eyebrow",
+          "width": 768,
+          "message": "3 eyebrow/kicker label(s) above headings: \"Up next\" above \"Guam Copa de Marianas 2027\"; \"Since 2007\" above \"The Largest BJJ Tournament in the Marian\"; \"Official Sponsors\" (pill) above \"Our Sponsors\"",
+          "fix": "Delete them. If the label carried real information, fold it into the headline or the supporting sentence."
+        },
+        {
+          "level": "FAIL",
+          "id": "micro-label",
+          "width": 768,
+          "message": "3 tiny uppercase letter-spaced labels (e.g. \"Presenting partner\", \"Supporting partners\", \"Official sponsors\").",
+          "fix": "Use sentence-case text at a readable size, or delete the label."
+        },
+        {
+          "level": "FAIL",
+          "id": "gradient",
+          "width": 768,
+          "message": "6 gradient fill(s): div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%) | div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%) | div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+          "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility."
+        },
+        {
+          "level": "FAIL",
+          "id": "hairline",
+          "width": 768,
+          "message": "6 thin rule(s)/divider line(s): header.fixed.top-0 768px | section.public-section.border-t 768px | section.public-section.bg-surface 768px | section.py-10.border-t 768px",
+          "fix": "Delete. Separate with space, a tone change, or scale. Lines are only for real tables and form fields."
+        },
+        {
+          "level": "FAIL",
+          "id": "outlined-box",
+          "width": 768,
+          "message": "7 boxes drawn with a 1px outline.",
+          "fix": "Define a surface by its fill (one tone step from the page) or leave the content unboxed."
+        },
+        {
+          "level": "FAIL",
+          "id": "icon-cards",
+          "width": 768,
+          "message": "1 row(s) of identical cards each topped with a small icon (4 cards).",
+          "fix": "Replace with one composed section from the direction: a narrative split, a list set in large type, or real imagery per item."
+        },
+        {
+          "level": "WARN",
+          "id": "size-count",
+          "width": 768,
+          "message": "11 different font sizes (11, 12, 13, 14, 16, 18, 20, 28, 30, 36, 42).",
+          "fix": "A page needs about five: display, heading, lead, body, small."
+        },
+        {
+          "level": "FAIL",
+          "id": "body-size",
+          "width": 768,
+          "message": "Body text is 14px (the size most of the running text is set in).",
+          "fix": "Body copy 16–20px. Map small sizes from blueprints onto your body step."
+        },
+        {
+          "level": "FAIL",
+          "id": "small-text",
+          "width": 768,
+          "message": "12 text blocks under 13px.",
+          "fix": "Nothing meant to be read goes below 13px."
+        }
+      ]
+    },
+    {
+      "source": "after",
+      "width": 390,
+      "metrics": {
+        "viewport": {
+          "w": 390,
+          "h": 844
+        },
+        "page": {
+          "height": 6523,
+          "screens": 7.7,
+          "words": 307,
+          "img": 29,
+          "video": 0,
+          "canvas": 0,
+          "svg": 64,
+          "sections": 9,
+          "horizontalOverflow": 0,
+          "overflowCulprits": [],
+          "uiFragments": 0,
+          "uiAbuse": false,
+          "realPictures": 4,
+          "videoCount": 0,
+          "uiPictures": 0,
+          "pictureSamples": [
+            "xtaover9drrgzcxgjytosasv50w6",
+            "cdhmjwmc1vzl5aa4dfdf1qi8amhh",
+            "42bukl7t0lwbvg87i8u6m0shbbon",
+            "mabgqbgqo15fep3p3h0me0hg1cit"
+          ],
+          "blendText": 0,
+          "sideScrollers": 0,
+          "brokenImages": [],
+          "emoji": [],
+          "videosNoPoster": 0
+        },
+        "hero": {
+          "text": "Guam Copa de Marianas 2027",
+          "words": 5,
+          "chars": 26,
+          "lines": 2,
+          "size": 36,
+          "vw": 9.2,
+          "font": "Outfit",
+          "weight": 700,
+          "tracking": -0.035,
+          "leading": 1.07,
+          "upper": false,
+          "italic": false,
+          "mono": false,
+          "align": "left",
+          "position": "center",
+          "widthRatio": 0.9,
+          "top": 247,
+          "tag": "h1",
+          "kind": "heading"
+        },
+        "h1": {
+          "text": "Guam Copa de Marianas 2027",
+          "words": 5,
+          "lines": 2,
+          "size": 36,
+          "font": "Outfit"
+        },
+        "headings": [
+          {
+            "text": "Guam Copa de Marianas 2027",
+            "words": 5,
+            "chars": 26,
+            "lines": 2,
+            "size": 36,
+            "vw": 9.2,
+            "font": "Outfit",
+            "weight": 700,
+            "tracking": -0.035,
+            "leading": 1.07,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.9,
+            "top": 247,
+            "tag": "h1",
+            "kind": "heading"
+          },
+          {
+            "text": "1,300+",
+            "words": 1,
+            "chars": 6,
+            "lines": 1,
+            "size": 24,
+            "vw": 6.2,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.33,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.21,
+            "top": 672,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "6",
+            "words": 1,
+            "chars": 1,
+            "lines": 1,
+            "size": 24,
+            "vw": 6.2,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.33,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "right",
+            "widthRatio": 0.16,
+            "top": 672,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "$50K",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 24,
+            "vw": 6.2,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.33,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.16,
+            "top": 756,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "2007",
+            "words": 1,
+            "chars": 4,
+            "lines": 1,
+            "size": 24,
+            "vw": 6.2,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": 0,
+            "leading": 1.33,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "right",
+            "widthRatio": 0.19,
+            "top": 756,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "Follow the Journey",
+            "words": 3,
+            "chars": 18,
+            "lines": 1,
+            "size": 28,
+            "vw": 7.2,
+            "font": "Outfit",
+            "weight": 600,
+            "tracking": -0.025,
+            "leading": 1.15,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.9,
+            "top": 888,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "The Largest BJJ Tournament in the Marianas",
+            "words": 7,
+            "chars": 42,
+            "lines": 3,
+            "size": 30,
+            "vw": 7.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.25,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.9,
+            "top": 2280,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "$2M",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 7.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.25,
+            "top": 2709,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "5K+",
+            "words": 1,
+            "chars": 3,
+            "lines": 1,
+            "size": 30,
+            "vw": 7.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "right",
+            "widthRatio": 0.16,
+            "top": 2709,
+            "tag": "div",
+            "kind": "heading"
+          },
+          {
+            "text": "Our Sponsors",
+            "words": 2,
+            "chars": 12,
+            "lines": 1,
+            "size": 30,
+            "vw": 7.7,
+            "font": "Outfit",
+            "weight": 900,
+            "tracking": 0,
+            "leading": 1.2,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.9,
+            "top": 3783,
+            "tag": "h2",
+            "kind": "heading"
+          }
+        ],
+        "headingSummary": {
+          "count": 10,
+          "maxLines": 3,
+          "over2Lines": 1,
+          "statements": 0,
+          "centered": 1,
+          "medianWords": 1,
+          "mixedFontHeadings": 0
+        },
+        "type": {
+          "families": [
+            {
+              "family": "DM Sans",
+              "share": 0.75,
+              "mono": false
+            },
+            {
+              "family": "Outfit",
+              "share": 0.25,
+              "mono": false
+            }
+          ],
+          "familyCount": 2,
+          "sizes": [
+            10,
+            12,
+            13,
+            14,
+            16,
+            18,
+            20,
+            24,
+            28,
+            30,
+            36
+          ],
+          "sizeCount": 11,
+          "notLoaded": [],
+          "body": {
+            "font": "DM Sans",
+            "size": 14,
+            "leading": 1.63,
+            "weight": 400,
+            "tracking": 0,
+            "contrast": null
+          },
+          "measureChars": 50,
+          "max": {
+            "size": 36,
+            "vw": 9.2,
+            "font": "Outfit",
+            "text": "Guam Copa de Marianas 2027"
+          },
+          "monoShare": 0,
+          "monoProseShare": 0,
+          "monoFamilies": [],
+          "monoSamples": [],
+          "microLabels": 3,
+          "microLabelShare": 0.026,
+          "microSamples": [
+            "Presenting partner",
+            "Supporting partners",
+            "Official sponsors"
+          ],
+          "upperShare": 0.03,
+          "centerShare": 0.43,
+          "smallText": 12
+        },
+        "eyebrows": [
+          {
+            "text": "Up next",
+            "above": "Guam Copa de Marianas 2027",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": false,
+            "size": 14,
+            "top": 203
+          },
+          {
+            "text": "Since 2007",
+            "above": "The Largest BJJ Tournament in the Marian",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": false,
+            "size": 12,
+            "top": 2230
+          },
+          {
+            "text": "Official Sponsors",
+            "above": "Our Sponsors",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": true,
+            "size": 14,
+            "top": 3730
+          }
+        ],
+        "numbered": [],
+        "color": {
+          "bodyBg": "#0a0a0b",
+          "bodyBgHsl": {
+            "h": 240,
+            "s": 0.05,
+            "l": 0.04
+          },
+          "dark": true,
+          "sectionBgs": [
+            {
+              "color": "#0a0a0b",
+              "top": 0,
+              "hsl": {
+                "h": 240,
+                "s": 0.05,
+                "l": 0.04
+              }
+            },
+            {
+              "color": "#111318",
+              "top": 1007,
+              "hsl": {
+                "h": 223,
+                "s": 0.17,
+                "l": 0.08
+              }
+            }
+          ],
+          "textColors": [
+            {
+              "color": "#9ca3af",
+              "share": 0.56
+            },
+            {
+              "color": "#ececec",
+              "share": 0.14
+            },
+            {
+              "color": "#9098a5",
+              "share": 0.13
+            },
+            {
+              "color": "#e4c06a",
+              "share": 0.13
+            },
+            {
+              "color": "#d4a843",
+              "share": 0.03
+            }
+          ],
+          "button": {
+            "bg": "#d4a843",
+            "hsl": {
+              "h": 42,
+              "s": 0.63,
+              "l": 0.55
+            },
+            "fg": "#0a0a0b"
+          },
+          "lowContrast": []
+        },
+        "buttons": {
+          "count": 10,
+          "inHero": 2,
+          "radius": 8,
+          "height": 48,
+          "withShadow": 0,
+          "withGradient": 0,
+          "mono": 0,
+          "upper": 0,
+          "heroLabels": [
+            "Register",
+            "All events"
+          ]
+        },
+        "surfaces": {
+          "shadowStatic": 0,
+          "shadowOverlay": 0,
+          "shadowSamples": [],
+          "gradients": 6,
+          "scrims": 1,
+          "gradientSamples": [
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%)",
+            "div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+            "div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%)"
+          ],
+          "gradientText": 0,
+          "hairlines": 6,
+          "hairlineSamples": [
+            "header.fixed.top-0 390px",
+            "section.public-section.border-t 390px",
+            "section.public-section.bg-surface 390px",
+            "section.py-10.border-t 390px",
+            "footer.bg-surface.border-t 390px"
+          ],
+          "outlinedBoxes": 7,
+          "dashed": 0,
+          "blurred": 1,
+          "roundedBoxes": 4,
+          "boxRadius": 8,
+          "squareMedia": 2,
+          "roundedMedia": 0,
+          "mediaRadius": 0,
+          "textShadow": 0,
+          "cardRows": [
+            {
+              "count": 4,
+              "iconTopped": true,
+              "rounded": true,
+              "top": 1007
+            }
+          ]
+        },
+        "heroMedia": [
+          {
+            "type": "img",
+            "ratio": 0.76
+          }
+        ],
+        "nav": {
+          "links": 1,
+          "fixed": true,
+          "height": 65,
+          "floatingPill": false,
+          "blur": true
+        },
+        "fontsLoaded": [
+          "outfit",
+          "dm sans"
+        ]
+      },
+      "findings": [
+        {
+          "level": "FAIL",
+          "id": "headline-lines",
+          "width": 390,
+          "message": "1 headline(s) wrap past two lines at 390px: \"The Largest BJJ Tournament in the Marianas\" → 3 lines (7 words, 30px)",
+          "fix": "Cut words first (a headline is a title, not a sentence). Then give it a wider measure. Lower the size only as a last resort and never below the scale you chose. A real statement paragraph belongs in a <p> or <blockquote> at 24px or less."
+        },
+        {
+          "level": "FAIL",
+          "id": "eyebrow",
+          "width": 390,
+          "message": "3 eyebrow/kicker label(s) above headings: \"Up next\" above \"Guam Copa de Marianas 2027\"; \"Since 2007\" above \"The Largest BJJ Tournament in the Marian\"; \"Official Sponsors\" (pill) above \"Our Sponsors\"",
+          "fix": "Delete them. If the label carried real information, fold it into the headline or the supporting sentence."
+        },
+        {
+          "level": "FAIL",
+          "id": "micro-label",
+          "width": 390,
+          "message": "3 tiny uppercase letter-spaced labels (e.g. \"Presenting partner\", \"Supporting partners\", \"Official sponsors\").",
+          "fix": "Use sentence-case text at a readable size, or delete the label."
+        },
+        {
+          "level": "FAIL",
+          "id": "gradient",
+          "width": 390,
+          "message": "6 gradient fill(s): div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%) | div.absolute.inset-0 → linear-gradient(to top, oklab(0.145248 0.000598863 -0.00204487 / 0.9) 0%, rgba(0, 0, 0, 0) 100%) | div.absolute.inset-0 → linear-gradient(90deg, rgb(15, 23, 36) 25%, rgb(26, 39, 68) 50%, rgb(15, 23, 36) 75%)",
+          "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility."
+        },
+        {
+          "level": "FAIL",
+          "id": "hairline",
+          "width": 390,
+          "message": "6 thin rule(s)/divider line(s): header.fixed.top-0 390px | section.public-section.border-t 390px | section.public-section.bg-surface 390px | section.py-10.border-t 390px",
+          "fix": "Delete. Separate with space, a tone change, or scale. Lines are only for real tables and form fields."
+        },
+        {
+          "level": "FAIL",
+          "id": "outlined-box",
+          "width": 390,
+          "message": "7 boxes drawn with a 1px outline.",
+          "fix": "Define a surface by its fill (one tone step from the page) or leave the content unboxed."
+        },
+        {
+          "level": "FAIL",
+          "id": "icon-cards",
+          "width": 390,
+          "message": "1 row(s) of identical cards each topped with a small icon (4 cards).",
+          "fix": "Replace with one composed section from the direction: a narrative split, a list set in large type, or real imagery per item."
+        },
+        {
+          "level": "WARN",
+          "id": "size-count",
+          "width": 390,
+          "message": "11 different font sizes (10, 12, 13, 14, 16, 18, 20, 24, 28, 30, 36).",
+          "fix": "A page needs about five: display, heading, lead, body, small."
+        },
+        {
+          "level": "FAIL",
+          "id": "body-size",
+          "width": 390,
+          "message": "Body text is 14px (the size most of the running text is set in).",
+          "fix": "Body copy 16–20px. Map small sizes from blueprints onto your body step."
+        },
+        {
+          "level": "FAIL",
+          "id": "small-text",
+          "width": 390,
+          "message": "12 text blocks under 13px.",
+          "fix": "Nothing meant to be read goes below 13px."
+        }
+      ]
+    }
+  ]
+}

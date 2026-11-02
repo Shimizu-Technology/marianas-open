@@ -1,10 +1,9 @@
 import { usePublicLinks } from '../hooks/usePublicLinks';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { usePublicCopy } from '../hooks/usePublicCopy';
-import { motion, useReducedMotion } from 'framer-motion';
 import {
-  Search, Play, Clock, Filter, ChevronDown, X, Youtube,
-  Camera, UserSearch, Sparkles, Bell, ExternalLink,
+  Search, Play, Filter, ChevronDown, X, Youtube,
+  ExternalLink,
 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
@@ -61,7 +60,6 @@ const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black'];
 export default function WatchPage() {
   const { t } = usePublicCopy();
   const publicLink = usePublicLinks();
-  const shouldReduceMotion = useReducedMotion();
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -70,7 +68,7 @@ export default function WatchPage() {
   const [beltFilter, setBeltFilter] = useState('');
   const [eventFilter, setEventFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [expandedVideo, setExpandedVideo] = useState<number | null>(null);
+  const [expandedVideo, setExpandedVideo] = useState<string | null>(null);
   const { events } = useEvents();
   const liveEvent = events.find(e => e.live_stream_active);
   const liveStreamUrl = liveEvent?.live_stream_url || publicLink('youtube_live_url', DEFAULT_LIVE_STREAM_URL);
@@ -106,12 +104,6 @@ export default function WatchPage() {
     });
   }, [videos, search, weightFilter, beltFilter, eventFilter, categoryFilter]);
 
-  const futureFeatures = [
-    { icon: Camera, titleKey: 'watch.featureReplay', descKey: 'watch.featureReplayDesc' },
-    { icon: UserSearch, titleKey: 'watch.featureSearch', descKey: 'watch.featureSearchDesc' },
-    { icon: Sparkles, titleKey: 'watch.featureAI', descKey: 'watch.featureAIDesc' },
-    { icon: Bell, titleKey: 'watch.featureNotify', descKey: 'watch.featureNotifyDesc' },
-  ];
 
   if (loading) {
     return (
@@ -140,14 +132,11 @@ export default function WatchPage() {
       />
       {/* Hero */}
       <section className="relative py-12 sm:py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-b from-navy-800 to-navy-900" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center">
-          <motion.div
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+        <div className="absolute inset-0 bg-surface" />
+        <div className="relative z-10 public-container text-center">
+          <div
           >
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] mb-4">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black leading-[0.9] mb-4">
               {t('watch.title')}
             </h1>
             <p className="text-text-secondary text-lg max-w-xl mx-auto mb-8">
@@ -158,7 +147,7 @@ export default function WatchPage() {
                 href={publicLink('youtube_channel_url', YOUTUBE_CHANNEL_URL)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-gold-500 text-navy-950 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors shadow-lg shadow-gold-500/20"
+                className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-gold-500 text-navy-900 font-heading font-bold text-sm hover:bg-gold-400 transition-colors "
               >
                 <Youtube size={18} />
                 {t('watch.youtubeCta', 'Visit Our YouTube Channel')}
@@ -168,23 +157,23 @@ export default function WatchPage() {
               <SocialShare shareText={t('share.watchText')} />
               <QRShare />
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Live Stream Section */}
       {liveEvent && (
         <section id="live" className="py-8 sm:py-12 scroll-mt-28">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="public-container">
             <ScrollReveal>
               <div className="border border-white/10 bg-surface overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-navy-800/50">
                   <div className="flex items-center gap-3">
                     <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                      <span className=" absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
                     </span>
-                    <span className="text-xs font-heading font-bold uppercase tracking-widest text-red-400">
+                    <span className="text-xs font-heading font-bold text-red-400">
                       {t('watch.liveNow')}
                     </span>
                   </div>
@@ -223,7 +212,7 @@ export default function WatchPage() {
                       className="block relative aspect-video bg-navy-800 group"
                     >
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                        <div className="w-20 h-20 rounded-full bg-red-600/20 flex items-center justify-center group-hover:bg-red-600/30 group-hover:scale-110 transition-all duration-300">
+                        <div className="w-20 h-20 rounded-full bg-red-600/20 flex items-center justify-center group-hover:bg-red-600/30 group-hover:scale-110 transition-colors duration-300">
                           <Play size={36} className="text-red-400 ml-1 group-hover:text-red-300" />
                         </div>
                         <span className="text-sm text-text-muted group-hover:text-text-secondary transition-colors">
@@ -235,7 +224,7 @@ export default function WatchPage() {
                 })()}
 
                 <div className="px-5 py-4">
-                  <h2 className="text-lg sm:text-xl font-heading font-bold uppercase text-text-primary mb-1">
+                  <h2 className="text-lg sm:text-xl font-heading font-bold text-text-primary mb-1">
                     {liveEvent.name}
                   </h2>
                   <p className="text-text-muted text-sm">
@@ -251,11 +240,11 @@ export default function WatchPage() {
       {/* Featured Videos */}
       {featuredVideos.length > 0 && (
         <section id="featured-videos" className="py-10 sm:py-16 scroll-mt-28">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="public-container">
             <ScrollReveal>
               <div className="mb-8">
-                <div className="w-12 h-0.5 bg-gold-500 mb-4" />
-                <h2 className="text-2xl sm:text-3xl font-heading font-black uppercase mb-2">
+
+                <h2 className="text-2xl sm:text-3xl font-heading font-black mb-2">
                   {t('watch.featuredTitle', 'Featured Videos')}
                 </h2>
                 <p className="text-text-secondary max-w-2xl">
@@ -268,8 +257,8 @@ export default function WatchPage() {
                 <ScrollReveal key={video.id} delay={i * 0.08}>
                   <VideoCard
                     video={video}
-                    expanded={expandedVideo === video.id}
-                    onToggle={() => setExpandedVideo(expandedVideo === video.id ? null : video.id)}
+                    expanded={expandedVideo === `featured:${video.id}`}
+                    onToggle={() => setExpandedVideo(expandedVideo === `featured:${video.id}` ? null : `featured:${video.id}`)}
                   />
                 </ScrollReveal>
               ))}
@@ -279,11 +268,11 @@ export default function WatchPage() {
       )}
 
       {/* Match Library */}
-      <section className="py-12 sm:py-20 bg-surface">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="public-section bg-surface">
+        <div className="public-container">
           <ScrollReveal>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-              <h2 className="text-2xl sm:text-3xl font-heading font-black uppercase">
+              <h2 className="text-2xl sm:text-3xl font-heading font-black">
                 {t('watch.matchLibrary')}
               </h2>
               <div className="flex items-center gap-2 text-sm text-text-muted">
@@ -323,7 +312,7 @@ export default function WatchPage() {
                 href={publicLink('youtube_channel_url', YOUTUBE_CHANNEL_URL)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-6 px-5 py-3 border border-gold-500/30 text-gold-400 font-heading font-bold uppercase tracking-wider text-sm hover:border-gold-500/60 hover:text-gold-300 transition-colors"
+                className="inline-flex items-center gap-2 mt-6 px-5 py-3 border border-gold-500/30 text-gold-400 font-heading font-bold text-sm hover:border-gold-500/60 hover:text-gold-300 transition-colors"
               >
                 <Youtube size={16} />
                 {t('watch.youtubeCta', 'Visit Our YouTube Channel')}
@@ -340,8 +329,8 @@ export default function WatchPage() {
                 <ScrollReveal key={video.id} delay={i * 0.05}>
                   <VideoCard
                     video={video}
-                    expanded={expandedVideo === video.id}
-                    onToggle={() => setExpandedVideo(expandedVideo === video.id ? null : video.id)}
+                    expanded={expandedVideo === `library:${video.id}`}
+                    onToggle={() => setExpandedVideo(expandedVideo === `library:${video.id}` ? null : `library:${video.id}`)}
                   />
                 </ScrollReveal>
               ))}
@@ -350,48 +339,6 @@ export default function WatchPage() {
         </div>
       </section>
 
-      {/* Coming Soon — Future Features */}
-      <section className="py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <ScrollReveal>
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-2 border border-gold-500/30 rounded-full bg-gold-500/5 mb-6">
-                <Clock size={14} className="text-gold-500" />
-                <span className="text-sm text-gold-400 font-heading uppercase tracking-wider">
-                  {t('watch.comingSoon')}
-                </span>
-              </div>
-              <h2 className="text-3xl sm:text-5xl font-heading font-black uppercase mb-4">
-                {t('watch.visionTitle')}
-              </h2>
-              <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-                {t('watch.comingSoonDesc')}
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {futureFeatures.map((feature, i) => (
-              <ScrollReveal key={feature.titleKey} delay={i * 0.1}>
-                <div className="relative group bg-navy-900/50 border border-gold-500/10 hover:border-gold-500/30 p-6 transition-all duration-300 h-full">
-                  <div className="absolute inset-0 bg-gold-500/3 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="relative space-y-4">
-                    <div className="w-12 h-12 rounded-lg bg-gold-500/10 flex items-center justify-center">
-                      <feature.icon size={24} className="text-gold-500" />
-                    </div>
-                    <h3 className="font-heading font-bold text-lg uppercase">
-                      {t(feature.titleKey)}
-                    </h3>
-                    <p className="text-text-muted text-sm leading-relaxed">
-                      {t(feature.descKey)}
-                    </p>
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
@@ -424,14 +371,22 @@ function FilterSelect({ value, onChange, label, allLabel, options, displayFn }: 
 
 function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: boolean; onToggle: () => void }) {
   const { t } = usePublicCopy();
+  const playButton = useRef<HTMLButtonElement>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
+  const restorePlaybackFocus = useRef(false);
+  useEffect(() => {
+    if (expanded) closeButton.current?.focus({ preventScroll: true });
+    else if (restorePlaybackFocus.current) playButton.current?.focus({ preventScroll: true });
+    restorePlaybackFocus.current = false;
+  }, [expanded]);
   const thumbnail = video.youtube_video_id
     ? `https://img.youtube.com/vi/${video.youtube_video_id}/mqdefault.jpg`
     : null;
 
   return (
-    <div className="group bg-navy-900 border border-white/5 hover:border-gold-500/20 transition-all duration-300 overflow-hidden">
+    <div className="group bg-navy-900 border border-white/5 hover:border-gold-500/20 transition-colors duration-300 overflow-hidden">
       {/* Thumbnail / Embed */}
-      <div className="relative aspect-video bg-navy-800 overflow-hidden cursor-pointer" onClick={onToggle}>
+      <div className="relative aspect-video bg-navy-800 overflow-hidden">
         {expanded && video.youtube_video_id ? (
           <iframe
             src={`https://www.youtube.com/embed/${video.youtube_video_id}?autoplay=1`}
@@ -443,25 +398,26 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
         ) : (
           <>
             <VideoThumbnail src={thumbnail} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-gold-500/20 group-hover:scale-110 transition-all">
+            <button ref={playButton} type="button" onClick={onToggle} aria-label={`${t('watch.watchNow')}: ${video.title}`} className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/10 transition-colors">
+              <span className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-gold-500/20 transition-colors">
                 <Play size={20} className="text-white/60 group-hover:text-gold-500 ml-0.5 transition-colors" />
-              </div>
-            </div>
+              </span>
+            </button>
           </>
         )}
         {expanded && (
           <button
-            onClick={(e) => { e.stopPropagation(); onToggle(); }}
-            className="absolute top-2 right-2 z-10 p-1 bg-black/60 text-white hover:bg-black/80 transition-colors"
+            ref={closeButton}
+            onClick={(e) => { e.stopPropagation(); restorePlaybackFocus.current = true; onToggle(); }}
+            aria-label={t('watch.closeVideo')}
+            className="absolute top-2 right-2 z-10 min-h-11 min-w-11 flex items-center justify-center bg-black/80 text-white hover:bg-black transition-colors"
           >
             <X size={14} />
           </button>
         )}
         {video.belt_rank && !expanded && (
           <div className="absolute top-2 left-2">
-            <span className={`px-2 py-0.5 text-xs font-bold uppercase ${beltColors[video.belt_rank] || ''}`}>
+            <span className={`px-2 py-0.5 text-xs font-bold ${beltColors[video.belt_rank] || ''}`}>
               {t(`watch.belt.${video.belt_rank}`, video.belt_rank)}
             </span>
           </div>
@@ -472,16 +428,16 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
       <div className="p-4 space-y-2">
         {video.competitor_1_name && video.competitor_2_name ? (
           <div className="flex items-center gap-2 text-sm">
-            <span className="font-heading font-bold text-text-primary truncate">
+            <span className="font-heading font-bold text-text-primary break-words">
               {video.competitor_1_name}
             </span>
             <span className="text-text-muted text-xs shrink-0">{t('watch.vs')}</span>
-            <span className="font-heading font-bold text-text-primary truncate">
+            <span className="font-heading font-bold text-text-primary break-words">
               {video.competitor_2_name}
             </span>
           </div>
         ) : (
-          <div className="text-sm font-heading font-bold text-text-primary truncate">
+          <div className="text-sm font-heading font-bold text-text-primary break-words">
             {video.title}
           </div>
         )}
@@ -496,7 +452,7 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
             <span className="text-xs text-text-muted">{video.event_name}</span>
           )}
           {video.category && (
-            <span className="text-xs text-text-muted uppercase">{t(`watch.category.${video.category === 'gi' ? 'gi' : 'noGi'}`, video.category)}</span>
+            <span className="text-xs text-text-muted">{t(`watch.category.${video.category === 'gi' ? 'gi' : 'noGi'}`, video.category)}</span>
           )}
         </div>
 

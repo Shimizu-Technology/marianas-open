@@ -29,3 +29,13 @@ it('closes mobile navigation before shortcut search and releases all scrolling l
   expect(document.body.style.overflow).toBe('');
   expect(document.body.style.position).toBe('');
 });
+
+it('closes a desktop dropdown from a focused child link and restores its trigger', () => {
+  render(<MemoryRouter><Header /></MemoryRouter>);
+  const trigger = screen.getByRole('button', { name: 'nav.events' });
+  fireEvent.click(trigger);
+  const link = screen.getByRole('link', { name: 'nav.calendar' }); link.focus();
+  fireEvent.keyDown(link, { key: 'Escape' });
+  expect(trigger.getAttribute('aria-expanded')).toBe('false');
+  expect(document.activeElement).toBe(trigger);
+});

@@ -18,7 +18,7 @@ export function SponsorLogo({ sponsor, dark = true }: { sponsor: Sponsor; dark?:
       className={`flex h-24 w-36 max-w-full sm:w-40 items-center justify-center rounded-md p-4 ${darkLogo ? "bg-navy-900" : "bg-white text-navy-900"}`}
     >
       {logo && failed !== logo ? (
-        <img src={logo} alt={sponsor.name} onError={() => setFailed(logo)} className="h-full w-full object-contain" />
+        <img loading="lazy" decoding="async" src={logo} alt={sponsor.name} onError={() => setFailed(logo)} className="h-full w-full object-contain" />
       ) : (
         <span className="break-words text-center text-sm font-bold">{sponsor.name}</span>
       )}
@@ -129,8 +129,8 @@ export function FeaturedSponsorBar({ placements }: { placements: SponsorPlacemen
   const items = placements.filter((p) => p.placement_type === "featured_bar");
   if (!items.length) return null;
   return (
-    <section aria-label={t("sponsorPlacements.featured")} className="border-y border-gold-500/20 bg-surface px-4 py-8">
-      <h2 className="mb-4 text-center font-heading text-sm font-semibold uppercase tracking-widest text-gold-400">
+    <section aria-label={t("sponsorPlacements.featured")} className="bg-surface px-4 py-8">
+      <h2 className="mb-4 text-center font-heading text-sm font-semibold text-gold-400">
         {t("sponsorPlacements.featured")}
       </h2>
       <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-5">
@@ -153,7 +153,7 @@ export function SponsorTiers({ placements, event = false }: { placements: Sponso
         if (!items.length) return null;
         return (
           <section key={tier} aria-label={t(`sponsorPlacements.${tier}`)}>
-            <h2 className="mb-5 text-center font-heading text-xs font-semibold uppercase tracking-widest text-gold-400">
+            <h2 className="mb-5 text-center font-heading text-base font-semibold text-gold-400">
               {t(`sponsorPlacements.${tier}`)}
             </h2>
             <div className="flex flex-wrap justify-center gap-3">

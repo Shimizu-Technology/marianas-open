@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 const BELT_STYLES: Record<string, { bg: string; text: string; ring: string }> = {
   white:  { bg: 'bg-white/90',     text: 'text-gray-900', ring: 'ring-white/30' },
   blue:   { bg: 'bg-blue-600',     text: 'text-white',    ring: 'ring-blue-500/30' },
-  purple: { bg: 'bg-purple-600',   text: 'text-white',    ring: 'ring-purple-500/30' },
+  purple: { bg: 'bg-purple-600',   text: 'text-white',    ring: 'ring-purple-500/30' }, // taste-skill-ignore: purple identifies an actual BJJ belt, not a decorative accent.
   brown:  { bg: 'bg-amber-800',    text: 'text-white',    ring: 'ring-amber-700/30' },
   black:  { bg: 'bg-gray-900',     text: 'text-white',    ring: 'ring-gray-700/30' },
 };
@@ -21,7 +21,7 @@ function BeltBadge({ rank }: { rank: string }) {
   const { t } = useTranslation();
   const s = BELT_STYLES[rank] || BELT_STYLES.white;
   return (
-    <span className={`inline-flex items-center px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider ${s.bg} ${s.text} ring-1 ${s.ring}`}>
+    <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium ${s.bg} ${s.text} ring-1 ${s.ring}`}>
       {t(`watch.belt.${rank}`, rank)}
     </span>
   );
@@ -47,17 +47,17 @@ export default function AcademyPage() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-dark pt-24 pb-16">
+      <div className="min-h-svh bg-dark pt-24 pb-16">
         <SEO
           title={academy ? `${academy.name} — Team Profile` : 'Team Profile'}
           description={academy ? `Team profile and athlete roster for ${academy.name} at Marianas Open events.` : 'Academy team profile.'}
           path={slug ? `/teams/${slug}` : '/teams'}
           noindex
         />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto px-5 sm:px-6">
           <button
             onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/teams')}
-            className="inline-flex items-center gap-2 text-text-muted hover:text-white transition-colors mb-6"
+            className="inline-flex min-h-11 items-center gap-2 text-text-secondary hover:text-white transition-colors mb-6"
           >
             <ArrowLeft size={16} />
             {t('common.back')}
@@ -75,11 +75,11 @@ export default function AcademyPage() {
 
           {academy && !loading && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.24 }}
             >
-              <div className="bg-surface border border-white/5 rounded-xl p-6 mb-6">
+              <div className="ui-card p-6 mb-6">
                 <div className="flex items-start gap-4">
                   {academy.logo_url ? (
                     <img src={academy.logo_url} alt={academy.name}
@@ -90,9 +90,9 @@ export default function AcademyPage() {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       {academy.country_code && <CountryFlag code={academy.country_code} />}
-                      <h1 className="text-2xl sm:text-3xl font-bold text-white truncate">
+                      <h1 className="font-heading text-2xl sm:text-4xl font-semibold text-text-primary break-words">
                         {academy.name}
                       </h1>
                     </div>
@@ -116,7 +116,7 @@ export default function AcademyPage() {
                 )}
 
                 {(academy.website_url || academy.instagram_url || academy.facebook_url) && (
-                  <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/5">
+                  <div className="flex flex-wrap items-center gap-4 mt-4 pt-4">
                     {academy.website_url && (
                       <a href={academy.website_url} target="_blank" rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-gold transition-colors">
@@ -147,17 +147,17 @@ export default function AcademyPage() {
               </div>
 
               {academy.athletes.length > 0 && (
-                <div className="bg-surface border border-white/5 rounded-xl overflow-hidden">
-                  <div className="p-4 border-b border-white/5">
+                <div className="ui-card overflow-hidden">
+                  <div className="p-4">
                     <h2 className="text-lg font-semibold text-white">{t('officialRankings.athletes')}</h2>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/[0.03]">
-                    {academy.athletes.map((athlete, i) => (
+                    {academy.athletes.map((athlete) => (
                       <motion.div
                         key={athlete.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: i * 0.03 }}
+                        transition={{ duration: 0.18 }}
                       >
                         <Link
                           to={`/competitors/${athlete.id}`}
@@ -174,9 +174,9 @@ export default function AcademyPage() {
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               {athlete.country_code && <CountryFlag code={athlete.country_code} />}
-                              <span className="text-sm font-medium text-text-primary truncate">{athlete.full_name}</span>
+                              <span className="text-base font-medium text-text-primary break-words">{athlete.full_name}</span>
                               {athlete.belt_rank && <BeltBadge rank={athlete.belt_rank} />}
                             </div>
                             <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-text-muted">
@@ -202,7 +202,7 @@ export default function AcademyPage() {
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   const { i18n } = useTranslation();
   return (
-    <div className="bg-surface border border-white/5 rounded-xl p-4 flex flex-col items-center gap-1">
+    <div className="ui-card p-4 flex flex-col items-center gap-1">
       {icon}
       <span className="text-2xl font-bold text-white">{formatNumber(value, i18n.language)}</span>
       <span className="text-xs text-text-muted">{label}</span>

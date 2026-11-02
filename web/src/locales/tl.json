@@ -265,7 +265,8 @@
       "heavy": "Heavy",
       "superHeavy": "Super Heavy",
       "ultraHeavy": "Ultra Heavy",
-      "openClass": "Bukas na Klase"
+      "openClass": "Bukas na Klase",
+      "openWeight": "Bukas na timbang"
     },
     "belt": {
       "white": "puti",
@@ -434,7 +435,14 @@
     "expandAll": "I-expand Lahat",
     "collapseAll": "I-collapse Lahat",
     "filterResults": "I-filter ang mga Resulta",
-    "sourcedFrom": "Mga resulta mula sa"
+    "sourcedFrom": "Mga resulta mula sa",
+    "filters": "Mga filter",
+    "closeFilters": "Isara ang mga filter",
+    "showResults": "Ipakita ang mga resulta",
+    "otherDivisions": "Iba pang dibisyon",
+    "placementsCount": "Mga puwesto: {{count, number}}",
+    "divisionsCount": "Mga dibisyon: {{count, number}}",
+    "placements": "Mga puwesto"
   },
   "competitorProfile": {
     "title": "Profile ng Kalahok",
@@ -840,7 +848,7 @@
     "missing": "Hindi nahanap ang akademya",
     "noSpecified": "Walang tinukoy na akademya",
     "athletes": "{{count}} atleta",
-    "events": "{{count}} kaganapan",
+    "events": "{{count, number}} kaganapan",
     "more": "Mag-load pa ({{shown}} sa {{total}})"
   },
   "error": {
@@ -870,5 +878,27 @@
     "partnerTitle": "Maging partner namin",
     "partnerDescription": "Interesado ka bang maging sponsor ng Marianas Open? Samahan kami sa pagpapalago ng isport at paglikha ng positibong epekto sa aming komunidad.",
     "contact": "Makipag-ugnayan"
+  },
+  "visualRefresh": {
+    "close": "Isara",
+    "stars": "ASJJF {{count}}-Star na Kaganapan",
+    "registrationOpens": "Magbubukas ang pagpaparehistro sa {{date}}",
+    "eventInfo": "Impormasyon ng kaganapan sa ASJJF",
+    "registrationPending": "Hindi pa bukas ang pagpaparehistro",
+    "allEvents": "Lahat ng kaganapan"
+  },
+  "galleryActions": {
+    "download": "I-download ang larawan",
+    "downloading": "Dina-download…",
+    "share": "Ibahagi ang larawan",
+    "copied": "Nakopya ang link ng larawan",
+    "shared": "Naibahagi ang larawan",
+    "copyManually": "Piliin at kopyahin ang link ng larawan sa ibaba.",
+    "photoLink": "Link ng larawan",
+    "downloaded": "Na-download ang larawan",
+    "downloadError": "Hindi na-download. Subukan ulit."
+  },
+  "visualB": {
+    "athleteCount": "Mga atleta mula sa mga resulta ng paligsahan: {{count, number}}"
   }
 }

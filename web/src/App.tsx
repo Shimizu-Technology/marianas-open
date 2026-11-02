@@ -176,7 +176,7 @@ export default function App() {
             <OrganizationProvider>
               <EventsProvider>
                 <BannerLayout>
-                  <main>
+                  <main className="public-main">
                     <PublicRoutes />
                   </main>
                   <Footer />

@@ -1,5 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -8,29 +7,19 @@ interface Props {
   className?: string;
 }
 
-export default function ScrollReveal({ children, delay = 0, direction = 'up', className }: Props) {
-  const shouldReduceMotion = useReducedMotion();
-
-  const directionOffset = {
-    up: { y: 40 },
-    down: { y: -40 },
-    left: { x: 40 },
-    right: { x: -40 },
-  };
-
-  if (shouldReduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, ...directionOffset[direction] }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.6, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
-    >
-      {children}
-    </motion.div>
-  );
+/** Content stays visible if observation fails or a fast scroll skips an entrance. */
+export default function ScrollReveal({ children, delay = 0, direction = 'up', className = '' }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [entered, setEntered] = useState(false);
+  useEffect(() => {
+    if (!ref.current || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setEntered(true);
+      observer.disconnect();
+    }, { threshold: 0 });
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+  return <div ref={ref} className={`${className} ${entered ? 'reveal-entered' : ''}`} data-direction={direction} style={{ animationDelay: `${Math.min(delay, 0.08)}s` }}>{children}</div>;
 }

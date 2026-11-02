@@ -265,7 +265,8 @@
       "heavy": "헤비",
       "superHeavy": "슈퍼 헤비",
       "ultraHeavy": "울트라 헤비",
-      "openClass": "오픈 클래스"
+      "openClass": "오픈 클래스",
+      "openWeight": "무제한급"
     },
     "belt": {
       "white": "화이트",
@@ -434,7 +435,14 @@
     "expandAll": "모두 펼치기",
     "collapseAll": "모두 접기",
     "filterResults": "결과 필터",
-    "sourcedFrom": "결과 출처"
+    "sourcedFrom": "결과 출처",
+    "filters": "필터",
+    "closeFilters": "필터 닫기",
+    "showResults": "결과 보기",
+    "otherDivisions": "기타 부문",
+    "placementsCount": "입상 수: {{count, number}}",
+    "divisionsCount": "부문 수: {{count, number}}",
+    "placements": "입상 기록"
   },
   "competitorProfile": {
     "title": "선수 프로필",
@@ -840,7 +848,7 @@
     "missing": "아카데미를 찾을 수 없습니다",
     "noSpecified": "아카데미가 지정되지 않았습니다",
     "athletes": "선수 {{count}}명",
-    "events": "대회 {{count}}개",
+    "events": "대회 {{count, number}}개",
     "more": "더 보기 ({{total}}개 중 {{shown}}개)"
   },
   "error": {
@@ -870,5 +878,27 @@
     "partnerTitle": "파트너로 함께하세요",
     "partnerDescription": "Marianas Open 후원에 관심이 있으신가요? 스포츠의 성장과 지역사회에 긍정적인 영향을 만드는 데 함께해 주세요.",
     "contact": "문의하기"
+  },
+  "visualRefresh": {
+    "close": "닫기",
+    "stars": "ASJJF {{count}}성 대회",
+    "registrationOpens": "참가 신청 시작: {{date}}",
+    "eventInfo": "ASJJF 대회 정보",
+    "registrationPending": "참가 신청이 아직 시작되지 않았습니다",
+    "allEvents": "모든 대회"
+  },
+  "galleryActions": {
+    "download": "사진 다운로드",
+    "downloading": "다운로드 중…",
+    "share": "사진 공유",
+    "copied": "사진 링크를 복사했습니다",
+    "shared": "사진을 공유했습니다",
+    "copyManually": "아래 사진 링크를 선택하여 복사하세요.",
+    "photoLink": "사진 링크",
+    "downloaded": "사진을 다운로드했습니다",
+    "downloadError": "다운로드하지 못했습니다. 다시 시도하세요."
+  },
+  "visualB": {
+    "athleteCount": "대회 결과에 등록된 선수: {{count, number}}"
   }
 }

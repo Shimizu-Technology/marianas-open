@@ -49,27 +49,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 3px;
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.shimmer-loading {
-  background: linear-gradient(
-    90deg,
-    var(--color-navy-800) 25%,
-    var(--color-navy-500) 50%,
-    var(--color-navy-800) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .shimmer-loading {
-    animation: none;
-  }
-}
+.shimmer-loading { background: var(--color-surface-light); }
 
 /* Latin subsets only; CJK content uses the platform's native fonts. */
 @font-face {
@@ -154,7 +134,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Shared primary actions also cover existing page CTAs without changing their markup. */
 .pressable, :where(button, a).bg-gold, :where(button, a).bg-gold-500 {
-  transition: transform 120ms ease-out, background-color 120ms ease-out, color 120ms ease-out;
+  transition: transform 120ms var(--ease-out), background-color 120ms var(--ease-out), color 120ms var(--ease-out);
 }
 .pressable:active, :where(button, a).bg-gold:active, :where(button, a).bg-gold-500:active {
   transform: scale(0.97);
@@ -176,9 +156,81 @@ h1, h2, h3, h4, h5, h6 {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .pressable, :where(button, a).bg-gold, :where(button, a).bg-gold-500 {
-    transition: none;
+    transition: background-color 120ms ease, color 120ms ease;
   }
   .pressable:active, :where(button, a).bg-gold:active, :where(button, a).bg-gold-500:active {
     transform: none;
   }
+}
+
+/* Public design foundation. Tailwind v4 tokens are configured above. */
+@theme {
+  --radius-control: 0.5rem;
+  --radius-card: 0.5rem;
+  --color-border: #ffffff1f;
+}
+@layer components {
+:root { --motion-feedback: 120ms; --motion-panel: 240ms; --ease-out: cubic-bezier(0.23, 1, 0.32, 1); }
+.ui-button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border: 1px solid transparent; border-radius: var(--radius-control); font-family: var(--font-body); font-size: 14px; line-height: 1.4; font-weight: 600; text-align: center; cursor: pointer; transition: transform var(--motion-feedback) var(--ease-out), background-color var(--motion-feedback) ease, color var(--motion-feedback) ease; }
+.ui-button--primary { background: var(--color-gold); color: var(--color-navy-900); }
+.ui-button--secondary { background: var(--color-surface); border-color: var(--color-border); color: var(--color-text-primary); }
+.ui-button--ghost { background: transparent; color: var(--color-gold-400); }
+@media (hover: hover) { .ui-button--primary:hover { background: var(--color-gold-400); } .ui-button--secondary:hover, .ui-button--ghost:hover { background: var(--color-surface-light); } }
+.ui-button:active { transform: scale(0.98); }
+.ui-button:disabled { opacity: 0.5; cursor: not-allowed; }
+.ui-button svg { flex-shrink: 0; }
+.ui-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); }
+.ui-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; background: var(--color-surface-light); color: var(--color-gold-400); font-size: 13px; font-weight: 500; line-height: 1.5; }
+.ui-section-heading { margin-bottom: 24px; }
+.ui-section-heading h2 { font-size: clamp(28px, 3vw, 40px); font-weight: 600; line-height: 1.15; letter-spacing: -0.025em; text-wrap: balance; }
+.ui-section-heading p { max-width: 60ch; margin-top: 12px; color: var(--color-text-secondary); font-size: 16px; line-height: 1.6; }
+}
+.register-backdrop { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: #000b; padding: 20px; }
+.register-dialog { width: 100%; max-width: 420px; max-height: calc(100dvh - 40px); overflow-y: auto; padding: 24px; }
+@media (prefers-reduced-motion: reduce) { .ui-button { transition: background-color 120ms ease, color 120ms ease; } .ui-button:active { transform: none; } }
+.public-container { max-width: 1280px; margin-inline: auto; padding-inline: 20px; }
+.public-section { padding-block: 48px; }
+.home-event-hero { min-height: 640px; }
+.event-hero-title { font-size: clamp(36px, 5.5vw, 72px); line-height: 1.07; letter-spacing: -0.035em; font-weight: 700; text-wrap: balance; overflow-wrap: anywhere; }
+.event-hero-scrim { background: linear-gradient(90deg, #0a0a0bea 0%, #0a0a0b88 55%, #0a0a0b18 100%), linear-gradient(0deg, #0a0a0b 0%, transparent 65%); }
+@media (min-width: 640px) { .public-container { padding-inline: 24px; } .public-section { padding-block: 64px; } .home-event-hero { min-height: 680px; } }
+@media (max-width: 639px) { .event-hero-scrim { background: linear-gradient(0deg, #0a0a0b 0%, #0a0a0bb3 60%, #0a0a0b9c 100%); } }
+.event-detail-hero { min-height: 500px; padding-block: 64px; display: flex; align-items: end; }
+.event-detail-hero > .public-container { width: 100%; }
+.mobile-register-bar { position: fixed; inset-inline: 0; bottom: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); background: var(--color-navy-900); border-top: 1px solid var(--color-border); }
+@media (min-width: 768px) { .mobile-register-bar { display: none; } }
+@media (max-width: 767px) { .event-with-registration { padding-bottom: 88px; } }
+
+/* One-shot story motion never leaves content hidden when observation is interrupted. */
+.reveal-entered { animation: reveal-in 240ms var(--ease-out) both; }
+[data-direction="up"] { --reveal-from: translateY(8px); }
+[data-direction="down"] { --reveal-from: translateY(-8px); }
+[data-direction="left"] { --reveal-from: translateX(8px); }
+[data-direction="right"] { --reveal-from: translateX(-8px); }
+@keyframes reveal-in { from { opacity: 0; transform: var(--reveal-from); } to { opacity: 1; transform: none; } }
+@keyframes reveal-fade { from { opacity: 0; } to { opacity: 1; } }
+.image-reveal { transition: opacity 180ms var(--ease-out); }
+.home-hero-content { min-height: 540px; }
+@media (min-width: 640px) { .home-hero-content { min-height: 420px; } }
+/* Semantics/focus close immediately; the retained panel finishes its short visual exit. */
+.panel-backdrop { opacity: 1; transition: opacity 160ms var(--ease-out); }
+.panel-surface { opacity: 1; transform: none; transition: transform 240ms var(--ease-out), opacity 160ms var(--ease-out); overscroll-behavior: contain; }
+.panel-backdrop[data-open="false"] { opacity: 0; pointer-events: none; }
+.panel-backdrop[data-open="false"] .panel-surface { opacity: 0; transform: scale(.97); transition-duration: 160ms; }
+.panel-sheet { --panel-entry: translateY(24px); }
+.register-dialog { --panel-entry: scale(.97); }
+@starting-style {
+  .panel-backdrop[data-open="true"] { opacity: 0; }
+  .panel-backdrop[data-open="true"] .panel-surface { opacity: 0; transform: var(--panel-entry, scale(.97)); }
+}
+.panel-backdrop[data-open="false"] .panel-sheet { transform: translateY(24px); }
+.panel-backdrop[data-keyboard="true"], .panel-backdrop[data-keyboard="true"] .panel-surface { transition: none; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal-entered { animation: reveal-fade 120ms var(--ease-out) both; }
+  .panel-surface, .panel-backdrop[data-open="false"] .panel-surface { transform: none; transition: opacity 120ms var(--ease-out); }
+  @starting-style { .panel-backdrop[data-open="true"] .panel-surface { transform: none; } }
+}
+/* Reading copy stays comfortable on phones; data labels keep their supporting role. */
+@media (max-width: 639px) {
+  .public-main p.text-sm, .public-main p.text-xs { font-size: 16px; line-height: 1.6; }
 }

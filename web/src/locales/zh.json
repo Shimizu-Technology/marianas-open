@@ -265,7 +265,8 @@
       "heavy": "重量级",
       "superHeavy": "超重量级",
       "ultraHeavy": "超超重量级",
-      "openClass": "公开级别"
+      "openClass": "公开级别",
+      "openWeight": "无差别级"
     },
     "belt": {
       "white": "白带",
@@ -434,7 +435,14 @@
     "expandAll": "全部展开",
     "collapseAll": "全部收起",
     "filterResults": "筛选结果",
-    "sourcedFrom": "成绩来源"
+    "sourcedFrom": "成绩来源",
+    "filters": "筛选",
+    "closeFilters": "关闭筛选",
+    "showResults": "显示结果",
+    "otherDivisions": "其他组别",
+    "placementsCount": "获奖名次：{{count, number}}",
+    "divisionsCount": "组别数：{{count, number}}",
+    "placements": "获奖记录"
   },
   "competitorProfile": {
     "title": "参赛者资料",
@@ -840,7 +848,7 @@
     "missing": "未找到道馆",
     "noSpecified": "未指定道馆",
     "athletes": "{{count}} 位运动员",
-    "events": "{{count}} 场赛事",
+    "events": "{{count, number}} 场赛事",
     "more": "加载更多（{{shown}} / {{total}}）"
   },
   "error": {
@@ -870,5 +878,27 @@
     "partnerTitle": "成为我们的合作伙伴",
     "partnerDescription": "有兴趣赞助 Marianas Open 吗？与我们一起推动这项运动的发展，为社区带来积极影响。",
     "contact": "联系我们"
+  },
+  "visualRefresh": {
+    "close": "关闭",
+    "stars": "ASJJF {{count}}星赛事",
+    "registrationOpens": "报名开放日期：{{date}}",
+    "eventInfo": "ASJJF赛事信息",
+    "registrationPending": "报名尚未开放",
+    "allEvents": "全部赛事"
+  },
+  "galleryActions": {
+    "download": "下载照片",
+    "downloading": "下载中…",
+    "share": "分享照片",
+    "copied": "已复制照片链接",
+    "shared": "已分享照片",
+    "copyManually": "请选择并复制下方的照片链接。",
+    "photoLink": "照片链接",
+    "downloaded": "照片已下载",
+    "downloadError": "下载失败，请重试。"
+  },
+  "visualB": {
+    "athleteCount": "赛事成绩中的运动员：{{count, number}}"
   }
 }
