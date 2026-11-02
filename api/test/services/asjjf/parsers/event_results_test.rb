@@ -9,7 +9,7 @@ class AsjjfEventResultsTest < AsjjfParserTest
       "results_list_2062_male_kids.html" => [ 48, 121, 9 ]
     }.each do |file, (divisions, placements, alone)|
       parsed = parse_fixture(file)
-      assert_equal({ divisions: divisions, placements: placements, alone_in_bracket: alone }, parsed[:counts], file)
+      assert_equal({ divisions: divisions, placements: placements, alone_in_bracket: alone, empty_divisions: 0 }, parsed[:counts], file)
       assert_equal divisions, parsed[:divisions].length
       assert_equal placements, parsed[:divisions].sum { |division| division[:placements].length }
       parsed[:divisions].each do |division|
@@ -99,8 +99,27 @@ class AsjjfEventResultsTest < AsjjfParserTest
     assert_raises(PARSERS::ParseError) do
       parse_fixture(file, html: mutate(file) { |doc| doc.css("h5")[1].content = doc.at_css("h5").text })
     end
-    assert_raises(PARSERS::ParseError) do
-      parse_fixture(file, html: mutate(file) { |doc| doc.at_css("tbody").children.remove })
+  end
+
+  def test_division_published_with_an_empty_placements_table_is_recorded_not_fatal
+    file = "event_results_2062_gi.html"
+    full = parse_fixture(file)
+    skipped = full[:divisions].first
+    parsed = parse_fixture(file, html: mutate(file) { |doc| doc.at_css("tbody").inner_html = " " })
+    assert_equal [ skipped[:name] ], parsed[:empty_divisions]
+    assert_equal 1, parsed[:counts][:empty_divisions]
+    assert_equal full[:divisions].drop(1), parsed[:divisions]
+    assert_equal full[:counts][:placements] - skipped[:placements].length, parsed[:counts][:placements]
+  end
+
+  def test_empty_placement_tables_still_fail_when_suspicious
+    file = "event_results_2062_gi.html"
+    [ ->(doc) { doc.css("tbody").each { |body| body.inner_html = "" } },
+      ->(doc) { doc.at_css("tbody").inner_html = "<tr></tr>" },
+      ->(doc) { doc.at_css("tbody").inner_html = "Loading" },
+      ->(doc) { body = doc.at_css("tbody"); body.inner_html = ""; doc.css("h5")[1].content = doc.at_css("h5").text }
+    ].each do |change|
+      assert_raises(PARSERS::ParseError) { parse_fixture(file, html: mutate(file, &change)) }
     end
   end
 end
