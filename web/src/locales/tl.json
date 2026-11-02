@@ -66,7 +66,9 @@
     "spectatorsValue": "5K+",
     "internationalReach": "Internasyonal na Abot",
     "internationalReachDesc": "May mga kasosyo sa Korea, Japan, Taiwan, Pilipinas, at Hong Kong. Tampok sa 40,000 nakalimbag na magasin sa buong Asya.",
-    "mainEvent": "Pangunahing Event"
+    "mainEvent": "Pangunahing Event",
+    "partnerChampionship": "Internasyonal na kampeonato",
+    "partnerSeries": "Taunang Pro Series"
   },
   "event": {
     "title": "Guam Marianas Open 2026",
@@ -164,7 +166,28 @@
     "galleryVenue": "Lugar ng Kumpetisyon",
     "galleryPodium": "Seremonya sa podium",
     "registrationComingSoon": "Malapit Nang Magbukas ang Rehistrasyon",
-    "officialPoster": "Opisyal na Poster"
+    "officialPoster": "Opisyal na Poster",
+    "date": "Ia-announce pa ang petsa",
+    "buySpectatorTickets": "Bumili ng tiket para manood",
+    "registerToCompete": "Magparehistro para lumaban",
+    "registerToCompeteGi": "Magparehistro para lumaban (Gi)",
+    "registerToCompeteNogi": "Magparehistro para lumaban (No-Gi)",
+    "spectatorAdmission": "Pagpasok ng mga manonood",
+    "ticketsOnSale": "Mabibili na ang mga tiket",
+    "ticketIntro": "Bumili ng tiket para manood online o nang personal. Dapat gamitin ng mga kalahok ang hiwalay na mga link ng ASJJF para sa pagpaparehistro.",
+    "admissionOption": "Pagpasok",
+    "earlyBird": "Maagang pagbili",
+    "atTheDoor": "Sa mismong lugar",
+    "earlyBirdDeadline": "Magtatapos ang diskuwento sa maagang pagbili sa {{date}}.",
+    "earlyBirdLimited": "Limitado ang panahon ng diskuwento sa maagang pagbili.",
+    "inPersonPurchase": "Bumili nang personal",
+    "buyOnlineGuamTime": "Bumili ng tiket online",
+    "ticketsSoldOut": "Ubos na ang mga tiket",
+    "ticketsSoldOutDescription": "Ubos na ang mga tiket para manood sa kaganapang ito. Hiwalay ang pagpaparehistro ng mga kalahok.",
+    "ticketSalesClosed": "Tapos na ang pagbebenta ng tiket",
+    "ticketSalesClosedDescription": "Tapos na ang pagbebenta ng tiket para manood sa kaganapang ito. Hiwalay ang pagpaparehistro ng mga kalahok.",
+    "ticketProviderNote": "Ang opisyal na tagapagbenta ng tiket ang nagtatakda ng availability, bayad sa serbisyo, at mga kondisyon sa pagbili.",
+    "ticketFlyerAlt": "Opisyal na poster ng pagbebenta ng tiket para manood sa {{eventName}}"
   },
   "calendar": {
     "title": "Guam Pro Series 2026",
@@ -184,19 +207,22 @@
     "pastResults": "Mga Resulta ng Nagdaan",
     "noPastEvents": "Wala pang nagdaang event.",
     "completed": "Tapos na",
-    "roadToOpen": "Serye ng Kwalipikasyon"
+    "roadToOpen": "Serye ng Kwalipikasyon",
+    "titleDynamic": "Guam Pro Series {{year}}",
+    "noUpcomingEvents": "Wala pang inanunsyong paparating na kaganapan",
+    "noUpcomingEventsDescription": "Lalabas dito ang susunod na serye ng mga kaganapan sa sandaling ilathala ito ng mga organizer."
   },
   "watch": {
     "title": "Panoorin",
     "subtitle": "Mga pag-stream nang live, buong laban, at mahahalagang bahagi mula sa bawat event ng Marianas Open.",
-    "liveNow": "Live Ngayon",
+    "liveNow": "Live ngayon",
     "liveDesc": "Wala pang live na event sa ngayon. Bumalik sa araw ng event para sa live na pag-stream.",
     "upcomingStream": "Susunod na Live na Pag-stream",
     "matchLibrary": "Aklatan ng mga Laban",
     "searchPlaceholder": "Maghanap ayon sa kalahok, academy...",
     "filterWeight": "Klase ng Timbang",
     "filterBelt": "Sinturon",
-    "filterEvent": "Event",
+    "filterEvent": "Kaganapan",
     "filterAll": "Lahat",
     "duration": "Tagal",
     "viewMatch": "Panoorin",
@@ -223,11 +249,11 @@
     "featureNotify": "Mga Push Notification",
     "featureNotifyDesc": "Makatanggap ng abiso kapag tumuntong na sa banig ang mga paborito mong kalahok. Huwag palampasin ang kahit isang laban.",
     "liveEventInfo": "Guam Marianas Open 2026 — UOG Calvo Fieldhouse",
-    "liveBadge": "LIVE",
+    "liveBadge": "KASALUKUYANG LIVE",
     "featured": "Tampok",
     "filterCategory": "Kategorya",
-    "noVideosYet": "Wala pang video",
-    "noVideosYetDesc": "Bumalik muli sa lalong madaling panahon para sa mga video ng laban at mahahalagang bahagi.",
+    "noVideosYet": "Wala pang mga video",
+    "noVideosYetDesc": "Bumalik sa lalong madaling panahon para sa mga video ng laban at mga tampok na sandali.",
     "vs": "vs",
     "weight": {
       "rooster": "Rooster",
@@ -253,7 +279,15 @@
       "noGi": "No-Gi"
     },
     "clearFilters": "Alisin ang mga filter",
-    "loadError": "Hindi ma-load ang mga video. I-refresh ang pahina upang subukang muli."
+    "loadError": "Hindi ma-load ang mga video. I-refresh ang pahina upang subukang muli.",
+    "youtubeCta": "Bisitahin ang aming YouTube channel",
+    "watchYoutube": "Manood sa YouTube",
+    "clickYoutube": "Pindutin para manood sa YouTube",
+    "liveTitle": "Live na pagsasahimpapawid - {{event}}",
+    "closeVideo": "Isara ang video",
+    "featuredTitle": "Mga tampok na video",
+    "featuredDesc": "Panoorin ang mga pinakabagong tampok na sandali, buong laban, at natatanging tagpo mula sa mga kaganapan ng Marianas Open.",
+    "watchNow": "Manood ngayon"
   },
   "share": {
     "defaultText": "Tingnan ang Marianas Open — Internasyonal na Kampeonato ng BJJ!",
@@ -265,7 +299,7 @@
     "tagline": "Ang nangungunang internasyonal na kampeonato ng Brazilian Jiu-Jitsu sa Guam",
     "followUs": "Sundan Kami",
     "contact": "Makipag-ugnayan",
-    "rights": "Lahat ng karapatan ay nakalaan.",
+    "rights": "Nakalaan ang lahat ng karapatan.",
     "builtBy": "Ginawa ng Shimizu Technology",
     "terms": "Mga Tuntunin at Kundisyon",
     "rules": "Mga Patakaran"
@@ -276,7 +310,12 @@
     "philippines": "Philippines",
     "taiwan": "Taiwan",
     "southKorea": "South Korea",
-    "hongKong": "Hong Kong"
+    "hongKong": "Hong Kong",
+    "back": "Bumalik",
+    "website": "Website",
+    "loading": "Naglo-load...",
+    "dismiss": "Isara",
+    "cancelled": "Kinansela"
   },
   "shimizu": {
     "title": "Ginawa ng Shimizu Technology",
@@ -305,7 +344,27 @@
     "timeline2025": "1,300+ kalahok mula sa 6 na bansa. $2M na epekto sa ekonomiya ng Guam.",
     "timeline2026": "Ang internasyonal na Pro Series ay sumasaklaw sa 7 event sa 6 na bansa.",
     "contactTitle": "Makipag-ugnayan",
-    "contactDesc": "May mga tanong tungkol sa Marianas Open? Makipag-ugnayan sa aming team."
+    "contactDesc": "May mga tanong tungkol sa Marianas Open? Makipag-ugnayan sa aming team.",
+    "federation": {
+      "eyebrow": "Opisyal na paglilinaw",
+      "title": "Marianas Sports Jiu-Jitsu Federation",
+      "intro": "Para sa aming mga atleta, akademya, partner, sponsor, tagasuporta, at komunidad ng Jiu-Jitsu:",
+      "photoAlt": "Mga delegadong magkakasamang nagpapakuha ng litrato sa Pangkalahatang Asembleya ng SJJIF",
+      "photoCaption": "Pangkalahatang Asembleya ng SJJIF",
+      "pullQuote": "Mula Guam patungo sa mundo. Mula sa mundo patungo sa Guam.",
+      "factGuam": "Pederasyong nakabase sa Guam",
+      "factIndependent": "Mga independiyenteng kaganapan at programa",
+      "factInternational": "May ugnayan sa buong mundo",
+      "p1": "Bilang tugon sa ilang tanong at pagtatanong na natanggap namin, nais ng Marianas Sports Jiu-Jitsu Federation (MSJJF) na linawin kung sino kami at ang aming mga internasyonal na kaanib.",
+      "p2": "Ang MSJJF ay isang independiyenteng pederasyon ng Jiu-Jitsu na nakabase sa Guam, na nagpapatakbo nang sarili ng mga kaganapan, programa, pakikipagtulungan, at internasyonal na ugnayan.",
+      "p3": "Ang MSJJF ay may internasyonal na kaugnayan sa mga kinikilalang organisasyon at pederasyon ng Jiu-Jitsu, kabilang ang ASJJF, SJJIF, ASJJF DUMAU, SJJIF South America, at mga internasyonal na partner sa pandaigdigang komunidad ng Jiu-Jitsu.",
+      "p4": "Sa pamamagitan ng mga ugnayang ito at ng aming internasyonal na plataporma, ipinagmamalaki ng MSJJF na nakatulong itong dalhin ang Guam sa pandaigdigang entablado—ikinokonekta ang aming isla at mga atleta sa mga world-class na kalahok, akademya, opisyal, organizer, at malalaking internasyonal na kompetisyon sa buong Asya at iba pang panig ng mundo.",
+      "p5": "Ang Guam Marianas Open ay isang internasyonal na pinahintulutang kaganapan na may ASJJF 5-Star na ranggo. Nagbibigay ito sa mga atleta ng Guam ng pagkakataong lumaban sa isang kinikilalang internasyonal na plataporma sa sariling tahanan, habang tinatanggap ang mga world-class na kalahok sa aming isla.",
+      "p6": "Ang aming misyon ay laging higit pa sa iisang kaganapan. Layunin naming lumikha ng mga pagkakataon para sa aming mga atleta, patatagin ang aming komunidad, at patuloy na ipakilala ang Guam sa internasyonal na Jiu-Jitsu. Nais naming magkaroon ang aming mga atleta ng mga pagkakataong lumaban sa buong mundo—at maranasan naman ng mundo ang Jiu-Jitsu dito sa Guam.",
+      "p7": "Ibinabahagi namin ang paglilinaw na ito upang magbigay ng malinaw at tumpak na impormasyon bilang sagot sa mga tanong na natanggap namin. Malaki ang aming paggalang sa buong komunidad ng Jiu-Jitsu ng Guam at sa lahat ng patuloy na nag-aambag sa pag-unlad ng isport sa aming isla. Nananatili ang aming pokus sa mga atleta, sa mga pagkakataong maaari naming likhain, at sa buong-pagmamalaking pagkatawan sa Guam sa internasyonal na entablado.",
+      "signature": "Marianas Sports Jiu-Jitsu Federation",
+      "tagline": "Guam sa pandaigdigang entablado"
+    }
   },
   "terms": {
     "title": "Mga Tuntunin at Kundisyon",
@@ -374,7 +433,8 @@
     "total": "Kabuuan",
     "expandAll": "I-expand Lahat",
     "collapseAll": "I-collapse Lahat",
-    "filterResults": "I-filter ang mga Resulta"
+    "filterResults": "I-filter ang mga Resulta",
+    "sourcedFrom": "Mga resulta mula sa"
   },
   "competitorProfile": {
     "title": "Profile ng Kalahok",
@@ -382,7 +442,7 @@
     "eventsCompeted": "mga event",
     "medals": "Mga Medalya",
     "results": "Mga Resulta",
-    "event": "Event",
+    "event": "Kaganapan",
     "division": "Dibisyon",
     "placement": "Puwesto",
     "pointsEarned": "Mga Puntos na Nakuha",
@@ -538,7 +598,14 @@
   "search": {
     "title": "Maghanap",
     "close": "Isara ang paghahanap",
-    "placeholder": "Maghanap ng mga atleta, akademya, at kaganapan..."
+    "placeholder": "Maghanap ng mga atleta, akademya, at kaganapan...",
+    "start": "Mag-type para maghanap...",
+    "navigate": "mag-navigate",
+    "select": "pumili",
+    "closeHint": "isara",
+    "none": "Walang nahanap na resulta para sa \"{{query}}\"",
+    "independent": "Walang kinabibilangang akademya",
+    "events": "Mga kaganapan"
   },
   "season": {
     "phase": {
@@ -593,7 +660,7 @@
     "source": "Tingnan sa ASJJF",
     "lastSync": "Huling pag-sync: {{date}}",
     "neverSynced": "Hindi pa na-sync",
-    "season": "Season",
+    "season": "Panahon",
     "discipline": "Disiplina",
     "kind": "Ranggo",
     "gi": "Gi",
@@ -643,9 +710,9 @@
       "purple": "Lila",
       "brown": "Kayumanggi",
       "black": "Itim",
-      "adultAge": "Adult {{age}}",
+      "adultAge": "Nasa hustong gulang {{age}}",
       "masterAge": "Master {{age}}",
-      "juvenileAge": "Juvenile {{age}}",
+      "juvenileAge": "Kabataan {{age}}",
       "kidAge": "Bata {{age}}"
     }
   },
@@ -695,7 +762,7 @@
     "official": "Mga opisyal na sponsor",
     "learnMore": "Matuto pa",
     "watchVideo": "Panoorin ang video ng {{name}}",
-    "video": "Video",
+    "video": "Bidyo",
     "closeVideo": "Isara ang video"
   },
   "sponsorAdmin": {
@@ -763,5 +830,45 @@
       "uploaded_logo": "Na-upload ang karaniwang logo",
       "uploaded_logo_dark": "Na-upload ang madilim na logo"
     }
+  },
+  "academies": {
+    "badge": "Mga akademya",
+    "title": "Mga koponan at akademya",
+    "summary": "{{count}} akademyang lumalahok sa mga torneo ng Marianas Open",
+    "search": "Maghanap ng akademya...",
+    "empty": "Walang nahanap na akademya.",
+    "missing": "Hindi nahanap ang akademya",
+    "noSpecified": "Walang tinukoy na akademya",
+    "athletes": "{{count}} atleta",
+    "events": "{{count}} kaganapan",
+    "more": "Mag-load pa ({{shown}} sa {{total}})"
+  },
+  "error": {
+    "title": "Bumalik tayo sa aksyon.",
+    "description": "Hindi ma-load ang pahinang ito. I-reload upang subukan muli, o bumalik sa home page.",
+    "reload": "I-reload ang pahina"
+  },
+  "impact": {
+    "roi": "Balik sa puhunan",
+    "costs": "Mga gastos at operasyon ng kaganapan",
+    "generated": "Nalikha para sa komunidad",
+    "multiplier": "Multiplier ng balik sa puhunan",
+    "perDollar": "Balik sa bawat dolyar na ipinuhunan",
+    "budget": "Kabuuang badyet",
+    "investment": "Kabuuang puhunan",
+    "economic": "Epekto sa ekonomiya",
+    "tourism": "Turismo",
+    "competition": "Kompetisyon",
+    "community": "Komunidad",
+    "emptyTitle": "Paparating na ang ulat ng epekto",
+    "emptyDescription": "Kinokolekta namin ang datos kung paano nakaaapekto ang Marianas Open sa turismo, kompetisyon, at paglago ng ekonomiya ng aming isla. Bumalik sa lalong madaling panahon.",
+    "badge": "Ulat ng epekto ng kaganapan",
+    "title": "Epekto at",
+    "transparency": "Transparensiya",
+    "description": "Kung paano itinataguyod ng Marianas Open ang turismo, kompetisyon, at paglago ng ekonomiya ng aming isla.",
+    "allocation": "Paglalaan ng pondo",
+    "partnerTitle": "Maging partner namin",
+    "partnerDescription": "Interesado ka bang maging sponsor ng Marianas Open? Samahan kami sa pagpapalago ng isport at paglikha ng positibong epekto sa aming komunidad.",
+    "contact": "Makipag-ugnayan"
   }
 }

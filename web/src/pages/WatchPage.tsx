@@ -1,5 +1,6 @@
+import { usePublicLinks } from '../hooks/usePublicLinks';
 import { useState, useMemo, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { usePublicCopy } from '../hooks/usePublicCopy';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   Search, Play, Clock, Filter, ChevronDown, X, Youtube,
@@ -58,7 +59,8 @@ const WEIGHT_CLASS_KEY_MAP: Record<string, string> = Object.fromEntries(
 const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black'];
 
 export default function WatchPage() {
-  const { t } = useTranslation();
+  const { t } = usePublicCopy();
+  const publicLink = usePublicLinks();
   const shouldReduceMotion = useReducedMotion();
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +73,7 @@ export default function WatchPage() {
   const [expandedVideo, setExpandedVideo] = useState<number | null>(null);
   const { events } = useEvents();
   const liveEvent = events.find(e => e.live_stream_active);
-  const liveStreamUrl = liveEvent?.live_stream_url || DEFAULT_LIVE_STREAM_URL;
+  const liveStreamUrl = liveEvent?.live_stream_url || publicLink('youtube_live_url', DEFAULT_LIVE_STREAM_URL);
 
   useEffect(() => {
     api.getVideos()
@@ -153,7 +155,7 @@ export default function WatchPage() {
             </p>
             <div className="flex items-center justify-center mb-8">
               <a
-                href={YOUTUBE_CHANNEL_URL}
+                href={publicLink('youtube_channel_url', YOUTUBE_CHANNEL_URL)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-gold-500 text-navy-950 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors shadow-lg shadow-gold-500/20"
@@ -183,7 +185,7 @@ export default function WatchPage() {
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
                     </span>
                     <span className="text-xs font-heading font-bold uppercase tracking-widest text-red-400">
-                      Live Now
+                      {t('watch.liveNow')}
                     </span>
                   </div>
                   <a
@@ -193,7 +195,7 @@ export default function WatchPage() {
                     className="flex items-center gap-1.5 text-xs text-text-muted hover:text-gold-400 transition-colors"
                   >
                     <Youtube size={14} />
-                    <span className="hidden sm:inline">Watch on YouTube</span>
+                    <span className="hidden sm:inline">{t('watch.watchYoutube')}</span>
                     <ExternalLink size={10} />
                   </a>
                 </div>
@@ -205,7 +207,7 @@ export default function WatchPage() {
                       <div className="relative aspect-video bg-black">
                         <iframe
                           src={embedUrl}
-                          title={`Live Stream - ${liveEvent.name}`}
+                          title={t('watch.liveTitle', { event: liveEvent.name })}
                           className="absolute inset-0 w-full h-full"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                           allowFullScreen
@@ -225,7 +227,7 @@ export default function WatchPage() {
                           <Play size={36} className="text-red-400 ml-1 group-hover:text-red-300" />
                         </div>
                         <span className="text-sm text-text-muted group-hover:text-text-secondary transition-colors">
-                          Click to watch on YouTube
+                          {t('watch.clickYoutube')}
                         </span>
                       </div>
                     </a>
@@ -318,7 +320,7 @@ export default function WatchPage() {
               <p className="text-text-muted text-lg">{loadError ? t('watch.loadError') : t('watch.noVideosYet', 'No videos yet')}</p>
               <p className="text-text-muted text-sm mt-2">{t('watch.noVideosYetDesc', 'Check back soon for match videos and highlights.')}</p>
               <a
-                href={YOUTUBE_CHANNEL_URL}
+                href={publicLink('youtube_channel_url', YOUTUBE_CHANNEL_URL)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 mt-6 px-5 py-3 border border-gold-500/30 text-gold-400 font-heading font-bold uppercase tracking-wider text-sm hover:border-gold-500/60 hover:text-gold-300 transition-colors"
@@ -421,7 +423,7 @@ function FilterSelect({ value, onChange, label, allLabel, options, displayFn }: 
 }
 
 function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: boolean; onToggle: () => void }) {
-  const { t } = useTranslation();
+  const { t } = usePublicCopy();
   const thumbnail = video.youtube_video_id
     ? `https://img.youtube.com/vi/${video.youtube_video_id}/mqdefault.jpg`
     : null;

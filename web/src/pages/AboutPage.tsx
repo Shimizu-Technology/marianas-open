@@ -1,4 +1,6 @@
-import { useTranslation } from 'react-i18next';
+import { useSiteContent } from '../hooks/useSiteContent';
+import { useOrg } from '../contexts/OrganizationContext';
+import { usePublicCopy } from '../hooks/usePublicCopy';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Users, Globe, Trophy, Calendar, MapPin, Mail, Phone, ShieldCheck, Globe2 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
@@ -17,8 +19,10 @@ const timeline = [
 ];
 
 export default function AboutPage() {
-  const { t } = useTranslation();
+  const { t } = usePublicCopy();
   const shouldReduceMotion = useReducedMotion();
+  const org = useOrg();
+  const { t: sc } = useSiteContent();
   const { images: siteImages } = useSiteImages();
 
   const heroFallback = '/images/venue-crowd.webp';
@@ -276,22 +280,22 @@ export default function AboutPage() {
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <a
-                href="mailto:moguam@marianasopen.com"
+              {org.contact_email && <a
+                href={`mailto:${org.contact_email}`}
                 className="flex items-center gap-2 text-text-secondary hover:text-gold-500 transition-colors"
               >
                 <Mail size={18} />
-                moguam@marianasopen.com
-              </a>
-              <span className="hidden sm:block text-white/10">|</span>
-              <div className="flex items-center gap-2 text-text-secondary">
+                {org.contact_email}
+              </a>}
+              {org.contact_email && <span className="hidden sm:block text-white/10">|</span>}
+              {org.phone && <div className="flex items-center gap-2 text-text-secondary">
                 <Phone size={18} />
-                (671) 777-9044
-              </div>
-              <span className="hidden sm:block text-white/10">|</span>
+                {org.phone}
+              </div>}
+              {org.phone && <span className="hidden sm:block text-white/10">|</span>}
               <div className="flex items-center gap-2 text-text-secondary">
                 <MapPin size={18} />
-                Guam, USA
+                {sc('contact_location', 'Guam, USA')}
               </div>
             </div>
           </ScrollReveal>

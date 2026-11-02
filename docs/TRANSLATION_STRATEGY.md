@@ -322,3 +322,12 @@ No changes to `web/src/i18n.ts` or any component's `useTranslation` usage are ne
 | **Storage** | Locale JSON files in repo | JSONB `translations` column per record |
 | **Runtime** | react-i18next loads JSON | `useTranslatedField()` hook reads translations |
 | **Cost** | Starter ($5/mo) | Same GT account — included in usage |
+
+
+## Completeness gate and editable organizer copy
+
+`npm test` runs `src/locales/parity.test.ts`: every English leaf, array item and interpolation variable must be present in all seven locale files. Identical English text needs a documented entry in `src/locales/intentional-identical.json` (proper names, numeric values or established shared terms). There is no missing-key allowlist. Review generated translation changes before committing; the no-translate CI build uses the committed files.
+
+Organizer-owned copy uses `usePublicCopy`, whose bindings and preview hints live in `web/src/content/publicCopy.json`. Defaults are frozen in `api/db/data/public_copy.json`; a test compares their seven locale values with the UI fallbacks. Existing CMS values win for the selected language; missing or blank CMS translations use that language's locale text. Keep UI chrome in locale files.
+
+The existing deployment `db:migrate` task runs `PublicCopySeed` after migrations; `bin/rails site_content:seed_public_copy` can also run it independently. Both paths only insert missing keys and never overwrite staff text, translations or metadata. The destructive demo `db:seed` is not a deployment step. For a new binding, add its locale strings, binding, seed defaults and plain admin preview hint together.

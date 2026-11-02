@@ -1,4 +1,5 @@
-import { useTranslation } from 'react-i18next';
+import { usePublicLinks } from '../hooks/usePublicLinks';
+import { usePublicCopy } from '../hooks/usePublicCopy';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Calendar, Trophy, Users, Globe, ExternalLink, Handshake } from 'lucide-react';
@@ -55,7 +56,8 @@ const ORG_PARTNERS = [
 ] as const;
 
 export default function HomePage() {
-  const { t } = useTranslation();
+  const { t } = usePublicCopy();
+  const publicLink = usePublicLinks();
   const shouldReduceMotion = useReducedMotion();
   const { events, loading: eventsLoading } = useEvents();
   const { placements, error: placementsError, retry: retryPlacements } = useSponsorPlacements();
@@ -329,7 +331,7 @@ export default function HomePage() {
               {ORG_PARTNERS.map((partner) => (
                 <a
                   key={partner.key}
-                  href={partner.url}
+                  href={publicLink(`partner_${partner.key}_url`, partner.url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex flex-col items-center justify-between text-center h-40 sm:h-44"
@@ -342,7 +344,7 @@ export default function HomePage() {
                     />
                   </div>
                   <div className="text-[10px] sm:text-[11px] font-heading font-semibold uppercase tracking-wider text-text-muted group-hover:text-text-secondary transition-colors duration-300 leading-tight mt-2">
-                    {partner.label}
+                    {sc(`partner_${partner.key}_label`, partner.key === 'copademarianas' ? t('home.partnerChampionship') : partner.key === 'roadtotheopen' ? t('home.partnerSeries') : partner.label)}
                   </div>
                 </a>
               ))}
@@ -407,7 +409,7 @@ export default function HomePage() {
 
 
 function SeasonOverview({ events: publishedEvents, loading }: { events: import('../services/api').Event[]; loading: boolean }) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = usePublicCopy();
   const { tf } = useTranslatedField();
   const { events, loading: countsLoading } = useResultCounts(publishedEvents, !publishedEvents.some(event => ['upcoming', 'live'].includes(eventPhase(event))));
   const state = selectHomeState(events);

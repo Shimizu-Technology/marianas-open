@@ -116,3 +116,5 @@ contents.each do |attrs|
 end
 
 puts "Seeded #{contents.size} site content entries."
+
+load Rails.root.join('db/seeds/public_copy.rb')

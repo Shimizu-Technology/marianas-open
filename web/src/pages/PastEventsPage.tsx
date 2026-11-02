@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { usePublicCopy } from '../hooks/usePublicCopy';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Calendar, MapPin, Star, Trophy, ArrowRight, Medal } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
@@ -121,7 +121,7 @@ const cardVariants = {
 };
 
 export default function PastEventsPage() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = usePublicCopy();
   const shouldReduceMotion = useReducedMotion();
   const { tf } = useTranslatedField();
   const { events: publishedEvents, loading } = useEvents();

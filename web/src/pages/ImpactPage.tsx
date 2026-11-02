@@ -1,3 +1,7 @@
+import { usePublicCopy } from '../hooks/usePublicCopy'
+import { useSiteContent } from '../hooks/useSiteContent'
+import { getDateLocale } from '../utils/dateLocale'
+import { formatNumber } from '../utils/numbers'
 import { useEffect, useState } from 'react'
 import {
   Globe, Users, Trophy, Heart, DollarSign, Star, TrendingUp, MapPin,
@@ -30,6 +34,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 function MetricCard({ metric, index }: { metric: ImpactMetric; index: number }) {
+  const { t } = usePublicCopy()
   const shouldReduceMotion = useReducedMotion()
   const Icon = ICON_MAP[metric.icon || 'globe'] || Globe
   const catColor = CATEGORY_COLORS[metric.category] || 'text-text-muted bg-white/5'
@@ -52,7 +57,7 @@ function MetricCard({ metric, index }: { metric: ImpactMetric; index: number }) 
             <Icon className="w-4 h-4" />
           </div>
           <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${catColor}`}>
-            {CATEGORY_LABELS[metric.category] || metric.category}
+            {t(`impact.${metric.category}`, CATEGORY_LABELS[metric.category] || metric.category)}
           </span>
         </div>
         <div className={`font-heading font-bold leading-tight ${
@@ -72,6 +77,7 @@ function MetricCard({ metric, index }: { metric: ImpactMetric; index: number }) 
 }
 
 function ROICard({ roi }: { roi: ImpactROI }) {
+  const { t, i18n } = usePublicCopy()
   const shouldReduceMotion = useReducedMotion()
   const impact = Number(roi.economic_impact) || 0
   const investment = Number(roi.investment_total) || 0
@@ -92,7 +98,7 @@ function ROICard({ roi }: { roi: ImpactROI }) {
                 <TrendingUp className="w-5 h-5 text-gold" />
               </div>
               <div>
-                <h2 className="font-heading text-lg sm:text-xl font-bold text-text-primary">Return on Investment</h2>
+                <h2 className="font-heading text-lg sm:text-xl font-bold text-text-primary">{t('impact.roi')}</h2>
                 {roi.year_label && (
                   <p className="text-xs text-text-muted">{roi.year_label}</p>
                 )}
@@ -109,12 +115,12 @@ function ROICard({ roi }: { roi: ImpactROI }) {
                 className="text-center sm:text-left p-4 rounded-xl bg-white/[0.02] border border-white/5"
               >
                 <div className="text-xs text-text-muted font-medium uppercase tracking-wider mb-2">
-                  {roi.investment_label || 'Total Investment'}
+                  {roi.investment_label || t('impact.investment')}
                 </div>
                 <div className="font-heading text-2xl sm:text-3xl font-bold text-text-primary">
-                  ${investment.toLocaleString()}
+                  ${investment.toLocaleString(getDateLocale(i18n.language))}
                 </div>
-                <div className="text-xs text-text-muted mt-1">Event costs &amp; operations</div>
+                <div className="text-xs text-text-muted mt-1">{t('impact.costs')}</div>
               </motion.div>
 
               {/* Economic Impact */}
@@ -126,12 +132,12 @@ function ROICard({ roi }: { roi: ImpactROI }) {
                 className="text-center sm:text-left p-4 rounded-xl bg-white/[0.02] border border-white/5"
               >
                 <div className="text-xs text-text-muted font-medium uppercase tracking-wider mb-2">
-                  {roi.economic_impact_label || 'Economic Impact'}
+                  {roi.economic_impact_label || t('impact.economic')}
                 </div>
                 <div className="font-heading text-2xl sm:text-3xl font-bold text-green-400">
-                  ${impact.toLocaleString()}
+                  ${impact.toLocaleString(getDateLocale(i18n.language))}
                 </div>
-                <div className="text-xs text-text-muted mt-1">Generated for the community</div>
+                <div className="text-xs text-text-muted mt-1">{t('impact.generated')}</div>
               </motion.div>
 
               {/* ROI Multiplier */}
@@ -143,12 +149,12 @@ function ROICard({ roi }: { roi: ImpactROI }) {
                 className="text-center p-4 rounded-xl bg-gold/5 border border-gold/20"
               >
                 <div className="text-xs text-gold/70 font-medium uppercase tracking-wider mb-2">
-                  ROI Multiplier
+                  {t('impact.multiplier')}
                 </div>
                 <div className="font-heading text-4xl sm:text-5xl font-bold text-gold">
-                  {multiplier}x
+                  {formatNumber(multiplier, i18n.language)}x
                 </div>
-                <div className="text-xs text-gold/60 mt-1">Return per dollar invested</div>
+                <div className="text-xs text-gold/60 mt-1">{t('impact.perDollar')}</div>
               </motion.div>
             </div>
 
@@ -171,6 +177,7 @@ function ROICard({ roi }: { roi: ImpactROI }) {
 }
 
 function DonutChart({ allocations }: { allocations: ImpactData['fund_allocations'] }) {
+  const { t, i18n } = usePublicCopy()
   const shouldReduceMotion = useReducedMotion()
   const total = allocations.reduce((s, a) => s + Number(a.amount), 0)
   if (total === 0) return null
@@ -216,14 +223,16 @@ function DonutChart({ allocations }: { allocations: ImpactData['fund_allocations
         })}
       </svg>
       <div className="mt-2 text-center">
-        <div className="font-heading text-xl font-bold text-text-primary">${total.toLocaleString()}</div>
-        <div className="text-xs text-text-muted">Total Budget</div>
+        <div className="font-heading text-xl font-bold text-text-primary">${total.toLocaleString(getDateLocale(i18n.language))}</div>
+        <div className="text-xs text-text-muted">{t('impact.budget')}</div>
       </div>
     </div>
   )
 }
 
 export default function ImpactPage() {
+  const { t, i18n } = usePublicCopy()
+  const { t: sc } = useSiteContent()
   const [data, setData] = useState<ImpactData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -255,11 +264,10 @@ export default function ImpactPage() {
             <TrendingUp className="w-10 h-10 text-gold/40" />
           </div>
           <h1 className="font-heading text-xl sm:text-2xl font-bold text-text-primary mb-2">
-            Impact Report Coming Soon
+            {t('impact.emptyTitle')}
           </h1>
           <p className="text-sm text-text-muted max-w-md">
-            We're compiling data on how the Marianas Open impacts tourism, competition,
-            and economic growth for our island community. Check back soon.
+            {t('impact.emptyDescription')}
           </p>
         </div>
       </>
@@ -291,13 +299,13 @@ export default function ImpactPage() {
           <ScrollReveal>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold text-xs font-medium mb-4">
               <TrendingUp className="w-3.5 h-3.5" />
-              Event Impact Report
+              {t('impact.badge')}
             </div>
             <h1 className="font-heading text-2xl sm:text-4xl font-bold text-text-primary leading-tight">
-              Impact & <span className="text-gold">Transparency</span>
+              {t('impact.title')} <span className="text-gold">{t('impact.transparency')}</span>
             </h1>
             <p className="mt-2 text-sm sm:text-base text-text-secondary max-w-xl mx-auto">
-              How the Marianas Open drives tourism, competition, and economic growth for our island community.
+              {t('impact.description')}
             </p>
           </ScrollReveal>
         </section>
@@ -323,7 +331,7 @@ export default function ImpactPage() {
               <div className="flex items-center gap-2 mb-5">
                 <DollarSign className="w-4 h-4 text-green-400" />
                 <h2 className="font-heading text-lg sm:text-xl font-bold text-text-primary">
-                  Fund Allocation
+                  {t('impact.allocation')}
                 </h2>
               </div>
             </ScrollReveal>
@@ -343,7 +351,7 @@ export default function ImpactPage() {
                       />
                       <span className="text-sm text-text-primary font-medium flex-1 min-w-0 truncate">{a.category}</span>
                       <span className="font-heading text-sm font-bold text-text-primary shrink-0">
-                        ${Number(a.amount).toLocaleString()}
+                        ${Number(a.amount).toLocaleString(getDateLocale(i18n.language))}
                       </span>
                       <div className="w-16 h-1.5 rounded-full bg-white/5 overflow-hidden shrink-0 hidden sm:block">
                         <motion.div
@@ -356,7 +364,7 @@ export default function ImpactPage() {
                         />
                       </div>
                       <span className="text-xs text-text-muted w-12 text-right shrink-0">
-                        {Number(a.percentage ?? 0).toFixed(1)}%
+                        {formatNumber(Number(a.percentage ?? 0), i18n.language)}%
                       </span>
                     </div>
                   </ScrollReveal>
@@ -375,17 +383,16 @@ export default function ImpactPage() {
               <div className="relative">
                 <Award className="w-8 h-8 text-gold mx-auto mb-3" />
                 <h3 className="font-heading text-lg sm:text-xl font-bold text-text-primary mb-2">
-                  Partner With Us
+                  {t('impact.partnerTitle')}
                 </h3>
                 <p className="text-text-secondary text-sm max-w-md mx-auto mb-4">
-                  Interested in sponsoring the Marianas Open? Join us in growing the sport
-                  and making a positive impact on our community.
+                  {t('impact.partnerDescription')}
                 </p>
                 <a
-                  href="mailto:info@marianasopen.com"
+                  href={`mailto:${sc('sponsor_contact_email', 'info@marianasopen.com')}`}
                   className="inline-flex items-center gap-2 px-5 py-2 bg-gold text-navy-900 rounded-lg font-heading font-semibold text-sm hover:bg-gold/90 transition-colors"
                 >
-                  Get in Touch
+                  {t('impact.contact')}
                 </a>
               </div>
             </div>

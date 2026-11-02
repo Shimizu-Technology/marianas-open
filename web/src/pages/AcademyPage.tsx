@@ -1,3 +1,4 @@
+import { formatNumber } from '../utils/numbers';
 import CountryFlag from '../components/CountryFlag';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -17,17 +18,18 @@ const BELT_STYLES: Record<string, { bg: string; text: string; ring: string }> = 
 };
 
 function BeltBadge({ rank }: { rank: string }) {
+  const { t } = useTranslation();
   const s = BELT_STYLES[rank] || BELT_STYLES.white;
   return (
     <span className={`inline-flex items-center px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider ${s.bg} ${s.text} ring-1 ${s.ring}`}>
-      {rank}
+      {t(`watch.belt.${rank}`, rank)}
     </span>
   );
 }
 
 
 export default function AcademyPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [academy, setAcademy] = useState<AcademyDetail | null>(null);
@@ -35,11 +37,11 @@ export default function AcademyPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!slug) { setLoading(false); setError('No academy specified'); return; }
+    if (!slug) { setLoading(false); setError('academies.noSpecified'); return; }
     setLoading(true);
     api.getAcademy(slug)
       .then(setAcademy)
-      .catch(() => setError('Academy not found'))
+      .catch(() => setError('academies.missing'))
       .finally(() => setLoading(false));
   }, [slug]);
 
@@ -58,7 +60,7 @@ export default function AcademyPage() {
             className="inline-flex items-center gap-2 text-text-muted hover:text-white transition-colors mb-6"
           >
             <ArrowLeft size={16} />
-            Back
+            {t('common.back')}
           </button>
 
           {loading && (
@@ -68,7 +70,7 @@ export default function AcademyPage() {
           )}
 
           {error && !loading && (
-            <div className="text-center py-20 text-text-muted">{error}</div>
+            <div className="text-center py-20 text-text-muted">{t(error)}</div>
           )}
 
           {academy && !loading && (
@@ -103,7 +105,7 @@ export default function AcademyPage() {
                       )}
                       <span className="flex items-center gap-1.5">
                         <Users size={14} className="text-text-muted" />
-                        {academy.athletes.length} athlete{academy.athletes.length !== 1 ? 's' : ''}
+                        {t('academies.athletes', { count: academy.athletes.length })}
                       </span>
                     </div>
                   </div>
@@ -118,7 +120,7 @@ export default function AcademyPage() {
                     {academy.website_url && (
                       <a href={academy.website_url} target="_blank" rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-gold transition-colors">
-                        <Globe size={14} /> Website <ExternalLink size={12} />
+                        <Globe size={14} /> {t('common.website')} <ExternalLink size={12} />
                       </a>
                     )}
                     {academy.instagram_url && (
@@ -147,7 +149,7 @@ export default function AcademyPage() {
               {academy.athletes.length > 0 && (
                 <div className="bg-surface border border-white/5 rounded-xl overflow-hidden">
                   <div className="p-4 border-b border-white/5">
-                    <h2 className="text-lg font-semibold text-white">Athletes</h2>
+                    <h2 className="text-lg font-semibold text-white">{t('officialRankings.athletes')}</h2>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/[0.03]">
                     {academy.athletes.map((athlete, i) => (
@@ -178,9 +180,9 @@ export default function AcademyPage() {
                               {athlete.belt_rank && <BeltBadge rank={athlete.belt_rank} />}
                             </div>
                             <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-text-muted">
-                              {athlete.gold > 0 && <span className="text-yellow-400">{athlete.gold} {t('competitorProfile.gold')}</span>}
-                              {athlete.silver > 0 && <span className="text-gray-300">{athlete.silver} {t('competitorProfile.silver')}</span>}
-                              {athlete.bronze > 0 && <span className="text-orange-400">{athlete.bronze} {t('competitorProfile.bronze')}</span>}
+                              {athlete.gold > 0 && <span className="text-yellow-400">{formatNumber(athlete.gold, i18n.language)} {t('competitorProfile.gold')}</span>}
+                              {athlete.silver > 0 && <span className="text-gray-300">{formatNumber(athlete.silver, i18n.language)} {t('competitorProfile.silver')}</span>}
+                              {athlete.bronze > 0 && <span className="text-orange-400">{formatNumber(athlete.bronze, i18n.language)} {t('competitorProfile.bronze')}</span>}
                             </div>
                           </div>
                         </Link>
@@ -198,10 +200,11 @@ export default function AcademyPage() {
 }
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  const { i18n } = useTranslation();
   return (
     <div className="bg-surface border border-white/5 rounded-xl p-4 flex flex-col items-center gap-1">
       {icon}
-      <span className="text-2xl font-bold text-white">{value}</span>
+      <span className="text-2xl font-bold text-white">{formatNumber(value, i18n.language)}</span>
       <span className="text-xs text-text-muted">{label}</span>
     </div>
   );
