@@ -32,7 +32,11 @@ test('real Chromium redirects: allowed hop succeeds, disallowed host closes with
   const config = { executablePath, allowedHosts: ['127.0.0.1'] };
   const base = `http://127.0.0.1:${port}`;
   assert.equal((await fetchPage(`${base}/allowed`, config, options)).outcome, 'ok');
-  await assert.rejects(fetchPage(`${base}/disallowed`, config, options), /disallowed_redirect/);
+  await assert.rejects(fetchPage(`${base}/disallowed`, config, options), error => {
+    assert.match(error.message, /disallowed_redirect/);
+    assert.equal(error.detail?.host, 'localhost');
+    return true;
+  });
   for (const path of ['/challenge', '/markup']) {
     assert.equal((await fetchPage(`${base}${path}`, config, options)).outcome, 'challenged');
   }

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { run, boundedSnapshot } from '../src/run.js';
 import { MAX_BODY_BYTES, ApiClient, StaleLeaseError } from '../src/api.js';
 import { loadConfig, allowedUrl } from '../src/config.js';
+import { FetchError, describeRejectedUrl } from '../src/errors.js';
 const config = { maxPages: 200, maxRunMinutes: 300, jitter: 0.15, allowedHosts: ['asjjf.org', 'dumau.asjjf.org'] };
 const request = (id = 1, url = 'https://asjjf.org/main/resultsList/2062') => ({ id, url, lease_token: id.toString(16).padStart(64, '0') });
 const ok = { final_url: 'https://asjjf.org/main/resultsList/2062', http_status: 200, outcome: 'ok', html: '<html>日本語</html>', error: null };
@@ -205,4 +206,18 @@ test('fetch failures log only safe categories and elapsed time, including aborts
     assert.ok(!JSON.stringify(f.logs).includes('secret.test'));
     assert.ok(!JSON.stringify(f.snapshots).includes('secret.test'));
   }
+});
+
+test('a rejected redirect logs only its scheme, host, port and rule; snapshots stay generic', async () => {
+  const detail = describeRejectedUrl('http://www.asjjf.org:8080/private/path?token=secret', ['asjjf.org']);
+  const f = fixture({ fetchImpl: async () => { throw new FetchError('disallowed_redirect', detail); } });
+  let tick = 0;
+  f.options.now = () => tick++;
+  await f.execute();
+  const entry = f.logs.find(log => log.event === 'fetch_error');
+  assert.equal(entry.category, 'disallowed_redirect');
+  assert.deepEqual(entry.rejected, { rule: 'scheme', scheme: 'http', host: 'www.asjjf.org', port: '8080' });
+  assert.equal(f.snapshots[0].error, 'disallowed_redirect');
+  assert.ok(!JSON.stringify(f.logs).includes('private/path') && !JSON.stringify(f.logs).includes('secret'));
+  assert.ok(!JSON.stringify(f.snapshots).includes('www.asjjf.org'));
 });
