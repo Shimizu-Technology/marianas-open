@@ -17,7 +17,7 @@ class PublicCopySeedTest < ActiveSupport::TestCase
     service = Minitest::Mock.new
     service.expect(:configured?, true)
     GtTranslationService.stub(:new, service) do
-      assert_enqueued_with(job: TranslateSiteContentJob, args: [entry.id]) do
+      assert_enqueued_with(job: TranslateSiteContentJob, args: [ entry.id ]) do
         entry.update!(value_en: "Updated by staff")
       end
     end
