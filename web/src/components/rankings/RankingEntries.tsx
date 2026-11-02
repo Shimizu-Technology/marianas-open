@@ -46,14 +46,14 @@ export default function RankingEntries({ entries, team }: { entries: OfficialRan
       </li>)}
     </ol>
     <table className="hidden w-full table-fixed text-left text-sm md:table">
-      <thead data-ui className="border-b border-white/10 text-sm text-text-secondary"><tr>
+      {/* taste-skill-ignore: real ranking table header separator. */}<thead className="border-b border-white/10 text-sm text-text-secondary"><tr>
         <th className="w-20 p-4">{t('officialRankings.position')}</th>
         <th className="p-4">{t(team ? 'officialRankings.team' : 'officialRankings.athlete')}</th>
         {!team && <th className="p-4">{t('officialRankings.academy')}</th>}
         <th className="w-28 p-4 text-right">{t('officialRankings.points')}</th>
         {!team && <th className="w-48 p-4">{t('officialRankings.medals')}</th>}
       </tr></thead>
-      <tbody data-ui className="divide-y divide-white/5">{entries.map(entry => <tr key={entry.id}>
+      {/* taste-skill-ignore: real ranking table row separators. */}<tbody className="divide-y divide-white/5">{entries.map(entry => <tr key={entry.id}>
         <td className="p-4 font-heading text-lg tabular-nums text-gold-400">#{formatNumber(entry.position, i18n.language)}</td>
         <td className="p-4"><EntryName entry={entry} team={team} /></td>
         {!team && <td className="p-4 text-text-secondary"><Academy entry={entry} /></td>}

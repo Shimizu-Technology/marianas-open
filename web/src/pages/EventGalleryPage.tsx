@@ -427,7 +427,7 @@ export default function EventGalleryPage() {
             <div className="py-24 text-center text-text-muted">{t('season.noPhotos')}</div>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
+              <div aria-busy={loadingMore} className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
                 {images.map((image, index) => {
                   const src = resolveMediaUrl(image.thumbnail_url);
                   const canOpen = Boolean(resolveMediaUrl(image.large_url || image.thumbnail_url));
@@ -445,7 +445,7 @@ export default function EventGalleryPage() {
                       onClick={() => {
                         if (canOpen) openLightbox(index);
                       }}
-                      disabled={!canOpen}
+                      disabled={!canOpen || loadingMore}
                       className="group relative aspect-[4/3] overflow-hidden border border-white/5 bg-white/[0.02] text-left disabled:cursor-default"
                     >
                       {src ? (
