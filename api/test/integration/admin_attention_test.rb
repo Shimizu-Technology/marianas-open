@@ -44,7 +44,7 @@ class AdminAttentionTest < ActionDispatch::IntegrationTest
   test "fetch failures pause and heartbeat freshness are independent sources and GET is pure" do
     AsjjfFetchRequest.create!(url: "https://asjjf.org/main/eventResults/2062", page_type: "event_results", status: "failed")
     AsjjfFetchRequest.create!(url: "https://asjjf.org/main/eventResults/2063", page_type: "event_results", status: "done")
-    AsjjfSetting.create!(key: "circuit_breaker", paused_until: 1.hour.from_now, reason: "challenge")
+    AsjjfSetting.breaker.update!(paused_until: 1.hour.from_now, reason: "challenge")
     AsjjfFetcherHeartbeat.first.update!(received_at: 37.hours.ago, updated_at: Time.current)
     keys = items.map { |item| item["key"] }
     assert_includes keys, "failed_fetches"
