@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router-dom';
 import en from '../locales/en.json';
 import ja from '../locales/ja.json';
 import AboutPage from './AboutPage';
+import HomePage from './HomePage';
 import RulesPage from './RulesPage';
 import Footer from '../components/Footer';
 import JourneySection from '../components/JourneySection';
@@ -14,6 +15,9 @@ import { invalidateSiteContentCache } from '../hooks/useSiteContent';
 import { api, type SiteContentMap } from '../services/api';
 
 vi.mock('../services/api', () => ({ api: { getSiteContents: vi.fn() } }));
+vi.mock('../hooks/useApi', () => ({ useEvents: () => ({ events: [], loading: false }) }));
+vi.mock('../hooks/useSponsorPlacements', () => ({ useSponsorPlacements: () => ({ placements: [], error: null, retry: vi.fn() }) }));
+vi.mock('../hooks/useResultCounts', () => ({ useResultCounts: () => ({ events: [], loading: false }) }));
 vi.mock('../components/SEO', () => ({ default: () => null }));
 vi.mock('../components/ScrollReveal', () => ({ default: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 vi.mock('../hooks/useSiteImages', () => ({ useSiteImages: () => ({ images: [] }), getImageUrl: (_images: unknown, _key: string, fallback: string) => fallback }));
@@ -45,4 +49,13 @@ it('renders the actual Home journey heading and series introduction from staff c
   await setup(<JourneySection events={[eventEditorFixture({ date: '2030-01-30', end_date: null, is_main_event: false, status: 'upcoming' })]} />, { journey_title: values('Staff journey'), journey_subtitleSeries: values('Staff series') });
   expect(await screen.findByRole('heading', { name: 'Staff journey' })).toBeTruthy();
   expect(await screen.findByText('Staff series')).toBeTruthy();
+});
+
+it.each(['en', 'ja'])('keeps both organizer-authored off-season hero lines in %s', async lang => {
+  await setup(<HomePage />, { hero_title_line1: values('Our first line', '最初の行'), hero_title_line2: values('Our second line', '次の行') }, lang);
+  expect(await screen.findByRole('heading', { level: 1, name: lang === 'ja' ? '最初の行 次の行' : 'Our first line Our second line' })).toBeTruthy();
+});
+it('keeps the complete default off-season hero title without CMS overrides', async () => {
+  await setup(<HomePage />, {});
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(en.hero.title);
 });

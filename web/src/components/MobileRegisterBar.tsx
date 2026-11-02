@@ -10,8 +10,19 @@ export default function MobileRegisterBar({ event }: { event: Event }) {
   useEffect(() => {
     const hero = document.getElementById('event-hero');
     if (!hero) return;
-    const observer = new IntersectionObserver(([entry]) => setVisible(!entry.isIntersecting), { threshold: 0 });
+    const footer = document.querySelector('footer');
+    let heroInView = true;
+    // Wait for the initial footer observation before revealing the bar.
+    let footerInView = !!footer;
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (entry.target === hero) heroInView = entry.isIntersecting;
+        if (entry.target === footer) footerInView = entry.isIntersecting;
+      }
+      setVisible(!heroInView && !footerInView);
+    }, { threshold: 0 });
     observer.observe(hero);
+    if (footer) observer.observe(footer);
     return () => observer.disconnect();
   }, [event.id]);
   if (!visible) return null;

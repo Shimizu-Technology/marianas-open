@@ -22,7 +22,7 @@ export default function CalendarPage() {
   const active = useMemo(() => events.filter(event => ['upcoming', 'live'].includes(eventPhase(event))).sort((a, b) => a.date.localeCompare(b.date)), [events]);
   const archive = useMemo(() => events.filter(event => eventPhase(event) === 'completed').sort((a, b) => b.date.localeCompare(a.date)), [events]);
   const cancelled = events.filter(event => eventPhase(event) === 'cancelled');
-  const years = [...new Set(archive.map(event => (event.date?.slice(0, 4) || String(event.season_year || ''))))];
+  const years = [...new Set(archive.map(event => (event.date?.slice(0, 4) || String(event.season_year || ''))))].sort((a, b) => Number(b) - Number(a));
   if (loading) return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;
   return <div className="min-h-screen pt-20">
     <SEO title="Event Calendar" description="Browse the Guam Marianas Pro Series, upcoming qualifier events across Asia-Pacific, and past results from Marianas Open tournaments." path="/calendar" image="/images/hero-podium.jpg" structuredData={[
