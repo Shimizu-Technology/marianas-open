@@ -47,7 +47,12 @@ module Asjjf
             banner_url: absolute_url(banner) }
         end
         raise ParseError, "Duplicate calendar event IDs" unless events.map { |event| event[:event_id] }.uniq.length == events.length
-        { url: @url, season_id: id, title: title, events: events, counts: { events: events.length } }
+        seasons = @doc.css('a[href*="/main/eventsBySeason/"]').filter_map do |link|
+          match = link["href"].match(%r{\A(?:https://asjjf\.org)?/main/eventsBySeason/([1-9]\d*)\z})
+          label = text(link)
+          { year: label.to_i, id: match[1].to_i } if match && label.match?(/\A20\d{2}\z/)
+        end.uniq
+        { url: @url, season_id: id, seasons: seasons, title: title, events: events, counts: { events: events.length } }
       end
 
       private
