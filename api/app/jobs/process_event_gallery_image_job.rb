@@ -47,6 +47,8 @@ class ProcessEventGalleryImageJob < ApplicationJob
       @processing_token = processing_token
     end
 
+    PhotoIntake::Review.call(gallery_image)
+
     blob = gallery_image.image.blob
     EventGalleryImageUploadPolicy.normalize_blob!(blob)
     blob.analyze unless blob.analyzed?

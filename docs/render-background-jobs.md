@@ -42,3 +42,20 @@ After native packages are installed, verify the image stack with:
 ```sh
 bundle exec rake image_processing:verify
 ```
+
+## D4 photo intake
+
+The same dedicated worker runs ZIP import, timestamp extraction and review checks.
+Deploy it from the same revision as the API after the D4 migration. Keep one
+thread/process initially: ZIP work uses temporary disk for the compressed archive
+plus one extracted image, while native image decoding also consumes memory.
+A 4 GiB ZIP needs over 4 GiB free on the temporary filesystem. The importer checks
+available space and rejects work it cannot safely fit; do not assume a small
+Render instance can accept the maximum archive size. See
+[Event Photos](photo-intake.md) and [the API/limits contract](photo-intake-api.md).
+
+Review is advisory and publishes flagged photos by default. Staff may opt into a
+review hold per event. Album/day changes require staff confirmation. Archive
+objects are purged after terminal import processing; normal unattached-blob
+cleanup handles abandoned direct uploads. No production storage is needed for
+local QA.

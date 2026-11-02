@@ -1,0 +1,41 @@
+{
+  "sourceCommit": "36edd2b7c702ef405a23666f7d7656bf7290a76d",
+  "synthetic": true,
+  "physicalPhone": "not_run",
+  "results": [
+    {
+      "width": 390,
+      "result": "passed",
+      "mobileNav": true,
+      "flows": [
+        "album create/rename/reorder",
+        "upload album choice",
+        "confirmed day assignments",
+        "review filter",
+        "confirmed hide",
+        "approve preserves manual hide",
+        "filename search/empty/recover"
+      ],
+      "horizontalOverflow": false,
+      "pageErrors": [],
+      "brokenImages": []
+    },
+    {
+      "width": 1440,
+      "result": "passed",
+      "mobileNav": false,
+      "flows": [
+        "album create/rename/reorder",
+        "upload album choice",
+        "confirmed day assignments",
+        "review filter",
+        "confirmed hide",
+        "approve preserves manual hide",
+        "filename search/empty/recover"
+      ],
+      "horizontalOverflow": false,
+      "pageErrors": [],
+      "brokenImages": []
+    }
+  ]
+}

@@ -50,3 +50,5 @@ gem "resend", "~> 1.0"
 
 gem "sentry-ruby", "~> 7.2"
 gem "sentry-rails", "~> 7.2"
+
+gem "rubyzip", "~> 3.2"

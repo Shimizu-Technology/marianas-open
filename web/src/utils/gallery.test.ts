@@ -14,4 +14,8 @@ describe('public gallery labels', () => {
     expect(getPublicImageLabel({ caption: '455A8210s', title: 'Adult final' })).toBe('Adult final');
     expect(isGeneratedImageName(null)).toBe(false);
   });
+  it.each(['Card John Smith.JPG', 'camera-custom-abc.jpeg', 'export (12).HEIC'])('suppresses the recorded filename and stem even without a recognized camera prefix: %s', filename => {
+    expect(getPublicImageLabel({ original_filename: filename, caption: filename, title: filename.replace(/\.[^.]+$/, '') })).toBe('');
+    expect(getPublicImageLabel({ original_filename: filename, caption: 'Championship podium', title: filename })).toBe('Championship podium');
+  });
 });

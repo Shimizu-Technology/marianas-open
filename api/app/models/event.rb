@@ -46,6 +46,8 @@ class Event < ApplicationRecord
   has_many :event_results, dependent: :destroy
   has_many :results_sync_runs, dependent: :destroy
   has_many :event_accommodations, dependent: :destroy
+  has_many :event_gallery_albums, dependent: :destroy
+  has_many :event_gallery_imports, dependent: :destroy
   has_many :event_gallery_images, dependent: :destroy
   has_many :event_gallery_upload_batches, dependent: :destroy
   has_one_attached :hero_image

@@ -63,6 +63,7 @@ const navSections: NavSection[] = [
   {
     label: 'Media & Content',
     items: [
+      { to: '/admin/photos', icon: Image, label: 'Photos' },
       { to: '/admin/videos', icon: Play, label: 'Videos' },
       { to: '/admin/images', icon: Image, label: 'Images' },
       { to: '/admin/content', icon: FileText, label: 'Content' },

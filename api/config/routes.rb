@@ -92,6 +92,13 @@ Rails.application.routes.draw do
               post :upload
             end
           end
+          resources :event_gallery_albums, only: [ :index, :create, :update ], path: 'gallery-albums' do
+            patch :settings, on: :collection
+          end
+          resources :event_gallery_imports, only: [ :index, :create ], path: 'gallery-imports' do
+            post :prepare_direct_upload, on: :collection
+          end
+          resources :event_gallery_day_proposals, only: [ :index, :create ], path: 'gallery-day-proposals'
           resources :event_gallery_upload_batches, only: [:index, :show, :create, :update, :destroy], path: 'gallery-upload-batches'
         end
         resources :videos do

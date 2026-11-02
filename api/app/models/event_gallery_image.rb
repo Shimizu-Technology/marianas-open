@@ -30,9 +30,13 @@ class EventGalleryImage < ApplicationRecord
 
   belongs_to :event
   belongs_to :event_gallery_upload_batch, optional: true
+  belongs_to :event_gallery_import, optional: true
+  has_many :event_gallery_import_entries, dependent: :nullify
   has_one_attached :image
 
   before_validation :normalize_category
+  before_validation :reset_review_on_replacement
+  after_save :ensure_album, if: :saved_change_to_category?
   after_commit :enqueue_processing, on: [ :create, :update ], if: :should_enqueue_processing?
 
   validates :sort_order, numericality: { greater_than_or_equal_to: 0 }
@@ -72,18 +76,60 @@ class EventGalleryImage < ApplicationRecord
   def self.category_options_for(event, public_only: false)
     scope = event.event_gallery_images
     scope = scope.active.ready if public_only
-    custom_categories = scope.where.not(category: [ nil, "" ]).distinct.order(:category).pluck(:category)
-    (PRESET_CATEGORIES + custom_categories).uniq
+    custom_categories = scope.where.not(category: [ nil, "" ]).distinct.pluck(:category)
+    albums = event.event_gallery_albums.sorted.pluck(:name)
+    albums = albums.select { |name| custom_categories.include?(name) } if public_only
+    (albums + PRESET_CATEGORIES + custom_categories.sort).uniq
   end
 
   def as_json(options = {})
-    super(options.merge(
-      methods: [ :image_url, :thumbnail_url, :large_url ],
-      except: [ :created_at, :updated_at, :preview_position, :public_gallery_images_count ]
+    options = options.dup
+    admin = options.delete(:admin)
+    excluded = [ :created_at, :updated_at, :preview_position, :public_gallery_images_count,
+      :content_sha256, :perceptual_hash, :proposal_base_category, :review_analyzed_at, :review_held, :capture_timezone ]
+    excluded += [ :original_filename, :review_flags, :reviewed_at, :captured_at, :capture_source, :album_type, :event_gallery_import_id ] unless admin
+    json = super(options.merge(
+      methods: [ :image_url, :thumbnail_url, :large_url ] + (admin ? [ :proposed_category ] : []),
+      except: excluded
     ))
+    unless admin
+      filename = original_filename.presence || (image.attached? ? image.blob.filename.to_s : "")
+      stem = File.basename(filename, File.extname(filename))
+      generated = [ filename, File.basename(filename), stem, stem.gsub(/[-_]+/, " ").strip ].map { |value| value.strip.downcase }.reject(&:blank?)
+      %w[title caption alt_text].each do |field|
+        json[field] = nil if generated.include?(json[field].to_s.strip.downcase)
+      end
+    end
+    json
+  end
+
+  def proposed_category
+    return nil unless captured_at
+
+    type = album_type.presence || category.presence
+    return nil unless type && type.length <= 65
+    PhotoIntake::DayProposals.new(event, type).category_for(self)
   end
 
   private
+
+  def reset_review_on_replacement
+    change = attachment_changes["image"]
+    return unless persisted? && change.respond_to?(:blob)
+    old_id = ActiveStorage::Attachment.where(record: self, name: "image").pick(:blob_id)
+    return unless old_id && old_id != change.blob.id
+
+    self.active = true if review_held?
+    assign_attributes(status: "uploaded", review_held: false, review_flags: [], reviewed_at: nil,
+      review_analyzed_at: nil, content_sha256: nil, perceptual_hash: nil,
+      captured_at: nil, capture_source: nil, capture_timezone: nil,
+      event_gallery_import_id: nil, album_type: nil, proposal_base_category: nil,
+      processing_token: nil, processing_started_at: nil)
+  end
+
+  def ensure_album
+    EventGalleryAlbum.ensure_for!(event, category)
+  end
 
   def normalize_category
     self.category = category.to_s.squish.presence

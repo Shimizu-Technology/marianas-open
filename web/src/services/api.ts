@@ -897,12 +897,19 @@ async function parseApiError(response: Response, fallback: string) {
   return new ApiError(typeof message === 'string' ? message : JSON.stringify(message), response.status);
 }
 
-export async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false): Promise<T> {
-  const buildHeaders = async (skipCache = false) => ({
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
-    ...(await authHeaders(requireAuth, skipCache)),
-  });
+export interface AuthenticatedRequestScope { signal: AbortSignal; isCurrent: () => boolean }
+
+export async function fetchApi<T>(endpoint: string, options: RequestInit = {}, requireAuth = false, isCurrent?: () => boolean): Promise<T> {
+  const checkScope = () => {
+    options.signal?.throwIfAborted();
+    if (isCurrent && !isCurrent()) throw new DOMException('Upload session ended', 'AbortError');
+  };
+  const buildHeaders = async (skipCache = false) => {
+    checkScope();
+    const authorization = await authHeaders(requireAuth, skipCache);
+    checkScope();
+    return { 'Content-Type': 'application/json', ...(options.headers as Record<string, string>), ...authorization };
+  };
 
   let response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
@@ -910,6 +917,7 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}, r
   });
 
   if (response.status === 401 && requireAuth && getAuthToken) {
+    checkScope();
     response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers: await buildHeaders(true),
@@ -1207,11 +1215,12 @@ export const api = {
     },
     deleteEventGalleryImage: (eventId: number, id: number) =>
       fetchApi<void>(`/api/v1/admin/events/${eventId}/gallery-images/${id}`, { method: 'DELETE' }, true),
-    createGalleryUploadBatch: (eventId: number, data: Partial<EventGalleryUploadBatch>) =>
+    createGalleryUploadBatch: (eventId: number, data: Partial<EventGalleryUploadBatch>, scope?: AuthenticatedRequestScope) =>
       fetchApi<{ batch: EventGalleryUploadBatch }>(`/api/v1/admin/events/${eventId}/gallery-upload-batches`, {
         method: 'POST',
         body: JSON.stringify(data),
-      }, true),
+        signal: scope?.signal,
+      }, true, scope?.isCurrent),
     getGalleryUploadBatches: (eventId: number) =>
       fetchApi<{ batches: EventGalleryUploadBatch[] }>(`/api/v1/admin/events/${eventId}/gallery-upload-batches`, {}, true),
     getGalleryUploadBatch: (eventId: number, batchId: number) =>
@@ -1226,19 +1235,21 @@ export const api = {
       byte_size: number;
       checksum: string;
       content_type: string;
-    }) =>
+    }, scope?: AuthenticatedRequestScope) =>
       fetchApi<DirectUploadPreparation>(`/api/v1/admin/events/${eventId}/gallery-images/prepare_direct_upload`, {
         method: 'POST',
         body: JSON.stringify(data),
-      }, true),
+        signal: scope?.signal,
+      }, true, scope?.isCurrent),
     completeEventGalleryDirectUpload: (eventId: number, data: Partial<EventGalleryImageFormData> & {
       signed_id: string;
       batch_id?: number;
-    }) =>
+    }, scope?: AuthenticatedRequestScope) =>
       fetchApi<{ gallery_image: EventGalleryImage }>(`/api/v1/admin/events/${eventId}/gallery-images/complete_direct_upload`, {
         method: 'POST',
         body: JSON.stringify(data),
-      }, true),
+        signal: scope?.signal,
+      }, true, scope?.isCurrent),
     bulkUpdateEventGalleryImages: (eventId: number, ids: number[], data: { active?: boolean; category?: string }) =>
       fetchApi<{ updated: number }>(`/api/v1/admin/events/${eventId}/gallery-images/bulk_update`, {
         method: 'PATCH',

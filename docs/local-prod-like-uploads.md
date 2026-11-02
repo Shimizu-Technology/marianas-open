@@ -1,5 +1,11 @@
 # Production-like local gallery upload testing
 
+For D4 Photos work, use **only local/test storage and an isolated database**.
+Do not use production S3 or production data. Register exact task-owned processes
+and containers with the lifecycle session supplied by the task hook, choose unused
+ports, and clean them after QA. Existing listeners are borrowed; do not stop them.
+The new entry point is `/admin/photos`. See [Event Photos](photo-intake.md).
+
 Use this when testing the event gallery upload flow before merging upload-related PRs. The normal Rails development environment still uses disk storage and async jobs for day-to-day work; this mode intentionally mirrors production by using S3 direct uploads and Solid Queue.
 
 ## What this mode matches

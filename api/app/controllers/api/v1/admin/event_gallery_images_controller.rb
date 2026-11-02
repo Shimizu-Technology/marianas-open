@@ -3,6 +3,7 @@ module Api
     module Admin
       class EventGalleryImagesController < ApplicationController
         include ClerkAuthenticatable
+        include ActiveStorage::SetCurrent
 
         UploadAlreadyUsed = Class.new(StandardError)
         UNCATEGORIZED_FILTER = "__uncategorized__".freeze
@@ -24,11 +25,17 @@ module Api
               scope.categorized_as(params[:category])
             end
           end
+          if params[:q].present?
+            return render json: { error: "Search must be 200 characters or fewer" }, status: :unprocessable_entity if params[:q].to_s.length > 200
+            scope = scope.where("original_filename ILIKE ?", "%#{EventGalleryImage.sanitize_sql_like(params[:q].to_s)}%")
+          end
+          scope = scope.where(active: false) if params[:hidden] == "1"
+          scope = scope.where(reviewed_at: nil).where("review_flags <> '[]'::jsonb") if params[:needs_review] == "1"
           total = scope.count
           gallery_images = scope.offset((page - 1) * per_page).limit(per_page)
 
           render json: {
-            gallery_images: gallery_images.as_json,
+            gallery_images: gallery_images.as_json(admin: true),
             categories: gallery_categories,
             uncategorized_count: uncategorized_count,
             total: total,
@@ -47,7 +54,7 @@ module Api
 
           if gallery_image.save
             refresh_batch_counts(batch)
-            render json: { gallery_image: gallery_image.as_json }, status: :created
+            render json: { gallery_image: gallery_image.as_json(admin: true) }, status: :created
           else
             render json: { errors: gallery_image.errors.full_messages }, status: :unprocessable_entity
           end
@@ -56,8 +63,10 @@ module Api
         end
 
         def update
-          if @gallery_image.update(gallery_image_params)
-            render json: { gallery_image: @gallery_image.reload.as_json }
+          attrs = gallery_image_params
+          attrs[:review_held] = false if attrs.key?(:active)
+          if @event.with_lock { @gallery_image.update(attrs) }
+            render json: { gallery_image: @gallery_image.reload.as_json(admin: true) }
           else
             render json: { errors: @gallery_image.errors.full_messages }, status: :unprocessable_entity
           end
@@ -72,7 +81,7 @@ module Api
           apply_blob_metadata(@gallery_image)
           @gallery_image.status = "uploaded"
           if @gallery_image.save
-            render json: { gallery_image: @gallery_image.reload.as_json }
+            render json: { gallery_image: @gallery_image.reload.as_json(admin: true) }
           else
             render json: { errors: @gallery_image.errors.full_messages }, status: :unprocessable_entity
           end
@@ -111,6 +120,9 @@ module Api
 
         def complete_direct_upload
           blob = ActiveStorage::Blob.find_signed!(params.require(:signed_id))
+          if blob.metadata["event_id"].present? && blob.metadata["event_id"].to_i != @event.id
+            return render json: { error: "Upload belongs to another event" }, status: :unprocessable_entity
+          end
           batch = find_batch
           attrs = gallery_image_params
           saved_image = nil
@@ -135,8 +147,6 @@ module Api
                 gallery_image.original_filename = blob.filename.to_s
                 gallery_image.content_type = blob.content_type
                 gallery_image.byte_size = blob.byte_size
-                gallery_image.title = gallery_image.title.presence || blob.filename.base
-                gallery_image.alt_text = gallery_image.alt_text.presence || gallery_image.title
                 gallery_image.image.attach(blob)
 
                 if gallery_image.save
@@ -156,7 +166,7 @@ module Api
 
           if saved_image
             refresh_batch_counts(saved_image.event_gallery_upload_batch || batch)
-            render json: { gallery_image: saved_image.as_json }, status: saved_existing ? :ok : :created
+            render json: { gallery_image: saved_image.as_json(admin: true) }, status: saved_existing ? :ok : :created
           else
             render json: { errors: errors }, status: :unprocessable_entity
           end
@@ -171,13 +181,25 @@ module Api
           return render json: { error: "No gallery images selected" }, status: :unprocessable_entity if ids.empty?
 
           attrs = params.permit(:active, :category).to_h.with_indifferent_access
+          approve = params[:approve_review] == true
           attrs[:category] = attrs[:category].to_s.squish.presence if attrs.key?(:category)
-          return render json: { error: "No supported updates provided" }, status: :unprocessable_entity if attrs.empty?
+          return render json: { error: "No supported updates provided" }, status: :unprocessable_entity if attrs.empty? && !approve
           if attrs[:category].to_s.length > EventGalleryImage::CATEGORY_MAX_LENGTH
             return render json: { error: "Category must be #{EventGalleryImage::CATEGORY_MAX_LENGTH} characters or fewer" }, status: :unprocessable_entity
           end
 
-          updated = @event.event_gallery_images.where(id: ids).update_all(attrs.merge(updated_at: Time.current))
+          updated = 0
+          @event.with_lock do
+            EventGalleryAlbum.ensure_for!(@event, attrs[:category]) if attrs.key?(:category)
+            images = @event.event_gallery_images.where(id: ids)
+            if approve
+              # Release review holds only; do not resurrect manually hidden photos.
+              images.where(review_held: true).update_all(active: true) unless attrs.key?(:active)
+              attrs.merge!(reviewed_at: Time.current, review_held: false)
+            end
+            attrs[:review_held] = false if attrs.key?(:active)
+            updated = images.update_all(attrs.merge(updated_at: Time.current))
+          end
           render json: { updated: updated }
         end
 
@@ -223,7 +245,7 @@ module Api
         def gallery_categories
           counts = category_counts
           custom_categories = counts.keys.compact.map { |category| category.to_s.squish }.reject(&:blank?).sort
-          (EventGalleryImage::PRESET_CATEGORIES + custom_categories).uniq.map do |category|
+          (EventGalleryImage.category_options_for(@event) + custom_categories).uniq.map do |category|
             { name: category, count: counts[category].to_i }
           end
         end
@@ -244,8 +266,6 @@ module Api
           gallery_image.original_filename = blob.filename.to_s
           gallery_image.content_type = blob.content_type
           gallery_image.byte_size = blob.byte_size
-          gallery_image.title = gallery_image.title.presence || blob.filename.base
-          gallery_image.alt_text = gallery_image.alt_text.presence || gallery_image.title
         end
 
         def find_batch
