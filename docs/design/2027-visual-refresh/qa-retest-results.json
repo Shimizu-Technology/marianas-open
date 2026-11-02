@@ -1,0 +1,19 @@
+{
+  "testedAt": "2026-11-02T09:29:03.679Z",
+  "source": "f62e47c0a071469fbd5115956090ff43f8d1c6ea",
+  "workingTree": "clean implementation source",
+  "outcomes": [
+    {
+      "case": "home",
+      "language": "zh-Hant",
+      "width": 1440,
+      "status": "passed"
+    },
+    {
+      "case": "normal-and-reduced-motion",
+      "status": "passed"
+    }
+  ],
+  "errors": [],
+  "blockedWrites": []
+}
