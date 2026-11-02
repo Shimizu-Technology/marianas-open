@@ -29,7 +29,7 @@ it.each([
       createObjectURL: vi.fn().mockReturnValue('blob:original'),
       revokeObjectURL: vi.fn(),
     });
-    vi.spyOn(window, 'setTimeout').mockReturnValue(1);
+    vi.spyOn(window, 'setTimeout').mockReturnValue(1 as unknown as ReturnType<typeof window.setTimeout>);
     let filename = '';
     vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
       this: HTMLAnchorElement
