@@ -14,15 +14,17 @@ class PublicCopySeedTest < ActiveSupport::TestCase
   test "editing seeded English copy enqueues translation when configured" do
     PublicCopySeed.call
     entry = SiteContent.find_by!(key: "watch_subtitle")
-    service = Minitest::Mock.new
-    service.expect(:configured?, true)
-    GtTranslationService.stub(:new, service) do
-      assert_enqueued_with(job: TranslateSiteContentJob, args: [ entry.id ]) do
-        entry.update!(value_en: "Updated by staff")
-      end
+    previous_key = ENV["GT_API_KEY"]
+    previous_project = ENV["GT_PROJECT_ID"]
+    ENV["GT_API_KEY"] = "test-key"
+    ENV["GT_PROJECT_ID"] = "test-project"
+    assert_enqueued_with(job: TranslateSiteContentJob, args: [ entry.id ]) do
+      entry.update!(value_en: "Updated by staff")
     end
     assert_equal "pending", entry.reload.translation_status
-    service.verify
+  ensure
+    ENV["GT_API_KEY"] = previous_key
+    ENV["GT_PROJECT_ID"] = previous_project
   end
 
   test "reruns preserve staff text, translations and metadata" do
