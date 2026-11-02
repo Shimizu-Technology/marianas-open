@@ -293,6 +293,7 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
     let refreshAgain = false;
     let notifyTimer: number | undefined;
     let busy = false;
+    let wakeRequested = false;
     const current = () => !signal.aborted && ownerRef.current === owner;
     const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('marianas-gallery-upload-queue') : undefined;
     const notify = () => {
@@ -345,7 +346,9 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
       if (current()) setState(previous => previous.owner === owner ? { ...previous, tasks: previous.tasks.map(task => task.id === id ? { ...task, ...update } : task) } : previous);
     };
     const wake = () => {
-      if (!owner || !current() || busy || !navigator.onLine) return;
+      if (!owner || !current() || !navigator.onLine) return;
+      if (busy) { wakeRequested = true; return; }
+      wakeRequested = false;
       busy = true;
       void withGalleryUploadLock(owner, signal, async () => {
         if (!current()) return;
@@ -382,7 +385,10 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
         }, signal, () => { void refresh(); notify(); }, updateProgress);
       }).catch(error => {
         if (current()) setQueueError(error instanceof Error ? error.message : 'Could not resume saved uploads');
-      }).finally(() => { busy = false; });
+      }).finally(() => {
+        busy = false;
+        if (wakeRequested && current()) wake();
+      });
     };
     sessionRef.current = owner ? { owner, signal } : null;
     refreshRef.current = refresh;

@@ -90,6 +90,31 @@ function completedCheckpoints(expected: number) {
 }
 
 describe('GalleryUploadProvider persisted user journeys (jsdom, mock API/storage)', () => {
+  it('starts files queued while the idle check is finishing without waiting for polling', async () => {
+    vi.spyOn(window, 'setInterval').mockReturnValue(0);
+    let releaseIdle!: () => void;
+    let idleFinished!: () => void;
+    const idlePause = new Promise<void>(resolve => { releaseIdle = resolve; });
+    const idleDone = new Promise<void>(resolve => { idleFinished = resolve; });
+    let first = true;
+    Object.defineProperty(navigator, 'locks', { configurable: true, value: {
+      request: vi.fn(async (_name: string, _options: unknown, work: () => Promise<unknown>) => {
+        const result = await work();
+        if (first) { first = false; idleFinished(); await idlePause; }
+        return result;
+      }),
+    } });
+    render(<View />);
+    try {
+      await idleDone;
+      await act(async () => { await queue.startUpload(options()); });
+      expect(api.admin.prepareEventGalleryDirectUpload).not.toHaveBeenCalled();
+      await act(async () => { releaseIdle(); });
+      await waitFor(() => expect(queue.completedCount).toBe(1));
+      expect(transfers).toBe(1);
+    } finally { releaseIdle(); }
+  });
+
   it('saves the files before network work and exposes quota failure without starting an upload', async () => {
     const add = IDBObjectStore.prototype.add;
     vi.spyOn(IDBObjectStore.prototype, 'add').mockImplementation(function (this: IDBObjectStore, ...args: Parameters<typeof add>) {
