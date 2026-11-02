@@ -112,7 +112,7 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col items-stretch sm:items-start sm:flex-row gap-3 pt-2"><RegisterControl event={nextEvent} /><Button to="/calendar" variant="secondary">{t('visualRefresh.allEvents')}<ArrowRight size={16} aria-hidden="true" /></Button></div>
             <Link to={`/events/${nextEvent.slug}`} className="inline-flex min-h-11 items-center gap-2 text-sm text-gold-400">{t('calendar.details')}<ArrowRight size={16} aria-hidden="true" /></Link>
-          </div> : <div className="max-w-3xl space-y-5"><h1 className="event-hero-title">{sc('hero_title_line1', t('hero.title'))}</h1><p className="text-lg text-text-secondary">{t('season.nextSeasonNote')}</p><Button to="/events/past">{t('nav.pastEvents')}<ArrowRight size={16} aria-hidden="true" /></Button></div>}
+          </div> : <div className="max-w-3xl space-y-5"><h1 className="event-hero-title">{sc('hero_title_line1', t('hero.title').split(' ').slice(0, -1).join(' '))}{' '}{sc('hero_title_line2', t('hero.title').split(' ').slice(-1)[0])}</h1><p className="text-lg text-text-secondary">{t('season.nextSeasonNote')}</p><Button to="/events/past">{t('nav.pastEvents')}<ArrowRight size={16} aria-hidden="true" /></Button></div>}
         </div>
       </section>
       <div className="public-container grid grid-cols-2 sm:grid-cols-4 py-6 gap-4 sm:gap-6">

@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, MapPin } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin, ExternalLink } from 'lucide-react';
 import type { Event } from '../services/api';
 import { usePublicCopy } from '../hooks/usePublicCopy';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { eventPhase, getEventDetailsPath, hasEventResults } from '../utils/events';
 import { eventHeroImage } from './eventPresentation';
+import { normalizeExternalUrl, resolveMediaUrl } from '../utils/images';
 import ImageWithShimmer from './ImageWithShimmer';
 import RegisterControl from './RegisterControl';
 import EventStars from './EventStars';
@@ -17,18 +18,27 @@ export default function PublicEventCard({ event, events = [], compact = false }:
   const phase = eventPhase(event);
   const active = phase === 'upcoming' || phase === 'live';
   const name = tf(event, 'name');
-  const date = event.date ? parseDateLocalSafe(event.date).toLocaleDateString(getDateLocale(i18n.language), { year: 'numeric', month: 'long', day: 'numeric' }) : t('event.date');
+  const dateFormat = new Intl.DateTimeFormat(getDateLocale(i18n.language), { year: 'numeric', month: 'long', day: 'numeric' });
+  const date = !event.date ? t('event.date') : event.end_date && event.end_date !== event.date
+    ? dateFormat.formatRange(parseDateLocalSafe(event.date), parseDateLocalSafe(event.end_date))
+    : dateFormat.format(parseDateLocalSafe(event.date));
+  const venue = tf(event, 'venue_name');
+  const poster = normalizeExternalUrl(resolveMediaUrl(event.poster_image_url));
   return <Card className="event-card flex h-full flex-col overflow-hidden">
     {!compact && <Link to={getEventDetailsPath(event)} tabIndex={-1} aria-hidden="true" className="block aspect-[16/7] overflow-hidden">
       <ImageWithShimmer src={eventHeroImage(event, events)} alt="" className="h-full w-full object-cover" />
     </Link>}
     <div className="flex flex-1 flex-col p-5 gap-4">
-      <div className="flex flex-wrap items-center gap-2"><Chip>{t(`season.phase.${phase}`)}</Chip><EventStars stars={event.asjjf_stars} /></div>
+      <div className="flex flex-wrap items-center gap-2"><Chip>{t(`season.phase.${phase}`)}</Chip>{compact && event.is_main_event && <Chip>{t('journey.grandChampionship')}</Chip>}<EventStars stars={event.asjjf_stars} /></div>
       <h3 className="font-heading text-xl font-semibold leading-tight"><Link to={getEventDetailsPath(event)} className="hover:text-gold-400">{name}</Link></h3>
       <div className="space-y-2 text-sm leading-relaxed text-text-secondary">
         <p className="flex items-start gap-2"><Calendar size={16} className="shrink-0 mt-0.5" />{date}</p>
-        <p className="flex items-start gap-2"><MapPin size={16} className="shrink-0 mt-0.5" />{tf(event, 'city')}, {tf(event, 'country')}</p>
+        <div className="flex items-start gap-2"><MapPin size={16} className="shrink-0 mt-0.5" /><div className="min-w-0 break-words">{!compact && venue && <p>{venue}</p>}<p>{tf(event, 'city')}, {tf(event, 'country')}</p></div></div>
       </div>
+      {!compact && poster && <a href={poster} target="_blank" rel="noopener noreferrer" aria-label={`${t('event.officialPoster')}: ${name}`} className="flex items-center gap-3 rounded-control text-sm text-gold-400 hover:text-gold-300">
+        <img src={poster} alt={`${name} — ${t('event.officialPoster')}`} width={56} height={72} loading="lazy" className="h-18 w-14 shrink-0 rounded-control object-contain bg-navy-900" />
+        <span className="min-w-0 break-words">{t('event.officialPoster')}</span><ExternalLink size={16} aria-hidden="true" className="shrink-0" />
+      </a>}
       {phase === 'completed' && <p className="text-sm text-gold-400">{t(hasEventResults(event) ? 'results.viewResults' : event.results_count === 0 ? 'season.resultsPending' : 'season.resultsUnavailableShort')}</p>}
       <div className={`mt-auto gap-2 pt-2 ${compact ? 'flex flex-wrap items-center' : 'grid'}`}>
         {active && <RegisterControl event={event} className={compact ? '' : 'w-full'} />}
