@@ -36,12 +36,13 @@ function DesktopDropdown({ item, pathname }: { item: NavDropdown; pathname: stri
   useEffect(() => () => clearTimeout(timeout.current), []);
 
   return (
-    <div ref={ref} className="relative" onMouseEnter={enter} onMouseLeave={leave}>
+    <div ref={ref} className="relative" onMouseEnter={enter} onMouseLeave={leave} onKeyDown={event => {
+      if (event.key === 'Escape') { setOpen(false); ref.current?.querySelector('button')?.focus(); }
+    }}>
       <button
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
-        onKeyDown={e => { if (e.key === 'Escape') setOpen(false); }}
-        className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors duration-200 ${
+        className={`flex items-center gap-1 text-sm font-medium transition-colors duration-200 ${
           isActive ? 'text-gold-500' : 'text-text-secondary hover:text-text-primary'
         }`}
       >
@@ -50,7 +51,7 @@ function DesktopDropdown({ item, pathname }: { item: NavDropdown; pathname: stri
       </button>
       {open && (
         <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50">
-          <div className="min-w-[190px] border border-white/10 bg-navy-900/95 py-1 shadow-xl backdrop-blur-xl">
+          <div className="ui-card min-w-[190px] py-1">
             {item.children.map(child => (
               <Link
                 key={child.to}
@@ -179,13 +180,13 @@ export default function Header() {
   return (
     <>
     <header className="fixed top-0 left-0 right-0 z-50 bg-navy-900/80 backdrop-blur-xl border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <div className="public-container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <img src={logoSrc} alt={org.name} className="h-10 w-10 object-contain" />
             <div className="hidden sm:block">
-              <span className="text-sm font-bold tracking-wider text-text-primary font-heading uppercase">
+              <span className="text-sm font-bold text-text-primary font-heading">
                 {org.name}
               </span>
             </div>
@@ -203,7 +204,7 @@ export default function Header() {
                   style={item.hidden ? { visibility: 'hidden' } : undefined}
                   aria-hidden={item.hidden || undefined}
                   tabIndex={item.hidden ? -1 : undefined}
-                  className={`text-sm font-medium tracking-wide transition-colors duration-200 ${
+                  className={`text-sm font-medium transition-colors duration-200 ${
                     location.pathname === item.to
                       ? 'text-gold-500'
                       : 'text-text-secondary hover:text-text-primary'
@@ -218,14 +219,14 @@ export default function Header() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => { setMobileOpen(false); setSearchOpen(true); }}
-              className="text-text-secondary hover:text-text-primary transition-colors min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg hover:bg-white/5"
+              className="text-text-secondary hover:text-text-primary transition-colors min-h-11 min-w-11 flex items-center justify-center p-2 rounded-control hover:bg-white/5"
               aria-label={t('search.title')}
             >
               <Search className="w-5 h-5" />
             </button>
             <Link
               to="/admin"
-              className="hidden lg:flex text-text-muted hover:text-text-primary transition-colors min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg hover:bg-white/5"
+              className="hidden lg:flex text-text-muted hover:text-text-primary transition-colors min-h-11 min-w-11 flex items-center justify-center p-2 rounded-control hover:bg-white/5"
               aria-label={t('nav.admin')}
             >
               <Shield className="w-4 h-4" />
@@ -264,7 +265,7 @@ export default function Header() {
           {mobileGroups.map((group, gi) => (
             <div key={gi} className={gi > 0 ? 'border-t border-white/5 mt-2 pt-2' : ''}>
               {group.heading && (
-                <div className="px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-text-muted">
+                <div className="px-4 py-1.5 text-xs font-semibold text-text-muted">
                   {group.heading}
                 </div>
               )}
@@ -273,7 +274,7 @@ export default function Header() {
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileOpen(false)}
-                  className={`block min-h-11 py-2.5 px-4 rounded-md text-sm font-medium transition-colors ${
+                  className={`block min-h-11 py-2.5 px-4 rounded-control text-sm font-medium transition-colors ${
                     location.pathname === link.to
                       ? 'text-gold-500 bg-white/5'
                       : 'text-text-secondary hover:text-text-primary hover:bg-white/5'

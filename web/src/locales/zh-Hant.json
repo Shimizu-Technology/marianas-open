@@ -870,5 +870,13 @@
     "partnerTitle": "成為我們的合作夥伴",
     "partnerDescription": "有興趣贊助 Marianas Open 嗎？與我們一起推動這項運動的發展，為社區帶來正面影響。",
     "contact": "聯絡我們"
+  },
+  "visualRefresh": {
+    "close": "關閉",
+    "stars": "ASJJF {{count}}星賽事",
+    "registrationOpens": "報名開放日期：{{date}}",
+    "eventInfo": "ASJJF賽事資訊",
+    "registrationPending": "報名尚未開放",
+    "allEvents": "所有賽事"
   }
 }

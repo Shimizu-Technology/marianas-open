@@ -870,5 +870,13 @@
     "partnerTitle": "파트너로 함께하세요",
     "partnerDescription": "Marianas Open 후원에 관심이 있으신가요? 스포츠의 성장과 지역사회에 긍정적인 영향을 만드는 데 함께해 주세요.",
     "contact": "문의하기"
+  },
+  "visualRefresh": {
+    "close": "닫기",
+    "stars": "ASJJF {{count}}성 대회",
+    "registrationOpens": "참가 신청 시작: {{date}}",
+    "eventInfo": "ASJJF 대회 정보",
+    "registrationPending": "참가 신청이 아직 시작되지 않았습니다",
+    "allEvents": "모든 대회"
   }
 }

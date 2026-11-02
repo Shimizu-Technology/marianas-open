@@ -1,0 +1,477 @@
+{
+ "files": 17,
+ "findings": [
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/index.css",
+   "line": 58,
+   "match": "linear-gradient(",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "WARN",
+   "id": "default-font",
+   "file": "web/src/index.css",
+   "line": 76,
+   "match": "font-family: 'Outfit",
+   "message": "A default typeface. Use the faces named by the drawn direction."
+  },
+  {
+   "level": "WARN",
+   "id": "default-font",
+   "file": "web/src/index.css",
+   "line": 83,
+   "match": "font-family: 'Outfit",
+   "message": "A default typeface. Use the faces named by the drawn direction."
+  },
+  {
+   "level": "WARN",
+   "id": "default-font",
+   "file": "web/src/index.css",
+   "line": 90,
+   "match": "font-family: 'Outfit",
+   "message": "A default typeface. Use the faces named by the drawn direction."
+  },
+  {
+   "level": "WARN",
+   "id": "default-font",
+   "file": "web/src/index.css",
+   "line": 97,
+   "match": "font-family: 'Outfit",
+   "message": "A default typeface. Use the faces named by the drawn direction."
+  },
+  {
+   "level": "WARN",
+   "id": "default-font",
+   "file": "web/src/index.css",
+   "line": 104,
+   "match": "font-family: 'Outfit",
+   "message": "A default typeface. Use the faces named by the drawn direction."
+  },
+  {
+   "level": "WARN",
+   "id": "default-font",
+   "file": "web/src/index.css",
+   "line": 111,
+   "match": "font-family: 'Outfit",
+   "message": "A default typeface. Use the faces named by the drawn direction."
+  },
+  {
+   "level": "WARN",
+   "id": "outlined-box",
+   "file": "web/src/index.css",
+   "line": 193,
+   "match": "border: 1px solid",
+   "message": "A 1px outlined box. Prefer a filled surface or no box."
+  },
+  {
+   "level": "WARN",
+   "id": "outlined-box",
+   "file": "web/src/index.css",
+   "line": 201,
+   "match": "border: 1px solid",
+   "message": "A 1px outlined box. Prefer a filled surface or no box."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/index.css",
+   "line": 213,
+   "match": "linear-gradient(",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/index.css",
+   "line": 215,
+   "match": "linear-gradient(",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/index.css",
+   "line": 218,
+   "match": "border-top: 1px",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/components/Header.tsx",
+   "line": 182,
+   "match": "border-b",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "WARN",
+   "id": "glass",
+   "file": "web/src/components/Header.tsx",
+   "line": 182,
+   "match": "backdrop-blur",
+   "message": "Backdrop blur. One sticky bar at most; glass cards are a tell."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/components/Header.tsx",
+   "line": 262,
+   "match": "border-t",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "WARN",
+   "id": "glass",
+   "file": "web/src/components/Header.tsx",
+   "line": 262,
+   "match": "backdrop-blur",
+   "message": "Backdrop blur. One sticky bar at most; glass cards are a tell."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/components/Header.tsx",
+   "line": 266,
+   "match": "border-t",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/components/Footer.tsx",
+   "line": 19,
+   "match": "border-t",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/components/Footer.tsx",
+   "line": 108,
+   "match": "border-t",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "WARN",
+   "id": "h-screen",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 95,
+   "match": "h-screen",
+   "message": "100vh jumps on mobile. Use 100svh / 100dvh."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 163,
+   "match": "bg-gradient-",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 171,
+   "match": "bg-gradient-",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 179,
+   "match": "bg-gradient-",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 199,
+   "match": "border-t",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 206,
+   "match": "h-px",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 241,
+   "match": "border-t",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "WARN",
+   "id": "outlined-box",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 245,
+   "match": "border",
+   "message": "A 1px outlined box. Prefer a filled surface or no box."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 266,
+   "match": "border-t",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 270,
+   "match": "h-px",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/HomePage.tsx",
+   "line": 301,
+   "match": "border-y",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 141,
+   "match": "bg-gradient-",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "WARN",
+   "id": "h-screen",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 263,
+   "match": "h-screen",
+   "message": "100vh jumps on mobile. Use 100svh / 100dvh."
+  },
+  {
+   "level": "WARN",
+   "id": "outlined-box",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 269,
+   "match": "border",
+   "message": "A 1px outlined box. Prefer a filled surface or no box."
+  },
+  {
+   "level": "WARN",
+   "id": "numbering",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 382,
+   "match": "padStart(2, '0')",
+   "message": "Zero-padding in script. Fine for a clock, a date or a price; if it builds 01 / 02 / 03 labels, remove it."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 570,
+   "match": "bg-gradient-",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "WARN",
+   "id": "h-screen",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 587,
+   "match": "h-screen",
+   "message": "100vh jumps on mobile. Use 100svh / 100dvh."
+  },
+  {
+   "level": "WARN",
+   "id": "h-screen",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 588,
+   "match": "h-screen",
+   "message": "100vh jumps on mobile. Use 100svh / 100dvh."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 728,
+   "match": "border-y",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 729,
+   "match": "radial-gradient(",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "FAIL",
+   "id": "shadow",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 733,
+   "match": "shadow-[0_24px_80px_rgba(0,0,0,0.35)]",
+   "message": "Shadow. Elements at rest carry none; only real overlays (menu, dialog, sticky bar) may."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 775,
+   "match": "border-b",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 781,
+   "match": "border-b",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 879,
+   "match": "border-b",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 900,
+   "match": "bg-gradient-",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 995,
+   "match": "bg-gradient-",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 1023,
+   "match": "radial-gradient(",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 1025,
+   "match": "bg-gradient-",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 1031,
+   "match": "bg-gradient-",
+   "message": "Gradient fill. Use a flat colour or a real image (a neutral scrim over a photo is the one exception)."
+  },
+  {
+   "level": "WARN",
+   "id": "glass",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 1045,
+   "match": "backdrop-blur",
+   "message": "Backdrop blur. One sticky bar at most; glass cards are a tell."
+  },
+  {
+   "level": "FAIL",
+   "id": "mono",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 1085,
+   "match": "font-mono",
+   "message": "Monospace type. Only literal code may be monospace."
+  },
+  {
+   "level": "FAIL",
+   "id": "mono",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 1182,
+   "match": "font-mono",
+   "message": "Monospace type. Only literal code may be monospace."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 1300,
+   "match": "divide-y",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 1328,
+   "match": "border-t",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "file": "web/src/pages/EventDetailPage.tsx",
+   "line": 1433,
+   "match": "border-y",
+   "message": "Thin rule / divider line. Separate with space, tone or scale; lines belong to real tables and form fields."
+  },
+  {
+   "level": "WARN",
+   "id": "h-screen",
+   "file": "web/src/pages/CalendarPage.tsx",
+   "line": 26,
+   "match": "h-screen",
+   "message": "100vh jumps on mobile. Use 100svh / 100dvh."
+  },
+  {
+   "level": "WARN",
+   "id": "h-screen",
+   "file": "web/src/pages/CalendarPage.tsx",
+   "line": 27,
+   "match": "h-screen",
+   "message": "100vh jumps on mobile. Use 100svh / 100dvh."
+  },
+  {
+   "level": "WARN",
+   "id": "h-screen",
+   "file": "web/src/pages/PastEventsPage.tsx",
+   "line": 17,
+   "match": "h-screen",
+   "message": "100vh jumps on mobile. Use 100svh / 100dvh."
+  },
+  {
+   "level": "WARN",
+   "id": "h-screen",
+   "file": "web/src/pages/PastEventsPage.tsx",
+   "line": 18,
+   "match": "h-screen",
+   "message": "100vh jumps on mobile. Use 100svh / 100dvh."
+  },
+  {
+   "level": "WARN",
+   "id": "em-dash",
+   "file": "(all files)",
+   "line": 0,
+   "match": "5 em dashes",
+   "message": "Em-dash habit. Use a full stop or a comma; keep at most one or two on a page."
+  }
+ ]
+}

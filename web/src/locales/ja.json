@@ -870,5 +870,13 @@
     "partnerTitle": "パートナーになりませんか",
     "partnerDescription": "Marianas Openのスポンサーにご興味はありませんか。競技の発展と地域社会への貢献に、ぜひご協力ください。",
     "contact": "お問い合わせ"
+  },
+  "visualRefresh": {
+    "close": "閉じる",
+    "stars": "ASJJF {{count}}つ星大会",
+    "registrationOpens": "エントリー開始：{{date}}",
+    "eventInfo": "ASJJF大会情報",
+    "registrationPending": "エントリーはまだ開始していません",
+    "allEvents": "すべての大会"
   }
 }

@@ -1,0 +1,13 @@
+
+> poc@0.0.0 test
+> vitest run --run src/pages/CalendarPage.test.tsx
+
+
+ RUN  v5.0.5 /Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-a/web
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  19:37:08
+   Duration  6.88s (environment 45%, tests 27%, import 20%, transform 6%, worker 3%)
+

@@ -58,7 +58,7 @@ export default function RulesPage() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 border border-gold-500/30 rounded-full bg-gold-500/5">
             <BookOpen size={12} className="text-gold-500" />
-            <span className="text-xs text-gold-400 font-heading uppercase tracking-widest font-medium">
+            <span className="text-xs text-gold-400 font-heading font-medium">
               {t('rules.badge', 'Competitor guide')}
             </span>
           </div>
@@ -97,7 +97,7 @@ export default function RulesPage() {
                 </p>
               </div>
               <div className="bg-navy-900/60 border border-white/5 rounded-xl p-5">
-                <p className="text-sm font-heading font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
+                <p className="text-sm font-heading font-semibold text-text-muted mb-3">
                   {t('rules.rulebookLabel')}
                 </p>
                 <p className="text-sm text-text-secondary leading-relaxed mb-5">
@@ -110,7 +110,7 @@ export default function RulesPage() {
                   href={ASJJF_RULES_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 px-4 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:opacity-90 transition-opacity"
+                  className="inline-flex w-full items-center justify-center gap-2 px-4 py-3 bg-gold-500 text-navy-900 font-heading font-bold text-sm hover:opacity-90 transition-opacity"
                 >
                   <ExternalLink size={16} />
                   {t('rules.officialSourceLinkText')}

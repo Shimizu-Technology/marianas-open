@@ -64,7 +64,7 @@ export default function AboutPage() {
             className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4"
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.24 }}
           >
             {t('about.heroTitle')}
           </motion.h1>
@@ -72,7 +72,7 @@ export default function AboutPage() {
             className="text-text-secondary text-lg sm:text-xl max-w-2xl mx-auto"
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.24, delay: 0.2 }}
           >
             {t('about.heroSubtitle')}
           </motion.p>
@@ -90,7 +90,7 @@ export default function AboutPage() {
                   <div className="text-2xl sm:text-3xl font-heading font-bold text-gold-500">
                     {stat.value}
                   </div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider mt-1">
+                  <div className="text-xs text-text-muted mt-1">
                     {stat.label}
                   </div>
                 </div>
@@ -101,7 +101,7 @@ export default function AboutPage() {
       </section>
 
       {/* About Content */}
-      <section className="py-20 sm:py-28">
+      <section className="public-section">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
             <h2 className="font-heading text-2xl sm:text-3xl font-bold mb-8 text-gold-500">
@@ -140,7 +140,7 @@ export default function AboutPage() {
       </section>
 
       {/* Timeline */}
-      <section className="py-20 sm:py-28">
+      <section className="public-section">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
             <h2 className="font-heading text-2xl sm:text-3xl font-bold mb-12 text-center">
@@ -179,7 +179,7 @@ export default function AboutPage() {
       <section
         id="federation"
         aria-labelledby="federation-title"
-        className="relative overflow-hidden border-t border-white/5 bg-surface py-20 sm:py-28"
+        className="relative overflow-hidden border-t border-white/5 bg-surface public-section"
       >
         <div
           aria-hidden="true"
@@ -191,13 +191,13 @@ export default function AboutPage() {
             <div className="mb-10 max-w-3xl sm:mb-14">
               <div className="mb-5 flex items-center gap-3">
                 <span className="h-px w-10 bg-gold-500" aria-hidden="true" />
-                <span className="font-heading text-xs font-semibold uppercase tracking-[0.28em] text-gold-500">
+                <span className="font-heading text-xs font-semibold text-gold-500">
                   {t('about.federation.eyebrow')}
                 </span>
               </div>
               <h2
                 id="federation-title"
-                className="font-heading text-3xl font-black uppercase tracking-tight text-text-primary sm:text-4xl lg:text-5xl"
+                className="font-heading text-3xl font-black tracking-tight text-text-primary sm:text-4xl lg:text-5xl"
               >
                 {t('about.federation.title')}
               </h2>
@@ -224,7 +224,7 @@ export default function AboutPage() {
           <div className="mt-12 grid gap-10 lg:grid-cols-[0.8fr_1.7fr] lg:gap-16">
             <ScrollReveal delay={0.15}>
               <aside className="border-l-2 border-gold-500 pl-6 lg:sticky lg:top-28">
-                <p className="font-heading text-2xl font-black uppercase leading-tight text-text-primary sm:text-3xl">
+                <p className="font-heading text-2xl font-black leading-tight text-text-primary sm:text-3xl">
                   {t('about.federation.pullQuote')}
                 </p>
                 <div className="mt-7 space-y-4 text-sm text-text-secondary">
@@ -254,10 +254,10 @@ export default function AboutPage() {
                 <p>{t('about.federation.p6')}</p>
                 <p>{t('about.federation.p7')}</p>
                 <div className="border-t border-white/10 pt-6">
-                  <p className="font-heading text-sm font-bold uppercase tracking-[0.18em] text-text-primary">
+                  <p className="font-heading text-sm font-bold text-text-primary">
                     {t('about.federation.signature')}
                   </p>
-                  <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-gold-500">
+                  <p className="mt-2 text-sm font-medium text-gold-500">
                     {t('about.federation.tagline')}
                   </p>
                 </div>
@@ -268,7 +268,7 @@ export default function AboutPage() {
       </section>
 
       {/* Contact */}
-      <section className="py-20 sm:py-28 bg-surface border-t border-white/5">
+      <section className="public-section bg-surface border-t border-white/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <ScrollReveal>
             <h2 className="font-heading text-2xl sm:text-3xl font-bold mb-4">

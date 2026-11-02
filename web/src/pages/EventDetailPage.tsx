@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Star, MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon, Ticket, Store, Check, Copy } from 'lucide-react';
+import { MapPin, Calendar, Trophy, Plane, Hotel, FileCheck, ExternalLink, Clock, Users, Share2, Mail, Phone, Image as ImageIcon, Ticket, Store, Check, Copy } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import SocialShare from '../components/SocialShare';
 import ImageWithShimmer from '../components/ImageWithShimmer';
@@ -14,10 +14,17 @@ import EventResultsSection from '../components/EventResultsSection';
 import SEO from '../components/SEO';
 import NotFoundPage from './NotFoundPage';
 import { useEvents } from '../hooks/useApi';
-import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
+import { isBrowserPreviewableImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
 import { getRegistrationLinks } from '../utils/registrationLinks';
+import RegisterControl from '../components/RegisterControl';
+import MobileRegisterBar from '../components/MobileRegisterBar';
+import EventStars from '../components/EventStars';
+import EventPhotoCard from '../components/EventPhotoCard';
+import { eventHeroImage } from '../components/eventPresentation';
+import { registrationState } from '../components/registrationState';
+import { buttonClassName } from '../components/ui';
 import { eventPhase, formatVenueAddress, getCurrentMainEvent, getOfficialResultsLinks, hasEventResults } from '../utils/events';
 import { getPublicImageLabel, isGeneratedImageName } from '../utils/gallery';
 import { getDateLocale } from '../utils/dateLocale';
@@ -36,7 +43,7 @@ function ShareButton({ platform, onClick }: { platform: string; onClick: () => v
   return (
     <button
       onClick={onClick}
-      className={`px-5 py-2.5 border border-white/10 text-text-secondary text-sm font-heading font-semibold uppercase tracking-wider transition-all duration-300 ${colors[platform] || ''}`}
+      className={`px-5 py-2.5 border border-white/10 text-text-secondary text-sm font-heading font-semibold  transition-colors duration-300 ${colors[platform] || ''}`}
     >
       {platform}
     </button>
@@ -139,7 +146,7 @@ function TravelItemCard({
               <Plane size={22} aria-hidden="true" />
             </div>
             <div>
-              <div className="text-[11px] font-heading font-semibold uppercase tracking-[0.22em] text-gold-400">
+              <div className="text-[11px] font-heading font-semibold text-gold-400">
                 {t('event.travelOffer', 'Travel offer')}
               </div>
               <h3 className="font-heading text-xl font-bold text-text-primary">{item.title}</h3>
@@ -152,15 +159,15 @@ function TravelItemCard({
 
           <div className="mt-6 flex flex-col gap-4 border border-white/10 bg-black/20 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="mb-1 text-[10px] font-heading font-semibold uppercase tracking-[0.22em] text-text-muted">
+              <div className="mb-1 text-[10px] font-heading font-semibold text-text-muted">
                 {t('event.offerCode', 'Offer code')}
               </div>
-              <code className="font-mono text-xl font-bold tracking-[0.08em] text-gold-300 sm:text-2xl">{code}</code>
+              <code className="font-mono text-xl font-bold text-gold-300 sm:text-2xl">{code}</code>
             </div>
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex min-h-11 items-center justify-center gap-2 border border-gold-500/40 bg-gold-500/10 px-4 py-2.5 text-xs font-heading font-bold uppercase tracking-wider text-gold-300 transition-colors hover:border-gold-400 hover:bg-gold-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+              className="inline-flex min-h-11 items-center justify-center gap-2 border border-gold-500/40 bg-gold-500/10 px-4 py-2.5 text-xs font-heading font-bold text-gold-300 transition-colors hover:border-gold-400 hover:bg-gold-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
               aria-label={`${t('event.copyOfferCode', 'Copy code')} ${code}`}
             >
               {copyStatus === 'copied' ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
@@ -185,7 +192,7 @@ function TravelItemCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => onLinkClicked(item, href)}
-              className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-heading font-bold uppercase tracking-wider text-gold-400 transition-colors hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-4 focus-visible:ring-offset-navy-900"
+              className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-heading font-bold text-gold-400 transition-colors hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-4 focus-visible:ring-offset-navy-900"
             >
               {item.link_label || t('event.learnMoreLink', 'Learn more')}
               <ExternalLink size={15} aria-hidden="true" />
@@ -201,7 +208,7 @@ function TravelItemCard({
       <Plane size={24} className="mb-4 text-gold-500" aria-hidden="true" />
       <h3 className="mb-3 font-heading text-lg font-bold">{item.title}</h3>
       {item.value && (
-        <div className="mb-3 font-heading text-sm font-semibold uppercase tracking-wider text-gold-400">
+        <div className="mb-3 font-heading text-sm font-semibold text-gold-400">
           {item.value}
         </div>
       )}
@@ -366,13 +373,6 @@ export default function EventDetailPage() {
   // Only the main championship has a standing tagline. Other events show a tagline
   // or star rating only when the organizers have actually published one.
   const eventTagline = isClosed ? '' : eventTaglineRaw;
-  const eventStars = mainEvent?.asjjf_stars && mainEvent.asjjf_stars > 0 ? mainEvent.asjjf_stars : null;
-  const asjjfRankText = eventStars
-    ? t('event.asjjfRankDynamic', {
-        count: eventStars,
-        defaultValue: `ASJJF ${eventStars}-Star Ranked Event`,
-      })
-    : t('event.asjjfSanctioned', 'ASJJF Sanctioned Event');
   const shareUrl = mainEvent?.slug
     ? `https://marianasopen.com/events/${mainEvent.slug}`
     : 'https://marianasopen.com';
@@ -388,8 +388,9 @@ export default function EventDetailPage() {
     : [];
   const registrationLinks = getRegistrationLinks(mainEvent);
   const isRegistrationClosed = isClosed;
-  const canShowRegistrationActions = !isRegistrationClosed && registrationLinks.hasAny;
-  const canShowRegistrationSection = !isRegistrationClosed && (displayRegistrationSteps.length > 0 || registrationLinks.hasAny);
+  const canShowRegistrationActions = !isRegistrationClosed && (registrationLinks.hasAny || !!mainEvent.registration_opens_on || !!mainEvent.registration_not_open);
+  const registrationIsOpen = registrationState(mainEvent) === 'open' && registrationLinks.hasAny;
+  const canShowRegistrationSection = !isRegistrationClosed && displayRegistrationSteps.length > 0;
   const ticketSalesUrl = normalizeExternalUrl(mainEvent?.ticket_sales_url);
   const translatedTicketOptions = mainEvent
     ? tfa<typeof mainEvent, EventTicketOption>(mainEvent, 'ticket_options')
@@ -456,7 +457,7 @@ export default function EventDetailPage() {
     : t('event.shareText');
 
   const eventDefaultImage = getImageUrl(siteImages, 'event_default', '', 0) || null;
-  const heroImageUrl = getEventHeroImage(mainEvent?.slug || 'marianas-open-2026', mainEvent?.hero_image_url ?? null, eventDefaultImage);
+  const heroImageUrl = eventHeroImage(mainEvent, events, eventDefaultImage);
   const canonicalPath = mainEvent?.slug
     ? `/events/${mainEvent.slug}`
     : slug
@@ -542,10 +543,10 @@ export default function EventDetailPage() {
 
   const gallerySection = galleryImages.length > 0 ? (
       <section id="gallery" className="py-10 sm:py-14" aria-label={t('season.gallery')}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="public-container">
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-heading font-semibold uppercase tracking-[0.24em] text-gold-400">
+              <p className="text-xs font-heading font-semibold text-gold-400">
                 {t('season.gallery')}
               </p>
               {galleryImagesCount > galleryImages.length && (
@@ -584,7 +585,7 @@ export default function EventDetailPage() {
   return (
     <>
     {awaitingResults && <div className="min-h-screen pt-20"><LoadingSpinner /></div>}
-    <div className={`min-h-screen pt-20 ${awaitingResults ? 'hidden' : ''}`}>
+    <div className={`min-h-screen pt-20 ${registrationIsOpen ? 'event-with-registration' : ''} ${awaitingResults ? 'hidden' : ''}`}>
       <SEO
         title={seoTitle}
         description={seoDescription}
@@ -594,11 +595,12 @@ export default function EventDetailPage() {
         structuredData={eventSchema ? [eventSchema] : []}
       />
       {/* Hero with background image */}
-      <section className="relative py-24 sm:py-32 overflow-hidden">
+      <section id="event-hero" className="relative event-detail-hero overflow-hidden">
         <div className="absolute inset-0">
           {heroImageUrl ? (
             <img
               src={heroImageUrl}
+              fetchPriority="high"
               alt=""
               className="w-full h-full object-cover"
             />
@@ -609,51 +611,24 @@ export default function EventDetailPage() {
               className="w-full h-full object-cover"
             />
           )}
-          <div className="absolute inset-0 bg-navy-900/75" />
-          <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/50 to-transparent" />
+          <div className="event-hero-scrim absolute inset-0" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="relative z-10 public-container">
           <motion.div
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.24 }}
             className="max-w-4xl"
           >
-            <div className="flex items-center gap-2 mb-6">
-              {eventStars ? Array.from({ length: eventStars }).map((_, i) => (
-                <Star key={i} size={16} className="fill-gold-500 text-gold-500" />
-              )) : null}
-              <span className={`text-gold-400 text-sm font-heading uppercase tracking-wider ${eventStars ? 'ml-2' : ''}`}>
-                {asjjfRankText}
-              </span>
-            </div>
-
-            <p className={`mb-5 inline-flex items-center border px-3 py-2 text-sm font-heading font-semibold uppercase tracking-wider ${isCancelled ? 'border-red-400/40 text-red-200' : 'border-gold-500/30 text-gold-300'}`}>
+            <div className="mb-5"><EventStars stars={mainEvent.asjjf_stars} /></div>
+            <p className={`mb-5 inline-flex items-center border px-3 py-2 text-sm font-heading font-semibold  ${isCancelled ? 'border-red-400/40 text-red-200' : 'border-gold-500/30 text-gold-300'}`}>
               {t(`season.phase.${phase}`)}
             </p>
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] mb-6">
-              {mainEvent ? (
-                <>
-                  <span className="text-text-primary">{eventName.split(' ').slice(0, -1).join(' ')}</span>
-                  <br />
-                  <span className="bg-gradient-to-r from-gold-500 to-gold-300 bg-clip-text text-transparent">
-                    {eventName.split(' ').slice(-1)[0]}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="text-text-primary">Marianas</span>
-                  <br />
-                  <span className="bg-gradient-to-r from-gold-500 to-gold-300 bg-clip-text text-transparent">
-                    Open
-                  </span>
-                </>
-              )}
-            </h1>
+            <h1 className="event-hero-title mb-6">{eventName}</h1>
 
             {eventTagline ? (
-              <p className="text-xl text-text-secondary font-heading uppercase tracking-wider mb-8">
+              <p className="text-xl text-text-secondary font-heading mb-8">
                 {eventTagline}
               </p>
             ) : null}
@@ -683,55 +658,20 @@ export default function EventDetailPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => trackTicketClick('hero')}
-                    className="inline-flex min-h-12 items-center justify-center gap-2 bg-gold-500 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-navy-900 shadow-[0_0_40px_rgba(226,178,68,0.2)] transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                    className={buttonClassName('secondary')}
                   >
                     <Ticket size={16} />
                     {t('event.buySpectatorTickets', 'Buy Spectator Tickets')}
                     <ExternalLink size={14} />
                   </a>
                 )}
-                {registrationLinks.hasDirect ? (
-                  <>
-                    {registrationLinks.gi && (
-                      <a
-                        href={registrationLinks.gi}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex min-h-12 items-center justify-center gap-2 border border-white/20 bg-navy-900/60 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-text-primary backdrop-blur-sm transition-colors hover:border-gold-500/50 hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
-                      >
-                        {t('event.registerToCompeteGi', 'Register to Compete (Gi)')}
-                        <ExternalLink size={14} />
-                      </a>
-                    )}
-                    {registrationLinks.nogi && (
-                      <a
-                        href={registrationLinks.nogi}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex min-h-12 items-center justify-center gap-2 border border-gold-500/70 bg-navy-900/50 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-gold-300 backdrop-blur-sm transition-colors hover:bg-gold-500/10 hover:text-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
-                      >
-                        {t('event.registerToCompeteNogi', 'Register to Compete (No-Gi)')}
-                        <ExternalLink size={14} />
-                      </a>
-                    )}
-                  </>
-                ) : (
-                  <a
-                    href={registrationLinks.legacy}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 border border-white/20 bg-navy-900/60 px-6 py-3 text-sm font-heading font-bold uppercase tracking-wider text-text-primary backdrop-blur-sm transition-colors hover:border-gold-500/50 hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
-                  >
-                    {t('event.registerToCompete', 'Register to Compete')}
-                    <ExternalLink size={14} />
-                  </a>
-                )}
+                {canShowRegistrationActions && <RegisterControl event={mainEvent} />}
               </div>
             )}
             {mainEvent && galleryImagesCount > 0 && (
               <Link
                 to={`/events/${mainEvent.slug}/gallery`}
-                className="mt-8 inline-flex items-center gap-2 border border-gold-500/30 bg-gold-500/10 px-5 py-3 text-sm font-heading font-semibold uppercase tracking-wider text-gold-300 transition-colors hover:border-gold-400/60 hover:bg-gold-500/15 hover:text-gold-200"
+                className="mt-8 inline-flex items-center gap-2 border border-gold-500/30 bg-gold-500/10 px-5 py-3 text-sm font-heading font-semibold text-gold-300 transition-colors hover:border-gold-400/60 hover:bg-gold-500/15 hover:text-gold-200"
               >
                 <ImageIcon size={16} />
                 {t('season.viewGallery')}
@@ -785,7 +725,7 @@ export default function EventDetailPage() {
       )}
       {!isClosed && <>
       {canShowTicketSection && (
-        <section id="spectator-tickets" className="relative overflow-hidden border-y border-gold-500/15 bg-surface/35 py-20 sm:py-28">
+        <section id="spectator-tickets" className="relative overflow-hidden border-y border-gold-500/15 bg-surface/35 public-section">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_30%,rgba(226,178,68,0.10),transparent_34%)]" />
           <div className={`relative mx-auto grid grid-cols-1 gap-10 px-4 sm:px-6 ${ticketSalesAreActive && ticketFlyer ? 'max-w-7xl lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16' : 'max-w-3xl'}`}>
             {ticketSalesAreActive && ticketFlyer && (
@@ -811,11 +751,11 @@ export default function EventDetailPage() {
 
             <ScrollReveal delay={0.08}>
               <div className="flex h-full flex-col justify-center">
-                <div className="mb-3 flex items-center gap-2 text-xs font-heading font-bold uppercase tracking-[0.22em] text-gold-400">
+                <div className="mb-3 flex items-center gap-2 text-xs font-heading font-bold text-gold-400">
                   <Ticket size={16} />
                   {t('event.spectatorAdmission', 'Spectator Admission')}
                 </div>
-                <h2 className="max-w-2xl font-heading text-4xl font-black uppercase leading-none text-text-primary sm:text-5xl">
+                <h2 className="max-w-2xl font-heading text-4xl font-black leading-none text-text-primary sm:text-5xl">
                   {ticketSalesAreActive
                     ? t('event.ticketsOnSale', 'Tickets on sale now')
                     : ticketSalesStatus === 'sold_out'
@@ -832,7 +772,7 @@ export default function EventDetailPage() {
 
                 {ticketSalesAreActive && ticketOptions.length > 0 && (
                   <div className="mt-8 overflow-hidden border border-white/10 bg-navy-900/55">
-                    <div className="grid grid-cols-[minmax(0,1fr)_5.75rem_5.75rem] border-b border-white/10 bg-white/[0.03] px-4 py-3 text-[10px] font-heading font-bold uppercase tracking-wider text-text-muted sm:grid-cols-[minmax(0,1fr)_7rem_7rem] sm:px-5">
+                    <div className="grid grid-cols-[minmax(0,1fr)_5.75rem_5.75rem] border-b border-white/10 bg-white/[0.03] px-4 py-3 text-[10px] font-heading font-bold text-text-muted sm:grid-cols-[minmax(0,1fr)_7rem_7rem] sm:px-5">
                       <span>{t('event.admissionOption', 'Admission')}</span>
                       <span className="text-right text-gold-400">{t('event.earlyBird', 'Early Bird')}</span>
                       <span className="text-right">{t('event.atTheDoor', 'At the Door')}</span>
@@ -864,7 +804,7 @@ export default function EventDetailPage() {
 
                 {ticketSalesAreActive && mainEvent?.ticket_in_person_name && (
                   <div className="mt-6 border border-white/10 px-5 py-4">
-                    <div className="mb-3 flex items-center gap-2 text-xs font-heading font-bold uppercase tracking-wider text-text-primary">
+                    <div className="mb-3 flex items-center gap-2 text-xs font-heading font-bold text-text-primary">
                       <Store size={16} className="text-gold-400" />
                       {t('event.inPersonPurchase', 'Buy In Person')}
                     </div>
@@ -889,7 +829,7 @@ export default function EventDetailPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => trackTicketClick('details')}
-                      className="inline-flex min-h-14 w-full items-center justify-center gap-2 bg-gold-500 px-7 py-4 font-heading text-sm font-black uppercase tracking-wider text-navy-900 transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900 sm:w-auto"
+                      className="inline-flex min-h-14 w-full items-center justify-center gap-2 bg-gold-500 px-7 py-4 font-heading text-sm font-black text-navy-900 transition-colors hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900 sm:w-auto"
                     >
                       {t('event.buyOnlineGuamTime', 'Buy Tickets Online')}
                       <ExternalLink size={16} />
@@ -906,8 +846,8 @@ export default function EventDetailPage() {
       )}
 
       {/* Bento Grid Info */}
-      <section className="py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="public-section">
+        <div className="public-container">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {/* About — from admin description, spans full width */}
             {hasMeaningfulText(eventDescription) && (
@@ -922,10 +862,10 @@ export default function EventDetailPage() {
 
             {/* Schedule — spans 2 cols */}
             <ScrollReveal className="lg:col-span-2">
-              <div className="bg-surface border border-white/5 p-8 h-full">
+              <div className="bg-surface rounded-card border border-white/5 p-8 h-full">
                 <div className="flex items-center gap-3 mb-6">
                   <Clock size={20} className="text-gold-500" />
-                  <h3 className="font-heading font-bold text-xl uppercase tracking-wider">
+                  <h3 className="font-heading font-bold text-xl">
                     {t('event.schedule')}
                   </h3>
                 </div>
@@ -962,7 +902,7 @@ export default function EventDetailPage() {
                 {hasCashPrizes ? (
                   <>
                     {prizePoolDisplay && <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>}
-                    <div className={`text-sm text-text-muted uppercase tracking-wider ${hasPrizeBreakdown ? 'mb-6' : ''}`}>{t('event.totalPrizePool')}</div>
+                    <div className={`text-sm text-text-muted  ${hasPrizeBreakdown ? 'mb-6' : ''}`}>{t('event.totalPrizePool')}</div>
                   </>
                 ) : hasTripPackages ? (
                   <>
@@ -976,7 +916,7 @@ export default function EventDetailPage() {
                 ) : (
                   <>
                     {prizePoolDisplay && <div className="text-5xl font-heading font-black text-gold-500 mb-2">{prizePoolDisplay}</div>}
-                    <div className={`text-sm text-text-muted uppercase tracking-wider ${hasPrizeBreakdown ? 'mb-6' : ''}`}>{t('event.totalPrizePool')}</div>
+                    <div className={`text-sm text-text-muted  ${hasPrizeBreakdown ? 'mb-6' : ''}`}>{t('event.totalPrizePool')}</div>
                   </>
                 )}
                 {hasPrizeBreakdown && (
@@ -993,45 +933,14 @@ export default function EventDetailPage() {
             </ScrollReveal>
             )}
 
-            {/* Event poster / action photo */}
-            <ScrollReveal delay={0.12}>
-              <div className="relative overflow-hidden border border-white/5 h-full min-h-[250px]">
-                {eventPoster ? (
-                  <>
-                    <img
-                      src={eventPoster.src}
-                      alt={eventPoster.label}
-                      className="w-full h-full object-cover object-top"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-navy-900/85 via-transparent to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="text-xs text-gold-400 font-heading uppercase tracking-wider">{t('event.officialPoster', 'Official Poster')}</div>
-                      <div className="text-sm text-text-secondary">{eventPoster.label}</div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <ImageWithShimmer
-                      src="/images/action-match-4.webp"
-                      alt="Marianas Open competition"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-navy-900/80 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="text-xs text-gold-400 font-heading uppercase tracking-wider">{t('event.pastEventLabel')}</div>
-                      <div className="text-sm text-text-secondary">{t('event.pastEventDesc')}</div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </ScrollReveal>
+            <EventPhotoCard event={mainEvent} events={events} poster={eventPoster} />
 
             {/* Venue + Map */}
             <ScrollReveal delay={0.15} className="lg:col-span-2">
-              <div className="bg-surface border border-white/5 p-8 h-full">
+              <div className="bg-surface rounded-card border border-white/5 p-8 h-full">
                 <div className="flex items-center gap-3 mb-4">
                   <MapPin size={20} className="text-gold-500" />
-                  <h3 className="font-heading font-bold text-xl uppercase tracking-wider">
+                  <h3 className="font-heading font-bold text-xl">
                     {mainEvent ? eventVenueName : t('event.venue')}
                   </h3>
                 </div>
@@ -1041,7 +950,7 @@ export default function EventDetailPage() {
                 {displayVenueHighlights.length > 0 && (
                   <div className={`grid grid-cols-1 gap-4 mb-4 ${displayVenueHighlights.length > 1 ? 'sm:grid-cols-2' : ''}`}>
                     {displayVenueHighlights.map((highlight, idx) => (
-                      <div key={`${highlight.title}-${idx}`} className="bg-navy-900 border border-white/5 p-4 text-center">
+                      <div key={`${highlight.title}-${idx}`} className="bg-navy-900 rounded-card border border-white/5 p-4 text-center">
                     <Users size={20} className="text-gold-500 mx-auto mb-2" />
                         <div className="text-sm text-text-primary font-medium">{highlight.title}</div>
                         <div className="text-sm text-text-secondary">{highlight.description}</div>
@@ -1064,7 +973,7 @@ export default function EventDetailPage() {
                       }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-gold-500 text-xs font-heading font-semibold uppercase tracking-wider hover:text-gold-400 transition-colors"
+                      className="inline-flex items-center gap-2 text-gold-500 text-xs font-heading font-semibold hover:text-gold-400 transition-colors"
                     >
                       {t('event.viewOnGoogleMaps')} <ExternalLink size={12} />
                     </a>
@@ -1078,7 +987,7 @@ export default function EventDetailPage() {
 
       {/* Official Accommodation — dynamic from API (shown right after venue) */}
       {activeAccommodations.length > 0 && (
-        <section className="relative py-16 sm:py-20 overflow-hidden">
+        <section className="relative public-section overflow-hidden">
           {accommodationBackdrop && (
             <div className="absolute inset-0 pointer-events-none">
               <img src={accommodationBackdrop} alt="" className="w-full h-full object-cover opacity-[0.12]" />
@@ -1086,10 +995,10 @@ export default function EventDetailPage() {
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-navy-900/60 to-navy-900" />
             </div>
           )}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="relative z-10 public-container">
             <ScrollReveal>
               <div className="text-center mb-12">
-                <h2 className="text-2xl sm:text-4xl font-heading font-black uppercase mb-3">
+                <h2 className="text-2xl sm:text-4xl font-heading font-black mb-3">
                   {t('event.officialAccommodation', 'Official Accommodation')}
                 </h2>
                 <p className="text-text-secondary text-sm max-w-lg mx-auto">
@@ -1120,7 +1029,7 @@ export default function EventDetailPage() {
                       <div key={src} className="relative overflow-hidden border border-white/10 bg-navy-900 min-h-[180px]">
                         <img src={src} alt="" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-navy-900/50 via-transparent to-transparent" />
-                        <div className="absolute bottom-3 left-3 text-[10px] font-heading uppercase tracking-[0.28em] text-white/70">
+                        <div className="absolute bottom-3 left-3 text-[10px] font-heading text-white/70">
                           {index === 0 ? t('event.lobbyAndExterior', 'Lobby & Exterior') : t('event.roomAndAmenities', 'Room & Amenities')}
                         </div>
                       </div>
@@ -1212,7 +1121,7 @@ export default function EventDetailPage() {
                             href={acc.booking_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-xs hover:bg-gold-400 transition-colors"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold-500 text-navy-900 font-heading font-bold text-xs hover:bg-gold-400 transition-colors"
                           >
                             {t('event.bookNow', 'Book Now')}
                             <ExternalLink size={12} />
@@ -1309,7 +1218,7 @@ export default function EventDetailPage() {
                             href={acc.booking_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-xs hover:bg-gold-400 transition-colors"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold-500 text-navy-900 font-heading font-bold text-xs hover:bg-gold-400 transition-colors"
                           >
                             {t('event.bookNow', 'Book Now')}
                             <ExternalLink size={12} />
@@ -1327,11 +1236,11 @@ export default function EventDetailPage() {
 
       {/* How to Register — only if steps or URL configured */}
       {canShowRegistrationSection && (
-      <section className="py-16 sm:py-20 bg-surface">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="public-section bg-surface">
+        <div className="public-container">
           <ScrollReveal>
-            <div className="bg-surface border border-white/5 p-8">
-                <h3 className="font-heading font-bold text-xl uppercase tracking-wider mb-8">
+            <div className="bg-surface rounded-card border border-white/5 p-8">
+                <h3 className="font-heading font-bold text-xl mb-8">
                   {t('event.howToRegister')}
                 </h3>
                 {displayRegistrationSteps.length > 0 && (
@@ -1343,7 +1252,7 @@ export default function EventDetailPage() {
                             <span className="text-gold-500 font-heading font-black text-xl">{s.step}</span>
                           </div>
                           <div className="space-y-2">
-                            <h4 className="font-heading font-bold text-sm uppercase tracking-wider">{s.title}</h4>
+                            <h4 className="font-heading font-bold text-sm">{s.title}</h4>
                             <p className="text-text-secondary text-sm leading-relaxed">{s.desc}</p>
                             {s.url && (
                               <a
@@ -1352,7 +1261,7 @@ export default function EventDetailPage() {
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1 text-xs text-gold-400 hover:text-gold-300 transition-colors"
                               >
-                                {s.linkLabel || t('event.learnMoreLink', 'Learn more')}
+                                {registrationIsOpen ? s.linkLabel || t('event.learnMoreLink', 'Learn more') : t('visualRefresh.eventInfo')}
                                 <ExternalLink size={12} />
                               </a>
                             )}
@@ -1362,46 +1271,6 @@ export default function EventDetailPage() {
                     ))}
                   </div>
                 )}
-                {canShowRegistrationActions && (
-                  <div className={`${displayRegistrationSteps.length > 0 ? 'mt-8' : ''} flex flex-wrap gap-3`}>
-                    {registrationLinks.hasDirect ? (
-                      <>
-                        {registrationLinks.gi && (
-                          <a
-                            href={registrationLinks.gi}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
-                          >
-                            {t('home.registerNowGi', 'Register Now (Gi)')}
-                            <ExternalLink size={14} />
-                          </a>
-                        )}
-                        {registrationLinks.nogi && (
-                          <a
-                            href={registrationLinks.nogi}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-6 py-3 border border-gold-500 text-gold-500 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-500/10 transition-colors"
-                          >
-                            {t('home.registerNowNogi', 'Register Now (No-Gi)')}
-                            <ExternalLink size={14} />
-                          </a>
-                        )}
-                      </>
-                    ) : (
-                      <a
-                        href={registrationLinks.legacy}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-900 font-heading font-bold uppercase tracking-wider text-sm hover:bg-gold-400 transition-colors"
-                      >
-                        {t('home.registerNow')}
-                        <ExternalLink size={14} />
-                      </a>
-                    )}
-                  </div>
-                )}
             </div>
           </ScrollReveal>
         </div>
@@ -1409,22 +1278,22 @@ export default function EventDetailPage() {
       )}
 
       {(registrationFeeSections.length > 0 || registrationInfoItems.length > 0) && (
-        <section className="py-16 sm:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <section className="public-section">
+          <div className="public-container">
             <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_0.9fr] gap-4">
               {registrationFeeSections.length > 0 && (
                 <ScrollReveal>
-                  <div className="bg-navy-900 border border-white/5 p-6 sm:p-8 h-full">
+                  <div className="bg-navy-900 rounded-card border border-white/5 p-6 sm:p-8 h-full">
                     <div className="flex items-center gap-3 mb-6">
                       <Users size={20} className="text-gold-500" />
-                      <h3 className="font-heading font-bold text-xl uppercase tracking-wider">
+                      <h3 className="font-heading font-bold text-xl">
                         {t('event.registrationFees', 'Registration Fees')}
                       </h3>
                     </div>
                     <div className="space-y-6">
                       {registrationFeeSections.map((section) => (
                         <div key={section.title}>
-                          <h4 className="font-heading text-sm font-bold uppercase tracking-[0.24em] text-gold-400 mb-3">
+                          <h4 className="font-heading text-sm font-bold text-gold-400 mb-3">
                             {section.title}
                           </h4>
                           {/* Phones: one row per fee so the deadline, option, and price stay together. */}
@@ -1443,13 +1312,13 @@ export default function EventDetailPage() {
                             <table className="w-full text-left text-sm">
                               <thead className="bg-white/[0.03]">
                                 <tr>
-                                  <th className="px-4 py-3 font-heading uppercase tracking-[0.2em] text-[11px] text-text-muted">
+                                  <th className="px-4 py-3 font-heading text-[11px] text-text-muted">
                                     {t('event.deadline', 'Deadline')}
                                   </th>
-                                  <th className="px-4 py-3 font-heading uppercase tracking-[0.2em] text-[11px] text-text-muted">
+                                  <th className="px-4 py-3 font-heading text-[11px] text-text-muted">
                                     {t('event.fee', 'Fee')}
                                   </th>
-                                  <th className="px-4 py-3 font-heading uppercase tracking-[0.2em] text-[11px] text-text-muted">
+                                  <th className="px-4 py-3 font-heading text-[11px] text-text-muted">
                                     {t('event.divisionOption', 'Division Option')}
                                   </th>
                                 </tr>
@@ -1477,14 +1346,14 @@ export default function EventDetailPage() {
                   <div className="bg-surface border border-gold-500/15 p-6 sm:p-8 h-full">
                     <div className="flex items-center gap-3 mb-6">
                       <Calendar size={20} className="text-gold-500" />
-                      <h3 className="font-heading font-bold text-xl uppercase tracking-wider">
+                      <h3 className="font-heading font-bold text-xl">
                         {t('event.importantRegistrationInfo', 'Important Registration Info')}
                       </h3>
                     </div>
                     <div className="space-y-3">
                       {registrationInfoItems.map((item) => (
                         <div key={`${item.label}-${item.value}`} className="border border-white/5 bg-white/[0.02] px-4 py-3">
-                          <div className="text-[11px] font-heading uppercase tracking-[0.22em] text-gold-400 mb-1">
+                          <div className="text-[11px] font-heading text-gold-400 mb-1">
                             {item.label}
                           </div>
                           <div className="text-sm text-text-secondary whitespace-pre-line">
@@ -1503,11 +1372,11 @@ export default function EventDetailPage() {
 
       {/* Travel Information */}
       {shouldShowTravelSection && (
-        <section className="py-20 sm:py-28">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <section className="public-section">
+          <div className="public-container">
             <ScrollReveal>
               <div className="text-center mb-16">
-                <h2 className="text-3xl sm:text-5xl font-heading font-black uppercase mb-4">
+                <h2 className="text-3xl sm:text-5xl font-heading font-black mb-4">
                   {t('event.travelTitle')}
                 </h2>
                 {travelDescription && (
@@ -1535,7 +1404,7 @@ export default function EventDetailPage() {
 
               {displayVisaItems.length > 0 && (
                 <ScrollReveal delay={displayTravelItems.length * 0.05}>
-                  <div className="bg-navy-900 border border-white/5 p-8 h-full hover:border-gold-500/20 transition-colors duration-300">
+                  <div className="bg-navy-900 rounded-card border border-white/5 p-8 h-full hover:border-gold-500/20 transition-colors duration-300">
                     <FileCheck size={24} className="text-gold-500 mb-4" />
                     <h3 className="font-heading font-bold text-lg mb-3">{t('event.visa')}</h3>
                     {visaDescription && (
@@ -1544,7 +1413,7 @@ export default function EventDetailPage() {
                     <div className="space-y-2 text-sm text-text-muted">
                       {displayVisaItems.map((item, index) => (
                         <div key={`${item.title}-${index}`} className="bg-navy-800 p-3 border border-white/5">
-                          <div className="font-heading font-semibold text-gold-400 text-xs uppercase tracking-wider mb-1">{item.title}</div>
+                          <div className="font-heading font-semibold text-gold-400 text-xs mb-1">{item.title}</div>
                           <div className="text-text-secondary text-xs">{item.description}</div>
                         </div>
                       ))}
@@ -1568,13 +1437,15 @@ export default function EventDetailPage() {
         </div>
       </section>}
 
+      {registrationIsOpen && <MobileRegisterBar event={mainEvent} />}
+
       {/* Share */}
       <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+        <div className="public-container text-center">
           <ScrollReveal>
             <div className="flex items-center justify-center gap-2 mb-6">
               <Share2 size={16} className="text-text-muted" />
-              <h3 className="font-heading font-bold text-sm uppercase tracking-[0.3em] text-text-muted">
+              <h3 className="font-heading font-bold text-sm text-text-muted">
                 {t('event.shareTitle')}
               </h3>
             </div>
