@@ -243,7 +243,11 @@ module Asjjf
           target = old || @event.event_results.new
           target.assign_attributes(row.attributes.slice(*FIELDS))
           target.sync_key = identity_key(row)
-          target.competitor = CompetitorLinker.find_or_create(target.competitor_name, target)
+          # A matched row is the same medal for the same athlete. Keep its
+          # existing profile link: the linker may refuse a name it cannot
+          # resolve unambiguously (duplicates, truncation), which must not
+          # silently remove the result from the athlete's profile.
+          target.competitor = (old&.competitor if old&.competitor_id) || CompetitorLinker.find_or_create(target.competitor_name, target)
           target.save!
         end
       end

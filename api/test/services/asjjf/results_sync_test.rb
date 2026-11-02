@@ -99,6 +99,26 @@ class AsjjfResultsSyncTest < ActiveSupport::TestCase
     assert_equal "no_changes", sync(@event).status
   end
 
+  test "relabel approval keeps existing athlete links the linker cannot resolve" do
+    complete_snapshots(@event, id: 2063, discipline: "nogi")
+    rows = Asjjf::ResultsAssembler.new(@event).call.rows
+    athlete = Competitor.create!(first_name: "Linked", last_name: "Athlete")
+    rows.each do |attrs|
+      @event.event_results.create!(attrs.merge(discipline: "gi", division: attrs[:division].sub("[NOGI]", "[GI]"), asjjf_event_id: nil, division_key: nil, competitor: athlete))
+    end
+    # Two identical profiles make every incoming name ambiguous for the linker.
+    rows.map { |attrs| attrs[:competitor_name] }.uniq.each do |name|
+      first, last = Identity::NameNormalizer.person_parts(name)
+      2.times { Competitor.create!(first_name: first, last_name: last) }
+    end
+    result = sync(@event)
+    assert_equal "held", result.status
+    Asjjf::ResultsSync.new(@event).approve!(result, user: @admin)
+    assert_equal "applied", result.reload.status
+    assert_equal [ athlete.id ], @event.event_results.distinct.pluck(:competitor_id)
+    assert_empty result.diff_summary["unlinked_competitors"]
+  end
+
   test "manual rows and edited ASJJF identity keys survive unchanged" do
     complete_snapshots(@event)
     assert_equal "applied", sync(@event).status
@@ -287,7 +307,8 @@ class AsjjfResultsSyncTest < ActiveSupport::TestCase
   test "partial apply failure restores removals and updates for automatic and approved runs" do
     complete_snapshots(@event, full: 3)
     assert_equal "applied", sync(@event).status
-    @event.event_results.order(:id).limit(2).update_all(academy: "Historical academy")
+    # Unlinked rows still go through the linker, which is the injected failure point.
+    @event.event_results.order(:id).limit(2).update_all(academy: "Historical academy", competitor_id: nil)
     obsolete = @event.event_results.create!(source: "asjjf", asjjf_event_id: 2062, discipline: "gi", division: "[GI] Male Black Adult 18 Ultra Heavy", placement: 3, competitor_name: "Obsolete")
     before = @event.event_results.order(:id).map(&:attributes)
     original = CompetitorLinker.method(:find_or_create)
