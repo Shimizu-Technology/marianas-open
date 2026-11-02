@@ -39,7 +39,7 @@ Status as of November 2, 2026. "Live" means merged to `main`, deployed to Render
 
 | Item | Status |
 |---|---|
-| 2027 events from the ASJJF calendar (Copa, Tokyo, Manila, Taiwan) | Live (#113). Facts checked against ASJJF event pages on Nov 2; evidence linking in #134. |
+| 2027 events from the ASJJF calendar (Copa, Tokyo, Manila, Taiwan) | Live (#113). Facts checked against ASJJF event pages on Nov 2; evidence linking in #136. |
 | B0/B2 Fetcher: real Chrome on the Mac mini, human pace, stops on challenges | Live (#114, #117, #127, #133) |
 | B1 Production intake: stored snapshots, signed ingest, server-side parsers, admin upload fallback | Live (#115, #132) |
 | B3 Results import rebuild: explicit Gi/No-Gi sources, fail-closed, diff preview, keyed updates | Live (#120, #125, #131) |
@@ -57,7 +57,7 @@ Status as of November 2, 2026. "Live" means merged to `main`, deployed to Render
 | C1 Season states (pre-event, live, post-event, off-season) | Live (#119) |
 | C2 Accessibility and performance | Live (#118) |
 | C3 Translation completeness | Live (#130) |
-| C4 Visual refresh (design brief, shared building blocks, home, event pages, results, profiles, gallery) | In progress: two workers. Needs Leon's sign-off on before/after before merge, then Steve and Carm's review. |
+| C4 Visual refresh (design brief, shared building blocks, home, event pages, results, profiles, gallery) | In progress (#134, #135). Needs Leon's sign-off on before/after before merge, then Steve and Carm's review. |
 | Registration opening date on public pages (no Register buttons before ASJJF opens registration) | In progress, part of C4 |
 
 ### Phase D: Self-service admin
