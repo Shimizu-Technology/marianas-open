@@ -34,6 +34,23 @@ class AsjjfCalendarAlertTest < ActiveSupport::TestCase
     Asjjf::CalendarWatcher.new(another).call
     assert_equal 2, deliveries.size
     assert_includes deliveries.last[:text], "1 changes or warnings"
+    draft = org.events.where(status: "draft").first
+    updated = saved.dup
+    updated.fetched_at = 3.minutes.from_now
+    summary = updated.parsed_summary.deep_dup
+    summary["events"].select { |row| draft.asjjf_event_ids.include?(row["event_id"]) }.each { |row| row["place"] = "New calendar venue - Japan" }
+    updated.parsed_summary = summary
+    updated.save!
+    Asjjf::CalendarWatcher.new(updated).call
+    assert_equal "New calendar venue", draft.reload.venue_name
+    assert_equal 3, deliveries.size
+    assert_includes deliveries.last[:text], "1 updated drafts"
+    Asjjf::CalendarWatcher.new(updated).call
+    equivalent = updated.dup
+    equivalent.fetched_at = 4.minutes.from_now
+    equivalent.save!
+    Asjjf::CalendarWatcher.new(equivalent).call
+    assert_equal 3, deliveries.size
   ensure
     Resend::Emails.define_singleton_method(:send, original) if original
     previous&.each { |key, value| value.nil? ? ENV.delete(key) : ENV[key] = value }

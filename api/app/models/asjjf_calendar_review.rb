@@ -1,7 +1,7 @@
 class AsjjfCalendarReview < ApplicationRecord
   belongs_to :snapshot, class_name: "AsjjfSnapshot"
   belongs_to :event, optional: true
-  validates :kind, inclusion: { in: %w[new_draft change missing ambiguous] }
+  validates :kind, inclusion: { in: %w[new_draft draft_update change missing ambiguous] }
   validates :status, inclusion: { in: %w[pending applied dismissed superseded] }
 
   def decide!(action, actor:)

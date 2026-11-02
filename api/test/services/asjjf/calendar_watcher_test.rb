@@ -139,6 +139,27 @@ class AsjjfCalendarWatcherTest < ActiveSupport::TestCase
     assert AsjjfCalendarReview.exists?(kind: "ambiguous")
   end
 
+  test "a disappearing contributing source preserves both draft and published date ranges" do
+    Asjjf::CalendarWatcher.new(parsed_snapshot).call
+    draft = @org.events.find_by!(date: "2027-04-24")
+    published = @org.events.find_by!(date: "2027-05-22")
+    published.update!(status: "upcoming")
+    saved = parsed_snapshot
+    summary = saved.parsed_summary
+    summary["events"].reject! { |row| [ 2211, 2235 ].include?(row["event_id"]) }
+    saved.update!(parsed_summary: summary)
+    Asjjf::CalendarWatcher.new(saved).call
+    assert_equal Date.new(2027, 4, 24), draft.reload.date
+    assert_equal Date.new(2027, 4, 25), draft.end_date
+    assert_equal Date.new(2027, 5, 22), published.reload.date
+    assert_equal Date.new(2027, 5, 23), published.end_date
+    assert_equal "draft", draft.status
+    assert_equal "upcoming", published.status
+    assert_equal [ 2211, 2212 ], draft.asjjf_event_ids
+    assert_empty AsjjfCalendarReview.where(event: [ draft, published ], kind: "change", status: "pending")
+    assert_equal 2, AsjjfCalendarReview.where(event: [ draft, published ], kind: "missing", status: "pending").count
+  end
+
   test "a partial title rename cannot narrow a saved event through separate groups" do
     Asjjf::CalendarWatcher.new(parsed_snapshot).call
     event = @org.events.find_by!(date: "2027-04-24")

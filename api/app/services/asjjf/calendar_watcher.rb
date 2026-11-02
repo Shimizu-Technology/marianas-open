@@ -51,6 +51,7 @@ module Asjjf
         selected = Parsers::SeasonCalendar.select_marianas(all_rows)
         @present_ids = all_rows.map { |row| row.fetch(:event_id) }
         @active_review_ids = []
+        @matched_event_ids = []
         # Resolve existing identity across the entire calendar before processing
         # title groups. A partial rename must never split one saved event's facts.
         owners = Hash.new { |hash, key| hash[key] = [] }
@@ -67,7 +68,8 @@ module Asjjf
           .where.not(id: @active_review_ids).update_all(status: "superseded", updated_at: Time.current)
         AsjjfCalendarRun.create!(snapshot: @snapshot, season_id: @snapshot.asjjf_id, season_year: @year,
           summary: { new_drafts: @created_reviews.count { |review| review.kind == "new_draft" },
-            pending_changes: @created_reviews.count { |review| review.kind != "new_draft" } })
+            pending_changes: @created_reviews.count { |review| review.kind.in?(%w[change missing ambiguous]) },
+            updated_drafts: @created_reviews.count { |review| review.kind == "draft_update" } })
       end
       CalendarAlert.deliver(run, @created_reviews) if run && @created_reviews.any?
       run
@@ -88,8 +90,12 @@ module Asjjf
           new_values: { "message" => "ASJJF entries do not identify one event with matching titles, dates and place. Review the source manually.", "asjjf_event_ids" => ids })
         return
       end
-      facts = facts_for(rows)
       event = matches.first
+      @matched_event_ids << event.id if event
+      # Remaining rows cannot establish the saved event's complete date range.
+      # Keep its facts and let flag_missing create a manual review warning.
+      return if event && (self.class.event_ids(event) - @present_ids).any?
+      facts = facts_for(rows)
       if event.nil?
         event = @organization.events.create!(facts.merge(name: title, slug: draft_slug(title, ids.first), status: "draft",
           season_year: Date.iso8601(facts.fetch("date")).year, content_review_required: true,
@@ -102,7 +108,11 @@ module Asjjf
           facts["asjjf_event_ids"] = (self.class.event_ids(event) + ids).uniq.sort
           diff = facts.reject { |key, value| equivalent?(event, key, value, facts) }
           if event.status == "draft" && event.asjjf_calendar_snapshot_id.present?
-            event.update!(facts.merge(asjjf_calendar_snapshot_id: @snapshot.id)) if diff.any?
+            if diff.any?
+              old_values = event.attributes.slice(*diff.keys).as_json
+              event.update!(facts.merge(asjjf_calendar_snapshot_id: @snapshot.id))
+              review(kind: "draft_update", title: event.name, event: event, old_values: old_values, new_values: diff)
+            end
           elsif diff.any?
             review(kind: "change", title: event.name, event: event,
               old_values: event.attributes.slice(*diff.keys).as_json, new_values: diff)
@@ -151,7 +161,7 @@ module Asjjf
 
     def flag_missing
       @events.each do |event|
-        next unless (event.season_year || event.date&.year) == @year
+        next unless (event.season_year || event.date&.year) == @year || @matched_event_ids.include?(event.id)
         missing = self.class.event_ids(event) - @present_ids
         if missing.any?
           review(kind: "missing", title: event.name, event: event,
@@ -161,7 +171,8 @@ module Asjjf
     end
 
     def review(kind:, title:, event: nil, old_values: {}, new_values: {})
-      fingerprint = Digest::SHA256.hexdigest([ kind, event&.id, self.class.name_key(title), old_values.sort, new_values.sort ].to_json)
+      fingerprint = Digest::SHA256.hexdigest([ kind, event&.id, self.class.name_key(title), old_values.sort, new_values.sort,
+        (kind == "draft_update" ? @snapshot.id : nil) ].to_json)
       existing = AsjjfCalendarReview.find_by(fingerprint: fingerprint)
       if existing
         @active_review_ids << existing.id
@@ -172,7 +183,7 @@ module Asjjf
         return existing
       end
       item = AsjjfCalendarReview.create!(snapshot: @snapshot, event: event, kind: kind, title: title,
-        old_values: old_values, new_values: new_values, fingerprint: fingerprint)
+        old_values: old_values, new_values: new_values, fingerprint: fingerprint, status: kind == "draft_update" ? "applied" : "pending")
       @created_reviews << item
       @active_review_ids << item.id
       item
