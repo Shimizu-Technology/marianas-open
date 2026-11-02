@@ -441,16 +441,13 @@ export default function EventResultsSection({
                 className="min-h-12 w-full rounded-lg border border-white/15 bg-surface pl-10 pr-3 text-base text-text-primary"
               />
             </div>
-            <Button
-              variant="secondary"
-              onClick={() => setSheetOpen(true)}
-              className="md:hidden"
-              aria-haspopup="dialog"
-            >
-              <SlidersHorizontal size={16} aria-hidden="true" />
-              {t('results.filters')}
-              {activeCount > 0 && ` (${activeCount})`}
-            </Button>
+            <div className="shrink-0 md:hidden">
+              <Button variant="secondary" onClick={() => setSheetOpen(true)} aria-haspopup="dialog">
+                <SlidersHorizontal size={16} aria-hidden="true" />
+                {t('results.filters')}
+                {activeCount > 0 && ` (${activeCount})`}
+              </Button>
+            </div>
           </div>
           <div className="hidden md:block">{!sheetOpen && filterFields}</div>
           <FilterSheet open={sheetOpen} onClose={closeSheet}>
