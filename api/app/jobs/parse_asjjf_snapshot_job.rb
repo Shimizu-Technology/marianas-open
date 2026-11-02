@@ -8,6 +8,7 @@ class ParseAsjjfSnapshotJob < ApplicationJob
       parse_snapshot(snapshot)
     end
     enqueue_ranking_divisions(snapshot)
+    ApplyAsjjfCalendarJob.perform_later(snapshot.id) if snapshot.page_type == "season_calendar" && snapshot.parse_status == "parsed"
   rescue StandardError => e
     snapshot&.update!(parse_status: "failed", parse_error: "#{e.class}: #{e.message}".truncate(2000), parsed_at: Time.current)
     Rails.logger.error("[ASJJF] Snapshot #{snapshot_id} parse failed: #{e.class}: #{e.message}")

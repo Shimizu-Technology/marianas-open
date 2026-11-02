@@ -13,6 +13,7 @@ vi.mock('../../components/admin/event-editor/AccommodationsSection', () => ({
 }))
 let saved = eventEditorFixture()
 beforeEach(() => {
+  vi.spyOn(api.admin, 'getAsjjfCalendar').mockResolvedValue({ last_checked_at: null, last_check_status: null, source_url: 'https://asjjf.org/main/eventsBySeason/381', reviews: [], total: 0, page: 1, per_page: 25 })
   saved = eventEditorFixture()
   vi.spyOn(api.admin, 'getEvents').mockImplementation(async () => ({ events: [saved] }))
   vi.spyOn(api, 'getCurrentUser').mockResolvedValue({ user: { role: 'staff' } } as Awaited<

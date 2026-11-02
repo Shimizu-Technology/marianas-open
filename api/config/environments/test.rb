@@ -4,6 +4,9 @@
 # and recreated between test runs. Don't rely on the data there!
 
 Rails.application.configure do
+  # Parallel phases reserve dated migration IDs in advance. Test databases are
+  # disposable; allow schema loading before those reserved timestamps arrive.
+  config.active_record.validate_migration_timestamps = false
   # Settings specified here will take precedence over those in config/application.rb.
 
   # While tests run files are not watched, reloading is not necessary.

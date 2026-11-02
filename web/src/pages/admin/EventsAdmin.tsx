@@ -1,3 +1,4 @@
+import AsjjfCalendarPanel from '../../components/admin/AsjjfCalendarPanel'
 import EditorSaveBar from '../../components/admin/event-editor/EditorSaveBar'
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import {
@@ -652,6 +653,8 @@ export default function EventsAdmin() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {editing === null && <AsjjfCalendarPanel onChanged={loadEvents} />}
 
       {editing !== null ? (
         <div className="bg-surface border border-white/5">
