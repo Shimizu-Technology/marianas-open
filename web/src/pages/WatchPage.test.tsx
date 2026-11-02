@@ -17,7 +17,12 @@ vi.mock('../hooks/useApi', () => ({ useEvents: () => ({ events: [{ name: 'No vid
 vi.mock('../services/api', () => ({ api: { getVideos: vi.fn(), getSiteContents: vi.fn().mockResolvedValue({}) } }));
 const i18n = createInstance();
 await i18n.init({ lng: 'en', resources: { en: { translation: en } }, interpolation: { escapeValue: false } });
-afterEach(() => { cleanup(); vi.clearAllMocks(); });
+const scrollIntoViewDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView');
+afterEach(() => {
+  cleanup(); vi.clearAllMocks(); vi.restoreAllMocks();
+  if (scrollIntoViewDescriptor) Object.defineProperty(Element.prototype, 'scrollIntoView', scrollIntoViewDescriptor);
+  else Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+});
 const video = (id: number, event_name: string | null, event_date: string | null) => ({ id, title: `Match ${id}`, event_name, event_date, youtube_video_id: 'sI5C5FpI0wQ', featured: false } as Video);
 function setup() {
   return render(<I18nextProvider i18n={i18n}><MemoryRouter><WatchPage /></MemoryRouter></I18nextProvider>);
@@ -80,4 +85,26 @@ it('plays only the chosen card when a featured match also appears in the library
   expect(screen.getAllByRole('button', { name: en.watch.closeVideo })).toHaveLength(1);
   fireEvent.click(screen.getByRole('button', { name: en.watch.closeVideo }));
   expect(document.querySelectorAll('iframe')).toHaveLength(0);
+});
+
+it('keeps focus with the new player without focusing or scrolling the collapsed featured card', async () => {
+  vi.mocked(api.getVideos).mockResolvedValue([
+    { ...video(1, 'Copa 2026', '2026-01-01'), featured: true },
+    video(2, 'Copa 2026', '2026-01-01'),
+  ]);
+  setup();
+  const [featured] = await screen.findAllByRole('button', { name: `${en.watch.watchNow}: Match 1` });
+  const card = featured.closest('.group')!;
+  fireEvent.click(featured);
+  const focus = vi.spyOn(HTMLElement.prototype, 'focus');
+  const scrollIntoView = vi.fn();
+  Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, value: scrollIntoView });
+  fireEvent.click(screen.getByRole('button', { name: `${en.watch.watchNow}: Match 2` }));
+  const close = screen.getByRole('button', { name: en.watch.closeVideo });
+  expect(document.activeElement).toBe(close);
+  expect(close.closest('.group')?.querySelector('iframe')?.title).toBe('Match 2');
+  expect(card.querySelector('iframe')).toBeNull();
+  expect(focus.mock.contexts).toEqual([close]);
+  expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+  expect(scrollIntoView).not.toHaveBeenCalled();
 });

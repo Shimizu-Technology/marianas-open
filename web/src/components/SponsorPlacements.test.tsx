@@ -128,3 +128,14 @@ it("shows a localized sponsor load error with a working retry action", () => {
   fireEvent.click(screen.getByRole("button", { name: en.eventDetail.retry }));
   expect(retry).toHaveBeenCalledTimes(1);
 });
+
+it("reserves sponsor logo space while its lazy image is still loading", () => {
+  const sponsor = { ...placement("official", "Sponsor").sponsor!, logo_url: "/sponsor.jpg" };
+  render(<SponsorLogo sponsor={sponsor} />);
+  const image = screen.getByRole("img");
+  expect(image.getAttribute("loading")).toBe("lazy");
+  expect(image.parentElement?.classList.contains("h-24")).toBe(true);
+  expect(image.parentElement?.classList.contains("w-36")).toBe(true);
+  fireEvent.error(image);
+  expect(screen.getByText("Sponsor").parentElement?.classList.contains("h-24")).toBe(true);
+});

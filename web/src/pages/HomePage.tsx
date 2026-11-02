@@ -164,8 +164,8 @@ export default function HomePage() {
                     <div className="text-sm text-text-primary">{sc('spectators_label', t('home.spectators'))}</div>
                   </div>
                 </div>
-                <div className="relative col-span-2 overflow-hidden border border-white/5">
-                  <ImageWithShimmer src={featuredImages[2]} fallbackSrc={featuredFallbacks[2]} alt="Podium ceremony" className="w-full h-48 object-cover" loading="lazy" lazyRootMargin="200px 0px" />
+                <div className="relative col-span-2 h-48 overflow-hidden border border-white/5">
+                  <ImageWithShimmer src={featuredImages[2]} fallbackSrc={featuredFallbacks[2]} alt="Podium ceremony" className="w-full h-full object-cover" loading="lazy" lazyRootMargin="200px 0px" />
                   <div className="absolute inset-0 bg-gradient-to-r from-navy-900/95 via-navy-900/70 to-transparent" />
                   <div className="absolute inset-0 p-5 sm:p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-2">

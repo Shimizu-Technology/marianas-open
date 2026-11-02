@@ -16,7 +16,7 @@ const result = (id: number, total = 1) => ({ gallery_images: [image(id)], catego
 function setup(url = '/events/marianas-open-2026/gallery') {
   return render(<I18nextProvider i18n={i18n}><MemoryRouter initialEntries={[url]}><Routes><Route path="/events/:slug/gallery" element={<EventGalleryPage />} /></Routes></MemoryRouter></I18nextProvider>);
 }
-afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); window.history.replaceState(null, '', '/'); });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers(); window.history.replaceState(null, '', '/'); });
 it('prevents opening stale thumbnails while an album changes and shares the newly selected photo', async () => {
   const writeText = vi.fn().mockResolvedValue(undefined);
   vi.stubGlobal('navigator', { clipboard: { writeText } });
@@ -60,4 +60,30 @@ it('keeps copy-link text selection separate from lightbox arrow navigation, incl
   expect(new URL(window.location.href).searchParams.get('photo')).toBe('3298');
   fireEvent.keyDown(window, { key: 'Escape' });
   expect(screen.queryByRole('dialog')).toBeNull();
+});
+
+it('restores the photo URL when the same photo reopens during its exit', async () => {
+  vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+  vi.spyOn(api, 'getEventGallery').mockResolvedValue(result(3004));
+  setup();
+  const thumbnail = await screen.findByRole('button', { name: 'Open photo 1' });
+  vi.useFakeTimers();
+  thumbnail.focus();
+  fireEvent.click(thumbnail);
+  expect(new URL(window.location.href).searchParams.get('photo')).toBe('3004');
+  fireEvent.keyDown(window, { key: 'Escape' });
+  expect(new URL(window.location.href).searchParams.has('photo')).toBe(false);
+  act(() => vi.advanceTimersByTime(80));
+  fireEvent.click(thumbnail);
+  expect(new URL(window.location.href).searchParams.get('photo')).toBe('3004');
+  act(() => vi.advanceTimersByTime(160));
+  expect(screen.getByRole('dialog')).toBeTruthy();
+  expect(document.body.style.overflow).toBe('hidden');
+  fireEvent.keyDown(window, { key: 'Escape' });
+  act(() => vi.advanceTimersByTime(160));
+  expect(screen.queryByRole('dialog', { hidden: true })).toBeNull();
+  expect(new URL(window.location.href).searchParams.has('photo')).toBe(false);
+  expect(document.body.style.overflow).toBe('');
+  expect(document.activeElement).toBe(thumbnail);
+  expect(vi.getTimerCount()).toBe(0);
 });

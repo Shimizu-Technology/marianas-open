@@ -260,13 +260,13 @@ export default function EventGalleryPage() {
   useModalFocus(lightboxOpen, dialogRef, closeLightbox);
 
   useEffect(() => {
-    if (!activeImage || loading) return;
+    if (!activeImage || !lightboxOpen) return;
     const url = new URL(window.location.href);
     url.searchParams.set('photo', String(activeImage.id));
     window.history.replaceState(window.history.state, '', url);
     setActionStatus('');
     setManualShareUrl('');
-  }, [activeImage, loading]);
+  }, [activeImage, lightboxOpen]);
 
   const photoUrl = activeImage
     ? new URL(`/events/${slug}/gallery?photo=${activeImage.id}`, window.location.origin).href

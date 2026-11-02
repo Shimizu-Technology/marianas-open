@@ -372,10 +372,12 @@ function FilterSelect({ value, onChange, label, allLabel, options, displayFn }: 
 function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: boolean; onToggle: () => void }) {
   const { t } = usePublicCopy();
   const playButton = useRef<HTMLButtonElement>(null);
-  const wasExpanded = useRef(expanded);
+  const closeButton = useRef<HTMLButtonElement>(null);
+  const restorePlaybackFocus = useRef(false);
   useEffect(() => {
-    if (wasExpanded.current && !expanded) playButton.current?.focus();
-    wasExpanded.current = expanded;
+    if (expanded) closeButton.current?.focus({ preventScroll: true });
+    else if (restorePlaybackFocus.current) playButton.current?.focus({ preventScroll: true });
+    restorePlaybackFocus.current = false;
   }, [expanded]);
   const thumbnail = video.youtube_video_id
     ? `https://img.youtube.com/vi/${video.youtube_video_id}/mqdefault.jpg`
@@ -405,7 +407,8 @@ function VideoCard({ video, expanded, onToggle }: { video: Video; expanded: bool
         )}
         {expanded && (
           <button
-            onClick={(e) => { e.stopPropagation(); onToggle(); }}
+            ref={closeButton}
+            onClick={(e) => { e.stopPropagation(); restorePlaybackFocus.current = true; onToggle(); }}
             aria-label={t('watch.closeVideo')}
             className="absolute top-2 right-2 z-10 min-h-11 min-w-11 flex items-center justify-center bg-black/80 text-white hover:bg-black transition-colors"
           >
