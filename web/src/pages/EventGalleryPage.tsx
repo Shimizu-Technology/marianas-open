@@ -24,7 +24,12 @@ import { useEvents } from '../hooks/useApi';
 import { resolveMediaUrl } from '../utils/images';
 
 import { Button, Chip } from '../components/ui';
-import { publicPhotoLabel, sharePhoto, downloadPhoto } from './EventGalleryActions';
+import {
+  publicPhotoLabel,
+  sharePhoto,
+  downloadPhoto,
+  isLightboxTextTarget,
+} from './EventGalleryActions';
 
 const PER_PAGE = 24;
 const EAGER_IMAGE_COUNT = 4;
@@ -223,6 +228,11 @@ export default function EventGalleryPage() {
     if (activeIndex === null) return undefined;
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        (event.key === 'ArrowLeft' || event.key === 'ArrowRight') &&
+        isLightboxTextTarget(event.target)
+      )
+        return;
       if (event.key === 'Escape') {
         setActiveIndex(null);
         const url = new URL(window.location.href);
@@ -304,10 +314,7 @@ export default function EventGalleryPage() {
     setDownloading(true);
     setActionStatus('');
     try {
-      await downloadPhoto(
-        src,
-        `${slug}-${activeImage.id}.${({ 'image/png': 'png', 'image/webp': 'webp', 'image/avif': 'avif', 'image/heic': 'heic' } as Record<string, string>)[activeImage.content_type || ''] || 'jpg'}`
-      );
+      await downloadPhoto(src, `${slug}-${activeImage.id}`);
       setActionStatus('galleryActions.downloaded');
     } catch {
       setActionStatus('galleryActions.downloadError');
@@ -427,7 +434,10 @@ export default function EventGalleryPage() {
             <div className="py-24 text-center text-text-muted">{t('season.noPhotos')}</div>
           ) : (
             <>
-              <div aria-busy={loadingMore} className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
+              <div
+                aria-busy={loadingMore}
+                className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4"
+              >
                 {images.map((image, index) => {
                   const src = resolveMediaUrl(image.thumbnail_url);
                   const canOpen = Boolean(resolveMediaUrl(image.large_url || image.thumbnail_url));

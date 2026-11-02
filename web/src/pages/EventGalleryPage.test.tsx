@@ -43,3 +43,21 @@ it('resolves a deep-linked photo beyond the first page without losing pagination
   fireEvent.keyDown(window, { key: 'Escape' });
   expect(screen.queryByRole('dialog')).toBeNull();
 });
+
+it('keeps copy-link text selection separate from lightbox arrow navigation, including Shift', async () => {
+  vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn().mockRejectedValue(new Error('Denied')) } });
+  vi.spyOn(api, 'getEventGallery').mockResolvedValue({ ...result(3004, 2), gallery_images: [image(3004), image(3298)] });
+  setup();
+  fireEvent.click(await screen.findByRole('button', { name: 'Open photo 1' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Share photo' }));
+  const input = await screen.findByRole('textbox', { name: 'Photo link' });
+  input.focus();
+  for (const key of ['ArrowLeft', 'ArrowRight']) for (const shiftKey of [false, true]) {
+    fireEvent.keyDown(input, { key, shiftKey });
+    expect(new URL(window.location.href).searchParams.get('photo')).toBe('3004');
+  }
+  fireEvent.keyDown(window, { key: 'ArrowRight' });
+  expect(new URL(window.location.href).searchParams.get('photo')).toBe('3298');
+  fireEvent.keyDown(window, { key: 'Escape' });
+  expect(screen.queryByRole('dialog')).toBeNull();
+});

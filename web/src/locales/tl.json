@@ -265,7 +265,8 @@
       "heavy": "Heavy",
       "superHeavy": "Super Heavy",
       "ultraHeavy": "Ultra Heavy",
-      "openClass": "Bukas na Klase"
+      "openClass": "Bukas na Klase",
+      "openWeight": "Bukas na timbang"
     },
     "belt": {
       "white": "puti",
@@ -439,8 +440,8 @@
     "closeFilters": "Isara ang mga filter",
     "showResults": "Ipakita ang mga resulta",
     "otherDivisions": "Iba pang dibisyon",
-    "placementsCount": "Mga puwesto: {{count}}",
-    "divisionsCount": "Mga dibisyon: {{count}}",
+    "placementsCount": "Mga puwesto: {{count, number}}",
+    "divisionsCount": "Mga dibisyon: {{count, number}}",
     "placements": "Mga puwesto"
   },
   "competitorProfile": {
@@ -847,7 +848,7 @@
     "missing": "Hindi nahanap ang akademya",
     "noSpecified": "Walang tinukoy na akademya",
     "athletes": "{{count}} atleta",
-    "events": "{{count}} kaganapan",
+    "events": "{{count, number}} kaganapan",
     "more": "Mag-load pa ({{shown}} sa {{total}})"
   },
   "error": {
@@ -897,6 +898,6 @@
     "downloadError": "Hindi na-download. Subukan ulit."
   },
   "visualB": {
-    "athleteCount": "Mga atleta mula sa mga resulta ng paligsahan: {{count}}"
+    "athleteCount": "Mga atleta mula sa mga resulta ng paligsahan: {{count, number}}"
   }
 }

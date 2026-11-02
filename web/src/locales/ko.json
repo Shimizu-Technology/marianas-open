@@ -265,7 +265,8 @@
       "heavy": "헤비",
       "superHeavy": "슈퍼 헤비",
       "ultraHeavy": "울트라 헤비",
-      "openClass": "오픈 클래스"
+      "openClass": "오픈 클래스",
+      "openWeight": "무제한급"
     },
     "belt": {
       "white": "화이트",
@@ -439,8 +440,8 @@
     "closeFilters": "필터 닫기",
     "showResults": "결과 보기",
     "otherDivisions": "기타 부문",
-    "placementsCount": "입상 수: {{count}}",
-    "divisionsCount": "부문 수: {{count}}",
+    "placementsCount": "입상 수: {{count, number}}",
+    "divisionsCount": "부문 수: {{count, number}}",
     "placements": "입상 기록"
   },
   "competitorProfile": {
@@ -847,7 +848,7 @@
     "missing": "아카데미를 찾을 수 없습니다",
     "noSpecified": "아카데미가 지정되지 않았습니다",
     "athletes": "선수 {{count}}명",
-    "events": "대회 {{count}}개",
+    "events": "대회 {{count, number}}개",
     "more": "더 보기 ({{total}}개 중 {{shown}}개)"
   },
   "error": {
@@ -897,6 +898,6 @@
     "downloadError": "다운로드하지 못했습니다. 다시 시도하세요."
   },
   "visualB": {
-    "athleteCount": "대회 결과에 등록된 선수: {{count}}"
+    "athleteCount": "대회 결과에 등록된 선수: {{count, number}}"
   }
 }

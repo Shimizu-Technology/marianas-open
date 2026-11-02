@@ -5,7 +5,7 @@ import { api } from '../services/api';
 import { MemoryRouter } from 'react-router-dom';
 import EventResultsSection from './EventResultsSection';
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 vi.mock('./ScrollReveal', () => ({ default: ({ children }: PropsWithChildren) => createElement('div', null, children) }));
 vi.mock('framer-motion', () => ({ useReducedMotion: () => true, motion: { div: ({ children }: PropsWithChildren) => createElement('div', null, children) }, AnimatePresence: ({ children }: PropsWithChildren) => children }));
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
@@ -41,9 +41,9 @@ it('separates disciplines, preserves raw division titles and links canonical ath
   render(createElement(MemoryRouter, null, createElement(EventResultsSection, { eventSlug: 'published-results' })));
   const athlete = await screen.findByRole('link', { name: 'Gabrieli Pessanha' });
   expect(athlete.getAttribute('href')).toBe('/competitors/2278');
-  expect(screen.getByText('Female · Black · Adult 18 · Heavy').closest('[title]')?.getAttribute('title')).toBe(gi);
+  expect(screen.getByText('officialRankings.values.female · officialRankings.values.black · officialRankings.values.adultAge · watch.weight.heavy').closest('[title]')?.getAttribute('title')).toBe(gi);
   expect(screen.queryByText('Another Athlete')).toBeNull();
-  expect(screen.getAllByText('watch.belt.black')).toHaveLength(1);
+  expect(athlete.closest('.ui-card')?.querySelector('.ui-chip')).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'officialRankings.nogi' }));
   expect(screen.queryByText('Gabrieli Pessanha')).toBeNull();
   const unknownAthlete = await screen.findByRole('link', { name: 'Another Athlete' });

@@ -265,7 +265,8 @@
       "heavy": "重量级",
       "superHeavy": "超重量级",
       "ultraHeavy": "超超重量级",
-      "openClass": "公开级别"
+      "openClass": "公开级别",
+      "openWeight": "无差别级"
     },
     "belt": {
       "white": "白带",
@@ -439,8 +440,8 @@
     "closeFilters": "关闭筛选",
     "showResults": "显示结果",
     "otherDivisions": "其他组别",
-    "placementsCount": "获奖名次：{{count}}",
-    "divisionsCount": "组别数：{{count}}",
+    "placementsCount": "获奖名次：{{count, number}}",
+    "divisionsCount": "组别数：{{count, number}}",
     "placements": "获奖记录"
   },
   "competitorProfile": {
@@ -847,7 +848,7 @@
     "missing": "未找到道馆",
     "noSpecified": "未指定道馆",
     "athletes": "{{count}} 位运动员",
-    "events": "{{count}} 场赛事",
+    "events": "{{count, number}} 场赛事",
     "more": "加载更多（{{shown}} / {{total}}）"
   },
   "error": {
@@ -897,6 +898,6 @@
     "downloadError": "下载失败，请重试。"
   },
   "visualB": {
-    "athleteCount": "赛事成绩中的运动员：{{count}}"
+    "athleteCount": "赛事成绩中的运动员：{{count, number}}"
   }
 }

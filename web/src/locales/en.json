@@ -265,7 +265,8 @@
       "heavy": "Heavy",
       "superHeavy": "Super Heavy",
       "ultraHeavy": "Ultra Heavy",
-      "openClass": "Open Class"
+      "openClass": "Open Class",
+      "openWeight": "Open Weight"
     },
     "belt": {
       "white": "White",
@@ -439,8 +440,8 @@
     "closeFilters": "Close filters",
     "showResults": "Show results",
     "otherDivisions": "Other divisions",
-    "placementsCount": "Placements: {{count}}",
-    "divisionsCount": "Divisions: {{count}}",
+    "placementsCount": "Placements: {{count, number}}",
+    "divisionsCount": "Divisions: {{count, number}}",
     "placements": "Placements"
   },
   "competitorProfile": {
@@ -847,7 +848,7 @@
     "missing": "Academy not found",
     "noSpecified": "No academy specified",
     "athletes": "{{count}} athletes",
-    "events": "{{count}} events",
+    "events": "{{count, number}} events",
     "more": "Load more ({{shown}} of {{total}})"
   },
   "error": {
@@ -897,6 +898,6 @@
     "downloadError": "Download failed. Try again."
   },
   "visualB": {
-    "athleteCount": "Athletes from tournament results: {{count}}"
+    "athleteCount": "Athletes from tournament results: {{count, number}}"
   }
 }
