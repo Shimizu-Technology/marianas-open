@@ -1,11 +1,40 @@
 require "test_helper"
 require_relative "../../support/photo_intake_fixtures"
+require_relative "../../support/gallery_capability_helpers"
 
 class PhotoIntakeImporterTest < ActiveSupport::TestCase
   include PhotoIntakeFixtures
+  include GalleryCapabilityHelpers
 
   setup do
     @event = Organization.create!(name: "Import", slug: "import").events.create!(name: "Import", slug: "import", date: Date.new(2027, 1, 30))
+  end
+
+  test "unsupported HEIC HEIF and AVIF entries are skipped before decoding with actionable reasons" do
+    with_heif_capability(false) do
+      files = %w[heic mif1 avif].map do |brand|
+        { name: "photo-#{brand}.bin", data: [ 24 ].pack("N") + "ftyp" + brand + "\0" * 12 }
+      end
+      files << { name: "one.png", data: image_bytes }
+      import = create_import(@event, files: files)
+      PhotoIntake::Importer.new(import).call
+      assert_equal "completed", import.reload.status
+      assert_equal 4, import.processed_entries
+      assert_equal 1, import.imported_count
+      assert_equal 3, import.skipped_count
+      %w[HEIC HEIF AVIF].each do |format|
+        assert import.entry_errors.any? { |error| error["message"].include?("This photo is #{format}.") && error["message"].include?("for ZIPs, export as JPEG") }
+      end
+    end
+  end
+
+  test "capable runtime allows optional formats through policy to native inspection" do
+    with_heif_capability(true) do
+      %w[heic heif avif].each do |format|
+        assert EventGalleryImageUploadPolicy.accepted?(filename: "photo.#{format}", content_type: "image/#{format}")
+        assert_nil EventGalleryImageUploadPolicy.unsupported_format_error("image/#{format}")
+      end
+    end
   end
 
   test "archive processes streams deduplicates and records progress without filename captions" do

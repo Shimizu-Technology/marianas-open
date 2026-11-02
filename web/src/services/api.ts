@@ -1,3 +1,4 @@
+import type { GalleryImagePolicy } from '../utils/galleryImagePolicy';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export type TranslationsBlob = Record<string, Record<string, unknown>>;
@@ -1195,6 +1196,8 @@ export const api = {
     },
 
     // Event Gallery Images
+    getGalleryUploadPolicy: (eventId: number) =>
+      fetchApi<{ upload_policy: GalleryImagePolicy }>(`/api/v1/admin/events/${eventId}/gallery-images/upload_policy`, {}, true),
     getEventGalleryImages: (eventId: number, params?: Record<string, string | number>) => {
       const query = params ? '?' + new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString() : '';
       return fetchApi<GalleryImagesResponse>(`/api/v1/admin/events/${eventId}/gallery-images${query}`, {}, true);

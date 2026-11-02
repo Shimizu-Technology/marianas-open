@@ -3,10 +3,11 @@ module Asjjf
     class LeaseError < StandardError; end
 
     def self.call(url:, html:, page_type: nil, fetcher_id: nil, request_id: nil, lease_token: nil, source: "fetcher", uploaded_by_user: nil,
-      final_url: nil, http_status: 200, fetched_at: Time.current, outcome: "ok", error: nil)
+      final_url: nil, http_status: 200, fetched_at: Time.current, outcome: "ok", error: nil, elapsed_ms: nil)
       raise ArgumentError, "Invalid outcome" unless %w[ok challenged error].include?(outcome)
       raise ArgumentError, "HTML must be a string" unless html.is_a?(String) || (html.nil? && outcome != "ok")
       raise ArgumentError, "HTML exceeds 2 MB" if html && html.bytesize > AsjjfSnapshot::MAX_BYTES
+      raise ArgumentError, "Invalid elapsed_ms" unless elapsed_ms.nil? || (elapsed_ms.is_a?(Integer) && elapsed_ms.between?(0, 86_400_000))
       timestamp = fetched_at.is_a?(String) ? Time.iso8601(fetched_at) : fetched_at
       raise ArgumentError, "Invalid fetched_at" unless timestamp.is_a?(Time) || timestamp.is_a?(ActiveSupport::TimeWithZone)
       raise ArgumentError, "Invalid HTTP status" unless (http_status.is_a?(Integer) && http_status.between?(100, 599)) || (http_status.nil? && outcome != "ok")
@@ -46,6 +47,7 @@ module Asjjf
           asjjf_id: uri.path.split("/").last.to_i, params: URI.decode_www_form(uri.query.to_s).to_h,
           http_status: http_status, outcome: outcome, fetched_at: timestamp, fetcher_id: fetcher_id,
           source: source, uploaded_by_user: uploaded_by_user, html: html,
+          parsed_summary: elapsed_ms.nil? ? {} : { "fetch_metadata" => { "elapsed_ms" => elapsed_ms } },
           parse_status: outcome == "ok" ? "pending" : "skipped", parse_error: error.to_s.truncate(2000).presence)
         if outcome == "challenged"
           breaker = AsjjfSetting.breaker

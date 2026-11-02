@@ -1,3 +1,4 @@
+import { DEFAULT_GALLERY_IMAGE_POLICY, isSupportedGalleryImage, galleryImageError } from '../utils/galleryImagePolicy';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import SparkMD5 from 'spark-md5';
@@ -74,29 +75,6 @@ const OPTIMIZATION_MAX_DIMENSION = 2880;
 const OPTIMIZATION_INITIAL_QUALITY = 0.86;
 const OPTIMIZATION_SIZE_THRESHOLD_BYTES = 4 * 1024 * 1024;
 const ACTIVE_STATUSES: UploadStatus[] = ['queued', 'optimizing', 'hashing', 'preparing', 'uploading', 'saving'];
-export const GALLERY_IMAGE_MAX_BYTES = 50 * 1024 * 1024;
-export const GALLERY_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'image/heic',
-  'image/heif',
-  'image/avif',
-  'image/tiff',
-];
-export const GALLERY_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.heic', '.heif', '.avif', '.tif', '.tiff'];
-export const GALLERY_IMAGE_ACCEPT = [...GALLERY_IMAGE_TYPES, ...GALLERY_IMAGE_EXTENSIONS].join(',');
-export const GALLERY_IMAGE_TYPE_LABEL = 'JPEG, PNG, WebP, GIF, HEIC, HEIF, AVIF, or TIFF';
-
-export function isSupportedGalleryImage(file: File) {
-  const fileType = file.type.toLowerCase();
-  const fileName = file.name.toLowerCase();
-  const hasSupportedType = fileType ? GALLERY_IMAGE_TYPES.includes(fileType) : false;
-  const hasSupportedExtension = GALLERY_IMAGE_EXTENSIONS.some(extension => fileName.endsWith(extension));
-  return (hasSupportedType || hasSupportedExtension) && file.size > 0 && file.size <= GALLERY_IMAGE_MAX_BYTES;
-}
-
 function isBrowserPreviewableGalleryFile(file: File | undefined) {
   if (!file) return true;
   const fileName = file.name.toLowerCase();
@@ -420,7 +398,13 @@ export function GalleryUploadProvider({ children }: { children: ReactNode }) {
     const session = sessionRef.current;
     if (!owner || !session || session.owner !== owner || session.signal.aborted) throw new Error('Sign in before starting a resumable upload.');
     if (!navigator.locks) throw new Error('Resumable uploads require a browser with Web Locks support. Update your browser and try again.');
-    const imageFiles = files.filter(isSupportedGalleryImage);
+    // Preserve offline JPEG queuing; optional formats stay disabled when config
+    // cannot be refreshed, just as they do while the picker policy is loading.
+    const { upload_policy: policy } = await api.admin.getGalleryUploadPolicy(eventId)
+      .catch(() => ({ upload_policy: DEFAULT_GALLERY_IMAGE_POLICY }));
+    if (session.signal.aborted || ownerRef.current !== owner) return;
+    const imageFiles = files.filter(file => isSupportedGalleryImage(file, policy));
+    if (imageFiles.length !== files.length) throw new Error(galleryImageError(files.find(file => !isSupportedGalleryImage(file, policy)), policy));
     if (!imageFiles.length) return;
     const records: { record: DurableGalleryUpload; file: File }[] = [];
     const createdAt = Date.now();

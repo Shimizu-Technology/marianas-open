@@ -87,14 +87,18 @@ module Api
           end
         end
 
+        def upload_policy
+          render json: { upload_policy: EventGalleryImageUploadPolicy.configuration }
+        end
+
         def prepare_direct_upload
           filename = params.require(:filename).to_s
           content_type = EventGalleryImageUploadPolicy.normalize(
             filename: filename,
             content_type: params[:content_type].to_s
           )
-          unless content_type.in?(EventGalleryImage::ALLOWED_CONTENT_TYPES)
-            return render json: { error: EventGalleryImageUploadPolicy.choose_error }, status: :unprocessable_entity
+          unless content_type.in?(EventGalleryImageUploadPolicy.accepted_content_types)
+            return render json: { error: EventGalleryImageUploadPolicy.choose_error(content_type) }, status: :unprocessable_entity
           end
           byte_size = params.require(:byte_size).to_i
           if byte_size <= 0 || byte_size > EventGalleryImage::MAX_BYTE_SIZE

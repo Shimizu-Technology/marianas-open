@@ -13,6 +13,9 @@ module PhotoIntake
       signature = File.binread(path, 64)
       @content_type = sniff(signature)
       raise Invalid, "Unsupported image signature" unless content_type
+      if (reason = EventGalleryImageUploadPolicy.unsupported_format_error(content_type))
+        raise Invalid, reason
+      end
       @image = Vips::Image.new_from_file(path, access: :sequential, fail_on: :error)
       raise Invalid, "Unsupported image sample layout" unless image.bands.between?(1, 4) && %i[uchar ushort].include?(image.format)
       raise Invalid, "Image exceeds pixel limit" if image.width * image.height > MAX_PIXELS

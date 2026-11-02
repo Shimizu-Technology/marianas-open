@@ -10,7 +10,6 @@ namespace :image_processing do
       webpload
       gifload
       tiffload
-      heifload
     ]
 
     missing = required_operations.reject { |operation| Vips.type_find("VipsOperation", operation).nonzero? }
@@ -18,6 +17,8 @@ namespace :image_processing do
       abort "Missing libvips image operations: #{missing.join(", ")}"
     end
 
+    optional = GalleryImageCapabilities.heif_supported? ? "enabled" : "disabled (heifload unavailable; export ZIP photos as JPEG)"
+    puts "HEIC/HEIF/AVIF uploads: #{optional}"
     puts "libvips #{Vips.version_string} supports required gallery image operations"
   end
 end

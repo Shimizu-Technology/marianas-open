@@ -67,10 +67,11 @@ class AsjjfIntakeTest < ActionDispatch::IntegrationTest
   test "successful snapshot is compressed and parsed without applying results" do
     lease
     before_counts = [ EventResult.count, Competitor.count, Academy.count ]
-    signed(:post, "/api/v1/internal/asjjf/snapshots", body: payload.to_json)
+    signed(:post, "/api/v1/internal/asjjf/snapshots", body: payload.merge(elapsed_ms: 1234).to_json)
     assert_response :created
     assert_equal "parsed", response.parsed_body["parse_status"]
     snapshot = AsjjfSnapshot.find(response.parsed_body["snapshot_id"])
+    assert_equal 1234, snapshot.parsed_summary.dig("fetch_metadata", "elapsed_ms")
     assert_equal fixture_html, snapshot.html
     assert_equal Digest::SHA256.hexdigest(fixture_html), snapshot.sha256
     assert_operator snapshot.compressed_html.bytesize, :<, snapshot.byte_size
@@ -78,6 +79,29 @@ class AsjjfIntakeTest < ActionDispatch::IntegrationTest
     assert_equal 2062, snapshot.asjjf_id
     assert_equal "done", @fetch_request.reload.status
     assert_equal before_counts, [ EventResult.count, Competitor.count, Academy.count ]
+  end
+
+  test "safe fetch error categories and elapsed time are stored unchanged" do
+    %w[navigation_timeout net_ERR_CONNECTION_RESET disallowed_redirect disallowed_method boundary_violation browser_launch_failed aborted_deadline unknown].each do |category|
+      @fetch_request.update!(status: "pending", attempts: 0)
+      lease
+      signed(:post, "/api/v1/internal/asjjf/snapshots", body: payload.merge(
+        outcome: "error", error: category, elapsed_ms: 60_012, final_url: nil, http_status: nil, html: nil).to_json)
+      assert_response :created
+      snapshot = AsjjfSnapshot.find(response.parsed_body["snapshot_id"])
+      assert_equal category, snapshot.parse_error
+      assert_equal 60_012, snapshot.parsed_summary.dig("fetch_metadata", "elapsed_ms")
+      assert_equal category, @fetch_request.reload.last_error
+    end
+  end
+
+  test "invalid elapsed time is rejected without consuming the lease" do
+    lease
+    [ -1, 86_400_001, "60000", 1.5 ].each do |elapsed|
+      signed(:post, "/api/v1/internal/asjjf/snapshots", body: payload.merge(elapsed_ms: elapsed).to_json)
+      assert_response :unprocessable_entity
+      assert_equal "leased", @fetch_request.reload.status
+    end
   end
 
   test "server detects a challenge claimed as ok and pauses leasing with one alert per episode" do

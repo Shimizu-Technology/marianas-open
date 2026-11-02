@@ -98,7 +98,7 @@ test('request chain rejects an earlier HTTP hop even when the final request is a
     goto: async () => requestListener(hop('https://asjjf.org/', hop('http://asjjf.org/'))) };
   const launch = async () => ({ close: async () => { closed++; }, newContext: async () => ({
     exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async () => {} }) });
-  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_navigation/);
+  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_redirect/);
   assert.ok(closed >= 1);
 });
 
@@ -160,7 +160,7 @@ test('a main-frame navigation to a disallowed host is still rejected when frames
       redirectedFrom: () => null, frame: () => mainFrame }) };
   const launch = async () => ({ close: async () => {}, newContext: async () => ({
     exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async () => {} }) });
-  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_navigation/);
+  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_redirect/);
 });
 
 test('popup top-level navigations are bounded by the context route and extra pages are closed', async () => {
@@ -214,7 +214,7 @@ test('a popup redirect to a disallowed host closes the browser via context-wide 
   const launch = async () => ({ close: async () => { closed++; }, newContext: async () => ({
     exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => original, route: async () => {},
     on: (event, listener) => { contextListeners[event] = listener; } }) });
-  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_navigation/);
+  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), /disallowed_redirect/);
   assert.ok(closed >= 1);
 });
 
@@ -234,4 +234,20 @@ test('a popup response whose frame is not available yet does not throw from the 
     on: (event, listener) => { contextListeners[event] = listener; } }) });
   const result = await fetchPage('https://asjjf.org/', config, { launch });
   assert.equal(result.final_url, 'https://asjjf.org/');
+});
+
+test('browser launch failures are tagged without exposing launch diagnostics', async () => {
+  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch: async () => { throw new Error('private launch details'); } }),
+    error => error.category === 'browser_launch_failed' && error.message === 'browser_launch_failed');
+});
+
+test('main-frame method violations retain their safe category', async () => {
+  let listener;
+  const frame = { parentFrame: () => null };
+  const page = { on: (event, callback) => { if (event === 'request') listener = callback; },
+    goto: async () => listener({ isNavigationRequest: () => true, method: () => 'POST', url: () => 'https://asjjf.org/',
+      redirectedFrom: () => null, frame: () => frame }) };
+  const launch = async () => ({ close: async () => {}, newContext: async () => ({
+    exposeBinding: async () => {}, addInitScript: async () => {}, newPage: async () => page, route: async () => {} }) });
+  await assert.rejects(fetchPage('https://asjjf.org/', config, { launch }), error => error.category === 'disallowed_method');
 });

@@ -31,15 +31,15 @@ class EventGalleryImageUploadPolicy
     ".tiff" => "image/tiff"
   }.freeze
 
-  SOURCE_TYPE_LABEL = "JPEG, PNG, WebP, GIF, HEIC, HEIF, AVIF, or TIFF".freeze
+  OPTIONAL_CONTENT_TYPES = %w[image/heic image/heif image/avif].freeze
 
   class << self
     def accepted_content_types
-      SOURCE_CONTENT_TYPES
+      GalleryImageCapabilities.heif_supported? ? SOURCE_CONTENT_TYPES : SOURCE_CONTENT_TYPES - OPTIONAL_CONTENT_TYPES
     end
 
     def accepted_extensions
-      EXTENSION_CONTENT_TYPES.keys
+      EXTENSION_CONTENT_TYPES.select { |_, type| accepted_content_types.include?(type) }.keys
     end
 
     def browser_previewable?(content_type)
@@ -52,10 +52,12 @@ class EventGalleryImageUploadPolicy
 
     def normalize(filename:, content_type:)
       normalized_content_type = normalize_content_type(content_type)
-      return normalized_content_type if accepted_content_types.include?(normalized_content_type)
+      extension_type = EXTENSION_CONTENT_TYPES[File.extname(filename.to_s).downcase]
+      return normalized_content_type if OPTIONAL_CONTENT_TYPES.include?(normalized_content_type)
+      return extension_type if OPTIONAL_CONTENT_TYPES.include?(extension_type)
+      return normalized_content_type if SOURCE_CONTENT_TYPES.include?(normalized_content_type)
 
-      extension = File.extname(filename.to_s).downcase
-      EXTENSION_CONTENT_TYPES[extension] || normalized_content_type
+      extension_type || normalized_content_type
     end
 
     def normalize_blob!(blob)
@@ -66,12 +68,26 @@ class EventGalleryImageUploadPolicy
       normalized_content_type
     end
 
-    def validation_error
-      "must be a #{SOURCE_TYPE_LABEL} file"
+    def source_type_label
+      accepted_content_types.map { |type| { "image/jpeg" => "JPEG", "image/webp" => "WebP" }.fetch(type, type.delete_prefix("image/").upcase) }.join(", ")
     end
 
-    def choose_error
-      "Choose #{SOURCE_TYPE_LABEL} images"
+    def configuration
+      { content_types: accepted_content_types, extensions: accepted_extensions, type_label: source_type_label }
+    end
+
+    def unsupported_format_error(content_type)
+      return unless OPTIONAL_CONTENT_TYPES.include?(content_type) && !accepted_content_types.include?(content_type)
+      format = content_type.delete_prefix("image/").upcase
+      "This photo is #{format}. iPhone photos upload automatically as JPEG when chosen from the photo picker; for ZIPs, export as JPEG."
+    end
+
+    def validation_error(content_type = nil)
+      unsupported_format_error(content_type) || "must be a #{source_type_label} file"
+    end
+
+    def choose_error(content_type = nil)
+      unsupported_format_error(content_type) || "Choose #{source_type_label} images"
     end
 
     private

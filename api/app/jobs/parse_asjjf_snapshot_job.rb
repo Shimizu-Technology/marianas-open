@@ -25,7 +25,7 @@ class ParseAsjjfSnapshotJob < ApplicationJob
   def parse_snapshot(snapshot)
     return unless snapshot.outcome == "ok"
     parsed = Asjjf::Parsers.parse(page_type: snapshot.page_type, html: snapshot.html, url: snapshot.url)
-    snapshot.update!(parsed_summary: parsed, parse_status: "parsed", parsed_at: Time.current, parse_error: nil)
+    snapshot.update!(parsed_summary: parsed.merge(snapshot.parsed_summary.slice("fetch_metadata")), parse_status: "parsed", parsed_at: Time.current, parse_error: nil)
     Asjjf::RankingDiscovery.call(snapshot)
     discipline = parsed[:discipline] || parsed["discipline"]
     if %w[event_info event_results].include?(snapshot.page_type) && %w[gi nogi].include?(discipline)

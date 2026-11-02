@@ -22,7 +22,7 @@ module Api
           data = JSON.parse(@raw_body)
           required = %w[request_id lease_token url final_url http_status fetched_at outcome html]
           raise ArgumentError, "Missing snapshot fields" unless data.is_a?(Hash) && required.all? { |key| data.key?(key) }
-          snapshot = Asjjf::SnapshotIntake.call(**data.slice(*required, "error").symbolize_keys, fetcher_id: @fetcher_id)
+          snapshot = Asjjf::SnapshotIntake.call(**data.slice(*required, "error", "elapsed_ms").symbolize_keys, fetcher_id: @fetcher_id)
           render json: { snapshot_id: snapshot.id, parse_status: snapshot.parse_status }, status: :created
         rescue JSON::ParserError => e
           invalid_payload(e)

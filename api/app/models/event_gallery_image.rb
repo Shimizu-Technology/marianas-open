@@ -15,7 +15,6 @@ class EventGalleryImage < ApplicationRecord
     "Sponsors",
     "Other"
   ].freeze
-  ALLOWED_CONTENT_TYPES = EventGalleryImageUploadPolicy.accepted_content_types.freeze
   MAX_BYTE_SIZE = ENV.fetch("EVENT_GALLERY_IMAGE_MAX_BYTES", 50.megabytes).to_i
   THUMBNAIL_TRANSFORMATIONS = {
     resize_to_fill: [ 600, 400 ],
@@ -155,8 +154,8 @@ class EventGalleryImage < ApplicationRecord
       filename: blob.filename.to_s,
       content_type: blob.content_type
     )
-    unless normalized_content_type.in?(ALLOWED_CONTENT_TYPES)
-      errors.add(:image, EventGalleryImageUploadPolicy.validation_error)
+    unless normalized_content_type.in?(EventGalleryImageUploadPolicy.accepted_content_types)
+      errors.add(:image, EventGalleryImageUploadPolicy.validation_error(normalized_content_type))
     end
     if blob.byte_size.to_i > MAX_BYTE_SIZE
       errors.add(:image, "must be smaller than #{MAX_BYTE_SIZE / 1.megabyte} MB")

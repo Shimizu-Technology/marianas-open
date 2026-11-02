@@ -1,4 +1,5 @@
 import { setTimeout as delay } from 'node:timers/promises';
+import { classifyFetchError, FetchError } from './errors.js';
 import { allowedUrl } from './config.js';
 import { MAX_BODY_BYTES, StaleLeaseError } from './api.js';
 
@@ -40,18 +41,21 @@ export async function run(config, { api, fetchPage, signal, sleep = delay, now =
         const pageSignal = AbortSignal.any([AbortSignal.timeout(Math.max(1, Math.ceil(deadline - now()))),
           ...(signal ? [signal] : [])]);
         try {
-          allowedUrl(request.url, config.allowedHosts);
+          try { allowedUrl(request.url, config.allowedHosts); }
+          catch { throw new FetchError('boundary_violation'); }
           result = await fetchPage(request.url, config, { signal: pageSignal });
-        } catch {
-          // Do not log browser exception messages: they can include entire page URLs/content.
-          result = { final_url: null, http_status: null, outcome: 'error', error: 'fetch_failed', html: null };
+        } catch (error) {
+          // Browser exception messages can include page URLs/content. Emit only a safe category.
+          const category = classifyFetchError(error, pageSignal);
+          log({ event: 'fetch_error', request_id: request.id, category, elapsed_ms: Math.max(0, now() - previousStart) });
+          result = { final_url: null, http_status: null, outcome: 'error', error: category, html: null };
         }
         const challenged = result.outcome === 'challenged';
         if (challenged) {
           stoppedByChallenge = true;
           log({ event: 'challenge_detected', request_id: request.id });
         }
-        const snapshot = boundedSnapshot({ ...result, request_id: request.id, lease_token: request.lease_token, url: request.url,
+        const snapshot = boundedSnapshot({ ...result, elapsed_ms: Math.max(0, now() - previousStart), request_id: request.id, lease_token: request.lease_token, url: request.url,
           fetched_at: new Date(now()).toISOString() });
         stats.fetched++;
         if (challenged) stats.challenged++;
