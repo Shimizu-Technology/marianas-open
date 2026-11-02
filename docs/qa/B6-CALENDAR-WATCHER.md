@@ -16,3 +16,7 @@ Agent-executed affected-flow scope:
 UI direction: existing dark admin palette and ASJJF control styles, quiet operational layout, explicit draft/review language, 44px controls, stacked phone actions. No new animation; feedback appears immediately in the settled state. Reduced motion needs no special transition.
 
 Verification results are recorded in the PR with the tested head. The T3 preview snapshot endpoint timed out twice; local headless Chromium fallback rendered the actual React component with app CSS, not a static mockup.
+
+UI execution (Chromium 1248, component harness, both 390×1000 and 1440×1000): scenario 6 passed for draft/open navigation, old→new review, apply/dismiss with refreshed queue, staff-only state, failed-load retry, empty state and long URL wrapping. Keyboard tab showed a visible solid focus outline. Buttons measured 44px; neither viewport overflowed horizontally. Screenshots: `/tmp/b6-calendar-390.png` and `/tmp/b6-calendar-1440.png` (local evidence, outside the repository). Mock API outcomes were inspected; persisted changes were tested through Rails integration cases. Owned UI processes and tabs were cleaned after this phase.
+
+Initial focused testing found that Manila/Taiwan's No-Gi dates are contained in the Gi range; grouping was corrected to use overlapping published ranges, then the focused Rails suite passed (16 tests, 102 assertions). Later coverage adds latest-source approval blocking and late season discovery. Full final gate counts are in the PR.

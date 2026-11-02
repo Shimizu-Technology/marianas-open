@@ -139,6 +139,79 @@ class AsjjfCalendarWatcherTest < ActiveSupport::TestCase
     assert AsjjfCalendarReview.exists?(kind: "ambiguous")
   end
 
+  test "a partial title rename cannot narrow a saved event through separate groups" do
+    Asjjf::CalendarWatcher.new(parsed_snapshot).call
+    event = @org.events.find_by!(date: "2027-04-24")
+    event.update!(status: "upcoming", venue_name: "Staff venue")
+    Asjjf::CalendarWatcher.new(parsed_snapshot).call
+    pending = AsjjfCalendarReview.find_by!(event: event, kind: "change", status: "pending")
+    renamed = parsed_snapshot
+    summary = renamed.parsed_summary
+    summary["events"].find { |row| row["event_id"] == 2212 }["title"] = "Guam Marianas Pro Manila Renamed 2027 ( No-gi Event)"
+    renamed.update!(parsed_summary: summary)
+    Asjjf::CalendarWatcher.new(renamed).call
+    assert_equal Date.new(2027, 4, 24), event.reload.date
+    assert_equal Date.new(2027, 4, 25), event.end_date
+    assert_equal "Staff venue", event.venue_name
+    assert_equal "superseded", pending.reload.status
+    assert_empty AsjjfCalendarReview.where(event: event, kind: "change", status: "pending")
+    assert AsjjfCalendarReview.exists?(event: event, kind: "ambiguous")
+    # The same hold protects automatic updates of watcher-created drafts.
+    event.update!(status: "draft")
+    another = renamed.dup
+    another.fetched_at = 1.minute.from_now
+    another.save!
+    Asjjf::CalendarWatcher.new(another).call
+    assert_equal Date.new(2027, 4, 24), event.reload.date
+    assert_equal Date.new(2027, 4, 25), event.end_date
+  end
+
+  test "leaving the Marianas selector invalidates older proposals even if IDs remain listed" do
+    event = existing(season_year: nil, date: nil)
+    Asjjf::CalendarWatcher.new(parsed_snapshot).call
+    pending = AsjjfCalendarReview.find_by!(event: event, kind: "change", status: "pending")
+    excluded = parsed_snapshot
+    summary = excluded.parsed_summary
+    summary["events"].select { |row| [ 2258, 2259 ].include?(row["event_id"]) }.each do |row|
+      row["title"] = row["title"].sub("Guam Copa De Marianas", "Dumau Open")
+      row["place"] = "Tokyo - Japan"
+    end
+    excluded.update!(parsed_summary: summary)
+    Asjjf::CalendarWatcher.new(excluded).call
+    assert_equal "superseded", pending.reload.status
+    assert_raises(ArgumentError) { pending.decide!("apply", actor: nil) }
+    assert_equal "Old venue", event.reload.venue_name
+    assert_nil event.date
+  end
+
+  test "moving a single-day event also clears an explicit old end date" do
+    event = existing(end_date: "2027-01-30")
+    moved = parsed_snapshot
+    summary = moved.parsed_summary
+    summary["events"].select { |row| [ 2258, 2259 ].include?(row["event_id"]) }.each do |row|
+      row["event_date"] = row["event_end_date"] = "2027-02-01"
+    end
+    moved.update!(parsed_summary: summary)
+    Asjjf::CalendarWatcher.new(moved).call
+    pending = AsjjfCalendarReview.find_by!(event: event, kind: "change", status: "pending")
+    assert pending.new_values.key?("end_date")
+    assert_nil pending.new_values["end_date"]
+    pending.decide!("apply", actor: nil)
+    assert_equal Date.new(2027, 2, 1), event.reload.date
+    assert_nil event.end_date
+  end
+
+  test "a newer failed or unprocessed calendar attempt blocks an older pending approval" do
+    event = existing
+    Asjjf::CalendarWatcher.new(parsed_snapshot).call
+    review = AsjjfCalendarReview.find_by!(event: event, kind: "change")
+    newer = snapshot
+    assert_raises(ArgumentError) { review.decide!("apply", actor: nil) }
+    newer.update!(parse_status: "failed")
+    assert_raises(ArgumentError) { review.decide!("apply", actor: nil) }
+    assert_equal "Old venue", event.reload.venue_name
+  end
+
   test "failed, challenged and superseded snapshots cannot change events" do
     old = parsed_snapshot
     latest = snapshot

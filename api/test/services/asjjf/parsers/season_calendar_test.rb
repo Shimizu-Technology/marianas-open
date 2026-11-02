@@ -6,6 +6,8 @@ class AsjjfSeasonCalendarTest < AsjjfParserTest
   def test_all_calendar_events_and_marianas_selection
     parsed = parse_fixture(FILE)
     assert_equal 381, parsed[:season_id]
+    assert_includes parsed[:seasons], { year: 2026, id: 341 }
+    assert_includes parsed[:seasons], { year: 2027, id: 381 }
     assert_equal({ events: 85 }, parsed[:counts])
     events = PARSERS::SeasonCalendar.select_marianas(parsed[:events])
     assert_equal [ 2258, 2259, 2233, 2234, 2211, 2212, 2235, 2236 ], events.map { |event| event[:event_id] }

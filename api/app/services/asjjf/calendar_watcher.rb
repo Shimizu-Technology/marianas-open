@@ -50,9 +50,21 @@ module Asjjf
         all_rows = summary.fetch(:events)
         selected = Parsers::SeasonCalendar.select_marianas(all_rows)
         @present_ids = all_rows.map { |row| row.fetch(:event_id) }
-        @matched_event_ids = []
+        @active_review_ids = []
+        # Resolve existing identity across the entire calendar before processing
+        # title groups. A partial rename must never split one saved event's facts.
+        owners = Hash.new { |hash, key| hash[key] = [] }
+        all_rows.group_by { |row| self.class.name_key(row.fetch(:title)) }.each do |key, rows|
+          matching_events(rows).each { |event| owners[event.id] << key }
+        end
+        @colliding_event_ids = owners.select { |_id, keys| keys.uniq.size > 1 }.keys
         selected.group_by { |row| self.class.name_key(row.fetch(:title)) }.each_value { |rows| apply_group(rows) }
         flag_missing
+        # Every warning/proposal must be revalidated by this season's latest run.
+        # New-draft notices remain until staff review, dismiss or publish them.
+        AsjjfCalendarReview.joins(:snapshot).where(kind: %w[change missing ambiguous], status: "pending",
+          asjjf_snapshots: { page_type: "season_calendar", asjjf_id: @snapshot.asjjf_id })
+          .where.not(id: @active_review_ids).update_all(status: "superseded", updated_at: Time.current)
         AsjjfCalendarRun.create!(snapshot: @snapshot, season_id: @snapshot.asjjf_id, season_year: @year,
           summary: { new_drafts: @created_reviews.count { |review| review.kind == "new_draft" },
             pending_changes: @created_reviews.count { |review| review.kind != "new_draft" } })
@@ -66,21 +78,16 @@ module Asjjf
     def apply_group(rows)
       title = self.class.base_name(rows.first.fetch(:title))
       ids = rows.map { |row| row.fetch(:event_id) }.sort
-      by_id = @events.select { |event| (self.class.event_ids(event) & ids).any? }
       # Pair disciplines only when the source agrees on dates and place.
       consistent = rows.map { |row| row[:place] }.uniq.one? &&
         rows.map { |row| row.fetch(:event_date) }.max <= rows.map { |row| row.fetch(:event_end_date) }.min &&
         rows.group_by { |row| row[:discipline] }.values.all?(&:one?)
-      matches = by_id.presence || @events.select do |event|
-        self.class.name_key(event.name) == self.class.name_key(title) && event.date&.iso8601 == rows.map { |row| row[:event_date] }.min &&
-          (event.end_date || event.date)&.iso8601 == rows.map { |row| row[:event_end_date] }.max
-      end
-      unless consistent && matches.size <= 1
-        AsjjfCalendarReview.where(event_id: matches.map(&:id), kind: "change", status: "pending").update_all(status: "superseded", updated_at: Time.current)
-        review(kind: "ambiguous", title: title, new_values: { "message" => "ASJJF entries do not identify one event with matching dates and place. Review the source manually.", "asjjf_event_ids" => ids })
+      matches = matching_events(rows)
+      unless consistent && matches.size <= 1 && (matches.map(&:id) & @colliding_event_ids).empty?
+        review(kind: "ambiguous", title: title, event: matches.one? ? matches.first : nil,
+          new_values: { "message" => "ASJJF entries do not identify one event with matching titles, dates and place. Review the source manually.", "asjjf_event_ids" => ids })
         return
       end
-      @matched_event_ids.concat(matches.map(&:id))
       facts = facts_for(rows)
       event = matches.first
       if event.nil?
@@ -93,25 +100,32 @@ module Asjjf
         event.with_lock do
           # Disappearing source IDs are retained and flagged below, never removed.
           facts["asjjf_event_ids"] = (self.class.event_ids(event) + ids).uniq.sort
-          diff = facts.reject { |key, value| equivalent?(event, key, value) }
+          diff = facts.reject { |key, value| equivalent?(event, key, value, facts) }
           if event.status == "draft" && event.asjjf_calendar_snapshot_id.present?
             event.update!(facts.merge(asjjf_calendar_snapshot_id: @snapshot.id)) if diff.any?
           elsif diff.any?
             review(kind: "change", title: event.name, event: event,
               old_values: event.attributes.slice(*diff.keys).as_json, new_values: diff)
           end
-          pending = AsjjfCalendarReview.where(event: event, kind: "change", status: "pending")
-          pending.where.not(fingerprint: @active_fingerprint).update_all(status: "superseded", updated_at: Time.current)
-          @active_fingerprint = nil
         end
       end
     end
 
-    def equivalent?(event, key, value)
+    def matching_events(rows)
+      ids = rows.map { |row| row.fetch(:event_id) }
+      by_id = @events.select { |event| (self.class.event_ids(event) & ids).any? }
+      by_id.presence || @events.select do |event|
+        self.class.name_key(event.name) == self.class.name_key(rows.first.fetch(:title)) &&
+          event.date&.iso8601 == rows.map { |row| row[:event_date] }.min &&
+          (event.end_date || event.date)&.iso8601 == rows.map { |row| row[:event_end_date] }.max
+      end
+    end
+
+    def equivalent?(event, key, value, facts)
       current = event.public_send(key).as_json
       return Array(current).map(&:to_i).sort == value if key == "asjjf_event_ids"
       # A one-day source range and a blank end date mean the same thing.
-      return (event.end_date || event.date)&.iso8601 == (value || event.date&.iso8601) if key == "end_date"
+      return (event.end_date&.iso8601 || facts["date"]) == (value || facts["date"]) if key == "end_date"
       current == value
     end
 
@@ -140,23 +154,17 @@ module Asjjf
         next unless (event.season_year || event.date&.year) == @year
         missing = self.class.event_ids(event) - @present_ids
         if missing.any?
-          item = review(kind: "missing", title: event.name, event: event,
+          review(kind: "missing", title: event.name, event: event,
             new_values: { "message" => "ASJJF no longer lists these event IDs on this season calendar. The event is still saved with its current publication status.", "asjjf_event_ids" => missing })
-          AsjjfCalendarReview.where(event: event, kind: "missing", status: "pending").where.not(id: item.id).update_all(status: "superseded", updated_at: Time.current)
-          unless @matched_event_ids.include?(event.id)
-            AsjjfCalendarReview.where(event: event, kind: "change", status: "pending").update_all(status: "superseded", updated_at: Time.current)
-          end
-        else
-          AsjjfCalendarReview.where(event: event, kind: "missing", status: "pending").update_all(status: "superseded", updated_at: Time.current)
         end
       end
     end
 
     def review(kind:, title:, event: nil, old_values: {}, new_values: {})
       fingerprint = Digest::SHA256.hexdigest([ kind, event&.id, self.class.name_key(title), old_values.sort, new_values.sort ].to_json)
-      @active_fingerprint = fingerprint if kind == "change"
       existing = AsjjfCalendarReview.find_by(fingerprint: fingerprint)
       if existing
+        @active_review_ids << existing.id
         if existing.status.in?(%w[superseded applied])
           existing.update!(snapshot: @snapshot, status: "pending", reviewed_at: nil)
           @created_reviews << existing
@@ -166,6 +174,7 @@ module Asjjf
       item = AsjjfCalendarReview.create!(snapshot: @snapshot, event: event, kind: kind, title: title,
         old_values: old_values, new_values: new_values, fingerprint: fingerprint)
       @created_reviews << item
+      @active_review_ids << item.id
       item
     end
 

@@ -14,6 +14,13 @@ class PlanAsjjfCalendarJobTest < ActiveSupport::TestCase
     end
   end
 
+  test "a late published season can still be discovered after rollover" do
+    travel_to Time.utc(2028, 1, 2) do
+      PlanAsjjfCalendarJob.perform_now
+      assert_equal [ "https://asjjf.org/main/eventsBySeason/381" ], AsjjfFetchRequest.pluck(:url)
+    end
+  end
+
   test "discovers future IDs from saved navigation without guessing" do
     travel_to Time.utc(2027, 12, 1) do
       PlanAsjjfCalendarJob.perform_now
