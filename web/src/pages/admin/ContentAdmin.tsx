@@ -214,9 +214,9 @@ function SectionGroup({
                     <div className="flex items-center gap-3 mb-1">
                       <span className="text-sm font-medium text-text-primary">{entry.label}</span>
                       <span className="text-xs text-text-muted font-mono">{entry.key}</span>
-                      <p className="text-xs text-text-secondary">{Object.values(copyEntries).find(item => item.key === entry.key)?.preview || 'Preview on the public page for this section.'}</p>
                       <TranslationBadge status={entry.translation_status} />
                     </div>
+                    <p className="text-xs text-text-secondary">{Object.values(copyEntries).find(item => item.key === entry.key)?.preview || 'Preview on the public page for this section.'}</p>
                     <p className="text-sm text-text-secondary truncate">
                       {entry.value_en || '(empty)'}
                     </p>
