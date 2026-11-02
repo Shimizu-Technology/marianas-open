@@ -18,24 +18,36 @@ module Asjjf
           empty = table && (text(table).empty? || text(table).match?(/\A(?:No (?:results|records)(?: found)?[.!]?|There are no results[.!]?)\z/i))
           raise ParseError, "Missing result divisions" unless empty && @doc.css("td.fighter-name").empty?
         end
-        divisions = headings.map do |heading|
+        empty_divisions = []
+        divisions = headings.filter_map do |heading|
           division = Division.parse(text(heading), weight: true)
           raise ParseError, "Division gender disagrees with category" unless division[:gender] == category.split.first.downcase
           kids = division[:age].match?(/\AKid /i)
           raise ParseError, "Division age disagrees with category" unless kids == category.match?(/Kids\z/i)
           body = heading.ancestors("thead").first.next_element
           raise ParseError, "Missing division placements" unless body&.name == "tbody"
+          # ASJJF lists some divisions with a present but empty placements table
+          # (nobody placed, e.g. Hong Kong 2026 "Male Black Master 41 Middle").
+          # Record those instead of failing the page; a tbody with any content
+          # still has to parse as complete placements.
+          if body.element_children.empty? && text(body).empty?
+            empty_divisions << division[:name]
+            next
+          end
           placements = required(body.css("tr"), "division placements").map { |row| placement(row) }
           raise ParseError, "Division must have exactly one gold placement" unless placements.count { |p| p[:position] == 1 } == 1
           division.merge(placements: placements, alone_in_bracket: placements.length == 1)
         end
-        raise ParseError, "Duplicate division names" unless divisions.map { |d| d[:name] }.uniq.length == divisions.length
+        raise ParseError, "Every division is missing placements" if divisions.empty? && empty_divisions.any?
+        names = divisions.map { |d| d[:name] } + empty_divisions
+        raise ParseError, "Duplicate division names" unless names.uniq.length == names.length
         unless @doc.css("td.fighter-name").length == divisions.sum { |d| d[:placements].length }
           raise ParseError, "Unparsed result rows"
         end
         { url: @url, event_id: id, title: title, discipline: discipline(title), category: category,
-          divisions: divisions, counts: { divisions: divisions.length, placements: divisions.sum { |d| d[:placements].length },
-                                        alone_in_bracket: divisions.count { |d| d[:alone_in_bracket] } } }
+          divisions: divisions, empty_divisions: empty_divisions,
+          counts: { divisions: divisions.length, placements: divisions.sum { |d| d[:placements].length },
+                    alone_in_bracket: divisions.count { |d| d[:alone_in_bracket] }, empty_divisions: empty_divisions.length } }
       end
 
       private
