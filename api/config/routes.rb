@@ -59,6 +59,7 @@ Rails.application.routes.draw do
             post :publish
             post :unpublish
             post :fill_asjjf
+            post :verify_asjjf
             post :upload_image
             post :upload_poster
             delete :remove_poster

@@ -81,7 +81,7 @@ class EventPublishingTest < ActionDispatch::IntegrationTest
 
   test "viewers and anonymous users cannot rollover or publish or fill facts" do
     @user.update!(role: "viewer")
-    %w[clone publish unpublish fill_asjjf].each do |action|
+    %w[clone publish unpublish fill_asjjf verify_asjjf].each do |action|
       post "/api/v1/admin/events/#{@event.id}/#{action}", params: { target_year: 2028, asjjf_event_id: 2258 }, headers: @headers, as: :json
       assert_response :forbidden
     end
@@ -89,6 +89,15 @@ class EventPublishingTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
     post "/api/v1/admin/events/#{@event.id}/publish", as: :json
     assert_response :unauthorized
+  end
+
+  test "staff can verify a published event against saved ASJJF evidence" do
+    make_ready
+    post "/api/v1/admin/events/#{@event.id}/publish", headers: @headers, as: :json
+    assert_response :success
+    post "/api/v1/admin/events/#{@event.id}/verify_asjjf", params: { asjjf_event_id: 2258 }, headers: @headers, as: :json
+    assert_response :unprocessable_entity
+    assert_includes response.parsed_body["errors"].first, "No saved ASJJF event information page"
   end
 
   test "slug duplicates are rejected and public URLs are stable until unpublished" do

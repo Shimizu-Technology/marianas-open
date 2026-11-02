@@ -78,10 +78,9 @@ it('publishes a ready saved draft and unpublishes an existing event', async () =
       onUpdate={onUpdate}
     />
   )
-  expect(screen.getByText('Unpublish to draft before filling official information.')).toBeTruthy()
-  expect(
-    (screen.getByRole('button', { name: 'Fill from ASJJF' }) as HTMLButtonElement).closest('fieldset')?.disabled
-  ).toBe(true)
+  expect(screen.queryByRole('button', { name: 'Fill from ASJJF' })).toBeNull()
+  expect(screen.getByRole('button', { name: 'Verify against ASJJF' })).toBeTruthy()
+  expect(screen.getByText(/Nothing on the public page changes/)).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: 'Unpublish to draft' }))
   await waitFor(() => expect(api.admin.unpublishEvent).toHaveBeenCalledWith(7))
 })
@@ -118,4 +117,16 @@ it('starts with the saved public status and reports action locks to the containi
   expect(busy).toHaveBeenLastCalledWith(true)
   resolve({ event })
   await waitFor(() => expect(busy).toHaveBeenLastCalledWith(false))
+})
+
+it('verifies a published event against ASJJF without replacing its wording', async () => {
+  const onUpdate = vi.fn()
+  const event = eventEditorFixture({ status: 'upcoming', asjjf_info_id: null, asjjf_event_ids: [2258, 2259] })
+  const verified = { ...event, asjjf_info_status: 'verified' }
+  vi.spyOn(api.admin, 'verifyEventAgainstAsjjf').mockResolvedValue({ event: verified, message: 'Linked.' })
+  render(<PublishingSection event={event} dirty={false} onSelect={vi.fn()} onUpdate={onUpdate} />)
+  expect((screen.getByLabelText('ASJJF info ID') as HTMLInputElement).value).toBe('2258')
+  fireEvent.click(screen.getByRole('button', { name: 'Verify against ASJJF' }))
+  await waitFor(() => expect(api.admin.verifyEventAgainstAsjjf).toHaveBeenCalledWith(event.id, 2258))
+  expect(onUpdate).toHaveBeenCalledWith(verified, 'Linked.')
 })

@@ -61,6 +61,9 @@ class EventReadiness
       # Early registration can legitimately open in the preceding calendar year.
       # Exempt only text still identical to its saved ASJJF evidence.
       next if sourced.key?(field) && value.as_json == sourced[field].as_json
+      # Reworded fee tables are exempt when every amount, deadline and option still
+      # matches the saved ASJJF evidence.
+      next if field == "registration_fee_sections" && info_snapshot && fees_match_evidence?(value)
       [ field.humanize, text_section(field), value.to_json ]
     end
     { event_schedule_items: %w[time description], prize_categories: %w[name], event_accommodations: %w[hotel_name description rate_info inclusions room_types booking_code booking_url] }.each do |association, fields|
@@ -73,6 +76,38 @@ class EventReadiness
       years = text.scan(/\b20\d{2}\b/).uniq.reject { |value| value.to_i == year }
       { label: label, section: section, years: years } if years.any?
     end
+  end
+
+  def fees_match_evidence?(sections)
+    evidence = Array(info_snapshot.parsed_summary["fees"]).map do |fee|
+      [ fee_group(fee["group"]), fee_amount(fee["amount"].presence || fee["fee_text"]), fee_date(fee["until"]), fee_option(fee["division"]) ]
+    end
+    ours = Array(sections).flat_map do |section|
+      Array(section["rows"] || section[:rows]).map do |row|
+        row = row.stringify_keys
+        [ fee_group(section["title"] || section[:title]), fee_amount(row["fee"]), fee_date(row["deadline"].to_s.sub(/\Auntil\s+/i, "")), fee_option(row["option"]) ]
+      end
+    end
+    ours.any? && ours.none? { |row| row.any?(&:nil?) } && ours.sort_by(&:to_s) == evidence.sort_by(&:to_s)
+  end
+
+  def fee_group(title)
+    title.to_s.downcase[/\b(kid|adult|master|junior|teen)/, 1] || title.to_s.downcase.squish
+  end
+
+  def fee_amount(value)
+    digits = value.to_s.delete(",")[/\d+(?:\.\d+)?/]
+    digits && BigDecimal(digits).to_s("F").sub(/\.0\z/, "")
+  end
+
+  def fee_date(value)
+    Date.parse(value.to_s).iso8601
+  rescue Date::Error
+    nil
+  end
+
+  def fee_option(value)
+    value.to_s.downcase.squish
   end
 
   def text_section(field)

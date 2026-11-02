@@ -45,6 +45,30 @@ class AsjjfCalendarWatcherTest < ActiveSupport::TestCase
     Asjjf::CalendarAlert.define_singleton_method(:deliver, original)
   end
 
+  test "ASJJF's Chinese Taipei calendar label uses the series' Taiwan name and is not a change" do
+    saved = snapshot
+    ParseAsjjfSnapshotJob.perform_now(saved.id)
+    ApplyAsjjfCalendarJob.perform_now(saved.id)
+    taiwan = @org.events.find_by!(date: Date.new(2027, 5, 22))
+    assert_equal "Taiwan", taiwan.country
+    taiwan.update!(status: "upcoming", asjjf_calendar_snapshot_id: nil)
+    Asjjf::CalendarWatcher.new(parsed_snapshot).call
+    assert_not AsjjfCalendarReview.where(event: taiwan, kind: "change").exists?
+  end
+
+  test "past season calendars are reference only and never draft or review events" do
+    saved = parsed_snapshot
+    summary = saved.parsed_summary.deep_dup
+    Array(summary["seasons"]).each { |season| season["year"] = 2022 if season["id"].to_i == 381 }
+    saved.update!(parsed_summary: summary)
+    travel_to Time.zone.parse("2026-11-02 12:00") do
+      Asjjf::CalendarWatcher.new(saved).call
+    end
+    assert_equal 0, @org.events.count
+    assert_equal 0, AsjjfCalendarReview.count
+    assert_equal 0, AsjjfCalendarRun.count
+  end
+
   test "IDs take priority over a renamed event and published facts never auto overwrite" do
     event = existing(name: "Staff name", date: "2027-01-29", asjjf_event_ids: [ 2258, 2259 ], venue_name: "Staff venue")
     Asjjf::CalendarWatcher.new(parsed_snapshot).call

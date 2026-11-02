@@ -2,6 +2,9 @@ require "digest"
 
 module Asjjf
   class CalendarWatcher
+    # ASJJF's calendar uses sporting names for some places; the series and site use these.
+    COUNTRY_LABELS = { "chinese taipei" => "Taiwan" }.freeze
+
     # Serialize calendar runs and decisions, including jobs for different seasons.
     def self.synchronize(&block)
       AsjjfCalendarRun.transaction do
@@ -47,6 +50,10 @@ module Asjjf
         @year = Array(summary[:seasons]).find { |season| season[:id] == @snapshot.asjjf_id }&.fetch(:year)
         @year ||= PlanAsjjfCalendarJob::KNOWN_SEASONS.key(@snapshot.asjjf_id)
         raise ArgumentError, "Calendar season year is not published" unless @year
+        # Past seasons are kept as reference evidence only. Fetching or uploading an
+        # old calendar (for example to look up a historical event ID) must never
+        # create drafts, change events or raise review items.
+        next if @year < Time.current.in_time_zone("Pacific/Guam").year - 1
         all_rows = summary.fetch(:events)
         selected = Parsers::SeasonCalendar.select_marianas(all_rows)
         @present_ids = all_rows.map { |row| row.fetch(:event_id) }
@@ -149,7 +156,7 @@ module Asjjf
       # Calendar place is a published label, not a structured street address or city.
       venue, country = row[:place].to_s.split(/\s+-\s+(?=[^-]+\z)/, 2)
       facts["venue_name"] = venue if venue.present?
-      facts["country"] = country if country.present?
+      facts["country"] = COUNTRY_LABELS.fetch(country.strip.downcase, country) if country.present?
       rows.each do |entry|
         key = { "gi" => "registration_url_gi", "nogi" => "registration_url_nogi" }[entry[:discipline]] || "registration_url"
         facts[key] = entry.fetch(:url)

@@ -1138,6 +1138,8 @@ export const api = {
       fetchApi<{ event: Event }>(`/api/v1/admin/events/${id}/unpublish`, { method: 'POST' }, true),
     fillEventFromAsjjf: (id: number, asjjf_event_id: number) =>
       fetchApi<{ event: Event; message: string }>(`/api/v1/admin/events/${id}/fill_asjjf`, { method: 'POST', body: JSON.stringify({ asjjf_event_id }) }, true),
+    verifyEventAgainstAsjjf: (id: number, asjjf_event_id: number) =>
+      fetchApi<{ event: Event; message: string }>(`/api/v1/admin/events/${id}/verify_asjjf`, { method: 'POST', body: JSON.stringify({ asjjf_event_id }) }, true),
     uploadEventImage: (id: number, file: File) => {
       const formData = new FormData();
       formData.append('image', file);

@@ -25,56 +25,62 @@ This is the working plan and status tracker for the end-of-season overhaul. It r
 
 ## Phases
 
-### Phase A — Safety net
+Status as of November 2, 2026. "Live" means merged to `main`, deployed to Render and Netlify, and checked in production.
+
+### Phase A: Safety net
 
 | Item | Status |
 |---|---|
-| A1 CI on `main` (API tests, RuboCop, Brakeman baseline, bundler-audit, web lint/typecheck/build/tests), CodeRabbit config | In progress |
-| A2 Sentry (env-gated), root error boundary, stale-chunk reload, real 404 for missing assets, dependency security updates | In progress |
-| A3 Hardening: pagination limits, last-admin guard, invite-only account linking, JWKS rotation, JSON-LD escaping, real 404 for unknown events, job cleanup, ASJJF rulebook link, invite-only admin sign-in | In progress |
+| A1 CI on `main` (API tests, RuboCop, Brakeman, bundler-audit, web lint/typecheck/build/tests), CodeRabbit config | Live (#111) |
+| A2 Sentry (env-gated), root error boundary, stale-chunk reload, real 404 for missing assets, dependency updates | Live (#111). Sentry has no DSN yet, deferred by Leon. |
+| A3 Hardening: pagination limits, last-admin guard, invite-only account linking, JWKS rotation, JSON-LD escaping, real 404 for unknown events, job cleanup, rulebook link, invite-only admin sign-in | Live (#112) |
 
-### Phase B — ASJJF data pipeline
-
-| Item | Status |
-|---|---|
-| 2027 events from the ASJJF calendar (Copa, Tokyo, Manila, Taiwan) | In progress |
-| B0 Fetcher feasibility: real Chrome on an always-on machine | Planned |
-| B1 Production intake: stored ASJJF page snapshots, signed ingest endpoint, server-side parsers, admin "upload saved page" fallback | Planned |
-| B2 Fetcher service (real Chrome, human pace, no stealth tooling; stops on interactive challenges) | Planned |
-| B3 Results import rebuild: explicit gi/no-gi sources, fail-closed, diff preview, keyed updates that keep manual edits | Planned |
-| B4 Names and identity: one normalizer, hyphen fix, per-result academy, rename detection, merge tools, near-duplicate review | Planned |
-| B5 Official ASJJF Marianas Pro rankings on the Rankings page and profiles | Planned |
-| B6 ASJJF calendar watcher: new Marianas events appear as drafts for review | Planned |
-| B7 Automation: scheduled syncs, review holds, email alerts, admin sync status | Planned |
-| Data repair: re-import affected events, apply confirmed merges and renames | Planned |
-
-### Phase C — Season-aware site and design
+### Phase B: ASJJF data pipeline
 
 | Item | Status |
 |---|---|
-| C1 Season states (pre-event, live, post-event, off-season) | Planned |
-| C2 Accessibility and performance (contrast, labels, layout shift, fonts, images, bundle) | Planned |
-| C3 Translation completeness | Planned |
-| C4 Visual refresh (keep the dark identity; Impeccable-led, Emil motion standards) | Planned |
+| 2027 events from the ASJJF calendar (Copa, Tokyo, Manila, Taiwan) | Live (#113). Facts checked against ASJJF event pages on Nov 2; evidence linking in #134. |
+| B0/B2 Fetcher: real Chrome on the Mac mini, human pace, stops on challenges | Live (#114, #117, #127, #133) |
+| B1 Production intake: stored snapshots, signed ingest, server-side parsers, admin upload fallback | Live (#115, #132) |
+| B3 Results import rebuild: explicit Gi/No-Gi sources, fail-closed, diff preview, keyed updates | Live (#120, #125, #131) |
+| B4 Names and identity: normalizer, per-result academy, merge tools | Live (#116) |
+| B5 Official ASJJF Marianas Pro rankings | Live (#121) |
+| B6 ASJJF calendar watcher | Live (#128). First check on Nov 2 proposed 4 changes. |
+| B7 Automation: scheduled syncs, review holds, alerts, admin sync status | Live (#120) |
+| Data repair: all 2026 events | Done. All eight 2026 events have results split into Gi and No-Gi, with no division showing two golds. Hong Kong 2026 imported Nov 2 (334 results, matching ASJJF). |
+| Data repair: Korea 2024, Manila 2025, Taiwan 2025 Gi/No-Gi relabel | Blocked. ASJJF redirects these pages outside the fetcher boundary; #133 logs the target for a decision. |
 
-### Phase D — Self-service admin
-
-| Item | Status |
-|---|---|
-| D1 Season rollover with review checklist | Planned |
-| D2 Sponsor placements and featured sponsor bar | Planned |
-| D3 Editable copy for remaining hard-coded text | Planned |
-| D4 Photo intake (zip upload, day albums from timestamps, review queue) | Planned |
-| D5 "Needs attention" dashboard, analytics link, help page, viewer role decision | Planned |
-| D6 Watch page upkeep (hide removed YouTube videos) | Planned |
-
-### Phase E — Operations
+### Phase C: Season-aware site and design
 
 | Item | Status |
 |---|---|
-| Ownership inventory for domain, hosting, database, storage, auth, analytics, and email | Planned |
-| Backup restore test | Planned |
-| Branch and worktree cleanup | Planned |
+| C1 Season states (pre-event, live, post-event, off-season) | Live (#119) |
+| C2 Accessibility and performance | Live (#118) |
+| C3 Translation completeness | Live (#130) |
+| C4 Visual refresh (design brief, shared building blocks, home, event pages, results, profiles, gallery) | In progress: two workers. Needs Leon's sign-off on before/after before merge, then Steve and Carm's review. |
+| Registration opening date on public pages (no Register buttons before ASJJF opens registration) | In progress, part of C4 |
+
+### Phase D: Self-service admin
+
+| Item | Status |
+|---|---|
+| D1 Season rollover with review checklist | Live (#124) |
+| D2 Sponsor placements and featured sponsor bar | Live (#122) |
+| D3 Editable copy for remaining hard-coded text | Live (#130) |
+| D4 Photo intake (zip upload, day albums, review queue) | Live (#123) |
+| D5 Needs attention dashboard, help page, read-only viewer role | Live (#129) |
+| D6 Watch page upkeep | Live (#126) |
+| Carm's phone walkthrough (set up an event, upload photos, add a sponsor) | Waiting on scheduling (draft message ready) |
+
+### Phase E: Operations
+
+| Item | Status |
+|---|---|
+| Ownership inventory for domain, hosting, database, storage, auth, analytics, email | Done; kept privately in Brain-Dump with items for Leon to confirm |
+| Backup restore test | Passed Nov 2 (Neon point-in-time branch, compared with production, deleted) |
+| Failed background jobs | 43 stale jobs from May cleared Nov 2 |
+| Branch and worktree cleanup | Ongoing after each merge |
+| Merge `main` into `staging` | Scheduled after C4 merges (30 conflicting files with the merchandise work) |
 
 ## Open questions for the Marianas Open team (not blocking)
 

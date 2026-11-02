@@ -31,7 +31,7 @@ export default function PublishingSection({
   }, [event.status])
   const [reason, setReason] = useState('')
   const [override, setOverride] = useState(false)
-  const [asjjfId, setAsjjfId] = useState(String(event.asjjf_info_id ?? ''))
+  const [asjjfId, setAsjjfId] = useState(String(event.asjjf_info_id ?? event.asjjf_event_ids?.[0] ?? ''))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function PublishingSection({
       active = false
     }
   }, [])
-  const perform = async (action: 'publish' | 'unpublish' | 'fill') => {
+  const perform = async (action: 'publish' | 'unpublish' | 'fill' | 'verify') => {
     if (dirty || busy) return
     if (action === 'publish' && override && (reason.trim().length < 10 || reason.trim().length > 2000)) {
       setError('Override reason must be 10–2000 characters.')
@@ -56,9 +56,12 @@ export default function PublishingSection({
     onBusyChange?.(true)
     setError('')
     try {
-      if (action === 'fill') {
+      if (action === 'fill' || action === 'verify') {
         if (!/^\d+$/.test(asjjfId.trim()) || Number(asjjfId) < 1) throw new Error('Enter a positive ASJJF info ID.')
-        const result = await api.admin.fillEventFromAsjjf(event.id, Number(asjjfId))
+        const result =
+          action === 'fill'
+            ? await api.admin.fillEventFromAsjjf(event.id, Number(asjjfId))
+            : await api.admin.verifyEventAgainstAsjjf(event.id, Number(asjjfId))
         onUpdate(result.event, result.message)
       } else {
         const result =
@@ -170,23 +173,32 @@ export default function PublishingSection({
           Current saved status: {event.status}. Overrides require administrator permission and a recorded reason.
         </p>
       </div>
-      <fieldset
-        disabled={dirty || busy || event.status !== 'draft'}
-        className="border border-white/10 p-4 space-y-3 min-w-0"
-      >
-        <legend className="px-1 font-semibold">Fill official event information</legend>
+      <fieldset disabled={dirty || busy} className="border border-white/10 p-4 space-y-3 min-w-0">
+        <legend className="px-1 font-semibold">
+          {event.status === 'draft' ? 'Fill official event information' : 'Verify against ASJJF'}
+        </legend>
         <Field label="ASJJF info ID" value={asjjfId} onChange={setAsjjfId} />
-        <p className="text-sm text-text-secondary">
-          Fills dates, venue, stars, fees and deadlines from a saved snapshot. Review any existing values before
-          continuing. If unavailable, the server queues a fetch.
-        </p>
-        {event.status !== 'draft' && (
-          <p className="text-sm text-amber-300">Unpublish to draft before filling official information.</p>
+        {event.status === 'draft' ? (
+          <p className="text-sm text-text-secondary">
+            Fills dates, venue, stars, fees and deadlines from a saved snapshot. Review any existing values before
+            continuing. If unavailable, the server queues a fetch.
+          </p>
+        ) : (
+          <p className="text-sm text-text-secondary">
+            Checks that this event's dates and star rating match the saved ASJJF page and links it as evidence.
+            Nothing on the public page changes.
+          </p>
         )}
         <p className="text-sm text-text-muted">Snapshot status: {event.asjjf_info_status || 'Not linked'}</p>
-        <AdminWriteButton type="button" onClick={() => perform('fill')} className="px-4 border border-white/10 text-gold">
-          Fill from ASJJF
-        </AdminWriteButton>
+        {event.status === 'draft' ? (
+          <AdminWriteButton type="button" onClick={() => perform('fill')} className="px-4 border border-white/10 text-gold">
+            Fill from ASJJF
+          </AdminWriteButton>
+        ) : (
+          <AdminWriteButton type="button" onClick={() => perform('verify')} className="px-4 border border-white/10 text-gold">
+            Verify against ASJJF
+          </AdminWriteButton>
+        )}
       </fieldset>
       {error && (
         <p role="alert" className="text-sm text-red-300">
