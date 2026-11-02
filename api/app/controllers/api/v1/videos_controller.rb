@@ -2,7 +2,7 @@ module Api
   module V1
     class VideosController < ApplicationController
       def index
-        videos = Video.published.includes(:event).order(sort_order: :asc, created_at: :desc)
+        videos = Video.published.visible.includes(:event).order(sort_order: :asc, created_at: :desc)
         videos = videos.where(event_id: params[:event_id]) if params[:event_id].present?
         videos = videos.where(belt_rank: params[:belt_rank]) if params[:belt_rank].present?
         videos = videos.where(weight_class: params[:weight_class]) if params[:weight_class].present?
@@ -12,7 +12,7 @@ module Api
       end
 
       def show
-        video = Video.published.find(params[:id])
+        video = Video.published.visible.find(params[:id])
         render json: video
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Video not found" }, status: :not_found

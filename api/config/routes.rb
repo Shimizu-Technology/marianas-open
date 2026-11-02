@@ -8,6 +8,7 @@ Rails.application.routes.draw do
         get 'gallery', to: 'event_gallery_images#index'
       end
       resources :sponsors, only: [:index]
+      resources :sponsor_placements, only: [:index]
       resources :competitors, only: [:index, :show]
       resources :academies, only: [:index, :show]
       resources :videos, only: [:index, :show]
@@ -100,7 +101,9 @@ Rails.application.routes.draw do
           resources :event_gallery_day_proposals, only: [ :index, :create ], path: 'gallery-day-proposals'
           resources :event_gallery_upload_batches, only: [:index, :show, :create, :update, :destroy], path: 'gallery-upload-batches'
         end
-        resources :videos
+        resources :videos do
+          post :check_availability, on: :member
+        end
         resources :sponsors do
           member do
             post :upload_logo

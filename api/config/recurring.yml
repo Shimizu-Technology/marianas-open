@@ -40,3 +40,7 @@ plan_results_sync:
 requeue_stale_gallery_imports:
   class: RequeueStaleGalleryImportsJob
   schedule: every 10 minutes
+
+check_video_availability:
+  class: CheckAllVideoAvailabilityJob
+  schedule: every day at 2am UTC

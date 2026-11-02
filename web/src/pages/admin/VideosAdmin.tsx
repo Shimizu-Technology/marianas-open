@@ -41,6 +41,8 @@ export default function VideosAdmin() {
   const [videos, setVideos] = useState<Video[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
+  const [unavailableOnly, setUnavailableOnly] = useState(false)
+  const [checking, setChecking] = useState<number | null>(null)
   const [editing, setEditing] = useEditingParam()
 
   const [form, setForm] = useState<VideoFormData>(emptyForm)
@@ -125,6 +127,20 @@ export default function VideosAdmin() {
     }
   }
 
+  const handleCheck = async (id: number) => {
+    setChecking(id)
+    setError('')
+    try {
+      await api.admin.checkVideoAvailability(id)
+      setSuccess('Check queued. Refresh the list shortly to see the result.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Check failed')
+    } finally {
+      setChecking(null)
+    }
+  }
+
+  const visibleVideos = unavailableOnly ? videos.filter(v => v.availability_hidden) : videos
   const youtubePreviewId = getYouTubeId(form.youtube_url)
 
   if (loading) {
@@ -162,6 +178,11 @@ export default function VideosAdmin() {
         </p>
       </div>
 
+      <div className="flex flex-wrap gap-4 items-center mb-4 text-sm">
+        <label className="flex items-center gap-2"><input type="checkbox" checked={unavailableOnly} onChange={e => setUnavailableOnly(e.target.checked)} />Unavailable only (hidden)</label>
+        <button className="text-gold underline" onClick={load}>Refresh status</button>
+      </div>
+      <p className="mb-4 text-sm text-text-muted">YouTube is checked nightly and after saves. Two consecutive removed or private/restricted results hide a video from Watch. A successful check restores it if published. Network errors are unknown and do not change visibility. Drafts stay drafts.</p>
       <AnimatePresence>
         {success && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -342,13 +363,13 @@ export default function VideosAdmin() {
         </motion.div>
       ) : (
         <div className="bg-surface border border-white/5">
-          {videos.length === 0 ? (
+          {visibleVideos.length === 0 ? (
             <div className="p-8 text-center text-text-muted text-sm">
-              No videos yet. Add your first video.
+              {unavailableOnly ? 'No hidden unavailable videos.' : 'No videos yet. Add your first video.'}
             </div>
           ) : (
             <div className="divide-y divide-white/5">
-              {videos.map(video => (
+              {visibleVideos.map(video => (
                 <div key={video.id} className="px-4 sm:px-5 py-3 flex items-start sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
                     {video.youtube_video_id ? (
@@ -380,10 +401,14 @@ export default function VideosAdmin() {
                         <span className={video.status === 'draft' ? 'text-yellow-400' : 'text-green-400'}>
                           {video.status}
                         </span>
+                        <span>YouTube: {video.availability_status || 'unknown'}{video.availability_hidden ? ' · Hidden from Watch' : ''}</span>
+                        <span>Last checked: {video.availability_checked_at ? new Date(video.availability_checked_at).toLocaleString() : 'Never'}</span>
+                        <span>Consecutive failures: {video.consecutive_failures || 0}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <button disabled={checking === video.id} onClick={() => handleCheck(video.id)} className="text-xs text-gold underline disabled:opacity-50">{checking === video.id ? 'Queuing…' : 'Check now'}</button>
                     <button
                       onClick={() => {
                         setForm({

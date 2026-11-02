@@ -1,0 +1,42 @@
+[
+  {
+    "width": 390,
+    "case": "updated editor labels/previews/no overflow and sticky Save visible",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "pending save locks name/logo fields; error retains edits and is visible; retry success is visible",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "missing editor target shows return action and cannot create a sponsor",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "event reorder rows and move buttons include event scope without overflow",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "updated editor labels/previews/no overflow and sticky Save visible",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "pending save locks name/logo fields; error retains edits and is visible; retry success is visible",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "missing editor target shows return action and cannot create a sponsor",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "event reorder rows and move buttons include event scope without overflow",
+    "status": "passed"
+  }
+]

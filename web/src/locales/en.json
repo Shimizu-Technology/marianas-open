@@ -275,7 +275,9 @@
     "category": {
       "gi": "Gi",
       "noGi": "No-Gi"
-    }
+    },
+    "clearFilters": "Clear filters",
+    "loadError": "Videos could not be loaded. Please refresh to try again."
   },
   "share": {
     "defaultText": "Check out the Marianas Open — International BJJ Championship!",
@@ -728,5 +730,82 @@
     "noHolds": "No ranking snapshots need review.",
     "savedSummary": "Inspect saved summary",
     "refresh": "Refresh held snapshots"
+  },
+  "sponsorPlacements": {
+    "loadError": "Sponsors could not be loaded. Please try again.",
+    "featured": "Featured sponsors",
+    "presenting": "Presenting partner",
+    "secondary": "Supporting partners",
+    "official": "Official sponsors",
+    "learnMore": "Learn more",
+    "watchVideo": "Watch {{name}} video",
+    "video": "Video",
+    "closeVideo": "Close video"
+  },
+  "sponsorAdmin": {
+    "notFound": "This sponsor could not be found. Return to the sponsor list.",
+    "title": "Sponsors",
+    "intro": "Add a sponsor, choose where it appears, and set dates.",
+    "add": "Add sponsor",
+    "saved": "Sponsor and placements saved.",
+    "saveFailed": "Could not save. Please try again.",
+    "deleted": "Sponsor deleted.",
+    "orderSaved": "Display order saved.",
+    "loading": "Loading sponsors…",
+    "edit": "Edit sponsor",
+    "back": "Back to sponsors",
+    "name": "Sponsor name",
+    "website": "Website (optional)",
+    "logos": "Logos",
+    "logoHelp": "PNG, JPEG, WebP or GIF, up to 10 MB. Use the regular logo on white. Add an optional version for dark backgrounds.",
+    "lightLogo": "Regular logo (white background)",
+    "darkLogo": "Logo for dark backgrounds (optional)",
+    "where": "Where and when to show this sponsor",
+    "placementNumber": "Placement {{number}}",
+    "removePlacement": "Remove placement",
+    "showOn": "Show on",
+    "eventTier": "Event sponsor label",
+    "eventScope": "Event page",
+    "allEvents": "All event pages",
+    "eventHelp": "To show on several selected events, add a placement for each event.",
+    "start": "First day (optional)",
+    "end": "Last day (optional)",
+    "order": "Display order",
+    "scheduleHelp": "Leave dates blank to keep showing. Both dates are included, using Guam time. Lower order numbers appear first.",
+    "headline": "Headline (optional)",
+    "blurb": "Short message (optional)",
+    "translationHelp": "Headlines and messages use the existing automatic translation service after saving.",
+    "video": "YouTube or Vimeo link (optional)",
+    "cta": "Link for this placement (optional)",
+    "addPlacement": "Add another placement",
+    "preview": "Preview",
+    "previewHelp": "Preview includes scheduled placements. Dates control visibility on the public site. Logos appear at full opacity.",
+    "saving": "Saving…",
+    "save": "Save sponsor",
+    "history": "Recent changes",
+    "allSponsors": "All sponsors",
+    "empty": "No sponsors yet. Add your first sponsor above.",
+    "placementCount": "{{count}} placements",
+    "delete": "Delete",
+    "confirmDelete": "Delete {{name}} and all its placements? This cannot be undone.",
+    "deleteConfirm": "Yes, delete sponsor",
+    "cancel": "Cancel",
+    "reorder": "Change display order",
+    "moveUp": "Move {{name}} up",
+    "moveDown": "Move {{name}} down",
+    "locations": {
+      "featured_bar": "Home page featured bar",
+      "presenting": "Home page presenting partner",
+      "secondary": "Home page supporting partners",
+      "official": "Home page official sponsor grid",
+      "event": "Event pages"
+    },
+    "actions": {
+      "created": "Created",
+      "updated": "Updated",
+      "deleted": "Deleted",
+      "uploaded_logo": "Regular logo uploaded",
+      "uploaded_logo_dark": "Dark logo uploaded"
+    }
   }
 }

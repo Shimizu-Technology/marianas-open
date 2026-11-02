@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -832,6 +832,39 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "sponsor_audit_logs", force: :cascade do |t|
+    t.string "action", null: false
+    t.bigint "actor_id"
+    t.string "actor_name", null: false
+    t.jsonb "change_set", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.bigint "sponsor_id"
+    t.string "sponsor_name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_sponsor_audit_logs_on_actor_id"
+    t.index ["sponsor_id"], name: "index_sponsor_audit_logs_on_sponsor_id"
+  end
+
+  create_table "sponsor_placements", force: :cascade do |t|
+    t.text "blurb"
+    t.datetime "created_at", null: false
+    t.string "cta_url"
+    t.string "display_tier", default: "official", null: false
+    t.date "ends_on"
+    t.bigint "event_id"
+    t.string "headline"
+    t.string "placement_type", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.bigint "sponsor_id", null: false
+    t.date "starts_on"
+    t.string "translation_status", default: "pending"
+    t.jsonb "translations", default: {}, null: false
+    t.datetime "updated_at", null: false
+    t.string "video_url"
+    t.index ["event_id"], name: "index_sponsor_placements_on_event_id"
+    t.index ["sponsor_id"], name: "index_sponsor_placements_on_sponsor_id"
+  end
+
   create_table "sponsors", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -862,10 +895,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
   end
 
   create_table "videos", force: :cascade do |t|
+    t.datetime "availability_checked_at"
+    t.boolean "availability_hidden", default: false, null: false
+    t.string "availability_status", default: "unknown", null: false
     t.string "belt_rank"
     t.string "category"
     t.string "competitor_1_name"
     t.string "competitor_2_name"
+    t.integer "consecutive_failures", default: 0, null: false
     t.datetime "created_at", null: false
     t.integer "duration_seconds"
     t.bigint "event_id"
@@ -932,6 +969,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_203000) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "sponsor_audit_logs", "sponsors", on_delete: :nullify
+  add_foreign_key "sponsor_audit_logs", "users", column: "actor_id", on_delete: :nullify
+  add_foreign_key "sponsor_placements", "events", on_delete: :cascade
+  add_foreign_key "sponsor_placements", "sponsors"
   add_foreign_key "sponsors", "organizations"
   add_foreign_key "users", "users", column: "invited_by_id", on_delete: :nullify
   add_foreign_key "videos", "events"

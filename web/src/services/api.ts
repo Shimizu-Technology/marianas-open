@@ -332,6 +332,23 @@ export interface EventAccommodationFormData {
   active: boolean;
 }
 
+export interface SponsorPlacement {
+  id?: number;
+  placement_type: 'featured_bar' | 'presenting' | 'secondary' | 'official' | 'event';
+  display_tier: 'presenting' | 'secondary' | 'official';
+  event_id: number | null;
+  sort_order: number;
+  starts_on: string | null;
+  ends_on: string | null;
+  headline: string | null;
+  blurb: string | null;
+  video_url: string | null;
+  cta_url: string | null;
+  translations?: Record<string, unknown>;
+  sponsor?: Sponsor;
+  _destroy?: boolean;
+}
+
 export interface Sponsor {
   id: number;
   name: string;
@@ -339,6 +356,9 @@ export interface Sponsor {
   website_url: string | null;
   sort_order: number;
   logo_url: string | null;
+  logo_dark_url?: string | null;
+  placements?: SponsorPlacement[];
+  audit_history?: { action: string; actor_name: string; created_at: string }[];
 }
 
 export interface AsjjfHeartbeat {
@@ -415,6 +435,11 @@ export interface Video {
   featured: boolean;
   status: string;
   event_name: string | null;
+  event_date?: string | null;
+  availability_status?: 'available' | 'removed' | 'restricted' | 'unknown';
+  availability_checked_at?: string | null;
+  consecutive_failures?: number;
+  availability_hidden?: boolean;
 }
 
 export interface VideoFormData {
@@ -496,6 +521,7 @@ export interface EventFormData {
 }
 
 export interface SponsorFormData {
+  sponsor_placements_attributes?: SponsorPlacement[];
   name: string;
   tier: string;
   website_url: string;
@@ -1001,6 +1027,7 @@ export const api = {
   getEventResultsSummary: (slug: string) =>
     fetchApi<EventResultsSummary>(`/api/v1/events/${slug}/results/summary`),
   getSponsors: () => fetchApi<Sponsor[]>('/api/v1/sponsors'),
+  getSponsorPlacements: (eventId?: number) => fetchApi<{ sponsor_placements: SponsorPlacement[] }>(`/api/v1/sponsor_placements${eventId ? `?event_id=${eventId}` : ''}`),
   getAnnouncements: () => fetchApi<{ announcements: Announcement[] }>('/api/v1/announcements'),
   getCompetitors: (params?: Record<string, string>) => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
@@ -1248,9 +1275,10 @@ export const api = {
       }, true),
     deleteSponsor: (id: number) =>
       fetchApi<void>(`/api/v1/admin/sponsors/${id}`, { method: 'DELETE' }, true),
-    uploadSponsorLogo: (id: number, file: File) => {
+    uploadSponsorLogo: (id: number, file: File, variant: 'light' | 'dark' = 'light') => {
       const formData = new FormData();
       formData.append('logo', file);
+      formData.append('variant', variant);
       return fetchApiUpload<{ sponsor: Sponsor }>(`/api/v1/admin/sponsors/${id}/upload_logo`, formData);
     },
 
@@ -1311,6 +1339,7 @@ export const api = {
     uploadAcademyLogo: (id: number, file: File) => {
       const formData = new FormData();
       formData.append('logo', file);
+
       return fetchApiUpload<{ academy: Academy }>(`/api/v1/admin/academies/${id}/upload_logo`, formData);
     },
 
@@ -1326,6 +1355,8 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(data),
       }, true),
+    checkVideoAvailability: (id: number) =>
+      fetchApi<{ message: string }>(`/api/v1/admin/videos/${id}/check_availability`, { method: 'POST' }, true),
     deleteVideo: (id: number) =>
       fetchApi<void>(`/api/v1/admin/videos/${id}`, { method: 'DELETE' }, true),
 
@@ -1447,6 +1478,7 @@ export const api = {
     uploadOrgLogo: (file: File) => {
       const formData = new FormData();
       formData.append('logo', file);
+
       return fetchApiUpload<Organization>('/api/v1/admin/organization/upload_logo', formData);
     },
     uploadOrgBanner: (file: File) => {

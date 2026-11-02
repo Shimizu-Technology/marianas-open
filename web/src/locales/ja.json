@@ -251,7 +251,9 @@
     "category": {
       "gi": "Gi",
       "noGi": "No-Gi"
-    }
+    },
+    "clearFilters": "フィルターをクリア",
+    "loadError": "動画を読み込めませんでした。ページを再読み込みしてお試しください。"
   },
   "share": {
     "defaultText": "Marianas Open — 国際BJJ選手権をチェック！",
@@ -683,5 +685,82 @@
     "noHolds": "確認が必要なランキング取得データはありません。",
     "savedSummary": "保存済みの内容を確認",
     "refresh": "確認待ちを更新"
+  },
+  "sponsorPlacements": {
+    "loadError": "スポンサーを読み込めませんでした。もう一度お試しください。",
+    "featured": "注目のスポンサー",
+    "presenting": "プレゼンティングパートナー",
+    "secondary": "協賛パートナー",
+    "official": "公式スポンサー",
+    "learnMore": "詳細を見る",
+    "watchVideo": "{{name}}の動画を視聴",
+    "video": "動画",
+    "closeVideo": "動画を閉じる"
+  },
+  "sponsorAdmin": {
+    "notFound": "このスポンサーが見つかりませんでした。スポンサー一覧に戻ってください。",
+    "title": "スポンサー",
+    "intro": "スポンサーを追加し、掲載場所と掲載期間を設定します.",
+    "add": "スポンサーを追加",
+    "saved": "スポンサーと掲載設定を保存しました.",
+    "saveFailed": "保存できませんでした. もう一度お試しください.",
+    "deleted": "スポンサーを削除しました.",
+    "orderSaved": "表示順を保存しました.",
+    "loading": "スポンサーを読み込み中…",
+    "edit": "スポンサーを編集",
+    "back": "スポンサー一覧に戻る",
+    "name": "スポンサー名",
+    "website": "ウェブサイト (任意)",
+    "logos": "ロゴ",
+    "logoHelp": "PNG, JPEG, WebP または GIF, 最大 10 MB. 白い背景には通常のロゴを使用してください. 暗い背景用のロゴも任意で追加できます.",
+    "lightLogo": "通常のロゴ (白い背景用)",
+    "darkLogo": "暗い背景用のロゴ (任意)",
+    "where": "このスポンサーの掲載場所と掲載期間",
+    "placementNumber": "掲載設定 {{number}}",
+    "removePlacement": "掲載設定を削除",
+    "showOn": "掲載場所",
+    "eventTier": "大会スポンサーの区分名",
+    "eventScope": "大会ページ",
+    "allEvents": "すべての大会ページ",
+    "eventHelp": "特定の複数の大会に掲載するには、大会ごとに掲載設定を追加してください.",
+    "start": "掲載開始日 (任意)",
+    "end": "掲載終了日 (任意)",
+    "order": "表示順",
+    "scheduleHelp": "掲載を継続するには日付を空欄にしてください. 日付はグアム時間を基準とし、開始日と終了日の両日を含みます. 表示順の数字が小さいものから先に表示されます.",
+    "headline": "見出し (任意)",
+    "blurb": "短いメッセージ (任意)",
+    "translationHelp": "見出しとメッセージは、保存後に既存の自動翻訳サービスで翻訳されます.",
+    "video": "YouTube または Vimeo のリンク (任意)",
+    "cta": "この掲載設定のリンク (任意)",
+    "addPlacement": "別の掲載設定を追加",
+    "preview": "プレビュー",
+    "previewHelp": "プレビューには掲載予定の設定も含まれます. 公開サイトでの表示は設定した日付で制御されます. ロゴは不透明度100%で表示されます.",
+    "saving": "保存中…",
+    "save": "スポンサーを保存",
+    "history": "最近の変更",
+    "allSponsors": "すべてのスポンサー",
+    "empty": "スポンサーはまだ登録されていません. 上から最初のスポンサーを追加してください.",
+    "placementCount": "{{count}} 件の掲載設定",
+    "delete": "削除",
+    "confirmDelete": "{{name}} とそのすべての掲載設定を削除しますか? この操作は元に戻せません.",
+    "deleteConfirm": "はい、スポンサーを削除",
+    "cancel": "キャンセル",
+    "reorder": "表示順を変更",
+    "moveUp": "{{name}} を上に移動",
+    "moveDown": "{{name}} を下に移動",
+    "locations": {
+      "featured_bar": "ホームページの注目欄",
+      "presenting": "ホームページのプレゼンティングパートナー欄",
+      "secondary": "ホームページの協力パートナー欄",
+      "official": "ホームページの公式スポンサー一覧",
+      "event": "大会ページ"
+    },
+    "actions": {
+      "created": "作成済み",
+      "updated": "更新済み",
+      "deleted": "削除済み",
+      "uploaded_logo": "通常ロゴをアップロード済み",
+      "uploaded_logo_dark": "ダーク版ロゴをアップロード済み"
+    }
   }
 }

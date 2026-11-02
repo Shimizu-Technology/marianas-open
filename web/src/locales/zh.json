@@ -251,7 +251,9 @@
     "category": {
       "gi": "道服",
       "noGi": "无道服"
-    }
+    },
+    "clearFilters": "清除筛选条件",
+    "loadError": "无法加载视频。请刷新页面重试。"
   },
   "share": {
     "defaultText": "快来了解 Marianas Open——国际巴西柔术锦标赛！",
@@ -683,5 +685,82 @@
     "noHolds": "没有需要审核的排名快照。",
     "savedSummary": "查看保存的摘要",
     "refresh": "刷新待审核快照"
+  },
+  "sponsorPlacements": {
+    "loadError": "无法加载赞助商。请重试。",
+    "featured": "精选赞助商",
+    "presenting": "冠名合作伙伴",
+    "secondary": "支持合作伙伴",
+    "official": "官方赞助商",
+    "learnMore": "了解更多",
+    "watchVideo": "观看 {{name}} 视频",
+    "video": "视频",
+    "closeVideo": "关闭视频"
+  },
+  "sponsorAdmin": {
+    "notFound": "找不到此赞助商。请返回赞助商列表。",
+    "title": "赞助商",
+    "intro": "添加赞助商, 选择展示位置并设置日期.",
+    "add": "添加赞助商",
+    "saved": "赞助商及展示设置已保存.",
+    "saveFailed": "无法保存. 请重试.",
+    "deleted": "赞助商已删除.",
+    "orderSaved": "展示顺序已保存.",
+    "loading": "正在加载赞助商…",
+    "edit": "编辑赞助商",
+    "back": "返回赞助商列表",
+    "name": "赞助商名称",
+    "website": "网站 (可选)",
+    "logos": "标志",
+    "logoHelp": "PNG, JPEG, WebP 或 GIF, 最大 10 MB. 白色背景使用常规标志. 可另行添加适用于深色背景的版本.",
+    "lightLogo": "常规标志 (白色背景)",
+    "darkLogo": "深色背景标志 (可选)",
+    "where": "此赞助商的展示位置和时间",
+    "placementNumber": "展示设置 {{number}}",
+    "removePlacement": "移除展示设置",
+    "showOn": "展示位置",
+    "eventTier": "赛事赞助商标签",
+    "eventScope": "赛事页面",
+    "allEvents": "所有赛事页面",
+    "eventHelp": "如需在多个指定赛事页面展示, 请为每项赛事分别添加展示设置.",
+    "start": "开始日期 (可选)",
+    "end": "结束日期 (可选)",
+    "order": "展示顺序",
+    "scheduleHelp": "日期留空则持续展示. 起止日期均包含在内, 以关岛时间为准. 排序数字越小越靠前.",
+    "headline": "标题 (可选)",
+    "blurb": "简短文案 (可选)",
+    "translationHelp": "保存后, 标题和文案将通过现有的自动翻译服务进行翻译.",
+    "video": "YouTube 或 Vimeo 链接 (可选)",
+    "cta": "此展示位置的链接 (可选)",
+    "addPlacement": "添加另一项展示设置",
+    "preview": "预览",
+    "previewHelp": "预览包含已设定展示时间的内容. 日期决定内容在公开网站上的展示时间. 标志以完全不透明的状态显示.",
+    "saving": "正在保存…",
+    "save": "保存赞助商",
+    "history": "最近更改",
+    "allSponsors": "所有赞助商",
+    "empty": "暂无赞助商. 请在上方添加首位赞助商.",
+    "placementCount": "{{count}} 项展示设置",
+    "delete": "删除",
+    "confirmDelete": "删除 {{name}} 及其所有展示设置? 此操作无法撤销.",
+    "deleteConfirm": "是的, 删除赞助商",
+    "cancel": "取消",
+    "reorder": "更改展示顺序",
+    "moveUp": "上移 {{name}}",
+    "moveDown": "下移 {{name}}",
+    "locations": {
+      "featured_bar": "首页精选栏",
+      "presenting": "首页冠名合作伙伴",
+      "secondary": "首页支持合作伙伴",
+      "official": "首页官方赞助商网格",
+      "event": "赛事页面"
+    },
+    "actions": {
+      "created": "已创建",
+      "updated": "已更新",
+      "deleted": "已删除",
+      "uploaded_logo": "常规标志已上传",
+      "uploaded_logo_dark": "深色标志已上传"
+    }
   }
 }

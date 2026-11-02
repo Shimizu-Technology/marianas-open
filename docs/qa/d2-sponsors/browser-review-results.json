@@ -1,0 +1,62 @@
+[
+  {
+    "width": 390,
+    "case": "initial API failure has visible translated Retry; real API recovery restores sponsors",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "home tiers/Hotel CTA; keyboard video open/Escape/focus; no autoplay/overflow",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "failed refresh retains last successful sponsors and Retry recovers",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "open visible page refreshes actual server scheduling window without navigation",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "2026 event scoped Hotel, tier labels/full opacity, no overflow",
+    "status": "passed"
+  },
+  {
+    "width": 390,
+    "case": "Hotel Tano excluded from Copa 2027",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "initial API failure has visible translated Retry; real API recovery restores sponsors",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "home tiers/Hotel CTA; keyboard video open/Escape/focus; no autoplay/overflow",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "failed refresh retains last successful sponsors and Retry recovers",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "open visible page refreshes actual server scheduling window without navigation",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "2026 event scoped Hotel, tier labels/full opacity, no overflow",
+    "status": "passed"
+  },
+  {
+    "width": 1440,
+    "case": "Hotel Tano excluded from Copa 2027",
+    "status": "passed"
+  }
+]

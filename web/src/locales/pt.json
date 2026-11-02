@@ -251,7 +251,9 @@
     "category": {
       "gi": "Gi",
       "noGi": "No-Gi"
-    }
+    },
+    "clearFilters": "Limpar filtros",
+    "loadError": "Não foi possível carregar os vídeos. Atualize a página para tentar novamente."
   },
   "share": {
     "defaultText": "Confira o Marianas Open — Campeonato Internacional de BJJ!",
@@ -685,5 +687,82 @@
     "noHolds": "Nenhuma captura de ranking precisa de revisão.",
     "savedSummary": "Ver resumo salvo",
     "refresh": "Atualizar capturas pendentes"
+  },
+  "sponsorPlacements": {
+    "loadError": "Não foi possível carregar os patrocinadores. Tente novamente.",
+    "featured": "Patrocinadores em destaque",
+    "presenting": "Parceiro apresentador",
+    "secondary": "Parceiros apoiadores",
+    "official": "Patrocinadores oficiais",
+    "learnMore": "Saiba mais",
+    "watchVideo": "Assistir ao vídeo de {{name}}",
+    "video": "Vídeo",
+    "closeVideo": "Fechar vídeo"
+  },
+  "sponsorAdmin": {
+    "notFound": "Este patrocinador não foi encontrado. Volte à lista de patrocinadores.",
+    "title": "Patrocinadores",
+    "intro": "Adicione um patrocinador, escolha onde ele aparece e defina as datas.",
+    "add": "Adicionar patrocinador",
+    "saved": "Patrocinador e inserções salvos.",
+    "saveFailed": "Não foi possível salvar. Tente novamente.",
+    "deleted": "Patrocinador excluído.",
+    "orderSaved": "Ordem de exibição salva.",
+    "loading": "Carregando patrocinadores…",
+    "edit": "Editar patrocinador",
+    "back": "Voltar aos patrocinadores",
+    "name": "Nome do patrocinador",
+    "website": "Site (opcional)",
+    "logos": "Logotipos",
+    "logoHelp": "PNG, JPEG, WebP ou GIF, até 10 MB. Use o logotipo padrão sobre fundo branco. Adicione uma versão opcional para fundos escuros.",
+    "lightLogo": "Logotipo padrão (fundo branco)",
+    "darkLogo": "Logotipo para fundos escuros (opcional)",
+    "where": "Onde e quando exibir este patrocinador",
+    "placementNumber": "Inserção {{number}}",
+    "removePlacement": "Remover inserção",
+    "showOn": "Exibir em",
+    "eventTier": "Designação do patrocinador do evento",
+    "eventScope": "Página do evento",
+    "allEvents": "Todas as páginas de eventos",
+    "eventHelp": "Para exibir em vários eventos selecionados, adicione uma inserção para cada evento.",
+    "start": "Primeiro dia (opcional)",
+    "end": "Último dia (opcional)",
+    "order": "Ordem de exibição",
+    "scheduleHelp": "Deixe as datas em branco para manter a exibição. Ambas as datas estão incluídas, seguindo o horário de Guam. Números de ordem menores aparecem primeiro.",
+    "headline": "Título (opcional)",
+    "blurb": "Mensagem curta (opcional)",
+    "translationHelp": "Os títulos e as mensagens usam o serviço de tradução automática existente após serem salvos.",
+    "video": "Link do YouTube ou Vimeo (opcional)",
+    "cta": "Link para esta inserção (opcional)",
+    "addPlacement": "Adicionar outra inserção",
+    "preview": "Prévia",
+    "previewHelp": "A prévia inclui inserções agendadas. As datas controlam a visibilidade no site público. Os logotipos aparecem com opacidade total.",
+    "saving": "Salvando…",
+    "save": "Salvar patrocinador",
+    "history": "Alterações recentes",
+    "allSponsors": "Todos os patrocinadores",
+    "empty": "Ainda não há patrocinadores. Adicione seu primeiro patrocinador acima.",
+    "placementCount": "{{count}} inserções",
+    "delete": "Excluir",
+    "confirmDelete": "Excluir {{name}} e todas as suas inserções? Esta ação não pode ser desfeita.",
+    "deleteConfirm": "Sim, excluir patrocinador",
+    "cancel": "Cancelar",
+    "reorder": "Alterar ordem de exibição",
+    "moveUp": "Mover {{name}} para cima",
+    "moveDown": "Mover {{name}} para baixo",
+    "locations": {
+      "featured_bar": "Barra de destaque da página inicial",
+      "presenting": "Parceiro apresentador da página inicial",
+      "secondary": "Parceiros apoiadores da página inicial",
+      "official": "Grade de patrocinadores oficiais da página inicial",
+      "event": "Páginas de eventos"
+    },
+    "actions": {
+      "created": "Criado",
+      "updated": "Atualizado",
+      "deleted": "Excluído",
+      "uploaded_logo": "Logotipo padrão enviado",
+      "uploaded_logo_dark": "Logotipo escuro enviado"
+    }
   }
 }
