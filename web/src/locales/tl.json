@@ -251,7 +251,9 @@
     "category": {
       "gi": "Gi",
       "noGi": "No-Gi"
-    }
+    },
+    "clearFilters": "Alisin ang mga filter",
+    "loadError": "Hindi ma-load ang mga video. I-refresh ang pahina upang subukang muli."
   },
   "share": {
     "defaultText": "Tingnan ang Marianas Open — Internasyonal na Kampeonato ng BJJ!",

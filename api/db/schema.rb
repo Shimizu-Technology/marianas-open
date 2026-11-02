@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_210000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -836,10 +836,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_200000) do
   end
 
   create_table "videos", force: :cascade do |t|
+    t.datetime "availability_checked_at"
+    t.boolean "availability_hidden", default: false, null: false
+    t.string "availability_status", default: "unknown", null: false
     t.string "belt_rank"
     t.string "category"
     t.string "competitor_1_name"
     t.string "competitor_2_name"
+    t.integer "consecutive_failures", default: 0, null: false
     t.datetime "created_at", null: false
     t.integer "duration_seconds"
     t.bigint "event_id"

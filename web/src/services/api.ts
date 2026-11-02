@@ -435,6 +435,11 @@ export interface Video {
   featured: boolean;
   status: string;
   event_name: string | null;
+  event_date?: string | null;
+  availability_status?: 'available' | 'removed' | 'restricted' | 'unknown';
+  availability_checked_at?: string | null;
+  consecutive_failures?: number;
+  availability_hidden?: boolean;
 }
 
 export interface VideoFormData {
@@ -1339,6 +1344,8 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(data),
       }, true),
+    checkVideoAvailability: (id: number) =>
+      fetchApi<{ message: string }>(`/api/v1/admin/videos/${id}/check_availability`, { method: 'POST' }, true),
     deleteVideo: (id: number) =>
       fetchApi<void>(`/api/v1/admin/videos/${id}`, { method: 'DELETE' }, true),
 

@@ -94,7 +94,9 @@ Rails.application.routes.draw do
           end
           resources :event_gallery_upload_batches, only: [:index, :show, :create, :update, :destroy], path: 'gallery-upload-batches'
         end
-        resources :videos
+        resources :videos do
+          post :check_availability, on: :member
+        end
         resources :sponsors do
           member do
             post :upload_logo

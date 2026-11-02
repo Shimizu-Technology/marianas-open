@@ -5,7 +5,9 @@ class Video < ApplicationRecord
   validates :youtube_url, presence: true
 
   before_save :extract_youtube_id
+  before_save :reset_availability, if: :will_save_change_to_youtube_url?
 
+  scope :visible, -> { where(availability_hidden: false) }
   scope :published, -> { where(status: 'published') }
   scope :featured, -> { where(featured: true) }
 
@@ -13,6 +15,7 @@ class Video < ApplicationRecord
     merged_except = (Array(options[:except]) + [:created_at, :updated_at]).uniq
     super(options.merge(except: merged_except)).tap do |hash|
       hash['event_name'] = event&.name
+      hash['event_date'] = event&.date
     end
   end
 
@@ -35,8 +38,15 @@ class Video < ApplicationRecord
 
   private
 
+  def reset_availability
+    self.availability_status = 'unknown'
+    self.availability_checked_at = nil
+    self.consecutive_failures = 0
+    self.availability_hidden = false
+  end
+
   def extract_youtube_id
     parsed = self.class.parse_youtube_video_id(youtube_url)
-    self.youtube_video_id = parsed if parsed.present?
+    self.youtube_video_id = parsed.presence
   end
 end

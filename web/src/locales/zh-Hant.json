@@ -251,7 +251,9 @@
     "category": {
       "gi": "Gi",
       "noGi": "No-Gi"
-    }
+    },
+    "clearFilters": "清除篩選條件",
+    "loadError": "無法載入影片。請重新整理頁面再試一次。"
   },
   "share": {
     "defaultText": "快來看看 Marianas Open — 國際巴西柔術錦標賽！",
