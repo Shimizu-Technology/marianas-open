@@ -25,7 +25,15 @@ export default function CalendarPage() {
   const years = [...new Set(archive.map(event => (event.date?.slice(0, 4) || String(event.season_year || ''))))];
   if (loading) return <div className="min-h-screen pt-20"><LoadingSpinner /></div>;
   return <div className="min-h-screen pt-20">
-    <SEO title="Event Calendar" description="Browse upcoming tournaments and past results from Marianas Open across Guam and Asia-Pacific." path="/calendar" image="/images/hero-podium.jpg" />
+    <SEO title="Event Calendar" description="Browse the Guam Marianas Pro Series, upcoming qualifier events across Asia-Pacific, and past results from Marianas Open tournaments." path="/calendar" image="/images/hero-podium.jpg" structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'Marianas Open Event Calendar',
+            url: 'https://marianasopen.com/calendar',
+            description: 'Upcoming and past Marianas Open events, qualifiers, and championships.',
+          },
+        ]} />
     <section className="public-section"><div className="public-container">
       <h1 className="event-hero-title max-w-4xl">{cycleYear ? t('calendar.titleDynamic', { year: cycleYear }) : t('calendar.title')}</h1>
       <p className="text-text-secondary text-lg mt-5 max-w-2xl">{cycleEventCount ? t(cycleHasMainEvent(events, cycleYear) ? 'calendar.subtitleDynamic' : 'calendar.subtitleSeriesDynamic', { count: cycleEventCount }) : t('calendar.subtitle')}</p>
