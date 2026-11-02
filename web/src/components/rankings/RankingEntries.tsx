@@ -1,3 +1,4 @@
+import { formatNumber } from '../../utils/numbers';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import CountryFlag from '../CountryFlag';
@@ -17,27 +18,27 @@ function Academy({ entry }: { entry: OfficialRankingEntry }) {
   return entry.academy_slug ? <Link className="break-words hover:text-gold-400" to={`/teams/${entry.academy_slug}`}>{entry.academy_name}</Link> : <span className="break-words">{entry.academy_name || '—'}</span>;
 }
 function Medals({ entry }: { entry: OfficialRankingEntry }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return <dl className="flex flex-wrap gap-3 text-xs">
     {(['gold', 'silver', 'bronze'] as const).map((medal, i) => <div key={medal} className={['text-yellow-400', 'text-gray-300', 'text-orange-400'][i]}>
-      <dt className="sr-only">{t(`competitorProfile.${medal}`)}</dt><dd><span aria-hidden="true">{t(`competitorProfile.${medal}`)} </span>{entry[medal] ?? '—'}</dd>
+      <dt className="sr-only">{t(`competitorProfile.${medal}`)}</dt><dd><span aria-hidden="true">{t(`competitorProfile.${medal}`)} </span>{entry[medal] == null ? '—' : formatNumber(entry[medal], i18n.language)}</dd>
     </div>)}
   </dl>;
 }
 
 export default function RankingEntries({ entries, team }: { entries: OfficialRankingEntry[]; team: boolean }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return <>
     <ol className="divide-y divide-white/10 md:hidden">
       {entries.map(entry => <li key={entry.id} className="p-4">
         <div className="flex items-start gap-3">
-          <span className="w-9 shrink-0 font-heading text-xl tabular-nums text-gold-400" aria-label={t('officialRankings.position')}>#{entry.position}</span>
+          <span className="w-9 shrink-0 font-heading text-xl tabular-nums text-gold-400" aria-label={t('officialRankings.position')}>#{formatNumber(entry.position, i18n.language)}</span>
           <div className="min-w-0 flex-1">
             <EntryName entry={entry} team={team} />
             {!team && <div className="mt-1 text-sm text-text-secondary"><Academy entry={entry} /></div>}
           </div>
           <div className="max-w-[35%] break-words text-right">
-            <span className="block font-bold tabular-nums text-gold-400">{entry.points}</span>
+            <span className="block font-bold tabular-nums text-gold-400">{formatNumber(entry.points, i18n.language)}</span>
             <span className="text-xs text-text-secondary">{t('officialRankings.points')}</span>
           </div>
         </div>
@@ -53,10 +54,10 @@ export default function RankingEntries({ entries, team }: { entries: OfficialRan
         {!team && <th className="w-48 p-4">{t('officialRankings.medals')}</th>}
       </tr></thead>
       <tbody className="divide-y divide-white/5">{entries.map(entry => <tr key={entry.id}>
-        <td className="p-4 font-heading text-lg tabular-nums text-gold-400">#{entry.position}</td>
+        <td className="p-4 font-heading text-lg tabular-nums text-gold-400">#{formatNumber(entry.position, i18n.language)}</td>
         <td className="p-4"><EntryName entry={entry} team={team} /></td>
         {!team && <td className="p-4 text-text-secondary"><Academy entry={entry} /></td>}
-        <td className="break-words p-4 text-right font-bold tabular-nums text-gold-400">{entry.points}</td>
+        <td className="break-words p-4 text-right font-bold tabular-nums text-gold-400">{formatNumber(entry.points, i18n.language)}</td>
         {!team && <td className="p-4"><Medals entry={entry} /></td>}
       </tr>)}</tbody>
     </table>

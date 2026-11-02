@@ -1,3 +1,4 @@
+import { getDateLocale } from '../../utils/dateLocale';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink } from 'lucide-react';
 import type { OfficialRankingList } from '../../services/officialRankingsApi';
@@ -10,7 +11,7 @@ export default function RankingSource({ list, syncedAt = list.last_synced_at }: 
       {t('officialRankings.source')} <ExternalLink size={13} aria-hidden="true" />
     </a>
     <span>{date && !Number.isNaN(date.getTime())
-      ? t('officialRankings.lastSync', { date: date.toLocaleString(i18n.language) })
+      ? t('officialRankings.lastSync', { date: date.toLocaleString(getDateLocale(i18n.language)) })
       : t('officialRankings.neverSynced')}</span>
   </div>;
 }

@@ -494,7 +494,7 @@ export default function EventResultsSection({ eventSlug, sourceUrls, onReady }: 
         {/* Data source attribution */}
         {sourceUrls && sourceUrls.length > 0 && (
           <div className="mt-8 flex items-center justify-center gap-2 text-xs text-text-muted">
-            <span>Results sourced from</span>
+            <span>{t('results.sourcedFrom')}</span>
             {sourceUrls.map((url, i) => (
               <a
                 key={i}

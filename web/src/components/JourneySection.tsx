@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { usePublicCopy } from '../hooks/usePublicCopy';
 import { motion, useReducedMotion, MotionConfig } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
@@ -398,7 +398,7 @@ function DesktopStop({
 
 /* ─── Main Section ─── */
 export default function JourneySection({ events }: { events: Event[] }) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = usePublicCopy();
   const shouldReduceMotion = useReducedMotion();
   const desktopScrollerRef = useRef<HTMLDivElement | null>(null);
   const desktopStopRefs = useRef<(HTMLDivElement | null)[]>([]);

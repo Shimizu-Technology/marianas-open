@@ -41,7 +41,7 @@ describe('official rankings', () => {
     expect((screen.getByLabelText('Age group') as HTMLSelectElement).value).toBe('Adult 18');
     expect((screen.getByLabelText('Belt') as HTMLSelectElement).value).toBe('Black');
     expect(officialRankingsApi.getEntries).toHaveBeenLastCalledWith(1, 12, 1, expect.any(AbortSignal));
-    expect(screen.getAllByText('123.50')).toHaveLength(4);
+    expect(screen.getAllByText('123.5')).toHaveLength(4);
     expect(screen.getAllByText('#4')).toHaveLength(4);
     expect(screen.queryByText('#1')).toBeNull();
     expect(screen.getAllByRole('link', { name: 'Matched Athlete' })[0].getAttribute('href')).toBe('/competitors/7');

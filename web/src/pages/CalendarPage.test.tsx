@@ -15,6 +15,7 @@ vi.mock('../hooks/useApi', () => ({
 vi.mock('../hooks/useResultCounts', () => ({ useResultCounts: (events: Event[]) => ({ events, loading: false }) }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string, fallback?: string) => key === 'event.date' ? 'Date to be announced' : (typeof fallback === 'string' ? fallback : key), i18n: { language: 'en' } }) }))
 vi.mock('../components/ScrollReveal', () => ({ default: ({ children }: { children: ReactNode }) => <div>{children}</div> }))
+vi.mock('../hooks/usePublicCopy', async () => { const { useTranslation } = await import('react-i18next'); return { usePublicCopy: useTranslation } })
 vi.mock('../components/SEO', () => ({ default: () => null }))
 vi.mock('../components/SocialShare', () => ({ default: () => null }))
 vi.mock('../components/QRShare', () => ({ default: () => null }))

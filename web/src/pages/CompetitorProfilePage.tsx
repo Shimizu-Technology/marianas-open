@@ -1,3 +1,5 @@
+import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
+import { formatNumber } from '../utils/numbers';
 import CountryFlag from '../components/CountryFlag';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useParams, useNavigate, Link } from 'react-router-dom';
@@ -89,7 +91,7 @@ function fromCompetitorProfile(p: CompetitorProfile): UnifiedProfile {
 }
 
 export default function CompetitorProfilePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -131,7 +133,7 @@ export default function CompetitorProfilePage() {
             className="inline-flex items-center gap-2 text-text-muted hover:text-white transition-colors mb-6"
           >
             <ArrowLeft size={16} />
-            Back
+            {t('common.back')}
           </button>
 
           {loading && (
@@ -260,7 +262,7 @@ export default function CompetitorProfilePage() {
                                 {r.event_name}
                               </Link>
                               {r.event_date && (
-                                <div className="text-xs text-text-muted mt-0.5">{r.event_date}</div>
+                                <div className="text-xs text-text-muted mt-0.5">{parseDateLocalSafe(r.event_date).toLocaleDateString(getDateLocale(i18n.language), { year: 'numeric', month: 'long', day: 'numeric' })}</div>
                               )}
                             </td>
                             <td className="p-3 text-text-secondary">{r.division}</td>
@@ -290,10 +292,11 @@ export default function CompetitorProfilePage() {
 }
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  const { i18n } = useTranslation();
   return (
     <div className="bg-surface border border-white/5 rounded-xl p-4 flex flex-col items-center gap-1">
       {icon}
-      <span className="text-2xl font-bold text-white">{value}</span>
+      <span className="text-2xl font-bold text-white">{formatNumber(value, i18n.language)}</span>
       <span className="text-xs text-text-muted">{label}</span>
     </div>
   );

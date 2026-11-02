@@ -66,7 +66,9 @@
     "spectatorsValue": "5K+",
     "internationalReach": "Alcance internacional",
     "internationalReachDesc": "Parceiros na Coreia, Japão, Taiwan, Filipinas e Hong Kong. Em destaque em 40.000 revistas impressas em toda a Ásia.",
-    "mainEvent": "Evento Principal"
+    "mainEvent": "Evento Principal",
+    "partnerChampionship": "Campeonato internacional",
+    "partnerSeries": "Série profissional anual"
   },
   "event": {
     "title": "Guam Marianas Open 2026",
@@ -164,7 +166,28 @@
     "galleryVenue": "Local da competição",
     "galleryPodium": "Cerimônia de pódio",
     "registrationComingSoon": "Inscrições em breve",
-    "officialPoster": "Pôster Oficial"
+    "officialPoster": "Pôster Oficial",
+    "date": "Data a anunciar",
+    "buySpectatorTickets": "Comprar ingressos para espectadores",
+    "registerToCompete": "Inscrever-se para competir",
+    "registerToCompeteGi": "Inscrever-se para competir (Gi)",
+    "registerToCompeteNogi": "Inscrever-se para competir (No-Gi)",
+    "spectatorAdmission": "Entrada para espectadores",
+    "ticketsOnSale": "Ingressos à venda",
+    "ticketIntro": "Compre a entrada para espectadores online ou pessoalmente. Competidores devem usar os links separados de inscrição da ASJJF.",
+    "admissionOption": "Entrada",
+    "earlyBird": "Lote antecipado",
+    "atTheDoor": "Na bilheteria",
+    "earlyBirdDeadline": "O preço antecipado termina em {{date}}.",
+    "earlyBirdLimited": "O preço antecipado está disponível por tempo limitado.",
+    "inPersonPurchase": "Comprar pessoalmente",
+    "buyOnlineGuamTime": "Comprar ingressos online",
+    "ticketsSoldOut": "Ingressos esgotados",
+    "ticketsSoldOutDescription": "Os ingressos para espectadores deste evento estão esgotados. A inscrição de competidores é separada.",
+    "ticketSalesClosed": "Venda de ingressos encerrada",
+    "ticketSalesClosedDescription": "A venda de ingressos para espectadores deste evento foi encerrada. A inscrição de competidores é separada.",
+    "ticketProviderNote": "Disponibilidade, taxas de serviço e condições de compra são definidas pelo fornecedor oficial de ingressos.",
+    "ticketFlyerAlt": "Cartaz oficial de venda de ingressos para espectadores de {{eventName}}"
   },
   "calendar": {
     "title": "Guam Pro Series 2026",
@@ -184,7 +207,10 @@
     "pastResults": "Resultados anteriores",
     "noPastEvents": "Ainda não há eventos anteriores.",
     "completed": "Concluído",
-    "roadToOpen": "Série classificatória"
+    "roadToOpen": "Série classificatória",
+    "titleDynamic": "Guam Pro Series {{year}}",
+    "noUpcomingEvents": "Nenhum próximo evento anunciado",
+    "noUpcomingEventsDescription": "O próximo ciclo de eventos aparecerá aqui assim que os organizadores o publicarem."
   },
   "watch": {
     "title": "Assistir",
@@ -227,7 +253,7 @@
     "featured": "Destaque",
     "filterCategory": "Categoria",
     "noVideosYet": "Ainda não há vídeos",
-    "noVideosYetDesc": "Volte em breve para assistir a vídeos das partidas e melhores momentos.",
+    "noVideosYetDesc": "Volte em breve para ver vídeos de lutas e melhores momentos.",
     "vs": "vs",
     "weight": {
       "rooster": "Galo",
@@ -253,7 +279,15 @@
       "noGi": "No-Gi"
     },
     "clearFilters": "Limpar filtros",
-    "loadError": "Não foi possível carregar os vídeos. Atualize a página para tentar novamente."
+    "loadError": "Não foi possível carregar os vídeos. Atualize a página para tentar novamente.",
+    "youtubeCta": "Visite nosso canal no YouTube",
+    "watchYoutube": "Assistir no YouTube",
+    "clickYoutube": "Clique para assistir no YouTube",
+    "liveTitle": "Transmissão ao vivo - {{event}}",
+    "closeVideo": "Fechar vídeo",
+    "featuredTitle": "Vídeos em destaque",
+    "featuredDesc": "Confira os últimos destaques, lutas completas e momentos marcantes dos eventos Marianas Open.",
+    "watchNow": "Assista agora"
   },
   "share": {
     "defaultText": "Confira o Marianas Open — Campeonato Internacional de BJJ!",
@@ -276,7 +310,12 @@
     "philippines": "Filipinas",
     "taiwan": "Taiwan",
     "southKorea": "Coreia do Sul",
-    "hongKong": "Hong Kong"
+    "hongKong": "Hong Kong",
+    "back": "Voltar",
+    "website": "Site",
+    "loading": "Carregando...",
+    "dismiss": "Dispensar",
+    "cancelled": "Cancelado"
   },
   "shimizu": {
     "title": "Desenvolvido por Shimizu Technology",
@@ -305,7 +344,27 @@
     "timeline2025": "Mais de 1.300 competidores de 6 países. Impacto econômico de US$ 2 milhões para Guam.",
     "timeline2026": "A Pro Series internacional abrange 7 eventos em 6 países.",
     "contactTitle": "Entre em contato",
-    "contactDesc": "Dúvidas sobre o Marianas Open? Entre em contato com nossa equipe."
+    "contactDesc": "Dúvidas sobre o Marianas Open? Entre em contato com nossa equipe.",
+    "federation": {
+      "eyebrow": "Esclarecimento oficial",
+      "title": "Marianas Sports Jiu-Jitsu Federation",
+      "intro": "Aos nossos atletas, academias, parceiros, patrocinadores, apoiadores e à comunidade do Jiu-Jitsu:",
+      "photoAlt": "Delegados posando juntos na Assembleia Geral da SJJIF",
+      "photoCaption": "Assembleia Geral da SJJIF",
+      "pullQuote": "De Guam para o mundo. Do mundo para Guam.",
+      "factGuam": "Federação sediada em Guam",
+      "factIndependent": "Eventos e programas independentes",
+      "factInternational": "Conexões internacionais",
+      "p1": "Em resposta às diversas perguntas e consultas que recebemos, a Marianas Sports Jiu-Jitsu Federation (MSJJF) gostaria de esclarecer quem somos e quais são nossas afiliações internacionais.",
+      "p2": "A MSJJF é uma federação independente de Jiu-Jitsu sediada em Guam, que opera de forma autônoma com seus próprios eventos, programas, parcerias e afiliações internacionais.",
+      "p3": "A MSJJF mantém afiliações e conexões internacionais com organizações e federações reconhecidas de Jiu-Jitsu, incluindo ASJJF, SJJIF, ASJJF DUMAU, SJJIF South America e parceiros internacionais em toda a comunidade global do Jiu-Jitsu.",
+      "p4": "Por meio dessas relações e de nossa plataforma internacional, a MSJJF tem orgulho de ajudar a levar Guam ao cenário mundial, conectando nossa ilha e nossos atletas a competidores de alto nível, academias, oficiais, organizadores e grandes competições internacionais na Ásia e além.",
+      "p5": "O Guam Marianas Open é um evento internacionalmente sancionado com classificação ASJJF de 5 estrelas, que oferece aos atletas de Guam a oportunidade de competir em uma plataforma reconhecida internacionalmente em sua própria terra, enquanto recebe competidores de alto nível em nossa ilha.",
+      "p6": "Nossa missão sempre foi maior do que um único evento. Trata-se de criar oportunidades para nossos atletas, fortalecer nossa comunidade e continuar colocando Guam no mapa internacional do Jiu-Jitsu. Queremos que nossos atletas tenham oportunidades de competir pelo mundo e que o mundo venha vivenciar o Jiu-Jitsu aqui em Guam.",
+      "p7": "Compartilhamos este esclarecimento apenas para fornecer informações claras e precisas em resposta às perguntas que recebemos. Temos grande respeito por toda a comunidade do Jiu-Jitsu de Guam e por todos que continuam contribuindo para o crescimento do esporte em nossa ilha. Nosso foco permanece nos atletas, nas oportunidades que podemos criar e em representar Guam com orgulho no cenário internacional.",
+      "signature": "Marianas Sports Jiu-Jitsu Federation",
+      "tagline": "Guam no cenário mundial"
+    }
   },
   "terms": {
     "title": "Termos e Condições",
@@ -374,7 +433,8 @@
     "total": "Total",
     "expandAll": "Expandir tudo",
     "collapseAll": "Recolher tudo",
-    "filterResults": "Filtrar resultados"
+    "filterResults": "Filtrar resultados",
+    "sourcedFrom": "Resultados obtidos de"
   },
   "competitorProfile": {
     "title": "Perfil do competidor",
@@ -538,7 +598,14 @@
   "search": {
     "title": "Pesquisar",
     "close": "Fechar pesquisa",
-    "placeholder": "Pesquisar atletas, academias, eventos..."
+    "placeholder": "Pesquisar atletas, academias, eventos...",
+    "start": "Digite para pesquisar...",
+    "navigate": "navegar",
+    "select": "selecionar",
+    "closeHint": "fechar",
+    "none": "Nenhum resultado para \"{{query}}\"",
+    "independent": "Independente",
+    "events": "Eventos"
   },
   "season": {
     "phase": {
@@ -764,5 +831,45 @@
       "uploaded_logo": "Logotipo padrão enviado",
       "uploaded_logo_dark": "Logotipo escuro enviado"
     }
+  },
+  "academies": {
+    "badge": "Academias",
+    "title": "Equipes e academias",
+    "summary": "{{count}} academias competindo nos torneios Marianas Open",
+    "search": "Pesquisar academias...",
+    "empty": "Nenhuma academia encontrada.",
+    "missing": "Academia não encontrada",
+    "noSpecified": "Nenhuma academia especificada",
+    "athletes": "{{count}} atletas",
+    "events": "{{count}} eventos",
+    "more": "Carregar mais ({{shown}} de {{total}})"
+  },
+  "error": {
+    "title": "Vamos voltar à ação.",
+    "description": "Não foi possível carregar esta página. Recarregue para tentar novamente ou volte à página inicial.",
+    "reload": "Recarregar página"
+  },
+  "impact": {
+    "roi": "Retorno sobre investimento",
+    "costs": "Custos e operações do evento",
+    "generated": "Gerado para a comunidade",
+    "multiplier": "Multiplicador do retorno",
+    "perDollar": "Retorno por dólar investido",
+    "budget": "Orçamento total",
+    "investment": "Investimento total",
+    "economic": "Impacto econômico",
+    "tourism": "Turismo",
+    "competition": "Competição",
+    "community": "Comunidade",
+    "emptyTitle": "Relatório de impacto em breve",
+    "emptyDescription": "Estamos reunindo dados sobre o impacto do Marianas Open no turismo, na competição e no crescimento econômico de nossa ilha. Volte em breve.",
+    "badge": "Relatório de impacto do evento",
+    "title": "Impacto e",
+    "transparency": "Transparência",
+    "description": "Como o Marianas Open impulsiona o turismo, a competição e o crescimento econômico de nossa ilha.",
+    "allocation": "Alocação de recursos",
+    "partnerTitle": "Seja nosso parceiro",
+    "partnerDescription": "Tem interesse em patrocinar o Marianas Open? Junte-se a nós para desenvolver o esporte e gerar um impacto positivo em nossa comunidade.",
+    "contact": "Entre em contato"
   }
 }

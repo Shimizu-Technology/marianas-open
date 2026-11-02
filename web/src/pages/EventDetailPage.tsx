@@ -57,11 +57,11 @@ const EVENT_TICKET_FLYER_MAP: Record<string, { src: string; srcSet: string }> = 
   },
 };
 
-function formatTicketPrice(value: string | null | undefined) {
+function formatTicketPrice(value: string | null | undefined, language: string) {
   if (!value) return '—';
   const amount = Number(value);
   return Number.isFinite(amount)
-    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount)
+    ? new Intl.NumberFormat(getDateLocale(language), { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(amount)
     : value;
 }
 
@@ -321,13 +321,13 @@ export default function EventDetailPage() {
           const amt = Number(cat.amount);
           return {
             division: tf(cat, 'name') || cat.name,
-            prize: amt > 0 ? `$${amt.toLocaleString()}` : '',
+            prize: amt > 0 ? `$${amt.toLocaleString(getDateLocale(i18n.language))}` : '',
           };
         })
     : [];
 
   const hasPrizeBreakdown = prizeBreakdown.length > 0;
-  const prizePoolDisplay = mainEvent?.prize_pool ? `$${Number(mainEvent.prize_pool).toLocaleString()}` : null;
+  const prizePoolDisplay = mainEvent?.prize_pool ? `$${Number(mainEvent.prize_pool).toLocaleString(getDateLocale(i18n.language))}` : null;
 
   const activeAccommodations = (mainEvent?.event_accommodations ?? [])
     .filter(a => a.active)
@@ -843,8 +843,8 @@ export default function EventDetailPage() {
                           <div className="text-sm font-semibold text-text-primary sm:text-base">{option.label}</div>
                           {option.description && <div className="mt-0.5 text-xs text-text-muted">{option.description}</div>}
                         </div>
-                        <div className="text-right font-heading text-xl font-black text-gold-400 sm:text-2xl">{formatTicketPrice(option.early_bird_price)}</div>
-                        <div className="text-right font-heading text-lg font-bold text-text-secondary sm:text-xl">{formatTicketPrice(option.regular_price)}</div>
+                        <div className="text-right font-heading text-xl font-black text-gold-400 sm:text-2xl">{formatTicketPrice(option.early_bird_price, i18n.language)}</div>
+                        <div className="text-right font-heading text-lg font-bold text-text-secondary sm:text-xl">{formatTicketPrice(option.regular_price, i18n.language)}</div>
                       </div>
                     ))}
                   </div>
@@ -855,7 +855,7 @@ export default function EventDetailPage() {
                     <Clock size={16} className="mt-0.5 shrink-0 text-gold-400" />
                     {mainEvent?.ticket_early_bird_ends_on
                       ? t('event.earlyBirdDeadline', {
-                          date: new Date(`${mainEvent.ticket_early_bird_ends_on}T00:00:00`).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
+                          date: new Date(`${mainEvent.ticket_early_bird_ends_on}T00:00:00`).toLocaleDateString(getDateLocale(i18n.language), { month: 'long', day: 'numeric', year: 'numeric' }),
                           defaultValue: 'Early-bird pricing ends {{date}}.',
                         })
                       : t('event.earlyBirdLimited', 'Early-bird pricing is available for a limited time.')}
