@@ -870,5 +870,12 @@
     "partnerTitle": "Maging partner namin",
     "partnerDescription": "Interesado ka bang maging sponsor ng Marianas Open? Samahan kami sa pagpapalago ng isport at paglikha ng positibong epekto sa aming komunidad.",
     "contact": "Makipag-ugnayan"
+  },
+  "visualRefresh": {
+    "close": "Isara",
+    "stars": "ASJJF {{count}}-Star na Kaganapan",
+    "registrationOpens": "Magbubukas ang pagpaparehistro sa {{date}}",
+    "eventInfo": "Impormasyon ng kaganapan sa ASJJF",
+    "registrationPending": "Hindi pa bukas ang pagpaparehistro"
   }
 }

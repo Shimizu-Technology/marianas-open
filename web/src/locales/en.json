@@ -870,5 +870,12 @@
     "partnerTitle": "Partner With Us",
     "partnerDescription": "Interested in sponsoring the Marianas Open? Join us in growing the sport and making a positive impact on our community.",
     "contact": "Get in Touch"
+  },
+  "visualRefresh": {
+    "close": "Close",
+    "stars": "ASJJF {{count}}-Star Ranked Event",
+    "registrationOpens": "Registration opens {{date}}",
+    "eventInfo": "ASJJF event info",
+    "registrationPending": "Registration is not open yet"
   }
 }
