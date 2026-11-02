@@ -73,8 +73,8 @@ const SPONSOR_LOGO_MAP: Record<string, string> = {
   'ite': '/images/logos/sponsors/ite-logo.png',
   'hertz & dollar': '/images/logos/sponsors/hertz-dollar-logo.jpg',
   'stroll guam': '/images/logos/sponsors/stroll-guam-logo.png',
-  'hotel tano': '/images/logos/sponsors/hotel-tano-logo.jpg',
-  'hotel tano guam': '/images/logos/sponsors/hotel-tano-logo.jpg',
+  'hotel tano': '/images/logos/sponsors/hotel-tano-logo.svg',
+  'hotel tano guam': '/images/logos/sponsors/hotel-tano-logo.svg',
 };
 
 /** Resolve sponsor logo: prefer Active Storage URL, fall back to local image map. */

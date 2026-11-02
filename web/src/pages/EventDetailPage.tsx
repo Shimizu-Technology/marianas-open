@@ -1,3 +1,5 @@
+import { SponsorTiers, SponsorPlacementsError } from '../components/SponsorPlacements';
+import { useSponsorPlacements } from '../hooks/useSponsorPlacements';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +13,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import EventResultsSection from '../components/EventResultsSection';
 import SEO from '../components/SEO';
 import NotFoundPage from './NotFoundPage';
-import { useEvents, useSponsors } from '../hooks/useApi';
+import { useEvents } from '../hooks/useApi';
 import { getEventHeroImage, isBrowserPreviewableImage, resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
@@ -228,7 +230,7 @@ export default function EventDetailPage() {
   const posthog = usePostHog();
   const { events, loading, error, retry } = useEvents();
 
-  const { sponsors } = useSponsors();
+
   const { images: siteImages } = useSiteImages();
 
   const { tf, tfa } = useTranslatedField();
@@ -239,6 +241,7 @@ export default function EventDetailPage() {
   }, [events, slug]);
   const { events: countedEvents, loading: resultsLoading } = useResultCounts(selectedEvents);
   const mainEvent = countedEvents[0] ?? null;
+  const { placements: sponsorPlacements, error: placementsError, retry: retryPlacements } = useSponsorPlacements(mainEvent?.id, Boolean(mainEvent));
   const [readyResultsSlug, setReadyResultsSlug] = useState<string | null>(null);
   const onResultsReady = useCallback((eventSlug: string) => setReadyResultsSlug(eventSlug), []);
   useEffect(() => {
@@ -1558,53 +1561,12 @@ export default function EventDetailPage() {
 
       {!isClosed && gallerySection}
 
-      {/* Official Sponsors — from database */}
-      {sponsors.length > 0 && (
-      <section className="py-14 border-y border-white/5 bg-navy-900/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <ScrollReveal>
-            <p className="text-center text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted mb-8">
-              {t('home.sponsorsTitle')}
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
-              {[...sponsors]
-                .sort((a, b) => a.sort_order - b.sort_order)
-                .map((sponsor) => {
-                const href = normalizeExternalUrl(sponsor.website_url)
-                const logoSrc = getSponsorLogo(sponsor.name, sponsor.logo_url)
-                const inner = logoSrc ? (
-                  <img
-                    src={logoSrc}
-                    alt={sponsor.name}
-                    className="h-10 sm:h-12 object-contain"
-                  />
-                ) : (
-                  <span className="text-sm font-medium text-text-muted">{sponsor.name}</span>
-                )
-                return href ? (
-                <a
-                  key={sponsor.id}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="opacity-60 hover:opacity-100 transition-opacity duration-300"
-                >
-                  {inner}
-                </a>
-                ) : (
-                <div
-                  key={sponsor.id}
-                  className="opacity-60"
-                >
-                  {inner}
-                </div>
-                )
-              })}
-            </div>
-          </ScrollReveal>
+      {(sponsorPlacements.length > 0 || placementsError) && <section className="border-y border-white/5 bg-navy-900/60 px-4 py-14">
+        <div className="mx-auto max-w-7xl">
+          {placementsError && <SponsorPlacementsError retry={retryPlacements} />}
+          <SponsorTiers placements={sponsorPlacements} event />
         </div>
-      </section>
-      )}
+      </section>}
 
       {/* Share */}
       <section className="py-16">

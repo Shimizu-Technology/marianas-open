@@ -6,26 +6,18 @@ import ScrollReveal from '../components/ScrollReveal';
 import ImageWithShimmer from '../components/ImageWithShimmer';
 import JourneySection from '../components/JourneySection';
 import SEO from '../components/SEO';
-import { useEvents, useSponsors } from '../hooks/useApi';
+import { useEvents } from '../hooks/useApi';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 import { useSiteImages, getImageUrl } from '../hooks/useSiteImages';
-import { resolveMediaUrl, getSponsorLogo, normalizeExternalUrl } from '../utils/images';
+import { FeaturedSponsorBar, SponsorTiers, SponsorPlacementsError } from '../components/SponsorPlacements';
+import { useSponsorPlacements } from '../hooks/useSponsorPlacements';
 import { eventPhase, getCurrentMainEvent, getEventCycleYear, selectHomeState } from '../utils/events';
 import { useResultCounts } from '../hooks/useResultCounts';
 import { useTranslatedField } from '../hooks/useTranslatedField';
 import { getRegistrationLinks } from '../utils/registrationLinks';
 import { getDateLocale, parseDateLocalSafe } from '../utils/dateLocale';
 import { getOrganizationSchema, getWebsiteSchema } from '../lib/seo';
-
-function normalizeSponsorKey(name: string) {
-  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
-function isGvbSponsor(name: string) {
-  const key = normalizeSponsorKey(name);
-  return key.includes('gvb') || key.includes('guamvisitorsbureau');
-}
 
 const ORG_PARTNERS = [
   {
@@ -62,33 +54,11 @@ const ORG_PARTNERS = [
   },
 ] as const;
 
-const HOTEL_TANO_URL = 'https://www.hoteltano.com';
-
-const OFFICIAL_SPONSORS_STATIC = [
-  { name: 'Triple J' },
-  { name: 'Pacific Points' },
-  { name: "Foody's" },
-  { name: 'Deal Depot' },
-  { name: 'CFPT' },
-  { name: 'Fokai' },
-  { name: 'Jamz Media' },
-  { name: 'Cherry Media' },
-  { name: 'Mannge Pops' },
-  { name: 'Aloha Maid' },
-  { name: 'Fence Masters' },
-  { name: 'ITE', url: 'https://shop.ite.net' },
-  { name: 'Hertz & Dollar', url: 'https://www.hertz.com/us/en/location/guam/guam/gumt50' },
-  { name: 'Stroll Guam', url: 'https://stroll.international' },
-  { name: 'Boss 104' },
-  { name: 'Sticky Fingers' },
-  { name: 'Hotel Tano Guam', url: HOTEL_TANO_URL },
-] as const;
-
 export default function HomePage() {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const { events, loading: eventsLoading } = useEvents();
-  const { sponsors } = useSponsors();
+  const { placements, error: placementsError, retry: retryPlacements } = useSponsorPlacements();
   const { images: siteImages } = useSiteImages();
   const { content: siteContent, t: sc, loading: siteContentLoading, hasCachedContent } = useSiteContent();
 
@@ -262,6 +232,8 @@ export default function HomePage() {
           </div>
         </motion.div>
       </section>
+      <FeaturedSponsorBar placements={placements} />
+
 
       <SeasonOverview events={events} loading={eventsLoading} />
 
@@ -399,138 +371,8 @@ export default function HomePage() {
             </div>
           </ScrollReveal>
 
-          {/* Presenting Partner — GVB */}
-          <ScrollReveal delay={0.1}>
-            <div className="mb-16">
-              <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-gold-500 text-center mb-8">
-                {t('home.presentingPartner')}
-              </p>
-              {(() => {
-                const gvbSponsor = sponsors.find(s => isGvbSponsor(s.name));
-                const secondaryPresentingSponsors = sponsors
-                  .filter(s => s.tier === 'presenting' && !isGvbSponsor(s.name))
-                  .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-                const gvbLogo = resolveMediaUrl(gvbSponsor?.logo_url) || '/images/logos/sponsors/gvb-logo-white.png';
-                const gvbUrl = gvbSponsor?.website_url || 'https://www.visitguam.com';
-                return (
-                  <div className="max-w-2xl mx-auto text-center">
-                    <a
-                      href={gvbUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mb-6 hover:opacity-80 transition-opacity"
-                    >
-                      <img
-                        src={gvbLogo}
-                        alt="Guam Visitors Bureau"
-                        className="h-24 sm:h-28 object-contain mx-auto"
-                      />
-                    </a>
-                    <p className="text-text-secondary text-sm sm:text-base leading-relaxed italic max-w-xl mx-auto">
-                      &ldquo;{t('home.gvbQuote')}&rdquo;
-                    </p>
-
-                    {secondaryPresentingSponsors.length > 0 && (
-                      <div className="mt-12 pt-10 border-t border-white/5 space-y-10">
-                        {secondaryPresentingSponsors.map((sponsor) => {
-                          const href = normalizeExternalUrl(sponsor.website_url);
-                          const logoSrc = getSponsorLogo(sponsor.name, sponsor.logo_url);
-                          const inner = logoSrc ? (
-                            <img
-                              src={logoSrc}
-                              alt={sponsor.name}
-                              className="h-32 sm:h-36 md:h-40 object-contain mx-auto"
-                            />
-                          ) : (
-                            <span className="font-heading text-2xl sm:text-3xl font-black uppercase tracking-wide text-text-primary">
-                              {sponsor.name}
-                            </span>
-                          );
-
-                          return href ? (
-                            <a
-                              key={sponsor.id}
-                              href={href}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-block hover:opacity-80 transition-opacity"
-                            >
-                              {inner}
-                            </a>
-                          ) : (
-                            <div key={sponsor.id}>{inner}</div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-          </ScrollReveal>
-
-          {/* Official Sponsors Grid */}
-          <ScrollReveal delay={0.2}>
-            <div className="border-t border-white/5 pt-12">
-              <p className="text-xs font-heading font-semibold uppercase tracking-[0.3em] text-text-muted text-center mb-10">
-                {t('home.officialSponsors')}
-              </p>
-              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl mx-auto">
-                {(() => {
-                  const officialFromApi = sponsors.filter(
-                    s => s.tier === 'official' && !isGvbSponsor(s.name)
-                  );
-                  const items = officialFromApi.length > 0
-                    ? officialFromApi.map(s => ({
-                        name: s.name,
-                        url: s.website_url,
-                        logoSrc: getSponsorLogo(s.name, s.logo_url),
-                      }))
-                    : OFFICIAL_SPONSORS_STATIC.map(s => ({
-                        name: s.name,
-                        url: ('url' in s ? s.url : null) as string | null,
-                        logoSrc: getSponsorLogo(s.name),
-                      }));
-
-                  return items.map((item) => {
-                    const isHotelTano = normalizeSponsorKey(item.name) === 'hoteltanoguam';
-                    const href = isHotelTano ? HOTEL_TANO_URL : normalizeExternalUrl(item.url);
-                    const inner = (
-                      <div className="group/card bg-navy-900/80 border border-white/5 hover:border-gold-500/20 rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-500/5 w-[calc(33.333vw-1.5rem)] sm:w-36 md:w-40 h-24 sm:h-28">
-                        {item.logoSrc ? (
-                          <div className={`${isHotelTano ? 'overflow-hidden bg-black' : 'bg-white/95'} rounded-md px-3 py-2 flex items-center justify-center w-full h-full`}>
-                            <img
-                              src={item.logoSrc}
-                              alt={item.name}
-                              className={`${isHotelTano ? 'scale-[2.35] sm:scale-[3.2]' : ''} max-h-14 max-w-full object-contain sm:max-h-16`}
-                            />
-                          </div>
-                        ) : (
-                          <div className="font-heading font-bold text-xs sm:text-sm uppercase tracking-wider text-text-primary group-hover/card:text-gold-400 transition-colors duration-300">
-                            {item.name}
-                          </div>
-                        )}
-                      </div>
-                    );
-
-                    return href ? (
-                      <a
-                        key={item.name}
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block"
-                      >
-                        {inner}
-                      </a>
-                    ) : (
-                      <div key={item.name}>{inner}</div>
-                    );
-                  });
-                })()}
-              </div>
-            </div>
-          </ScrollReveal>
+          {placementsError && <SponsorPlacementsError retry={retryPlacements} />}
+          <SponsorTiers placements={placements} />
         </div>
       </section>
 
