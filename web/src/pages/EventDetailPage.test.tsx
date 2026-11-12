@@ -39,9 +39,11 @@ it('keeps a failed event request retryable at the same URL and only renders 404 
 })
 
 it('shows the poster uploaded in admin on the event page', async () => {
+  // Keep the fixture upcoming whenever the suite runs; the poster card only shows before an event ends.
+  const nextYear = new Date().getUTCFullYear() + 1
   vi.mocked(api.getEvents).mockResolvedValue([{
     id: 71, name: 'Guam Marianas Pro Tokyo 2027', slug: 'marianas-pro-tokyo-2027', status: 'upcoming',
-    date: '2027-02-20', end_date: null, is_main_event: false, city: 'Tokyo', country: 'Japan',
+    date: `${nextYear}-02-20`, end_date: null, is_main_event: false, city: 'Tokyo', country: 'Japan',
     poster_image_url: 'https://cdn.example.com/tokyo-poster.jpg', prize_categories: [], gallery_images_count: 0, results_count: 0,
   } as unknown as Event])
   render(<HelmetProvider><MemoryRouter initialEntries={['/events/marianas-pro-tokyo-2027']}><EventsProvider><Routes><Route path="/events/:slug" element={<EventDetailPage />} /></Routes></EventsProvider></MemoryRouter></HelmetProvider>)
