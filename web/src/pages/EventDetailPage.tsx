@@ -502,7 +502,11 @@ export default function EventDetailPage() {
     url: `https://marianasopen.com/events/${mainEvent.slug}`,
   } : null;
 
-  const eventPoster = mainEvent?.slug ? EVENT_POSTER_MAP[mainEvent.slug] : undefined;
+  const staticEventPoster = mainEvent?.slug ? EVENT_POSTER_MAP[mainEvent.slug] : undefined;
+  const uploadedEventPoster = resolveMediaUrl(mainEvent?.poster_image_url);
+  const eventPoster = uploadedEventPoster
+    ? { src: uploadedEventPoster, label: eventName }
+    : staticEventPoster;
 
   const trackTicketClick = (placement: 'hero' | 'details') => {
     posthog?.capture('spectator_ticket_clicked', {
@@ -997,18 +1001,26 @@ export default function EventDetailPage() {
             <ScrollReveal delay={0.12}>
               <div className="relative overflow-hidden border border-white/5 h-full min-h-[250px]">
                 {eventPoster ? (
-                  <>
-                    <img
-                      src={eventPoster.src}
-                      alt={eventPoster.label}
-                      className="w-full h-full object-cover object-top"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-navy-900/85 via-transparent to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
+                  // Show the whole poster: its bottom edge usually carries sponsors and ranking stars.
+                  <a
+                    href={eventPoster.src}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${t('event.officialPoster', 'Official Poster')}: ${eventPoster.label}`}
+                    className="flex h-full flex-col bg-navy-900 transition-colors hover:bg-navy-800"
+                  >
+                    <div className="flex flex-1 items-center justify-center">
+                      <img
+                        src={eventPoster.src}
+                        alt={eventPoster.label}
+                        className="block w-full h-auto lg:max-h-[560px] object-contain"
+                      />
+                    </div>
+                    <div className="border-t border-white/5 px-4 py-3">
                       <div className="text-xs text-gold-400 font-heading uppercase tracking-wider">{t('event.officialPoster', 'Official Poster')}</div>
                       <div className="text-sm text-text-secondary">{eventPoster.label}</div>
                     </div>
-                  </>
+                  </a>
                 ) : (
                   <>
                     <ImageWithShimmer

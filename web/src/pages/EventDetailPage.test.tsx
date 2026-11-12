@@ -4,15 +4,20 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import EventDetailPage from './EventDetailPage'
 import { EventsProvider } from '../contexts/EventsContext'
-import { api } from '../services/api'
+import { api, type Event } from '../services/api'
 
-vi.mock('../services/api', () => ({ api: { getEvents: vi.fn() } }))
+vi.mock('../services/api', () => ({ api: {
+  getEvents: vi.fn(),
+  getSponsorPlacements: vi.fn(async () => ({ sponsor_placements: [] })),
+  getEventResultsSummary: vi.fn(async () => ({ total_results: 0 })),
+} }))
 vi.mock('../hooks/useApi', async () => {
   const { usePublicEvents } = await import('../contexts/EventsContext')
   return { useEvents: usePublicEvents, useSponsors: () => ({ sponsors: [] }) }
 })
 vi.mock('../hooks/useSiteImages', () => ({ useSiteImages: () => ({ images: [] }), getImageUrl: vi.fn() }))
-vi.mock('../hooks/useTranslatedField', () => ({ useTranslatedField: () => ({ tf: vi.fn(), tfa: vi.fn() }) }))
+vi.mock('../hooks/useTranslatedField', () => ({ useTranslatedField: () => ({ tf: vi.fn(), tfa: vi.fn(() => []) }) }))
+vi.mock('../components/ScrollReveal', () => ({ default: ({ children }: { children: React.ReactNode }) => <>{children}</> }))
 vi.mock('../providers/PostHogProvider', () => ({ usePostHog: () => null }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }))
 afterEach(() => { cleanup(); vi.useRealTimers() })
@@ -31,4 +36,16 @@ it('keeps a failed event request retryable at the same URL and only renders 404 
   expect(api.getEvents).toHaveBeenCalledTimes(5)
   expect(screen.queryByRole('alert')).toBeNull()
   expect(screen.getByText('404')).toBeTruthy()
+})
+
+it('shows the poster uploaded in admin on the event page', async () => {
+  vi.mocked(api.getEvents).mockResolvedValue([{
+    id: 71, name: 'Guam Marianas Pro Tokyo 2027', slug: 'marianas-pro-tokyo-2027', status: 'upcoming',
+    date: '2027-02-20', end_date: null, is_main_event: false, city: 'Tokyo', country: 'Japan',
+    poster_image_url: 'https://cdn.example.com/tokyo-poster.jpg', prize_categories: [], gallery_images_count: 0, results_count: 0,
+  } as unknown as Event])
+  render(<HelmetProvider><MemoryRouter initialEntries={['/events/marianas-pro-tokyo-2027']}><EventsProvider><Routes><Route path="/events/:slug" element={<EventDetailPage />} /></Routes></EventsProvider></MemoryRouter></HelmetProvider>)
+  const poster = await screen.findByRole('img', { name: 'Guam Marianas Pro Tokyo 2027' })
+  expect(poster.getAttribute('src')).toBe('https://cdn.example.com/tokyo-poster.jpg')
+  expect(screen.getByText('event.officialPoster')).toBeTruthy()
 })
