@@ -82,7 +82,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
       - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
+        run: node scripts/audit-guards.mjs && node scripts/audit-check.mjs .
       - run: npm run lint
       - run: npx tsc -b
       - run: npm test
