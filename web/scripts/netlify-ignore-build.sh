@@ -36,6 +36,7 @@ git -C "$repository_root" diff --quiet \
   "$COMMIT_REF" \
   -- \
   web \
+  api/db/seeds.rb \
   netlify.toml \
   .nvmrc \
   .node-version \
