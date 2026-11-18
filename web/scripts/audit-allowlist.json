@@ -11,6 +11,24 @@
       "node_modules/micromatch/node_modules/picomatch",
       "node_modules/picomatch"
     ],
-    "range": "*"
+    "range": "*",
+    "reviewedConsumers": [
+      "@generaltranslation/vue-extractor",
+      "@typescript-eslint/eslint-plugin",
+      "@typescript-eslint/parser",
+      "@typescript-eslint/type-utils",
+      "@typescript-eslint/typescript-estree",
+      "@typescript-eslint/utils",
+      "@vitejs/plugin-react",
+      "fast-glob",
+      "fdir",
+      "gt",
+      "micromatch",
+      "tinyglobby",
+      "typescript-eslint",
+      "vite",
+      "vitest"
+    ],
+    "devOnly": true
   }
 ]
