@@ -29,8 +29,8 @@ function Medals({ entry }: { entry: OfficialRankingEntry }) {
 export default function RankingEntries({ entries, team }: { entries: OfficialRankingEntry[]; team: boolean }) {
   const { t, i18n } = useTranslation();
   return <>
-    <ol className="divide-y divide-white/10 md:hidden">
-      {entries.map(entry => <li key={entry.id} className="p-4">
+    <ol className="space-y-3 p-3 md:hidden">
+      {entries.map(entry => <li key={entry.id} className="ui-card p-4">
         <div className="flex items-start gap-3">
           <span className="w-9 shrink-0 font-heading text-xl tabular-nums text-gold-400" aria-label={t('officialRankings.position')}>#{formatNumber(entry.position, i18n.language)}</span>
           <div className="min-w-0 flex-1">
@@ -39,21 +39,21 @@ export default function RankingEntries({ entries, team }: { entries: OfficialRan
           </div>
           <div className="max-w-[35%] break-words text-right">
             <span className="block font-bold tabular-nums text-gold-400">{formatNumber(entry.points, i18n.language)}</span>
-            <span className="text-xs text-text-secondary">{t('officialRankings.points')}</span>
+            <span className="text-sm text-text-secondary">{t('officialRankings.points')}</span>
           </div>
         </div>
         {!team && <div className="mt-3 pl-12"><Medals entry={entry} /></div>}
       </li>)}
     </ol>
     <table className="hidden w-full table-fixed text-left text-sm md:table">
-      <thead className="border-b border-white/10 text-xs text-text-secondary"><tr>
+      {/* taste-skill-ignore: real ranking table header separator. */}<thead className="border-b border-white/10 text-sm text-text-secondary"><tr>
         <th className="w-20 p-4">{t('officialRankings.position')}</th>
         <th className="p-4">{t(team ? 'officialRankings.team' : 'officialRankings.athlete')}</th>
         {!team && <th className="p-4">{t('officialRankings.academy')}</th>}
         <th className="w-28 p-4 text-right">{t('officialRankings.points')}</th>
         {!team && <th className="w-48 p-4">{t('officialRankings.medals')}</th>}
       </tr></thead>
-      <tbody className="divide-y divide-white/5">{entries.map(entry => <tr key={entry.id}>
+      {/* taste-skill-ignore: real ranking table row separators. */}<tbody className="divide-y divide-white/5">{entries.map(entry => <tr key={entry.id}>
         <td className="p-4 font-heading text-lg tabular-nums text-gold-400">#{formatNumber(entry.position, i18n.language)}</td>
         <td className="p-4"><EntryName entry={entry} team={team} /></td>
         {!team && <td className="p-4 text-text-secondary"><Academy entry={entry} /></td>}

@@ -1,0 +1,12 @@
+TASTESKILL · LINT   19 file(s)
+
+WARN
+  [outlined-box] A 1px outlined box. Prefer a filled surface or no box.  (5×)
+      web/src/pages/CompetitorProfilePage.tsx:184  border
+      web/src/pages/CompetitorsPage.tsx:218  border
+      web/src/pages/AcademyPage.tsx:68  border
+      web/src/pages/TeamsPage.tsx:117  border
+      web/src/pages/EventGalleryPage.tsx:591  border
+
+RESULT: 0 FAIL, 5 WARN
+Interface fragments marked data-ui keep their own borders and shadows. Any other line that must keep a flagged pattern for a real reason can carry the comment taste-skill-ignore.

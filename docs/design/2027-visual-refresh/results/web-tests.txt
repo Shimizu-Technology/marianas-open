@@ -1,0 +1,21 @@
+
+> poc@0.0.0 test
+> vitest run --run
+
+
+ RUN  v5.0.5 /Users/leonshimizu/Desktop/ShimizuTechnology/.worktrees/mo-visual-b/web
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: navigation to another Document
+
+ Test Files  75 passed (75)
+      Tests  398 passed (398)
+   Start at  19:41:36
+   Duration  182.57s (environment 58%, tests 29%, import 11%, transform 1%, worker 1%)
+
+Environment  jsdom was created 75 times · 187.84s total, 58% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+

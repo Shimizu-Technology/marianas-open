@@ -1,0 +1,83 @@
+[
+  {
+    "page": "gallery",
+    "failures": 0,
+    "warnings": 3,
+    "allow": [
+      "hairline",
+      "outlined-box",
+      "palette-purple"
+    ],
+    "report": "docs/design/2027-visual-refresh/results/taste/gallery/report.json"
+  },
+  {
+    "page": "academy",
+    "failures": 0,
+    "warnings": 3,
+    "allow": [
+      "hairline",
+      "outlined-box",
+      "palette-purple"
+    ],
+    "report": "docs/design/2027-visual-refresh/results/taste/academy/report.json"
+  },
+  {
+    "page": "results",
+    "failures": 0,
+    "warnings": 5,
+    "allow": [
+      "hairline",
+      "outlined-box",
+      "palette-purple",
+      "micro-label",
+      "gradient",
+      "gradient-text",
+      "headline-lines"
+    ],
+    "report": "docs/design/2027-visual-refresh/results/taste/results/report.json"
+  },
+  {
+    "page": "rankings",
+    "failures": 0,
+    "warnings": 3,
+    "allow": [
+      "hairline",
+      "outlined-box",
+      "palette-purple"
+    ],
+    "report": "docs/design/2027-visual-refresh/results/taste/rankings/report.json"
+  },
+  {
+    "page": "teams",
+    "failures": 0,
+    "warnings": 6,
+    "allow": [
+      "hairline",
+      "outlined-box",
+      "palette-purple"
+    ],
+    "report": "docs/design/2027-visual-refresh/results/taste/teams/report.json"
+  },
+  {
+    "page": "athlete",
+    "failures": 0,
+    "warnings": 4,
+    "allow": [
+      "hairline",
+      "outlined-box",
+      "palette-purple"
+    ],
+    "report": "docs/design/2027-visual-refresh/results/taste/athlete/report.json"
+  },
+  {
+    "page": "competitors",
+    "failures": 0,
+    "warnings": 6,
+    "allow": [
+      "hairline",
+      "outlined-box",
+      "palette-purple"
+    ],
+    "report": "docs/design/2027-visual-refresh/results/taste/competitors/report.json"
+  }
+]

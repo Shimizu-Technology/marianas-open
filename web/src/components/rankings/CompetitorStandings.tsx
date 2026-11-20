@@ -12,15 +12,15 @@ export default function CompetitorStandings({ competitorId }: { competitorId?: n
   const { t, i18n } = useTranslation();
   const request = useCallback((signal: AbortSignal) => officialRankingsApi.getStandings(competitorId!, signal), [competitorId]);
   const standings = useRankingRequest(competitorId ? request : null);
-  return <section className="mb-6 overflow-hidden rounded-xl border border-white/10 bg-surface">
-    <div className="border-b border-white/10 p-4">
+  return <section className="mb-6 overflow-hidden ui-card">
+    <div className="p-4">
       <h2 className="font-heading text-lg font-semibold">{standings.data ? t('officialRankings.profileTitle', { year: standings.data.season_year }) : t('officialRankings.currentStandings')}</h2>
     </div>
     {!competitorId ? <RankingState state="unmatched" />
       : standings.loading ? <RankingState state="loading" />
         : standings.error ? <RankingState state="error" retry={standings.retry} />
           : !standings.data?.standings.length ? <RankingState state="noStanding" />
-            : <ul className="divide-y divide-white/10">{standings.data.standings.map(standing => {
+            : <ul className="space-y-1">{standings.data.standings.map(standing => {
               const { list, division } = standing;
               const query = new URLSearchParams({ season: String(list.season_year), discipline: list.discipline, kind: 'individual', category: list.category, division_id: String(division.id), gender: division.gender, age: division.age_group, belt: division.belt });
               return <li key={`${list.id}-${division.id}`} className="p-4">
@@ -32,8 +32,8 @@ export default function CompetitorStandings({ competitorId }: { competitorId?: n
                     </Link>
                   </div>
                   <dl className="flex shrink-0 gap-5 text-right">
-                    <div><dt className="text-xs text-text-secondary">{t('officialRankings.position')}</dt><dd className="text-xl font-bold tabular-nums text-gold-400">#{formatNumber(standing.position, i18n.language)}</dd></div>
-                    <div><dt className="text-xs text-text-secondary">{t('officialRankings.points')}</dt><dd className="text-xl font-bold tabular-nums text-white">{formatNumber(standing.points, i18n.language)}</dd></div>
+                    <div><dt className="text-sm text-text-secondary">{t('officialRankings.position')}</dt><dd className="text-xl font-bold tabular-nums text-gold-400">#{formatNumber(standing.position, i18n.language)}</dd></div>
+                    <div><dt className="text-sm text-text-secondary">{t('officialRankings.points')}</dt><dd className="text-xl font-bold tabular-nums text-white">{formatNumber(standing.points, i18n.language)}</dd></div>
                   </dl>
                 </div>
                 <RankingSource list={list} syncedAt={division.last_synced_at} />

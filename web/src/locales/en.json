@@ -265,7 +265,8 @@
       "heavy": "Heavy",
       "superHeavy": "Super Heavy",
       "ultraHeavy": "Ultra Heavy",
-      "openClass": "Open Class"
+      "openClass": "Open Class",
+      "openWeight": "Open Weight"
     },
     "belt": {
       "white": "White",
@@ -402,7 +403,7 @@
     "weightClass": "Weight Class"
   },
   "results": {
-    "title": "Event Results",
+    "title": "Event results",
     "badge": "Official Results",
     "subtitle": "Complete results from this event.",
     "totalCompetitors": "Competitors",
@@ -410,8 +411,8 @@
     "countries": "Countries",
     "academies": "Academies",
     "goldMedals": "Gold Medals",
-    "beltBreakdown": "Belt Breakdown",
-    "topAcademies": "Top Academies",
+    "beltBreakdown": "Belt breakdown",
+    "topAcademies": "Top academies",
     "placement1": "1st Place",
     "placement2": "2nd Place",
     "placement3": "3rd Place",
@@ -419,9 +420,9 @@
     "placementBadge2": "2nd",
     "placementBadge3": "3rd",
     "searchPlaceholder": "Search by name or academy...",
-    "allBelts": "All Belts",
-    "allWeights": "All Weight Classes",
-    "allGenders": "All Genders",
+    "allBelts": "All belts",
+    "allWeights": "All weight classes",
+    "allGenders": "All genders",
     "male": "Male",
     "female": "Female",
     "noResults": "No results available for this event.",
@@ -431,10 +432,17 @@
     "silver": "Silver",
     "bronze": "Bronze",
     "total": "Total",
-    "expandAll": "Expand All",
-    "collapseAll": "Collapse All",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
     "filterResults": "Filter Results",
-    "sourcedFrom": "Results sourced from"
+    "sourcedFrom": "Results sourced from",
+    "filters": "Filters",
+    "closeFilters": "Close filters",
+    "showResults": "Show results",
+    "otherDivisions": "Other divisions",
+    "placementsCount": "Placements: {{count, number}}",
+    "divisionsCount": "Divisions: {{count, number}}",
+    "placements": "Placements"
   },
   "competitorProfile": {
     "title": "Competitor Profile",
@@ -840,7 +848,7 @@
     "missing": "Academy not found",
     "noSpecified": "No academy specified",
     "athletes": "{{count}} athletes",
-    "events": "{{count}} events",
+    "events": "{{count, number}} events",
     "more": "Load more ({{shown}} of {{total}})"
   },
   "error": {
@@ -870,5 +878,26 @@
     "partnerTitle": "Partner With Us",
     "partnerDescription": "Interested in sponsoring the Marianas Open? Join us in growing the sport and making a positive impact on our community.",
     "contact": "Get in Touch"
+  },
+  "visualRefresh": {
+    "close": "Close",
+    "stars": "ASJJF {{count}}-Star Ranked Event",
+    "registrationOpens": "Registration opens {{date}}",
+    "eventInfo": "ASJJF event info",
+    "registrationPending": "Registration is not open yet"
+  },
+  "galleryActions": {
+    "download": "Download photo",
+    "downloading": "Downloading…",
+    "share": "Share photo",
+    "copied": "Photo link copied",
+    "shared": "Photo shared",
+    "copyManually": "Select and copy the photo link below.",
+    "photoLink": "Photo link",
+    "downloaded": "Photo downloaded",
+    "downloadError": "Download failed. Try again."
+  },
+  "visualB": {
+    "athleteCount": "Athletes from tournament results: {{count, number}}"
   }
 }

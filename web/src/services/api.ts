@@ -255,6 +255,7 @@ export interface Event {
   season_year?: number | null;
   source_event_id?: number | null;
   registration_not_open?: boolean;
+  registration_opens_on?: string | null;
   content_review_required?: boolean;
   asjjf_info_id?: number | null;
   asjjf_info_status?: string | null;
@@ -497,6 +498,7 @@ export interface SiteImage {
 export interface EventFormData {
   season_year?: number | null;
   registration_not_open?: boolean;
+  registration_opens_on?: string | null;
   content_review_required?: boolean;
   name: string;
   slug: string;

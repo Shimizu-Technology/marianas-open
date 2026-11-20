@@ -1,0 +1,54 @@
+{
+  "implementation": "8d713acc53c41ed031d6b54e79621a5ac3161f76",
+  "foundation": "467d91824c8a24ef0d2c11235b8440049cfbd10c",
+  "date_utc": "2026-11-02",
+  "web_gate": {
+    "npm ci": "passed; unchanged lockfile since installation at base",
+    "npm run lint": "passed",
+    "npx tsc -b": "passed",
+    "npm test -- --run": {
+      "status": "passed",
+      "files": 75,
+      "tests": 398
+    },
+    "npm run build:no-translate": "passed"
+  },
+  "focused_regressions": {
+    "files": 5,
+    "tests": 27,
+    "status": "passed"
+  },
+  "production_dependency_audit": "passed high severity threshold; one low and one moderate existing advisory",
+  "browser": {
+    "passed": 48,
+    "failed": 0,
+    "blocked": 0,
+    "not_run_required": 0,
+    "locales": [
+      "en",
+      "ja",
+      "zh-Hant"
+    ],
+    "viewports": [
+      "390x844",
+      "1440x900"
+    ],
+    "source_by_case": "browser-results.json"
+  },
+  "impeccable": {
+    "version": "4.6.0",
+    "findings": 0
+  },
+  "lifecycle": {
+    "session": "01a19b79-e9a2-7f70-94ee-f21d7a0cb887",
+    "active_owned_resources": 0,
+    "runtime_handoffs": []
+  },
+  "not_run": [
+    "physical phones",
+    "native OS Web Share sheets",
+    "API/fetcher suites (frontend-only slice)"
+  ],
+  "merge": "held for lead integration/review and Leon sign-off",
+  "production_writes": false
+}
