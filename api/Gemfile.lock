@@ -365,7 +365,7 @@ DEPENDENCIES
   image_processing (~> 1.2)
   jwt
   pg (~> 1.1)
-  puma (>= 5.0)
+  puma (~> 8.0.4)
   rack-cors
   rails (~> 8.1.2)
   resend (~> 1.0)
