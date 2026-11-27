@@ -19,6 +19,10 @@ function loadClient() {
       capture_pageview: false,
       capture_pageleave: true,
       autocapture: false,
+      disable_session_recording: false,
+      session_recording: {
+        maskAllInputs: true,
+      },
     });
     return posthog;
   }).catch(error => { clientPromise = undefined; throw error; });
